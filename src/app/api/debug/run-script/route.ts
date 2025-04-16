@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
+import path from 'path';
+import fs from 'fs';
 import { promisify } from 'util';
 import { auth } from '@clerk/nextjs/server'; // Use Clerk auth
 
-const execPromise = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 // Define expected structure for sessionClaims metadata
 interface SessionClaimsMetadata {
@@ -13,6 +15,15 @@ interface SessionClaimsMetadata {
 interface CustomSessionClaims {
   metadata?: SessionClaimsMetadata;
 }
+
+// Define the allowed scripts to prevent arbitrary code execution
+const ALLOWED_SCRIPTS: { [key: string]: { path: string; reportPath?: string } } = {
+  'scripts/debug/database/find-hook-issues.js': {
+    path: 'scripts/debug/database/find-hook-issues.js',
+    reportPath: 'docs/hook-dependency-issues-report.md',
+  },
+  // Add other allowed scripts here if needed
+};
 
 /**
  * POST /api/debug/run-script
@@ -43,45 +54,62 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // Parse the request body
-    const { scriptName } = await request.json();
+    const body = await request.json();
+    const requestedScriptName = body.scriptName;
 
-    // Whitelist of allowed scripts for security
-    const allowedScripts = ['find-any-types.js', 'find-img-tags.js', 'find-hook-issues.js'];
-
-    if (!scriptName || !allowedScripts.includes(scriptName)) {
-      return NextResponse.json({ error: 'Invalid script name' }, { status: 400 });
+    if (!requestedScriptName) {
+      return NextResponse.json({ error: 'Missing scriptName in request body' }, { status: 400 });
     }
 
-    // Run the script
-    const scriptPath = `src/scripts/${scriptName}`;
-    const outputPath = `docs/${scriptName.replace('.js', '-report.md')}`;
+    const scriptConfig = ALLOWED_SCRIPTS[requestedScriptName];
 
-    const command = `cd ${process.cwd()} && node ${scriptPath}`;
+    if (!scriptConfig) {
+      console.warn(`Attempted to run disallowed script: ${requestedScriptName}`);
+      return NextResponse.json({ error: 'Invalid or disallowed script name' }, { status: 400 });
+    }
 
-    const { stdout, stderr } = await execPromise(command);
+    // Construct the absolute path safely
+    const scriptPath = path.join(process.cwd(), scriptConfig.path);
+
+    // Optional: Check if the script file actually exists before trying to run it
+    try {
+      await fs.promises.access(scriptPath, fs.constants.F_OK | fs.constants.X_OK); // Check existence and execute permission
+    } catch (fsError) {
+      console.error(`Script not found or not executable: ${scriptPath}`, fsError);
+      return NextResponse.json({ error: `Script file not found or not executable: ${scriptConfig.path}` }, { status: 404 });
+    }
+
+    console.log(`Executing script: ${scriptPath}`);
+
+    // Execute the script using Node.js
+    // Pass any necessary arguments if required by the scripts
+    const { stdout, stderr } = await execFileAsync('node', [scriptPath], {
+      timeout: 60000, // Set a timeout (e.g., 60 seconds)
+      cwd: process.cwd(), // Set the working directory
+    });
 
     if (stderr) {
-      console.error(`Script execution error: ${stderr}`);
-      return NextResponse.json(
-        { error: 'Error executing script', details: stderr },
-        { status: 500 }
-      );
+      console.error(`Script execution error for ${scriptConfig.path}:
+${stderr}`);
+      // Decide if stderr always means failure or could be warnings
+      // For simplicity, we'll treat stderr as an error for now
+      return NextResponse.json({ error: `Script execution failed: ${stderr}` }, { status: 500 });
     }
 
+    console.log(`Script execution successful for ${scriptConfig.path}:
+${stdout}`);
+
+    // Return success response
     return NextResponse.json({
       success: true,
-      message: 'Script executed successfully',
-      output: stdout,
-      reportPath: outputPath,
+      message: `Successfully ran ${scriptConfig.path}. ${stdout ? `Output: ${stdout.substring(0, 100)}...` : ''}`, // Include partial output if desired
+      reportPath: scriptConfig.reportPath, // Include report path if defined
     });
-  } catch (error) {
-    console.error('Error running script:', error);
+
+  } catch (error: any) {
+    console.error('Error in run-script API route:', error);
     return NextResponse.json(
-      {
-        error: 'Internal server error',
-        details: error instanceof Error ? error.message : String(error),
-      },
+      { error: error.message || 'An unexpected error occurred' },
       { status: 500 }
     );
   }

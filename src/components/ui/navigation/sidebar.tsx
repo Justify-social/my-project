@@ -348,7 +348,7 @@ export function Sidebar({
         <ul className="list-none space-y-0.5">
           {/* Settings Item */}
           <SidebarItem
-            href="/settings"
+            href="/settings/profile"
             label="Settings"
             icon="appSettings"
             isActive={isActive('/settings')}
