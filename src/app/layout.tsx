@@ -1,7 +1,7 @@
 import { Inter } from 'next/font/google';
 // Remove Auth0 UserProvider
 // import { UserProvider } from '@auth0/nextjs-auth0/client';
-import ClientLayout from '@/components/layouts/client-layout';
+import ConditionalLayout from '@/components/layouts/conditional-layout'; // Import the new wrapper
 import './globals.css';
 import { NextSSRPlugin } from '@uploadthing/react/next-ssr-plugin';
 import { extractRouterConfig } from 'uploadthing/server';
@@ -57,10 +57,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Suspense>
                 <UTSSR />
               </Suspense>
-              {/* Let ClientLayout handle auth controls internally */}
-              <ClientLayout authHeaderControls={null}> {/* Passing null */}
+              {/* Use ConditionalLayout to wrap children */}
+              <ConditionalLayout>
                 {children}
-              </ClientLayout>
+              </ConditionalLayout>
               <Toaster />
             </SearchProvider>
           </SidebarProvider>
