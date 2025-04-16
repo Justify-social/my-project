@@ -81,7 +81,7 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
 
   // --- Navigation Definitions (SSOT) ---
   const sidebarItems: SidebarItemDef[] = [
-    { id: 'home', label: 'Home', href: '/', icon: 'appHome' },
+    { id: 'home', label: 'Home', href: '/dashboard', icon: 'appHome' },
     {
       id: 'campaigns',
       label: 'Campaigns',
