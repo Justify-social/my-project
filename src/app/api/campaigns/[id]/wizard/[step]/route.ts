@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 import { prisma } from '@/lib/prisma';
 import { EnumTransformers } from '@/utils/enum-transformers';
-import { tryCatch } from '@/config/middleware/api';
+import { v4 as uuidv4 } from 'uuid';
+import { dbLogger, DbOperation } from '@/lib/data-mapping/db-logger';
+import { withValidation, tryCatch } from '@/lib/middleware/api';
 import { z } from 'zod';
 // Import the BASE schemas for partial validation
 import {
@@ -19,8 +21,9 @@ const fullCampaignSchemaForReference = z.object({ /* ... existing full schema ..
 /**
  * PATCH handler for saving/updating campaign wizard step data
  */
-export const PATCH = tryCatch(
-  async (request: NextRequest, { params }: { params: Promise<{ id: string; step: string }> }) => {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string; step: string }> }) {
+  // Apply tryCatch logic internally
+  try {
     const { id: campaignId, step } = await params;
     const stepNumber = parseInt(step, 10);
 
@@ -263,14 +266,20 @@ export const PATCH = tryCatch(
       data: campaignDataForResponse, // Send the raw data from DB
       message: `Step ${stepNumber} updated${messageSuffix}`,
     });
-  },
-  { entityName: 'CampaignWizardStep' }
-);
+  } catch (error) {
+    // Log the error from the outer tryCatch
+    // Await params before accessing properties
+    const resolvedParams = await params;
+    console.error(`Unhandled error in PATCH /api/campaigns/${resolvedParams.id}/wizard/${resolvedParams.step}:`, error);
+    // Consider using a more specific error handling function if available
+    return NextResponse.json({ success: false, error: 'An unexpected error occurred.', details: error instanceof Error ? error.message : String(error) }, { status: 500 });
+  }
+}
 
 // --- GET handler (Ensure this export is correct) ---
-export const GET = tryCatch(
-  async (request: NextRequest, { params }: { params: Promise<{ id: string; step: string }> }) => {
-    // ... (Original GET handler logic) ...
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string; step: string }> }) {
+  // Apply tryCatch logic internally
+  try {
     const { id: campaignId, step } = await params;
     const stepNumber = parseInt(step, 10);
 
@@ -302,6 +311,12 @@ export const GET = tryCatch(
       success: true,
       data: transformedCampaign,
     });
-  },
-  { entityName: 'CampaignWizardStep' }
-);
+  } catch (error) {
+    // Log the error from the outer tryCatch
+    // Await params before accessing properties
+    const resolvedParams = await params;
+    console.error(`Unhandled error in GET /api/campaigns/${resolvedParams.id}/wizard/${resolvedParams.step}:`, error);
+    // Consider using a more specific error handling function if available
+    return NextResponse.json({ success: false, error: 'An unexpected error occurred.', details: error instanceof Error ? error.message : String(error) }, { status: 500 });
+  }
+}

@@ -9,7 +9,7 @@ export default function ClientAuthComponents() {
     return (
         <>
             <SignedIn>
-                <UserButton afterSignOutUrl="/" />
+                <UserButton afterSignOutUrl="/sign-in" />
             </SignedIn>
             <SignedOut>
                 {/* Example Sign In Button - Adjust as needed */}

@@ -14,8 +14,7 @@ import {
 import { prisma } from '@/lib/prisma';
 import { dbLogger, DbOperation } from '@/lib/data-mapping/db-logger';
 import { v4 as uuidv4 } from 'uuid';
-import { withValidation } from '@/config/middleware/api/validate-api';
-import { tryCatch } from '@/config/middleware/api/handle-api-errors';
+import { withValidation, tryCatch } from '@/lib/middleware/api';
 import {
   DraftCampaignDataSchema,
   ContactSchema,
@@ -237,7 +236,6 @@ const campaignFlexibleSchema = z.object({
 });
 
 // Define a specific schema for the POST API endpoint validation
-// Replicates DraftCampaignDataSchema structure but ensures dates expect strings
 const CampaignPostApiSchema = z.object({
   id: z.string().optional(),
   createdAt: z.string().datetime({ offset: true, message: "Invalid ISO date string" }).nullable().optional(), // Expect string
@@ -381,9 +379,11 @@ export async function GET(request: NextRequest) {
 
 // POST handler - Create campaign
 export const POST = withValidation(
-  CampaignPostApiSchema, // Use the API-specific schema
+  CampaignPostApiSchema, // Use the original, refined schema
   async (data: z.infer<typeof CampaignPostApiSchema>, request: NextRequest) => {
     try {
+      // Remove manual refinement checks
+
       // Log the raw request data (now validated against the stricter schema)
       console.log('Raw request data:', JSON.stringify(data, null, 2));
 

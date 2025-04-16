@@ -198,8 +198,13 @@ const DraftCampaignDataBaseSchema = z.object({
     hashtags: z.array(z.string()).optional(),
     keyBenefits: z.array(z.string()).optional(),
   }).passthrough().nullable().optional(),
-  /** Expected outcomes (structure assumed, verify with Step 2 form). */
-  expectedOutcomes: z.object({}).passthrough().nullable().optional(),
+  /** Expected outcomes (Define known string fields). */
+  expectedOutcomes: z.object({
+    memorability: z.string().optional(),
+    purchaseIntent: z.string().optional(),
+    brandPerception: z.string().optional(),
+    // Add other known fields if applicable
+  }).passthrough().nullable().optional(),
   /** Selected features for the campaign (e.g., Brand Lift). */
   features: z.array(FeatureEnum).nullable().optional(),
   /** Flag indicating Step 2 completion. */
@@ -210,8 +215,12 @@ const DraftCampaignDataBaseSchema = z.object({
   demographics: DemographicsSchema.nullable().optional(),
   /** Audience location details. */
   locations: z.array(LocationSchema).nullable().optional(),
-  /** Audience targeting criteria (keywords, interests). */
-  targeting: z.object({}).passthrough().nullable().optional(),
+  /** Audience targeting criteria (Define known array fields). */
+  targeting: z.object({
+    interests: z.array(z.string()).optional(),
+    keywords: z.array(z.string()).optional(),
+    // Add other known fields if applicable
+  }).passthrough().nullable().optional(),
   /** List of competitor brands/handles. */
   competitors: z.array(z.string()).nullable().optional(),
   /** Flag indicating Step 3 completion. */
@@ -436,10 +445,28 @@ export const Step1ValidationSchema = Step1BaseSchema.extend({
   primaryContact: ContactSchema.refine(contact => contact !== null, { // Ensure primaryContact object exists
     message: "Primary contact is required.", // Add a message if needed
   }),
-  Influencer: InfluencerSchema.array().min(1, "Please add at least one influencer").optional(),
+}).refine(data => data.Influencer && data.Influencer.length >= 1, {
+  message: "Please add at least one influencer",
+  path: ["Influencer"], // Apply error message to the Influencer field array
 });
-/** TypeScript type for Step 1 form data. */
-export type Step1FormData = z.infer<typeof Step1ValidationSchema>;
+
+// Define Step1FormData explicitly for useForm typing clarity
+export type Step1FormData = {
+  name: string;
+  businessGoal?: string | null;
+  brand: string;
+  website?: string | null;
+  startDate?: string | null; // Keep as string from schema
+  endDate?: string | null; // Keep as string from schema
+  timeZone?: string | null;
+  primaryContact: z.infer<typeof ContactSchema>; // Non-null based on refinement
+  secondaryContact?: z.infer<typeof ContactSchema> | null;
+  // Explicitly define as array, matching base schema + refinement
+  additionalContacts: Array<z.infer<typeof ContactSchema>>;
+  budget?: z.infer<typeof BudgetSchema> | null;
+  // Explicitly define as array, matching base schema + refinement
+  Influencer: Array<z.infer<typeof InfluencerSchema>>;
+};
 
 // --- Step 2 --- 
 /** BASE schema for Step 2: Objectives - Only field definitions */

@@ -181,8 +181,8 @@ const Step1Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
 const Step2Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
         <DataItem label="Primary KPI" value={data.primaryKPI} />
-        <DataItem label="Secondary KPIs" value={data.secondaryKPIs} />
-        <DataItem label="Features" value={data.features} />
+        <DataItem label="Secondary KPIs" value={data.secondaryKPIs?.join(', ')} />
+        <DataItem label="Features" value={data.features?.join(', ')} />
         <DataItem label="Main Message" value={data.messaging?.mainMessage} className="md:col-span-2" />
         <DataItem label="Hashtags" value={data.messaging?.hashtags} />
         <DataItem label="Key Benefits" value={data.messaging?.keyBenefits} />
@@ -294,9 +294,8 @@ function Step5Content() {
             campaignName: draft.name || 'Untitled Campaign',
             businessGoal: draft.businessGoal ?? '',
             description: draft.businessGoal ?? '',
-            brand: draft.brand ?? '',
-            startDate: draft.startDate ? (typeof draft.startDate === 'string' ? draft.startDate : draft.startDate.toISOString()) : undefined,
-            endDate: draft.endDate ? (typeof draft.endDate === 'string' ? draft.endDate : draft.endDate.toISOString()) : undefined,
+            startDate: draft.startDate ? (typeof draft.startDate === 'string' ? draft.startDate : (draft.startDate as Date).toISOString()) : undefined,
+            endDate: draft.endDate ? (typeof draft.endDate === 'string' ? draft.endDate : (draft.endDate as Date).toISOString()) : undefined,
             timeZone: draft.timeZone ?? 'UTC',
             currency: draft.budget?.currency,
             totalBudget: draft.budget?.total,
@@ -323,8 +322,8 @@ function Step5Content() {
             secondaryKPIs: draft.secondaryKPIs ?? [],
             features: draft.features ?? [],
             mainMessage: draft.messaging?.mainMessage ?? '',
-            hashtags: draft.messaging?.hashtags?.join(', ') ?? '',
-            keyBenefits: draft.messaging?.keyBenefits ?? '',
+            hashtags: Array.isArray(draft.messaging?.hashtags) ? draft.messaging?.hashtags.join(', ') : (draft.messaging?.hashtags || ''),
+            keyBenefits: Array.isArray(draft.messaging?.keyBenefits) ? draft.messaging?.keyBenefits.join(', ') : (typeof draft.messaging?.keyBenefits === 'string' ? draft.messaging?.keyBenefits : ''),
             expectedAchievements: draft.expectedOutcomes?.purchaseIntent ?? '',
             memorability: draft.expectedOutcomes?.memorability ?? '',
             purchaseIntent: draft.expectedOutcomes?.purchaseIntent ?? '',

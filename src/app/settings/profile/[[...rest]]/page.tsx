@@ -54,7 +54,7 @@ const UserProfileSettingsPage = () => {
 
             <Separator />
             <div className="flex justify-start pt-4">
-                <SignOutButton>
+                <SignOutButton redirectUrl="/sign-in">
                     <Button variant="outline">Sign Out</Button>
                 </SignOutButton>
             </div>

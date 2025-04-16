@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm, Controller, useFieldArray, UseFormReturn, FormProvider, useFormContext, SubmitHandler, FieldArrayWithId, FieldPath } from 'react-hook-form';
+import { useForm, Controller, useFieldArray, UseFormReturn, FormProvider, useFormContext, SubmitHandler, FieldArrayWithId, FieldPath, FieldArrayPath } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWizard } from '@/components/features/campaigns/WizardContext';
@@ -424,8 +424,8 @@ function Step1Content() {
         });
     }, []); // Empty dependency array means run once on mount
 
-    // Initialize form with static defaults - PROVIDE EXPLICIT TYPE
-    const form = useForm<z.infer<typeof Step1ValidationSchema>>({
+    // Initialize form with static defaults - Use explicit Step1FormData type
+    const form = useForm<Step1FormData>({
         resolver: zodResolver(Step1ValidationSchema),
         defaultValues: {
             name: '',
@@ -437,14 +437,13 @@ function Step1Content() {
             timeZone: 'GMT',
             primaryContact: { firstName: '', surname: '', email: '', position: PositionEnum.Values.Director },
             secondaryContact: { firstName: '', surname: '', email: '', position: PositionEnum.Values.Director },
-            additionalContacts: [],
-            // Nest budget fields
+            additionalContacts: [], // Default to empty array
             budget: {
                 currency: CurrencyEnum.Values.USD,
                 total: 0, // Use number for default
                 socialMedia: 0, // Use number for default
             },
-            Influencer: [{ id: `new-${Date.now()}`, platform: PlatformEnumBackend.Values.INSTAGRAM, handle: '' }], // Start empty handle
+            Influencer: [{ id: `new-${Date.now()}`, platform: PlatformEnumBackend.Values.INSTAGRAM, handle: '' }], // Default to array with one empty item
         },
         mode: 'onChange',
     });
@@ -513,12 +512,12 @@ function Step1Content() {
             };
 
             console.log("[Step1Content useEffect] Calling form.reset with formatted data:", formattedData);
-            form.reset(formattedData);
+            form.reset(formattedData as Step1FormData);
             initialDataLoaded.current = true; // Mark as loaded
         }
     }, [isLoading, wizardState, detectedTimezone, form.reset]);
 
-    // UseFieldArray hooks (CORRECTED - no type assertions)
+    // UseFieldArray hooks
     const { fields, append: appendInfluencer, remove: removeInfluencer } = useFieldArray({
         control: form.control,
         name: "Influencer",
@@ -567,6 +566,28 @@ function Step1Content() {
         return contacts.filter((contact) => !!contact?.email);
     }, [wizardState?.additionalContacts]);
 
+    // Move useEffect outside of callback to comply with React Hooks rules
+    useEffect(() => {
+        if (influencerError) {
+            toast({
+                title: 'Error',
+                description: influencerError,
+                variant: 'destructive',
+            });
+        }
+    }, [influencerError, toast]);
+
+    // Move useEffect outside of callback to comply with React Hooks rules
+    useEffect(() => {
+        if (influencerSuccess) {
+            toast({
+                title: 'Success',
+                description: influencerSuccess,
+                variant: 'success',
+            });
+            refetchInfluencers();
+        }
+    }, [influencerSuccess, toast, refetchInfluencers]);
 
     // --- AUTOSAVE LOGIC (COMMENTED OUT) --- 
     /*

@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
-import { withValidation } from '@/config/middleware/api';
+import { withValidation } from '@/lib/middleware/api';
 import { DbOperation } from '@/lib/data-mapping/db-logger';
 import { v4 as uuidv4 } from 'uuid';
 import { Prisma } from '@prisma/client';

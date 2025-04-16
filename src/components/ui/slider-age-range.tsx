@@ -74,10 +74,17 @@ export function AgeRangeSlider<TFieldValues extends FieldValues = FieldValues>(
                     const [localValue, setLocalValue] = useState<number[]>(field.value || componentDefaultValue);
 
                     useEffect(() => {
-                        if (field.value && !isEqual(field.value, localValue)) {
-                            setLocalValue(field.value);
-                        }
-                    }, [field.value, localValue]);
+                        const handler = setTimeout(() => {
+                            if (localValue !== field.value) {
+                                setLocalValue(field.value);
+                                field.onChange(field.value);
+                            }
+                        }, 500);
+
+                        return () => {
+                            clearTimeout(handler);
+                        };
+                    }, [field.value, localValue, field.onChange]);
 
                     // Display '+' if the max value selected is the component's max prop and > 64
                     const maxDisplay = localValue[1] === maxVal && maxVal > 64 ? `${maxVal}+` : `${localValue[1]}`;

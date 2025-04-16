@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { validateRequestImpl, withValidationImpl } from './implementation/validate-api-impl';
+import { withValidationImpl, validateRequestImpl } from '../implementation/validate-api-impl';
 
 export type ValidationOptions = {
   logValidationErrors?: boolean;
@@ -41,8 +41,11 @@ export async function validateRequest<T extends z.ZodType>(
  */
 export function withValidation<T extends z.ZodType>(
   schema: T,
-  handler: (data: z.infer<T>, request: NextRequest) => Promise<NextResponse>,
-  options: ValidationOptions = {}
-): (request: NextRequest) => Promise<NextResponse> {
+  handler: (
+    data: z.infer<T>,
+    request: NextRequest
+  ) => Promise<NextResponse>,
+  options?: { logRequestBody?: boolean; logValidationErrors?: boolean; entityName?: string; }
+) {
   return withValidationImpl(schema, handler, options);
 }

@@ -1,9 +1,9 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
-import * as z from 'zod';
+import { z } from 'zod';
 import { DbOperation } from '@/lib/data-mapping/db-logger';
-import { handleDbError } from 'config/middleware/api/handle-db-errors';
+import { handleDbError } from '@/lib/middleware/api';
 import { Prisma } from '@prisma/client'; // Import Prisma namespace for error checking
 
 // Re-define or import the schema used in the frontend form for validation
@@ -33,7 +33,6 @@ export async function GET(request: NextRequest) {
 
         // Attempt to find directly by userId
         const settings = await prisma.brandingSettings.findUnique({
-            // @ts-expect-error - TS Linter incorrectly flags userId despite schema definition
             where: { userId: userId },
         });
 
@@ -87,7 +86,6 @@ export async function PATCH(request: NextRequest) {
         let existingSettings = null;
         try {
             existingSettings = await prisma.brandingSettings.findUnique({
-                // @ts-expect-error - TS Linter incorrectly flags userId despite schema definition
                 where: { userId: userId },
             });
         } catch (findError) {
@@ -112,7 +110,6 @@ export async function PATCH(request: NextRequest) {
             finalSettings = await prisma.brandingSettings.create({
                 data: {
                     ...validatedData,
-                    // @ts-expect-error - TS Linter incorrectly flags userId despite schema definition
                     userId: userId,
                 },
             });

@@ -3,7 +3,8 @@ import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import * as z from 'zod';
 import { DbOperation } from '@/lib/data-mapping/db-logger';
-import { handleDbError } from 'config/middleware/api/handle-db-errors';
+import { handleDbError } from '@/lib/middleware/api';
+import { Prisma } from '@prisma/client';
 
 // Schema for expected PATCH request body
 const notificationPrefsSchema = z.object({

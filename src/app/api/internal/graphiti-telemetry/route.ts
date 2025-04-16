@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server'; // Use Clerk auth
-import { getGraphitiTelemetry } from '@/config/middleware/cursor-ai';
+import { logError } from '@/lib/error-logging';
+import { getGraphitiTelemetry } from '@/lib/middleware/cursor-ai';
 
 // Define expected structure for sessionClaims metadata
 interface SessionClaimsMetadata {
@@ -31,10 +32,10 @@ export async function GET(req: NextRequest) {
     // Additional stats
     const stats = {
       activeSessions: telemetryData.activeSessions.length,
-      checkCount: telemetryData.telemetry.filter(t => t.action === 'check').length,
-      blockCount: telemetryData.telemetry.filter(t => t.action === 'block').length,
-      completeCount: telemetryData.telemetry.filter(t => t.action === 'complete').length,
-      bypassCount: telemetryData.telemetry.filter(t => t.action === 'bypass').length,
+      checkCount: telemetryData.telemetry.filter((t: { action: string }) => t.action === 'check').length,
+      blockCount: telemetryData.telemetry.filter((t: { action: string }) => t.action === 'block').length,
+      completeCount: telemetryData.telemetry.filter((t: { action: string }) => t.action === 'complete').length,
+      bypassCount: telemetryData.telemetry.filter((t: { action: string }) => t.action === 'bypass').length,
       successRate: calculateSuccessRate(telemetryData.telemetry),
     };
 
@@ -50,7 +51,7 @@ export async function GET(req: NextRequest) {
 }
 
 // Calculate success rate from telemetry records
-function calculateSuccessRate(telemetry: any[]) {
+function calculateSuccessRate(telemetry: { success: boolean }[]) {
   if (telemetry.length === 0) return 100;
 
   const successCount = telemetry.filter(t => t.success).length;

@@ -13,7 +13,7 @@ echo "Starting SSOT migration in $ROOT_DIR"
 
 # Create necessary directories
 echo "Creating config directories..."
-mkdir -p config/git config/npm config/eslint config/prettier config/postcss config/ui config/cypress config/jest config/middleware config/server config/prisma config/sentry config/platform/next config/tailwind
+mkdir -p config/git config/npm config/eslint config/prettier config/postcss config/ui config/cypress config/jest config/server config/prisma config/sentry config/platform/next config/tailwind
 
 # Function to create symlink
 create_symlink() {
@@ -73,7 +73,6 @@ create_symlink "jest.config.js" "config/jest" "jest.config.js"
 create_symlink "jest.setup.js" "config/jest" "jest.setup.js"
 
 echo "Processing Next.js configuration..."
-create_symlink "middleware.ts" "config/middleware" "middleware.ts"
 # Note: next-env.d.ts is kept in root (Next.js requires this)
 create_symlink "next.config.js" "config/platform/next" "index.js"
 
