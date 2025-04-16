@@ -53,7 +53,7 @@ const outputContent = `// This file is generated automatically by scripts/icons/
 interface IconMetadata { 
   id: string; 
   path?: string; 
-  [key: string]: any; 
+  [key: string]: unknown; 
 }
 
 interface IconRegistryData { 
