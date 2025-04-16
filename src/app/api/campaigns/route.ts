@@ -436,9 +436,6 @@ export const POST = withValidation(
         targeting: transformedData.targeting || Prisma.JsonNull,
         competitors: transformedData.competitors || [], // Prisma expects String[]
         assets: transformedData.assets || [], // Pass array directly
-        guidelines: transformedData.guidelines,
-        requirements: transformedData.requirements || [], // Pass array directly
-        notes: transformedData.notes,
         status: Status.DRAFT,
         step1Complete: true,
         step2Complete: false,

@@ -262,13 +262,12 @@ model TeamInvitation {
 
 model BrandingSettings {
   id             String   @id @default(uuid())
-  companyId      String   @unique
+  userId         String   @unique
   primaryColor   String
   secondaryColor String
+  accentColor    String
   headerFont     String
-  headerFontSize String
   bodyFont       String
-  bodyFontSize   String
   logoUrl        String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

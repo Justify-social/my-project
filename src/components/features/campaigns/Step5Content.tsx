@@ -294,6 +294,7 @@ function Step5Content() {
             campaignName: draft.name || 'Untitled Campaign',
             businessGoal: draft.businessGoal ?? '',
             description: draft.businessGoal ?? '',
+            brand: draft.brand ?? '',
             startDate: draft.startDate ? (typeof draft.startDate === 'string' ? draft.startDate : draft.startDate.toISOString()) : undefined,
             endDate: draft.endDate ? (typeof draft.endDate === 'string' ? draft.endDate : draft.endDate.toISOString()) : undefined,
             timeZone: draft.timeZone ?? 'UTC',

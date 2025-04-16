@@ -17,12 +17,16 @@ import { SearchProvider } from '@/providers/SearchProvider';
 // Import Shadcn Toaster
 import { Toaster } from '@/components/ui/toaster';
 // Import ClerkProvider and UI components
-import { ClerkProvider, SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
+import { ClerkProvider } from '@clerk/nextjs';
+// Remove dynamic import: import dynamic from 'next/dynamic';
 
 // Import diagnostic script for legacy compatibility
 // Removed as part of icon system simplification - functionality now built into Icon component
 
 const inter = Inter({ subsets: ['latin'] });
+
+// Remove dynamic import definition
+// const DynamicClientAuth = dynamic(...);
 
 export const metadata = {
   title: 'Justify',
@@ -53,20 +57,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Suspense>
                 <UTSSR />
               </Suspense>
-              {/* Pass Clerk UI components into ClientLayout for rendering in header */}
-              <ClientLayout
-                authHeaderControls={(
-                  <div className="flex items-center gap-4">
-                    <SignedOut>
-                      <SignInButton />
-                      <SignUpButton />
-                    </SignedOut>
-                    <SignedIn>
-                      <UserButton />
-                    </SignedIn>
-                  </div>
-                )}
-              >
+              {/* Let ClientLayout handle auth controls internally */}
+              <ClientLayout authHeaderControls={null}> {/* Passing null */}
                 {children}
               </ClientLayout>
               <Toaster />

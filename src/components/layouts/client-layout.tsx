@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { Header } from '@/components/ui/navigation/header';
 import { Sidebar } from '@/components/ui/navigation/sidebar';
 import { useSidebar } from '@/providers/SidebarProvider';
@@ -15,6 +16,12 @@ import { ThemeProvider } from '@/components/providers/theme-provider';
 import { MobileMenu } from '@/components/ui/navigation/mobile-menu';
 import { cn } from '@/lib/utils';
 import { useUser } from '@clerk/nextjs';
+
+// Dynamically import the client-side auth components with SSR disabled
+const DynamicClientAuth = dynamic(
+  () => import('@/components/auth/ClientAuthComponents'),
+  { ssr: false }
+);
 
 // --- App Icon Mapping (Copied from MobileMenu.tsx) ---
 const appIconMap: Record<string, string> = {
@@ -68,11 +75,10 @@ interface NavItemDef {
 
 interface ClientLayoutProps {
   children: React.ReactNode;
-  authHeaderControls?: React.ReactNode;
 }
 
 // Inner component that uses the SidebarProvider
-const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children, authHeaderControls }) => {
+const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
   const pathname = usePathname() ?? '';
   const { user } = useUser();
   const { isOpen: isSidebarProviderOpen, toggle: toggleSidebarProvider } = useSidebar();
@@ -262,7 +268,7 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children, authHeaderCo
             remainingCredits={100}
             notificationsCount={3}
             onMenuClick={() => setIsMobileOpen(!isMobileOpen)}
-            authControls={authHeaderControls}
+            authControls={<DynamicClientAuth />}
           />
 
           <div className="flex flex-1 overflow-hidden">
@@ -301,9 +307,9 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children, authHeaderCo
   );
 };
 
-// Export the ClientLayoutInner directly since SidebarProvider is now in RootLayout
-const ClientLayout: React.FC<ClientLayoutProps> = ({ children, authHeaderControls }) => {
-  return <ClientLayoutInner authHeaderControls={authHeaderControls}>{children}</ClientLayoutInner>;
+// Export the ClientLayoutInner directly
+const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
+  return <ClientLayoutInner>{children}</ClientLayoutInner>;
 };
 
 export default ClientLayout;

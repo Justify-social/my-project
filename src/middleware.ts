@@ -1,34 +1,44 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
-// Define ALL routes that should be protected
-const isProtectedRoute = createRouteMatcher([
-    '/dashboard(.*)',
-    '/settings(.*)',
-    '/admin(.*)',
-    '/api/(.*)', // Protect ALL API routes initially
-]);
-
 // Define routes that should bypass the protection check (public routes)
 const isPublicRoute = createRouteMatcher([
     '/', // Homepage
     '/api/webhook/(.*)', // Webhooks
-    '/api/auth/(.*)' // Clerk auth routes (might be implicit, but safe to add)
+    '/signin(.*)', // Sign in routes
+    '/signup(.*)', // Sign up routes
     // Add other public routes like '/pricing', '/about' here if needed
 ]);
 
-// Simplified middleware: Let Clerk handle protection based on matchers implicitly.
-// The config below handles which routes the middleware runs on.
-// Clerk's default behavior protects routes NOT matched by public patterns.
-// (Note: The specific logic might depend slightly on Clerk version, but this is the standard approach)
-export default clerkMiddleware();
+// Define ALL routes that should be protected
+// (Can be simplified if relying on Clerk's default behavior below)
+// const isProtectedRoute = createRouteMatcher([
+//     '/dashboard(.*)',
+//     '/settings(.*)',
+//     '/admin(.*)',
+//     '/api/(.*)', // Protect ALL API routes initially, except public ones above
+// ]);
+
+// Explicitly configure public/protected routes within clerkMiddleware
+export default clerkMiddleware((auth, req) => {
+    // By default, if it's not a public route, it's protected.
+    if (!isPublicRoute(req)) {
+        auth(); // Calling auth() implicitly protects non-public routes here
+    }
+});
 
 export const config = {
     // The matcher ensures the middleware runs on relevant paths,
     // excluding static files and specific framework paths.
     matcher: [
-        // Run middleware on all routes except static assets and _next internal paths
+        /*
+         * Match all request paths except for the ones starting with:
+         * - _next/static (static files)
+         * - _next/image (image optimization files)
+         * - favicon.ico (favicon file)
+         * - Specific file extensions (svg, png, jpg, etc.)
+         * It WILL run on API routes now because we removed the `(?!api)` exclusion
+         * The logic inside clerkMiddleware handles public/protected status for APIs.
+         */
         '/((?!_next/static|_next/image|favicon.ico|.*\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-        // Ensure API routes are included
-        '/(api|trpc)(.*)',
     ],
-}; 
+};
