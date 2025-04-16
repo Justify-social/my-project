@@ -1,3 +1,4 @@
+// Test comment to verify file edits
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
 // Define routes that should bypass the protection check (public routes)
