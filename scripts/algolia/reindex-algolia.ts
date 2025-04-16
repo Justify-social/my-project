@@ -1,17 +1,33 @@
 // scripts/reindex-algolia.ts
-import { PrismaClient, CampaignWizard } from '@prisma/client'; // Import type
+import { CampaignWizard } from '@prisma/client'; // Import type
 import { prisma } from '../../src/lib/prisma'; // Corrected path
-import { indexCampaigns } from '../../src/lib/algolia'; // Corrected path
+import { indexCampaigns, CampaignSearchResult } from '../../src/lib/algolia'; // Corrected path, added CampaignSearchResult
 import { EnumTransformers } from '../../src/utils/enum-transformers'; // Corrected path
+
+// Define an interface for the expected shape after backend transformation
+interface FrontendReadyCampaign {
+  id: string;
+  name?: string;
+  campaignName?: string;
+  businessGoal?: string;
+  description?: string;
+  status?: string | null;
+  startDate?: Date | string | null; // Allow Date or string
+  endDate?: Date | string | null; // Allow Date or string
+  timeZone?: string | null;
+  budget?: Record<string, unknown> | null; // More flexible budget type
+  primaryKPI?: string | null;
+  // Add other potential fields
+  [key: string]: unknown;
+}
 
 async function main() {
   console.log('Starting re-indexing process...');
 
   try {
     console.log('Fetching campaigns from database...');
-    // Fetch all campaigns. Include relations if needed for indexing.
     const campaignsFromDb = await prisma.campaignWizard.findMany({
-      // include: { Influencer: true }, // Uncomment if you need influencer data
+      // include: { Influencer: true },
     });
     console.log(`Fetched ${campaignsFromDb.length} campaigns.`);
 
@@ -20,46 +36,54 @@ async function main() {
       return;
     }
 
-    // --- Data Transformation ---
     console.log('Transforming data for Algolia...');
-    const transformedCampaigns = campaignsFromDb.map((campaign: CampaignWizard) => {
-      // Use the existing frontend transformer first
-      // Assert type to help TypeScript, though it might be loosely typed
-      const frontendReady = EnumTransformers.transformObjectFromBackend(campaign) as any;
+    const transformedCampaigns: Partial<CampaignSearchResult>[] = campaignsFromDb.map(
+      (campaign: CampaignWizard) => {
+        const frontendReady = EnumTransformers.transformObjectFromBackend(
+          campaign
+        ) as FrontendReadyCampaign;
 
-      // Further flatten or select specific fields if needed for Algolia
-      // Example: Flatten budget, primaryContact, etc.
-      return {
-        objectID: frontendReady.id, // Use campaign ID as objectID
-        // Use safe access with fallbacks
-        campaignName: frontendReady.name || frontendReady.campaignName || 'Unknown Campaign',
-        description: frontendReady.businessGoal || frontendReady.description || '',
-        status: frontendReady.status || null,
-        startDate: frontendReady.startDate || null, // Keep as ISO string or format if needed
-        endDate: frontendReady.endDate || null,
-        timeZone: frontendReady.timeZone || null,
-        // Flatten budget safely
-        currency: frontendReady.budget?.currency || null,
-        totalBudget: frontendReady.budget?.total || null,
-        socialMediaBudget: frontendReady.budget?.socialMedia || null,
-        // Add other fields you want searchable
-        primaryKPI: frontendReady.primaryKPI || null,
-        // Add influencer handles if needed (assuming Influencer relation was included)
-        // influencerHandles: frontendReady.Influencer?.map((inf: any) => inf.handle).join(', ') || null,
-        // ... add more fields as required for your search use case ...
-      };
-    });
+        // Explicitly handle potentially null values before assigning
+        const tz = frontendReady.timeZone;
+        const pKpi = frontendReady.primaryKPI;
+        const curr = frontendReady.budget?.currency;
+        const tBudget = frontendReady.budget?.total;
+        const smBudget = frontendReady.budget?.socialMedia;
+
+        // Construct the object for Algolia, ensuring type compatibility
+        const algoliaRecord: Partial<CampaignSearchResult> = {
+          objectID: frontendReady.id,
+          campaignName: frontendReady.name || frontendReady.campaignName || 'Unknown Campaign',
+          description: frontendReady.businessGoal || frontendReady.description || '',
+          status: frontendReady.status ?? undefined, // Map null to undefined
+          // Convert Date to ISO string or keep null
+          startDate:
+            frontendReady.startDate instanceof Date
+              ? frontendReady.startDate.toISOString()
+              : undefined,
+          endDate:
+            frontendReady.endDate instanceof Date ? frontendReady.endDate.toISOString() : undefined,
+          // Use explicit ternary with intermediate variables
+          timeZone: tz ? tz : undefined,
+          currency: curr ? (curr as string) : undefined,
+          totalBudget: tBudget ? (tBudget as number) : undefined,
+          socialMediaBudget: smBudget ? (smBudget as number) : undefined,
+          primaryKPI: pKpi ? pKpi : undefined,
+          // influencerHandles: frontendReady.Influencer?.map((inf: any) => inf.handle).join(', ') || null,
+        };
+        return algoliaRecord;
+      }
+    );
     console.log('Data transformation complete.');
-    // ------------------------
 
     console.log(`Indexing ${transformedCampaigns.length} transformed campaigns in Algolia...`);
-    await indexCampaigns(transformedCampaigns); // This function is in src/lib/algolia.ts
+    await indexCampaigns(transformedCampaigns); // Now expects Partial<CampaignSearchResult>[]
     console.log('Re-indexing complete!');
   } catch (error) {
     console.error('Error during re-indexing:', error);
-    process.exit(1); // Exit with error code
+    process.exit(1);
   } finally {
-    await prisma.$disconnect(); // Ensure Prisma client disconnects
+    await prisma.$disconnect();
     console.log('Prisma client disconnected.');
   }
 }

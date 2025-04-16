@@ -15,18 +15,39 @@ import {
   CampaignData,
   AudienceData,
   AssetData,
-  ValidationResult,
+  ValidationError,
+  LocationData,
+  GenderData,
+  AgeRangeData,
+  ScreeningQuestionData,
+  LanguageData,
+  CompetitorData,
 } from './validation';
 
 /**
  * Response interface for API operations
  */
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   status: number;
   message: string;
   data?: T;
-  errors?: any[];
+  errors?: ValidationError[];
+}
+
+// Define type for objectives update payload
+interface ObjectivesUpdateData {
+  objectives?: string[]; // Assuming string array based on usage
+}
+
+// Define type for audience update payload
+interface AudienceUpdateData {
+  locations?: LocationData[];
+  genders?: GenderData[];
+  ageRanges?: AgeRangeData[];
+  screeningQuestions?: ScreeningQuestionData[];
+  languages?: LanguageData[];
+  competitors?: CompetitorData[];
 }
 
 /**
@@ -94,13 +115,13 @@ export class CampaignService {
    * @param data Campaign overview data to update
    * @returns API response
    */
-  public async updateOverview(id: number, data: any): Promise<ApiResponse> {
+  public async updateOverview(id: number, data: Partial<CampaignData>): Promise<ApiResponse> {
     try {
       // Validate the data first
-      const campaignData: CampaignData = {
+      const campaignDataForValidation: CampaignData = {
         id,
-        name: data.name,
-        status: data.status || 'draft',
+        name: data.name || '', // Provide default for validation
+        status: data.status || 'draft', // Provide default for validation
         startDate: data.startDate,
         endDate: data.endDate,
         budget: data.budget,
@@ -108,7 +129,7 @@ export class CampaignService {
         brandId: data.brandId,
       };
 
-      const validationResult = validateCampaignData(campaignData);
+      const validationResult = validateCampaignData(campaignDataForValidation);
 
       if (!validationResult.valid) {
         return validationErrorResponse(validationResult);
@@ -121,7 +142,7 @@ export class CampaignService {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(campaignData),
+        body: JSON.stringify(data),
       });
 
       if (!response.ok) {
@@ -176,16 +197,8 @@ export class CampaignService {
    * @param data Campaign objectives data to update
    * @returns API response
    */
-  public async updateObjectives(id: number, data: any): Promise<ApiResponse> {
+  public async updateObjectives(id: number, data: ObjectivesUpdateData): Promise<ApiResponse> {
     try {
-      // Prepare the data for validation
-      const campaignData: CampaignData = {
-        id,
-        name: data.name || '', // Required for validation but will be ignored in update
-        status: data.status || 'draft',
-        objectives: data.objectives,
-      };
-
       dbLogger.info(DbOperation.UPDATE, `Updating campaign ${id} objectives`, { campaignId: id });
 
       const response = await fetch(`/api/campaigns/${id}/objectives`, {
@@ -252,17 +265,17 @@ export class CampaignService {
    * @param data Campaign audience data to update
    * @returns API response
    */
-  public async updateAudience(id: number, data: any): Promise<ApiResponse> {
+  public async updateAudience(id: number, data: AudienceUpdateData): Promise<ApiResponse> {
     try {
-      // Prepare the audience data for validation
+      // Map the input data to the AudienceData structure for validation/API call
       const audienceData: AudienceData = {
         campaignId: id,
-        targetLocations: data.locations,
-        targetGenders: data.genders,
-        targetAgeRanges: data.ageRanges,
-        screeningQuestions: data.screeningQuestions,
-        languages: data.languages,
-        competitors: data.competitors,
+        targetLocations: data.locations || [], // Map input key
+        targetGenders: data.genders || [], // Map input key
+        targetAgeRanges: data.ageRanges || [], // Map input key
+        screeningQuestions: data.screeningQuestions || [],
+        languages: data.languages || [],
+        competitors: data.competitors || [],
       };
 
       const validationResult = validateAudienceData(audienceData);
@@ -635,7 +648,7 @@ export class CampaignService {
    * @param data Step-specific data
    * @returns API response
    */
-  public async autoSaveWizardStep(id: number, step: number, data: any): Promise<ApiResponse> {
+  public async autoSaveWizardStep(id: number, step: number, data: unknown): Promise<ApiResponse> {
     try {
       dbLogger.info(DbOperation.UPDATE, `Auto-saving campaign ${id} wizard step ${step}`, {
         campaignId: id,
@@ -686,25 +699,20 @@ export class CampaignService {
         data: savedData,
       };
     } catch (error) {
-      dbLogger.error(
-        DbOperation.UPDATE,
-        `Exception while auto-saving campaign ${id} wizard step ${step}`,
-        { campaignId: id, step },
-        error
+      const unknownError = error as unknown; // Type as unknown
+      console.error(
+        `Error auto-saving campaign ${id} wizard step ${step}:`,
+        unknownError instanceof Error ? unknownError.message : String(unknownError)
       );
-
       return {
         success: false,
         status: 500,
         message:
-          error instanceof Error ? error.message : 'Unknown error occurred while auto-saving',
+          error instanceof Error ? error.message : 'An unknown error occurred during autosave.',
       };
     }
   }
 }
 
-// Export a singleton instance
+// Instantiate the service
 export const campaignService = new CampaignService();
-
-// Default export
-export default campaignService;

@@ -114,7 +114,9 @@ export default function TablePreviewPage() {
                   {componentMeta.status}
                 </Badge>
               )}
-              <span className="text-secondary capitalize">({componentMeta.renderType || 'N/A'})</span>
+              <span className="text-secondary capitalize">
+                ({componentMeta.renderType || 'N/A'})
+              </span>
             </div>
           </div>
           {componentMeta.description && (

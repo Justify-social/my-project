@@ -5,7 +5,7 @@
  * It ensures data integrity and provides helpful error messages for invalid data.
  */
 
-import { dbLogger, DbOperation, LogLevel } from './db-logger';
+import { dbLogger, DbOperation } from './db-logger';
 
 // Types for campaign data
 // These should match the database schema structure

@@ -4,7 +4,7 @@
  * Provides standardized icon path resolution and utility functions
  */
 
-import { IconStyle, IconMetadata } from './icon-types';
+import { IconMetadata } from './icon-types';
 
 // IMPORTANT: Import the generated registry data
 import { iconRegistryData } from '@/lib/generated/icon-registry'; // Use path alias
@@ -15,10 +15,13 @@ const registry = iconRegistryData; // Use the imported data object
 // Debug flag
 const DEBUG = process.env.NODE_ENV === 'development';
 
+// Set to keep track of logged warnings
+const loggedWarnings = new Set<string>();
+
 // Helper for debug logging
-const debug = (...args: any[]) => {
+const debug = (..._args: unknown[]) => {
   if (DEBUG) {
-    // console.log('[Icons]', ...args); // Commented out debug logs
+    // console.log('[Icons]', ..._args); // Commented out debug logs
   }
 };
 
@@ -83,4 +86,12 @@ export function iconExists(iconId: string): boolean {
   if (!iconId) return false;
   const icon = findIconById(iconId);
   return !!icon; // Returns true if icon is found, false otherwise
+}
+
+export function logIconWarning(message: string, ..._args: unknown[]) {
+  // Prefix unused args
+  if (!loggedWarnings.has(message)) {
+    console.warn(`[Icon Warning] ${message}`, ..._args);
+    loggedWarnings.add(message);
+  }
 }

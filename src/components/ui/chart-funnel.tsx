@@ -59,7 +59,11 @@ export interface FunnelChartProps {
   showLabels?: boolean;
   labelPosition?: 'inside' | 'outside' | 'center';
   showPercentage?: boolean;
-  tooltipFormatter?: (value: any, name: string, props: any) => React.ReactNode;
+  tooltipFormatter?: (
+    value: string | number,
+    name: string,
+    props: DefaultTooltipProps
+  ) => React.ReactNode;
 }
 
 // Use brand colors or a compatible palette
@@ -74,12 +78,39 @@ const DEFAULT_COLORS = [
   'hsl(var(--secondary) / 0.4)',
 ];
 
+// Define type for default tooltip props
+interface DefaultTooltipProps {
+  payload?: {
+    percent?: number;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [key: string]: any; // Allow other payload properties
+  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any; // Allow other top-level props
+}
+
 // Default Tooltip Formatter
-const defaultTooltipFormatter = (value: number, name: string, props: any) => {
+const defaultTooltipFormatter = (value: number, name: string, props: DefaultTooltipProps) => {
   const percent = props.payload?.percent;
   const percentString = percent !== undefined ? `(${(percent * 100).toFixed(0)}%)` : '';
   return [`${value.toLocaleString()} ${percentString}`, name];
 };
+
+// Define type for label content props
+interface LabelContentProps {
+  value?: string | number | undefined;
+  percent?: number;
+  x?: string | number | undefined;
+  y?: string | number | undefined;
+  width?: string | number | undefined;
+  height?: string | number | undefined;
+  name?: string;
+  payload?: {
+    value?: number;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [key: string]: any;
+  };
+}
 
 export const FunnelChart: React.FC<FunnelChartProps> = ({
   data,
@@ -92,10 +123,32 @@ export const FunnelChart: React.FC<FunnelChartProps> = ({
   showLabels = true,
   labelPosition = 'inside',
   showPercentage = true,
-  tooltipFormatter = defaultTooltipFormatter, // Use default formatter
+  tooltipFormatter = defaultTooltipFormatter,
 }) => {
-  const renderLabelContent = (props: any) => {
+  const renderLabelContent = (props: LabelContentProps) => {
     const { value, percent, x, y, width, height, name, payload } = props;
+
+    // Add null/undefined checks AND parsing for coordinates/dimensions
+    const numX = typeof x === 'string' ? parseFloat(x) : x;
+    const numY = typeof y === 'string' ? parseFloat(y) : y;
+    const numWidth = typeof width === 'string' ? parseFloat(width) : width;
+    const numHeight = typeof height === 'string' ? parseFloat(height) : height;
+
+    if (
+      value === undefined ||
+      percent === undefined ||
+      numX === undefined ||
+      isNaN(numX) || // Check for NaN after parsing
+      numY === undefined ||
+      isNaN(numY) ||
+      numWidth === undefined ||
+      isNaN(numWidth) ||
+      numHeight === undefined ||
+      isNaN(numHeight)
+    ) {
+      return null;
+    }
+
     const percentValue = (percent * 100).toFixed(0);
     const originalValue = payload?.value ?? value;
 
@@ -103,7 +156,7 @@ export const FunnelChart: React.FC<FunnelChartProps> = ({
     const textColor = 'hsl(var(--primary-foreground))'; // Assume this is white/light
 
     return (
-      <g transform={`translate(${x + width / 2}, ${y + height / 2 + 5})`}>
+      <g transform={`translate(${numX + numWidth / 2}, ${numY + numHeight / 2 + 5})`}>
         {/* Stage Name - slightly less prominent */}
         <text
           textAnchor="middle"
@@ -153,7 +206,7 @@ export const FunnelChart: React.FC<FunnelChartProps> = ({
       <ResponsiveContainer width={width} height={height}>
         <RechartsFunnelChart data={data}>
           <Tooltip
-            formatter={tooltipFormatter} // Use the (potentially default) formatter
+            formatter={tooltipFormatter}
             contentStyle={{
               backgroundColor: 'hsl(var(--background))',
               color: 'hsl(var(--foreground))',
@@ -179,12 +232,7 @@ export const FunnelChart: React.FC<FunnelChartProps> = ({
                 strokeWidth={1}
               />
             ))}
-            {showLabels && (
-              <LabelList
-                position={labelPosition}
-                content={renderLabelContent} // Use enhanced renderer
-              />
-            )}
+            {showLabels && <LabelList position={labelPosition} content={renderLabelContent} />}
           </Funnel>
         </RechartsFunnelChart>
       </ResponsiveContainer>

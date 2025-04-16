@@ -6,8 +6,6 @@
  * correctly and provide helpful diagnostics when they are not.
  */
 
-import { dbLogger, DbOperation } from './data-mapping/db-logger';
-
 /**
  * Enumeration of possible API error types for better error categorization
  */
@@ -28,7 +26,7 @@ export enum ApiErrorType {
 export interface ApiErrorInfo {
   type: ApiErrorType;
   message: string;
-  details?: any;
+  details?: unknown;
   isRetryable: boolean;
 }
 
@@ -40,7 +38,7 @@ export interface ApiVerificationResult {
   apiName: string;
   endpoint: string;
   latency?: number;
-  data?: any;
+  data?: unknown;
   error?: ApiErrorInfo;
 }
 
@@ -59,7 +57,7 @@ async function isHostReachable(
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-    const response = await fetch(`https://${hostname}/`, {
+    const _response = await fetch(`https://${hostname}/`, {
       method: 'HEAD',
       mode: 'no-cors', // This prevents CORS errors but means we can't read the response
       signal: controller.signal,
@@ -516,7 +514,7 @@ export async function verifyPhylloApi(): Promise<ApiVerificationResult> {
 
     // Using example credentials from the Phyllo documentation
     // Example auth from docs
-    const exampleAuth =
+    const _exampleAuth =
       'Basic MDMxNTM0NWYtMjgxMS00MGYwLThmNTItOTdmNTNmYTE0MWQxOjg5MjVhN2U0LTY1YjctNDZiYS1iYzk1LWY1YTMyYzFlYmVkOQ==';
     const testUserId = '3b310265-f9a4-43a0-889b-2adc97084bd4';
     const testAccountId = 'e90d7893-13a6-46a7-a958-2d041b02723a';
@@ -1323,7 +1321,7 @@ export async function verifyGiphyApi(): Promise<ApiVerificationResult> {
           },
         };
       }
-    } catch (error) {
+    } catch {
       // If we get a CORS error, return a helpful message
       console.error(
         `${apiName} API call failed, likely due to CORS. Using host check result instead.`

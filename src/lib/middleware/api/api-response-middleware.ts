@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
  * Custom middleware to replace the default NextResponse.json serialization
  * This ensures proper handling of Date objects at the HTTP level
  */
-export function createApiResponse(data: any, options?: ResponseInit) {
+export function createApiResponse(data: unknown, options?: ResponseInit) {
   const serialized = JSON.stringify(data, (key, value) => {
     // Properly serialize Date objects at the HTTP response level
     if (value instanceof Date) {

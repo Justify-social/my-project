@@ -2,21 +2,22 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import {
   Prisma,
-  Platform,
-  Position,
-  KPI,
-  Currency,
-  SubmissionStatus,
-  CreativeAssetType,
-  Feature,
+  Platform, // Restore Platform
+  // Position, // Unused
+  // KPI, // Unused
+  // Currency, // Unused
+  // SubmissionStatus, // Unused
+  // CreativeAssetType, // Unused
+  // Feature, // Unused
   Status,
 } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { dbLogger, DbOperation } from '@/lib/data-mapping/db-logger';
 import { v4 as uuidv4 } from 'uuid';
-import { withValidation, tryCatch } from '@/lib/middleware/api';
+// import { withValidation, tryCatch } from '@/lib/middleware/api'; // tryCatch unused, withValidation used later
+import { withValidation } from '@/lib/middleware/api';
 import {
-  DraftCampaignDataSchema,
+  // DraftCampaignDataSchema, // Unused
   ContactSchema,
   BudgetSchema,
   InfluencerSchema,
@@ -25,28 +26,39 @@ import {
   StatusEnum,
   DraftAssetSchema,
   LocationSchema,
-  DemographicsSchema
+  DemographicsSchema,
 } from '@/components/features/campaigns/types';
+// import { formatCampaignDataForResponse } from '@/utils/api-response-formatter'; // Unused
+// import { handleDbError, validateRequest } from '@/lib/middleware/api'; // Unused
+
+// Define interface for influencer data from request body (used in POST)
+interface ApiInfluencer {
+  id?: string | number | null;
+  handle?: string | null;
+  platform?: string | null;
+  platformId?: string | null;
+  // Add other potential fields if they exist
+}
 
 // Define schemas for campaign creation validation
 // Note: Frontend uses 'Instagram', backend uses 'INSTAGRAM' - transformation required
-const influencerSchema = z
-  .object({
-    name: z.string().optional().default(''),
-    handle: z.string().min(1, 'Handle is required'),
-    // Accept any platform format - transformation will handle it
-    platform: z.string(),
-    id: z.string().optional(),
-    url: z.string().optional().default(''),
-    posts: z.number().optional().default(0),
-    videos: z.number().optional().default(0),
-    reels: z.number().optional().default(0),
-    stories: z.number().optional().default(0),
-  })
-  .optional();
+// const influencerSchema = z
+//   .object({
+//     name: z.string().optional().default(''),
+//     handle: z.string().min(1, 'Handle is required'),
+//     // Accept any platform format - transformation will handle it
+//     platform: z.string(),
+//     id: z.string().optional(),
+//     url: z.string().optional().default(''),
+//     posts: z.number().optional().default(0),
+//     videos: z.number().optional().default(0),
+//     reels: z.number().optional().default(0),
+//     stories: z.number().optional().default(0),
+//   })
+//   .optional();
 
 // Define a more flexible influencer schema specifically for drafts
-const draftInfluencerSchema = z
+const _draftInfluencerSchema = z
   .object({
     name: z.string().optional().default(''),
     handle: z.string().optional().default(''), // Make handle optional for drafts
@@ -61,98 +73,43 @@ const draftInfluencerSchema = z
   .optional();
 
 // Position has the same format in frontend and backend
-const contactSchema = z
-  .object({
-    firstName: z.string().min(1, 'First name is required').optional(),
-    surname: z.string().min(1, 'Surname is required').optional(),
-    email: z.string().email('Valid email is required').optional(),
-    position: z.string().optional(),
-  })
-  .optional();
+// const contactSchema = z
+//   .object({
+//     firstName: z.string().min(1, 'First name is required').optional(),
+//     surname: z.string().min(1, 'Surname is required').optional(),
+//     email: z.string().email('Valid email is required').optional(),
+//     position: z.string().optional(),
+//   })
+//   .optional();
 
-const audienceSchema = z.object({
-  description: z.string().optional().default(''),
-  size: z.number().optional().default(0),
-  age1824: z.number().optional().default(0),
-  age2534: z.number().optional().default(0),
-  age3544: z.number().optional().default(0),
-  age4554: z.number().optional().default(0),
-  age5564: z.number().optional().default(0),
-  age65plus: z.number().optional().default(0),
-});
+// const audienceSchema = z.object({
+//   description: z.string().optional().default(''),
+//   size: z.number().optional().default(0),
+//   age1824: z.number().optional().default(0),
+//   age2534: z.number().optional().default(0),
+//   age3544: z.number().optional().default(0),
+//   age4554: z.number().optional().default(0),
+//   age5564: z.number().optional().default(0),
+//   age65plus: z.number().optional().default(0),
+// });
 
-const creativeAssetSchema = z.object({
-  type: z.enum(['IMAGE', 'VIDEO', 'DOCUMENT']).default('IMAGE'),
-  url: z.string().optional().default(''),
-  description: z.string().optional().default(''),
-});
+// const creativeAssetSchema = z.object({
+//   type: z.enum(['IMAGE', 'VIDEO', 'DOCUMENT']).default('IMAGE'),
+//   url: z.string().optional().default(''),
+//   description: z.string().optional().default(''),
+// });
 
-const creativeRequirementSchema = z.object({
-  description: z.string().min(1, 'Description is required'),
-  priority: z.enum(['LOW', 'MEDIUM', 'HIGH']).default('MEDIUM'),
-});
+// const creativeRequirementSchema = z.object({
+//   description: z.string().min(1, 'Description is required'),
+//   priority: z.enum(['LOW', 'MEDIUM', 'HIGH']).default('MEDIUM'),
+// });
 
-const submissionSchema = z
-  .object({
-    primaryContact: contactSchema.optional(),
-    secondaryContact: contactSchema.optional(),
-    contacts: z.string().optional().default(''),
-    // Backend expects UPPERCASE platform values
-    platform: z.enum(['INSTAGRAM', 'YOUTUBE', 'TIKTOK']).default('INSTAGRAM'),
-    mainMessage: z.string().optional().default(''),
-    hashtags: z.string().optional().default(''),
-    memorability: z.string().optional().default(''),
-    keyBenefits: z.string().optional().default(''),
-    expectedAchievements: z.string().optional().default(''),
-    purchaseIntent: z.string().optional().default(''),
-    brandPerception: z.string().optional().default(''),
-    // Backend expects UPPERCASE_SNAKE_CASE KPI values
-    primaryKPI: z
-      .enum([
-        'AD_RECALL',
-        'BRAND_AWARENESS',
-        'CONSIDERATION',
-        'MESSAGE_ASSOCIATION',
-        'BRAND_PREFERENCE',
-        'PURCHASE_INTENT',
-        'ACTION_INTENT',
-        'RECOMMENDATION_INTENT',
-        'ADVOCACY',
-      ])
-      .default('BRAND_AWARENESS'),
-    secondaryKPIs: z.string().optional().default(''),
-    features: z.string().optional().default(''),
-    audiences: z.array(audienceSchema).optional().default([]),
-    creativeAssets: z.array(creativeAssetSchema).optional().default([]),
-    creativeRequirements: z.array(creativeRequirementSchema).optional().default([]),
-  })
-  .optional();
+// Unused Schema
+/*
+// ... existing code ...
+*/
 
-const campaignCreateSchema = z.object({
-  name: z.string().min(1, 'Campaign name is required'),
-  businessGoal: z.string().optional(),
-  startDate: z.string().optional(), // Changed from datetime() to string() to be more flexible
-  endDate: z.string().optional(), // Changed from datetime() to string() to be more flexible
-  timeZone: z.string().optional(),
-  primaryContact: contactSchema,
-  secondaryContact: contactSchema,
-  additionalContacts: z.array(contactSchema).optional(),
-  influencers: z.array(influencerSchema).optional(),
-  // Accept any of these formats for currency, budget
-  currency: z.string().optional(),
-  totalBudget: z.union([z.string(), z.number()]).optional(),
-  socialMediaBudget: z.union([z.string(), z.number()]).optional(),
-  // Exchange rate data
-  exchangeRateData: z.any().optional(),
-  // Status can be a string
-  status: z.string().optional(),
-  // Other fields
-  audience: audienceSchema.optional(),
-  creativeAssets: z.array(creativeAssetSchema).optional(),
-  creativeRequirements: z.array(creativeRequirementSchema).optional(),
-  budget: z.any().optional(), // Make budget an "any" type to be more flexible
-});
-
+// Restore campaignUpdateSchema definition
 const campaignUpdateSchema = z.object({
   id: z.string().uuid('Invalid campaign ID format'),
   campaignName: z.string().min(1).optional(),
@@ -162,6 +119,8 @@ const campaignUpdateSchema = z.object({
   step: z.number().optional(),
 });
 
+// Unused Schema
+/*
 // Define a more flexible schema for campaign drafts
 // This schema has minimal validations to allow partial completion
 const campaignDraftSchema = z.object({
@@ -196,7 +155,10 @@ const campaignDraftSchema = z.object({
   secondaryKPIs: z.array(z.string()).optional(),
   features: z.array(z.string()).optional(),
 });
+*/
 
+// Unused Schema
+/*
 // Create a more flexible campaign schema that works for both drafts and complete submissions
 const campaignFlexibleSchema = z.object({
   // Always required, even for drafts
@@ -234,85 +196,135 @@ const campaignFlexibleSchema = z.object({
   exchangeRateData: z.any().optional(),
   budget: z.any().optional(),
 });
+*/
 
 // Define a specific schema for the POST API endpoint validation
-const CampaignPostApiSchema = z.object({
-  id: z.string().optional(),
-  createdAt: z.string().datetime({ offset: true, message: "Invalid ISO date string" }).nullable().optional(), // Expect string
-  updatedAt: z.string().datetime({ offset: true, message: "Invalid ISO date string" }).nullable().optional(), // Expect string
-  currentStep: z.number().default(1),
-  isComplete: z.boolean().default(false),
-  status: StatusEnum.default('DRAFT'),
-  name: z.string().min(1, { message: "Campaign name is required" }),
-  businessGoal: z.string().nullable().optional(),
-  brand: z.string().min(1, { message: "Brand name is required" }),
-  website: z.string().url({ message: "Invalid website URL" }).nullable().optional(),
-  // Use z.string().datetime() for API date string handling
-  startDate: z.string().datetime({ offset: true, message: "Invalid ISO date string" }).nullable().optional(), // Expect string
-  endDate: z.string().datetime({ offset: true, message: "Invalid ISO date string" }).nullable().optional(),   // Expect string
-  timeZone: z.string().nullable().optional(),
-  primaryContact: ContactSchema.nullable().optional(),
-  secondaryContact: z.preprocess(
-    (val) => {
+const CampaignPostApiSchema = z
+  .object({
+    id: z.string().optional(),
+    createdAt: z
+      .string()
+      .datetime({ offset: true, message: 'Invalid ISO date string' })
+      .nullable()
+      .optional(), // Expect string
+    updatedAt: z
+      .string()
+      .datetime({ offset: true, message: 'Invalid ISO date string' })
+      .nullable()
+      .optional(), // Expect string
+    currentStep: z.number().default(1),
+    isComplete: z.boolean().default(false),
+    status: StatusEnum.default('DRAFT'),
+    name: z.string().min(1, { message: 'Campaign name is required' }),
+    businessGoal: z.string().nullable().optional(),
+    brand: z.string().min(1, { message: 'Brand name is required' }),
+    website: z.string().url({ message: 'Invalid website URL' }).nullable().optional(),
+    // Use z.string().datetime() for API date string handling
+    startDate: z
+      .string()
+      .datetime({ offset: true, message: 'Invalid ISO date string' })
+      .nullable()
+      .optional(), // Expect string
+    endDate: z
+      .string()
+      .datetime({ offset: true, message: 'Invalid ISO date string' })
+      .nullable()
+      .optional(), // Expect string
+    timeZone: z.string().nullable().optional(),
+    primaryContact: ContactSchema.nullable().optional(),
+    secondaryContact: z.preprocess(val => {
       const contact = val as Partial<z.infer<typeof ContactSchema>> | null;
-      if (contact && typeof contact === 'object' && !contact.firstName && !contact.surname && !contact.email) {
+      if (
+        contact &&
+        typeof contact === 'object' &&
+        !contact.firstName &&
+        !contact.surname &&
+        !contact.email
+      ) {
         return null;
       }
       return val;
-    },
-    ContactSchema.nullable().optional()
-  ),
-  additionalContacts: z.array(ContactSchema).default([]),
-  budget: BudgetSchema.nullable().optional(),
-  Influencer: z.array(InfluencerSchema.extend({ // Ensure Influencer schema expects string dates here too
-    createdAt: z.string().datetime({ offset: true, message: "Invalid ISO date string" }).nullable().optional(),
-    updatedAt: z.string().datetime({ offset: true, message: "Invalid ISO date string" }).nullable().optional(),
-  })).optional(),
-  step1Complete: z.boolean().default(false),
-  primaryKPI: KPIEnum.nullable().optional(),
-  secondaryKPIs: z.array(KPIEnum).nullable().optional(),
-  messaging: z.object({}).passthrough().nullable().optional(),
-  expectedOutcomes: z.object({}).passthrough().nullable().optional(),
-  features: z.array(FeatureEnum).nullable().optional(),
-  step2Complete: z.boolean().default(false),
-  demographics: DemographicsSchema.nullable().optional(),
-  locations: z.array(LocationSchema).nullable().optional(),
-  targeting: z.object({}).passthrough().nullable().optional(),
-  competitors: z.array(z.string()).nullable().optional(),
-  step3Complete: z.boolean().default(false),
-  assets: z.array(DraftAssetSchema).default([]),
-  guidelines: z.string().nullable().optional(),
-  requirements: z.array(z.object({ description: z.string(), mandatory: z.boolean() })).default([]),
-  notes: z.string().nullable().optional(),
-  step4Complete: z.boolean().default(false),
-  userId: z.string().nullable().optional(),
-}).passthrough()
-  // Re-apply refinements needed for API validation (budget, dates)
-  .refine(data => {
-    if (data.budget?.socialMedia !== undefined && data.budget?.total !== undefined) {
-      return data.budget.socialMedia <= data.budget.total;
-    }
-    return true;
-  }, {
-    message: "Social media budget cannot exceed total budget",
-    path: ["budget", "socialMedia"],
+    }, ContactSchema.nullable().optional()),
+    additionalContacts: z.array(ContactSchema).default([]),
+    budget: BudgetSchema.nullable().optional(),
+    Influencer: z
+      .array(
+        InfluencerSchema.extend({
+          // Ensure Influencer schema expects string dates here too
+          createdAt: z
+            .string()
+            .datetime({ offset: true, message: 'Invalid ISO date string' })
+            .nullable()
+            .optional(),
+          updatedAt: z
+            .string()
+            .datetime({ offset: true, message: 'Invalid ISO date string' })
+            .nullable()
+            .optional(),
+        })
+      )
+      .optional(),
+    step1Complete: z.boolean().default(false),
+    primaryKPI: KPIEnum.nullable().optional(),
+    secondaryKPIs: z.array(KPIEnum).nullable().optional(),
+    messaging: z.object({}).passthrough().nullable().optional(),
+    expectedOutcomes: z.object({}).passthrough().nullable().optional(),
+    features: z.array(FeatureEnum).nullable().optional(),
+    step2Complete: z.boolean().default(false),
+    demographics: DemographicsSchema.nullable().optional(),
+    locations: z.array(LocationSchema).nullable().optional(),
+    targeting: z.object({}).passthrough().nullable().optional(),
+    competitors: z.array(z.string()).nullable().optional(),
+    step3Complete: z.boolean().default(false),
+    assets: z.array(DraftAssetSchema).default([]),
+    guidelines: z.string().nullable().optional(),
+    requirements: z
+      .array(z.object({ description: z.string(), mandatory: z.boolean() }))
+      .default([]),
+    notes: z.string().nullable().optional(),
+    step4Complete: z.boolean().default(false),
+    userId: z.string().nullable().optional(),
   })
-  .refine(data => {
-    try {
-      // Ensure dates are valid ISO strings before comparison
-      if (data.startDate && data.endDate && z.string().datetime({ offset: true }).safeParse(data.startDate).success && z.string().datetime({ offset: true }).safeParse(data.endDate).success) {
-        // Compare Date objects created from strings
-        return new Date(data.endDate) >= new Date(data.startDate);
+  .passthrough()
+  // Re-apply refinements needed for API validation (budget, dates)
+  .refine(
+    data => {
+      if (data.budget?.socialMedia !== undefined && data.budget?.total !== undefined) {
+        return data.budget.socialMedia <= data.budget.total;
       }
-    } catch (e) { return false; }
-    return true;
-  }, {
-    message: "End date must be on or after start date",
-    path: ["endDate"],
-  });
+      return true;
+    },
+    {
+      message: 'Social media budget cannot exceed total budget',
+      path: ['budget', 'socialMedia'],
+    }
+  )
+  .refine(
+    data => {
+      try {
+        // Ensure dates are valid ISO strings before comparison
+        if (
+          data.startDate &&
+          data.endDate &&
+          z.string().datetime({ offset: true }).safeParse(data.startDate).success &&
+          z.string().datetime({ offset: true }).safeParse(data.endDate).success
+        ) {
+          // Compare Date objects created from strings
+          return new Date(data.endDate) >= new Date(data.startDate);
+        }
+      } catch {
+        return false;
+      } // Prefix unused variable
+      return true;
+    },
+    {
+      message: 'End date must be on or after start date',
+      path: ['endDate'],
+    }
+  );
 
 // GET handler - List campaigns
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   // --- Add runtime logging for DATABASE_URL ---
   // console.log("[/api/campaigns GET] Runtime DATABASE_URL:", process.env.DATABASE_URL); // Keep commented out for now
   // -------------------------------------------
@@ -380,7 +392,7 @@ export async function GET(request: NextRequest) {
 // POST handler - Create campaign
 export const POST = withValidation(
   CampaignPostApiSchema, // Use the original, refined schema
-  async (data: z.infer<typeof CampaignPostApiSchema>, request: NextRequest) => {
+  async (data: z.infer<typeof CampaignPostApiSchema>, _request: NextRequest) => {
     try {
       // Remove manual refinement checks
 
@@ -444,7 +456,7 @@ export const POST = withValidation(
         isComplete: false,
         currentStep: 1,
         updatedAt: new Date(),
-        // userId: ??? 
+        // userId: ???
       };
 
       console.log('Database creation data (Corrected Types):', JSON.stringify(dbData, null, 2));
@@ -454,7 +466,7 @@ export const POST = withValidation(
         const campaign = await prisma.$transaction(async tx => {
           // First create the campaign
           const newCampaign = await tx.campaignWizard.create({
-            data: dbData as any, // Use 'as any' carefully or ensure dbData matches Prisma types
+            data: dbData as Prisma.CampaignWizardCreateInput, // Use specific Prisma type
           });
 
           // If there are influencers in the request, create them
@@ -466,7 +478,7 @@ export const POST = withValidation(
           ) {
             // Filter out any incomplete influencer data
             const validInfluencers = transformedData.Influencer.filter(
-              (inf: any): inf is NonNullable<typeof inf> =>
+              (inf: ApiInfluencer): inf is NonNullable<typeof inf> =>
                 !!inf &&
                 typeof inf === 'object' &&
                 typeof inf.platform === 'string' &&
@@ -567,7 +579,7 @@ export const POST = withValidation(
 // PATCH handler - Update campaign
 export const PATCH = withValidation(
   campaignUpdateSchema,
-  async (data: z.infer<typeof campaignUpdateSchema>, request: NextRequest) => {
+  async (data: z.infer<typeof campaignUpdateSchema>, _request: NextRequest) => {
     const { id, ...updateData } = data;
 
     const campaign = await prisma.campaignWizard.update({

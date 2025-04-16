@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '../../../../../../components/ui/slider';
-import { Label } from '@/components/ui/label'; // Import Label if used
+// import { Label } from '@/components/ui/label'; // Unused import
 
 const statusStyles: Record<string, string> = {
   stable: 'bg-green-100 text-green-800 border-green-200',
@@ -28,7 +28,7 @@ export default function SliderPreviewPage() {
     since: '2023-01-01',
     status: 'stable',
   };
-  const examples: string[] = [];
+  // const examples: string[] = []; // Unused variable
 
   // State for controlled slider example
   const [sliderValue, setSliderValue] = useState([50]); // Default to 50

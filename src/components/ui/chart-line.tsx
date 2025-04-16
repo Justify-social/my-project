@@ -62,7 +62,7 @@ const formatDate = (dateStr: string, dateFormat = 'MMM d'): string => {
     if (isValid(date)) {
       return format(date, dateFormat);
     }
-  } catch (e) {
+  } catch {
     // If not a valid date string, return as is
   }
   return dateStr;

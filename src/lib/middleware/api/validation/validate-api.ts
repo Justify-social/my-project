@@ -41,11 +41,8 @@ export async function validateRequest<T extends z.ZodType>(
  */
 export function withValidation<T extends z.ZodType>(
   schema: T,
-  handler: (
-    data: z.infer<T>,
-    request: NextRequest
-  ) => Promise<NextResponse>,
-  options?: { logRequestBody?: boolean; logValidationErrors?: boolean; entityName?: string; }
+  handler: (data: z.infer<T>, request: NextRequest) => Promise<NextResponse>,
+  options?: { logRequestBody?: boolean; logValidationErrors?: boolean; entityName?: string }
 ) {
   return withValidationImpl(schema, handler, options);
 }

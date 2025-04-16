@@ -1,11 +1,8 @@
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { FlatCompat } from "@eslint/eslintrc";
-import js from '@eslint/js'
-import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
-import tseslint from 'typescript-eslint'
 import nextjs from '@next/eslint-plugin-next'
 
 const __filename = fileURLToPath(import.meta.url);
@@ -37,6 +34,7 @@ const eslintConfig = [
       '.next/**',
       'build/**',
       'dist/**',
+      'vercel-mcp-server/dist/**',
       'public/**',
       'scripts-backup-*/**',
       'src/components/ui/LoadingSpinner.tsx',

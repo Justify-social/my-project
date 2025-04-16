@@ -6,7 +6,6 @@ import { Alert } from '@/components/ui/alert';
 import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
 import { cn } from '@/lib/utils';
 import { Influencer } from '@/types/influencer';
-import { Icon } from '@/components/ui/icon/icon';
 import { InfluencerCard } from '@/components/ui/card-influencer';
 import { PlatformSchema, PlatformEnumBackend } from './types';
 import { z } from 'zod';
@@ -18,7 +17,6 @@ export interface MarketplaceListProps {
   viewMode: 'grid' | 'list';
   onInfluencerSelect: (influencer: Influencer) => void;
   emptyStateMessage?: string;
-  showMetrics?: boolean;
 }
 
 const MarketplaceList: React.FC<MarketplaceListProps> = ({
@@ -28,19 +26,20 @@ const MarketplaceList: React.FC<MarketplaceListProps> = ({
   viewMode,
   onInfluencerSelect,
   emptyStateMessage = 'No influencers found matching your criteria',
-  showMetrics = true,
 }) => {
   const [hoveredInfluencer, setHoveredInfluencer] = useState<string | null>(null);
 
   if (isLoading) {
     const skeletonCount = 10; // Number of skeleton cards to show
     return (
-      <div className={cn(
-        'mt-6 grid gap-4',
-        viewMode === 'grid'
-          ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
-          : 'grid-cols-1'
-      )}>
+      <div
+        className={cn(
+          'mt-6 grid gap-4',
+          viewMode === 'grid'
+            ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+            : 'grid-cols-1'
+        )}
+      >
         {Array.from({ length: skeletonCount }).map((_, index) => (
           <LoadingSkeleton key={index} variant="card" height={150} /> // Use card variant
         ))}
@@ -49,7 +48,14 @@ const MarketplaceList: React.FC<MarketplaceListProps> = ({
   }
 
   if (error) {
-    return <Alert variant="destructive" title="Error loading influencers" description={error} className="mt-4" />;
+    return (
+      <Alert
+        variant="destructive"
+        title="Error loading influencers"
+        description={error}
+        className="mt-4"
+      />
+    );
   }
 
   if (influencers.length === 0) {
@@ -71,7 +77,9 @@ const MarketplaceList: React.FC<MarketplaceListProps> = ({
           platformEnum = PlatformSchema.parse(influencer.platform);
         } catch {
           platformEnum = undefined;
-          console.warn(`Invalid platform string for influencer ${influencer.id}: ${influencer.platform}`);
+          console.warn(
+            `Invalid platform string for influencer ${influencer.id}: ${influencer.platform}`
+          );
         }
 
         return platformEnum ? (

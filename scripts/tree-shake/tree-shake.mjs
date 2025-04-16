@@ -37,16 +37,16 @@ const config = {
 const deprecatedPatterns = [
   // Duplicate scripts with different extensions
   { type: 'duplicate', pattern: /\.(js|cjs)$/, preferredExt: '.mjs', locations: ['scripts'] },
-  
+
   // Legacy files known to be deprecated
   { type: 'legacy', pattern: /setup-components\.js$/, locations: ['.'] },
-  
+
   // Files replaced by new structure
   { type: 'structure', pattern: /validate-component-registry\.js$/, locations: ['config/start-up', 'scripts'] },
-  
+
   // Old script backups
   { type: 'backup', pattern: /\.(old|bak|backup)$/, locations: ['scripts'] },
-  
+
   // Temporary files
   { type: 'temp', pattern: /\.(tmp|temp)$/, locations: ['scripts', 'src'] },
 ];
@@ -90,17 +90,17 @@ async function backupFile(filePath) {
     verboseLog(`Skipping backup for ${filePath} (--no-backup)`);
     return true;
   }
-  
+
   try {
     const relativePath = path.relative(process.cwd(), filePath);
     const backupPath = path.join(config.backupDir, relativePath);
     const backupDir = path.dirname(backupPath);
-    
+
     // Create backup directory if it doesn't exist
     if (!fs.existsSync(backupDir)) {
       fs.mkdirSync(backupDir, { recursive: true });
     }
-    
+
     // Copy file to backup
     fs.copyFileSync(filePath, backupPath);
     verboseLog(`Backed up ${filePath} to ${backupPath}`);
@@ -116,9 +116,9 @@ async function backupFile(filePath) {
  * Check if a file is referenced in important project files
  */
 async function checkReferences(filePath) {
-  const relativePath = path.relative(process.cwd(), filePath);
+  // const relativePath = path.relative(process.cwd(), filePath); // Unused variable
   const fileBasename = path.basename(filePath);
-  
+
   for (const checkPath of checkForReferences) {
     try {
       // For directories, grep recursively
@@ -129,7 +129,7 @@ async function checkReferences(filePath) {
             verboseLog(`Found reference to ${fileBasename} in ${checkPath}`);
             return true;
           }
-        } catch (e) {
+        } catch { // Removed unused _e variable
           // grep returns non-zero exit code if no matches found
           verboseLog(`No references to ${fileBasename} found in ${checkPath}`);
         }
@@ -145,7 +145,7 @@ async function checkReferences(filePath) {
       verboseLog(`Error checking references in ${checkPath}: ${error.message}`);
     }
   }
-  
+
   verboseLog(`No references found for ${filePath}`);
   return false;
 }
@@ -155,13 +155,13 @@ async function checkReferences(filePath) {
  */
 async function scanForDeprecatedFiles() {
   const deprecatedFiles = [];
-  
+
   for (const { type, pattern, preferredExt, locations } of deprecatedPatterns) {
     for (const location of locations) {
       try {
         // Get files matching the pattern
         const files = findFilesMatchingPattern(location, pattern);
-        
+
         for (const file of files) {
           if (type === 'duplicate' && preferredExt) {
             // Check if there's a preferred extension version
@@ -181,7 +181,7 @@ async function scanForDeprecatedFiles() {
       }
     }
   }
-  
+
   return deprecatedFiles;
 }
 
@@ -190,13 +190,13 @@ async function scanForDeprecatedFiles() {
  */
 function findFilesMatchingPattern(dir, pattern) {
   const results = [];
-  
+
   function traverse(currentPath) {
     const entries = fs.readdirSync(currentPath, { withFileTypes: true });
-    
+
     for (const entry of entries) {
       const entryPath = path.join(currentPath, entry.name);
-      
+
       if (entry.isDirectory()) {
         // Skip node_modules
         if (entry.name === 'node_modules') continue;
@@ -206,7 +206,7 @@ function findFilesMatchingPattern(dir, pattern) {
       }
     }
   }
-  
+
   traverse(dir);
   return results;
 }
@@ -220,12 +220,12 @@ function confirmRemoval(files) {
       resolve(true);
       return;
     }
-    
+
     console.log('\nThe following files will be removed:');
     for (const { path, reason } of files) {
       console.log(`  - ${path} (${reason})`);
     }
-    
+
     rl.question('\nProceed with removal? (y/N) ', (answer) => {
       resolve(answer.toLowerCase() === 'y');
     });
@@ -241,7 +241,7 @@ async function removeFile(filePath) {
     stats.confirmed++;
     return true;
   }
-  
+
   try {
     // Backup file first
     if (!config.noBackup) {
@@ -252,7 +252,7 @@ async function removeFile(filePath) {
         return false;
       }
     }
-    
+
     // Remove the file
     fs.unlinkSync(filePath);
     console.log(`Removed: ${filePath}`);
@@ -271,26 +271,26 @@ async function removeFile(filePath) {
 async function main() {
   console.log('Tree Shake - Aggressively identifying and removing deprecated files');
   console.log('--------------------------------------------------------------');
-  
+
   if (config.dryRun) {
     console.log('DRY RUN MODE: No files will be removed');
   }
-  
+
   console.log('Scanning for deprecated files...');
   const deprecatedFiles = await scanForDeprecatedFiles();
-  
+
   if (deprecatedFiles.length === 0) {
     console.log('No deprecated files found!');
     rl.close();
     return;
   }
-  
+
   console.log(`\nFound ${deprecatedFiles.length} potentially deprecated files`);
-  
+
   // Check for references
   console.log('Checking for references to these files...');
   const confirmedDeprecated = [];
-  
+
   for (const file of deprecatedFiles) {
     const hasReferences = await checkReferences(file.path);
     if (!hasReferences) {
@@ -300,34 +300,34 @@ async function main() {
       stats.skipped++;
     }
   }
-  
+
   if (confirmedDeprecated.length === 0) {
     console.log('No confirmed deprecated files found!');
     rl.close();
     return;
   }
-  
+
   // Get user confirmation
   const confirmed = await confirmRemoval(confirmedDeprecated);
-  
+
   if (!confirmed) {
     console.log('Operation cancelled by user');
     rl.close();
     return;
   }
-  
+
   // Remove files
   console.log('\nRemoving deprecated files...');
-  
+
   if (!config.noBackup && !config.dryRun) {
     console.log(`Creating backups in ${config.backupDir}`);
     fs.mkdirSync(config.backupDir, { recursive: true });
   }
-  
+
   for (const file of confirmedDeprecated) {
     await removeFile(file.path);
   }
-  
+
   // Print summary
   console.log('\nTree Shake Summary:');
   console.log('------------------');
@@ -336,7 +336,7 @@ async function main() {
   console.log(`Backed up: ${stats.backed_up} files`);
   console.log(`Removed: ${stats.removed} files`);
   console.log(`Skipped: ${stats.skipped} files`);
-  
+
   rl.close();
 }
 

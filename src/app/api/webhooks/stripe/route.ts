@@ -7,27 +7,49 @@ import Stripe from 'stripe';
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
+// Define an interface for subscription update data
+interface SubscriptionUpdateData {
+  stripeSubscriptionId: string | null;
+  stripeCustomerId: string;
+  subscriptionStatus: string;
+  // role?: string; // Optional: Example if role were used
+}
+
+// Define an interface for analytics properties
+interface SubscriptionAnalyticsProps {
+  userId: string;
+  subscriptionId: string;
+  status?: string; // Optional as it's deleted for deletion event
+  [key: string]: unknown; // Add index signature to satisfy Analytics.track
+}
+
 // --- Webhook Handler Functions ---
 
 async function handleSubscriptionEvent(subscription: Stripe.Subscription, eventType: string) {
   const clerkUserId = subscription.metadata?.userId; // Get Clerk ID from metadata
 
   if (!clerkUserId) {
-    console.error(`Clerk User ID not found in ${eventType} subscription metadata: ${subscription.id}`);
+    console.error(
+      `Clerk User ID not found in ${eventType} subscription metadata: ${subscription.id}`
+    );
     // Depending on strictness, you might want to throw an error or just return
     return; // Exit if no Clerk ID is found
   }
 
-  console.log(`Handling ${eventType} for Clerk User ID: ${clerkUserId}, Subscription ID: ${subscription.id}`);
+  console.log(
+    `Handling ${eventType} for Clerk User ID: ${clerkUserId}, Subscription ID: ${subscription.id}`
+  );
 
-  let updateData: any = {
+  // Use the defined interface
+  let updateData: Partial<SubscriptionUpdateData> = {
     stripeSubscriptionId: subscription.id,
     stripeCustomerId: subscription.customer as string,
     subscriptionStatus: subscription.status,
   };
 
   let analyticsEventName = 'Subscription_Event';
-  const analyticsProps: any = {
+  // Use the defined interface
+  const analyticsProps: SubscriptionAnalyticsProps = {
     userId: clerkUserId,
     subscriptionId: subscription.id,
     status: subscription.status,
@@ -42,6 +64,7 @@ async function handleSubscriptionEvent(subscription: Stripe.Subscription, eventT
   if (eventType === 'customer.subscription.updated') {
     analyticsEventName = 'Subscription_Updated';
     // Only update relevant fields for update
+    // Use the defined interface
     updateData = {
       subscriptionStatus: subscription.status,
       stripeCustomerId: subscription.customer as string, // Keep customer ID potentially updated
@@ -51,6 +74,7 @@ async function handleSubscriptionEvent(subscription: Stripe.Subscription, eventT
   if (eventType === 'customer.subscription.deleted') {
     analyticsEventName = 'Subscription_Deleted';
     // Update fields for deletion
+    // Use the defined interface
     updateData = {
       subscriptionStatus: 'canceled', // Explicitly set status
       stripeSubscriptionId: null, // Clear subscription ID
@@ -73,7 +97,6 @@ async function handleSubscriptionEvent(subscription: Stripe.Subscription, eventT
 
     // Track analytics event
     Analytics.track(analyticsEventName, analyticsProps);
-
   } catch (error) {
     console.error(`Failed to update user for Clerk ID ${clerkUserId} during ${eventType}:`, error);
     // Optionally, re-throw or handle the error for retry logic
@@ -103,9 +126,11 @@ export async function POST(req: Request) {
     try {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error constructing event';
-      console.error(`⚠️ Webhook signature verification failed: ${errorMessage}`);
-      return NextResponse.json({ error: `Webhook signature verification failed: ${errorMessage}` }, { status: 400 });
+      const unknownError = err as unknown; // Type as unknown
+      const errorMessage =
+        unknownError instanceof Error ? unknownError.message : String(unknownError);
+      console.error(`Webhook signature verification failed: ${errorMessage}`);
+      return NextResponse.json({ error: `Webhook Error: ${errorMessage}` }, { status: 400 });
     }
 
     console.log(`Received Stripe Event: ${event.type}`);
@@ -127,9 +152,14 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ received: true });
   } catch (err) {
-    // Catch unexpected errors in the handler logic
-    const errorMessage = err instanceof Error ? err.message : 'Unknown webhook handler error';
-    console.error('Stripe webhook handler error:', errorMessage);
-    return NextResponse.json({ error: 'Webhook handler failed' }, { status: 500 }); // Return 500 for internal errors
+    const unknownError = err as unknown; // Type as unknown
+    const errorMessage =
+      unknownError instanceof Error ? unknownError.message : String(unknownError);
+    // Adjust log message as event might be undefined here
+    console.error(`Error processing webhook: ${errorMessage}`);
+    return NextResponse.json(
+      { error: 'Webhook handler failed', details: errorMessage },
+      { status: 500 }
+    );
   }
 }

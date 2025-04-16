@@ -6,7 +6,7 @@
  */
 
 // Use CommonJS for Cypress compatibility
- 
+
 const { defineConfig } = require('cypress');
 
 module.exports = defineConfig({

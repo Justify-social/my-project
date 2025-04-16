@@ -46,14 +46,16 @@ export function useClientCache<T>(key: string, fetcher: () => Promise<T>, ttl: n
 
         setData(freshData);
         setLoading(false);
-      } catch (err: any) {
-        setError(err);
+      } catch (err: unknown) {
+        // Create a standard Error object for consistency
+        const error = err instanceof Error ? err : new Error(String(err));
+        setError(error);
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [key, ttl]);
+  }, [key, ttl, fetcher]);
 
   return { data, loading, error };
 }

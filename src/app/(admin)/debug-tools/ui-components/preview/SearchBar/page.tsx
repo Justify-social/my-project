@@ -60,7 +60,7 @@ export default function SearchBarPreviewPage() {
     since: '2023-06-01',
     status: 'stable',
   };
-  const examples: string[] = [];
+  // const examples: string[] = []; // Unused variable
 
   // State for the basic interactive example
   const [basicValue, setBasicValue] = useState('Initial value');

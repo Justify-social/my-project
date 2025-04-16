@@ -1,11 +1,12 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import React from 'react';
+// import Link from 'next/link'; // Unused
+// import { usePathname } from 'next/navigation'; // Unused
 // import { getIconClasses } from '@/components/ui/utils/icon-integration';
 // import { ThemeProvider } from '@/components/providers/theme-provider';
-import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { LightIcon } from '@/components/ui/icon';
+// import { ThemeToggle } from '@/components/ui/theme-toggle'; // Unused
+// import { LightIcon } from '@/components/ui/icon'; // Unused and restricted path
 
 export default function ComponentBrowserLayout({ children }: { children: React.ReactNode }) {
   // const pathname = usePathname() || ''; // No longer needed for nav links

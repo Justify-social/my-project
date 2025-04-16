@@ -4,7 +4,6 @@
  */
 
 import { fontFamily } from 'tailwindcss/defaultTheme';
-import plugin from 'tailwindcss/plugin';
 import animate from 'tailwindcss-animate';
 
 /** @type {import('tailwindcss').Config} */

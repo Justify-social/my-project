@@ -26,9 +26,9 @@ The Campaign Wizard guides users through the process of creating a new marketing
 - `WizardContext.tsx`: Manages state, data loading, and saving logic.
 - `Step[1-5]Content.tsx`: Components for each step of the wizard, handling layout and form fields.
 - `types.ts`: Contains TypeScript interfaces and Zod schemas for form data, validation, and API payloads.
-- `ProgressBar.tsx`: *Feature-specific* wrapper/logic around the progress bar UI (though the main nav is now `/ui/progress-bar-wizard.tsx`).
+- `ProgressBar.tsx`: _Feature-specific_ wrapper/logic around the progress bar UI (though the main nav is now `/ui/progress-bar-wizard.tsx`).
 - `Header.tsx`: Displays the wizard title and step count.
-- `InfluencerCard.tsx`: *Feature-specific* widget displaying aggregate influencer metrics (distinct from `/ui/card-influencer.tsx`).
+- `InfluencerCard.tsx`: _Feature-specific_ widget displaying aggregate influencer metrics (distinct from `/ui/card-influencer.tsx`).
 
 ## Related UI Components (`/src/components/ui/`)
 

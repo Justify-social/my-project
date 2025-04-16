@@ -20,12 +20,11 @@
 
 import React from 'react';
 import { Icon } from '../icon';
-import { IconProps, IconStyle } from '../icon-types';
 
 /**
  * Adapter props for legacy components
  */
-export interface IconAdapterProps {
+export interface IconAdapterProps extends React.HTMLAttributes<HTMLElement> {
   /**
    * The iconId to render with explicit variant suffix (required)
    * For SSOT compliance, prefer using the full ID with variant suffix:
@@ -63,11 +62,6 @@ export interface IconAdapterProps {
    * @deprecated - Legacy prop, no longer used
    */
   // iconType?: string; // Removed deprecated prop
-
-  /**
-   * Any additional props
-   */
-  [key: string]: any;
 }
 
 /**

@@ -4,11 +4,13 @@ const f = createUploadthing();
 
 export const ourFileRouter = {
   // General endpoint for campaign assets (images, videos, PDFs)
-  campaignAsset: f({ image: { maxFileSize: '4MB' } })
+  campaignAsset: f({
+    image: { maxFileSize: '4MB' },
+  })
     .middleware(async () => {
       return { userId: 'user' };
     })
-    .onUploadComplete(async ({ metadata, file }) => {
+    .onUploadComplete(async ({ metadata: _metadata, file }) => {
       return { url: file.url };
     }),
 
@@ -24,7 +26,7 @@ export const ourFileRouter = {
         userId: 'user',
       };
     })
-    .onUploadComplete(async ({ metadata, file }) => {
+    .onUploadComplete(async ({ metadata: _metadata, file }) => {
       return {
         url: file.url,
         name: file.name,

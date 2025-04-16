@@ -11,7 +11,6 @@ import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Icon } from '@/components/ui/icon/icon';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge'; // Keep Badge for potential future use
 import {
   format,
   getDaysInMonth,
@@ -44,7 +43,7 @@ export interface CalendarEvent {
 
 export interface CalendarUpcomingProps {
   events?: CalendarEvent[]; // Make events optional, default to empty array
-  onEventClick?: (eventId: number | string, event: CalendarEvent) => void;
+  // onEventClick?: (eventId: string | number, event: CalendarEvent) => void; // Removed unused prop
 }
 
 // Re-add getStatusColor function needed for tooltip status dot
@@ -86,7 +85,6 @@ const getPlatformIconPath = (platformName: string): string | undefined => {
 
 export function CalendarUpcoming({
   events = [], // Default to empty array
-  onEventClick,
 }: CalendarUpcomingProps) {
   // Initialize date state
   const [currentMonthDate, setCurrentMonthDate] = useState(startOfMonth(new Date()));

@@ -20,9 +20,7 @@ import {
   SheetFooter,
   SheetClose,
   SheetTitle,
-  SheetDescription,
 } from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
 
 // --- Single Source of Truth for Menu Item Structure ---
 export interface MenuItem {
@@ -287,7 +285,9 @@ export function MobileMenu({
                 />
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate text-sm">
-                    {user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'User'}
+                    {user.fullName ||
+                      `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
+                      'User'}
                   </p>
                   <p className="text-xs text-muted-foreground truncate">
                     {user.primaryEmailAddress?.emailAddress || 'No email'}

@@ -30,7 +30,7 @@ export interface ComponentMetadata {
   classNames?: string[];
   filePath?: string;
   code?: string;
-  [key: string]: any; // Allow indexing with string
+  [key: string]: unknown; // Changed any to unknown
 }
 
 /**

@@ -1,37 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge"; // For status indicators
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
-
-// Interfaces (keep as is)
-interface CampaignData {
-  id?: string;
-  campaignName?: string;
-  description?: string;
-  startDate?: string | Date;
-  endDate?: string | Date;
-  timeZone?: string;
-  status?: string;
-  currency?: string;
-  totalBudget?: number | string;
-  socialMediaBudget?: number | string;
-  platform?: string;
-  influencerHandle?: string;
-  // Use 'any' for contacts initially, refine later if structure is known
-  primaryContact?: any;
-  secondaryContact?: any;
-  contacts?: string; // Keep as string if it's JSON needing parsing
-  objectives?: string; // Keep as string if it's JSON needing parsing
-  contactsData?: any;
-  [key: string]: any; // Allow other potential fields
-}
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 // --- Helper: Card for Debug Tool Links ---
 interface DebugToolCardProps {
@@ -43,7 +17,14 @@ interface DebugToolCardProps {
   isLoading?: boolean;
 }
 
-const DebugToolCard: React.FC<DebugToolCardProps> = ({ title, description, linkHref, buttonText, onButtonClick, isLoading }) => (
+const DebugToolCard: React.FC<DebugToolCardProps> = ({
+  title,
+  description,
+  linkHref,
+  buttonText,
+  onButtonClick,
+  isLoading,
+}) => (
   <Card className="border-divider">
     <CardHeader>
       <CardTitle className="text-lg">{title}</CardTitle>
@@ -67,21 +48,6 @@ const DebugToolCard: React.FC<DebugToolCardProps> = ({ title, description, linkH
 
 export default function DebugToolsPage() {
   const [campaignId, setCampaignId] = useState<string>('');
-  const [results, setResults] = useState<CampaignData | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [uploadthingStatus, setUploadthingStatus] = useState<{
-    loading: boolean;
-    data: any | null;
-    error: string | null;
-  }>({ loading: false, data: null, error: null });
-  const router = useRouter();
-
-  // --- Handlers (keep as is) ---
-  const fetchCampaignData = async () => { /* ... */ };
-  const navigateToCampaignForm = (step: number) => { /* ... */ };
-  const testUploadthingApi = async () => { /* ... */ };
-  // --------------------------
 
   return (
     <div className="container mx-auto p-6 space-y-8 max-w-6xl">
@@ -136,27 +102,12 @@ export default function DebugToolsPage() {
               placeholder="Enter Campaign ID"
               className="flex-grow"
             />
-            <Button onClick={fetchCampaignData} disabled={loading || !campaignId} className="sm:w-auto">
-              {loading && <LoadingSpinner size="sm" className="mr-2" />}
-              {loading ? 'Loading...' : 'Verify Data'}
-            </Button>
           </div>
-
-          {error && (
-            <div className="p-3 text-destructive bg-destructive/10 border border-destructive rounded-md text-sm">
-              {error}
-            </div>
-          )}
 
           {/* Go to Step Buttons */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[1, 2, 3, 4].map(step => (
-              <Button
-                key={step}
-                variant="secondary"
-                onClick={() => navigateToCampaignForm(step)}
-                disabled={!campaignId}
-              >
+              <Button key={step} variant="secondary" disabled={!campaignId}>
                 Go to Step {step}
               </Button>
             ))}
@@ -164,14 +115,14 @@ export default function DebugToolsPage() {
         </CardContent>
       </Card>
 
-      {/* Campaign Results Display */}
+      {/* Campaign Results Display - Commented out as 'results' state is removed */}
+      {/*
       {results && (
         <Card className="border-divider">
           <CardHeader>
             <CardTitle className="text-xl">Campaign Data for: <span className="font-mono text-base">{results.id}</span></CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Basic & Financial Info Side-by-side */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card className="border-input bg-muted/30">
                 <CardHeader><CardTitle className="text-base">Basic Information</CardTitle></CardHeader>
@@ -202,11 +153,9 @@ export default function DebugToolsPage() {
                 </CardContent>
               </Card>
             </div>
-            {/* Contacts Section */}
             <Card className="border-input bg-muted/30">
               <CardHeader><CardTitle className="text-base">Contacts</CardTitle></CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                {/* Primary Contact */}
                 <div>
                   <h4 className="font-semibold mb-1">Primary</h4>
                   {results.primaryContact ? (
@@ -217,7 +166,6 @@ export default function DebugToolsPage() {
                     </div>
                   ) : <p className="text-destructive text-xs italic">Missing</p>}
                 </div>
-                {/* Secondary Contact */}
                 <div>
                   <h4 className="font-semibold mb-1">Secondary</h4>
                   {results.secondaryContact ? (
@@ -230,7 +178,6 @@ export default function DebugToolsPage() {
                 </div>
               </CardContent>
             </Card>
-            {/* Raw Data */}
             <Card className="border-input bg-muted/30">
               <CardHeader><CardTitle className="text-base">Raw Campaign Data</CardTitle></CardHeader>
               <CardContent className="bg-background text-accent-foreground p-3 rounded overflow-auto max-h-96">
@@ -240,6 +187,7 @@ export default function DebugToolsPage() {
           </CardContent>
         </Card>
       )}
+      */}
     </div>
   );
 }

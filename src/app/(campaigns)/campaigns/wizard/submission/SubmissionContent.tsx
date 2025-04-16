@@ -6,14 +6,7 @@ import { useWizard } from '@/components/features/campaigns/WizardContext';
 import { WizardSkeleton } from '@/components/ui/loading-skeleton';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon/icon';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import Link from 'next/link';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 
 export default function SubmissionContent() {
@@ -25,7 +18,11 @@ export default function SubmissionContent() {
 
   // --- Loading State ---
   if (isLoading && !wizardState) {
-    return <div className="flex items-center justify-center min-h-[calc(100vh-200px)]"><WizardSkeleton /></div>;
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
+        <WizardSkeleton />
+      </div>
+    );
   }
 
   // --- Error State ---
@@ -34,7 +31,10 @@ export default function SubmissionContent() {
       <div className="flex flex-col items-center justify-center h-full min-h-[calc(100vh-200px)] text-center p-6">
         <Icon iconId="faTriangleExclamationLight" className="text-destructive h-16 w-16 mb-6" />
         <h2 className="text-2xl font-semibold mb-3">Error Loading Confirmation</h2>
-        <p className="text-muted-foreground mb-6 max-w-md">Could not retrieve campaign details for confirmation. The campaign ID might be missing or invalid.</p>
+        <p className="text-muted-foreground mb-6 max-w-md">
+          Could not retrieve campaign details for confirmation. The campaign ID might be missing or
+          invalid.
+        </p>
         <Button variant="outline" onClick={() => router.push('/campaigns')}>
           <Icon iconId="faArrowLeftLight" className="mr-2 h-4 w-4" />
           Back to Campaigns
@@ -46,17 +46,20 @@ export default function SubmissionContent() {
   // --- Success State ---
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-150px)] text-center p-6">
-
       {/* Enhanced Success Message */}
       <h1 className="text-5xl font-bold mb-5 tracking-tight">Campaign Submitted!</h1>
       <p className="text-xl text-muted-foreground mb-12 max-w-xl">
-        Congratulations! Your campaign <span className="font-semibold text-foreground">"{campaignName}"</span> has been successfully submitted.
+        Congratulations! Your campaign{' '}
+        <span className="font-semibold text-foreground">"{campaignName}"</span> has been
+        successfully submitted.
       </p>
 
       {/* Navigation Options Card */}
       <Card className="w-full max-w-lg bg-gradient-to-br from-background to-muted/20 border-none shadow-xl rounded-xl overflow-hidden">
         <CardHeader className="pb-4">
-          <CardTitle className="text-xl font-semibold text-center">What would you like to do next?</CardTitle>
+          <CardTitle className="text-xl font-semibold text-center">
+            What would you like to do next?
+          </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center gap-4 px-8 pb-8">
           {/* Start Brand Lift - Primary Action */}
@@ -96,7 +99,6 @@ export default function SubmissionContent() {
           </div>
         </CardContent>
       </Card>
-
     </div>
   );
 }

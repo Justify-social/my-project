@@ -72,7 +72,7 @@ export function validateUserQuery(
   }
 
   // Check if this appears to be a new task (not follow-up to previous)
-  const seemsLikeNewTask = !isFollowUpQuery(query, previousQueries);
+  const seemsLikeNewTask = !isFollowUpQuery(query);
 
   if (seemsLikeNewTask) {
     // For new tasks, check if any previous queries in this session included Graphiti checks
@@ -96,9 +96,9 @@ export function validateUserQuery(
 }
 
 /**
- * Helper to determine if a query is likely a follow-up to previous queries
+ * Helper to determine if a query is likely a follow-up
  */
-function isFollowUpQuery(query: string, previousQueries: string[]): boolean {
+function isFollowUpQuery(query: string): boolean {
   const followUpPhrases = [
     'continue',
     'go on',

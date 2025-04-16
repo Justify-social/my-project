@@ -17,9 +17,9 @@ interface LogEntry {
   level: LogLevel;
   operation: string;
   campaignId?: number;
-  data?: any;
+  data?: unknown;
   message: string;
-  error?: any;
+  error?: unknown;
 }
 
 // Database operation types
@@ -34,8 +34,16 @@ export enum DbOperation {
 
 // Type for log data that might contain a campaignId
 interface LogData {
-  [key: string]: any;
-  campaignId?: any; // We'll handle type conversion internally
+  [key: string]: unknown;
+  campaignId?: string | number | undefined;
+}
+
+// Define structure for formatted errors
+interface FormattedError {
+  message: string;
+  stack?: string;
+  name?: string;
+  code?: string | number;
 }
 
 class DbLogger {
@@ -58,7 +66,7 @@ class DbLogger {
     operation: DbOperation | string,
     message: string,
     data?: LogData,
-    error?: any
+    error?: unknown
   ): void {
     if (!this.enabled) return;
 
@@ -129,7 +137,12 @@ class DbLogger {
   /**
    * Log a warning message
    */
-  public warn(operation: DbOperation | string, message: string, data?: LogData, error?: any): void {
+  public warn(
+    operation: DbOperation | string,
+    message: string,
+    data?: LogData,
+    error?: unknown
+  ): void {
     this.log(LogLevel.WARN, operation, message, data, error);
   }
 
@@ -140,7 +153,7 @@ class DbLogger {
     operation: DbOperation | string,
     message: string,
     data?: LogData,
-    error?: any
+    error?: unknown
   ): void {
     this.log(LogLevel.ERROR, operation, message, data, error);
   }
@@ -190,40 +203,78 @@ class DbLogger {
   /**
    * Format error for logging
    */
-  private formatError(error: any): any {
+  private formatError(error: unknown): FormattedError | null {
     if (!error) return null;
 
-    return {
-      message: error.message || String(error),
-      stack: error.stack,
-      name: error.name,
-      code: error.code,
-    };
+    // Initialize properties
+    let message = 'Unknown error';
+    let stack: string | undefined;
+    let name: string | undefined;
+    let code: string | number | undefined;
+
+    // Attempt to extract properties safely from unknown type
+    if (error instanceof Error) {
+      message = error.message;
+      stack = error.stack;
+      name = error.name;
+      // Attempt to get code if it exists (common in Node errors like ECONNREFUSED)
+      if ('code' in error) {
+        code = (error as { code?: string | number }).code;
+      }
+    } else if (typeof error === 'object' && error !== null) {
+      // Handle plain objects that might represent errors
+      message = (error as { message?: string }).message || JSON.stringify(error);
+      stack = (error as { stack?: string }).stack;
+      name = (error as { name?: string }).name;
+      code = (error as { code?: string | number }).code;
+    } else {
+      // Handle primitives (string, number, etc.)
+      message = String(error);
+    }
+
+    return { message, stack, name, code };
   }
 
   /**
    * Sanitize data for logging to remove sensitive information
    */
-  private sanitizeData(data: any): any {
+  private sanitizeData(data: unknown): unknown {
     if (!data) return null;
 
     // Deep clone to avoid modifying original data
-    let clonedData: any;
+    let clonedData: unknown;
     try {
-      clonedData = JSON.parse(JSON.stringify(data));
-    } catch (e) {
-      // If data can't be stringified (e.g., circular references),
-      // create a simplified object with the keys
-      clonedData = {};
-      Object.keys(data).forEach(key => {
-        if (typeof data[key] === 'function') {
-          clonedData[key] = '[Function]';
-        } else if (typeof data[key] === 'object' && data[key] !== null) {
-          clonedData[key] = '[Object]';
-        } else {
-          clonedData[key] = data[key];
-        }
-      });
+      // Ensure deep cloning doesn't modify original object on failure
+      try {
+        clonedData = JSON.parse(JSON.stringify(data));
+      } catch (_error) { // Renamed error to _error
+        // Log the error using the logger, include context if available
+        this.error(
+          DbOperation.VALIDATION, // Assuming validation context if clone fails
+          `Failed to deep clone data for sanitization`,
+          { entityName: 'unknown', operation: 'clone' }, // Provide some context
+          _error instanceof Error ? _error : new Error(String(_error))
+        );
+        // Return original data if cloning fails to avoid breaking flow
+        console.warn(
+          '[DbLogger] Warning: Failed to deep clone data for sanitization. Returning original data.'
+        );
+        return data;
+      }
+    } catch (error) {
+      // Log the error using the logger, include context if available
+      // Prefix error with _ if not used directly
+      this.error(
+        DbOperation.VALIDATION, // Assuming validation context if clone fails
+        `Failed to deep clone data for sanitization`,
+        { entityName: 'unknown', operation: 'clone' }, // Provide some context
+        error instanceof Error ? error : new Error(String(error))
+      );
+      // Return original data if cloning fails to avoid breaking flow
+      console.warn(
+        '[DbLogger] Warning: Failed to deep clone data for sanitization. Returning original data.'
+      );
+      return data;
     }
 
     // List of sensitive fields to redact
@@ -244,45 +295,38 @@ class DbLogger {
     ];
 
     // Recursively sanitize the data
-    const sanitize = (obj: any): any => {
+    const sanitize = (obj: unknown): unknown => {
       if (!obj || typeof obj !== 'object') return obj;
 
       if (Array.isArray(obj)) {
-        return obj.map(item => sanitize(item));
+        // Ensure map result is unknown[]
+        return obj.map(item => sanitize(item)); // No assertion needed, map preserves unknown
       }
 
-      const sanitized: any = {};
+      // Assert obj is a Record for safe iteration and access
+      const recordObj = obj as Record<string, unknown>;
+      const sanitized: Record<string, unknown> = {};
 
-      for (const key in obj) {
-        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      for (const key in recordObj) {
+        if (Object.prototype.hasOwnProperty.call(recordObj, key)) {
+          const value = recordObj[key];
           // Check if this key contains sensitive information
           const isFieldSensitive = sensitiveFields.some(field =>
             key.toLowerCase().includes(field.toLowerCase())
           );
 
           if (isFieldSensitive) {
-            // Redact sensitive fields but retain the type information
-            if (typeof obj[key] === 'string') {
-              sanitized[key] = '[REDACTED]';
-            } else if (typeof obj[key] === 'number') {
-              sanitized[key] = 0;
-            } else if (typeof obj[key] === 'boolean') {
-              sanitized[key] = false;
-            } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-              sanitized[key] = '[REDACTED_OBJECT]';
-            } else {
-              sanitized[key] = '[REDACTED]';
-            }
-          } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+            // Redact sensitive fields but retain the type information (using unknown)
+            sanitized[key] = '[REDACTED]'; // Simple redaction for unknown
+          } else if (typeof value === 'object' && value !== null) {
             // Recursively sanitize nested objects
-            sanitized[key] = sanitize(obj[key]);
+            sanitized[key] = sanitize(value);
           } else {
             // Keep non-sensitive fields as is
-            sanitized[key] = obj[key];
+            sanitized[key] = value;
           }
         }
       }
-
       return sanitized;
     };
 

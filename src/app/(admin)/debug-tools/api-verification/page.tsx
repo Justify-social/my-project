@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
+import React, { useState } from 'react';
 import {
   verifyGeolocationApi,
   verifyExchangeRatesApi,
@@ -11,41 +10,9 @@ import {
   verifyStripeApi,
   verifyUploadthingApi,
   verifyDatabaseConnection,
-  verifyAllApis,
   ApiVerificationResult,
   ApiErrorType,
 } from '@/lib/api-verification';
-
-/**
- * Helper function to check if a host is reachable without triggering CORS issues
- */
-async function isHostReachable(
-  hostname: string
-): Promise<{ reachable: boolean; latency?: number }> {
-  const startTime = Date.now();
-
-  try {
-    // Use a HEAD request which is lightweight
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-    const response = await fetch(`https://${hostname}/`, {
-      method: 'HEAD',
-      mode: 'no-cors', // This prevents CORS errors but means we can't read the response
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeoutId);
-    const latency = Date.now() - startTime;
-
-    // With mode: 'no-cors', the response type is 'opaque' and we can't read status
-    // But if we get here without an error, the host is likely reachable
-    return { reachable: true, latency };
-  } catch (error) {
-    console.warn(`Host ${hostname} connectivity check failed:`, error);
-    return { reachable: false };
-  }
-}
 
 /**
  * API Verification Debug Tool
@@ -54,21 +21,11 @@ async function isHostReachable(
  * used in Justify. It provides detailed information about API
  * response times, status, and any potential issues.
  */
-export default function ApiVerificationPage() {
+const ApiVerificationPage: React.FC = () => {
   const [results, setResults] = useState<ApiVerificationResult[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedApi, setSelectedApi] = useState<string>('');
-  const [lastTested, setLastTested] = useState<Record<string, Date | null>>({
-    all: null,
-    geolocation: null,
-    exchange: null,
-    phyllo: null,
-    giphy: null,
-    cint: null,
-    stripe: null,
-    uploadthing: null,
-    database: null,
-  });
+  const [lastTested, setLastTested] = useState<Record<string, Date | null>>({});
 
   // API descriptions shown in the UI
   const apiDescriptions: Record<string, string> = {
@@ -133,52 +90,6 @@ export default function ApiVerificationPage() {
       }));
     } catch (error) {
       console.error(`Error testing API: ${apiName}`, error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Test all APIs
-  const testAllApis = async () => {
-    setIsLoading(true);
-    setSelectedApi('all');
-
-    try {
-      const geolocationResult = await verifyGeolocationApi();
-      const exchangeRatesResult = await verifyExchangeRatesApi();
-      const phylloResult = await verifyPhylloApi();
-      const giphyResult = await verifyGiphyApi();
-      const cintResult = await verifyCintExchangeApi();
-      const stripeResult = await verifyStripeApi();
-      const uploadthingResult = await verifyUploadthingApi();
-      const databaseResult = await verifyDatabaseConnection();
-
-      const allResults = [
-        geolocationResult,
-        exchangeRatesResult,
-        phylloResult,
-        giphyResult,
-        cintResult,
-        stripeResult,
-        uploadthingResult,
-        databaseResult,
-      ];
-
-      setResults(allResults);
-      setLastTested(prev => ({
-        ...prev,
-        all: new Date(),
-        geolocation: new Date(),
-        exchange: new Date(),
-        phyllo: new Date(),
-        giphy: new Date(),
-        cint: new Date(),
-        stripe: new Date(),
-        uploadthing: new Date(),
-        database: new Date(),
-      }));
-    } catch (error) {
-      console.error('Error testing all APIs:', error);
     } finally {
       setIsLoading(false);
     }
@@ -300,9 +211,7 @@ export default function ApiVerificationPage() {
                   results.some(r => r.apiName.includes('IP Geolocation'))
                 )}
               </div>
-              <p className="text-sm text-gray-500 mt-1 font-body">
-                {apiDescriptions.geolocation}
-              </p>
+              <p className="text-sm text-gray-500 mt-1 font-body">{apiDescriptions.geolocation}</p>
               <div className="mt-2 text-xs text-gray-500 font-body">
                 Last tested:{' '}
                 <span className="font-medium font-body">
@@ -320,9 +229,7 @@ export default function ApiVerificationPage() {
                   results.some(r => r.apiName.includes('Exchange Rates'))
                 )}
               </div>
-              <p className="text-sm text-gray-500 mt-1 font-body">
-                {apiDescriptions.exchange}
-              </p>
+              <p className="text-sm text-gray-500 mt-1 font-body">{apiDescriptions.exchange}</p>
               <div className="mt-2 text-xs text-gray-500 font-body">
                 Last tested:{' '}
                 <span className="font-medium font-body">
@@ -343,9 +250,7 @@ export default function ApiVerificationPage() {
               <p className="text-sm text-gray-500 mt-1 font-body">{apiDescriptions.phyllo}</p>
               <div className="mt-2 text-xs text-gray-500 font-body">
                 Last tested:{' '}
-                <span className="font-medium font-body">
-                  {formatTimestamp(lastTested.phyllo)}
-                </span>
+                <span className="font-medium font-body">{formatTimestamp(lastTested.phyllo)}</span>
               </div>
             </div>
 
@@ -412,9 +317,7 @@ export default function ApiVerificationPage() {
                   results.some(r => r.apiName.includes('Uploadthing'))
                 )}
               </div>
-              <p className="text-sm text-gray-500 mt-1 font-body">
-                {apiDescriptions.uploadthing}
-              </p>
+              <p className="text-sm text-gray-500 mt-1 font-body">{apiDescriptions.uploadthing}</p>
               <div className="mt-2 text-xs text-gray-500 font-body">
                 Last tested:{' '}
                 <span className="font-medium font-body">
@@ -432,9 +335,7 @@ export default function ApiVerificationPage() {
                   results.some(r => r.apiName.includes('Database'))
                 )}
               </div>
-              <p className="text-sm text-gray-500 mt-1 font-body">
-                {apiDescriptions.database}
-              </p>
+              <p className="text-sm text-gray-500 mt-1 font-body">{apiDescriptions.database}</p>
               <div className="mt-2 text-xs text-gray-500 font-body">
                 Last tested:{' '}
                 <span className="font-medium font-body">
@@ -452,10 +353,11 @@ export default function ApiVerificationPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 font-body">
               <button
                 onClick={() => testApi('geolocation')}
-                className={`px-4 py-3 rounded-md border font-body transition-colors ${selectedApi === 'geolocation'
-                  ? 'bg-accent-color text-white border-accent-color'
-                  : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
-                  }`}
+                className={`px-4 py-3 rounded-md border font-body transition-colors ${
+                  selectedApi === 'geolocation'
+                    ? 'bg-accent-color text-white border-accent-color'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                }`}
                 disabled={isLoading}
               >
                 {isLoading && selectedApi === 'geolocation' ? (
@@ -470,10 +372,11 @@ export default function ApiVerificationPage() {
 
               <button
                 onClick={() => testApi('exchange')}
-                className={`px-4 py-3 rounded-md border font-body transition-colors ${selectedApi === 'exchange'
-                  ? 'bg-accent-color text-white border-accent-color'
-                  : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
-                  }`}
+                className={`px-4 py-3 rounded-md border font-body transition-colors ${
+                  selectedApi === 'exchange'
+                    ? 'bg-accent-color text-white border-accent-color'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                }`}
                 disabled={isLoading}
               >
                 {isLoading && selectedApi === 'exchange' ? (
@@ -488,10 +391,11 @@ export default function ApiVerificationPage() {
 
               <button
                 onClick={() => testApi('phyllo')}
-                className={`px-4 py-3 rounded-md border font-body transition-colors ${selectedApi === 'phyllo'
-                  ? 'bg-accent-color text-white border-accent-color'
-                  : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
-                  }`}
+                className={`px-4 py-3 rounded-md border font-body transition-colors ${
+                  selectedApi === 'phyllo'
+                    ? 'bg-accent-color text-white border-accent-color'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                }`}
                 disabled={isLoading}
               >
                 {isLoading && selectedApi === 'phyllo' ? (
@@ -506,10 +410,11 @@ export default function ApiVerificationPage() {
 
               <button
                 onClick={() => testApi('giphy')}
-                className={`px-4 py-3 rounded-md border font-body transition-colors ${selectedApi === 'giphy'
-                  ? 'bg-accent-color text-white border-accent-color'
-                  : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
-                  }`}
+                className={`px-4 py-3 rounded-md border font-body transition-colors ${
+                  selectedApi === 'giphy'
+                    ? 'bg-accent-color text-white border-accent-color'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                }`}
                 disabled={isLoading}
               >
                 {isLoading && selectedApi === 'giphy' ? (
@@ -524,10 +429,11 @@ export default function ApiVerificationPage() {
 
               <button
                 onClick={() => testApi('cint')}
-                className={`px-4 py-3 rounded-md border font-body transition-colors ${selectedApi === 'cint'
-                  ? 'bg-accent-color text-white border-accent-color'
-                  : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
-                  }`}
+                className={`px-4 py-3 rounded-md border font-body transition-colors ${
+                  selectedApi === 'cint'
+                    ? 'bg-accent-color text-white border-accent-color'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                }`}
                 disabled={isLoading}
               >
                 {isLoading && selectedApi === 'cint' ? (
@@ -542,10 +448,11 @@ export default function ApiVerificationPage() {
 
               <button
                 onClick={() => testApi('stripe')}
-                className={`px-4 py-3 rounded-md border font-body transition-colors ${selectedApi === 'stripe'
-                  ? 'bg-accent-color text-white border-accent-color'
-                  : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
-                  }`}
+                className={`px-4 py-3 rounded-md border font-body transition-colors ${
+                  selectedApi === 'stripe'
+                    ? 'bg-accent-color text-white border-accent-color'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                }`}
                 disabled={isLoading}
               >
                 {isLoading && selectedApi === 'stripe' ? (
@@ -560,10 +467,11 @@ export default function ApiVerificationPage() {
 
               <button
                 onClick={() => testApi('uploadthing')}
-                className={`px-4 py-3 rounded-md border font-body transition-colors ${selectedApi === 'uploadthing'
-                  ? 'bg-accent-color text-white border-accent-color'
-                  : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
-                  }`}
+                className={`px-4 py-3 rounded-md border font-body transition-colors ${
+                  selectedApi === 'uploadthing'
+                    ? 'bg-accent-color text-white border-accent-color'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                }`}
                 disabled={isLoading}
               >
                 {isLoading && selectedApi === 'uploadthing' ? (
@@ -578,10 +486,11 @@ export default function ApiVerificationPage() {
 
               <button
                 onClick={() => testApi('database')}
-                className={`px-4 py-3 rounded-md border font-body transition-colors ${selectedApi === 'database'
-                  ? 'bg-accent-color text-white border-accent-color'
-                  : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
-                  }`}
+                className={`px-4 py-3 rounded-md border font-body transition-colors ${
+                  selectedApi === 'database'
+                    ? 'bg-accent-color text-white border-accent-color'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-accent-color hover:text-accent-color'
+                }`}
                 disabled={isLoading}
               >
                 {isLoading && selectedApi === 'database' ? (
@@ -593,31 +502,11 @@ export default function ApiVerificationPage() {
                   'Database Connection'
                 )}
               </button>
-
-              <button
-                onClick={testAllApis}
-                className={`px-4 py-3 rounded-md border font-body font-bold transition-colors ${selectedApi === 'all'
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-600 hover:text-white'
-                  }`}
-                disabled={isLoading}
-              >
-                {isLoading && selectedApi === 'all' ? (
-                  <div className="flex items-center justify-center font-body">
-                    <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 font-body"></span>
-                    <span className="font-body">Testing All...</span>
-                  </div>
-                ) : (
-                  'Test All APIs'
-                )}
-              </button>
             </div>
 
             {isLoading && (
               <div className="mt-3 p-3 bg-blue-50 text-blue-700 rounded-md font-body">
-                <p className="text-sm font-medium font-body">
-                  Testing in progress, please wait...
-                </p>
+                <p className="text-sm font-medium font-body">Testing in progress, please wait...</p>
               </div>
             )}
           </div>
@@ -671,8 +560,9 @@ export default function ApiVerificationPage() {
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm font-body">
                         <span
-                          className={`inline-block px-2 py-1 rounded-md text-xs font-medium ${getStatusBadgeClass(result.success)
-                            }`}
+                          className={`inline-block px-2 py-1 rounded-md text-xs font-medium ${getStatusBadgeClass(
+                            result.success
+                          )}`}
                         >
                           {result.success ? 'Operational' : 'Error'}
                         </span>
@@ -700,11 +590,12 @@ export default function ApiVerificationPage() {
                               {result.error?.type}
                             </span>
                             <p className="font-body">{result.error?.message}</p>
-                            {result.error?.details && (
-                              <pre className="text-xs bg-gray-50 p-2 rounded overflow-auto max-h-40 font-body">
-                                {JSON.stringify(result.error.details, null, 2)}
-                              </pre>
-                            )}
+                            {result.error?.details !== undefined &&
+                              result.error?.details !== null && (
+                                <pre className="text-xs bg-gray-50 p-2 rounded overflow-auto max-h-40 font-body">
+                                  {JSON.stringify(result.error.details, null, 2)}
+                                </pre>
+                              )}
                             <div className="font-body">
                               <span
                                 className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${result.error?.isRetryable ? 'bg-green-100 text-green-800 border-green-200' : 'bg-red-100 text-red-800 border-red-200'} font-body`}
@@ -725,4 +616,6 @@ export default function ApiVerificationPage() {
       </div>
     </div>
   );
-}
+};
+
+export default ApiVerificationPage;

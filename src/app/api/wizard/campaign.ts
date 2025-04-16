@@ -3,9 +3,10 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { withValidation } from '@/lib/middleware/api';
-import { DbOperation } from '@/lib/data-mapping/db-logger';
 import { v4 as uuidv4 } from 'uuid';
 import { Prisma } from '@prisma/client';
+import { auth as _auth } from '@clerk/nextjs/server';
+import { CampaignWizard as _CampaignWizard } from '@prisma/client';
 
 // Define schema for campaign creation
 const campaignSchema = z.object({
@@ -27,7 +28,7 @@ const campaignSchema = z.object({
 export const POST = withValidation(
   campaignSchema,
   // Explicitly type the validated data
-  async (data: z.infer<typeof campaignSchema>, request) => {
+  async (data: z.infer<typeof campaignSchema>, _request) => {
     // Import the EnumTransformers utility
     const { EnumTransformers } = await import('@/utils/enum-transformers');
 

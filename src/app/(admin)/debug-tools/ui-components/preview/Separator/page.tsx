@@ -25,7 +25,7 @@ export default function SeparatorPreviewPage() {
     since: '2023-01-01',
     status: 'stable',
   };
-  const examples: string[] = [];
+  // const examples: string[] = []; // Unused variable
 
   return (
     <div className="container mx-auto px-4 py-8">

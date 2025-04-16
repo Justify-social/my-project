@@ -93,7 +93,9 @@ export default function LineChartPreviewPage() {
                   {componentMeta.status}
                 </Badge>
               )}
-              <span className="text-secondary capitalize">({componentMeta.renderType || 'N/A'})</span>
+              <span className="text-secondary capitalize">
+                ({componentMeta.renderType || 'N/A'})
+              </span>
             </div>
           </div>
           {componentMeta.description && (
@@ -128,7 +130,12 @@ export default function LineChartPreviewPage() {
                       }}
                     />
                     <Legend wrapperStyle={{ fontSize: '12px' }} />
-                    <Line type="monotone" dataKey="pv" stroke="var(--interactive-color)" activeDot={{ r: 8 }} />
+                    <Line
+                      type="monotone"
+                      dataKey="pv"
+                      stroke="var(--interactive-color)"
+                      activeDot={{ r: 8 }}
+                    />
                     <Line type="monotone" dataKey="uv" stroke="var(--secondary-color)" />
                   </LineChart>
                 </ResponsiveContainer>

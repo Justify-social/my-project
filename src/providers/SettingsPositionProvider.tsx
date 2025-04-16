@@ -30,7 +30,7 @@ export const useSettingsPosition = () => useContext(SettingsPositionContext);
 // Provider component
 export const SettingsPositionProvider = ({ children }: { children: ReactNode }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [position, setPosition] = useState({ topOffset: 65 });
+  const [position] = useState({ topOffset: 65 });
 
   const toggleSettings = () => setIsOpen(prev => !prev);
   const closeSettings = () => setIsOpen(false);

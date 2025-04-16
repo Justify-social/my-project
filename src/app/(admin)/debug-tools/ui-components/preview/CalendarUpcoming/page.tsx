@@ -6,8 +6,17 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import { CalendarUpcoming, CalendarEvent } from '@/components/ui/calendar-upcoming';
+import { CalendarUpcoming, type CalendarEvent } from '@/components/ui/calendar-upcoming';
 import { useToast } from '@/hooks/use-toast'; // Add toast for click feedback
+
+// Define the expected raw structure from the API
+interface RawApiEvent {
+  id: string | number;
+  title: string;
+  start: string; // Assume string from JSON
+  end?: string | null; // Assume string or null from JSON
+  [key: string]: unknown; // Use unknown instead of any
+}
 
 const statusStyles: Record<string, string> = {
   stable: 'bg-green-100 text-green-800 border-green-200',
@@ -38,7 +47,7 @@ export default function CalendarUpcomingPreviewPage() {
           throw new Error('API response missing events data');
         }
         // Dates from JSON need conversion back to Date objects
-        const fetchedEvents = data.events.map((event: any) => ({
+        const fetchedEvents = data.events.map((event: RawApiEvent) => ({
           ...event,
           start: new Date(event.start),
           end: event.end ? new Date(event.end) : undefined,
@@ -55,7 +64,7 @@ export default function CalendarUpcomingPreviewPage() {
       });
   }, []);
 
-  const handleEventClick = (eventId: string | number, event: CalendarEvent) => {
+  const _handleEventClick = (eventId: string | number, event: CalendarEvent) => {
     toast({
       title: 'Event Clicked',
       description: `ID: ${eventId}, Title: ${event.title}`,
@@ -145,9 +154,7 @@ export default function CalendarUpcomingPreviewPage() {
                 <p className="text-center text-muted-foreground p-4">Loading events...</p>
               )}
               {error && <p className="text-center text-red-600 p-4">Error: {error}</p>}
-              {!isLoading && !error && (
-                <CalendarUpcoming events={events} onEventClick={handleEventClick} />
-              )}
+              {!isLoading && !error && <CalendarUpcoming events={events} />}
             </div>
           </div>
           {/* ---- END UPDATED EXAMPLE ---- */}

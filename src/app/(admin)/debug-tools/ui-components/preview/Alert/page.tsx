@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 // Import Alert and its sub-components
 import { Alert, AlertTitle, AlertDescription } from '../../../../../../components/ui/alert';
 // Import Icon for examples
-import { Icon } from '@/components/ui/icon';
+import { Icon } from '@/components/ui/icon/icon';
 
 const statusStyles: Record<string, string> = {
   stable: 'bg-green-100 text-green-800 border-green-200',

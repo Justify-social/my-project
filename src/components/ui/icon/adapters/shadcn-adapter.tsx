@@ -21,7 +21,7 @@
 
 import React, { forwardRef } from 'react';
 import { Icon } from '..';
-import { IconSize, IconVariant } from '../icon-types';
+import { IconSize } from '../icon-types';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 /**
@@ -87,14 +87,13 @@ export interface ShadcnIconProps
  * - Supports ref forwarding for DOM access
  */
 export const ShadcnIcon = forwardRef<HTMLSpanElement, ShadcnIconProps>(
-  ({ iconId, className, size, variant, onClick, ...props }, ref) => {
+  ({ iconId, className, size, variant, onClick, ...props }, _ref) => {
     // Convert the onClick handler to the format expected by Icon
     const handleClick = onClick ? () => onClick({} as React.MouseEvent<HTMLElement>) : undefined;
 
     // Render using the core Icon component (SSOT implementation)
     return (
       <Icon
-        ref={ref}
         iconId={iconId}
         size={size as IconSize}
         className={combinedClassNames(iconVariants({ size, variant }), className)}

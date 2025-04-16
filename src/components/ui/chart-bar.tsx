@@ -68,8 +68,8 @@ export interface BarChartProps {
   barSize?: number;
   barGap?: number;
   gridColor?: string;
-  tickFormatter?: (value: any) => string;
-  tooltipFormatter?: (value: any) => string;
+  tickFormatter?: (value: string | number) => string;
+  tooltipFormatter?: (value: string | number) => string;
 }
 
 // Use HSL theme variables for default colors
@@ -133,7 +133,14 @@ export const BarChart: React.FC<BarChartProps> = ({
           <Tooltip
             formatter={tooltipFormatter}
             contentStyle={{}}
-            wrapperStyle={{ backgroundColor: 'bg-background', color: 'text-foreground', borderRadius: 'rounded-md', boxShadow: 'shadow-md', padding: 'p-2', fontSize: 'text-xs' }}
+            wrapperStyle={{
+              backgroundColor: 'bg-background',
+              color: 'text-foreground',
+              borderRadius: 'rounded-md',
+              boxShadow: 'shadow-md',
+              padding: 'p-2',
+              fontSize: 'text-xs',
+            }}
           />
 
           {showLegend && (

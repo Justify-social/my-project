@@ -6,11 +6,9 @@
  */
 
 import { NextResponse } from 'next/server';
-import { ZodError } from 'zod';
 import { handleDbError } from './handle-db-errors'; // Assuming this is in the same dir now or re-exported
 import { DbOperation } from '@/lib/data-mapping/db-logger';
 import { tryCatchImpl } from '../implementation/handle-api-errors-impl';
-import { Prisma } from '@prisma/client';
 
 export type ErrorHandlingOptions = {
   entityName?: string;
@@ -44,7 +42,9 @@ export function handleDbErrorImpl(
  * @returns A new function that wraps the handler with error handling.
  */
 export function tryCatch<TResponse>(
-  handler: (...args: any[]) => Promise<NextResponse<TResponse | { success: boolean; error: string; details?: any }>>,
+  handler: (
+    ...args: unknown[]
+  ) => Promise<NextResponse<TResponse | { success: boolean; error: string; details?: unknown }>>,
   options?: { entityName?: string; operation?: DbOperation }
 ) {
   return tryCatchImpl(handler, options);

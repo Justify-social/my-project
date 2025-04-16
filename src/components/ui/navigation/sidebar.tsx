@@ -9,6 +9,7 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import Image from 'next/image';
 
 // Placeholder type for the icon registry data
 type AppIconRegistry = Record<string, string>;
@@ -62,10 +63,12 @@ function SidebarItem({
           <div className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0">
             {' '}
             {/* Icon container */}
-            <img
+            <Image
               src={iconPath}
               alt={`${label} icon`}
-              className="w-5 h-5" // Standard icon size
+              className="w-5 h-5"
+              width={20}
+              height={20}
               style={{
                 filter:
                   active || isHovered
@@ -73,6 +76,7 @@ function SidebarItem({
                     : 'none', // Accent color filter on hover/active
                 transition: 'filter 0.15s ease-in-out',
               }}
+              unoptimized
             />
           </div>
         ) : icon ? (
@@ -200,7 +204,7 @@ export function Sidebar({
   );
 
   const hasActiveChild = useCallback(
-    (item: { children?: any[] }) => {
+    (item: { children?: { href: string }[] }) => {
       return item.children?.some(child => isActive(child.href));
     },
     [isActive]
@@ -214,15 +218,22 @@ export function Sidebar({
       )}
       data-testid="sidebar"
     >
-      {/* Sidebar header - simplified, no toggle */}
-      <div
-        className={cn(
-          'h-14 flex items-center px-4 border-b border' // THEMED border
-        )}
-      >
+      {/* Sidebar header */}
+      <div className={cn('h-14 flex items-center px-4 border-b border')}>
         <div className="flex items-center">
-          {logoSrc && <img src={logoSrc} alt={logoAlt} className="h-6 w-auto mr-2" />}
-          <span className="font-medium text-foreground">{title}</span> {/* THEMED text */}
+          {/* Replaced img with Image */}
+          {logoSrc && (
+            <Image
+              src={logoSrc}
+              alt={logoAlt}
+              className="h-6 w-auto mr-2" // Keep className, w-auto might allow flexibility
+              width={24} // Provide width (6 * 4px)
+              height={24} // Provide height (6 * 4px)
+              // Add unoptimized if logoSrc can be external/dynamic
+              // unoptimized
+            />
+          )}
+          <span className="font-medium text-foreground">{title}</span>
         </div>
       </div>
 
@@ -261,10 +272,12 @@ export function Sidebar({
                       <div className="flex items-center">
                         {parentIconPath ? (
                           <div className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0">
-                            <img
+                            <Image
                               src={parentIconPath}
                               alt={`${item.label} icon`}
                               className="w-5 h-5"
+                              width={20}
+                              height={20}
                               style={{
                                 filter:
                                   isActiveParent || isHoveredParent
@@ -272,6 +285,7 @@ export function Sidebar({
                                     : 'none',
                                 transition: 'filter 0.15s ease-in-out',
                               }}
+                              unoptimized
                             />
                           </div>
                         ) : parentIconName ? (

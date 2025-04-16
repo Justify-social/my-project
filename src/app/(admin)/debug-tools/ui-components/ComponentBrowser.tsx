@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { type ExtendedComponentMetadata, type ComponentCategory } from './types';
+import { type ExtendedComponentMetadata } from './types';
 import { cn } from '@/lib/utils';
 
 // Define the props for the client component

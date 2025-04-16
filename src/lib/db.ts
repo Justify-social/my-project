@@ -1,10 +1,9 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, BrandingSettings } from '@prisma/client';
 
 // Add a declaration for the global mockBrandingSettings
 declare global {
   // Using var to be compatible with global object
-   
-  var mockBrandingSettings: Record<string, any>;
+  var mockBrandingSettings: Record<string, unknown>;
 }
 
 // Prevent multiple instances of Prisma Client in development
@@ -96,10 +95,10 @@ export async function getBrandingSettings(companyId: string) {
 
   try {
     // Try to get from actual database if not in development
-    // Will use this once migrations are applied
-    // Note: Using any here because the schema might not be generated yet
-    return await (prisma as any).brandingSettings.findUnique({
-      where: { companyId },
+    // Removed 'as any' cast. If brandingSettings doesn't exist on the client,
+    // the access attempt will throw and fall back to the catch block's default.
+    return await prisma.brandingSettings.findUnique({
+      where: { userId: companyId },
     });
   } catch (error) {
     console.error('Error fetching branding settings:', error);
@@ -120,27 +119,69 @@ export async function getBrandingSettings(companyId: string) {
   }
 }
 
+// Add a type guard for BrandingSettings
+function isBrandingSettings(obj: unknown): obj is BrandingSettings {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'id' in obj &&
+    'companyId' in obj &&
+    'primaryColor' in obj
+    // Add more checks if needed
+  );
+}
+
 // Mock implementation of saving branding settings
-export async function saveBrandingSettings(companyId: string, settings: any) {
+export async function saveBrandingSettings(companyId: string, settings: Partial<BrandingSettings>) {
   if (process.env.NODE_ENV === 'development') {
     console.log('Saving branding settings (mock):', settings);
 
     // First, try to get existing data to preserve logo if not explicitly changed
-    let existingData: any = null;
+    let existingData: BrandingSettings | null = null;
 
     try {
+      let rawExistingData: unknown = null; // Store retrieved data as unknown first
       if (typeof window === 'undefined') {
         if (global.mockBrandingSettings && global.mockBrandingSettings[companyId]) {
-          existingData = global.mockBrandingSettings[companyId];
+          rawExistingData = global.mockBrandingSettings[companyId];
         }
       } else if (typeof window !== 'undefined') {
         const savedSettings = localStorage.getItem(`mockBrandingSettings_${companyId}`);
         if (savedSettings) {
-          existingData = JSON.parse(savedSettings);
+          try {
+            rawExistingData = JSON.parse(savedSettings);
+            // Restore dates after parsing JSON
+            if (typeof rawExistingData === 'object' && rawExistingData !== null) {
+              // Use specific type assertion instead of 'as any'
+              if ('createdAt' in rawExistingData && typeof rawExistingData.createdAt === 'string') {
+                (rawExistingData as { createdAt?: string | Date }).createdAt = new Date(
+                  rawExistingData.createdAt
+                );
+              }
+              if ('updatedAt' in rawExistingData && typeof rawExistingData.updatedAt === 'string') {
+                (rawExistingData as { updatedAt?: string | Date }).updatedAt = new Date(
+                  rawExistingData.updatedAt
+                );
+              }
+            }
+          } catch (parseError) {
+            console.error(
+              'Error parsing saved mock branding settings from localStorage:',
+              parseError
+            );
+            rawExistingData = null; // Reset on parse error
+          }
         }
       }
-    } catch (e) {
-      console.error('Error getting existing mock data:', e);
+
+      // Use the type guard to safely assign
+      if (isBrandingSettings(rawExistingData)) {
+        existingData = rawExistingData;
+      } else if (rawExistingData !== null) {
+        console.warn('Existing mock data does not match BrandingSettings type:', rawExistingData);
+      }
+    } catch (e: unknown) {
+      console.error('Error accessing mock branding storage:', e);
     }
 
     // If we have existing data with a logo and the new settings don't specify a logo change
@@ -179,7 +220,7 @@ export async function saveBrandingSettings(companyId: string, settings: any) {
         localStorage.setItem(`mockBrandingSettings_${companyId}`, JSON.stringify(mockData));
         console.log('CLIENT: Saved mock branding settings to localStorage');
       }
-    } catch (e) {
+    } catch (e: unknown) {
       console.error('Error saving to mock branding storage:', e);
     }
 
@@ -188,11 +229,20 @@ export async function saveBrandingSettings(companyId: string, settings: any) {
 
   try {
     // Try to save to actual database if not in development
-    return await (prisma as any).brandingSettings.upsert({
-      where: { companyId },
+    // Removed 'as any' cast. Runtime error if model doesn't exist will be caught.
+    return await prisma.brandingSettings.upsert({
+      where: { userId: companyId },
       update: settings,
       create: {
-        companyId,
+        userId: companyId,
+        // Provide defaults for required fields potentially missing in Partial<BrandingSettings>
+        primaryColor: settings.primaryColor ?? 'var(--accent-color)',
+        secondaryColor: settings.secondaryColor ?? 'var(--secondary-color)',
+        accentColor: settings.accentColor ?? 'var(--accent-color)',
+        headerFont: settings.headerFont ?? 'var(--font-heading)',
+        bodyFont: settings.bodyFont ?? 'var(--font-body)',
+        logoUrl: settings.logoUrl !== undefined ? settings.logoUrl : null, // Handle null/undefined
+        // Spread the rest of settings, potentially overwriting defaults if explicitly provided
         ...settings,
       },
     });

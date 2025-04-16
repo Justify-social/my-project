@@ -22,7 +22,7 @@ import { Label } from '@/components/ui/label';
 
 const SHEET_SIDES = ['top', 'right', 'bottom', 'left'] as const;
 
-type SheetSide = (typeof SHEET_SIDES)[number];
+// type SheetSide = (typeof SHEET_SIDES)[number]; // Unused type alias
 
 const statusStyles: Record<string, string> = {
   stable: 'bg-green-100 text-green-800 border-green-200',
@@ -126,13 +126,21 @@ export default function SheetPreviewPage() {
                         <Label htmlFor={`name-${side}`} className="text-right">
                           Name
                         </Label>
-                        <Input id={`name-${side}`} defaultValue="Pedro Duarte" className="col-span-3" />
+                        <Input
+                          id={`name-${side}`}
+                          defaultValue="Pedro Duarte"
+                          className="col-span-3"
+                        />
                       </div>
                       <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor={`username-${side}`} className="text-right">
                           Username
                         </Label>
-                        <Input id={`username-${side}`} defaultValue="@peduarte" className="col-span-3" />
+                        <Input
+                          id={`username-${side}`}
+                          defaultValue="@peduarte"
+                          className="col-span-3"
+                        />
                       </div>
                     </div>
                     <SheetFooter>

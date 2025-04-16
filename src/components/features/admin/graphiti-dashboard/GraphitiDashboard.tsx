@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
 import { Card, Button, Alert, AlertTitle, AlertDescription } from '@/components/ui';
 import { format } from 'date-fns';
@@ -137,30 +136,33 @@ export default function GraphitiDashboard() {
             <nav className="-mb-px flex space-x-6">
               <button
                 onClick={() => setActiveTab('sessions')}
-                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'sessions'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'sessions'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
               >
                 Active Sessions ({data.telemetry.activeSessions.length})
               </button>
 
               <button
                 onClick={() => setActiveTab('activity')}
-                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'activity'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'activity'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
               >
                 Recent Activity ({data.telemetry.telemetry.length})
               </button>
 
               <button
                 onClick={() => setActiveTab('analytics')}
-                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'analytics'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'analytics'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
               >
                 Analytics
               </button>
@@ -242,10 +244,11 @@ function SessionsTable({ sessions }: { sessions: SessionState[] }) {
               <td className="px-4 py-3">{session.queryCount}</td>
               <td className="px-4 py-3">
                 <span
-                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${session.hasCheckedGraphiti
-                    ? 'bg-[var(--background-success)] text-[var(--foreground-success)]'
-                    : 'bg-[var(--background-error)] text-[var(--foreground-error)]'
-                    }`}
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    session.hasCheckedGraphiti
+                      ? 'bg-[var(--background-success)] text-[var(--foreground-success)]'
+                      : 'bg-[var(--background-error)] text-[var(--foreground-error)]'
+                  }`}
                 >
                   {session.hasCheckedGraphiti ? 'Compliant' : 'Pending Check'}
                 </span>
@@ -287,8 +290,11 @@ function ActivityTable({ records }: { records: TelemetryRecord[] }) {
               <td className="px-4 py-3">{record.taskType || 'unknown'}</td>
               <td className="px-4 py-3">
                 <span
-                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${record.success ? 'bg-[var(--background-success)] text-[var(--foreground-success)]' : 'bg-[var(--background-error)] text-[var(--foreground-error)]'
-                    }`}
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    record.success
+                      ? 'bg-[var(--background-success)] text-[var(--foreground-success)]'
+                      : 'bg-[var(--background-error)] text-[var(--foreground-error)]'
+                  }`}
                 >
                   {record.success ? 'Success' : 'Failed'}
                 </span>
@@ -362,8 +368,13 @@ function AnalyticsView({
               <div key={day} className="flex flex-col items-center">
                 <div className="text-xs mb-1">{rate}%</div>
                 <div
-                  className={`w-12 ${rate > 90 ? 'bg-[var(--background-success)]' : rate > 75 ? 'bg-[var(--background-warning)]' : 'bg-[var(--background-error)]'
-                    }`}
+                  className={`w-12 ${
+                    rate > 90
+                      ? 'bg-[var(--background-success)]'
+                      : rate > 75
+                        ? 'bg-[var(--background-warning)]'
+                        : 'bg-[var(--background-error)]'
+                  }`}
                   style={{ height: `${rate}%` }}
                 ></div>
                 <div className="text-xs mt-1">{format(new Date(day), 'MMM d')}</div>

@@ -45,7 +45,9 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  TooltipProps,
 } from 'recharts';
+import { ValueType, NameType } from 'recharts/types/component/DefaultTooltipContent';
 import { cn } from '@/lib/utils';
 
 export interface DataPoint {
@@ -69,8 +71,8 @@ export interface AreaChartProps {
   stackId?: string;
   strokeWidth?: number;
   gridColor?: string;
-  tickFormatter?: (value: any) => string;
-  tooltipFormatter?: (value: any) => string;
+  tickFormatter?: (value: unknown) => string;
+  tooltipFormatter?: (value: unknown) => string;
 }
 
 // Use HSL theme variables for default colors
@@ -81,6 +83,31 @@ const DEFAULT_COLORS = [
   { stroke: 'hsl(var(--primary))', fill: 'hsl(var(--primary) / 0.2)' }, // Jet
   { stroke: 'hsl(var(--success))', fill: 'hsl(var(--success) / 0.2)' }, // Example: Assuming a success color
 ];
+
+// Define interface for tooltip payload entry
+interface TooltipPayloadEntry {
+  name?: NameType | undefined;
+  value?: ValueType | undefined;
+  color?: string;
+  // Add other potential properties if needed
+}
+
+// Use imported types for CustomTooltip props
+const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-background border border-border shadow-lg rounded-md p-2">
+        <p className="label text-sm font-medium mb-1 text-muted-foreground">{`${label}`}</p>
+        {payload.map((entry: TooltipPayloadEntry, index: number) => (
+          <p key={`item-${index}`} style={{ color: entry.color }} className="text-sm">
+            {`${entry.name}: ${typeof entry.value === 'number' ? entry.value.toLocaleString() : entry.value}`}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
 
 export const AreaChart: React.FC<AreaChartProps> = ({
   data,
@@ -97,7 +124,6 @@ export const AreaChart: React.FC<AreaChartProps> = ({
   strokeWidth = 2,
   gridColor = 'hsl(var(--border))', // Use theme border color
   tickFormatter,
-  tooltipFormatter,
 }) => {
   // Handle multiple y-keys
   const yKeys = Array.isArray(yKey) ? yKey : [yKey];
@@ -114,17 +140,7 @@ export const AreaChart: React.FC<AreaChartProps> = ({
 
           <YAxis tick={{ fontSize: 12 }} tickFormatter={tickFormatter} />
 
-          <Tooltip
-            formatter={tooltipFormatter}
-            contentStyle={{
-              backgroundColor: 'hsl(var(--background))',
-              color: 'hsl(var(--foreground))',
-              borderRadius: 'var(--radius-md)',
-              boxShadow: 'var(--shadow-md)',
-              padding: '0.5rem',
-              fontSize: '12px',
-            }}
-          />
+          <Tooltip content={<CustomTooltip />} labelStyle={{ color: 'hsl(var(--foreground))' }} />
 
           {showLegend && (
             <Legend

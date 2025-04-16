@@ -8,7 +8,7 @@
 
 import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import Link from 'next/link';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import {
   Card,
   CardHeader,
@@ -22,8 +22,7 @@ import {
   AlertTitle,
   AlertDescription,
 } from '@/components/ui';
-import { Icon } from '@/components/ui/icon';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { Icon } from '@/components/ui/icon/icon';
 import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
 import { iconRegistryData } from '@/lib/generated/icon-registry';
 import { IconMetadata } from '@/components/ui/icon/icon-types';
@@ -67,7 +66,13 @@ const getIconInfo = (
 
 export default function ComponentBrowserPage() {
   const router = useRouter();
-  const searchParams = useSearchParams() ?? new URLSearchParams();
+  const searchParams = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      return new URLSearchParams(window.location.search);
+    }
+    return new URLSearchParams();
+  }, []);
+
   const initialTab = searchParams.get('tab') || 'components';
   const initialCategory = (searchParams.get('category') as ComponentCategory | null) || null;
 
@@ -155,14 +160,22 @@ export default function ComponentBrowserPage() {
   // Helper function to get icon ID for filter buttons
   const getFilterIconId = (category: string): string => {
     switch (category) {
-      case 'All': return 'faListLight';
-      case 'Hover': return 'faHandPointerLight';
-      case 'App': return 'faTableCellsLight';
-      case 'Brands': return 'brandsGithub'; // Example Brand
-      case 'KPIs': return 'faChartLineLight';
-      case 'Light': return 'faLightbulbLight';
-      case 'Solid': return 'faLightbulbSolid'; // Assuming exists in solid registry
-      default: return 'faQuestionLight';
+      case 'All':
+        return 'faListLight';
+      case 'Hover':
+        return 'faHandPointerLight';
+      case 'App':
+        return 'faTableCellsLight';
+      case 'Brands':
+        return 'brandsGithub'; // Example Brand
+      case 'KPIs':
+        return 'faChartLineLight';
+      case 'Light':
+        return 'faLightbulbLight';
+      case 'Solid':
+        return 'faLightbulbSolid'; // Assuming exists in solid registry
+      default:
+        return 'faQuestionLight';
     }
   };
 
@@ -237,10 +250,18 @@ export default function ComponentBrowserPage() {
   }
 
   return (
-    <Suspense fallback={<div className="container mx-auto py-8 px-4 flex justify-center items-center min-h-[300px]"><LoadingSkeleton /></div>}>
+    <Suspense
+      fallback={
+        <div className="container mx-auto py-8 px-4 flex justify-center items-center min-h-[300px]">
+          <LoadingSkeleton />
+        </div>
+      }
+    >
       <div className="container mx-auto py-8 px-4 max-w-7xl">
         <h1 className="text-3xl font-bold mb-6 text-primary">UI Component Browser</h1>
-        <p className="mb-6 text-secondary">Browse and preview the UI components and icons available in the system.</p>
+        <p className="mb-6 text-secondary">
+          Browse and preview the UI components and icons available in the system.
+        </p>
 
         <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full mb-6">
           <TabsList className="grid grid-cols-4 mb-4 w-full sm:w-[500px]">
@@ -261,14 +282,17 @@ export default function ComponentBrowserPage() {
                 >
                   <Icon
                     iconId={CATEGORIES_DISPLAY[category]?.icon || 'faQuestionLight'}
-                    name={CATEGORIES_DISPLAY[category]?.icon || 'faQuestionLight'}
                     className="mr-2 h-4 w-4 sm:h-5 sm:w-5"
                   />
                   <span className="flex-1 capitalize">{category}</span>
-                  <span className={cn(
-                    "text-xs",
-                    selectedCategory === category ? 'text-primary-foreground/80' : 'text-muted-foreground'
-                  )}>
+                  <span
+                    className={cn(
+                      'text-xs',
+                      selectedCategory === category
+                        ? 'text-primary-foreground/80'
+                        : 'text-muted-foreground'
+                    )}
+                  >
                     {registry?.byCategory?.[category]?.length || 0}
                   </span>
                 </UiButton>
@@ -321,7 +345,8 @@ export default function ComponentBrowserPage() {
               <Alert className="border-divider mb-6">
                 <AlertTitle>No components in this category</AlertTitle>
                 <AlertDescription>
-                  There are no components registered under the &quot;{selectedCategory}&quot; category.
+                  There are no components registered under the &quot;{selectedCategory}&quot;
+                  category.
                 </AlertDescription>
               </Alert>
             ) : null}
@@ -338,16 +363,16 @@ export default function ComponentBrowserPage() {
                     className="h-auto py-3 px-2 sm:px-4 text-left justify-start"
                     onClick={() => setSelectedIconCategory(category)}
                   >
-                    <Icon
-                      iconId={iconId}
-                      name={iconId} // Use the determined ID for name too
-                      className="mr-2 h-4 w-4 sm:h-5 sm:w-5"
-                    />
+                    <Icon iconId={iconId} className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                     <span className="flex-1 capitalize">{category}</span>
-                    <span className={cn(
-                      "text-xs",
-                      selectedIconCategory === category ? 'text-primary-foreground/80' : 'text-muted-foreground'
-                    )}>
+                    <span
+                      className={cn(
+                        'text-xs',
+                        selectedIconCategory === category
+                          ? 'text-primary-foreground/80'
+                          : 'text-muted-foreground'
+                      )}
+                    >
                       {getCategoryCount(category)}
                     </span>
                   </UiButton>
@@ -372,16 +397,19 @@ export default function ComponentBrowserPage() {
                         className="h-6 w-6 hidden group-hover:block text-accent"
                       />
                     </div>
-                    <div className="text-[10px] text-center truncate text-secondary w-full">{pair.name}</div>
+                    <div className="text-[10px] text-center truncate text-secondary w-full">
+                      {pair.name}
+                    </div>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3 mb-6 max-h-[600px] overflow-y-auto p-1">
                 {allIcons
-                  .filter(icon =>
-                    selectedIconCategory === 'All' ||
-                    icon.category?.toLowerCase() === selectedIconCategory.toLowerCase()
+                  .filter(
+                    icon =>
+                      selectedIconCategory === 'All' ||
+                      icon.category?.toLowerCase() === selectedIconCategory.toLowerCase()
                   )
                   .map(icon => (
                     <div
@@ -394,7 +422,9 @@ export default function ComponentBrowserPage() {
                           className="h-6 w-6 text-primary group-hover:text-[var(--color-accent)]"
                         />
                       </div>
-                      <div className="text-[10px] text-center truncate text-secondary w-full">{icon.name}</div>
+                      <div className="text-[10px] text-center truncate text-secondary w-full">
+                        {icon.name}
+                      </div>
                     </div>
                   ))}
               </div>

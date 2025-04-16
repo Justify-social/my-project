@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { MobileMenu, MenuItem } from '@/components/ui/navigation/mobile-menu'; // Import component and MenuItem type
 import { Button } from '@/components/ui/button'; // Import Button for trigger example
-import { Icon } from '@/components/ui/icon'; // Import Icon
+import { Icon } from '@/components/ui/icon/icon';
 
 // Updated Sample navigation items using MenuItem structure (iconId is mapped internally)
 const sampleNavItems: Omit<MenuItem, 'iconId'>[] = [
@@ -24,12 +24,12 @@ const sampleNavItems: Omit<MenuItem, 'iconId'>[] = [
   // Note: "Settings" is handled by the settingsItem prop below
 ];
 
-// Updated Example Settings Item
-const settingsItem: Omit<MenuItem, 'iconId'> = {
-  id: 'settings',
-  label: 'Settings', // Use the label the component expects for mapping
-  href: '#settings',
-};
+// Updated Example Settings Item (UNUSED)
+// const settingsItem: Omit<MenuItem, 'iconId'> = {
+//   id: 'settings',
+//   label: 'Settings', // Use the label the component expects for mapping
+//   href: '#settings',
+// };
 
 // Example User Data
 const sampleUser = {

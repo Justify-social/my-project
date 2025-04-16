@@ -2,10 +2,9 @@ import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import { Icon } from '@/components/ui/icon';
-import { IconButtonAction } from '@/components/ui/button-icon-action';
+import { Icon } from '@/components/ui/icon/icon';
 
-import { Button } from '../../../../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 
 const statusStyles: Record<string, string> = {
   stable: 'bg-green-100 text-green-800 border-green-200',

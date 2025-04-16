@@ -7,7 +7,6 @@ import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,

@@ -161,7 +161,12 @@ export default function BarChartPreviewPage() {
                   />
                   <Legend wrapperStyle={{ fontSize: '12px' }} />
                   <Bar dataKey="pv" fill="var(--accent-color)" radius={[0, 4, 4, 0]} barSize={20} />
-                  <Bar dataKey="uv" fill="var(--primary-color)" radius={[0, 4, 4, 0]} barSize={20} />
+                  <Bar
+                    dataKey="uv"
+                    fill="var(--primary-color)"
+                    radius={[0, 4, 4, 0]}
+                    barSize={20}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </div>

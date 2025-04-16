@@ -40,7 +40,6 @@ export default function ScrollAreaPreviewPage() {
     art: `ArtworkItem ${i + 1}`,
   }));
 
-
   return (
     // Wrap the entire page content in Suspense
     <React.Suspense fallback={<div>Loading component preview...</div>}>
@@ -86,7 +85,9 @@ export default function ScrollAreaPreviewPage() {
                   {componentMeta.status}
                 </Badge>
               )}
-              <span className="text-secondary capitalize">({componentMeta.renderType || 'N/A'})</span>
+              <span className="text-secondary capitalize">
+                ({componentMeta.renderType || 'N/A'})
+              </span>
             </div>
           </div>
           {componentMeta.description && (
@@ -101,12 +102,15 @@ export default function ScrollAreaPreviewPage() {
         {/* Examples Section (Rendering the actual component) */}
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-4 text-primary">Examples / Usage</h2>
-          <div className="space-y-8"> {/* Increased spacing for clarity */}
-
+          <div className="space-y-8">
+            {' '}
+            {/* Increased spacing for clarity */}
             {/* Example 1: Basic Vertical Scroll */}
             <div className="border border-divider rounded-lg p-6">
               <h3 className="text-lg font-medium mb-4">Vertical Scrolling</h3>
-              <ScrollArea className="h-72 w-60 rounded-md border border-divider"> {/* Adjusted width */}
+              <ScrollArea className="h-72 w-60 rounded-md border border-divider">
+                {' '}
+                {/* Adjusted width */}
                 <div className="p-4">
                   <h4 className="mb-4 text-sm font-medium leading-none">Tags</h4>
                   {tags.map(tag => (
@@ -118,13 +122,14 @@ export default function ScrollAreaPreviewPage() {
                 </div>
               </ScrollArea>
             </div>
-
             {/* Example 2: Horizontal Scroll */}
             <div className="border border-divider rounded-lg p-6">
               <h3 className="text-lg font-medium mb-4">Horizontal Scrolling</h3>
-              <ScrollArea className="w-full whitespace-nowrap rounded-md border border-divider"> {/* Use full width */}
+              <ScrollArea className="w-full whitespace-nowrap rounded-md border border-divider">
+                {' '}
+                {/* Use full width */}
                 <div className="flex w-max space-x-4 p-4">
-                  {works.map((artwork) => (
+                  {works.map(artwork => (
                     <figure key={artwork.artist} className="shrink-0">
                       <div className="overflow-hidden rounded-md">
                         <div className="h-40 w-40 bg-secondary flex items-center justify-center text-center p-2 text-secondary-foreground">
@@ -132,7 +137,8 @@ export default function ScrollAreaPreviewPage() {
                         </div>
                       </div>
                       <figcaption className="pt-2 text-xs text-muted-foreground">
-                        Photo by <span className="font-semibold text-foreground">{artwork.artist}</span>
+                        Photo by{' '}
+                        <span className="font-semibold text-foreground">{artwork.artist}</span>
                       </figcaption>
                     </figure>
                   ))}
@@ -140,7 +146,6 @@ export default function ScrollAreaPreviewPage() {
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
             </div>
-
             {/* ---- END MANUAL EXAMPLES ---- */}
           </div>
         </div>

@@ -1,12 +1,15 @@
 # Pull Request Template
 
 ## Description
+
 Please provide a brief description of the changes in this pull request.
 
 ## Related Issues
+
 - Link to related issues or tickets (if any).
 
 ## Checklist
+
 Ensure your changes adhere to the following standards before requesting a review:
 
 - [ ] **Single Source of Truth (SSOT)**: All styles are defined in `globals.css` or use Tailwind CSS classes; no inline styles or custom CSS outside the central stylesheet.
@@ -18,4 +21,5 @@ Ensure your changes adhere to the following standards before requesting a review
 - [ ] **Accessibility**: UI changes comply with WCAG 2.1 guidelines (ARIA attributes, keyboard navigation).
 
 ## Additional Notes
-Add any additional context or information for reviewers. 
+
+Add any additional context or information for reviewers.

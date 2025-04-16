@@ -4,8 +4,8 @@
 import {
   type ExtendedComponentMetadata,
   type ComponentCategory,
-  type ComponentRenderType,
-  type ComponentStatus,
+  // type ComponentRenderType, // Removed unused
+  // type ComponentStatus, // Removed unused
 } from '@/app/(admin)/debug-tools/ui-components/types'; // Import shared types
 
 // Removed redundant interface ManualComponentEntry
@@ -112,7 +112,7 @@ export const manualComponentRegistry = buildManualRegistry();
 
 // --- (Optional but Recommended) Component Import Map for Renderer ---
 // This helps ComponentPreviewRenderer load components without complex path logic
-export const componentImportMap: Record<string, () => Promise<any>> = {
+export const componentImportMap: Record<string, () => Promise<unknown>> = {
   Button: () => import('@/components/ui/button'),
   Card: () => import('@/components/ui/card'),
   Badge: () => import('@/components/ui/badge'),

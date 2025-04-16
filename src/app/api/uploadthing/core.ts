@@ -1,5 +1,8 @@
 import { createUploadthing } from 'uploadthing/next';
 import type { FileRouter } from 'uploadthing/next';
+import { auth } from '@clerk/nextjs/server';
+// Assuming authMiddleware is defined elsewhere, add a placeholder import
+// import { authMiddleware } from '@/lib/middleware/api'; // Potential location
 
 // For SDK v7+ configuration - no need to decode token or configure manually
 // UploadThing automatically reads UPLOADTHING_TOKEN from environment variables
@@ -24,7 +27,7 @@ export const ourFileRouter = {
       console.log('Processing media upload');
       return { uploadedAt: new Date() };
     })
-    .onUploadComplete(async ({ metadata, file }) => {
+    .onUploadComplete(async ({ file }) => {
       console.log('Media upload complete:', file.url);
       return { url: file.url };
     }),
@@ -37,7 +40,7 @@ export const ourFileRouter = {
       console.log('Processing logo upload');
       return { uploadedAt: new Date(), type: 'logo' };
     })
-    .onUploadComplete(async ({ metadata, file }) => {
+    .onUploadComplete(async ({ file }) => {
       console.log('Logo upload complete:', file.url);
       return { url: file.url, type: 'logo' };
     }),
@@ -50,7 +53,7 @@ export const ourFileRouter = {
       console.log('Processing avatar upload');
       return { uploadedAt: new Date(), type: 'avatar' };
     })
-    .onUploadComplete(async ({ metadata, file }) => {
+    .onUploadComplete(async ({ file }) => {
       console.log('Avatar upload complete:', file.url);
       return { url: file.url, type: 'avatar' };
     }),
@@ -77,6 +80,36 @@ export const ourFileRouter = {
         size: file.size,
         type: file.type,
       };
+    }),
+
+  // Endpoint for Brand Logo uploads
+  brandLogoUploader: f({ image: { maxFileSize: '1MB', maxFileCount: 1 } })
+    // Set permissions and file types for this FileRoute
+    .middleware(async ({ req: _req }) => {
+      // Validate user permissions
+      const { userId } = await auth();
+      if (!userId) throw new Error('Unauthorized');
+      // Return metadata
+      return { uploadedBy: userId };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      console.log('Upload complete for userId:', metadata.uploadedBy);
+      console.log('file url', file.url);
+      return { uploadedBy: metadata.uploadedBy, url: file.url };
+    }),
+
+  // Endpoint for Creative Asset uploads
+  creativeAssetUploader: f({ blob: { maxFileSize: '16MB', maxFileCount: 10 } })
+    .middleware(async ({ req: _req }) => {
+      const { userId } = await auth();
+      if (!userId) throw new Error('Unauthorized');
+      // Return metadata
+      return { uploadedBy: userId };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      console.log('Creative asset upload complete for userId:', metadata.uploadedBy);
+      console.log('file url', file.url);
+      return { uploadedBy: metadata.uploadedBy, url: file.url };
     }),
 } satisfies FileRouter;
 

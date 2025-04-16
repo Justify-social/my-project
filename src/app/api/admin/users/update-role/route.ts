@@ -101,7 +101,10 @@ export async function POST(request: Request) {
       const exists =
         Array.isArray(tableExists) &&
         tableExists.length > 0 &&
-        (tableExists[0] as any).exists === true;
+        typeof tableExists[0] === 'object' &&
+        tableExists[0] !== null &&
+        'exists' in tableExists[0] &&
+        tableExists[0].exists === true;
 
       if (exists) {
         // Update the user's role in the TeamMember table

@@ -8,7 +8,10 @@
 
 import React, { memo, useEffect, useState } from 'react';
 import { getIconPath } from './icons';
-import { IconProps, IconSize, IconVariant, SIZE_CLASSES } from './icon-types';
+import { IconProps, SIZE_CLASSES } from './icon-types';
+// import { IconMetadata } from './icon-types'; // Removed unused import
+// import { iconRegistryData } from '@/lib/generated/icon-registry'; // Removed unused import
+// import { cn } from '@/lib/utils'; // Removed unused import
 
 // Debug flag for development
 const DEBUG = process.env.NODE_ENV === 'development';
@@ -25,14 +28,6 @@ export const Icon: React.FC<IconProps> = memo(
 
     // Get context values
     // const context = useIconContext(); // Removed unused context call
-
-    // Determine if icon ID explicitly contains variant
-    const hasSolidSuffix = iconId.endsWith('Solid');
-    const hasLightSuffix = iconId.endsWith('Light');
-    const variant: IconVariant = hasSolidSuffix ? 'solid' : hasLightSuffix ? 'light' : 'light';
-
-    // Special handling for app icons (they don't have variants)
-    const isAppIcon = iconId.startsWith('app');
 
     // Determine the path using the single source of truth
     const iconPath = getIconPath(iconId);

@@ -121,7 +121,6 @@ export default function PieChartPreviewPage() {
                 dataKey="value"
                 colors={COLORS} // Pass custom colors
                 title="Spend Overview"
-                tooltipFormatter={(value: number) => `$${value.toLocaleString()}`}
               />
             </div>
           </div>
@@ -136,7 +135,6 @@ export default function PieChartPreviewPage() {
                 dataKey="value"
                 innerRadius="60%" // Use percentage for better responsiveness
                 colors={COLORS.slice().reverse()} // Reverse colors
-                tooltipFormatter={(value: number) => `${value.toLocaleString()} users`}
               />
             </div>
           </div>

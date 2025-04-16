@@ -9,7 +9,7 @@
  */
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Icon } from './icon/icon';
 import { Input } from '@/components/ui/input'; // Import Shadcn Input

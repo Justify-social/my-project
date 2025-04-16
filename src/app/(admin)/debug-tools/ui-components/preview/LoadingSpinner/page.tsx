@@ -26,7 +26,7 @@ export default function LoadingSpinnerPreviewPage() {
     since: '2023-05-15',
     status: 'stable',
   };
-  const examples: string[] = [];
+  // const examples: string[] = []; // Unused variable
 
   return (
     <div className="container mx-auto px-4 py-8">

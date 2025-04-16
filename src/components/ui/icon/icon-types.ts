@@ -12,6 +12,15 @@ export type ActionType = 'default' | 'delete' | 'warning' | 'success';
 export type IconType = 'button' | 'static';
 export type IconVariant = 'light' | 'solid';
 
+// Define common props shared across different icon components
+interface CommonIconProps {
+  className?: string;
+  size?: IconSize;
+  title?: string;
+  onClick?: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
+  // Add other common attributes if needed, potentially extend React.HTMLAttributes<HTMLElement>
+}
+
 // Size constants
 export const SIZE_CLASSES: Record<IconSize, string> = {
   xs: 'w-3 h-3',
@@ -37,7 +46,7 @@ export const PLATFORM_ICON_TYPE_MAP: Record<PlatformName, IconName> = {
 /**
  * Icon component props
  */
-export interface IconProps {
+export interface IconProps extends React.HTMLAttributes<HTMLElement> {
   /**
    * The icon ID with explicit variant suffix (e.g. 'faUserLight', 'faUserSolid')
    * This is the preferred and most direct way to specify an icon
@@ -64,11 +73,6 @@ export interface IconProps {
    * Optional click handler for the icon
    */
   onClick?: (event: React.MouseEvent<HTMLSpanElement, MouseEvent>) => void;
-
-  /**
-   * Any additional props to pass to the icon container
-   */
-  [key: string]: any;
 }
 
 // Platform icon props interface
@@ -184,4 +188,9 @@ export interface IconRegistryData {
 
 export interface IconUrlMapData {
   [key: string]: string;
+}
+
+/** Props for rendering an error state */
+export interface ErrorProps extends CommonIconProps {
+  error: Error | string; // Allow Error object or string message
 }

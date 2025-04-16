@@ -114,9 +114,10 @@ export default function ScatterChartPreviewPage() {
       {/* Examples Section (Rendering the actual component) */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4 text-primary">Examples / Usage</h2>
-        <div className="space-y-8"> {/* Added spacing */}
+        <div className="space-y-8">
+          {' '}
+          {/* Added spacing */}
           {/* ---- ADD YOUR RENDERING EXAMPLES MANUALLY BELOW ---- */}
-
           {/* Example 1: Basic Scatter Chart */}
           <div className="border border-divider rounded-lg p-6">
             <h3 className="text-lg font-medium mb-4">Basic Scatter Chart (Two Series)</h3>
@@ -156,7 +157,6 @@ export default function ScatterChartPreviewPage() {
               </ResponsiveContainer>
             </div>
           </div>
-
           {/* Example 2: Bubble Chart (Using ZAxis) */}
           <div className="border border-divider rounded-lg p-6">
             <h3 className="text-lg font-medium mb-4">Bubble Chart (Size based on Z value)</h3>
@@ -207,7 +207,6 @@ export default function ScatterChartPreviewPage() {
               </ResponsiveContainer>
             </div>
           </div>
-
           {/* ---- END MANUAL EXAMPLES ---- */}
         </div>
       </div>

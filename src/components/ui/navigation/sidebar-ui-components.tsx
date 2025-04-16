@@ -7,9 +7,9 @@
 
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { Icon } from '@/components/ui/icon/icon';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
@@ -38,7 +38,6 @@ interface SidebarUIComponentsInternalProps {
 
 // Component for the Debug Tools Sidebar
 function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalProps) {
-  const pathname = usePathname() ?? '';
   const searchParams = useSearchParams() ?? new URLSearchParams();
   const [hoverStates, setHoverStates] = useState<Record<string, boolean>>({});
 

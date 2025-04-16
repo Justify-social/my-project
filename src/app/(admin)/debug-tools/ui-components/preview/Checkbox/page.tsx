@@ -3,7 +3,7 @@
 
 'use client'; // Make this a Client Component for state handling
 
-import React, { useState } from 'react'; // Import useState
+import React from 'react'; // Removed unused useState
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';

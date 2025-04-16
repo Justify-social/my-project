@@ -3,8 +3,8 @@
 
 import React from 'react';
 import { Icon } from '@/components/ui/icon/icon';
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 // Wizard step configuration
@@ -42,7 +42,6 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   isNextLoading = false,
   // lastSaved prop is received but not directly used for display here
 }) => {
-
   return (
     <footer
       className={cn(
@@ -63,25 +62,27 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
               key={number}
               onClick={() => canClick && onStepClick(number)}
               className={cn(
-                "flex items-center p-1 rounded-md transition-colors",
-                canClick ? 'cursor-pointer hover:bg-muted/50' : 'cursor-default opacity-50',
+                'flex items-center p-1 rounded-md transition-colors',
+                canClick ? 'cursor-pointer hover:bg-muted/50' : 'cursor-default opacity-50'
               )}
               aria-current={isCurrent ? 'step' : undefined}
             >
               <Badge
                 variant={isCompleted ? 'default' : isCurrent ? 'secondary' : 'outline'}
                 className={cn(
-                  "h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center mr-1 sm:mr-2 text-xs sm:text-sm flex-shrink-0",
-                  isCompleted && "bg-green-600 border-green-600 text-white",
-                  isCurrent && "border-primary text-primary"
+                  'h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center mr-1 sm:mr-2 text-xs sm:text-sm flex-shrink-0',
+                  isCompleted && 'bg-green-600 border-green-600 text-white',
+                  isCurrent && 'border-primary text-primary'
                 )}
               >
                 {isCompleted ? <Icon iconId="faCheckSolid" className="h-2.5 w-2.5" /> : number}
               </Badge>
-              <span className={cn(
-                "hidden sm:inline truncate",
-                isCurrent ? 'font-semibold text-primary' : 'text-muted-foreground'
-              )}>
+              <span
+                className={cn(
+                  'hidden sm:inline truncate',
+                  isCurrent ? 'font-semibold text-primary' : 'text-muted-foreground'
+                )}
+              >
                 {label}
               </span>
             </div>

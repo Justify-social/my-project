@@ -9,11 +9,9 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import React, { useState } from 'react';
-import { MobileMenu, type MenuItem } from '@/components/ui/navigation/mobile-menu';
 import { SearchBar } from '@/components/ui/search-bar';
 import { Icon } from '@/components/ui/icon/icon';
 import { iconExists } from '@/components/ui/icon/icons';
-import { cn } from '@/lib/utils';
 import { useSearch } from '@/providers/SearchProvider';
 import { SearchResultsDisplay } from './search-results-display';
 
@@ -28,10 +26,7 @@ interface HeaderProps {
   companyName: string;
   remainingCredits: number;
   notificationsCount: number;
-  profileImageUrl?: string;
   onMenuClick?: () => void;
-  navItems?: MenuItem[];
-  settingsNavItem?: MenuItem;
   authControls?: React.ReactNode;
 }
 
@@ -39,10 +34,7 @@ const Header: React.FC<HeaderProps> = ({
   companyName,
   remainingCredits,
   notificationsCount,
-  profileImageUrl,
   onMenuClick,
-  navItems,
-  settingsNavItem,
   authControls,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -156,9 +148,7 @@ const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Render Clerk Auth Controls (passed as prop) - visible on desktop */}
-          <div className="hidden md:block font-body">
-            {authControls}
-          </div>
+          <div className="hidden md:block font-body">{authControls}</div>
 
           {/* Mobile Menu Button - moved slightly right for balance */}
           <button

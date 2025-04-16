@@ -22,7 +22,7 @@ const ROOT_DIR = path.resolve(__dirname, '../..');
 const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
 const STATIC_DIR = path.join(PUBLIC_DIR, 'static');
 const CATEGORIES_DIR = path.join(STATIC_DIR, 'categories');
-const ICONS_DIR = path.join(PUBLIC_DIR, 'icons');
+// const ICONS_DIR = path.join(PUBLIC_DIR, 'icons'); // Unused constant
 
 // Registry files
 const REGISTRY_FILES = {
@@ -61,7 +61,7 @@ function loadRegistry(type) {
     console.warn(`${colors.yellow}Warning: Registry file for '${type}' does not exist at ${filePath}${colors.reset}`);
     return null;
   }
-  
+
   try {
     const content = fs.readFileSync(filePath, 'utf8');
     return JSON.parse(content);
@@ -74,11 +74,11 @@ function loadRegistry(type) {
 /**
  * Checks if all SVG files referenced in a registry actually exist
  */
-function validateSVGFiles(registry, type) {
+function validateSVGFiles(registry /*, type */) { // Parameter correctly removed here
   if (!registry) return { valid: false, missing: [] };
-  
+
   const missing = [];
-  
+
   for (const icon of registry.icons) {
     // Remove leading slash to get relative path from project root
     const filePath = path.join(PUBLIC_DIR, icon.path.replace(/^\//, ''));
@@ -86,7 +86,7 @@ function validateSVGFiles(registry, type) {
       missing.push({ id: icon.id, path: filePath });
     }
   }
-  
+
   return {
     valid: missing.length === 0,
     missing
@@ -100,12 +100,12 @@ function findIconReferencesInCode() {
   try {
     const command = `grep -r --include="*.{ts,tsx,js,jsx}" "id=[\\"']\\(fa\\|app\\|brands\\|kpis\\)" ${path.join(ROOT_DIR, 'src')}`;
     const output = execSync(command, { encoding: 'utf8' });
-    
+
     // Extract icon IDs using regex
     const iconRefs = new Set();
     const regex = /id=["'](fa|app|brands|kpis)([A-Za-z0-9]+)(Light|Solid)?["']/g;
     let match;
-    
+
     const lines = output.split('\n');
     for (const line of lines) {
       while ((match = regex.exec(line)) !== null) {
@@ -113,7 +113,7 @@ function findIconReferencesInCode() {
         iconRefs.add(fullId);
       }
     }
-    
+
     return Array.from(iconRefs);
   } catch (error) {
     console.error(`${colors.red}Error finding icon references: ${error.message}${colors.reset}`);
@@ -127,23 +127,24 @@ function findIconReferencesInCode() {
 function validateIconReferences(iconRefs, registries) {
   const missing = [];
   const registryIcons = new Set();
-  
+
   // Collect all icon IDs from registries
-  for (const [type, registry] of Object.entries(registries)) {
+  // Here, 'type' was genuinely unused, so keep it removed from destructuring
+  for (const [/* type */, registry] of Object.entries(registries)) {
     if (registry && registry.icons) {
       for (const icon of registry.icons) {
         registryIcons.add(icon.id);
       }
     }
   }
-  
+
   // Check for missing icons
   for (const iconId of iconRefs) {
     if (!registryIcons.has(iconId)) {
       missing.push(iconId);
     }
   }
-  
+
   return {
     valid: missing.length === 0,
     missing
@@ -157,12 +158,12 @@ async function auditIcons() {
   console.log(`${colors.cyan}======================================${colors.reset}`);
   console.log(`${colors.cyan}Icon Registry Audit Tool${colors.reset}`);
   console.log(`${colors.cyan}======================================${colors.reset}`);
-  
+
   // Load all registries
   console.log('\nLoading icon registries...');
   const registries = {};
   let totalIcons = 0;
-  
+
   for (const type of Object.keys(REGISTRY_FILES)) {
     registries[type] = loadRegistry(type);
     if (registries[type]) {
@@ -171,24 +172,25 @@ async function auditIcons() {
       console.log(`- ${type}: ${count} icons`);
     }
   }
-  
+
   console.log(`\nTotal icons across all registries: ${totalIcons}`);
-  
+
   // Check SVG file existence
   console.log('\nValidating SVG files existence...');
   let allFilesValid = true;
   const fileValidationResults = {};
-  
+
   for (const [type, registry] of Object.entries(registries)) {
     if (!registry) continue;
-    
-    const result = validateSVGFiles(registry, type);
+
+    // Call validateSVGFiles without the type parameter
+    const result = validateSVGFiles(registry);
     fileValidationResults[type] = result;
-    
+
     if (!result.valid) {
       allFilesValid = false;
       console.log(`${colors.red}✗ ${type}: Missing ${result.missing.length} SVG files${colors.reset}`);
-      
+
       if (options.verbose) {
         for (const { id, path } of result.missing) {
           console.log(`  - ${id}: ${path}`);
@@ -198,16 +200,16 @@ async function auditIcons() {
       console.log(`${colors.green}✓ ${type}: All SVG files exist${colors.reset}`);
     }
   }
-  
+
   // Find and validate icon references in code
   console.log('\nFinding icon references in codebase...');
   const iconRefs = findIconReferencesInCode();
   console.log(`Found ${iconRefs.length} icon references in code`);
-  
+
   const refValidation = validateIconReferences(iconRefs, registries);
   if (!refValidation.valid) {
     console.log(`${colors.red}✗ Missing ${refValidation.missing.length} icons referenced in code${colors.reset}`);
-    
+
     if (options.verbose || refValidation.missing.length < 10) {
       for (const iconId of refValidation.missing) {
         console.log(`  - ${iconId}`);
@@ -216,16 +218,16 @@ async function auditIcons() {
   } else {
     console.log(`${colors.green}✓ All icon references have corresponding registry entries${colors.reset}`);
   }
-  
+
   // Summary
   console.log('\nAudit Summary:');
   const allValid = allFilesValid && refValidation.valid;
-  
+
   if (allValid) {
     console.log(`${colors.green}✓ All checks passed successfully!${colors.reset}`);
   } else {
     console.log(`${colors.red}✗ Some validation checks failed${colors.reset}`);
-    
+
     if (options.fix) {
       console.log('\nAttempting to fix issues...');
       // Add fixing logic here if needed
@@ -234,7 +236,7 @@ async function auditIcons() {
       console.log('\nRun with --fix option to attempt automatic fixes');
     }
   }
-  
+
   console.log(`${colors.cyan}======================================${colors.reset}`);
   return allValid;
 }

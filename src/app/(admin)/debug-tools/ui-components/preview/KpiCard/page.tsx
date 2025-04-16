@@ -7,34 +7,34 @@ import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { KpiCard } from '@/components/ui/card-kpi';
 
-// Sample data for chart within KpiCard
-const sampleTrendData = [
-  { value: 10 },
-  { value: 20 },
-  { value: 15 },
-  { value: 25 },
-  { value: 30 },
-  { value: 28 },
-  { value: 40 },
-];
-const negativeTrendData = [
-  { value: 50 },
-  { value: 45 },
-  { value: 48 },
-  { value: 40 },
-  { value: 35 },
-  { value: 38 },
-  { value: 30 },
-];
-const flatTrendData = [
-  { value: 100 },
-  { value: 100 },
-  { value: 100 },
-  { value: 100 },
-  { value: 100 },
-  { value: 100 },
-  { value: 100 },
-];
+// Sample data for chart within KpiCard (UNUSED)
+// const sampleTrendData = [
+//   { value: 10 },
+//   { value: 20 },
+//   { value: 15 },
+//   { value: 25 },
+//   { value: 30 },
+//   { value: 28 },
+//   { value: 40 },
+// ];
+// const negativeTrendData = [
+//   { value: 50 },
+//   { value: 45 },
+//   { value: 48 },
+//   { value: 40 },
+//   { value: 35 },
+//   { value: 38 },
+//   { value: 30 },
+// ];
+// const flatTrendData = [
+//   { value: 100 },
+//   { value: 100 },
+//   { value: 100 },
+//   { value: 100 },
+//   { value: 100 },
+//   { value: 100 },
+//   { value: 100 },
+// ];
 
 const statusStyles: Record<string, string> = {
   stable: 'bg-green-100 text-green-800 border-green-200',

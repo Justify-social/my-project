@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '../../../../../../components/ui/progress';
-import { Button } from '../../../../../../components/ui/button';
+// import { Button } from '../../../../../../components/ui/button'; // Unused
 
 const statusStyles: Record<string, string> = {
   stable: 'bg-green-100 text-green-800 border-green-200',
@@ -28,7 +28,7 @@ export default function ProgressPreviewPage() {
     since: '2023-01-01',
     status: 'stable',
   };
-  const examples: string[] = [];
+  // const examples: string[] = []; // Unused
 
   const [progressValue, setProgressValue] = useState(13);
 

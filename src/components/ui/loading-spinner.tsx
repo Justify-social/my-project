@@ -10,19 +10,16 @@
 'use client';
 
 import React from 'react';
-import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
 interface LoadingSpinnerProps {
   /**
-   * Size of the spinner
-   * @default "md"
+   * @deprecated Size prop is no longer used as component uses a fixed GIF.
    */
   size?: 'sm' | 'md' | 'lg' | 'xl';
 
   /**
-   * Color of the spinner
-   * @default "primary"
+   * @deprecated Color prop is no longer used as component uses a fixed GIF.
    */
   color?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info';
 
@@ -32,36 +29,15 @@ interface LoadingSpinnerProps {
   label?: string;
 
   /**
-   * Additional class names
+   * @deprecated className prop is no longer applied to the spinner itself.
    */
   className?: string;
 }
 
 /**
- * LoadingSpinner component for indicating loading states
+ * LoadingSpinner component - Renders a loading GIF.
  */
-export function LoadingSpinner({
-  size = 'md',
-  color = 'primary',
-  label,
-  className,
-}: LoadingSpinnerProps) {
-  const sizeClasses = {
-    sm: 'w-4 h-4 border-2',
-    md: 'w-8 h-8 border-3',
-    lg: 'w-12 h-12 border-4',
-    xl: 'w-16 h-16 border-4',
-  };
-
-  const colorClasses = {
-    primary: 'border-primary border-b-transparent',
-    secondary: 'border-secondary border-b-transparent',
-    success: 'border-success border-b-transparent',
-    danger: 'border-destructive border-b-transparent',
-    warning: 'border-warning border-b-transparent',
-    info: 'border-accent border-b-transparent',
-  };
-
+export function LoadingSpinner({ label }: LoadingSpinnerProps) {
   return (
     <div className="flex flex-col items-center justify-center">
       <Image

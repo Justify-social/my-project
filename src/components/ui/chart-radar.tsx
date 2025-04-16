@@ -67,7 +67,7 @@ export interface RadarChartProps {
   fillOpacity?: number;
   gridColor?: string;
   outerRadius?: number | string;
-  tooltipFormatter?: (value: any) => string;
+  tooltipFormatter?: (value: string | number) => string;
 }
 
 // Use HSL theme variables for default colors

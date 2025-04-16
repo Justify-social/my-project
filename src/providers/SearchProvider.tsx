@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback, ReactNode, useMemo } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 // Revert to standard type import
 import { SearchContextProps, SearchProviderProps } from './SearchProvider.types';
 import { searchCampaigns, CampaignSearchResult } from '@/lib/algolia';

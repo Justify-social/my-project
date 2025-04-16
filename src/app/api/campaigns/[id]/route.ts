@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/prisma'; // Re-added import as it's used
 import { z } from 'zod'; // For input validation
-import { Currency, Platform, SubmissionStatus } from '@prisma/client';
+import { Currency, SubmissionStatus } from '@prisma/client';
 import { connectToDatabase } from '@/lib/db';
-import { tryCatch } from '@/lib/middleware/api';
-import { EnumTransformers } from '@/utils/enum-transformers';
-import { dbLogger, DbOperation } from '@/lib/data-mapping/db-logger';
 import { auth } from '@clerk/nextjs/server';
+import { campaignService as _campaignService } from '@/lib/data-mapping/campaign-service';
 
-type RouteParams = { params: { id: string } };
+// type RouteParams = { params: { id: string } }; // Unused
 
+// Unused Schema
+/*
 // More comprehensive schema matching Prisma model
 const campaignSchema = z.object({
   campaignName: z.string().min(1).max(255),
@@ -67,6 +67,7 @@ const campaignSchema = z.object({
     )
     .optional(),
 });
+*/
 
 // More comprehensive schema matching Prisma model
 const campaignUpdateSchema = z.object({
@@ -197,7 +198,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const campaignId = id;
 
     // Check if the ID is a UUID (string format) or a numeric ID
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+    const _isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
       campaignId
     );
 
@@ -209,7 +210,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     let isSubmittedCampaign = false;
 
     // Try to find the campaign based on ID format
-    if (isUuid) {
+    if (_isUuid) {
       console.log('Using UUID format for campaign ID:', campaignId);
       // Look for draft in CampaignWizard table with string ID
       console.log('[API GET /api/campaigns/[id]] Querying CampaignWizard...'); // Log before query
@@ -280,72 +281,111 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     // Normalize the campaign data to match frontend schema expectations
-    console.log('[API GET /api/campaigns/[id]] Normalizing data for frontend schema compatibility...');
+    console.log(
+      '[API GET /api/campaigns/[id]] Normalizing data for frontend schema compatibility...'
+    );
     const normalizedCampaign = {
       ...campaign,
       // Transform locations if it's an array of strings to array of objects
-      locations: 'locations' in campaign && Array.isArray(campaign.locations) && campaign.locations.length > 0 && typeof campaign.locations[0] === 'string'
-        ? campaign.locations.map(loc => ({ city: loc }))
-        : ('locations' in campaign ? campaign.locations : []),
+      locations:
+        'locations' in campaign &&
+        Array.isArray(campaign.locations) &&
+        campaign.locations.length > 0 &&
+        typeof campaign.locations[0] === 'string'
+          ? campaign.locations.map(loc => ({ city: loc }))
+          : 'locations' in campaign
+            ? campaign.locations
+            : [],
       // Ensure budget is in the correct format
-      budget: 'budget' in campaign && campaign.budget && typeof campaign.budget === 'object' ? {
-        currency: 'currency' in campaign.budget ? campaign.budget.currency : 'GBP',
-        total: 'total' in campaign.budget ? campaign.budget.total : 0,
-        socialMedia: 'socialMedia' in campaign.budget ? campaign.budget.socialMedia : 0
-      } : { currency: 'GBP', total: 0, socialMedia: 0 },
+      budget:
+        'budget' in campaign && campaign.budget && typeof campaign.budget === 'object'
+          ? {
+              currency: 'currency' in campaign.budget ? campaign.budget.currency : 'GBP',
+              total: 'total' in campaign.budget ? campaign.budget.total : 0,
+              socialMedia: 'socialMedia' in campaign.budget ? campaign.budget.socialMedia : 0,
+            }
+          : { currency: 'GBP', total: 0, socialMedia: 0 },
       // Normalize contacts if they exist
-      primaryContact: 'primaryContact' in campaign && campaign.primaryContact && typeof campaign.primaryContact === 'object' ? {
-        firstName: 'firstName' in campaign.primaryContact ? campaign.primaryContact.firstName : '',
-        surname: 'surname' in campaign.primaryContact ? campaign.primaryContact.surname : '',
-        email: 'email' in campaign.primaryContact ? campaign.primaryContact.email : '',
-        position: 'position' in campaign.primaryContact ? campaign.primaryContact.position : ''
-      } : null,
-      secondaryContact: 'secondaryContact' in campaign && campaign.secondaryContact && typeof campaign.secondaryContact === 'object' ? {
-        firstName: 'firstName' in campaign.secondaryContact ? campaign.secondaryContact.firstName : '',
-        surname: 'surname' in campaign.secondaryContact ? campaign.secondaryContact.surname : '',
-        email: 'email' in campaign.secondaryContact ? campaign.secondaryContact.email : '',
-        position: 'position' in campaign.secondaryContact ? campaign.secondaryContact.position : ''
-      } : null,
+      primaryContact:
+        'primaryContact' in campaign &&
+        campaign.primaryContact &&
+        typeof campaign.primaryContact === 'object'
+          ? {
+              firstName:
+                'firstName' in campaign.primaryContact ? campaign.primaryContact.firstName : '',
+              surname: 'surname' in campaign.primaryContact ? campaign.primaryContact.surname : '',
+              email: 'email' in campaign.primaryContact ? campaign.primaryContact.email : '',
+              position:
+                'position' in campaign.primaryContact ? campaign.primaryContact.position : '',
+            }
+          : null,
+      secondaryContact:
+        'secondaryContact' in campaign &&
+        campaign.secondaryContact &&
+        typeof campaign.secondaryContact === 'object'
+          ? {
+              firstName:
+                'firstName' in campaign.secondaryContact ? campaign.secondaryContact.firstName : '',
+              surname:
+                'surname' in campaign.secondaryContact ? campaign.secondaryContact.surname : '',
+              email: 'email' in campaign.secondaryContact ? campaign.secondaryContact.email : '',
+              position:
+                'position' in campaign.secondaryContact ? campaign.secondaryContact.position : '',
+            }
+          : null,
       // Ensure additionalContacts is always an array
-      additionalContacts: 'additionalContacts' in campaign && Array.isArray(campaign.additionalContacts) ? campaign.additionalContacts : [],
+      additionalContacts:
+        'additionalContacts' in campaign && Array.isArray(campaign.additionalContacts)
+          ? campaign.additionalContacts
+          : [],
       // Normalize assets if they exist
-      assets: 'assets' in campaign && Array.isArray(campaign.assets) ? campaign.assets.map(asset => {
-        if (asset && typeof asset === 'object') {
-          return {
-            id: 'id' in asset ? asset.id : '',
-            name: 'name' in asset ? asset.name : '',
-            type: 'type' in asset ? asset.type : 'image',
-            url: 'url' in asset ? asset.url : '',
-            fileName: 'fileName' in asset ? asset.fileName : '',
-            fileSize: 'fileSize' in asset ? asset.fileSize : 0,
-            description: 'description' in asset ? asset.description : '',
-            temp: 'temp' in asset ? asset.temp : false,
-            rationale: 'rationale' in asset ? asset.rationale : '',
-            budget: 'budget' in asset ? asset.budget : undefined,
-            associatedInfluencerIds: 'associatedInfluencerIds' in asset && Array.isArray(asset.associatedInfluencerIds) ? asset.associatedInfluencerIds : []
-          };
-        }
-        return {
-          id: '',
-          name: '',
-          type: 'image',
-          url: '',
-          fileName: '',
-          fileSize: 0,
-          description: '',
-          temp: false,
-          rationale: '',
-          budget: undefined,
-          associatedInfluencerIds: []
-        };
-      }) : [],
+      assets:
+        'assets' in campaign && Array.isArray(campaign.assets)
+          ? campaign.assets.map(asset => {
+              if (asset && typeof asset === 'object') {
+                return {
+                  id: 'id' in asset ? asset.id : '',
+                  name: 'name' in asset ? asset.name : '',
+                  type: 'type' in asset ? asset.type : 'image',
+                  url: 'url' in asset ? asset.url : '',
+                  fileName: 'fileName' in asset ? asset.fileName : '',
+                  fileSize: 'fileSize' in asset ? asset.fileSize : 0,
+                  description: 'description' in asset ? asset.description : '',
+                  temp: 'temp' in asset ? asset.temp : false,
+                  rationale: 'rationale' in asset ? asset.rationale : '',
+                  budget: 'budget' in asset ? asset.budget : undefined,
+                  associatedInfluencerIds:
+                    'associatedInfluencerIds' in asset &&
+                    Array.isArray(asset.associatedInfluencerIds)
+                      ? asset.associatedInfluencerIds
+                      : [],
+                };
+              }
+              return {
+                id: '',
+                name: '',
+                type: 'image',
+                url: '',
+                fileName: '',
+                fileSize: 0,
+                description: '',
+                temp: false,
+                rationale: '',
+                budget: undefined,
+                associatedInfluencerIds: [],
+              };
+            })
+          : [],
       // Normalize influencers if they exist
-      Influencer: 'Influencer' in campaign && Array.isArray(campaign.Influencer) ? campaign.Influencer.map(inf => ({
-        id: 'id' in inf ? inf.id : '',
-        platform: 'platform' in inf ? inf.platform : 'INSTAGRAM',
-        handle: 'handle' in inf ? inf.handle : '',
-        platformId: 'platformId' in inf ? inf.platformId : ''
-      })) : []
+      Influencer:
+        'Influencer' in campaign && Array.isArray(campaign.Influencer)
+          ? campaign.Influencer.map(inf => ({
+              id: 'id' in inf ? inf.id : '',
+              platform: 'platform' in inf ? inf.platform : 'INSTAGRAM',
+              handle: 'handle' in inf ? inf.handle : '',
+              platformId: 'platformId' in inf ? inf.platformId : '',
+            }))
+          : [],
     };
 
     // Add draft status to the response
@@ -467,7 +507,9 @@ export async function DELETE(
             await prisma.campaignWizardSubmission.delete({
               where: { id: numericId },
             });
-            console.log(`Successfully deleted campaign from CampaignWizardSubmission table: ${numericId}`);
+            console.log(
+              `Successfully deleted campaign from CampaignWizardSubmission table: ${numericId}`
+            );
             submissionDeleted = true;
           } else {
             console.log(`No campaign found in CampaignWizardSubmission with ID: ${numericId}`);
@@ -485,7 +527,6 @@ export async function DELETE(
 
     console.log(`DELETE request successful for campaign ID: ${campaignId}`);
     return NextResponse.json({ success: true, message: 'Campaign deleted' });
-
   } catch (error) {
     console.error(`Error during DELETE for campaign ID ${campaignId}:`, error);
     return NextResponse.json(
@@ -505,13 +546,27 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const campaignId = id;
 
     // Check if the ID is a UUID (string format) or a numeric ID
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(campaignId);
+    const _isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      campaignId
+    );
     const numericId = parseInt(campaignId, 10);
     const isNumeric = !isNaN(numericId);
 
-    // Parse the request body
-    const body = await request.json();
-    const validatedData = campaignUpdateSchema.parse(body);
+    // Parse the request body and assert type
+    const body = (await request.json()) as z.infer<typeof campaignUpdateSchema>;
+    // Validate the body (type assertion doesn't replace runtime validation)
+    const validationResult = campaignUpdateSchema.safeParse(body);
+    if (!validationResult.success) {
+      console.error(
+        '[API PUT /api/campaigns/[id]] Validation failed:',
+        validationResult.error.format()
+      );
+      return NextResponse.json(
+        { success: false, error: 'Invalid request body', details: validationResult.error.format() },
+        { status: 400 }
+      );
+    }
+    const validatedData = validationResult.data;
 
     // Connect to database
     await connectToDatabase();
@@ -520,7 +575,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     if (isNumeric) {
       // Update the campaign in CampaignWizardSubmission table for numeric IDs (submitted campaigns)
-      console.log('[API PUT /api/campaigns/[id]] Updating submitted campaign with numeric ID:', numericId);
+      console.log(
+        '[API PUT /api/campaigns/[id]] Updating submitted campaign with numeric ID:',
+        numericId
+      );
       updatedCampaign = await prisma.campaignWizardSubmission.update({
         where: { id: numericId },
         data: {
@@ -545,13 +603,19 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       });
     } else {
       // If it's neither UUID nor Numeric after removing UUID logic
-      return NextResponse.json({ success: false, error: 'Invalid or non-submitted campaign ID format' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: 'Invalid or non-submitted campaign ID format' },
+        { status: 400 }
+      );
     }
 
     console.log(`[API PUT /api/campaigns/[id]] Campaign updated: ${campaignId}`);
     return NextResponse.json({ success: true, data: updatedCampaign }, { status: 200 });
   } catch (error) {
     console.error(`[API PUT /api/campaigns/[id]] Error:`, error);
-    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
   }
 }

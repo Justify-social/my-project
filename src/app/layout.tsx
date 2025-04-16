@@ -47,7 +47,9 @@ async function UTSSR() {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkProvider> {/* Wrap with ClerkProvider */}
+    <ClerkProvider>
+      {' '}
+      {/* Wrap with ClerkProvider */}
       <html lang="en">
         <head>{/* Using local SVG icons - no external scripts needed */}</head>
         <body className={`${inter.className} bg-white`}>
@@ -58,9 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <UTSSR />
               </Suspense>
               {/* Use ConditionalLayout to wrap children */}
-              <ConditionalLayout>
-                {children}
-              </ConditionalLayout>
+              <ConditionalLayout>{children}</ConditionalLayout>
               <Toaster />
             </SearchProvider>
           </SidebarProvider>

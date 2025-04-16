@@ -263,7 +263,7 @@ export const EnumTransformers = {
         result[key] = value; // Keep backend format (TeamRole)
       } else if (key === 'status') {
         // Assuming status refers to Campaign Status (DRAFT, etc.)
-        result[key] = value; // Keep backend format 
+        result[key] = value; // Keep backend format
       } else if (key === 'userRole') {
         result[key] = value; // Keep backend format (UserRole)
       } else if (value instanceof Date) {

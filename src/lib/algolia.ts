@@ -1,4 +1,4 @@
-import { InstantSearch } from 'react-instantsearch';
+// import { InstantSearch } from 'react-instantsearch'; // Removed unused import
 
 // Initialize the Algolia client configuration
 const appId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || 'SJ76D9C6X0';
@@ -16,6 +16,11 @@ export interface CampaignSearchResult {
   startDate?: string;
   endDate?: string;
   objectID: string;
+  timeZone?: string;
+  currency?: string;
+  totalBudget?: number;
+  socialMediaBudget?: number;
+  primaryKPI?: string;
 }
 
 // Function to search campaigns using the Algolia REST API
@@ -56,7 +61,7 @@ export async function searchCampaigns(query: string): Promise<CampaignSearchResu
 }
 
 // Function to index campaign data from database by replacing existing content
-export async function indexCampaigns(campaigns: any[]): Promise<void> {
+export async function indexCampaigns(campaigns: Partial<CampaignSearchResult>[]): Promise<void> {
   if (!process.env.ALGOLIA_ADMIN_API_KEY) {
     console.error(
       'Error: ALGOLIA_ADMIN_API_KEY is not set in environment variables. Cannot clear index.'

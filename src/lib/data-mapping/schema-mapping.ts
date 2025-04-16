@@ -1,26 +1,4 @@
-import {
-  CampaignWizardSubmission,
-  Audience,
-  AudienceLocation,
-  AudienceGender,
-  AudienceScreeningQuestion,
-  AudienceLanguage,
-  AudienceCompetitor,
-  CreativeAsset,
-  KPI,
-  Feature,
-  Position,
-  Platform,
-  Currency,
-  Prisma,
-  CreativeAssetType,
-  CreativeRequirement,
-} from '@prisma/client';
-import { z } from 'zod'; // Assuming Zod might be useful for validation later
-
-// Remove imports for non-existent files
-// import { ... } from './form-types';
-// import { ... } from './api-payload-types';
+import { KPI, Feature, Platform, Currency, Prisma, CreativeAssetType } from '@prisma/client';
 
 /**
  * Type definitions for form data from each step of the wizard
@@ -199,9 +177,10 @@ export function mapObjectivesToSchema(
   };
 }
 
-// Map Step 3 form data to Audience-related tables
-export function mapAudienceToSchema(data: AudienceFormData): {
+// Define the return type for mapAudienceToSchema separately for clarity
+type MapAudienceReturn = {
   audience: Partial<Prisma.AudienceCreateWithoutCampaignInput> & {
+    // Explicitly require ageRangeMin/Max as per original logic/type needs
     ageRangeMin: number;
     ageRangeMax: number;
   };
@@ -210,22 +189,39 @@ export function mapAudienceToSchema(data: AudienceFormData): {
   screeningQuestions: Prisma.AudienceScreeningQuestionCreateWithoutAudienceInput[];
   languages: Prisma.AudienceLanguageCreateWithoutAudienceInput[];
   competitors: Prisma.AudienceCompetitorCreateWithoutAudienceInput[];
-} {
-  const defaultReturn = {
-    audience: { ageRangeMin: 0, ageRangeMax: 100 }, // Ensure defaults are in the type base
+};
+
+// Map Step 3 form data to Audience-related tables
+export function mapAudienceToSchema(data: AudienceFormData): MapAudienceReturn {
+  // Explicitly type defaultReturn to match the function's return signature
+  const defaultReturn: MapAudienceReturn = {
+    audience: {
+      // Provide defaults satisfying Partial<...> and the required intersection
+      age1824: 0,
+      age2534: 0,
+      age3544: 0,
+      age4554: 0,
+      age5564: 0,
+      age65plus: 0,
+      keywords: [],
+      interests: [],
+      // Explicitly add the required intersection part
+      ageRangeMin: 0, // Default min age
+      ageRangeMax: 100, // Default max age (adjust if needed)
+    },
     locations: [],
     genders: [],
     screeningQuestions: [],
     languages: [],
     competitors: [],
   };
-  const audienceData = data?.audience;
-  if (!audienceData) return defaultReturn as any; // Cast needed due to partial vs required mismatch, implementation ensures correctness
 
-  const audience: Partial<Prisma.AudienceCreateWithoutCampaignInput> & {
-    ageRangeMin: number;
-    ageRangeMax: number;
-  } = {
+  const audienceData = data?.audience;
+  // Remove 'as any' cast, return the correctly typed default object
+  if (!audienceData) return defaultReturn;
+
+  // Construct the actual audience object based on audienceData
+  const audience: MapAudienceReturn['audience'] = {
     age1824: Number(audienceData.ageDistribution?.age1824 ?? 0),
     age2534: Number(audienceData.ageDistribution?.age2534 ?? 0),
     age3544: Number(audienceData.ageDistribution?.age3544 ?? 0),
@@ -234,8 +230,10 @@ export function mapAudienceToSchema(data: AudienceFormData): {
     age65plus: Number(audienceData.ageDistribution?.age65plus ?? 0),
     keywords: audienceData.keywords ?? [],
     interests: audienceData.interests ?? [],
-    ageRangeMin: 0, // Default/Calculate if needed
-    ageRangeMax: 100, // Default/Calculate if needed
+    // Calculate or set appropriate ageRangeMin/Max based on ageDistribution if needed
+    // Keeping defaults for now
+    ageRangeMin: 0,
+    ageRangeMax: 100,
   };
 
   const locations = (audienceData.locations ?? []).map(

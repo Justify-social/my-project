@@ -55,7 +55,7 @@ export function withPermissions(permissions: Permission[]) {
   return async function checkPermissionsMiddleware(
     req: NextApiRequest, // Keep types for compatibility if used in Pages Router
     res: NextApiResponse,
-    next: (err?: any) => void // Standard middleware next function signature
+    next: (err?: Error) => void // Changed any to Error for the optional error parameter
   ) {
     // Call the updated checkPermissions function (no req/res needed)
     const hasPermission = await checkPermissions(permissions);

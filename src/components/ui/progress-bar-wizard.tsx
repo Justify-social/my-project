@@ -31,199 +31,208 @@
 
 import React, { useState } from 'react';
 import { Icon } from '@/components/ui/icon/icon';
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { AutosaveIndicator, AutosaveStatus } from "@/components/ui/autosave-indicator";
 import { useWizard } from '@/components/features/campaigns/WizardContext';
-import { DraftCampaignData } from '@/components/features/campaigns/types';
 import { toast } from 'react-hot-toast';
 
 // Define the structure for each step passed in
 export interface WizardStepConfig {
-    number: number;
-    label: string;
-    isComplete?: boolean; // Optional: Parent can explicitly mark steps complete
+  number: number;
+  label: string;
+  isComplete?: boolean; // Optional: Parent can explicitly mark steps complete
 }
 
 export interface ProgressBarWizardProps {
-    /** The currently active step number (1-based) */
-    currentStep: number;
-    /** Array defining the steps in the wizard */
-    steps: WizardStepConfig[];
-    /** Callback when a step indicator is clicked */
-    onStepClick: (stepNumber: number) => void;
-    /** Callback for the Back button (null if disabled/not shown) */
-    onBack: (() => void) | null;
-    /** Callback for the Next/Submit button */
-    onNext: () => void;
-    /** Whether the Next/Submit button should be disabled */
-    isNextDisabled?: boolean;
-    /** Whether the Next/Submit action is currently loading */
-    isNextLoading?: boolean;
-    /** Optional: Text for the final step's submit button (defaults to "Submit") */
-    submitButtonText?: string;
-    /** Optional: Add custom class names */
-    className?: string;
-    /** Function to get the current step's validated form data */
-    getCurrentFormData: () => any | null; // Use 'any' for now, or import specific step types union
+  /** The currently active step number (1-based) */
+  currentStep: number;
+  /** Array defining the steps in the wizard */
+  steps: WizardStepConfig[];
+  /** Callback when a step indicator is clicked */
+  onStepClick: (stepNumber: number) => void;
+  /** Callback for the Back button (null if disabled/not shown) */
+  onBack: (() => void) | null;
+  /** Callback for the Next/Submit button */
+  onNext: () => void;
+  /** Whether the Next/Submit button should be disabled */
+  isNextDisabled?: boolean;
+  /** Whether the Next/Submit action is currently loading */
+  isNextLoading?: boolean;
+  /** Optional: Text for the final step's submit button (defaults to "Submit") */
+  submitButtonText?: string;
+  /** Optional: Add custom class names */
+  className?: string;
+  /** Function to get the current step's validated form data */
+  getCurrentFormData: () => unknown | null; // Changed any to unknown
 }
 
 export function ProgressBarWizard({
-    currentStep,
-    steps,
-    onStepClick,
-    onBack,
-    onNext,
-    isNextDisabled = false,
-    isNextLoading = false,
-    submitButtonText = "Submit",
-    getCurrentFormData,
-    className
+  currentStep,
+  steps,
+  onStepClick,
+  onBack,
+  onNext,
+  isNextDisabled = false,
+  isNextLoading = false,
+  submitButtonText = 'Submit',
+  getCurrentFormData,
+  className,
 }: ProgressBarWizardProps) {
+  const totalSteps = steps.length;
+  const wizard = useWizard();
+  const [isManualSaving, setIsManualSaving] = useState(false);
 
-    const totalSteps = steps.length;
-    const wizard = useWizard();
-    const [isManualSaving, setIsManualSaving] = useState(false);
+  // Manual Save Handler
+  const handleManualSave = async () => {
+    if (!wizard.campaignId) {
+      toast.error('Cannot save, campaign ID not found.');
+      return;
+    }
+    if (!getCurrentFormData) {
+      toast.error('Save handler not configured correctly.');
+      return;
+    }
 
-    // Manual Save Handler
-    const handleManualSave = async () => {
-        if (!wizard.campaignId) {
-            toast.error("Cannot save, campaign ID not found.");
-            return;
-        }
-        if (!getCurrentFormData) {
-            toast.error("Save handler not configured correctly.");
-            return;
-        }
+    setIsManualSaving(true);
+    toast.loading('Saving changes...', { id: 'manual-save-toast' });
 
-        setIsManualSaving(true);
-        toast.loading('Saving changes...', { id: 'manual-save-toast' });
+    const currentData = getCurrentFormData();
 
-        const currentData = getCurrentFormData();
+    if (!currentData) {
+      toast.error('Cannot save, form data is invalid or unavailable.', { id: 'manual-save-toast' });
+      setIsManualSaving(false);
+      return;
+    }
 
-        if (!currentData) {
-            toast.error('Cannot save, form data is invalid or unavailable.', { id: 'manual-save-toast' });
-            setIsManualSaving(false);
-            return;
-        }
+    // Directly call saveProgress with the data from the current step
+    try {
+      // Add currentStep to the data object before sending
+      const dataToSaveWithStep = { ...currentData, currentStep: currentStep };
+      const success = await wizard.saveProgress(dataToSaveWithStep);
 
-        // Directly call saveProgress with the data from the current step
-        try {
-            // Add currentStep to the data object before sending
-            const dataToSaveWithStep = { ...currentData, currentStep: currentStep };
-            const success = await wizard.saveProgress(dataToSaveWithStep);
+      if (success) {
+        toast.success('Changes saved successfully!', { id: 'manual-save-toast', duration: 5000 });
+      } else {
+        // saveProgress logs errors and shows toast, maybe remove redundant one here?
+        // toast.error('Failed to save changes.', { id: 'manual-save-toast' });
+      }
+    } catch (error) {
+      console.error('Manual save error:', error);
+      toast.error('An error occurred during save.', { id: 'manual-save-toast' });
+    } finally {
+      setIsManualSaving(false);
+    }
+  };
 
-            if (success) {
-                toast.success('Changes saved successfully!', { id: 'manual-save-toast', duration: 5000 });
-            } else {
-                // saveProgress logs errors and shows toast, maybe remove redundant one here?
-                // toast.error('Failed to save changes.', { id: 'manual-save-toast' });
-            }
-        } catch (error) {
-            console.error("Manual save error:", error);
-            toast.error('An error occurred during save.', { id: 'manual-save-toast' });
-        } finally {
-            setIsManualSaving(false);
-        }
-    };
+  return (
+    <footer
+      className={cn(
+        'fixed bottom-0 left-0 md:left-[var(--sidebar-width)] bg-background shadow z-40 flex justify-between items-center border-t',
+        'h-[65px] w-full md:w-[calc(100%-var(--sidebar-width))] px-4 sm:px-6 font-body text-sm',
+        className
+      )}
+      role="navigation"
+      aria-label="Wizard progress"
+    >
+      {/* Steps Indicator (Left Side) */}
+      <div className="flex items-center space-x-1 sm:space-x-2 overflow-x-auto py-2 flex-grow min-w-0">
+        {steps.map(({ number, label, isComplete: explicitComplete }) => {
+          // Determine completion status: explicitly passed or based on current step
+          const isCompleted = explicitComplete ?? number < currentStep;
+          const isCurrent = number === currentStep;
+          const isUpcoming = number > currentStep;
+          // Allow clicking completed or current steps
+          const canClick = isCompleted || isCurrent;
 
-    return (
-        <footer
-            className={cn(
-                'fixed bottom-0 left-0 md:left-[var(--sidebar-width)] bg-background shadow z-40 flex justify-between items-center border-t',
-                'h-[65px] w-full md:w-[calc(100%-var(--sidebar-width))] px-4 sm:px-6 font-body text-sm',
-                className
-            )}
-            role="navigation"
-            aria-label="Wizard progress"
-        >
-            {/* Steps Indicator (Left Side) */}
-            <div className="flex items-center space-x-1 sm:space-x-2 overflow-x-auto py-2 flex-grow min-w-0">
-                {steps.map(({ number, label, isComplete: explicitComplete }) => {
-                    // Determine completion status: explicitly passed or based on current step
-                    const isCompleted = explicitComplete ?? (number < currentStep);
-                    const isCurrent = number === currentStep;
-                    const isUpcoming = number > currentStep;
-                    // Allow clicking completed or current steps
-                    const canClick = isCompleted || isCurrent;
-
-                    return (
-                        <div
-                            key={number}
-                            onClick={() => canClick && onStepClick(number)}
-                            className={cn(
-                                "flex items-center p-1 rounded-md transition-colors",
-                                canClick ? 'cursor-pointer hover:bg-muted/50' : 'cursor-default opacity-50',
-                            )}
-                            aria-current={isCurrent ? 'step' : undefined}
-                        >
-                            <Badge
-                                className={cn(
-                                    "h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center mr-1 sm:mr-2 text-xs sm:text-sm flex-shrink-0 rounded-full",
-                                    isCompleted && "bg-success border-success text-success-foreground",
-                                    isCurrent && "bg-primary border-primary text-primary-foreground",
-                                    isUpcoming && "border border-muted-foreground text-muted-foreground bg-transparent"
-                                )}
-                            >
-                                {isCompleted ? <span className="relative z-50"><Icon iconId="faCheckSolid" className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-success-foreground" /></span> : number}
-                            </Badge>
-                            <span className={cn(
-                                "hidden sm:inline truncate",
-                                isCurrent ? 'font-semibold text-primary' : 'text-muted-foreground'
-                            )}>
-                                {label}
-                            </span>
-                        </div>
-                    );
-                })}
-            </div>
-
-            {/* Action Buttons (Right Side) */}
-            <div className="flex items-center space-x-2 flex-shrink-0">
-                {onBack && currentStep > 1 && (
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={onBack}
-                        disabled={isNextLoading || isManualSaving}
-                    >
-                        <Icon iconId="faArrowLeftLight" className="h-4 w-4 mr-1.5" /> Back
-                    </Button>
+          return (
+            <div
+              key={number}
+              onClick={() => canClick && onStepClick(number)}
+              className={cn(
+                'flex items-center p-1 rounded-md transition-colors',
+                canClick ? 'cursor-pointer hover:bg-muted/50' : 'cursor-default opacity-50'
+              )}
+              aria-current={isCurrent ? 'step' : undefined}
+            >
+              <Badge
+                className={cn(
+                  'h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center mr-1 sm:mr-2 text-xs sm:text-sm flex-shrink-0 rounded-full',
+                  isCompleted && 'bg-success border-success text-success-foreground',
+                  isCurrent && 'bg-primary border-primary text-primary-foreground',
+                  isUpcoming &&
+                    'border border-muted-foreground text-muted-foreground bg-transparent'
                 )}
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleManualSave}
-                    disabled={isManualSaving || isNextLoading}
-                    title="Save current progress"
-                >
+              >
+                {isCompleted ? (
+                  <span className="relative z-50">
                     <Icon
-                        iconId={isManualSaving ? "faCircleNotchLight" : "faFloppyDiskLight"}
-                        className={cn("h-4 w-4 mr-1.5", isManualSaving && "animate-spin")}
+                      iconId="faCheckSolid"
+                      className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-success-foreground"
                     />
-                    Save
-                </Button>
-                <Button
-                    type="button"
-                    variant="default"
-                    size="sm"
-                    onClick={onNext}
-                    disabled={isNextDisabled || isNextLoading || isManualSaving}
-                    data-cy="wizard-next-button"
-                >
-                    {isNextLoading ? (
-                        <Icon iconId="faCircleNotchLight" className="animate-spin mr-1.5 h-4 w-4" />
-                    ) : currentStep < totalSteps ? (
-                        <Icon iconId="faArrowRightLight" className="h-4 w-4 mr-1.5" />
-                    ) : (
-                        <Icon iconId="faPaperPlaneLight" className="h-4 w-4 mr-1.5" />
-                    )}
-                    {currentStep < totalSteps ? 'Next' : submitButtonText}
-                </Button>
+                  </span>
+                ) : (
+                  number
+                )}
+              </Badge>
+              <span
+                className={cn(
+                  'hidden sm:inline truncate',
+                  isCurrent ? 'font-semibold text-primary' : 'text-muted-foreground'
+                )}
+              >
+                {label}
+              </span>
             </div>
-        </footer>
-    );
+          );
+        })}
+      </div>
+
+      {/* Action Buttons (Right Side) */}
+      <div className="flex items-center space-x-2 flex-shrink-0">
+        {onBack && currentStep > 1 && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onBack}
+            disabled={isNextLoading || isManualSaving}
+          >
+            <Icon iconId="faArrowLeftLight" className="h-4 w-4 mr-1.5" /> Back
+          </Button>
+        )}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handleManualSave}
+          disabled={isManualSaving || isNextLoading}
+          title="Save current progress"
+        >
+          <Icon
+            iconId={isManualSaving ? 'faCircleNotchLight' : 'faFloppyDiskLight'}
+            className={cn('h-4 w-4 mr-1.5', isManualSaving && 'animate-spin')}
+          />
+          Save
+        </Button>
+        <Button
+          type="button"
+          variant="default"
+          size="sm"
+          onClick={onNext}
+          disabled={isNextDisabled || isNextLoading || isManualSaving}
+          data-cy="wizard-next-button"
+        >
+          {isNextLoading ? (
+            <Icon iconId="faCircleNotchLight" className="animate-spin mr-1.5 h-4 w-4" />
+          ) : currentStep < totalSteps ? (
+            <Icon iconId="faArrowRightLight" className="h-4 w-4 mr-1.5" />
+          ) : (
+            <Icon iconId="faPaperPlaneLight" className="h-4 w-4 mr-1.5" />
+          )}
+          {currentStep < totalSteps ? 'Next' : submitButtonText}
+        </Button>
+      </div>
+    </footer>
+  );
 }

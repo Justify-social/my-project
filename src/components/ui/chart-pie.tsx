@@ -35,14 +35,7 @@
  */
 
 import React from 'react';
-import {
-  PieChart as RechartsPieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
+import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { cn } from '@/lib/utils';
 
 export interface PieDataPoint {
@@ -61,8 +54,6 @@ export interface PieChartProps {
   innerRadius?: number | string;
   outerRadius?: number | string;
   paddingAngle?: number;
-  showLegend?: boolean;
-  tooltipFormatter?: (value: any) => string;
 }
 
 // Refined Color Palette (Example using Brand + variations)
@@ -77,6 +68,18 @@ const DEFAULT_COLORS = [
   'hsl(var(--accent) / 0.4)', // Even Lighter Blue
 ];
 
+// Define type for renderOutsideLabel props
+interface OutsideLabelProps {
+  cx?: string | number | undefined;
+  cy?: string | number | undefined;
+  midAngle?: number;
+  outerRadius?: string | number | undefined;
+  percent?: number;
+  name?: string;
+  payload?: PieDataPoint;
+  // Add other potential props if needed
+}
+
 export const PieChart: React.FC<PieChartProps> = ({
   data,
   nameKey,
@@ -86,19 +89,37 @@ export const PieChart: React.FC<PieChartProps> = ({
   colors = DEFAULT_COLORS,
   title,
   className,
-  innerRadius = 0, // Default to Pie, can be overridden for Donut
+  innerRadius = 0,
   outerRadius = '80%',
   paddingAngle = 1,
-  showLegend = true,
-  tooltipFormatter,
 }) => {
-  // Custom label renderer for outside labels (optional customization)
-  const renderOutsideLabel = (props: any) => {
-    const { cx, cy, midAngle, outerRadius, percent, index, name, value } = props;
+  // Custom label renderer for outside labels
+  const renderOutsideLabel = (props: OutsideLabelProps) => {
+    // Use defined type
+    const { cx, cy, midAngle, outerRadius, percent, name } = props;
+
+    // Parse and validate numeric props
+    const numCx = typeof cx === 'string' ? parseFloat(cx) : cx;
+    const numCy = typeof cy === 'string' ? parseFloat(cy) : cy;
+    const numOuterRadius = typeof outerRadius === 'string' ? parseFloat(outerRadius) : outerRadius;
+
+    if (
+      numCx === undefined ||
+      isNaN(numCx) ||
+      numCy === undefined ||
+      isNaN(numCy) ||
+      numOuterRadius === undefined ||
+      isNaN(numOuterRadius) ||
+      midAngle === undefined ||
+      percent === undefined
+    ) {
+      return null; // Don't render if essential props are invalid
+    }
+
     const RADIAN = Math.PI / 180;
-    const radius = outerRadius * 1.15; // Position labels further out
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+    const radius = numOuterRadius * 1.15; // Position labels further out
+    const x = numCx + radius * Math.cos(-midAngle * RADIAN);
+    const y = numCy + radius * Math.sin(-midAngle * RADIAN);
     const percentValue = `${(percent * 100).toFixed(0)}%`;
 
     // Basic check to avoid tiny labels
@@ -109,7 +130,7 @@ export const PieChart: React.FC<PieChartProps> = ({
         x={x}
         y={y}
         fill="hsl(var(--foreground))"
-        textAnchor={x > cx ? 'start' : 'end'}
+        textAnchor={x > numCx ? 'start' : 'end'}
         dominantBaseline="central"
         className="text-[11px] font-medium"
       >
@@ -154,36 +175,14 @@ export const PieChart: React.FC<PieChartProps> = ({
             strokeWidth={2} // Slightly thicker stroke
             style={{ filter: 'url(#pie-shadow)' }} // Apply drop shadow
           >
-            {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+            {data.map((_entry: PieDataPoint, index: number) => (
+              <Cell
+                key={`cell-${index}`}
+                fill={colors[index % colors.length]}
+                style={{ outline: 'none' }} // Prevent focus outline on cells
+              />
             ))}
           </Pie>
-          <Tooltip
-            formatter={tooltipFormatter}
-            contentStyle={{
-              backgroundColor: 'hsl(var(--background))',
-              border: '1px solid hsl(var(--border))',
-              borderRadius: '4px',
-              boxShadow: 'var(--shadow-sm)',
-            }}
-            cursor={{
-              stroke: 'hsl(var(--border))',
-              strokeWidth: 1,
-              fill: 'hsl(var(--accent) / 0.1)',
-            }} // Enhanced cursor
-          />
-          {showLegend && (
-            <Legend
-              layout="horizontal"
-              verticalAlign="bottom"
-              align="center"
-              iconSize={10} // Smaller legend icons
-              wrapperStyle={{
-                fontSize: '12px',
-                paddingTop: '10px',
-              }}
-            />
-          )}
         </RechartsPieChart>
       </ResponsiveContainer>
     </div>

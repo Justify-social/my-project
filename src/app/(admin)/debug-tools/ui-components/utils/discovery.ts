@@ -9,7 +9,7 @@ import fs from 'fs';
 import path from 'path';
 // Import shared types
 import {
-  type ComponentMetadata,
+  // type ComponentMetadata, // Unused
   type ExtendedComponentMetadata,
   type ComponentCategory,
   type ComponentRenderType,

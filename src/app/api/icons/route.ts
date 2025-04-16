@@ -68,7 +68,7 @@ export async function GET() {
           content.includes('viewBox') &&
           (content.includes('<path') || content.includes('<g') || content.includes('<rect'))
         );
-      } catch (error) {
+      } catch {
         return false;
       }
     };
@@ -93,7 +93,7 @@ export async function GET() {
 
         // Compare the actual path data, which should be different between light and solid
         return pathMatch1[1] !== pathMatch2[1];
-      } catch (error) {
+      } catch {
         return false;
       }
     };
@@ -255,7 +255,8 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error('Error in icons API:', error);
+    const _error = error as Error; // Prefix unused variable
+    console.error('Error in icons API:', _error.message);
     return NextResponse.json(
       {
         icons: [],

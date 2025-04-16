@@ -32,7 +32,7 @@ export async function validateRequestImpl<T extends z.ZodType>(
     let body;
     try {
       body = await request.json();
-    } catch (error) {
+    } catch {
       return [
         false,
         null,

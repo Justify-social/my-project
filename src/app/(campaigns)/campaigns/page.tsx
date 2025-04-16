@@ -32,14 +32,104 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-  DialogClose,
 } from '@/components/ui/dialog';
+
+// Define raw API structure (based on usage in transformCampaignData)
+interface ApiCampaignData {
+  id: string | number;
+  name?: string | null;
+  status?: string | null;
+  startDate?: string | Date | null | Record<string, never>; // Account for various formats seen
+  endDate?: string | Date | null | Record<string, never>;
+  timeZone?: string | null;
+  budget?:
+    | string
+    | {
+        total?: number | string | null;
+        socialMedia?: number | string | null;
+        currency?: string | null;
+      }
+    | null;
+  primaryContact?:
+    | string
+    | {
+        firstName?: string | null;
+        surname?: string | null;
+        email?: string | null;
+        position?: string | null;
+      }
+    | null;
+  secondaryContact?:
+    | string
+    | {
+        firstName?: string | null;
+        surname?: string | null;
+        email?: string | null;
+        position?: string | null;
+      }
+    | null;
+  Influencer?: { handle?: string | null; platform?: string | null }[] | null;
+  primaryKPI?: string | null;
+  secondaryKPIs?: string[] | null;
+  features?: string[] | null;
+  messaging?: {
+    mainMessage?: string | null;
+    hashtags?: string | null;
+    keyBenefits?: string | null;
+  } | null;
+  mainMessage?: string | null; // Allow top-level mainMessage as fallback
+  expectedOutcomes?: {
+    memorability?: string | null;
+    purchaseIntent?: string | null;
+    brandPerception?: string | null;
+  } | null;
+  demographics?: {
+    gender?: string[] | null;
+    ageRange?: string | string[] | null;
+    interests?: string[] | null;
+  } | null;
+  targeting?: { languages?: { language?: string | null }[] | null } | null;
+  locations?: { location?: string | null }[] | null;
+  competitors?: string[] | null;
+  guidelines?: string | null;
+  requirements?: { requirement?: string | null }[] | null;
+  assets?: { name?: string | null; url?: string | null }[] | null;
+  notes?: string | null;
+  additionalContacts?:
+    | {
+        firstName?: string | null;
+        surname?: string | null;
+        email?: string | null;
+        position?: string | null;
+      }[]
+    | null;
+  createdAt?: string | Date | null;
+  // Add any other potential top-level fields observed
+  [key: string]: unknown; // Allow other fields safely
+}
+
+// Define interfaces for other mapped API data structures (MOVED OUTSIDE FUNCTION)
+interface ApiLocation {
+  location?: string | null;
+}
+
+/* // Removed unused type ApiAudienceLocation
+interface ApiAudienceLocation {
+  location?: string | null;
+}
+*/
+
+/* // Removed unused type ApiAudienceInterest
+interface ApiAudienceInterest {
+  interest?: string | null;
+}
+*/
 
 /**
  * Transforms raw campaign data from API to the Campaign interface format
  * Safely handles different data formats and ensures consistent transformation
  */
-const transformCampaignData = (campaign: any): Campaign => {
+const transformCampaignData = (campaign: ApiCampaignData): Campaign => {
   // Log the incoming campaign ID for debugging
   console.log(`Campaign ID from API: ${campaign.id}, type: ${typeof campaign.id}`);
 
@@ -52,7 +142,9 @@ const transformCampaignData = (campaign: any): Campaign => {
   );
 
   // Helper to safely parse dates from various formats
-  const safelyParseDate = (dateValue: any): string => {
+  const safelyParseDate = (
+    dateValue: string | number | Date | null | undefined | Record<string, never>
+  ): string => {
     try {
       // Handle null or undefined
       if (!dateValue) return '';
@@ -82,7 +174,7 @@ const transformCampaignData = (campaign: any): Campaign => {
   };
 
   // Helper to safely parse JSON strings
-  const safelyParseJSON = (jsonValue: any, defaultValue: any): any => {
+  const safelyParseJSON = (jsonValue: unknown, defaultValue: unknown): unknown => {
     if (typeof jsonValue === 'object' && jsonValue !== null) {
       return jsonValue;
     }
@@ -97,18 +189,25 @@ const transformCampaignData = (campaign: any): Campaign => {
   };
 
   // Helper to safely get budget total
-  const safelyGetBudgetTotal = (budget: any): number => {
+  const safelyGetBudgetTotal = (budget: unknown): number => {
     if (!budget) return 0;
     try {
-      // Already parsed object
-      if (typeof budget === 'object') {
-        return Number(budget.total || budget.totalBudget || 0);
-      }
+      let parsedBudget: unknown = budget; // Use unknown instead of any
 
       // String that needs parsing
       if (typeof budget === 'string') {
-        const parsedBudget = JSON.parse(budget);
-        return Number(parsedBudget.total || parsedBudget.totalBudget || 0);
+        parsedBudget = JSON.parse(budget);
+      }
+
+      // Check if it's an object and has the property
+      if (typeof parsedBudget === 'object' && parsedBudget !== null) {
+        // Use type assertion or 'in' operator for property access
+        if ('total' in parsedBudget && parsedBudget.total != null) {
+          return Number(parsedBudget.total);
+        }
+        if ('totalBudget' in parsedBudget && parsedBudget.totalBudget != null) {
+          return Number(parsedBudget.totalBudget);
+        }
       }
       return 0;
     } catch (error) {
@@ -118,10 +217,16 @@ const transformCampaignData = (campaign: any): Campaign => {
   };
 
   // Parse primary contact
+  // Assuming safelyParseJSON returns an object with firstName/surname or a default
   const primaryContact = safelyParseJSON(campaign.primaryContact, {
     firstName: '',
     surname: '',
-  });
+  }) as {
+    firstName?: string | null;
+    surname?: string | null;
+    email?: string | null;
+    position?: string | null;
+  }; // Assert type after parsing
 
   // Map the status properly from the database schema (DRAFT, IN_REVIEW, APPROVED, ACTIVE, COMPLETED)
   // to the frontend statuses
@@ -131,6 +236,10 @@ const transformCampaignData = (campaign: any): Campaign => {
   } else {
     status = 'draft';
   }
+
+  // Ensure influencers is an array before accessing index
+  const influencersArray = Array.isArray(campaign.Influencer) ? campaign.Influencer : [];
+
   return {
     id: campaign.id,
     campaignName: campaign.name || 'Untitled Campaign',
@@ -143,16 +252,26 @@ const transformCampaignData = (campaign: any): Campaign => {
       | 'paused'
       | 'completed',
     // Use the first influencer's platform or default to Instagram
-    platform:
-      campaign.influencers?.[0]?.platform || ('Instagram' as 'Instagram' | 'YouTube' | 'TikTok'),
+    platform: (influencersArray[0]?.platform as 'Instagram' | 'YouTube' | 'TikTok') || 'Instagram',
     startDate: safelyParseDate(campaign.startDate),
     endDate: safelyParseDate(campaign.endDate),
     totalBudget: safelyGetBudgetTotal(campaign.budget),
     primaryKPI: campaign.primaryKPI || '',
-    primaryContact: primaryContact,
+    primaryContact: {
+      firstName: primaryContact.firstName || '',
+      surname: primaryContact.surname || '',
+      email: primaryContact.email || undefined,
+      position: primaryContact.position || undefined,
+    },
     createdAt: safelyParseDate(campaign.createdAt),
     audience: {
-      locations: campaign.locations || [],
+      // Filter locations to ensure they match the expected type
+      locations: Array.isArray(campaign.locations)
+        ? campaign.locations
+            .map((loc: ApiLocation) => loc?.location)
+            .filter((loc): loc is string => typeof loc === 'string' && loc.trim() !== '')
+            .map(location => ({ location }))
+        : [],
     },
   };
 };
@@ -204,13 +323,13 @@ interface Campaign {
   id: string | number; // Handle both string and number IDs
   campaignName: string;
   submissionStatus:
-  | 'draft'
-  | 'in_review'
-  | 'approved'
-  | 'active'
-  | 'submitted'
-  | 'paused'
-  | 'completed';
+    | 'draft'
+    | 'in_review'
+    | 'approved'
+    | 'active'
+    | 'submitted'
+    | 'paused'
+    | 'completed';
   platform: 'Instagram' | 'YouTube' | 'TikTok';
   startDate: string;
   endDate: string;
@@ -315,7 +434,9 @@ const ClientCampaignList: React.FC = () => {
       };
 
     // Helper function to safely parse dates
-    const safelyFormatDate = (dateValue: any): string | undefined => {
+    const safelyFormatDate = (
+      dateValue: string | number | Date | null | undefined | Record<string, never>
+    ): string | undefined => {
       if (!dateValue) return undefined;
       try {
         // If it's already a Date object
@@ -718,14 +839,6 @@ const ClientCampaignList: React.FC = () => {
   const handleViewCampaign = (campaignId: string) => {
     router.push(`/campaigns/${campaignId}`);
   };
-  const resetFilters = () => {
-    setSearch('');
-    setStatusFilter('');
-    setObjectiveFilter('');
-    setStartDateFilter('');
-    setEndDateFilter('');
-    setCurrentPage(1);
-  };
 
   // Helper to get status color and text
   const getStatusInfo = (status: string) => {
@@ -1008,9 +1121,7 @@ const ClientCampaignList: React.FC = () => {
                             onClick={() => handleViewCampaign(campaign.id.toString())}
                             className="w-8 h-8"
                           />
-                          <Link
-                            href={`/campaigns/wizard/step-1?id=${campaign.id}`}
-                          >
+                          <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`}>
                             <IconButtonAction
                               iconBaseName="faPenToSquare"
                               hoverColorClass="text-accent"
@@ -1195,9 +1306,7 @@ const ClientCampaignList: React.FC = () => {
                   onClick={() => handleViewCampaign(campaign.id.toString())}
                   className="w-8 h-8"
                 />
-                <Link
-                  href={`/campaigns/wizard/step-1?id=${campaign.id}`}
-                >
+                <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`}>
                   <IconButtonAction
                     iconBaseName="faPenToSquare"
                     hoverColorClass="text-accent"

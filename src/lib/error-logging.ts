@@ -4,7 +4,7 @@ import { Prisma } from '@prisma/client';
 export interface ErrorLogContext {
   userId?: string;
   route?: string;
-  additionalData?: Record<string, any>;
+  additionalData?: Record<string, unknown>;
 }
 
 export class APIError extends Error {

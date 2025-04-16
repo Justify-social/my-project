@@ -13,10 +13,10 @@ import {
   ContextMenu,
   ContextMenuCheckboxItem,
   ContextMenuContent,
-  ContextMenuGroup,
+  // ContextMenuGroup, // Unused
   ContextMenuItem,
   ContextMenuLabel,
-  ContextMenuPortal,
+  // ContextMenuPortal, // Unused
   ContextMenuRadioGroup,
   ContextMenuRadioItem,
   ContextMenuSeparator,
@@ -55,7 +55,7 @@ export default function ContextMenuPreviewPage() {
     since: '', // Add if known
     status: 'stable', // Example status
   };
-  const examples: string[] = [];
+  // const examples: string[] = []; // Unused variable
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -115,9 +115,13 @@ export default function ContextMenuPreviewPage() {
       {/* Examples Section (Rendering the actual component) */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4 text-primary">Examples / Usage</h2>
-        <div className="space-y-8 flex flex-col items-center"> {/* Increased spacing */}
+        <div className="space-y-8 flex flex-col items-center">
+          {' '}
+          {/* Increased spacing */}
           {/* ---- ADD YOUR RENDERING EXAMPLES MANUALLY BELOW ---- */}
-          <div className="border border-dashed border-divider rounded-lg p-10 flex items-center justify-center w-full max-w-md"> {/* Added width constraint */}
+          <div className="border border-dashed border-divider rounded-lg p-10 flex items-center justify-center w-full max-w-md">
+            {' '}
+            {/* Added width constraint */}
             <ContextMenu>
               <ContextMenuTrigger className="flex h-[150px] w-full items-center justify-center rounded-md border border-dashed text-sm">
                 Right-click here

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { indexCampaigns } from '@/lib/algolia';
 import { prisma } from '@/lib/prisma';
+import { CampaignWizard } from '@prisma/client';
 
 // This route will be called to index campaigns in Algolia
 export async function POST(req: Request) {
@@ -27,12 +28,13 @@ export async function POST(req: Request) {
       message: `Successfully indexed ${campaigns.length} campaigns.`,
     });
   } catch (error) {
-    console.error('Error indexing campaigns:', error);
+    const unknownError = error as unknown; // Type as unknown
+    console.error('Error indexing campaigns:', unknownError);
+    // Check if it's an error object before accessing message
+    const errorMessage =
+      unknownError instanceof Error ? unknownError.message : String(unknownError);
     return NextResponse.json(
-      {
-        error: 'Failed to index campaigns.',
-        details: error instanceof Error ? error.message : String(error),
-      },
+      { success: false, error: 'Failed to index campaigns', details: errorMessage },
       { status: 500 }
     );
   }
@@ -63,13 +65,11 @@ export async function GET() {
 
       // Transform campaigns for Algolia
       console.log('Transforming campaigns for Algolia...');
-      const algoliaRecords = campaigns.map((campaign: any) => ({
+      const algoliaRecords = campaigns.map((campaign: CampaignWizard) => ({
         objectID: campaign.id,
         id: campaign.id,
         campaignName: campaign.name || '',
         description: campaign.businessGoal || '',
-        platform: campaign.platform || '',
-        brand: '', // Add brand data if available
         status: campaign.status || 'DRAFT',
         startDate: campaign.startDate ? new Date(campaign.startDate).toISOString() : '',
         endDate: campaign.endDate ? new Date(campaign.endDate).toISOString() : '',

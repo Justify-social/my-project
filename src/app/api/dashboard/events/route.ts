@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 // Removed Edge Runtime export
 // export const runtime = 'edge';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Get Clerk auth object
     const authObject = await auth();
@@ -25,7 +25,6 @@ export async function GET(request: NextRequest) {
 
     // Return standard NextResponse
     return NextResponse.json({ success: true, data: events });
-
   } catch (error) {
     console.error('API Error fetching dashboard events:', error);
     dbLogger?.error(

@@ -1,5 +1,5 @@
 export const Analytics = {
-  track: (eventName: string, properties?: Record<string, any>) => {
+  track: (eventName: string, properties?: Record<string, unknown>) => {
     // For now, just console log the events
     console.log(`[Analytics] ${eventName}`, properties);
 

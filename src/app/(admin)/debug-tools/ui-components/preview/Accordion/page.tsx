@@ -5,7 +5,7 @@ import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import { Accordion } from '../../../../../../components/ui/accordion';
+// import { Accordion } from '../../../../../../components/ui/accordion'; // Unused
 
 const statusStyles: Record<string, string> = {
   stable: 'bg-green-100 text-green-800 border-green-200',

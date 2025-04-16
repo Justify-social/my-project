@@ -45,7 +45,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { operation, id, name, testId, isolation, additionalOperations } = validationResult.data;
+    const {
+      operation,
+      id,
+      name,
+      testId,
+      isolation: _isolation,
+      additionalOperations,
+    } = validationResult.data;
 
     // Handle different operations
     switch (operation) {

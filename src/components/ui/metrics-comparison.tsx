@@ -29,10 +29,15 @@ export interface LineData {
   stroke?: string;
 }
 
+// Define a more specific type for chart data points
+interface DataPoint {
+  [key: string]: string | number;
+}
+
 export interface MetricData {
   id: string;
   name: string;
-  data: any[]; // Consider defining a more specific data point type if possible
+  data: DataPoint[]; // Changed any[] to DataPoint[]
   xField?: string; // Key for x-axis data
   yField: string | string[]; // Key(s) for y-axis data
   dateFormat?: string; // Date format for LineChart

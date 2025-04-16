@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Icon } from '@/components/ui/icon/icon';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
 import { cn } from '@/lib/utils';
 
@@ -36,9 +36,11 @@ export default function InfluencerCard({ className }: { className?: string }) {
         const jsonData = await res.json();
         // TODO: Add Zod validation for API response data
         setData(jsonData as InfluencerData);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Error fetching influencer data:', err);
-        setError(err.message || 'Failed to load influencer metrics.');
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to load influencer metrics.';
+        setError(errorMessage);
         // Keep existing placeholder data logic or remove?
         // setData({ totalInfluencers: 5, averageEngagement: 7.5 });
         setData(null); // Set data to null on error
@@ -52,7 +54,7 @@ export default function InfluencerCard({ className }: { className?: string }) {
   if (loading) {
     // Use Skeleton loaders for better UX
     return (
-      <Card className={cn("p-4", className)}>
+      <Card className={cn('p-4', className)}>
         <CardHeader className="p-2">
           <LoadingSkeleton className="h-6 w-3/4" />
         </CardHeader>
@@ -66,10 +68,11 @@ export default function InfluencerCard({ className }: { className?: string }) {
 
   if (error) {
     return (
-      <Card className={cn("p-4 border-destructive/50 bg-destructive/5", className)}>
+      <Card className={cn('p-4 border-destructive/50 bg-destructive/5', className)}>
         <CardHeader className="p-2">
           <CardTitle className="text-lg text-destructive flex items-center">
-            <Icon iconId="faExclamationTriangleLight" className="h-4 w-4 mr-2" /> Error Loading Metrics
+            <Icon iconId="faExclamationTriangleLight" className="h-4 w-4 mr-2" /> Error Loading
+            Metrics
           </CardTitle>
         </CardHeader>
         <CardContent className="p-2">
@@ -82,7 +85,7 @@ export default function InfluencerCard({ className }: { className?: string }) {
   if (!data) {
     // Handles the case where API returns no data successfully
     return (
-      <Card className={cn("p-4", className)}>
+      <Card className={cn('p-4', className)}>
         <CardHeader className="p-2">
           <CardTitle className="text-lg">Influencer Metrics</CardTitle>
         </CardHeader>
@@ -90,15 +93,18 @@ export default function InfluencerCard({ className }: { className?: string }) {
           <p className="text-sm text-muted-foreground italic">No influencer data available.</p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   // Success state
   return (
-    <Card className={cn("p-4", className)}>
+    <Card className={cn('p-4', className)}>
       <CardHeader className="p-2 mb-2">
         {/* Keep test ID if needed, use theme color */}
-        <CardTitle data-testid="influencer-card-header" className="text-lg font-semibold text-primary">
+        <CardTitle
+          data-testid="influencer-card-header"
+          className="text-lg font-semibold text-primary"
+        >
           Influencer Metrics
         </CardTitle>
       </CardHeader>
@@ -107,16 +113,12 @@ export default function InfluencerCard({ className }: { className?: string }) {
         <div className="flex items-center">
           <Icon iconId="faUsersLight" className="h-4 w-4 mr-2 text-muted-foreground" />
           <span className="text-sm text-secondary mr-2">Total Influencers:</span>
-          <span className="font-semibold text-primary">
-            {data.totalInfluencers}
-          </span>
+          <span className="font-semibold text-primary">{data.totalInfluencers}</span>
         </div>
         <div className="flex items-center">
           <Icon iconId="faThumbsUpLight" className="h-4 w-4 mr-2 text-muted-foreground" />
           <span className="text-sm text-secondary mr-2">Avg. Engagement:</span>
-          <span className="font-semibold text-primary">
-            {data.averageEngagement.toFixed(1)}%
-          </span>
+          <span className="font-semibold text-primary">{data.averageEngagement.toFixed(1)}%</span>
         </div>
       </CardContent>
     </Card>

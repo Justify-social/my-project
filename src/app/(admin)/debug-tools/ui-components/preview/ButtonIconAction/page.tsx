@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import { Icon } from '@/components/ui/icon';
+// import { Icon } from '@/components/ui/icon'; // Unused and restricted path
 import { IconButtonAction } from '@/components/ui/button-icon-action';
 
 // Keep statusStyles definition for potential future use or if referenced elsewhere implicitly
@@ -26,7 +26,8 @@ export default function ButtonIconActionPreviewPage() {
     status?: string | null;
   } = {
     name: 'ButtonIconAction',
-    description: 'A specialized button displaying only an icon that changes state (e.g., light/solid) on hover.',
+    description:
+      'A specialized button displaying only an icon that changes state (e.g., light/solid) on hover.',
     category: 'atom',
     subcategory: 'button',
     renderType: 'client', // Assuming this is client due to useState

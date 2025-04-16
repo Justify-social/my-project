@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 // Removed Edge Runtime export
 // export const runtime = 'edge';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Get userId using Clerk's auth() helper
     const { userId } = await auth();

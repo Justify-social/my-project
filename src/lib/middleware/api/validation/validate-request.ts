@@ -68,12 +68,16 @@ export function validateRequest<T extends z.ZodType>(
       const headers = new Headers(request.headers);
       headers.set('X-Validated-Data', JSON.stringify(validationResult.data));
 
-      // Create a new request with the validated data
+      // Create a new request with the validated data (Removed unused variable)
+      /*
       const requestWithValidatedData = new Request(request.url, {
         method: request.method,
         headers: headers,
         body: JSON.stringify(validationResult.data),
       });
+      */
+
+      console.log('[Validation Middleware] Data validated successfully');
 
       // Pass the validated request to the next middleware or handler
       return next();

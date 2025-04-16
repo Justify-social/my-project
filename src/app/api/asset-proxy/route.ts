@@ -1,7 +1,22 @@
 import { NextResponse } from 'next/server';
 
+// Define interfaces for UploadThing API response
+interface UploadThingFile {
+  key: string;
+  name: string;
+  url: string;
+  size: number;
+  // Add other known/potential fields if available
+  [key: string]: unknown; // Allow other fields
+}
+
+interface UploadThingApiResponse {
+  files: UploadThingFile[];
+  // Include other potential top-level properties if known
+}
+
 // Cache for UploadThing API responses (to avoid excessive API calls)
-const UPLOADTHING_CACHE = new Map<string, { timestamp: number; data: any }>();
+const UPLOADTHING_CACHE = new Map<string, { timestamp: number; data: UploadThingApiResponse }>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 // Additional cache for known good URL formats for each file
@@ -104,7 +119,7 @@ export async function HEAD(request: Request) {
 /**
  * Query the UploadThing API for file information
  */
-async function queryUploadThingAPI(): Promise<any> {
+async function queryUploadThingAPI(): Promise<UploadThingApiResponse> {
   const cacheKey = 'uploadthing-files';
   const cached = UPLOADTHING_CACHE.get(cacheKey);
 
@@ -233,7 +248,7 @@ async function queryUploadThingAPI(): Promise<any> {
         }
 
         throw new Error(`UploadThing API error: ${status} - ${errorText}`);
-      } catch (e) {
+      } catch {
         throw new Error(`UploadThing API error: ${status}`);
       }
     }
@@ -299,7 +314,7 @@ async function findUploadThingFileKeys(requestedFileId: string): Promise<string[
     console.log(`Processing ${apiResponse.files.length} files from UploadThing API`);
 
     // Look for exact and partial matches
-    const matches = apiResponse.files.filter((file: any) => {
+    const matches = apiResponse.files.filter((file: UploadThingFile) => {
       const fileKey = file.key || '';
       // Include both exact match and contains match for flexibility
       const isMatch = fileKey === requestedFileId || fileKey.includes(requestedFileId);
@@ -309,7 +324,7 @@ async function findUploadThingFileKeys(requestedFileId: string): Promise<string[
       return isMatch;
     });
 
-    const keys = matches.map((file: any) => file.key || '').filter(Boolean);
+    const keys = matches.map((file: UploadThingFile) => file.key || '').filter(Boolean);
     console.log(`Found ${keys.length} matching file keys`);
 
     // If no keys found but we have a valid ID, still return the original ID
@@ -335,47 +350,6 @@ async function findUploadThingFileKeys(requestedFileId: string): Promise<string[
     // Return empty array only if we have no usable ID
     return [];
   }
-}
-
-/**
- * Check if a URL format works for a given file key
- */
-async function checkUrlFormat(urlFormat: string, fetchOptions: RequestInit): Promise<boolean> {
-  try {
-    console.log(`Trying UploadThing URL format: ${urlFormat}`);
-    const response = await fetch(urlFormat, fetchOptions);
-
-    if (response.ok) {
-      console.log(`✅ Successful URL format: ${urlFormat}`);
-      // Cache this successful URL format for future use
-      const fileId = extractFileIdFromUrl(urlFormat);
-      if (fileId) {
-        FILE_URL_CACHE.set(fileId, {
-          timestamp: Date.now(),
-          url: urlFormat,
-        });
-      }
-      return true;
-    } else {
-      console.log(`❌ Failed URL format (${response.status}): ${urlFormat}`);
-      return false;
-    }
-  } catch (e) {
-    console.log(`❌ Error fetching: ${urlFormat}`, e instanceof Error ? e.message : String(e));
-    return false;
-  }
-}
-
-/**
- * Extract a file ID from a URL
- */
-function extractFileIdFromUrl(url: string): string {
-  if (url.includes('/f/')) {
-    return url.split('/f/')[1].split('?')[0];
-  } else if (url.includes('/files/')) {
-    return url.split('/files/')[1].split('?')[0];
-  }
-  return '';
 }
 
 /**
@@ -490,6 +464,8 @@ async function handleAssetProxy(request: Request, isHeadRequest = false) {
           }
         } catch (e) {
           // Continue with 410 Gone if final check fails
+          const _e = e;
+          console.warn(`Final direct check failed, proceeding with 410: ${_e}`);
         }
 
         console.log(

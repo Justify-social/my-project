@@ -14,10 +14,17 @@ type TaskRequest = {
   sessionId?: string;
 };
 
+// Define the structure of the result object
+type TaskResultData = {
+  taskProcessed: boolean;
+  queryLength: number;
+  timestamp: string;
+};
+
 type TaskResponse = {
   success: boolean;
   message: string;
-  result?: any;
+  result?: TaskResultData;
   error?: string;
 };
 

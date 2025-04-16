@@ -4,11 +4,11 @@ export const componentApi = {
     // Mock implementation
     return [];
   },
-  getComponentMetadata: async (componentPath: string) => {
+  getComponentMetadata: async (_componentPath: string) => {
     // Mock implementation
     return null;
   },
-  getComponentChanges: async (componentPath: string) => {
+  getComponentChanges: async (_componentPath: string) => {
     // Mock implementation
     return [];
   },

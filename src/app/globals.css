@@ -380,7 +380,7 @@ main {
 .text-accent {
   color: hsl(var(--accent)) !important;
   /* Ensures the accent color is applied */
-  color: #00BFFF !important;
+  color: #00bfff !important;
   /* Fallback to explicit Deep Sky Blue */
 }
 

@@ -76,7 +76,10 @@ export async function POST(request: NextRequest) {
       await fs.promises.access(scriptPath, fs.constants.F_OK | fs.constants.X_OK); // Check existence and execute permission
     } catch (fsError) {
       console.error(`Script not found or not executable: ${scriptPath}`, fsError);
-      return NextResponse.json({ error: `Script file not found or not executable: ${scriptConfig.path}` }, { status: 404 });
+      return NextResponse.json(
+        { error: `Script file not found or not executable: ${scriptConfig.path}` },
+        { status: 404 }
+      );
     }
 
     console.log(`Executing script: ${scriptPath}`);
@@ -105,12 +108,9 @@ ${stdout}`);
       message: `Successfully ran ${scriptConfig.path}. ${stdout ? `Output: ${stdout.substring(0, 100)}...` : ''}`, // Include partial output if desired
       reportPath: scriptConfig.reportPath, // Include report path if defined
     });
-
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in run-script API route:', error);
-    return NextResponse.json(
-      { error: error.message || 'An unexpected error occurred' },
-      { status: 500 }
-    );
+    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

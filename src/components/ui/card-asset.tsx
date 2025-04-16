@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 import { Icon } from '@/components/ui/icon/icon';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import Image from 'next/image';
 
 /**
  * Formats currency values for display
@@ -95,15 +95,13 @@ const hasPlatform = (
  * @subcategory display
  * @description Renders a preview for image or video assets with hover controls for video.
  */
-interface AssetPreviewProps {
+interface AssetPreviewProps extends React.HTMLAttributes<HTMLDivElement> {
   url?: string;
   fileName?: string;
   type?: string;
   mediaTypeIconId?: string;
   mediaTypeLabel?: string;
-  showTypeLabel?: boolean;
   className?: string;
-  [key: string]: any;
 }
 
 export const AssetPreview = ({
@@ -112,7 +110,6 @@ export const AssetPreview = ({
   type,
   mediaTypeIconId,
   mediaTypeLabel,
-  showTypeLabel = false,
   className,
   ...props
 }: AssetPreviewProps) => {
@@ -218,12 +215,14 @@ export const AssetPreview = ({
       {...props}
     >
       {/* Image preview */}
-      {isImage && (
-        <img
+      {isImage && url && (
+        <Image
           src={url}
           alt={fileName ?? 'Asset preview'}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-          loading="lazy"
+          width={300}
+          height={300}
+          unoptimized
         />
       )}
 
@@ -296,14 +295,12 @@ interface AssetData {
 }
 
 // Ensure this interface is defined
-export interface AssetCardProps {
+export interface AssetCardProps extends React.HTMLAttributes<HTMLDivElement> {
   asset?: AssetData;
   currency?: string;
   defaultPlatform?: string | undefined; // Allow undefined
   className?: string; // Will apply to CardContent
   cardClassName?: string; // Will apply to Card root
-  showTypeLabel?: boolean;
-  [key: string]: any; // Allow passing other props like onClick
 }
 
 /**
@@ -317,7 +314,6 @@ export function AssetCard({
   defaultPlatform, // Now accepts undefined
   className,
   cardClassName,
-  showTypeLabel = false,
   ...props
 }: AssetCardProps) {
   // Uses updated AssetCardProps
@@ -354,7 +350,13 @@ export function AssetCard({
       )}
       {...props}
     >
-      <AssetPreview url={url} fileName={name} type={type} mediaTypeIconId={mediaTypeIconId} mediaTypeLabel={mediaTypeLabel} showTypeLabel={showTypeLabel} />
+      <AssetPreview
+        url={url}
+        fileName={name}
+        type={type}
+        mediaTypeIconId={mediaTypeIconId}
+        mediaTypeLabel={mediaTypeLabel}
+      />
 
       <CardHeader className="flex-row items-center justify-between gap-2 pb-2 pt-3 px-3">
         <div className="flex items-center gap-1.5 flex-1 min-w-0">
@@ -393,7 +395,9 @@ export function AssetCard({
         <div className="mt-auto pt-2 space-y-2 border-t border-divider">
           {budget !== undefined && budget !== null && (
             <div className="flex justify-end items-center text-foreground">
-              <span className="text-sm font-medium text-primary">{formatCurrency(budget, currency)}</span>
+              <span className="text-sm font-medium text-primary">
+                {formatCurrency(budget, currency)}
+              </span>
             </div>
           )}
         </div>

@@ -64,11 +64,15 @@ export default function ClientDashboard() {
 
           if (!eventsResponse.ok) {
             const errorData = await eventsResponse.json().catch(() => ({}));
-            throw new Error(`Failed to fetch events: ${eventsResponse.statusText} (${errorData?.error || 'Unknown error'})`);
+            throw new Error(
+              `Failed to fetch events: ${eventsResponse.statusText} (${errorData?.error || 'Unknown error'})`
+            );
           }
           if (!campaignsResponse.ok) {
             const errorData = await campaignsResponse.json().catch(() => ({}));
-            throw new Error(`Failed to fetch campaigns: ${campaignsResponse.statusText} (${errorData?.error || 'Unknown error'})`);
+            throw new Error(
+              `Failed to fetch campaigns: ${campaignsResponse.statusText} (${errorData?.error || 'Unknown error'})`
+            );
           }
 
           const eventsData = await eventsResponse.json();
@@ -85,7 +89,11 @@ export default function ClientDashboard() {
             setCampaigns(campaignsData.data);
           } else {
             console.error('Invalid campaigns data format:', campaignsData);
-            setFetchError(prev => prev ? `${prev}; Invalid format for campaigns data` : 'Invalid format for campaigns data');
+            setFetchError(prev =>
+              prev
+                ? `${prev}; Invalid format for campaigns data`
+                : 'Invalid format for campaigns data'
+            );
           }
         } catch (error) {
           console.error('Failed to fetch dashboard data:', error);

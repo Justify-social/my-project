@@ -19,9 +19,7 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import { Icon } from '@/components/ui/icon/icon';
-import { IconProps } from './icon/icon-types';
 import { cn } from '@/lib/utils';
 
 interface SectionHeaderProps {

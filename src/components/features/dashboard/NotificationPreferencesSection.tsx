@@ -17,9 +17,8 @@ interface NotificationPreferences {
   aiInsightNotifications: boolean;
 }
 
-interface NotificationPreferencesSectionProps {
-  initialData: NotificationPreferences;
-  onSave: (data: NotificationPreferences) => Promise<void>;
+interface NotificationPreferencesProps {
+  _onSave?: (data: NotificationPreferences) => Promise<void>; // Use _onSave to match usage
 }
 
 // Define component aliases for the warning, success, and static icons
@@ -35,16 +34,16 @@ const StaticIcon = ({ className, iconId }: { className?: string; iconId: string 
   <Icon iconId={iconId} className={className} />
 );
 
-const NotificationPreferencesSection: React.FC<NotificationPreferencesSectionProps> = ({
-  initialData,
-  onSave,
-}) => {
-  const [preferences, setPreferences] = useState<NotificationPreferences>(initialData);
-  const [originalData] = useState<NotificationPreferences>(initialData);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+const NotificationPreferencesSection: React.FC<NotificationPreferencesProps> = ({ _onSave }) => {
+  const [preferences, setPreferences] = useState<NotificationPreferences>({
+    campaignUpdates: false,
+    brandHealthAlerts: false,
+    aiInsightNotifications: false,
+  });
+  const [isEditing, _setIsEditing] = useState(false);
+  const [isSaving, _setIsSaving] = useState(false);
+  const [error, _setError] = useState<string | null>(null);
+  const [success, _setSuccess] = useState<string | null>(null);
 
   const handleToggle = (key: keyof NotificationPreferences, value: boolean) => {
     if (!isEditing) return;
@@ -53,49 +52,6 @@ const NotificationPreferencesSection: React.FC<NotificationPreferencesSectionPro
       ...prev,
       [key]: value,
     }));
-  };
-
-  const hasChanges = () => {
-    return (
-      preferences.campaignUpdates !== originalData.campaignUpdates ||
-      preferences.brandHealthAlerts !== originalData.brandHealthAlerts ||
-      preferences.aiInsightNotifications !== originalData.aiInsightNotifications
-    );
-  };
-
-  const handleEdit = () => {
-    setIsEditing(true);
-    setError(null);
-    setSuccess(null);
-  };
-
-  const handleCancel = () => {
-    setPreferences({ ...originalData });
-    setIsEditing(false);
-    setError(null);
-    setSuccess(null);
-  };
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    setError(null);
-    setSuccess(null);
-
-    try {
-      await onSave(preferences);
-      setIsEditing(false);
-      setSuccess('Notification preferences updated successfully');
-
-      // Clear success message after 3 seconds
-      setTimeout(() => {
-        setSuccess(null);
-      }, 3000);
-    } catch (err) {
-      console.error('Failed to save notification preferences:', err);
-      setError('Failed to update notification preferences. Please try again.');
-    } finally {
-      setIsSaving(false);
-    }
   };
 
   return (

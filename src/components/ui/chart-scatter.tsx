@@ -57,7 +57,9 @@ import {
   Legend,
   ResponsiveContainer,
   Label,
+  TooltipProps,
 } from 'recharts';
+import { ValueType, NameType } from 'recharts/types/component/DefaultTooltipContent';
 import { cn } from '@/lib/utils';
 
 export interface ScatterDataPoint {
@@ -79,14 +81,48 @@ export interface ScatterChartProps {
   showLegend?: boolean;
   xAxisLabel?: string;
   yAxisLabel?: string;
-  xTickFormatter?: (value: any) => string;
-  yTickFormatter?: (value: any) => string;
-  tooltipFormatter?: (value: any, name: string) => string;
+  xTickFormatter?: (value: string | number) => string;
+  yTickFormatter?: (value: string | number) => string;
+  tooltipFormatter?: (value: string | number, name: string) => string;
   gridColor?: string;
   xDomain?: [number | string, number | string];
   yDomain?: [number | string, number | string];
   zDomain?: [number | string, number | string];
 }
+
+// Define type for ScatterTooltipContent payload entry
+interface ScatterTooltipPayloadEntry {
+  name?: NameType | undefined;
+  value?: ValueType | undefined;
+  color?: string;
+  dataKey?: string | number | undefined;
+}
+
+// Define custom tooltip content component with proper types
+const ScatterTooltipContent = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="custom-tooltip bg-background text-foreground p-2 shadow-md rounded-md border border-border text-xs">
+        {label && <p className="label mb-1 font-medium text-muted-foreground">{`${label}`}</p>}
+        {payload.map((entry: ScatterTooltipPayloadEntry, index: number) => {
+          const valueString =
+            entry.value === undefined || entry.value === null
+              ? 'N/A'
+              : typeof entry.value === 'number'
+                ? entry.value.toLocaleString()
+                : entry.value;
+
+          return (
+            <p key={`item-${index}`} style={{ color: entry.color }} className="text-sm">
+              {`${entry.name} (${entry.dataKey}): ${valueString}`}
+            </p>
+          );
+        })}
+      </div>
+    );
+  }
+  return null;
+};
 
 export const ScatterChart: React.FC<ScatterChartProps> = ({
   data,
@@ -141,17 +177,12 @@ export const ScatterChart: React.FC<ScatterChartProps> = ({
           {zKey && <ZAxis dataKey={zKey} domain={zDomain} range={[20, 200]} />}
 
           <Tooltip
-            cursor={{ strokeDasharray: '3 3' }}
-            formatter={tooltipFormatter}
-            contentStyle={{
-              backgroundColor: 'hsl(var(--background))',
-              color: 'hsl(var(--foreground))',
-              borderRadius: 'var(--radius-md)',
-              boxShadow: 'var(--shadow-md)',
-              padding: '0.5rem',
-              fontSize: '12px',
+            cursor={{
+              strokeDasharray: '3 3',
             }}
-          />
+            formatter={tooltipFormatter}
+            content={<ScatterTooltipContent />}
+          ></Tooltip>
 
           {showLegend && (
             <Legend

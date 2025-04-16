@@ -214,7 +214,10 @@ export function WizardSkeleton({
       </div>
 
       {/* Step indicator - Use Progress component? Or keep simple? Keep simple for now */}
-      <Skeleton className="h-2 w-full rounded-full" style={{ width: `${(normalizedStep / 5) * 100}%`, backgroundColor: 'hsl(var(--muted))' }}>
+      <Skeleton
+        className="h-2 w-full rounded-full"
+        style={{ width: `${(normalizedStep / 5) * 100}%`, backgroundColor: 'hsl(var(--muted))' }}
+      >
         {/* Maybe indicate progress visually? Difficult with skeleton primitive */}
         {/* <div
           className="h-2 bg-primary rounded-full"

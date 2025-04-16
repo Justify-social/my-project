@@ -17,7 +17,7 @@ function WizardStatusIndicator() {
   // Effect to show the indicator temporarily when lastSaved updates
   useEffect(() => {
     if (wizardContext.lastSaved) {
-      console.log("[WizardStatusIndicator] lastSaved updated, showing indicator.");
+      console.log('[WizardStatusIndicator] lastSaved updated, showing indicator.');
       setShowIndicator(true);
 
       // Clear any existing timeout
@@ -27,7 +27,7 @@ function WizardStatusIndicator() {
 
       // Set a new timeout to hide the indicator after 5 seconds
       timeoutRef.current = setTimeout(() => {
-        console.log("[WizardStatusIndicator] Timeout reached, hiding indicator.");
+        console.log('[WizardStatusIndicator] Timeout reached, hiding indicator.');
         setShowIndicator(false);
       }, 5000); // 5 seconds
     }
@@ -72,7 +72,9 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
   const isWizardStepPage = pathname?.includes('/wizard/step-');
 
   return (
-    <WizardProvider> {/* Provider wraps the children */}
+    <WizardProvider>
+      {' '}
+      {/* Provider wraps the children */}
       {/* Conditionally render the component that uses the hook */}
       {isWizardStepPage && <WizardStatusIndicator />}
       {children} {/* The actual step page content */}

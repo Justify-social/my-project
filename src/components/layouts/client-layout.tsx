@@ -1,16 +1,12 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Header } from '@/components/ui/navigation/header';
 import { Sidebar } from '@/components/ui/navigation/sidebar';
 import { useSidebar } from '@/providers/SidebarProvider';
 import { usePathname } from 'next/navigation';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
-import { Icon } from '@/components/ui/icon/icon';
-import Link from 'next/link';
-import Image from 'next/image';
 import SidebarUIComponents from '@/components/ui/navigation/sidebar-ui-components';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { MobileMenu } from '@/components/ui/navigation/mobile-menu';
@@ -18,10 +14,9 @@ import { cn } from '@/lib/utils';
 import { useUser } from '@clerk/nextjs';
 
 // Dynamically import the client-side auth components with SSR disabled
-const DynamicClientAuth = dynamic(
-  () => import('@/components/auth/ClientAuthComponents'),
-  { ssr: false }
-);
+const DynamicClientAuth = dynamic(() => import('@/components/auth/ClientAuthComponents'), {
+  ssr: false,
+});
 
 // --- App Icon Mapping (Copied from MobileMenu.tsx) ---
 const appIconMap: Record<string, string> = {
@@ -81,7 +76,7 @@ interface ClientLayoutProps {
 const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
   const pathname = usePathname() ?? '';
   const { user } = useUser();
-  const { isOpen: isSidebarProviderOpen, toggle: toggleSidebarProvider } = useSidebar();
+  const { isOpen: _isSidebarProviderOpen, toggle: _toggleSidebarProvider } = useSidebar();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   // --- Navigation Definitions (SSOT) ---
@@ -249,15 +244,6 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
 
   // Select the correct items for the Mobile Menu based on the page
   const mobileMenuItems = isUIComponentsPage ? debugNavItems : allMainNavItemsForMenu;
-  // Define settingsItem for MobileMenu based on context (only for main app)
-  const mobileSettingsItem = !isUIComponentsPage
-    ? {
-      id: settingsItemDef.id,
-      label: settingsItemDef.label,
-      href: settingsItemDef.href as string,
-      iconId: settingsItemDef.icon || 'faGearLight',
-    }
-    : undefined;
 
   return (
     <React.Suspense fallback={<LoadingSkeleton />}>
@@ -288,7 +274,9 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
             <div
               className={`flex-1 transition-margin duration-200 md:ml-[var(--sidebar-width)] pt-16 font-body overflow-y-auto`}
             >
-              <main className="p-4 md:p-6 bg-white min-h-[calc(100vh-4rem)] pb-[65px]">{children}</main>
+              <main className="p-4 md:p-6 bg-white min-h-[calc(100vh-4rem)] pb-[65px]">
+                {children}
+              </main>
             </div>
           </div>
 

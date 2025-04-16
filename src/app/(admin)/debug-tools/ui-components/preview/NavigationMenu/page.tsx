@@ -15,7 +15,7 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu'; // Import components
-import { Icon } from '@/components/ui/icon'; // Import Icon
+// import { Icon } from '@/components/ui/icon'; // Import Icon - Unused and restricted path
 
 // Define structure for example components
 const components: { title: string; href: string; description: string }[] = [
