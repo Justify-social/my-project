@@ -358,19 +358,6 @@ export function Sidebar({
               </React.Fragment>
             );
           })}
-          {/* Settings Item - Use props if available, otherwise hide/fallback */}
-          {settingsHref && settingsLabel && (
-            <SidebarItem
-              href={settingsHref}
-              label={settingsLabel}
-              icon={settingsIcon}
-              isActive={isActive(settingsHref)} // Check active state against the correct href
-              isChild={false}
-              onClick={onItemClick}
-              iconRegistry={isRegistryLoading ? {} : iconRegistry}
-              isLoadingRegistry={isRegistryLoading}
-            />
-          )}
         </ul>
       </nav>
 
@@ -379,17 +366,19 @@ export function Sidebar({
         {' '}
         {/* Removed general 'border', kept 'border-t' */}
         <ul className="list-none space-y-0.5">
-          {/* Settings Item */}
-          <SidebarItem
-            href="/settings/profile"
-            label="Settings"
-            icon="appSettings"
-            isActive={isActive('/settings')}
-            isChild={false}
-            onClick={onItemClick}
-            iconRegistry={isRegistryLoading ? {} : iconRegistry}
-            isLoadingRegistry={isRegistryLoading}
-          />
+          {/* Settings Item - Use props if available, otherwise hide/fallback */}
+          {settingsHref && settingsLabel && (
+            <SidebarItem
+              href={settingsHref} // Use prop
+              label={settingsLabel} // Use prop
+              icon={settingsIcon} // Use prop
+              isActive={isActive(settingsHref)} // Check active state against the correct href from prop
+              isChild={false}
+              onClick={onItemClick}
+              iconRegistry={isRegistryLoading ? {} : iconRegistry}
+              isLoadingRegistry={isRegistryLoading}
+            />
+          )}
         </ul>
       </div>
     </aside>
