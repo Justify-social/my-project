@@ -267,7 +267,14 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
               {isUIComponentsPage ? (
                 <SidebarUIComponents navItems={debugNavItems} />
               ) : (
-                <Sidebar items={sidebarItems} activePath={pathname} title="Justify" />
+                <Sidebar
+                  items={sidebarItems}
+                  activePath={pathname}
+                  title="Justify"
+                  settingsHref={settingsItemDef.href as string}
+                  settingsLabel={settingsItemDef.label}
+                  settingsIcon={settingsItemDef.icon}
+                />
               )}
             </div>
 

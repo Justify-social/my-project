@@ -126,6 +126,9 @@ interface SidebarProps {
   logoAlt?: string;
   title?: string;
   onItemClick?: () => void; // Keep this for potential mobile overlay closing etc.
+  settingsHref?: string; // Add prop for settings link href
+  settingsLabel?: string; // Add prop for settings link label
+  settingsIcon?: string; // Add prop for settings link icon
 }
 
 export function Sidebar({
@@ -136,6 +139,9 @@ export function Sidebar({
   logoAlt = 'Logo',
   title = 'Dashboard',
   onItemClick,
+  settingsHref, // Destructure new props
+  settingsLabel,
+  settingsIcon,
 }: SidebarProps) {
   // --- Icon Registry Loading ---
   const [iconRegistry, setIconRegistry] = useState<AppIconRegistry>({});
@@ -352,6 +358,19 @@ export function Sidebar({
               </React.Fragment>
             );
           })}
+          {/* Settings Item - Use props if available, otherwise hide/fallback */}
+          {settingsHref && settingsLabel && (
+            <SidebarItem
+              href={settingsHref}
+              label={settingsLabel}
+              icon={settingsIcon}
+              isActive={isActive(settingsHref)} // Check active state against the correct href
+              isChild={false}
+              onClick={onItemClick}
+              iconRegistry={isRegistryLoading ? {} : iconRegistry}
+              isLoadingRegistry={isRegistryLoading}
+            />
+          )}
         </ul>
       </nav>
 
