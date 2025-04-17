@@ -1,16 +1,29 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-02-24.acacia',
-});
+// TODO: Uncomment Stripe initialization and ensure STRIPE_SECRET_KEY is set in environment
+// const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+//   apiVersion: '2025-02-24.acacia',
+// });
 
 export async function POST(request: Request) {
   try {
+    // Immediately return error as Stripe is temporarily disabled
+    console.error('Stripe checkout temporarily disabled: STRIPE_SECRET_KEY not configured.');
+    return NextResponse.json(
+      { error: 'Checkout functionality is temporarily disabled.' },
+      { status: 503 } // Service Unavailable
+    );
+
+    /* TODO: Uncomment the following block when Stripe is re-enabled
     const { priceId, mode } = await request.json();
 
     if (!priceId) {
       return NextResponse.json({ error: 'Price ID is required' }, { status: 400 });
+    }
+
+    if (!stripe) { // Add check in case stripe is conditionally initialized later
+        throw new Error('Stripe client is not initialized. Check STRIPE_SECRET_KEY.');
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -27,8 +40,9 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ url: session.url });
+    */
   } catch (error) {
-    console.error('Stripe checkout error:', error);
+    console.error('Stripe checkout error (initialization or session creation):', error);
     return NextResponse.json({ error: 'Error creating checkout session' }, { status: 500 });
   }
 }
