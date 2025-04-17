@@ -65,6 +65,10 @@ export interface ProgressBarWizardProps {
   className?: string;
   /** Function to get the current step's validated form data */
   getCurrentFormData: () => unknown | null; // Changed any to unknown
+  onPrevious?: () => void; // Added for consistency
+  canGoPrevious?: boolean; // Control previous button state
+  isLoadingNext?: boolean; // Optional loading state for Next button
+  onSave?: () => Promise<boolean>; // New prop for manual save action, returns success
 }
 
 export function ProgressBarWizard({
@@ -78,50 +82,24 @@ export function ProgressBarWizard({
   submitButtonText = 'Submit',
   getCurrentFormData,
   className,
+  onPrevious,
+  canGoPrevious = false,
+  isLoadingNext = false,
+  onSave,
 }: ProgressBarWizardProps) {
   const totalSteps = steps.length;
   const wizard = useWizard();
-  const [isManualSaving, setIsManualSaving] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Manual Save Handler
-  const handleManualSave = async () => {
-    if (!wizard.campaignId) {
-      toast.error('Cannot save, campaign ID not found.');
-      return;
-    }
-    if (!getCurrentFormData) {
-      toast.error('Save handler not configured correctly.');
-      return;
-    }
-
-    setIsManualSaving(true);
-    toast.loading('Saving changes...', { id: 'manual-save-toast' });
-
-    const currentData = getCurrentFormData();
-
-    if (!currentData) {
-      toast.error('Cannot save, form data is invalid or unavailable.', { id: 'manual-save-toast' });
-      setIsManualSaving(false);
-      return;
-    }
-
-    // Directly call saveProgress with the data from the current step
+  const handleSaveClick = async () => {
+    if (!onSave) return;
+    setIsSaving(true);
     try {
-      // Add currentStep to the data object before sending
-      const dataToSaveWithStep = { ...currentData, currentStep: currentStep };
-      const success = await wizard.saveProgress(dataToSaveWithStep);
-
-      if (success) {
-        toast.success('Changes saved successfully!', { id: 'manual-save-toast', duration: 5000 });
-      } else {
-        // saveProgress logs errors and shows toast, maybe remove redundant one here?
-        // toast.error('Failed to save changes.', { id: 'manual-save-toast' });
-      }
+      const success = await onSave();
     } catch (error) {
-      console.error('Manual save error:', error);
-      toast.error('An error occurred during save.', { id: 'manual-save-toast' });
+      console.error('Manual save failed:', error);
     } finally {
-      setIsManualSaving(false);
+      setIsSaving(false);
     }
   };
 
@@ -196,31 +174,33 @@ export function ProgressBarWizard({
             variant="outline"
             size="sm"
             onClick={onBack}
-            disabled={isNextLoading || isManualSaving}
+            disabled={isNextLoading || isSaving}
           >
             <Icon iconId="faArrowLeftLight" className="h-4 w-4 mr-1.5" /> Back
           </Button>
         )}
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={handleManualSave}
-          disabled={isManualSaving || isNextLoading}
-          title="Save current progress"
-        >
-          <Icon
-            iconId={isManualSaving ? 'faCircleNotchLight' : 'faFloppyDiskLight'}
-            className={cn('h-4 w-4 mr-1.5', isManualSaving && 'animate-spin')}
-          />
-          Save
-        </Button>
+        {onSave && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleSaveClick}
+            disabled={isSaving || isNextLoading}
+            title="Save current progress"
+          >
+            <Icon
+              iconId={isSaving ? 'faCircleNotchLight' : 'faFloppyDiskLight'}
+              className={cn('h-4 w-4 mr-1.5', isSaving && 'animate-spin')}
+            />
+            Save
+          </Button>
+        )}
         <Button
           type="button"
           variant="default"
           size="sm"
           onClick={onNext}
-          disabled={isNextDisabled || isNextLoading || isManualSaving}
+          disabled={isNextDisabled || isNextLoading || isSaving}
           data-cy="wizard-next-button"
         >
           {isNextLoading ? (

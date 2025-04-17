@@ -53,6 +53,7 @@ import { differenceInDays, isValid as isValidDate } from 'date-fns';
 import { IconButtonAction } from '@/components/ui/button-icon-action';
 import timezonesData from '@/lib/timezones.json'; // Import the static timezone data
 import { logger } from '@/lib/logger';
+import { toast } from 'react-hot-toast';
 
 // --- Formatting Helpers ---
 
@@ -175,51 +176,6 @@ const InfluencerEntry: React.FC<InfluencerEntryProps> = ({ index, control, error
 // Type for influencer data coming from the context (uses Backend enum)
 type ContextInfluencer = z.infer<typeof InfluencerSchema>;
 
-// --- Add Helper Functions ---
-
-/**
- * Detects user's timezone using an IP Geolocation API.
- */
-async function detectUserTimezone(): Promise<string> {
-  try {
-    // Prefer ipgeolocation.io if key is available
-    const ipGeoApiKey = process.env.NEXT_PUBLIC_IPGEOLOCATION_API_KEY;
-    const endpoint = ipGeoApiKey
-      ? `https://api.ipgeolocation.io/ipgeo?apiKey=${ipGeoApiKey}`
-      : 'https://ipapi.co/json/'; // Fallback
-
-    console.log('Detecting user timezone from IP Geolocation API...');
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000); // 3-second timeout
-
-    const response = await fetch(endpoint, {
-      method: 'GET',
-      signal: controller.signal,
-      headers: { Accept: 'application/json' }, // Needed for ipapi.co
-    });
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      throw new Error(`API returned status ${response.status}`);
-    }
-    const data = await response.json();
-
-    // Extract timezone based on API used
-    const timezone = ipGeoApiKey ? data.time_zone?.name : data.timezone;
-
-    if (!timezone) {
-      console.warn('Timezone not found in API response:', data);
-      return 'UTC'; // Fallback if timezone field is missing
-    }
-
-    console.log('Detected timezone:', timezone);
-    return timezone;
-  } catch (error) {
-    console.warn('Failed to detect timezone:', error);
-    return 'UTC'; // Default fallback on error
-  }
-}
-
 // --- Duration Helper ---
 const calculateDuration = (
   startStr: string | null | undefined,
@@ -240,19 +196,63 @@ const calculateDuration = (
   return `${days} day${days !== 1 ? 's' : ''}`;
 };
 
+async function preparePayload(
+  data: Step1FormData,
+  currentStep: number
+): Promise<Partial<DraftCampaignData>> {
+  // Payload preparation logic extracted
+  return {
+    name: data.name,
+    businessGoal: data.businessGoal,
+    brand: data.brand,
+    website: data.website,
+    startDate: data.startDate,
+    endDate: data.endDate,
+    timeZone: data.timeZone,
+    primaryContact: {
+      firstName: data.primaryContact?.firstName || '',
+      surname: data.primaryContact?.surname || '',
+      email: data.primaryContact?.email || '',
+      position: data.primaryContact?.position || PositionEnum.Values.Director,
+    },
+    secondaryContact: data.secondaryContact?.email
+      ? {
+          firstName: data.secondaryContact?.firstName || '',
+          surname: data.secondaryContact?.surname || '',
+          email: data.secondaryContact?.email || '',
+          position: data.secondaryContact?.position || PositionEnum.Values.Director,
+        }
+      : null,
+    additionalContacts:
+      data.additionalContacts
+        ?.filter(c => c.email)
+        .map(c => ({
+          firstName: c.firstName || '',
+          surname: c.surname || '',
+          email: c.email || '',
+          position: c.position || PositionEnum.Values.Director,
+        })) || [],
+    budget: {
+      currency: data.budget?.currency || CurrencyEnum.Values.USD,
+      total: parseFloat(parseCurrencyInput(data.budget?.total?.toString() || '0')) || 0,
+      socialMedia: parseFloat(parseCurrencyInput(data.budget?.socialMedia?.toString() || '0')) || 0,
+    },
+    Influencer:
+      data.Influencer?.filter(inf => inf.platform && inf.handle).map(inf => ({
+        id: inf.id, // Keep ID
+        platform: inf.platform,
+        handle: inf.handle,
+      })) || [],
+    step1Complete: true,
+    currentStep: currentStep, // Use passed currentStep
+  };
+}
+
 function Step1Content() {
   const { wizardState, updateWizardState, isLoading, saveProgress, stepsConfig } = useWizard();
   const router = useRouter();
   const initialDataLoaded = useRef(false);
-  const [detectedTimezone, setDetectedTimezone] = useState<string | null>(null);
-
-  // Ensure all hooks are called unconditionally at the top level
-  useEffect(() => {
-    detectUserTimezone().then(tz => {
-      setDetectedTimezone(tz);
-      console.log('Timezone detection complete.', tz);
-    });
-  }, []);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<Step1FormData>({
     resolver: zodResolver(Step1ValidationSchema),
@@ -263,7 +263,7 @@ function Step1Content() {
       website: '',
       startDate: null,
       endDate: null,
-      timeZone: 'GMT',
+      timeZone: 'UTC',
       primaryContact: {
         firstName: '',
         surname: '',
@@ -290,14 +290,8 @@ function Step1Content() {
   });
 
   useEffect(() => {
-    if (((!isLoading && wizardState) || detectedTimezone) && !initialDataLoaded.current) {
-      if (isLoading || detectedTimezone === null) return;
-
-      console.log(
-        '[Step1Content useEffect] Resetting form with wizardState and detected timezone:',
-        wizardState,
-        detectedTimezone
-      );
+    if (!isLoading && wizardState && !initialDataLoaded.current) {
+      console.log('[Step1Content useEffect] Resetting form with wizardState:', wizardState);
 
       const formattedData: Step1FormData = {
         name: wizardState?.name || '',
@@ -306,7 +300,7 @@ function Step1Content() {
         website: wizardState?.website || '',
         startDate: wizardState?.startDate || null,
         endDate: wizardState?.endDate || null,
-        timeZone: wizardState?.timeZone || detectedTimezone || 'GMT',
+        timeZone: wizardState?.timeZone || 'UTC',
         primaryContact: {
           firstName: wizardState?.primaryContact?.firstName || '',
           surname: wizardState?.primaryContact?.surname || '',
@@ -391,15 +385,16 @@ function Step1Content() {
       initialDataLoaded.current = true;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, wizardState, detectedTimezone, form.reset]);
+  }, [isLoading, wizardState, form.reset]);
 
   const {
-    fields,
+    fields: influencerFields,
     append: appendInfluencer,
     remove: removeInfluencer,
   } = useFieldArray({
     control: form.control,
     name: 'Influencer',
+    keyName: 'fieldId',
   });
 
   const {
@@ -412,680 +407,239 @@ function Step1Content() {
   });
 
   const handleStepClick = (step: number) => {
-    if (wizardState?.campaignId && step === 1) {
-      router.push(`/campaigns/wizard/step-1?id=${wizardState.campaignId}`);
-    }
+    // Only allow clicking if the step has been completed or is the current step
+    // This depends on having completion status in wizardState or stepsConfig
+    console.log('Navigate to step', step);
+    // router.push(`/campaigns/wizard/step-${step}?id=${wizardState?.campaignId}`);
   };
 
   const onSubmitAndNavigate = async () => {
+    setIsSubmitting(true);
+    logger.info('[Step 1] Attempting Next...');
     const isValid = await form.trigger();
     if (!isValid) {
+      logger.warn('[Step 1] Validation failed.');
+      toast.error('Please fix the errors before proceeding.');
+      setIsSubmitting(false);
       return;
     }
-    const data = form.getValues();
-    const payload: Partial<DraftCampaignData> = {
-      name: data.name,
-      businessGoal: data.businessGoal,
-      brand: data.brand,
-      website: data.website,
-      startDate: data.startDate,
-      endDate: data.endDate,
-      timeZone: data.timeZone,
-      primaryContact: data.primaryContact,
-      secondaryContact: data.secondaryContact,
-      additionalContacts: Array.isArray(data.additionalContacts) ? data.additionalContacts : [],
-      budget: {
-        total: parseFloat(String(data.budget?.total || '0')) || 0,
-        socialMedia: parseFloat(String(data.budget?.socialMedia || '0')) || 0,
-        currency: data.budget?.currency as z.infer<typeof CurrencyEnum>,
-      },
-      Influencer: Array.isArray(data.Influencer)
-        ? data.Influencer.filter(
-            (inf): inf is ContextInfluencer => !!inf?.id && !!inf?.platform && !!inf?.handle
-          )
-        : [],
-      step1Complete: true,
-      currentStep: 2,
-    };
-    updateWizardState(payload);
-    const savedCampaignId = await saveProgress(payload);
-    if (savedCampaignId) {
-      logger.info('Save successful, navigating to Step 2.');
-      router.push(`/campaigns/wizard/step-2?id=${savedCampaignId}`);
-    } else {
-      logger.error('Save failed, navigation aborted.');
+    const formData = form.getValues();
+    logger.info('[Step 1] Form data is valid.');
+
+    try {
+      const payload = await preparePayload(formData, 2);
+      logger.info('[Step 1] Payload prepared for save.');
+
+      updateWizardState(payload);
+      const saveSuccess = await saveProgress(payload);
+
+      if (saveSuccess) {
+        logger.info('[Step 1] Save successful, navigating to Step 2');
+        router.push(`/campaigns/wizard/step-2?id=${wizardState?.campaignId || saveSuccess}`); // Use returned ID if new
+      } else {
+        logger.error('[Step 1] Save failed after validation.');
+        // saveProgress should have shown an error toast
+      }
+    } catch (error) {
+      logger.error('[Step 1] Error during submission:', error);
+      toast.error('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  if (isLoading && !wizardState) {
+  // NEW: Handler for the manual Save button
+  const handleSave = async (): Promise<boolean> => {
+    setIsSubmitting(true);
+    logger.info('[Step 1] Attempting Manual Save...');
+    const isValid = await form.trigger();
+    if (!isValid) {
+      logger.warn('[Step 1] Validation failed for manual save.');
+      toast.error('Please fix the errors before saving.');
+      setIsSubmitting(false);
+      return false;
+    }
+    const formData = form.getValues();
+    logger.info('[Step 1] Form data is valid for manual save.');
+
+    try {
+      const payload = await preparePayload(formData, 1);
+      logger.info('[Step 1] Payload prepared for manual save.');
+
+      const saveSuccess = await saveProgress(payload);
+
+      if (saveSuccess) {
+        logger.info('[Step 1] Manual save successful!');
+        toast.success('Progress saved!');
+        return true;
+      } else {
+        logger.error('[Step 1] Manual save failed.');
+        // saveProgress should show specific error
+        return false;
+      }
+    } catch (error) {
+      logger.error('[Step 1] Error during manual save:', error);
+      toast.error('An unexpected error occurred during save.');
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isLoading || !initialDataLoaded.current) {
     return <WizardSkeleton step={1} />;
   }
 
   return (
-    <>
+    <FormProvider {...form}>
+      <Form {...form}>
+        <form onSubmit={e => e.preventDefault()} className="space-y-8">
+          {/* ... Form Fields ... */}
+
+          {/* === Influencer Section === */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Influencer Selection</CardTitle>
+              <CardDescription>
+                Add the social media platform and handle for each influencer.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {influencerFields.map((field, index) => (
+                <InfluencerEntry
+                  key={field.fieldId} // Use fieldId provided by useFieldArray
+                  index={index}
+                  control={form.control}
+                  errors={form.formState.errors}
+                  remove={removeInfluencer}
+                />
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() =>
+                  appendInfluencer({
+                    id: `new-${Date.now()}`,
+                    platform: PlatformEnumBackend.Values.INSTAGRAM, // Default platform
+                    handle: '',
+                  })
+                }
+              >
+                <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" />
+                Add Influencer
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Schedule & Timezone</CardTitle>
+              <CardDescription>
+                Set the campaign dates and select the relevant timezone.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="md:col-span-1">
+                <FormField
+                  control={form.control}
+                  name="startDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Start Date *</FormLabel>
+                      <FormControl>
+                        <DatePicker
+                          value={field.value ? new Date(field.value) : undefined}
+                          onChange={(date: Date | undefined) => {
+                            field.onChange(date ? date.toISOString() : null);
+                            form.trigger('endDate');
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="md:col-span-1">
+                <FormField
+                  control={form.control}
+                  name="endDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>End Date *</FormLabel>
+                      <FormControl>
+                        <DatePicker
+                          value={field.value ? new Date(field.value) : undefined}
+                          onChange={(date: Date | undefined) => {
+                            field.onChange(date ? date.toISOString() : null);
+                          }}
+                          disabled={(date: Date) => {
+                            const currentStartDateStr = form.getValues('startDate') as
+                              | string
+                              | null;
+                            if (!currentStartDateStr) return false;
+                            const currentStartDate = new Date(currentStartDateStr);
+                            return isValidDate(currentStartDate) && date < currentStartDate;
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="md:col-span-1">
+                <FormField
+                  control={form.control}
+                  name="timeZone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Time Zone *</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || ''}>
+                        <FormControl>
+                          <SelectTrigger className="w-full"></SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {timezonesData.map(option => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        Please select the primary timezone for this campaign.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Error Summary */}
+          {Object.keys(form.formState.errors).length > 0 && (
+            <Alert variant="destructive">
+              <Icon iconId="faTriangleExclamationLight" className="h-4 w-4" />
+              <AlertDescription>
+                Please correct the errors above before proceeding.
+              </AlertDescription>
+            </Alert>
+          )}
+        </form>
+      </Form>
+
       <ProgressBarWizard
         currentStep={1}
         steps={stepsConfig}
-        onStepClick={handleStepClick}
-        onBack={null}
         onNext={onSubmitAndNavigate}
-        isNextDisabled={!form.formState.isValid}
-        isNextLoading={form.formState.isSubmitting || isLoading}
-        getCurrentFormData={form.getValues}
+        onSave={handleSave}
+        isLoadingNext={isSubmitting}
       />
-      <FormProvider {...form}>
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmitAndNavigate)}
-            className="space-y-6 pt-8 pb-[var(--footer-height)]"
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>Basic Information</CardTitle>
-                <CardDescription>Enter the core details for your campaign.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Campaign Name *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Summer Sale Launch" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="businessGoal"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Business Goal</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="What is the main objective?"
-                            {...field}
-                            value={field.value ?? ''}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="brand"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Brand Name *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Acme Corporation" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="website"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Website</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="https://www.example.com"
-                            {...field}
-                            value={field.value ?? ''}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Schedule & Timezone</CardTitle>
-                <CardDescription>
-                  Set the campaign dates and select the relevant timezone.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="md:col-span-1 space-y-4">
-                  <div>
-                    <FormLabel>Campaign Duration *</FormLabel>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
-                      <FormField
-                        control={form.control}
-                        name="startDate"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-col relative">
-                            <FormLabel className="text-xs font-medium absolute top-1 left-3 bg-background px-1 z-10 text-muted-foreground">
-                              Start Date
-                            </FormLabel>
-                            <DatePicker
-                              value={field.value ? new Date(field.value) : undefined}
-                              onChange={(date: Date | undefined) => {
-                                field.onChange(date ? date.toISOString() : null);
-                                form.trigger('endDate');
-                              }}
-                              displayFormat="dd/MM/yyyy"
-                              className="w-full pt-3"
-                              placeholder="Select Start Date"
-                            />
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="endDate"
-                        render={({ field }) => {
-                          const currentStartDateStr = form.getValues('startDate') as string | null;
-                          const disabledBefore = (date: Date) => {
-                            if (!currentStartDateStr) return false;
-                            const currentStartDate = new Date(currentStartDateStr);
-                            if (!isValidDate(currentStartDate)) return false;
-                            return date < currentStartDate;
-                          };
-                          return (
-                            <FormItem className="flex flex-col relative">
-                              <FormLabel className="text-xs font-medium absolute top-1 left-3 bg-background px-1 z-10 text-muted-foreground">
-                                End Date
-                              </FormLabel>
-                              <DatePicker
-                                value={field.value ? new Date(field.value) : undefined}
-                                onChange={(date: Date | undefined) => {
-                                  field.onChange(date ? date.toISOString() : null);
-                                  form.trigger('endDate');
-                                }}
-                                displayFormat="dd/MM/yyyy"
-                                className="w-full pt-3"
-                                placeholder="Select End Date"
-                                disabled={disabledBefore}
-                              />
-                              <FormMessage />
-                            </FormItem>
-                          );
-                        }}
-                      />
-                    </div>
-                    <Alert variant="default" className="mt-4">
-                      <AlertDescription className="flex items-center text-sm">
-                        <Icon iconId="faCircleInfoLight" className="h-4 w-4 mr-2 flex-shrink-0" />
-                        <span>
-                          Campaign Duration:{' '}
-                          {calculateDuration(
-                            form.getValues('startDate') as string | null,
-                            form.getValues('endDate') as string | null
-                          )}
-                        </span>
-                      </AlertDescription>
-                    </Alert>
-                  </div>
-                </div>
-                <div className="md:col-span-1">
-                  <FormField
-                    control={form.control}
-                    name="timeZone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Time Zone *</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value || ''}>
-                          <FormControl>
-                            <SelectTrigger className="w-full">
-                              <div className="flex items-center">
-                                <Icon
-                                  iconId="faGlobeLight"
-                                  className="mr-2 h-4 w-4 text-muted-foreground"
-                                />
-                                <SelectValue placeholder="Select timezone...">
-                                  {field.value
-                                    ? timezonesData.find(opt => opt.value === field.value)?.label ||
-                                      field.value
-                                    : 'Select timezone...'}
-                                </SelectValue>
-                              </div>
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {timezonesData.map(option => (
-                              <SelectItem key={option.value} value={option.value}>
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Contact Information</CardTitle>
-                <CardDescription>Primary contact is required.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <h4 className="text-md font-semibold mb-3 text-foreground">Primary Contact *</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-md bg-card/50">
-                    <FormField
-                      control={form.control}
-                      name="primaryContact.firstName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>First Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="John" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="primaryContact.surname"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Surname</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Doe" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="primaryContact.email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input type="email" placeholder="john.doe@example.com" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="primaryContact.position"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Position</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value || PositionEnum.Values.Director}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select position" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {PositionEnum.options.map(pos => (
-                                <SelectItem key={pos} value={pos}>
-                                  {pos}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <h4 className="text-md font-semibold mb-3 text-foreground">
-                    Secondary Contact (Optional)
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-md bg-card/50">
-                    <FormField
-                      control={form.control}
-                      name="secondaryContact.firstName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>First Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Jane" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="secondaryContact.surname"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Surname</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Smith" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="secondaryContact.email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input type="email" placeholder="jane.smith@example.com" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="secondaryContact.position"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Position</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value || PositionEnum.Values.Director}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select position" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {PositionEnum.options.map(pos => (
-                                <SelectItem key={pos} value={pos}>
-                                  {pos}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-4 mt-6">
-                  {contactFields.length > 0 && (
-                    <h4 className="text-md font-semibold mb-3 text-foreground">
-                      Additional Contacts
-                    </h4>
-                  )}
-                  {contactFields.map((item, index) => (
-                    <div
-                      key={item.id}
-                      className="p-4 border rounded-md bg-card/50 relative space-y-4"
-                    >
-                      <IconButtonAction
-                        iconBaseName="faTrashCan"
-                        hoverColorClass="text-destructive"
-                        ariaLabel={`Remove Additional Contact ${index + 1}`}
-                        className="absolute top-2 right-2 h-7 w-7"
-                        onClick={() => removeContact(index)}
-                      />
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                        <FormField
-                          control={form.control}
-                          name={`additionalContacts.${index}.firstName`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>First Name</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Alex" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name={`additionalContacts.${index}.surname`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Surname</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Chen" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name={`additionalContacts.${index}.email`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Email</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="email"
-                                  placeholder="alex.chen@example.com"
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name={`additionalContacts.${index}.position`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Position</FormLabel>
-                              <Select
-                                onValueChange={field.onChange}
-                                value={field.value || PositionEnum.Values.Director}
-                              >
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select position" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {PositionEnum.options.map(pos => (
-                                    <SelectItem key={pos} value={pos}>
-                                      {pos}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="mt-4"
-                  onClick={() =>
-                    appendContact({
-                      firstName: '',
-                      surname: '',
-                      email: '',
-                      position: PositionEnum.Values.Director,
-                    })
-                  }
-                >
-                  <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" /> Add Additional Contact
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Budget & Influencers</CardTitle>
-                <CardDescription>Define the budget and add influencer(s).</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                  <FormField
-                    control={form.control}
-                    name="budget.currency"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Currency *</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={(field.value as string | undefined) || CurrencyEnum.Values.USD}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select currency" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {CurrencyEnum.options.map(curr => (
-                              <SelectItem key={curr} value={curr}>
-                                {curr}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="budget.total"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Total Budget *</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Input
-                              type="text"
-                              placeholder="5,000"
-                              {...field}
-                              value={formatCurrencyInput(
-                                field.value !== null && field.value !== undefined
-                                  ? String(field.value)
-                                  : ''
-                              )}
-                              onChange={e => field.onChange(parseCurrencyInput(e.target.value))}
-                              className="pl-7"
-                            />
-                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
-                              {form.getValues('budget.currency') === 'GBP'
-                                ? '£'
-                                : form.getValues('budget.currency') === 'EUR'
-                                  ? '€'
-                                  : '$'}
-                            </span>
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="budget.socialMedia"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Social Media Budget *</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Input
-                              type="text"
-                              placeholder="1,000"
-                              {...field}
-                              value={formatCurrencyInput(
-                                field.value !== null && field.value !== undefined
-                                  ? String(field.value)
-                                  : ''
-                              )}
-                              onChange={e => field.onChange(parseCurrencyInput(e.target.value))}
-                              className="pl-7"
-                            />
-                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
-                              {form.getValues('budget.currency') === 'GBP'
-                                ? '£'
-                                : form.getValues('budget.currency') === 'EUR'
-                                  ? '€'
-                                  : '$'}
-                            </span>
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="mt-4">
-                  <FormLabel className="text-md font-semibold">Influencer(s) *</FormLabel>
-                  <FormDescription className="mb-4">
-                    Add the influencer(s) you want to work with.
-                  </FormDescription>
-                  <div className="space-y-4">
-                    {fields.map((item, index) => (
-                      <InfluencerEntry
-                        key={item.id}
-                        index={index}
-                        control={form.control}
-                        errors={form.formState.errors}
-                        remove={removeInfluencer}
-                      />
-                    ))}
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="mt-4"
-                    onClick={() =>
-                      appendInfluencer({
-                        id: `new-${Date.now()}`,
-                        platform: PlatformEnumBackend.Values.INSTAGRAM,
-                        handle: '',
-                      })
-                    }
-                  >
-                    <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" /> Add Influencer
-                  </Button>
-                  {form.formState.errors.Influencer?.root && (
-                    <p className="text-sm font-medium text-destructive mt-2">
-                      {form.formState.errors.Influencer.root.message}
-                    </p>
-                  )}
-                  {form.formState.errors.Influencer &&
-                    !form.formState.errors.Influencer.root &&
-                    typeof form.formState.errors.Influencer.message === 'string' && (
-                      <p className="text-sm font-medium text-destructive mt-2">
-                        {form.formState.errors.Influencer.message}
-                      </p>
-                    )}
-                </div>
-              </CardContent>
-            </Card>
-          </form>
-        </Form>
-      </FormProvider>
-    </>
+    </FormProvider>
   );
 }
 
