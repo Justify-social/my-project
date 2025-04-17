@@ -30,6 +30,8 @@ jobs:
 
       - name: Build application
         run: npm run build
+        env:
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
 
       - name: Run Cypress tests
         run: npm run test:e2e

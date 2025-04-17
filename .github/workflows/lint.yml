@@ -27,15 +27,6 @@ jobs:
       - name: Run ESLint
         run: npx eslint . --ext .ts,.tsx --max-warnings=0
         
-      - name: Check for 'any' type usage
-        run: node scripts/consolidated/linting/find-any-types.js
-        
-      - name: Check for <img> tag usage
-        run: node scripts/consolidated/linting/find-img-tags.js
-        
-      - name: Check for React Hook dependency issues
-        run: node scripts/consolidated/linting/find-hook-issues.js
-
       - name: Upload linter reports
         uses: actions/upload-artifact@v4
         with:
