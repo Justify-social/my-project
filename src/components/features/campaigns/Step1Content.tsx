@@ -54,6 +54,8 @@ import { IconButtonAction } from '@/components/ui/button-icon-action';
 import timezonesData from '@/lib/timezones.json'; // Import the static timezone data
 import { logger } from '@/lib/logger';
 import { toast } from 'react-hot-toast';
+import { convertCurrencyUsingApi } from '@/utils/currency'; // Import the new utility
+import { InfluencerCard } from '@/components/ui/card-influencer'; // Import InfluencerCard
 
 // --- Formatting Helpers ---
 
@@ -86,13 +88,64 @@ interface InfluencerEntryProps {
 
 const InfluencerEntry: React.FC<InfluencerEntryProps> = ({ index, control, errors, remove }) => {
   const { watch } = useFormContext<Step1FormData>();
+  // State for Phyllo validation
+  const [isValidating, setIsValidating] = useState(false);
+  const [validationData, setValidationData] = useState<any | null>(null); // TODO: Define proper type for Phyllo data
+  const [validationError, setValidationError] = useState<string | null>(null);
 
-  const _watchedPlatform = watch(`Influencer.${index}.platform`);
-  const _watchedHandle = watch(`Influencer.${index}.handle`);
+  const watchedPlatform = watch(`Influencer.${index}.platform`);
+  const watchedHandle = watch(`Influencer.${index}.handle`);
 
-  // Placeholder values for validation until hook is implemented
-  const _isValidating = false;
-  const _validationData = null;
+  // Placeholder function for Phyllo API call
+  const handleVerifyInfluencer = async () => {
+    if (!watchedPlatform || !watchedHandle) {
+      toast.error('Platform and handle are required.');
+      return;
+    }
+    setIsValidating(true);
+    setValidationError(null);
+    setValidationData(null);
+    logger.info('Verifying influencer via Phyllo...', {
+      platform: watchedPlatform,
+      handle: watchedHandle,
+    });
+
+    try {
+      // TODO: Implement actual fetch to backend API endpoint
+      // const response = await fetch('/api/phyllo/validate-influencer', { ... });
+      // const result = await response.json();
+      // if (response.ok && result.success) {
+      //   setValidationData(result.data);
+      // } else {
+      //   throw new Error(result.error || 'Failed to validate influencer');
+      // }
+
+      // Simulate API call for now
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Simulate success/failure based on handle for testing
+      if (watchedHandle.includes('fail')) {
+        throw new Error('Simulated Phyllo API validation failure.');
+      } else {
+        // Simulate successful validation data
+        setValidationData({
+          id: `phyllo-${Date.now()}`,
+          displayName: `User ${watchedHandle}`,
+          platform: watchedPlatform,
+          handle: watchedHandle,
+          followerCount: Math.floor(Math.random() * 100000),
+          avatarUrl: 'https://via.placeholder.com/150',
+          verified: Math.random() > 0.5,
+        });
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'An unknown error occurred';
+      logger.error('Phyllo validation failed.', { error: message });
+      setValidationError(message);
+      toast.error(`Verification failed: ${message}`);
+    } finally {
+      setIsValidating(false);
+    }
+  };
 
   return (
     <Card className="mb-4 border-border bg-card/50 relative overflow-hidden">
@@ -123,6 +176,7 @@ const InfluencerEntry: React.FC<InfluencerEntryProps> = ({ index, control, error
                     }
                   }}
                   value={field.value ? platformToFrontend(field.value) : undefined}
+                  disabled={isValidating} // Disable while validating
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -147,22 +201,51 @@ const InfluencerEntry: React.FC<InfluencerEntryProps> = ({ index, control, error
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Handle / Username *</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <Input placeholder="@username or channel_name" {...field} />
-                    {/* *** Spinner COMMENTED OUT - Depends on hook *** */}
-                    {/* {isValidating && ( ... )} */}
-                  </div>
-                </FormControl>
+                <div className="flex items-center space-x-2">
+                  <FormControl className="flex-grow">
+                    <Input
+                      placeholder="@username or channel_name"
+                      {...field}
+                      disabled={isValidating} // Disable while validating
+                    />
+                  </FormControl>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleVerifyInfluencer}
+                    disabled={isValidating || !watchedPlatform || !watchedHandle}
+                  >
+                    {isValidating ? (
+                      <Icon iconId="faCircleNotchLight" className="animate-spin h-4 w-4" />
+                    ) : (
+                      <Icon iconId="faCheckLight" className="h-4 w-4" />
+                    )}
+                    <span className="ml-1.5">{isValidating ? 'Verifying...' : 'Verify'}</span>
+                  </Button>
+                </div>
                 <FormMessage>{errors.Influencer?.[index]?.handle?.message}</FormMessage>
-                {/* *** Error description COMMENTED OUT - Depends on hook *** */}
-                {/* {!isValidating && validationData === null && watchedHandle && watchedHandle.length >= 3 && validationError && ( ... )} */}
+                {/* Restore Error description - Display API error */}
+                {!isValidating && validationError && (
+                  <p className="text-sm text-destructive mt-1">{validationError}</p>
+                )}
               </FormItem>
             )}
           />
         </div>
-        {/* *** InfluencerCard display COMMENTED OUT - Depends on hook *** */}
-        {/* {!isValidating && validationData && ( ... )} */}
+        {/* Restore InfluencerCard display - Show card on successful validation */}
+        {!isValidating && validationData && (
+          <div className="mt-4 border-t pt-4">
+            <InfluencerCard
+              platform={validationData.platform}
+              handle={validationData.handle}
+              displayName={validationData.displayName}
+              followerCount={validationData.followerCount}
+              avatarUrl={validationData.avatarUrl}
+              verified={validationData.verified}
+            />
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -253,6 +336,12 @@ function Step1Content() {
   const router = useRouter();
   const initialDataLoaded = useRef(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // State for timezone detection
+  const [detectedTimezone, setDetectedTimezone] = useState<string | null>(null);
+  const [isDetectingTimezone, setIsDetectingTimezone] = useState<boolean>(false);
+  // State for currency conversion display
+  const [convertedTotalBudget, setConvertedTotalBudget] = useState<string | null>(null);
+  const [convertedSocialMediaBudget, setConvertedSocialMediaBudget] = useState<string | null>(null);
 
   const form = useForm<Step1FormData>({
     resolver: zodResolver(Step1ValidationSchema),
@@ -441,7 +530,9 @@ function Step1Content() {
         // saveProgress should have shown an error toast
       }
     } catch (error) {
-      logger.error('[Step 1] Error during submission:', error);
+      logger.error('[Step 1] Error during submission:', {
+        error: error instanceof Error ? error : String(error),
+      });
       toast.error('An unexpected error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -478,13 +569,84 @@ function Step1Content() {
         return false;
       }
     } catch (error) {
-      logger.error('[Step 1] Error during manual save:', error);
+      logger.error('[Step 1] Error during manual save:', {
+        error: error instanceof Error ? error : String(error),
+      });
       toast.error('An unexpected error occurred during save.');
       return false;
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // --- Currency Conversion Effect ---
+  // Watch the specific budget fields
+  const [watchedTotal, watchedSocial, watchedCurrency] = form.watch([
+    'budget.total',
+    'budget.socialMedia',
+    'budget.currency',
+  ]);
+  // Process watched values
+  const totalBudgetRaw = parseFloat(parseCurrencyInput(String(watchedTotal || '0')));
+  const socialMediaBudgetRaw = parseFloat(parseCurrencyInput(String(watchedSocial || '0')));
+  const selectedCurrency = watchedCurrency || CurrencyEnum.Values.USD;
+
+  useEffect(() => {
+    let isMounted = true; // Prevent state update on unmounted component
+
+    const updateConvertedValues = async () => {
+      if (selectedCurrency === 'USD') {
+        if (isMounted) {
+          setConvertedTotalBudget(null);
+          setConvertedSocialMediaBudget(null);
+        }
+        return;
+      }
+
+      // Convert Total Budget
+      if (!isNaN(totalBudgetRaw) && totalBudgetRaw > 0) {
+        const convertedTotal = await convertCurrencyUsingApi(
+          totalBudgetRaw,
+          selectedCurrency,
+          'USD'
+        );
+        if (isMounted) {
+          setConvertedTotalBudget(
+            convertedTotal !== null
+              ? `Approx. $${convertedTotal.toLocaleString()} USD`
+              : 'Conversion unavailable'
+          );
+        }
+      } else {
+        if (isMounted) setConvertedTotalBudget(null);
+      }
+
+      // Convert Social Media Budget
+      if (!isNaN(socialMediaBudgetRaw) && socialMediaBudgetRaw > 0) {
+        const convertedSocial = await convertCurrencyUsingApi(
+          socialMediaBudgetRaw,
+          selectedCurrency,
+          'USD'
+        );
+        if (isMounted) {
+          setConvertedSocialMediaBudget(
+            convertedSocial !== null
+              ? `Approx. $${convertedSocial.toLocaleString()} USD`
+              : 'Conversion unavailable'
+          );
+        }
+      } else {
+        if (isMounted) setConvertedSocialMediaBudget(null);
+      }
+    };
+
+    updateConvertedValues();
+
+    return () => {
+      isMounted = false;
+    }; // Cleanup function
+    // Rerun effect when raw values or currency change
+  }, [totalBudgetRaw, socialMediaBudgetRaw, selectedCurrency]);
 
   if (isLoading || !initialDataLoaded.current) {
     return <WizardSkeleton step={1} />;
@@ -638,6 +800,8 @@ function Step1Content() {
         onNext={onSubmitAndNavigate}
         onSave={handleSave}
         isLoadingNext={isSubmitting}
+        onStepClick={handleStepClick}
+        onBack={null}
       />
     </FormProvider>
   );

@@ -419,6 +419,8 @@ function Step2Content() {
         onNext={onSubmitAndNavigate}
         onSave={handleSave}
         isLoadingNext={form.formState.isSubmitting || wizard.isLoading}
+        onStepClick={handleStepClick}
+        onBack={handleBack}
       />
       <Form {...form}>
         <form

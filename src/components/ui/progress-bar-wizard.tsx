@@ -64,7 +64,7 @@ export interface ProgressBarWizardProps {
   /** Optional: Add custom class names */
   className?: string;
   /** Function to get the current step's validated form data */
-  getCurrentFormData: () => unknown | null; // Changed any to unknown
+  getCurrentFormData?: () => unknown | null; // Changed any to unknown - NOW OPTIONAL
   onPrevious?: () => void; // Added for consistency
   canGoPrevious?: boolean; // Control previous button state
   isLoadingNext?: boolean; // Optional loading state for Next button

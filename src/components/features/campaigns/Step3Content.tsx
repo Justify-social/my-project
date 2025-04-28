@@ -146,6 +146,52 @@ function Step3Content() {
     }
   };
 
+  // NEW: Handler for the manual Save button
+  const handleSave = async (): Promise<boolean> => {
+    console.log('[Step 3] Attempting Manual Save...');
+    const isValid = await form.trigger();
+    if (!isValid) {
+      console.warn('[Step 3] Validation failed for manual save.');
+      toast.error('Please fix the errors before saving.');
+      return false;
+    }
+    const data = form.getValues();
+    console.log('[Step 3] Form data is valid for manual save.');
+
+    // Prepare payload, keeping currentStep as 3
+    const payload: Partial<DraftCampaignData> = {
+      demographics: data.demographics,
+      locations: data.locations,
+      targeting: data.targeting,
+      competitors: data.competitors,
+      step3Complete: form.formState.isValid, // Use current validation state
+      currentStep: 3,
+    };
+
+    console.log('[Step 3] Payload prepared for manual save:', payload);
+
+    try {
+      // Only call saveProgress, do not update local state or navigate
+      const saveSuccess = await wizard.saveProgress(payload);
+
+      if (saveSuccess) {
+        console.log('[Step 3] Manual save successful!');
+        toast.success('Progress saved!');
+        // Optionally reset dirty state if needed
+        // form.reset(data, { keepValues: true, keepDirty: false, keepErrors: true });
+        return true;
+      } else {
+        console.error('[Step 3] Manual save failed.');
+        // saveProgress should show specific error
+        return false;
+      }
+    } catch (error) {
+      console.error('[Step 3] Error during manual save:', error);
+      toast.error('An unexpected error occurred during save.');
+      return false;
+    }
+  };
+
   // Keyword Input Handlers
   const currentKeywords = Array.isArray(watchedValues.targeting?.keywords)
     ? watchedValues.targeting.keywords
@@ -275,6 +321,7 @@ function Step3Content() {
         isNextDisabled={!form.formState.isValid}
         isNextLoading={form.formState.isSubmitting || wizard.isLoading}
         getCurrentFormData={form.getValues}
+        onSave={handleSave}
       />
       <Form {...form}>
         <form

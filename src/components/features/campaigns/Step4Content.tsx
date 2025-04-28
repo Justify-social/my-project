@@ -179,6 +179,51 @@ function Step4Content() {
     }
   };
 
+  // NEW: Handler for the manual Save button
+  const handleSave = async (): Promise<boolean> => {
+    console.log('[Step 4] Attempting Manual Save...');
+    // Explicitly trigger validation for manual save
+    const isValid = await form.trigger();
+    if (!isValid) {
+      console.warn('[Step 4] Validation failed for manual save.');
+      toast.error('Please fix the errors before saving.');
+      return false;
+    }
+    const data = form.getValues();
+    console.log('[Step 4] Form data is valid for manual save.');
+
+    // Prepare payload, keeping currentStep as 4
+    const payload: Partial<DraftCampaignData> = {
+      assets: data.assets,
+      // Ensure deprecated fields are not included
+      step4Complete: form.formState.isValid, // Use current validation state
+      currentStep: 4,
+    };
+
+    console.log('[Step 4] Payload prepared for manual save:', payload);
+
+    try {
+      // Only call saveProgress
+      const saveSuccess = await wizard.saveProgress(payload);
+
+      if (saveSuccess) {
+        console.log('[Step 4] Manual save successful!');
+        toast.success('Progress saved!');
+        // Optionally reset dirty state
+        // form.reset(data, { keepValues: true, keepDirty: false, keepErrors: true });
+        return true;
+      } else {
+        console.error('[Step 4] Manual save failed.');
+        // saveProgress should show specific error
+        return false;
+      }
+    } catch (error) {
+      console.error('[Step 4] Error during manual save:', error);
+      toast.error('An unexpected error occurred during save.');
+      return false;
+    }
+  };
+
   // Render Logic
   if (wizard.isLoading && !wizard.wizardState && wizard.campaignId) {
     // Revert to using LoadingSkeleton
@@ -197,6 +242,7 @@ function Step4Content() {
         isNextDisabled={form.watch('assets')?.length === 0}
         isNextLoading={form.formState.isSubmitting || wizard.isLoading}
         getCurrentFormData={form.getValues}
+        onSave={handleSave}
       />
       <Form {...form}>
         <form

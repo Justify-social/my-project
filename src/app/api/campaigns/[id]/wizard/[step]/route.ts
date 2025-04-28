@@ -4,16 +4,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { EnumTransformers } from '@/utils/enum-transformers';
 import { connectToDatabase, prisma } from '@/lib/db';
 import { auth } from '@clerk/nextjs/server';
-/*
-// TODO: Restore correct schema imports
+// Import the specific schemas needed (adjust path if necessary)
 import {
   Step1BaseSchema,
   Step2BaseSchema,
   Step3BaseSchema,
   Step4BaseSchema,
-  Step5BaseSchema,
-} from '@/lib/validations/campaign';
-*/
+  Step5BaseSchema, // Assuming this exists for step 5 logic
+} from '@/components/features/campaigns/types'; // Using types.ts as source
 
 // Define interface for influencer data locally if not exported
 interface ApiInfluencer {
@@ -60,7 +58,7 @@ export async function PATCH(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const _validationResult: z.SafeParseReturnType<any, any> = { success: true, data: body }; // Temporarily assume success
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const dataToSave: any = body; // Temporarily use raw body
+    let dataToSave: any = body; // Temporarily use raw body - CHANGED TO LET
     const mappedData: Prisma.CampaignWizardUpdateInput = {
       updatedAt: new Date(),
       currentStep: step,
@@ -74,28 +72,29 @@ export async function PATCH(
     if (step >= 5) mappedData.isComplete = true;
 
     // Use the appropriate base schema for validation in each step
+    let validationResult: z.SafeParseReturnType<any, any>;
     switch (step) {
       case 1:
-        // TODO: Restore validation: validationResult = Step1BaseSchema.partial().safeParse(body);
+        validationResult = Step1BaseSchema.partial().safeParse(body);
         break;
       case 2:
-        // TODO: Restore validation: validationResult = Step2BaseSchema.partial().safeParse(body);
+        validationResult = Step2BaseSchema.partial().safeParse(body);
         break;
       case 3:
-        // TODO: Restore validation: validationResult = Step3BaseSchema.partial().safeParse(body);
+        validationResult = Step3BaseSchema.partial().safeParse(body);
         break;
       case 4:
-        // TODO: Restore validation: validationResult = Step4BaseSchema.partial().safeParse(body);
+        validationResult = Step4BaseSchema.partial().safeParse(body);
         break;
       case 5:
-        // TODO: Restore validation: validationResult = Step5BaseSchema.partial().safeParse(body);
+        // Assuming Step5BaseSchema exists and is appropriate for PATCH
+        validationResult = Step5BaseSchema.partial().safeParse(body);
         break;
       default:
         return NextResponse.json({ error: `Invalid step number: ${step}` }, { status: 400 });
     }
 
-    // Temporarily disable validation failure check
-    /*
+    // Check validation result
     if (!validationResult.success) {
       console.error(`Step ${step} Validation failed:`, validationResult.error.format());
       return NextResponse.json(
@@ -104,11 +103,8 @@ export async function PATCH(
       );
     }
     dataToSave = validationResult.data;
-    */
-    console.log(
-      `Validated Step ${step} data (Validation Skipped):`,
-      JSON.stringify(dataToSave, null, 2)
-    );
+
+    console.log(`Validated Step ${step} data:`, JSON.stringify(dataToSave, null, 2));
 
     // --- Map validated data (needs correct types based on dataToSave) ---
     // TODO: Ensure correct type mapping after fixing validationResult/dataToSave types
