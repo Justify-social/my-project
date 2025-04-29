@@ -135,18 +135,7 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
       id: 'influencers',
       label: 'Influencers',
       icon: 'appInfluencers',
-      children: [
-        {
-          id: 'influencers-marketplace',
-          label: 'Marketplace',
-          href: '/influencers/marketplace',
-        },
-        {
-          id: 'influencers-list',
-          label: 'List',
-          href: '/influencers',
-        },
-      ],
+      href: '/influencer-marketplace',
     },
     { id: 'mmm', href: '/mmm', label: 'MMM', icon: 'appMmm' },
     { id: 'help', href: '/help', label: 'Help', icon: 'appHelp' },
@@ -156,7 +145,7 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
   const settingsItemDef: SidebarItemDef = {
     id: 'settings',
     label: 'Settings',
-    href: '/settings',
+    href: '/settings/profile',
     icon: 'appSettings',
   };
 

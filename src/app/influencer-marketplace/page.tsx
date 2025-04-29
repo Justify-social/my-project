@@ -1,19 +1,18 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { influencerService } from '@/services/influencer'; // Ensure service is imported
+import { useWizard } from '@/components/features/campaigns/WizardContext';
+import { influencerService } from '@/services/influencer';
 import { InfluencerSummary } from '@/types/influencer';
-// import { useWizard } from '@/components/features/campaigns/WizardContext'; // Context interaction later
-import ConditionalLayout from '@/components/layouts/conditional-layout';
+import { PlatformEnum } from '@/types/enums';
+import { logger } from '@/utils/logger';
+
+// Import UI Components
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon/icon';
 import { MarketplaceList } from '@/components/features/influencers/MarketplaceList';
-import {
-  MarketplaceFilters,
-  FilterValues,
-} from '@/components/features/influencers/MarketplaceFilters'; // Import Filters component and type
-import { logger } from '@/utils/logger'; // Import logger
+import { MarketplaceFilters } from '@/components/features/influencers/MarketplaceFilters';
 import {
   Pagination,
   PaginationContent,
@@ -21,38 +20,101 @@ import {
   PaginationPrevious,
   PaginationNext,
 } from '@/components/ui/pagination';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { toast } from 'react-hot-toast';
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetClose,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from '@/components/ui/sheet';
 
-// Define initial empty filters state
-const initialFilters: FilterValues = {
-  platforms: undefined,
-  minScore: undefined,
-  maxScore: undefined,
-  minFollowers: undefined,
-  maxFollowers: undefined,
-  audienceAge: undefined,
-  audienceLocation: undefined,
-  isPhylloVerified: undefined,
-};
+// Define the shape of filters state
+export interface FiltersState {
+  platforms?: PlatformEnum[];
+  minScore?: number;
+  maxScore?: number;
+  minFollowers?: number;
+  maxFollowers?: number;
+  audienceAge?: string;
+  audienceLocation?: string;
+  isPhylloVerified?: boolean;
+}
 
-export default function MarketplacePage() {
+function MarketplacePage() {
   const router = useRouter();
-  // const { wizardState, updateWizardState } = useWizard(); // Integrate later
+  const wizard = useWizard();
 
+  const isWizardJourney = useMemo(
+    () => wizard?.wizardState?.isFindingInfluencers === true,
+    [wizard?.wizardState?.isFindingInfluencers]
+  );
+
+  // Component State (Keep appliedFilters separate)
   const [influencers, setInfluencers] = useState<InfluencerSummary[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true); // Start loading
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalInfluencers, setTotalInfluencers] = useState<number>(0);
-  const [limit, setLimit] = useState<number>(12); // Default page size
-  const [showFilters, setShowFilters] = useState<boolean>(false); // State for drawer visibility
-  const [activeFilters, setActiveFilters] = useState<FilterValues>(initialFilters); // State for applied filters
-  const [isFiltersOpen, setIsFiltersOpen] = useState<boolean>(false);
+  const [limit, setLimit] = useState<number>(12);
+  const [isFiltersSheetOpen, setIsFiltersSheetOpen] = useState<boolean>(false);
+  const [appliedFilters, setAppliedFilters] = useState<FiltersState>(() => {
+    if (isWizardJourney && wizard?.wizardState) {
+      const initialFilters: FiltersState = {};
+      if (wizard.wizardState.targetPlatforms && wizard.wizardState.targetPlatforms.length > 0) {
+        initialFilters.platforms = wizard.wizardState.targetPlatforms as PlatformEnum[];
+      }
+      logger.info(
+        '[MarketplacePage] Initializing appliedFilters from Wizard context',
+        initialFilters
+      );
+      return initialFilters;
+    }
+    logger.info('[MarketplacePage] Initializing with default empty appliedFilters.');
+    return {};
+  });
 
-  // TODO: Add state for filters and filter drawer visibility later (Ticket 1.6, 1.7)
-  // const [showFilters, setShowFilters] = useState<boolean>(false);
-  // const [filters, setFilters] = useState<FiltersState>({});
+  // --- Data Fetching ---
+  const fetchData = useCallback(
+    async (page = 1, filtersToUse: FiltersState) => {
+      logger.info(`[MarketplacePage] Fetching data for page ${page}`, { filters: filtersToUse });
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await influencerService.getInfluencers({
+          pagination: { page, limit },
+          filters: filtersToUse,
+        });
+        setInfluencers(response.influencers);
+        setCurrentPage(response.page);
+        setTotalInfluencers(response.total);
+        setLimit(response.limit);
+        logger.info(
+          `[MarketplacePage] Data fetch successful. Found ${response.total} influencers.`
+        );
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Failed to load influencers.';
+        logger.error('[MarketplacePage] Data fetch error:', err);
+        setError(message);
+        setInfluencers([]);
+        setTotalInfluencers(0);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [limit]
+  );
 
+  // Fetch data on initial load & when appliedFilters or currentPage change
+  useEffect(() => {
+    fetchData(currentPage, appliedFilters);
+  }, [currentPage, appliedFilters, fetchData]);
+
+  // --- Event Handlers ---
   const handleSelectToggle = useCallback((id: string) => {
     setSelectedIds(prev =>
       prev.includes(id) ? prev.filter(selectedId => selectedId !== id) : [...prev, id]
@@ -66,123 +128,125 @@ export default function MarketplacePage() {
     [router]
   );
 
-  // Fetch data function - updated to accept filters
-  const fetchData = useCallback(
-    async (page = 1, currentFilters: FilterValues = initialFilters) => {
-      setIsLoading(true);
-      setError(null);
-      // Clean up filters before sending to API (remove undefined/empty values)
-      const cleanFilters = Object.entries(currentFilters).reduce((acc, [key, value]) => {
-        if (value !== undefined && value !== '' && (!Array.isArray(value) || value.length > 0)) {
-          acc[key as keyof FilterValues] = value;
-        }
-        return acc;
-      }, {} as FilterValues);
-
-      logger.info(`[MarketplacePage] Fetching data for page ${page} with filters:`, cleanFilters);
-
-      try {
-        // Pass the cleaned filters to the service
-        const response = await influencerService.getInfluencers({
-          pagination: { page, limit },
-          filters: cleanFilters,
-        });
-        setInfluencers(response.influencers);
-        setTotalInfluencers(response.total);
-        setCurrentPage(response.page);
-        setLimit(response.limit);
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'Failed to load influencers.';
-        logger.error('[MarketplacePage] Error fetching influencers:', message);
-        setError(message);
-        setInfluencers([]);
-        setTotalInfluencers(0);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [limit]
-  );
-
-  // Handler for applying filters from the drawer
-  const handleApplyFilters = useCallback(
-    (newFilters: FilterValues) => {
-      logger.info('[MarketplacePage] Applying filters:', newFilters);
-      setActiveFilters(newFilters);
-      setCurrentPage(1); // Reset to page 1 is crucial when filters change
-      fetchData(1, newFilters); // Fetch data with the new filters applied
-      setShowFilters(false);
-    },
-    [fetchData]
-  );
-
-  // Handler for resetting filters
-  const handleResetFilters = useCallback(() => {
-    logger.info('[MarketplacePage] Resetting filters');
-    setActiveFilters(initialFilters);
-    setCurrentPage(1);
-    fetchData(1, initialFilters);
-    // Optionally keep drawer open: setShowFilters(true);
-  }, [fetchData]);
-
-  // Handle page changes
   const handlePageChange = useCallback(
     (newPage: number) => {
-      fetchData(newPage, activeFilters);
+      if (newPage >= 1 && newPage <= Math.ceil(totalInfluencers / limit)) {
+        setCurrentPage(newPage);
+      }
     },
-    [fetchData, activeFilters]
+    [totalInfluencers, limit]
   );
 
-  // TODO: Implement handleAddToCampaign
+  // Apply filters handler - Called by MarketplaceFilters via onApply prop
+  const handleApplyFilters = useCallback((filtersFromComponent: FiltersState) => {
+    logger.info('[MarketplacePage] Applying filters:', filtersFromComponent);
+    setAppliedFilters(filtersFromComponent);
+    setCurrentPage(1);
+    setIsFiltersSheetOpen(false);
+  }, []);
+
+  // Reset filters handler - Called by MarketplaceFilters via onReset prop
+  const handleResetFilters = useCallback(() => {
+    logger.info('[MarketplacePage] Resetting filters.');
+    const initialFilters =
+      isWizardJourney && wizard?.wizardState
+        ? {
+            platforms: wizard.wizardState.targetPlatforms as PlatformEnum[],
+          }
+        : {};
+    setAppliedFilters(initialFilters);
+    setCurrentPage(1);
+    setIsFiltersSheetOpen(false);
+  }, [isWizardJourney, wizard?.wizardState]);
+
+  // Handler for adding selected influencers back to the wizard
   const handleAddToCampaign = useCallback(() => {
-    // Logic depends on whether coming from Wizard or direct navigation
-    // updateWizardState({ selectedInfluencerIds: selectedIds, isFindingInfluencers: false });
-    // router.push('/campaigns/wizard/step-X'); // Navigate back to Wizard Review step
-    logger.info('[MarketplacePage] Add to campaign clicked with IDs:', selectedIds);
-  }, [selectedIds, router /*, updateWizardState */]);
+    if (isWizardJourney && wizard && selectedIds.length > 0) {
+      logger.info(
+        `[MarketplacePage] Adding ${selectedIds.length} influencers to campaign via Wizard context.`
+      );
+      wizard.updateWizardState({ selectedInfluencerIds: selectedIds, isFindingInfluencers: false });
+      if (wizard.campaignId) {
+        router.push(`/campaigns/wizard/step-5?id=${wizard.campaignId}`);
+      } else {
+        logger.error(
+          '[MarketplacePage] Cannot navigate back to wizard: campaignId is missing from context.'
+        );
+        toast.error('Error returning to campaign wizard (missing campaign ID).');
+      }
+    } else {
+      logger.warn(
+        '[MarketplacePage] AddToCampaign called outside of wizard journey or no selection/context.'
+      );
+    }
+  }, [wizard, selectedIds, router, isWizardJourney]);
 
-  // Initial data fetch on mount
-  useEffect(() => {
-    fetchData(1, activeFilters);
-  }, [fetchData]); // Trigger only once on mount based on initial fetchData instance
-
+  // Calculate total pages
   const totalPages = Math.ceil(totalInfluencers / limit);
 
+  // --- Render Logic ---
   return (
-    <ConditionalLayout>
-      <div className="container mx-auto px-4 py-6">
-        {/* Header Area */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-semibold">Influencer Marketplace</h1>
-          <div className="flex items-center space-x-2">
-            {/* Filter Button */}
-            <Button variant="outline" onClick={() => setIsFiltersOpen(true)}>
-              <Icon iconId="faFilterLight" className="mr-2 h-4 w-4" /> Filters
-            </Button>
+    <div className="container mx-auto px-4 py-6">
+      <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
+        <h1 className="text-2xl font-semibold">Influencer Marketplace</h1>
+        <div className="flex items-center gap-2">
+          <Sheet open={isFiltersSheetOpen} onOpenChange={setIsFiltersSheetOpen}>
+            <SheetTrigger asChild>
+              <Button variant="outline">
+                <Icon iconId="faFilterLight" className="mr-2 h-4 w-4" />
+                Filters
+              </Button>
+            </SheetTrigger>
+            <SheetContent className="w-80 md:w-96 flex flex-col" side="right">
+              <SheetHeader className="mb-4 border-b pb-4">
+                <SheetTitle>Filter Influencers</SheetTitle>
+                <SheetDescription>Refine the list based on your criteria.</SheetDescription>
+              </SheetHeader>
+              <div className="flex-grow overflow-y-auto pr-6">
+                <MarketplaceFilters
+                  isOpen={isFiltersSheetOpen}
+                  onOpenChange={setIsFiltersSheetOpen}
+                  currentFilters={appliedFilters}
+                  onApplyFilters={handleApplyFilters}
+                  onResetFilters={handleResetFilters}
+                />
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          {isWizardJourney && (
             <Button onClick={handleAddToCampaign} disabled={selectedIds.length === 0}>
-              Add {selectedIds.length > 0 ? `${selectedIds.length} ` : ''}to Campaign
+              Add {selectedIds.length > 0 ? `(${selectedIds.length}) ` : ''}to Campaign
             </Button>
-          </div>
+          )}
         </div>
+      </div>
 
-        {/* Content Area - Use MarketplaceList */}
-        <MarketplaceList
-          influencers={influencers}
-          isLoading={isLoading}
-          error={error}
-          selectedIds={selectedIds}
-          onSelectToggle={handleSelectToggle}
-          onViewProfile={handleViewProfile}
-          itemsPerPage={limit}
-        />
+      {error && (
+        <Alert variant="destructive" className="mb-4">
+          <Icon iconId="faExclamationTriangle" className="h-4 w-4" />
+          <AlertTitle>Error Loading Influencers</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
-        {/* Pagination - Using Shadcn structure */}
-        {totalPages > 1 && (
+      <MarketplaceList
+        influencers={influencers}
+        isLoading={isLoading}
+        error={null}
+        selectedIds={selectedIds}
+        onSelectToggle={handleSelectToggle}
+        onViewProfile={handleViewProfile}
+        itemsPerPage={limit}
+      />
+
+      {totalPages > 1 && !isLoading && (
+        <div className="mt-6 flex justify-center">
           <Pagination>
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
-                  onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+                  onClick={() => handlePageChange(currentPage - 1)}
                   className={currentPage <= 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                   aria-disabled={currentPage <= 1}
                 />
@@ -194,7 +258,7 @@ export default function MarketplacePage() {
               </PaginationItem>
               <PaginationItem>
                 <PaginationNext
-                  onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+                  onClick={() => handlePageChange(currentPage + 1)}
                   className={
                     currentPage >= totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'
                   }
@@ -203,17 +267,10 @@ export default function MarketplacePage() {
               </PaginationItem>
             </PaginationContent>
           </Pagination>
-        )}
-
-        {/* Filter Drawer - Pass state and handlers */}
-        <MarketplaceFilters
-          isOpen={isFiltersOpen}
-          onOpenChange={setIsFiltersOpen}
-          currentFilters={activeFilters}
-          onApplyFilters={handleApplyFilters}
-          onResetFilters={handleResetFilters}
-        />
-      </div>
-    </ConditionalLayout>
+        </div>
+      )}
+    </div>
   );
 }
+
+export default MarketplacePage;

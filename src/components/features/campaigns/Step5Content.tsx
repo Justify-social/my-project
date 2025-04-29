@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWizard } from '@/components/features/campaigns/WizardContext';
-import { DraftCampaignData, SubmissionPayloadData } from '@/components/features/campaigns/types';
+import { DraftCampaignData, SubmissionPayloadData } from './types';
 import { toast } from 'react-hot-toast';
 import { WizardSkeleton } from '@/components/ui/loading-skeleton';
 import { Icon } from '@/components/ui/icon/icon';
@@ -22,13 +22,23 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Accordion, AccordionContent, AccordionItem } from '@/components/ui/accordion';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { InfluencerCard } from '@/components/ui/card-influencer';
 import { ProgressBarWizard } from '@/components/ui/progress-bar-wizard';
 import { IconButtonAction } from '@/components/ui/button-icon-action';
 import { AssetCard } from '@/components/ui/card-asset';
+import { InfluencerSummary } from '@/types/influencer';
+import { influencerService } from '@/services/influencer';
+import { logger } from '@/lib/logger';
+import { PlatformEnum } from '@/types/enums';
+import { Platform as PlatformEnumBackend } from '@prisma/client';
 
 // --- Data Display Components ---
 
@@ -52,46 +62,40 @@ const SummarySection: React.FC<SummarySectionProps> = ({
       value={`step-${stepNumber}`}
       className="group border rounded-lg mb-2 overflow-hidden"
     >
-      <div
+      <AccordionTrigger
         className={cn(
-          'flex justify-between items-center w-full p-4 cursor-pointer hover:bg-accent/10',
-          isComplete ? 'bg-green-50/50' : 'bg-card'
+          'flex justify-between items-center w-full p-4 hover:bg-accent/10 text-left text-lg font-semibold text-primary',
+          isComplete ? 'bg-green-50/50' : 'bg-card',
+          '[&[data-state=open]>div>button]:bg-muted'
         )}
-        onClick={() => {
-          // Toggle accordion state manually if needed, or rely on AccordionItem's internal state
-        }}
       >
-        <div className="flex flex-1 items-center text-left text-lg font-semibold text-primary p-0 mr-4">
-          <div className="flex items-center">
-            <Badge
-              variant={isComplete ? 'default' : 'secondary'}
-              className={cn('mr-3 h-6 w-6 justify-center', isComplete && 'bg-green-600 text-white')}
-            >
-              {stepNumber}
-            </Badge>
-            <span>{title}</span>
-            {isComplete && (
-              <Icon
-                iconId="faCircleCheckSolid"
-                className="ml-2 h-4 w-4 text-green-600 flex-shrink-0"
-              />
-            )}
-          </div>
+        <div className="flex flex-1 items-center">
+          <Badge
+            variant={isComplete ? 'default' : 'secondary'}
+            className={cn('mr-3 h-6 w-6 justify-center', isComplete && 'bg-green-600 text-white')}
+          >
+            {stepNumber}
+          </Badge>
+          <span>{title}</span>
+          {isComplete && (
+            <Icon
+              iconId="faCircleCheckSolid"
+              className="ml-2 h-4 w-4 text-green-600 flex-shrink-0"
+            />
+          )}
         </div>
-
-        <div className="flex items-center flex-shrink-0">
+        <div className="flex items-center flex-shrink-0 mr-2">
           <IconButtonAction
             iconBaseName="faPenToSquare"
             hoverColorClass="text-accent"
             ariaLabel={`Edit ${title}`}
-            className="mr-2"
             onClick={e => {
               e.stopPropagation();
               onEdit();
             }}
           />
         </div>
-      </div>
+      </AccordionTrigger>
       <AccordionContent className="p-4 pt-0 border-t">
         <div className="pl-[calc(1rem_+_1.5rem_+_0.75rem)] mt-2">{children}</div>
       </AccordionContent>
@@ -138,142 +142,102 @@ const DataItem: React.FC<DataItemProps> = ({ label, value, children, className }
 
 // --- Review Sub-Components ---
 
-const Step1Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
-    <DataItem label="Campaign Name" value={data.name} />
-    <DataItem label="Business Goal" value={data.businessGoal} className="md:col-span-2" />
-    <DataItem
-      label="Start Date"
-      value={data.startDate ? new Date(data.startDate).toLocaleDateString() : null}
-    />
-    <DataItem
-      label="End Date"
-      value={data.endDate ? new Date(data.endDate).toLocaleDateString() : null}
-    />
-    <DataItem label="Timezone" value={data.timeZone} />
-    <DataItem label="Currency" value={data.budget?.currency} />
-    <DataItem label="Total Budget" value={data.budget?.total?.toLocaleString()} />
-    <DataItem label="Social Media Budget" value={data.budget?.socialMedia?.toLocaleString()} />
-    <DataItem
-      label="Primary Contact Name"
-      value={`${data.primaryContact?.firstName} ${data.primaryContact?.surname}`}
-    />
-    <DataItem label="Primary Contact Email" value={data.primaryContact?.email} />
-    <DataItem label="Primary Contact Position" value={data.primaryContact?.position} />
-    {data.secondaryContact && (
-      <>
-        <DataItem
-          label="Secondary Contact Name"
-          value={`${data.secondaryContact?.firstName} ${data.secondaryContact?.surname}`}
-        />
-        <DataItem label="Secondary Contact Email" value={data.secondaryContact?.email} />
-        <DataItem label="Secondary Contact Position" value={data.secondaryContact?.position} />
-      </>
-    )}
-    <div className="md:col-span-2">
-      <p className="text-sm font-medium text-muted-foreground mb-1">Influencers</p>
-      {data.Influencer && data.Influencer.length > 0 ? (
-        <div className="space-y-2">
-          {data.Influencer.map((inf, idx) => (
-            <InfluencerCard
-              key={idx}
-              platform={inf.platform}
-              handle={inf.handle}
-              className="bg-muted/30"
-            />
-          ))}
-        </div>
+// Mapping function: Backend Enum -> Frontend Enum STRING VALUE (UPPERCASE)
+const mapBackendPlatformToFrontendString = (
+  backendPlatform: PlatformEnumBackend | undefined | null
+): string | undefined => {
+  // Return type is now string
+  if (!backendPlatform) return undefined;
+  switch (backendPlatform) {
+    // Return the STRING VALUE of the frontend enum member
+    case PlatformEnumBackend.INSTAGRAM:
+      return PlatformEnum.Instagram; // Returns 'INSTAGRAM'
+    case PlatformEnumBackend.YOUTUBE:
+      return PlatformEnum.YouTube; // Returns 'YOUTUBE'
+    case PlatformEnumBackend.TIKTOK:
+      return PlatformEnum.TikTok; // Returns 'TIKTOK'
+    default:
+      logger.warn(`[Step5Content] Unknown backend platform encountered: ${backendPlatform}`);
+      return undefined;
+  }
+};
+
+const Step1Review: React.FC<{
+  data: DraftCampaignData;
+  marketplaceInfluencers: InfluencerSummary[] | null;
+}> = ({ data, marketplaceInfluencers }) => {
+  const allInfluencersForDisplay = [
+    // Map marketplace influencers (extract first platform string value)
+    ...(marketplaceInfluencers || []).map(inf => ({
+      key: inf.id,
+      // Extract the string value (e.g., 'INSTAGRAM') from the PlatformEnum member
+      platform: inf.platforms?.[0], // Directly use the enum value which is already the UPPERCASE string
+      handle: inf.handle,
+      name: inf.name,
+      followersCount: inf.followersCount,
+      avatarUrl: inf.avatarUrl,
+      isPhylloVerified: inf.isPhylloVerified,
+      id: inf.id,
+    })),
+    // Map manually added influencers (convert backend enum to frontend string value)
+    ...(data.Influencer || [])
+      .filter(manualInf => {
+        // Map manual platform (Backend) to Frontend Enum STRING VALUE for comparison
+        const manualPlatformFrontendString = mapBackendPlatformToFrontendString(
+          manualInf.platform as PlatformEnumBackend
+        );
+        // Check if this manual entry is already represented by a marketplace entry (handle + platform match)
+        return !marketplaceInfluencers?.some(
+          mpInf =>
+            mpInf.handle === manualInf.handle &&
+            manualPlatformFrontendString && // Ensure mapping was successful
+            // Compare the string value from the marketplace summary with the mapped string value
+            mpInf.platforms?.[0] === manualPlatformFrontendString
+        );
+      })
+      .map((inf, idx) => ({
+        key: inf.id || `manual-${idx}`,
+        // Map manual entry platform (Backend) to Frontend Enum STRING VALUE
+        platform: mapBackendPlatformToFrontendString(inf.platform as PlatformEnumBackend),
+        handle: inf.handle,
+        name: inf.handle, // Use handle as name if missing
+        followersCount: undefined,
+        avatarUrl: undefined,
+        isPhylloVerified: undefined,
+        id: inf.id || `manual-${idx}`,
+      })),
+  ]
+    // Filter out any influencers where the platform string couldn't be mapped or is undefined
+    // Ensure the type passed to InfluencerCard is compatible (likely string | PlatformEnum)
+    .filter(
+      (inf): inf is typeof inf & { platform: PlatformEnum | string } => inf.platform !== undefined
+    );
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      {allInfluencersForDisplay.length > 0 ? (
+        allInfluencersForDisplay.map(inf => (
+          <InfluencerCard
+            key={inf.key}
+            // Pass the platform string value (e.g., 'INSTAGRAM')
+            // Ensure InfluencerCard accepts string or PlatformEnum for its platform prop
+            platform={inf.platform as PlatformEnum} // Cast needed if InfluencerCard expects Enum type
+            handle={inf.handle}
+            displayName={inf.name}
+            followerCount={inf.followersCount}
+            avatarUrl={inf.avatarUrl}
+            verified={inf.isPhylloVerified}
+            className="bg-muted/30 p-3 text-sm"
+          />
+        ))
       ) : (
-        <span className="text-sm text-muted-foreground italic">None added</span>
+        <p className="text-sm text-muted-foreground italic col-span-full">
+          No influencers associated with this step.
+        </p>
       )}
     </div>
-  </div>
-);
-
-const Step2Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
-    <DataItem label="Primary KPI" value={data.primaryKPI} />
-    <DataItem label="Secondary KPIs" value={data.secondaryKPIs?.join(', ')} />
-    <DataItem label="Features" value={data.features?.join(', ')} />
-    <DataItem label="Main Message" value={data.messaging?.mainMessage} className="md:col-span-2" />
-    <DataItem label="Hashtags" value={data.messaging?.hashtags} />
-    <DataItem label="Key Benefits" value={data.messaging?.keyBenefits} />
-    <DataItem label="Memorability Hypothesis" value={data.expectedOutcomes?.memorability} />
-    <DataItem label="Purchase Intent Hypothesis" value={data.expectedOutcomes?.purchaseIntent} />
-    <DataItem label="Brand Perception Hypothesis" value={data.expectedOutcomes?.brandPerception} />
-  </div>
-);
-
-const Step3Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
-    {/* <DataItem label="Age Range" value={data.demographics?.ageRange?.join(' - ')} /> */}
-    <DataItem label="Genders" value={data.demographics?.genders} />
-    <DataItem label="Languages" value={data.demographics?.languages} />
-    <DataItem label="Interests" value={data.targeting?.interests} />
-    <DataItem label="Keywords" value={data.targeting?.keywords} />
-    <DataItem label="Locations" className="md:col-span-2">
-      {data.locations && data.locations.length > 0 ? (
-        <div className="flex flex-wrap gap-1">
-          {data.locations.map((loc, idx) => (
-            <Badge key={idx} variant="outline">
-              {[loc.city, loc.region, loc.country].filter(Boolean).join(', ') || 'Invalid Location'}
-            </Badge>
-          ))}
-        </div>
-      ) : (
-        <span className="text-muted-foreground italic">None specified</span>
-      )}
-    </DataItem>
-    <DataItem label="Competitors" value={data.competitors} />
-  </div>
-);
-
-const Step4Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
-  <div className="space-y-4">
-    {/* Remove deprecated fields */}
-    {/* <DataItem label="Brand Guidelines Summary" value={data.guidelines} /> */}
-    {/* <DataItem label="Mandatory Requirements">
-            {data.requirements && data.requirements.length > 0 ? (
-                <ul className="list-disc pl-5 space-y-1 text-sm">
-                    {data.requirements.map((req, idx) => (
-                        <li key={idx}>{req.description} {req.mandatory ? "(Mandatory)" : "(Optional)"}</li>
-                    ))}
-                </ul>
-            ) : <span className="text-muted-foreground italic">None</span>}
-        </DataItem> */}
-    <DataItem label="Uploaded Assets">
-      {data.assets && data.assets.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pt-2">
-          {data.assets.map((asset, idx) => {
-            // Map the asset data for AssetCard
-            const assetCardData = {
-              id: asset.id || idx, // Use asset ID or index as key
-              name: asset.name || asset.fileName || `Asset ${idx + 1}`,
-              url: asset.url,
-              type: asset.type,
-              description: asset.rationale, // Map rationale to description for display
-              budget: asset.budget,
-              // associatedInfluencerIds are not directly displayed by AssetCard
-              // but could be added if AssetCard is extended
-            };
-            return (
-              <AssetCard
-                key={assetCardData.id}
-                asset={assetCardData}
-                currency={data.budget?.currency ?? 'USD'}
-                cardClassName="h-full" // Ensure cards fill height in grid
-                className="p-0" // Adjust padding if needed
-              />
-            );
-          })}
-        </div>
-      ) : (
-        <span className="text-muted-foreground italic">None uploaded</span>
-      )}
-    </DataItem>
-    {/* <DataItem label="Additional Notes" value={data.notes} /> */}
-  </div>
-);
+  );
+};
 
 // --- Final Confirmation Schema ---
 const ConfirmationSchema = z.object({
@@ -290,10 +254,49 @@ function Step5Content() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  // State for fetched marketplace influencer summaries
+  const [selectedInfluencerSummaries, setSelectedInfluencerSummaries] = useState<
+    InfluencerSummary[] | null
+  >(null);
+  const [isFetchingSummaries, setIsFetchingSummaries] = useState<boolean>(false);
+  const [fetchSummariesError, setFetchSummariesError] = useState<string | null>(null);
+
   const form = useForm<ConfirmationFormData>({
     resolver: zodResolver(ConfirmationSchema),
     defaultValues: { confirm: false },
   });
+
+  // Fetch summaries when selected IDs change
+  useEffect(() => {
+    const selectedIds = wizard.wizardState?.selectedInfluencerIds;
+    if (Array.isArray(selectedIds) && selectedIds.length > 0) {
+      const fetchSummaries = async () => {
+        logger.info(
+          `[Step5Content] Fetching summaries for ${selectedIds.length} selected influencers...`
+        );
+        setIsFetchingSummaries(true);
+        setFetchSummariesError(null);
+        try {
+          const summaries = await influencerService.getInfluencerSummariesByIds(selectedIds);
+          setSelectedInfluencerSummaries(summaries);
+          logger.info(`[Step5Content] Successfully fetched summaries.`);
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : 'Failed to load selected influencer details.';
+          logger.error('[Step5Content] Error fetching summaries:', { error: message });
+          setFetchSummariesError(message);
+          setSelectedInfluencerSummaries(null);
+        } finally {
+          setIsFetchingSummaries(false);
+        }
+      };
+      fetchSummaries();
+    } else {
+      setSelectedInfluencerSummaries(null);
+      setIsFetchingSummaries(false);
+      setFetchSummariesError(null);
+    }
+  }, [JSON.stringify(wizard.wizardState?.selectedInfluencerIds)]);
 
   // --- Data Transformation & Validation for Submission (REWRITTEN) ---
   const prepareSubmissionPayload = useCallback((): SubmissionPayloadData | null => {
@@ -499,8 +502,9 @@ function Step5Content() {
         '[Step5Content] Submission successful. Attempting to navigate to submission page...'
       );
       if (wizard.campaignId) {
-        router.push(`/campaigns/wizard/submission?id=${wizard.campaignId}`); // Correct destination
-        console.log('[Step5Content] Navigation to /campaigns/wizard/submission initiated.');
+        router.push(`/campaigns/wizard/submission?id=${wizard.campaignId}`);
+        // Correct logger call (remove second arg or make it an object)
+        logger.info('[Step5Content] Navigation to /campaigns/wizard/submission initiated.');
       } else {
         console.error(
           'Navigation to submission page failed: Campaign ID missing after successful submission.'
@@ -561,16 +565,69 @@ function Step5Content() {
 
       <Accordion
         type="multiple"
-        defaultValue={['step-1', 'step-2', 'step-3', 'step-4']}
+        defaultValue={['step-1', 'influencers', 'step-2', 'step-3', 'step-4']}
         className="w-full space-y-2"
       >
         <SummarySection
-          title="Basic Information & Contacts"
+          title="Basic Information"
           stepNumber={1}
           onEdit={() => handleStepClick(1)}
           isComplete={wizardState.step1Complete}
         >
-          <Step1Review data={wizardState} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+            <DataItem label="Campaign Name" value={wizardState.name} />
+            <DataItem label="Brand Name" value={wizardState.brand} />
+            <DataItem
+              label="Business Goal"
+              value={wizardState.businessGoal}
+              className="md:col-span-2"
+            />
+            <DataItem
+              label="Start Date"
+              value={
+                wizardState.startDate ? new Date(wizardState.startDate).toLocaleDateString() : null
+              }
+            />
+            <DataItem
+              label="End Date"
+              value={
+                wizardState.endDate ? new Date(wizardState.endDate).toLocaleDateString() : null
+              }
+            />
+            <DataItem
+              label="Total Budget"
+              value={`${wizardState.budget?.currency} ${wizardState.budget?.total?.toLocaleString() ?? 'N/A'}`}
+            />
+          </div>
+        </SummarySection>
+        <SummarySection
+          title="Selected Influencers"
+          stepNumber={1.5}
+          onEdit={() => handleStepClick(1)}
+          isComplete={
+            !!wizardState.selectedInfluencerIds && wizardState.selectedInfluencerIds.length > 0
+          }
+        >
+          {isFetchingSummaries ? (
+            <p className="text-sm text-muted-foreground italic">
+              Loading selected influencer details...
+            </p>
+          ) : fetchSummariesError ? (
+            <p className="text-sm text-destructive">
+              Error loading influencer details: {fetchSummariesError}
+            </p>
+          ) : selectedInfluencerSummaries && selectedInfluencerSummaries.length > 0 ? (
+            <div className="space-y-2">
+              <Step1Review
+                data={wizardState}
+                marketplaceInfluencers={selectedInfluencerSummaries}
+              />
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground italic">
+              No influencers selected from marketplace.
+            </p>
+          )}
         </SummarySection>
         <SummarySection
           title="Objectives & Messaging"
@@ -578,7 +635,8 @@ function Step5Content() {
           onEdit={() => handleStepClick(2)}
           isComplete={wizardState.step2Complete}
         >
-          <Step2Review data={wizardState} />
+          <DataItem label="Primary KPI" value={wizardState.primaryKPI} />
+          <DataItem label="Secondary KPIs" value={wizardState.secondaryKPIs} />
         </SummarySection>
         <SummarySection
           title="Audience Targeting"
@@ -586,7 +644,8 @@ function Step5Content() {
           onEdit={() => handleStepClick(3)}
           isComplete={wizardState.step3Complete}
         >
-          <Step3Review data={wizardState} />
+          <DataItem label="Genders" value={wizardState.demographics?.genders} />
+          <DataItem label="Languages" value={wizardState.demographics?.languages} />
         </SummarySection>
         <SummarySection
           title="Assets & Guidelines"
@@ -594,7 +653,7 @@ function Step5Content() {
           onEdit={() => handleStepClick(4)}
           isComplete={wizardState.step4Complete}
         >
-          <Step4Review data={wizardState} />
+          <p className="text-sm text-muted-foreground italic">[Asset Review Placeholder]</p>
         </SummarySection>
       </Accordion>
 

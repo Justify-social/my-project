@@ -125,14 +125,13 @@ export function MarketplaceFilters({
           <div className="space-y-2">
             <Label htmlFor="platforms">Platforms</Label>
             <Select
-              value={localFilters.platforms?.[0] ?? ''} // Reflect local state (first item for single select)
+              value={localFilters.platforms?.[0] ?? ''} // Use empty string for uncontrolled state when undefined
               onValueChange={handlePlatformChange}
             >
               <SelectTrigger id="platforms">
                 <SelectValue placeholder="Select a platform..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any Platform</SelectItem> {/* Added reset option */}
                 <SelectItem value={PlatformEnum.Instagram}>Instagram</SelectItem>
                 <SelectItem value={PlatformEnum.YouTube}>YouTube</SelectItem>
                 <SelectItem value={PlatformEnum.TikTok}>TikTok</SelectItem>
@@ -186,17 +185,16 @@ export function MarketplaceFilters({
           <div className="space-y-2">
             <Label htmlFor="audienceAge">Audience Age Range</Label>
             <Select
-              name="audienceAge"
-              value={localFilters.audienceAge ?? ''}
-              onValueChange={value =>
-                setLocalFilters(prev => ({ ...prev, audienceAge: value || undefined }))
+              name="audienceAge" // Keep name for potential form handling
+              value={localFilters.audienceAge ?? ''} // Use empty string for uncontrolled state when undefined
+              onValueChange={
+                value => setLocalFilters(prev => ({ ...prev, audienceAge: value || undefined })) // Set to undefined if empty string selected
               }
             >
               <SelectTrigger id="audienceAge">
                 <SelectValue placeholder="Select age range..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any Age</SelectItem> {/* Added reset option */}
                 <SelectItem value="18-24">18-24</SelectItem>
                 <SelectItem value="25-34">25-34</SelectItem>
                 <SelectItem value="35-44">35-44</SelectItem>

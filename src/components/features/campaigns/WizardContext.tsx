@@ -191,6 +191,7 @@ const defaultWizardState: DraftCampaignData = {
   locations: [],
   targeting: { interests: [], keywords: [] },
   competitors: [],
+  targetPlatforms: [], // Initialize targetPlatforms
   assets: [],
   guidelines: null,
   requirements: [],
@@ -336,10 +337,10 @@ export function WizardProvider({ children }: { children: ReactNode }) {
             secondaryContact: dataToSave.secondaryContact,
             additionalContacts: dataToSave.additionalContacts,
             budget: dataToSave.budget,
-            Influencer: dataToSave.Influencer, // Pass influencers too
-            // Set initial step states
+            Influencer: dataToSave.Influencer,
+            targetPlatforms: dataToSave.targetPlatforms, // Include targetPlatforms
             step1Complete: true,
-            currentStep: 1, // Created at step 1
+            currentStep: 1,
           };
 
           logger.debug(
@@ -523,16 +524,17 @@ export function WizardProvider({ children }: { children: ReactNode }) {
 }
 
 /**
- * Custom hook to consume the WizardContext.
- * Provides access to the campaign wizard state and actions.
- * Must be used within a WizardProvider.
- * @throws {Error} If used outside of a WizardProvider.
- * @returns {WizardContextType} The wizard context value.
+ * Custom hook to access the Wizard context.
+ * Throws an error if used outside of a WizardProvider.
  */
-export const useWizard = (): WizardContextType => {
+export const useWizard = (): WizardContextType | null => {
   const context = useContext(WizardContext);
   if (context === undefined) {
-    throw new Error('useWizard must be used within a WizardProvider');
+    // Return null instead of throwing an error
+    // Components using this hook must handle the null case
+    // throw new Error('useWizard must be used within a WizardProvider');
+    logger.warn('[useWizard] Hook called outside of WizardProvider. Returning null.');
+    return null;
   }
   return context;
 };

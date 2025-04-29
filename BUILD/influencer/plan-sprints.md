@@ -117,19 +117,19 @@ By following these steps, we move from the comprehensive `plan.md` to a concrete
 
 **Candidate Tickets (Review during Sprint 3 Planning):**
 *   **Frontend Focus / Refactor:**
-    *   `3.1: REFACTOR: Ensure WizardContext Stores Filter Criteria` (Ensure Step 1 criteria like platforms can be stored).
-    *   `4.2: FEAT: Implement Navigation from Wizard **(Step 1)** to Marketplace` (Specific UI component in Wizard Step 1).
-    *   `4.3: FEAT(FE): Pre-filter Marketplace Based on Wizard Context` (Using criteria set in Step 1).
-    *   `4.4: FEAT(UI): Implement "Add Selected to Campaign" Button Logic` (Updates context, navigates back to **Review Step**).
-    *   `4.5: FEAT: Display Selected Influencers in Wizard Review Step` (Requires BE Ticket 0.8/Summaries API).
+    *   `3.1: REFACTOR: Ensure WizardContext Stores Filter Criteria` ✅ **(Done)**
+    *   `4.2: FEAT: Implement Navigation from Wizard **(Step 1)** to Marketplace` ✅ **(Done)**
+    *   `4.3: FEAT(FE): Pre-filter Marketplace Based on Wizard Context` ✅ **(Done)**
+    *   `4.4: FEAT(UI): Implement "Add Selected to Campaign" Button Logic` ✅ **(Done)**
+    *   `4.5: FEAT: Display Selected Influencers in Wizard Review Step` ✅ **(Done)**
 *   **Backend Focus:**
-    *   Implement `GET /api/influencers/summaries` endpoint (or ensure `GET /influencers` can handle multiple IDs) if needed for Ticket 4.5.
-    *   Ensure filtering logic in `GET /influencers` robustly handles criteria passed from Wizard context (Ticket 4.3).
-    *   Continue refining Phyllo data refresh/webhook strategy.
-    *   Address bugs identified during Sprint 2 testing.
+    *   Implement `GET /api/influencers/summaries` endpoint (or ensure `GET /influencers` can handle multiple IDs) if needed for Ticket 4.5. ✅ **(Done)**
+    *   Ensure filtering logic in `GET /influencers` robustly handles criteria passed from Wizard context (Ticket 4.3). ✅ **(Done)**
+    *   Continue refining Phyllo data refresh/webhook strategy. ⏳ **(Ongoing)**
+    *   Address bugs identified during Sprint 2 testing. ⏳ **(Ongoing)**
 *   **Testing Focus:**
-    *   Implement core E2E test suite for the **Journey 1: Wizard-First** flow (Wizard Step 1 -> Marketplace -> Select -> Wizard Review Step).
-    *   Expand unit/integration test coverage for context interactions and API filtering logic.
+    *   Implement core E2E test suite for the **Journey 1: Wizard-First** flow (Wizard Step 1 -> Marketplace -> Select -> Wizard Review Step). 🅿️ **(Pending)**
+    *   Expand unit/integration test coverage for context interactions and API filtering logic. 🅿️ **(Pending)**
 
 ## Projected Sprint 4: MVP Stabilization, Polish & Post-MVP Prep
 
@@ -143,7 +143,8 @@ By following these steps, we move from the comprehensive `plan.md` to a concrete
 *   **Backend Focus:**
     *   Performance Tuning: Analyze and optimize database queries (indexes) and Phyllo API call caching based on observed performance.
     *   Robustness: Enhance error handling, particularly around Phyllo API interactions (staleness flags, more specific errors).
-    *   Post-MVP Investigation: Begin technical design/investigation for high-priority items like Sponsored Post data sourcing (Ticket 5.2), Brand Safety API integration (Ticket 5.3), and potentially the Add to Existing Campaign API (backend part of Ticket 5.4).
+    *   **(New Task) Determine & confirm data source strategy for 'contactEmail'.**
+    *   Post-MVP Investigation: Begin technical design/investigation for high-priority items like Sponsored Post data sourcing (Ticket 5.2), Brand Safety API integration (Ticket 5.3), Add to Existing Campaign API (Ticket 5.4). **Confirm Phyllo SDK integration timing dependencies.**
     *   Bug Fixes identified in Sprint 3 testing.
 *   **Testing Focus:**
     *   Expand E2E test coverage (edge cases, different filter combinations, error conditions).
@@ -154,7 +155,7 @@ By following these steps, we move from the comprehensive `plan.md` to a concrete
 
 ## Projected Sprint 5: Advanced Data & Vetting (High Priority - Kelly P.)
 
-*Goal Suggestion: Integrate critical post-MVP data points for deeper vetting and ROI analysis, leveraging Phyllo further.*
+*Goal Suggestion: Integrate critical post-MVP data points for deeper vetting and ROI analysis, leveraging Phyllo further. **Implement associated permissions and analytics.** *
 
 **Candidate Tickets (Review during Sprint 5 Planning):**
 *   `5.2: FEAT: Sponsored Post Performance Metrics (High Priority Post-MVP)`
@@ -162,32 +163,65 @@ By following these steps, we move from the comprehensive `plan.md` to a concrete
 *   `5.8: FEAT: Podcast Influencer Support (High Priority Post-MVP)`
 *   (BE) Continued refinement of Phyllo data handling/webhooks.
 *   (FE/BE) Begin Phase X: Frontend Phyllo Connect SDK integration (Tickets X.1-X.3).
+*   (BE/FE) Implement permissions checks & usage analytics tracking for new features.
 *   Address bugs/refinements from Sprint 4.
+*   (Testing) Unit/Integration tests for new features.
 
 ---
 
 ## Projected Sprint 6: Workflow Enhancements & Alternative Journeys
 
-*Goal Suggestion: Enable the "Marketplace-First" user journey and add core workflow improvements like shortlisting.*
+*Goal Suggestion: Enable the "Marketplace-First" user journey and add core workflow improvements like shortlisting. **Implement associated permissions and analytics.** *
 
 **Candidate Tickets (Review during Sprint 6 Planning):**
 *   `5.4: FEAT: Add to Existing Campaign Flow`
 *   `5.7: FEAT: Influencer Shortlisting/Saving (Post-MVP)`
 *   `5.6: FEAT: Collaboration History / Saturation Indicator (Post-MVP)`
 *   (FE) Complete Phase X: Phyllo Connect SDK Integration if needed.
+*   (BE/FE) Implement permissions checks & usage analytics tracking for new features.
 *   Address bugs/refinements from Sprint 5.
+*   (Testing) E2E tests for Journey 2 ("Marketplace-First").
 
 ---
 
 ## Projected Sprint 7: Advanced Insights & Refinement
 
-*Goal Suggestion: Focus on higher-level insights, technical debt reduction, and potential future features.*
+*Goal Suggestion: Focus on higher-level insights, technical debt reduction, and potential future features. **Ensure comprehensive test coverage.** *
 
 **Candidate Tickets (Review during Sprint 7 Planning):**
-*   `5.1: FEAT: Direct Influencer Contact Info Display` (Verify if needed beyond current implementation).
+*   `5.1: REFACTOR: Refine Contact Info Display/Source` (Refined from original 5.1).
 *   `5.5: FEAT: Content Effectiveness Insights (Placeholder)` (Scoping & initial steps).
 *   `5.9: TECH-DEBT: Refactor Wizard/Marketplace State Coupling`.
-*   Further performance tuning, testing, and tech debt reduction.
+*   Further performance tuning, testing (regression, etc.), and tech debt reduction.
+*   (BE/FE) Implement permissions checks & usage analytics tracking for new features.
 *   Address bugs/refinements from Sprint 6.
+
+---
+
+## Projected Sprint 8: Deployment Readiness & Documentation Kickoff
+
+*Goal Suggestion: Ensure the MVP is technically ready for deployment, address any critical stabilization issues found in late testing, and initiate formal documentation efforts.*
+
+**Candidate Tickets (Review during Sprint 8 Planning):**
+*   `CHORE: Finalize Monitoring & Logging Configuration`
+*   `CHORE: Verify CI/CD Pipeline for Production Deployment`
+*   `CHORE: Document Rollback Procedures`
+*   `DOCS: Draft Initial Technical Documentation (API, Architecture)`
+*   `DOCS: Outline User Guide Structure`
+*   Address any critical bugs or final polish items identified in Sprint 7 testing.
+
+---
+
+## Future Sprints (Sprint 9+): Freemium Implementation & Full Documentation
+
+*Goal Suggestion: Implement Freemium model feature gating, subscription management UI, and complete comprehensive user/technical documentation.*
+
+**Candidate Areas (Details TBD closer to phase):**
+*   Implement Feature Access Manager logic based on user subscription.
+*   Build Plan Comparison Table UI.
+*   Integrate with billing system (if applicable).
+*   Complete User Guides & Training Materials.
+*   Finalize Technical Documentation.
+*   Ongoing bug fixing and refinement.
 
 ---
