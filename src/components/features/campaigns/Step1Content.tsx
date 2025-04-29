@@ -58,6 +58,7 @@ import { Badge } from '@/components/ui/badge';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocalization } from '@/hooks/useLocalization';
 import timezonesData from '@/lib/timezones.json';
+import { cn } from '@/lib/utils'; // Import cn for potential styling
 
 // --- Formatting Helpers ---
 
@@ -333,6 +334,35 @@ async function preparePayload(
   };
 }
 
+// --- Formatting & Parsing Helpers ---
+const formatNumberWithCommas = (value: number | string | null | undefined): string => {
+  if (value === null || value === undefined || value === '') return '0'; // Default to '0' for empty/null/undefined
+  const num = typeof value === 'string' ? parseFloat(value.replace(/[^\d.-]/g, '')) : value;
+  if (isNaN(num)) return '0'; // Default to '0' if parsing fails
+  // Use toLocaleString for robust formatting
+  return num.toLocaleString('en-US'); // Use appropriate locale
+};
+
+const parseFormattedNumber = (value: string): number | undefined => {
+  const cleaned = value.replace(/[^\d.-]/g, ''); // Allow digits, decimal, negative sign
+  if (cleaned === '' || cleaned === '-') return undefined; // Return undefined if empty or just negative sign
+  const num = parseFloat(cleaned);
+  return isNaN(num) ? undefined : num; // Return undefined if parsing fails
+};
+
+// --- Currency Symbol Helper ---
+const getCurrencySymbol = (currencyCode?: string | null): string => {
+  switch (currencyCode) {
+    case 'GBP':
+      return '£';
+    case 'EUR':
+      return '€';
+    case 'USD':
+    default:
+      return '$';
+  }
+};
+
 function Step1Content() {
   const {
     wizardState,
@@ -602,13 +632,13 @@ function Step1Content() {
   // Process watched values
   const totalBudgetRaw = parseFloat(parseCurrencyInput(String(watchedTotal || '0')));
   const socialMediaBudgetRaw = parseFloat(parseCurrencyInput(String(watchedSocial || '0')));
-  const selectedCurrency = watchedCurrency || CurrencyEnum.Values.USD;
+  const selectedCurrencyForConversion = watchedCurrency || CurrencyEnum.Values.USD;
 
   useEffect(() => {
     let isMounted = true; // Prevent state update on unmounted component
 
     const updateConvertedValues = async () => {
-      if (selectedCurrency === 'USD') {
+      if (selectedCurrencyForConversion === 'USD') {
         if (isMounted) {
           _setConvertedTotalBudget(null);
           _setConvertedSocialMediaBudget(null);
@@ -620,7 +650,7 @@ function Step1Content() {
       if (!isNaN(totalBudgetRaw) && totalBudgetRaw > 0) {
         const convertedTotal = await convertCurrencyUsingApi(
           totalBudgetRaw,
-          selectedCurrency,
+          selectedCurrencyForConversion,
           'USD'
         );
         if (isMounted) {
@@ -638,7 +668,7 @@ function Step1Content() {
       if (!isNaN(socialMediaBudgetRaw) && socialMediaBudgetRaw > 0) {
         const convertedSocial = await convertCurrencyUsingApi(
           socialMediaBudgetRaw,
-          selectedCurrency,
+          selectedCurrencyForConversion,
           'USD'
         );
         if (isMounted) {
@@ -659,7 +689,7 @@ function Step1Content() {
       isMounted = false;
     }; // Cleanup function
     // Rerun effect when raw values or currency change
-  }, [totalBudgetRaw, socialMediaBudgetRaw, selectedCurrency]);
+  }, [totalBudgetRaw, socialMediaBudgetRaw, selectedCurrencyForConversion]);
 
   // --- Duration Calculation Effect (Add back) ---
   const watchedStartDate = form.watch('startDate');
@@ -668,6 +698,9 @@ function Step1Content() {
     const duration = calculateDuration(watchedStartDate, watchedEndDate);
     setCampaignDuration(duration);
   }, [watchedStartDate, watchedEndDate]);
+
+  // Get the currency symbol based on the watched currency value
+  const currencySymbol = getCurrencySymbol(watchedCurrency);
 
   if (isWizardLoading || localization.isLoading || !initialDataLoaded.current) {
     // Show skeleton while wizard context is loading OR localization is loading OR initial form data hasn't been loaded yet
@@ -1077,72 +1110,90 @@ function Step1Content() {
                   )}
                 />
               </div>
-
-              {/* Placeholder for alignment */}
-              <div className="md:col-span-1"></div>
-
+              <div className="md:col-span-1"></div> {/* Placeholder */}
               {/* Total Budget */}
               <div className="md:col-span-1">
                 <FormField
                   control={form.control}
                   name="budget.total"
-                  render={({ field: { onChange, ...fieldProps } }) => {
-                    return (
-                      <FormItem>
-                        <FormLabel>Total Budget *</FormLabel>
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Total Budget *</FormLabel>
+                      <div className="relative">
+                        {/* Add symbol as an absolutely positioned element */}
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                          {currencySymbol}
+                        </span>
                         <FormControl>
                           <Input
-                            type="number" // Use number type
+                            type="text" // Change type to text
                             placeholder="0"
-                            {...fieldProps}
-                            value={fieldProps.value ?? ''} // Bind directly to number value
+                            // Add padding to the left to avoid overlapping the symbol
+                            className="pl-7" // Adjust padding as needed
+                            {...field}
+                            value={formatNumberWithCommas(field.value)} // Display formatted value
                             onChange={e => {
-                              const value = e.target.value;
-                              // Allow empty input or convert to number
-                              onChange(value === '' ? undefined : parseFloat(value));
+                              // Update form state with parsed number
+                              field.onChange(parseFormattedNumber(e.target.value));
+                            }}
+                            onFocus={e => {
+                              // Select content if it's "0"
+                              if (e.target.value === '0') {
+                                e.target.select();
+                              }
                             }}
                           />
                         </FormControl>
-                        {/* Display converted value from state */}
-                        {_convertedTotalBudget && (
-                          <FormDescription>{_convertedTotalBudget}</FormDescription>
-                        )}
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
+                      </div>
+                      {/* Display converted value from state */}
+                      {_convertedTotalBudget && (
+                        <FormDescription>{_convertedTotalBudget}</FormDescription>
+                      )}
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
-
               {/* Social Media Budget */}
               <div className="md:col-span-1">
                 <FormField
                   control={form.control}
                   name="budget.socialMedia"
-                  render={({ field: { onChange, ...fieldProps } }) => {
-                    return (
-                      <FormItem>
-                        <FormLabel>Social Media Budget *</FormLabel>
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Social Media Budget *</FormLabel>
+                      <div className="relative">
+                        {/* Add symbol */}
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                          {currencySymbol}
+                        </span>
                         <FormControl>
                           <Input
-                            type="number" // Use number type
+                            type="text" // Change type to text
                             placeholder="0"
-                            {...fieldProps}
-                            value={fieldProps.value ?? ''} // Bind directly to number value
+                            className="pl-7" // Add padding
+                            {...field}
+                            value={formatNumberWithCommas(field.value)} // Display formatted value
                             onChange={e => {
-                              const value = e.target.value;
-                              onChange(value === '' ? undefined : parseFloat(value));
+                              // Update form state with parsed number
+                              field.onChange(parseFormattedNumber(e.target.value));
+                            }}
+                            onFocus={e => {
+                              // Select content if it's "0"
+                              if (e.target.value === '0') {
+                                e.target.select();
+                              }
                             }}
                           />
                         </FormControl>
-                        {/* Display converted value from state */}
-                        {_convertedSocialMediaBudget && (
-                          <FormDescription>{_convertedSocialMediaBudget}</FormDescription>
-                        )}
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
+                      </div>
+                      {/* Display converted value from state */}
+                      {_convertedSocialMediaBudget && (
+                        <FormDescription>{_convertedSocialMediaBudget}</FormDescription>
+                      )}
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
             </CardContent>
