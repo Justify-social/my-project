@@ -67,15 +67,18 @@ export function InfluencerCard({
   className,
 }: InfluencerCardProps) {
   const nameToDisplay = displayName || handle;
-  const platformIconId = platformIcons[platform] || 'faUserLight'; // Default icon
+  const platformIconId = platformIcons[platform] || 'faUserLight';
 
   const cardContent = (
     <div className="flex items-center space-x-4">
       <Avatar className="h-12 w-12 border">
         {avatarUrl ? <AvatarImage src={avatarUrl} alt={`${nameToDisplay} avatar`} /> : null}
-        <AvatarFallback className="text-lg">
-          {/* Fallback initials from display name or handle */}
-          {nameToDisplay?.substring(0, 2).toUpperCase() ?? '??'}
+        <AvatarFallback className="text-lg bg-muted">
+          {!avatarUrl ? (
+            <Icon iconId="faUserLight" className="h-6 w-6 text-muted-foreground" />
+          ) : (
+            (nameToDisplay?.substring(0, 2).toUpperCase() ?? '??')
+          )}
         </AvatarFallback>
       </Avatar>
       <div className="flex-1 min-w-0">

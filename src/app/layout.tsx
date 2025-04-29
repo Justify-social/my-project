@@ -12,6 +12,7 @@ import { Suspense } from 'react';
 // import { IconContextProvider } from '@/components/ui/icon/icon-context'; // Removed context import
 import { SidebarProvider } from '@/providers/SidebarProvider';
 import { SearchProvider } from '@/providers/SearchProvider';
+import { LocalizationProvider } from '@/providers/LocalizationProvider'; // Import the new provider
 // Remove the custom AuthStateProvider import
 // import { AuthStateProvider } from '@/lib/auth/authCoordinator';
 // Import Shadcn Toaster
@@ -53,17 +54,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <html lang="en">
         <head>{/* Using local SVG icons - no external scripts needed */}</head>
         <body className={`${inter.className} bg-white`}>
-          {/* Remove AuthStateProvider wrapper */}
-          <SidebarProvider>
-            <SearchProvider>
-              <Suspense>
-                <UTSSR />
-              </Suspense>
-              {/* Use ConditionalLayout to wrap children */}
-              <ConditionalLayout>{children}</ConditionalLayout>
-              <Toaster />
-            </SearchProvider>
-          </SidebarProvider>
+          {/* Wrap with LocalizationProvider */}
+          <LocalizationProvider>
+            <SidebarProvider>
+              <SearchProvider>
+                <Suspense>
+                  <UTSSR />
+                </Suspense>
+                {/* Use ConditionalLayout to wrap children */}
+                <ConditionalLayout>{children}</ConditionalLayout>
+                <Toaster />
+              </SearchProvider>
+            </SidebarProvider>
+          </LocalizationProvider>
         </body>
       </html>
     </ClerkProvider>

@@ -22,7 +22,7 @@ import {
   PositionEnum,
   platformToFrontend,
   PlatformSchema,
-  InfluencerSchema,
+  BudgetSchema,
 } from '@/components/features/campaigns/types';
 import { WizardSkeleton } from '@/components/ui/loading-skeleton';
 import { Icon } from '@/components/ui/icon/icon';
@@ -50,11 +50,14 @@ import { ProgressBarWizard } from '@/components/ui/progress-bar-wizard';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { differenceInDays, isValid as isValidDate } from 'date-fns';
 import { IconButtonAction } from '@/components/ui/button-icon-action';
-import timezonesData from '@/lib/timezones.json'; // Import the static timezone data
 import { logger } from '@/lib/logger';
 import { toast } from 'react-hot-toast';
 import { convertCurrencyUsingApi } from '@/utils/currency'; // Import the new utility
 import { InfluencerCard } from '@/components/ui/card-influencer'; // Import InfluencerCard
+import { Badge } from '@/components/ui/badge';
+import { v4 as uuidv4 } from 'uuid';
+import { useLocalization } from '@/hooks/useLocalization';
+import timezonesData from '@/lib/timezones.json';
 
 // --- Formatting Helpers ---
 
@@ -74,11 +77,11 @@ interface InfluencerEntryProps {
 // Define proper type for Phyllo validation data
 interface PhylloValidationData {
   id: string;
-  displayName: string;
-  platform: z.infer<typeof PlatformEnumBackend>; // Use specific type
+  displayName?: string | null;
+  platform: z.infer<typeof PlatformEnumBackend>;
   handle: string;
   followerCount?: number;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
   verified?: boolean;
 }
 
@@ -126,11 +129,11 @@ const InfluencerEntry: React.FC<InfluencerEntryProps> = ({ index, control, error
         // Simulate successful validation data
         setValidationData({
           id: `phyllo-${Date.now()}`,
-          displayName: `User ${watchedHandle}`,
+          displayName: null,
           platform: watchedPlatform,
           handle: watchedHandle,
           followerCount: Math.floor(Math.random() * 100000),
-          avatarUrl: 'https://via.placeholder.com/150',
+          avatarUrl: null,
           verified: Math.random() > 0.5,
         });
       }
@@ -257,24 +260,19 @@ const InfluencerEntry: React.FC<InfluencerEntryProps> = ({ index, control, error
 // type ContextInfluencer = z.infer<typeof InfluencerSchema>;
 
 // --- Duration Helper ---
-// const calculateDuration = (
-//   startStr: string | null | undefined,
-//   endStr: string | null | undefined
-// ): string => {
-//   // Explicitly handle null/undefined/empty inputs
-//   if (!startStr || !endStr) return '...';
-//
-//   const startDate = new Date(startStr);
-//   const endDate = new Date(endStr);
-//
-//   // Check for invalid date parsing
-//   if (!isValidDate(startDate) || !isValidDate(endDate) || endDate < startDate) {
-//     return '...';
-//   }
-//
-//   const days = differenceInDays(endDate, startDate) + 1; // Inclusive
-//   return `${days} day${days !== 1 ? 's' : ''}`;
-// };
+const calculateDuration = (
+  startStr: string | null | undefined,
+  endStr: string | null | undefined
+): string | null => {
+  if (!startStr || !endStr) return null;
+  const startDate = new Date(startStr);
+  const endDate = new Date(endStr);
+  if (!isValidDate(startDate) || !isValidDate(endDate) || endDate < startDate) {
+    return null;
+  }
+  const days = differenceInDays(endDate, startDate) + 1; // Inclusive
+  return `${days} day${days !== 1 ? 's' : ''}`;
+};
 
 async function preparePayload(
   data: Step1FormData,
@@ -312,11 +310,18 @@ async function preparePayload(
           email: c.email || '',
           position: c.position || PositionEnum.Values.Director,
         })) || [],
-    budget: {
-      currency: data.budget?.currency || CurrencyEnum.Values.USD,
-      total: parseFloat(parseCurrencyInput(data.budget?.total?.toString() || '0')) || 0,
-      socialMedia: parseFloat(parseCurrencyInput(data.budget?.socialMedia?.toString() || '0')) || 0,
-    },
+    budget: data.budget
+      ? {
+          currency: data.budget.currency || CurrencyEnum.Values.USD,
+          total: parseFloat(parseCurrencyInput(data.budget.total?.toString() || '0')) || 0,
+          socialMedia:
+            parseFloat(parseCurrencyInput(data.budget.socialMedia?.toString() || '0')) || 0,
+        }
+      : ({
+          currency: CurrencyEnum.Values.USD,
+          total: 0,
+          socialMedia: 0,
+        } as z.infer<typeof BudgetSchema>),
     Influencer:
       data.Influencer?.filter(inf => inf.platform && inf.handle).map(inf => ({
         id: inf.id, // Keep ID
@@ -329,248 +334,159 @@ async function preparePayload(
 }
 
 function Step1Content() {
-  const { wizardState, updateWizardState, isLoading, saveProgress, stepsConfig } = useWizard();
+  const {
+    wizardState,
+    updateWizardState,
+    isLoading: isWizardLoading,
+    saveProgress,
+    stepsConfig,
+  } = useWizard();
   const router = useRouter();
   const initialDataLoaded = useRef(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // Prefix unused state variables with _
-  const [_detectedTimezone, _setDetectedTimezone] = useState<string | null>(null);
-  const [_isDetectingTimezone, _setIsDetectingTimezone] = useState<boolean>(false);
+  const localization = useLocalization();
   const [_convertedTotalBudget, _setConvertedTotalBudget] = useState<string | null>(null);
   const [_convertedSocialMediaBudget, _setConvertedSocialMediaBudget] = useState<string | null>(
     null
   );
+  const [campaignDuration, setCampaignDuration] = useState<string | null>(null);
+  const [initialFormState, setInitialFormState] = useState<Step1FormData | null>(null);
 
   const form = useForm<Step1FormData>({
     resolver: zodResolver(Step1ValidationSchema),
     defaultValues: {
-      name: '',
-      businessGoal: '',
-      brand: '',
-      website: '',
-      startDate: null,
-      endDate: null,
       timeZone: 'UTC',
+      budget: { currency: 'USD', total: 0, socialMedia: 0 },
+      name: '',
+      brand: '',
       primaryContact: {
         firstName: '',
         surname: '',
         email: '',
         position: PositionEnum.Values.Director,
       },
-      secondaryContact: {
-        firstName: '',
-        surname: '',
-        email: '',
-        position: PositionEnum.Values.Director,
-      },
       additionalContacts: [],
-      budget: {
-        currency: CurrencyEnum.Values.USD,
-        total: 0,
-        socialMedia: 0,
-      },
-      Influencer: [
-        { id: `new-${Date.now()}`, platform: PlatformEnumBackend.Values.INSTAGRAM, handle: '' },
-      ],
+      Influencer: [{ id: uuidv4(), platform: PlatformEnumBackend.Values.INSTAGRAM, handle: '' }],
     },
     mode: 'onChange',
   });
 
-  // --- Timezone Detection Effect ---
+  // --- Initial Value Calculation Effect (Updated) ---
   useEffect(() => {
-    async function performTimezoneDetection() {
-      _setIsDetectingTimezone(true);
-      logger.info('[Step 1] Attempting automatic timezone detection...');
-      let detectedTz: string | null = null;
-      let source: string = 'default';
+    logger.debug('[Initial Value Calc Effect] Running Check...', {
+      isWizardLoading,
+      isLocationLoading: localization.isLoading,
+      hasWizardState: !!wizardState,
+      isExistingCampaign: !!wizardState?.id, // Add check for existing campaign
+      initialFormStateExists: !!initialFormState,
+      localizedTz: localization.timezone,
+      localizedCurrency: localization.currency,
+    });
 
-      // 1. Try external API (ipgeolocation.io) first (RECOMMENDED FOR PROD ACCURACY)
-      const apiKey = process.env.NEXT_PUBLIC_IPGEOLOCATION_API_KEY;
-      if (apiKey) {
-        source = 'ipgeolocation.io';
-        try {
-          const response = await fetch(`https://api.ipgeolocation.io/ipgeo?apiKey=${apiKey}`, {
-            signal: AbortSignal.timeout(3000),
-          });
-          if (!response.ok) throw new Error(`API Error: ${response.status}`);
-          const data = await response.json();
-          if (data?.time_zone?.name && timezonesData.some(tz => tz.value === data.time_zone.name)) {
-            detectedTz = data.time_zone.name;
-            logger.info(`[Step 1] Detected timezone via ${source}.`, { detected: detectedTz });
-          } else {
-            logger.warn(`[Step 1] ${source} returned invalid timezone: ${data?.time_zone?.name}`);
-          }
-        } catch (error) {
-          logger.warn(`[Step 1] Failed to detect timezone via ${source}.`, {
-            error: error instanceof Error ? error.message : String(error),
-          });
-        }
+    if (!isWizardLoading && !localization.isLoading && wizardState && initialFormState === null) {
+      logger.info('[Initial Value Calc Effect] Conditions met. Calculating initial values...');
+
+      const isExistingCampaign = !!wizardState.id; // Explicitly check if it's an existing campaign
+      let timezoneToUse: string | null = null;
+      let currencyToUse: z.infer<typeof CurrencyEnum> | null = null;
+
+      // Determine Timezone: Prioritize saved only if it's an existing campaign
+      const savedTimezone = wizardState.timeZone;
+      if (isExistingCampaign && savedTimezone) {
+        timezoneToUse = savedTimezone;
+        logger.info(
+          `[Initial Value Calc Effect] Existing campaign: Using saved timezone: ${timezoneToUse}`
+        );
       } else {
-        logger.warn(
-          '[Step 1] Skipping ipgeolocation.io check: NEXT_PUBLIC_IPGEOLOCATION_API_KEY not set.'
+        // For new campaigns OR existing ones without a saved TZ, use localized
+        timezoneToUse = localization.timezone;
+        logger.info(
+          `[Initial Value Calc Effect] ${isExistingCampaign ? 'Existing campaign (no saved TZ)' : 'New campaign'}: Using localized timezone: ${timezoneToUse}`
         );
       }
 
-      // 2. If external API failed or key missing, try Intl API
-      if (!detectedTz) {
-        source = 'Intl API';
-        try {
-          const intlTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-          // Validate against our list
-          if (intlTz && timezonesData.some(tz => tz.value === intlTz)) {
-            detectedTz = intlTz;
-            logger.info(`[Step 1] Detected timezone via ${source}.`, { detected: detectedTz });
-          } else {
-            logger.warn(`[Step 1] Intl timezone not valid or not found in local list: ${intlTz}`);
-          }
-        } catch (error) {
-          logger.warn(`[Step 1] Failed to detect timezone via ${source}.`, {
-            error: error instanceof Error ? error.message : String(error),
-          });
-        }
-      }
-
-      // 3. Fallback (already default, just log)
-      if (!detectedTz) {
-        source = 'fallback';
-        logger.info('[Step 1] Using fallback timezone UTC.');
-      }
-
-      logger.info('[Step 1] Timezone detection process complete.', {
-        finalDetected: detectedTz,
-        source,
-      });
-      _setDetectedTimezone(detectedTz);
-      _setIsDetectingTimezone(false);
-    }
-
-    // Trigger condition: Only run if not currently loading and NOT already detecting
-    // This runs once when isLoading becomes false. Subsequent state updates don't re-trigger.
-    if (!isLoading && !_isDetectingTimezone) {
-      logger.debug('[Timezone Detection Effect] Triggering detection.');
-      performTimezoneDetection();
-    }
-    // Depend only on isLoading to trigger once when loading finishes
-  }, [isLoading]);
-
-  // --- Form Reset Effect (Modified dependencies) ---
-  useEffect(() => {
-    logger.debug('[Timezone Reset Effect] Running...', {
-      isLoading,
-      _isDetectingTimezone,
-      initialDataLoaded: initialDataLoaded.current,
-    });
-    // Wait for wizard state loading AND timezone detection to be FINISHED
-    if (!isLoading && !_isDetectingTimezone && wizardState && !initialDataLoaded.current) {
-      // --- This block now runs only AFTER detection is complete ---
-      logger.info('[Timezone Reset Effect] Conditions met for form reset.');
-      let timezoneToUse = 'UTC';
-      const savedTimezone = wizardState?.timeZone;
-      // Use the detected timezone state variable which is now set
-      const isValidDetectedTz =
-        _detectedTimezone && timezonesData.some(tz => tz.value === _detectedTimezone);
-      logger.debug('[Timezone Reset Effect] Determining timezone:', {
-        savedTimezone,
-        _detectedTimezone,
-        isValidDetectedTz,
-      });
-      if (savedTimezone) {
-        timezoneToUse = savedTimezone;
-        logger.info('[Timezone Reset Effect] Using saved timezone.', { timezoneToUse });
-      } else if (isValidDetectedTz) {
-        timezoneToUse = _detectedTimezone; // Apply detected timezone
-        logger.info('[Timezone Reset Effect] Using detected timezone.', { timezoneToUse });
+      // Determine Currency: Prioritize saved only if it's an existing campaign
+      const savedCurrency = wizardState.budget?.currency;
+      if (isExistingCampaign && savedCurrency && CurrencyEnum.safeParse(savedCurrency).success) {
+        currencyToUse = savedCurrency;
+        logger.info(
+          `[Initial Value Calc Effect] Existing campaign: Using saved currency: ${currencyToUse}`
+        );
       } else {
-        logger.info('[Timezone Reset Effect] Using default timezone (UTC).');
+        // For new campaigns OR existing ones without a saved currency, use localized
+        currencyToUse = localization.currency;
+        logger.info(
+          `[Initial Value Calc Effect] ${isExistingCampaign ? 'Existing campaign (no saved currency)' : 'New campaign'}: Using localized currency: ${currencyToUse}`
+        );
       }
-      const formattedData: Step1FormData = {
-        name: wizardState?.name || '',
-        businessGoal: wizardState?.businessGoal || '',
-        brand: wizardState?.brand || '',
-        website: wizardState?.website || '',
-        startDate: wizardState?.startDate || null,
-        endDate: wizardState?.endDate || null,
-        timeZone: timezoneToUse,
-        // Restore detailed mapping for complex types
-        primaryContact: {
-          firstName: wizardState?.primaryContact?.firstName || '',
-          surname: wizardState?.primaryContact?.surname || '',
-          email: wizardState?.primaryContact?.email || '',
-          position: (wizardState?.primaryContact?.position &&
-          PositionEnum.safeParse(wizardState.primaryContact.position).success
-            ? wizardState.primaryContact.position
-            : PositionEnum.Values.Director) as z.infer<typeof PositionEnum>,
+
+      // Final fallbacks remain the same (belt-and-suspenders)
+      const finalTimezone = timezoneToUse || 'UTC';
+      const finalCurrency = currencyToUse || CurrencyEnum.Values.USD;
+
+      logger.info('[Initial Value Calc Effect] Determined final initial values:', {
+        finalTimezone,
+        finalCurrency,
+      });
+
+      // Construct the full initial data object (structure remains the same)
+      const initialData: Step1FormData = {
+        name: wizardState.name || '',
+        businessGoal: wizardState.businessGoal ?? null,
+        brand: wizardState.brand || '',
+        website: wizardState.website ?? null,
+        startDate: wizardState.startDate || null,
+        endDate: wizardState.endDate || null,
+        timeZone: finalTimezone,
+        primaryContact: wizardState.primaryContact ?? {
+          firstName: '',
+          surname: '',
+          email: '',
+          position: PositionEnum.Values.Director,
         },
-        secondaryContact: {
-          firstName: wizardState?.secondaryContact?.firstName || '',
-          surname: wizardState?.secondaryContact?.surname || '',
-          email: wizardState?.secondaryContact?.email || '',
-          position: (wizardState?.secondaryContact?.position &&
-          PositionEnum.safeParse(wizardState.secondaryContact.position).success
-            ? wizardState.secondaryContact.position
-            : PositionEnum.Values.Director) as z.infer<typeof PositionEnum>,
-        },
-        additionalContacts: Array.isArray(wizardState?.additionalContacts)
-          ? wizardState.additionalContacts.map(contact => ({
-              firstName: contact?.firstName || '',
-              surname: contact?.surname || '',
-              email: contact?.email || '',
-              position: (contact?.position && PositionEnum.safeParse(contact.position).success
-                ? contact.position
-                : PositionEnum.Values.Director) as z.infer<typeof PositionEnum>,
-            }))
-          : [],
+        secondaryContact: wizardState.secondaryContact ?? null,
+        additionalContacts: wizardState.additionalContacts ?? [],
         budget: {
-          currency: (wizardState?.budget?.currency &&
-          CurrencyEnum.safeParse(wizardState.budget.currency).success
-            ? wizardState.budget.currency
-            : CurrencyEnum.Values.USD) as z.infer<typeof CurrencyEnum>,
-          total: parseFloat(wizardState?.budget?.total?.toString() || '0') || 0,
-          socialMedia: parseFloat(wizardState?.budget?.socialMedia?.toString() || '0') || 0,
+          currency: finalCurrency, // Removed 'as any' - check if TS error returns
+          total: parseFloat(wizardState.budget?.total?.toString() || '0') || 0,
+          socialMedia: parseFloat(wizardState.budget?.socialMedia?.toString() || '0') || 0,
         },
-        Influencer:
-          Array.isArray(wizardState?.Influencer) && wizardState.Influencer.length > 0
-            ? wizardState.Influencer.map((inf: unknown) => {
-                const id =
-                  typeof inf === 'object' &&
-                  inf !== null &&
-                  'id' in inf &&
-                  typeof inf.id === 'string'
-                    ? inf.id
-                    : `new-${Date.now()}`;
-                const platformValue =
-                  typeof inf === 'object' && inf !== null && 'platform' in inf
-                    ? inf.platform
-                    : undefined;
-                const handleValue =
-                  typeof inf === 'object' &&
-                  inf !== null &&
-                  'handle' in inf &&
-                  typeof inf.handle === 'string'
-                    ? inf.handle
-                    : '';
-                return {
-                  id: id,
-                  platform: (platformValue && PlatformEnumBackend.safeParse(platformValue).success
-                    ? platformValue
-                    : PlatformEnumBackend.Values.INSTAGRAM) as z.infer<typeof PlatformEnumBackend>,
-                  handle: handleValue,
-                };
-              })
-            : [
-                {
-                  id: `new-${Date.now()}`,
-                  platform: PlatformEnumBackend.Values.INSTAGRAM,
-                  handle: '',
-                },
-              ],
+        Influencer: wizardState.Influencer ?? [
+          { id: uuidv4(), platform: PlatformEnumBackend.Values.INSTAGRAM, handle: '' },
+        ],
       };
-      logger.info('[Timezone Reset Effect] Calling form.reset with formatted data:', formattedData);
-      form.reset(formattedData as Step1FormData);
-      initialDataLoaded.current = true; // Mark initial load as complete here
+
+      setInitialFormState(initialData);
     }
-    // Depend on detection state change as well
-  }, [isLoading, wizardState, form.reset, _isDetectingTimezone, _detectedTimezone]);
+    // Dependencies remain largely the same, adding wizardState.id implicitly via wizardState dependency
+  }, [
+    isWizardLoading,
+    localization.isLoading,
+    localization.timezone,
+    localization.currency,
+    wizardState, // Includes wizardState.id
+    initialFormState,
+  ]);
+
+  // --- Form Reset Effect (Updated) ---
+  useEffect(() => {
+    logger.debug('[Form Reset Effect] Running Check...', {
+      initialFormStateExists: !!initialFormState,
+      initialDataLoaded: initialDataLoaded.current,
+      isLocationLoading: localization.isLoading, // Check localization loading
+    });
+
+    // Only run ONCE when initialFormState is set AND localization detection is finished
+    if (initialFormState && !initialDataLoaded.current && !localization.isLoading) {
+      logger.info(
+        '[Form Reset Effect] Conditions met. Applying calculated initial values to form:',
+        initialFormState
+      );
+      form.reset(initialFormState);
+      initialDataLoaded.current = true;
+    }
+    // Depend on initialFormState, form.reset, form object, and localization.isLoading
+  }, [initialFormState, form.reset, form, localization.isLoading]); // Add form dependency
 
   const {
     fields: influencerFields,
@@ -584,9 +500,6 @@ function Step1Content() {
 
   // Prefix unused contact useFieldArray results
   const {
-    // fields: contactFields, // Prefix if unused
-    // append: appendContact, // Prefix if unused
-    // remove: removeContact, // Prefix if unused
     fields: _contactFields,
     append: _appendContact,
     remove: _removeContact,
@@ -748,7 +661,16 @@ function Step1Content() {
     // Rerun effect when raw values or currency change
   }, [totalBudgetRaw, socialMediaBudgetRaw, selectedCurrency]);
 
-  if (isLoading || !initialDataLoaded.current) {
+  // --- Duration Calculation Effect (Add back) ---
+  const watchedStartDate = form.watch('startDate');
+  const watchedEndDate = form.watch('endDate');
+  useEffect(() => {
+    const duration = calculateDuration(watchedStartDate, watchedEndDate);
+    setCampaignDuration(duration);
+  }, [watchedStartDate, watchedEndDate]);
+
+  if (isWizardLoading || localization.isLoading || !initialDataLoaded.current) {
+    // Show skeleton while wizard context is loading OR localization is loading OR initial form data hasn't been loaded yet
     return <WizardSkeleton step={1} />;
   }
 
@@ -771,7 +693,7 @@ function Step1Content() {
                     <FormItem>
                       <FormLabel>Campaign Name *</FormLabel>
                       <FormControl>
-                        <Input placeholder="E.g., Summer Skincare Launch" {...field} />
+                        <Input placeholder="Summer Skincare Launch" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -787,7 +709,7 @@ function Step1Content() {
                       <FormLabel>Business Goal</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="E.g., Increase brand awareness by 15%"
+                          placeholder="Increase brand awareness by 15%"
                           {...field}
                           value={field.value ?? ''}
                         />
@@ -805,7 +727,7 @@ function Step1Content() {
                     <FormItem>
                       <FormLabel>Brand Name *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Your Brand Name" {...field} />
+                        <Input placeholder="Brand Name" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -821,7 +743,7 @@ function Step1Content() {
                       <FormLabel>Website</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="https://yourbrand.com"
+                          placeholder="https://brandname.com"
                           {...field}
                           value={field.value ?? ''}
                         />
@@ -892,6 +814,14 @@ function Step1Content() {
                   )}
                 />
               </div>
+              <div className="md:col-span-2 flex items-center min-h-[2.25rem] pt-2">
+                {campaignDuration && (
+                  <Badge variant="outline" className="font-normal">
+                    <Icon iconId="faCalendarDaysLight" className="mr-1.5 h-3 w-3" />
+                    Duration: {campaignDuration}
+                  </Badge>
+                )}
+              </div>
               <div className="md:col-span-1 pt-4">
                 <FormField
                   control={form.control}
@@ -899,8 +829,8 @@ function Step1Content() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="flex items-center">
-                        Time Zone *
-                        {_isDetectingTimezone && ( // Use prefixed state
+                        Time Zone *{/* Use localization hook's loading state */}
+                        {localization.isLoading && (
                           <Icon
                             iconId="faCircleNotchLight"
                             className="animate-spin h-3 w-3 ml-2 text-muted-foreground"
@@ -909,16 +839,20 @@ function Step1Content() {
                       </FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        value={field.value || ''}
-                        disabled={_isDetectingTimezone}
+                        value={field.value || ''} // Default value might need adjustment if field.value can be null
+                        // Disable while localization is loading
+                        disabled={localization.isLoading}
                       >
                         <FormControl>
                           <SelectTrigger className="w-full">
+                            {/* Ensure SelectValue has a valid value or placeholder displays */}
                             <SelectValue placeholder="Select timezone..." />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {timezonesData.map(option => (
+                          {/* Populate from static data */}
+                          {/* Add type for option */}
+                          {timezonesData.map((option: { value: string; label: string }) => (
                             <SelectItem key={option.value} value={option.value}>
                               {option.label}
                             </SelectItem>
@@ -1153,8 +1087,6 @@ function Step1Content() {
                   control={form.control}
                   name="budget.total"
                   render={({ field: { onChange, ...fieldProps } }) => {
-                    const displayValue = String(fieldProps.value ?? ''); // Display raw number for now
-                    // const displayValue = formatCurrencyInput(fieldProps.value); // Use this if helper is restored
                     return (
                       <FormItem>
                         <FormLabel>Total Budget *</FormLabel>
@@ -1188,8 +1120,6 @@ function Step1Content() {
                   control={form.control}
                   name="budget.socialMedia"
                   render={({ field: { onChange, ...fieldProps } }) => {
-                    const displayValue = String(fieldProps.value ?? ''); // Display raw number
-                    // const displayValue = formatCurrencyInput(fieldProps.value); // Use this if helper is restored
                     return (
                       <FormItem>
                         <FormLabel>Social Media Budget *</FormLabel>
