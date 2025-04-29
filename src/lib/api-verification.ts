@@ -1098,31 +1098,34 @@ export async function verifyUploadthingApi(): Promise<ApiVerificationResult> {
  */
 export async function verifyDatabaseConnection(): Promise<ApiVerificationResult> {
   const apiName = 'Database Connection';
-  const endpoint = process.env.DATABASE_URL || 'postgres://example.com';
+  // Prioritize POSTGRES_DATABASE_URL, fall back to DATABASE_URL
+  const dbVarName = process.env.POSTGRES_DATABASE_URL ? 'POSTGRES_DATABASE_URL' : 'DATABASE_URL';
+  const endpoint = process.env[dbVarName] || 'postgres://example.com'; // Use the determined var name
+  const actualDbUrl = process.env[dbVarName]; // Get the actual value
 
   try {
-    console.info(`Testing ${apiName}`);
+    console.info(`Testing ${apiName} using ${dbVarName}`);
 
-    // Extract hostname from DATABASE_URL
+    // Extract hostname from the database URL
     const dbUrl = new URL(endpoint);
     const hostname = dbUrl.hostname;
 
     // First check if the host is reachable at all to rule out connectivity issues
     const hostCheck = await isHostReachable(hostname);
 
-    // Check if DATABASE_URL exists
-    const hasDbUrl = process.env.DATABASE_URL !== undefined && process.env.DATABASE_URL.length > 0;
+    // Check if the prioritized DB URL exists
+    const hasDbUrl = actualDbUrl !== undefined && actualDbUrl.length > 0;
 
     if (!hasDbUrl) {
-      console.warn(`${apiName} verification warning: Missing DATABASE_URL`);
+      console.warn(`${apiName} verification warning: Missing ${dbVarName}`);
 
       return {
         success: false,
         apiName,
-        endpoint: 'DATABASE_URL',
+        endpoint: dbVarName, // Indicate which variable was missing
         error: {
           type: ApiErrorType.AUTHENTICATION_ERROR,
-          message: 'Missing DATABASE_URL in environment variables.',
+          message: `Missing ${dbVarName} in environment variables.`,
           details: null,
           isRetryable: true,
         },
@@ -1134,7 +1137,7 @@ export async function verifyDatabaseConnection(): Promise<ApiVerificationResult>
       return {
         success: false,
         apiName,
-        endpoint,
+        endpoint: dbVarName, // Indicate which variable was used for endpoint
         error: {
           type: ApiErrorType.NETWORK_ERROR,
           message: `Cannot connect to the database host (${hostname}). The service may be down or blocked by network policies.`,
@@ -1188,7 +1191,7 @@ export async function verifyDatabaseConnection(): Promise<ApiVerificationResult>
     return {
       success: false,
       apiName,
-      endpoint: 'DATABASE_URL',
+      endpoint: dbVarName, // Indicate which variable was used for endpoint
       error: {
         type: ApiErrorType.UNKNOWN_ERROR,
         message: errorMessage,
