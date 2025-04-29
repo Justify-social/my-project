@@ -1,62 +1,85 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/utils/logger'; // Assuming logger path
 
-// TODO: Uncomment Phyllo credential checks and ensure they are set in the build environment.
-/*
-const PHYLLO_CLIENT_ID = process.env.NEXT_PUBLIC_PHYLLO_CLIENT_ID;
-const PHYLLO_SECRET = process.env.PHYLLO_SECRET || process.env.NEXT_PUBLIC_PHYLLO_SECRET;
-if (!PHYLLO_CLIENT_ID || !PHYLLO_SECRET) {
-  console.error('Build Error: Missing Phyllo credentials for SDK token. Temporarily disabling route.');
-  // Handle in POST handler
-  // throw new Error('Missing Phyllo credentials in environment variables');
+const PHYLLO_BASE_URL = process.env.PHYLLO_BASE_URL;
+const PHYLLO_CLIENT_ID = process.env.PHYLLO_CLIENT_ID;
+const PHYLLO_CLIENT_SECRET = process.env.PHYLLO_CLIENT_SECRET;
+
+/**
+ * Generates the Basic Auth header value.
+ * Centralized function for consistency.
+ */
+function getBasicAuthHeader(): string {
+  if (!PHYLLO_CLIENT_ID || !PHYLLO_CLIENT_SECRET) {
+    logger.error('[API Phyllo SdkToken] Missing Phyllo Client ID or Secret.');
+    throw new Error('Phyllo Client ID or Secret is missing.');
+  }
+  const credentials = `${PHYLLO_CLIENT_ID}:${PHYLLO_CLIENT_SECRET}`;
+  return `Basic ${Buffer.from(credentials).toString('base64')}`;
 }
-const PHYLLO_AUTH = Buffer.from(`${PHYLLO_CLIENT_ID}:${PHYLLO_SECRET}`).toString('base64');
-*/
 
-export async function POST(_req: NextRequest) {
-  // Prefix unused req
-  // TODO: Remove this block and uncomment the credential checks/API call below when re-enabling.
-  console.error('Phyllo /sdk-token route temporarily disabled due to missing build credentials.');
-  return NextResponse.json(
-    { error: 'Phyllo SDK token generation is temporarily disabled.' },
-    { status: 503 } // Service Unavailable
-  );
-  /*
-    try {
-      const PHYLLO_CLIENT_ID = process.env.NEXT_PUBLIC_PHYLLO_CLIENT_ID;
-      const PHYLLO_SECRET = process.env.PHYLLO_SECRET || process.env.NEXT_PUBLIC_PHYLLO_SECRET;
-      if (!PHYLLO_CLIENT_ID || !PHYLLO_SECRET) {
-        console.error('Runtime Error: Missing Phyllo credentials. Cannot get SDK token.');
-        return NextResponse.json({ error: 'Phyllo configuration error' }, { status: 500 });
-      }
-      const PHYLLO_AUTH = Buffer.from(`${PHYLLO_CLIENT_ID}:${PHYLLO_SECRET}`).toString('base64');
-  
-      const body = await _req.json();
-      const { user_id } = body;
-      if (!user_id) {
-        return NextResponse.json({ error: 'Missing user_id' }, { status: 400 });
-      }
-      // Request the SDK token from Phyllo
-      const response = await fetch('https://api.staging.getphyllo.com/v1/sdk-tokens', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Basic ${PHYLLO_AUTH}`,
-        },
-        body: JSON.stringify({
-          user_id,
-          products: ['IDENTITY', 'ENGAGEMENT'],
-        }),
-      });
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Phyllo SDK token error:', errorText);
-        throw new Error(`Token fetch failed: ${response.status}`);
-      }
-      const result = await response.json();
-      return NextResponse.json(result);
-    } catch (err) {
-      console.error('Error fetching SDK token:', err);
-      return NextResponse.json({ error: 'Failed to fetch SDK token' }, { status: 500 });
+// Define the products needed for the Influencer Marketplace MVP
+// Reference: https://docs.getphyllo.com/docs/api-reference/reference/products
+const REQUIRED_PRODUCTS = [
+  'IDENTITY', // For user verification status (isPhylloVerified)
+  'IDENTITY.PROFILE', // Basic profile info like name, handle, bio, avatar (confirm if needed or use ANALYTICS)
+  // 'PROFILE.ANALYTICS', // Consider using this instead of IDENTITY.PROFILE for richer data like followers? Verify overlap.
+  'ENGAGEMENT', // For engagement metrics like likes, comments (if not in ANALYTICS)
+  'ENGAGEMENT.AUDIENCE', // For audience demographics (age, gender, location)
+  // Add other products if needed, e.g., 'INCOME' (Post-MVP)
+];
+
+export async function POST(req: NextRequest) {
+  if (!PHYLLO_BASE_URL || !PHYLLO_CLIENT_ID || !PHYLLO_CLIENT_SECRET) {
+    logger.error('[API Phyllo SdkToken] Runtime Error: Missing Phyllo credentials.');
+    return NextResponse.json({ error: 'Phyllo configuration error' }, { status: 503 });
+  }
+
+  try {
+    const body = await req.json();
+    const { user_id } = body;
+    if (!user_id) {
+      logger.warn('[API Phyllo SdkToken] Missing user_id parameter.');
+      return NextResponse.json({ error: 'Missing user_id' }, { status: 400 });
     }
-  */
+
+    const apiUrl = `${PHYLLO_BASE_URL}/v1/sdk-tokens`;
+    logger.info(`[API Phyllo SdkToken] Requesting SDK token for user_id: ${user_id}`);
+
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: getBasicAuthHeader(),
+      },
+      body: JSON.stringify({
+        user_id: user_id,
+        products: REQUIRED_PRODUCTS, // Use the updated product list
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      logger.error('[API Phyllo SdkToken] Phyllo API error:', {
+        status: response.status,
+        body: result,
+      });
+      const errorMessage = result?.details || result?.error_message || 'Failed to fetch SDK token';
+      return NextResponse.json(
+        { error: errorMessage, phylloError: result },
+        { status: response.status }
+      );
+    }
+
+    logger.info(`[API Phyllo SdkToken] Successfully generated SDK token for user_id: ${user_id}`);
+    return NextResponse.json(result);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unknown internal error';
+    logger.error('[API Phyllo SdkToken] Failed to fetch SDK token:', message);
+    return NextResponse.json(
+      { error: 'Failed to fetch SDK token', details: message },
+      { status: 500 }
+    );
+  }
 }

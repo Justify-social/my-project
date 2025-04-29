@@ -351,3 +351,40 @@ enum InvitationStatus {
   REJECTED
   EXPIRED
 }
+
+// New model for storing persistent influencer profile data for the marketplace
+model MarketplaceInfluencer {
+  id                        String    @id @default(uuid()) // Internal Justify ID
+  name                      String
+  handle                    String // Primary handle, need uniqueness constraint?
+  avatarUrl                 String?
+  platforms                 Platform[] // Platforms active on (from Phyllo)
+  followersCount            Int?      // Latest known follower count (from Phyllo)
+  justifyScore              Float?    // Calculated score (from Justify logic)
+  isPhylloVerified          Boolean?  // Verification status (from Phyllo Identity)
+  primaryAudienceLocation String?   // Quick summary field (from Phyllo Profile Analytics)
+  primaryAudienceAgeRange String?   // Quick summary field (from Phyllo Profile Analytics)
+  primaryAudienceGender     String?   // Quick summary field (from Phyllo Profile Analytics)
+  engagementRate            Float?    // Overall engagement rate (from Phyllo)
+  audienceQualityIndicator  String?   // High/Medium/Low (from Phyllo Profile Analytics)
+  bio                       String?   // Profile bio (from Phyllo)
+  contactEmail              String?   // Contact email (source TBD - Phyllo? Manual?)
+  // JSON fields for more detailed data from Phyllo
+  audienceDemographics      Json?     // Store detailed age/gender/location distributions
+  engagementMetrics         Json?     // Store detailed likes/comments etc.
+  // Timestamps
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+  phylloDataLastRefreshedAt DateTime? // Timestamp of last successful Phyllo data pull
+
+  // Indexes based on MVP filters (Ticket 0.10)
+  @@index([justifyScore]) // Filtering by score range
+  @@index([followersCount]) // Filtering by follower range
+  @@index([primaryAudienceLocation]) // Filtering by location
+  @@index([primaryAudienceAgeRange]) // Filtering by age
+  @@index([isPhylloVerified]) // Filtering by verification status
+  @@index([platforms]) // Filtering by platform (if DB supports array index)
+  @@index([handle]) // For potential future search/lookup
+  // Consider compound indexes later if needed, e.g., @@index([primaryAudienceLocation, primaryAudienceAgeRange])
+  // Note: Uniqueness constraint on handle/platform might be too strict if storing multiple platform profiles per influencer concept
+}

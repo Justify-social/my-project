@@ -304,6 +304,12 @@ const DraftCampaignDataBaseSchema = z
     // --- Relations / Other ---
     /** ID of the user who owns the campaign draft. */
     userId: z.string().nullable().optional(),
+
+    // --- Frontend Flow State (Not Persisted in CampaignWizard model) ---
+    /** IDs of influencers selected in the marketplace during the wizard flow. */
+    selectedInfluencerIds: z.array(z.string()).optional(),
+    /** Flag indicating the user navigated to the marketplace from the wizard. */
+    isFindingInfluencers: z.boolean().optional(),
   })
   .passthrough(); // Apply passthrough to the main base schema
 

@@ -19,27 +19,34 @@ Before a ticket from `plan.md` can be pulled into a Sprint Backlog, it should me
 2.  **Prepare for Sprint 1 Planning: Backlog Refinement:**
     *   **Action:** Review **Phase 0 & Foundational Phase 1 tickets** from `plan.md` as primary candidates for the Sprint 1 Backlog. These enable the parallel streams:
         *   **Core Setup:**
-            *   `0.1: CHORE: Create Core Directory Structure`
-            *   `0.2: TYPE: Define InfluencerSummary Type (MVP)`
-            *   `0.3: TYPE: Define InfluencerProfileData Type (MVP)`
-            *   `0.4: TYPE: Extend DraftCampaignData in WizardContext`
-            *   `0.5: DATA: Create Mock Influencer Data File` (Still useful for Storybook/fallback)
-            *   `0.9: CHORE: Implement Service Abstraction Layer`
-            *   `0.10: CHORE(DB): Define Initial Database Indexes`
+            *   `0.1: CHORE: Create Core Directory Structure` ✅ **(Done)**
+            *   `0.2: TYPE: Define InfluencerSummary Type (MVP)` ✅ **(Done)**
+            *   `0.3: TYPE: Define InfluencerProfileData Type (MVP)` ✅ **(Done)**
+            *   `0.4: TYPE: Extend DraftCampaignData in WizardContext` ✅ **(Done)**
+            *   `0.5: DATA: Create Mock Influencer Data File` ✅ **(Done)**
+            *   `0.9: CHORE: Implement Service Abstraction Layer` ✅ **(Done)**
+            *   `0.10: CHORE(DB): Define Initial Database Indexes` ✅ **(Done)**
             *   `0.13: CHORE(Config): Setup Phyllo API Key Management` (Using Sandbox keys)
             *   *Note: Mock service implementation (0.6-0.8) serves primarily as a fallback during BE deployment delays or for isolated FE testing (e.g., Storybook), **not** as the primary development target. Frontend development (Ticket 1.4 onwards) MUST integrate with live dev/staging backend APIs ASAP.*
         *   **Backend Foundation (Sprint 1 Focus):**
-            *   `0.11: BE-SETUP: Initialize Influencer DB Models & Basic API Routes`
-            *   `0.12: BE-SETUP: Implement Phyllo Service Initial Connection` (Targeting Sandbox)
-            *   `0.14: CHORE(API): Verify Existing Phyllo User/Token Endpoints` (Targeting Sandbox)
-            *   `1.0: BE-FEAT: Implement GET /influencers v1 (Core Data + Phyllo Verification)` (Targeting Sandbox)
-            *   `1.1: BE-FEAT: Implement GET /influencers/:id v1 (Core Profile Data)` (Targeting Sandbox)
-            *   `1.9: BE-FEAT: Implement MVP Justify Score v1 Calculation`
+            *   `0.11: BE-SETUP: Initialize Influencer DB Models & Basic API Routes` ✅ **(Done)**
+            *   `0.12: BE-SETUP: Implement Phyllo Service Initial Connection` ✅ **(Done)**
+            *   `0.13: CHORE(Config): Setup Phyllo API Key Management (Sandbox)` ✅ **(Done)**
+            *   `0.14: CHORE(API): Verify Existing Phyllo User/Token Endpoints` ✅ **(Done)**
+            *   `1.0: BE-FEAT: Implement GET /influencers v1 (Core Data + Phyllo Verification)` ✅ **(Done - Linter Issues Pending)**
+            *   `1.1: BE-FEAT: Implement GET /influencers/:id v1 (Core Profile Data)` ✅ **(Done - Linter Issues Pending)**
+            *   `1.9: BE-FEAT: Implement MVP Justify Score v1 Calculation` ✅ **(Done - Linter Issues Pending)**
         *   **Frontend Foundation (Sprint 1 Focus):**
-            *   `1.2: FEAT(UI): Build InfluencerSummaryCard Component`
-            *   `1.3: FEAT(UI): Setup Marketplace Page (`page.tsx`) & Initial State`
-            *   `1.4: FEAT(FE): Implement Initial Data Fetching on Marketplace Page` (**Integrate with BE Ticket 1.0 deployed to dev/staging ASAP**)
-            *   `1.5: FEAT(UI): Create MarketplaceList Component`
+            *   `0.1: CHORE: Create Core Directory Structure` ✅ **(Done)**
+            *   `0.2: TYPE: Define InfluencerSummary Type (MVP)` ✅ **(Done)**
+            *   `0.3: TYPE: Define InfluencerProfileData Type (MVP)` ✅ **(Done)**
+            *   `0.4: TYPE: Extend DraftCampaignData in WizardContext` ✅ **(Done)**
+            *   `0.5: DATA: Create Mock Influencer Data File` ✅ **(Done)**
+            *   `0.9: CHORE: Implement Service Abstraction Layer` ✅ **(Done)**
+            *   `1.2: FEAT(UI): Build InfluencerSummaryCard Component` ✅ **(Done)**
+            *   `1.3: FEAT(UI): Setup Marketplace Page (`page.tsx`) & Initial State` ✅ **(Done)**
+            *   `1.4: FEAT(FE): Implement Initial Data Fetching on Marketplace Page` (**Blocked by BE Ticket 1.0 Deployment**)
+            *   `1.5: FEAT(UI): Create MarketplaceList Component` ✅ **(Done)**
     *   **Action:** **Clarify `TODOs` (Pre-Planning):** Resolve `TODOs` from Ticket 0.3 (incl. clarifying MVP fields) with Product Owner.
     *   **Action:** **Initiate UI Dependency Check (Pre-Planning):** Audit UI library (Ticket 1.2 Dep Check) and create `CHORE(UI)` tickets for gaps.
     *   **Action:** **Confirm Backend Task Details & Readiness (Pre-Planning):** Simultaneously, the Backend team confirms the details and their readiness to start on their prioritized Sprint 1 tickets (0.11, 0.12, 0.14, 1.0, 1.1, 1.9) based on finalized API contracts and sandbox credentials. **This includes verifying the required Phyllo `products` list in the existing `/api/phyllo/sdk-token` endpoint (part of Ticket 0.14).**
