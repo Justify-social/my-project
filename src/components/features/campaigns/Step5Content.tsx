@@ -62,29 +62,37 @@ const SummarySection: React.FC<SummarySectionProps> = ({
       value={`step-${stepNumber}`}
       className="group border rounded-lg mb-2 overflow-hidden"
     >
-      <AccordionTrigger
+      <div
         className={cn(
-          'flex justify-between items-center w-full p-4 hover:bg-accent/10 text-left text-lg font-semibold text-primary',
+          'flex items-center justify-between w-full p-4 text-left',
           isComplete ? 'bg-green-50/50' : 'bg-card',
-          '[&[data-state=open]>div>button]:bg-muted'
+          'hover:bg-accent/10'
         )}
       >
-        <div className="flex flex-1 items-center">
-          <Badge
-            variant={isComplete ? 'default' : 'secondary'}
-            className={cn('mr-3 h-6 w-6 justify-center', isComplete && 'bg-green-600 text-white')}
-          >
-            {stepNumber}
-          </Badge>
-          <span>{title}</span>
-          {isComplete && (
-            <Icon
-              iconId="faCircleCheckSolid"
-              className="ml-2 h-4 w-4 text-green-600 flex-shrink-0"
-            />
+        <AccordionTrigger
+          className={cn(
+            'flex flex-1 items-center text-lg font-semibold text-primary',
+            'group/trigger'
           )}
-        </div>
-        <div className="flex items-center flex-shrink-0 mr-2">
+          asChild
+        >
+          <div className="flex flex-1 items-center">
+            <Badge
+              variant={isComplete ? 'default' : 'secondary'}
+              className={cn('mr-3 h-6 w-6 justify-center', isComplete && 'bg-green-600 text-white')}
+            >
+              {stepNumber}
+            </Badge>
+            <span>{title}</span>
+            {isComplete && (
+              <Icon
+                iconId="faCircleCheckSolid"
+                className="ml-2 h-4 w-4 text-green-600 flex-shrink-0"
+              />
+            )}
+          </div>
+        </AccordionTrigger>
+        <div className="flex items-center flex-shrink-0 ml-2">
           <IconButtonAction
             iconBaseName="faPenToSquare"
             hoverColorClass="text-accent"
@@ -93,9 +101,10 @@ const SummarySection: React.FC<SummarySectionProps> = ({
               e.stopPropagation();
               onEdit();
             }}
+            className="focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
           />
         </div>
-      </AccordionTrigger>
+      </div>
       <AccordionContent className="p-4 pt-0 border-t">
         <div className="pl-[calc(1rem_+_1.5rem_+_0.75rem)] mt-2">{children}</div>
       </AccordionContent>
@@ -268,7 +277,7 @@ function Step5Content() {
 
   // Fetch summaries when selected IDs change
   useEffect(() => {
-    const selectedIds = wizard.wizardState?.selectedInfluencerIds;
+    const selectedIds = wizard?.wizardState?.selectedInfluencerIds;
     if (Array.isArray(selectedIds) && selectedIds.length > 0) {
       const fetchSummaries = async () => {
         logger.info(
@@ -296,11 +305,11 @@ function Step5Content() {
       setIsFetchingSummaries(false);
       setFetchSummariesError(null);
     }
-  }, [JSON.stringify(wizard.wizardState?.selectedInfluencerIds)]);
+  }, [JSON.stringify(wizard?.wizardState?.selectedInfluencerIds)]);
 
   // --- Data Transformation & Validation for Submission (REWRITTEN) ---
   const prepareSubmissionPayload = useCallback((): SubmissionPayloadData | null => {
-    const draft = wizard.wizardState;
+    const draft = wizard?.wizardState;
     if (!draft) {
       toast.error('Cannot prepare submission, draft data is missing.');
       return null;
@@ -432,7 +441,7 @@ function Step5Content() {
     console.log('Submission Payload (Frontend Validation Bypassed):', payload);
     // Directly return the constructed payload without frontend validation
     return payload as SubmissionPayloadData; // Cast as SubmissionPayloadData for type consistency downstream
-  }, [wizard.wizardState]);
+  }, [wizard?.wizardState]);
 
   // Submit Handler (Uses validated payload)
   const onSubmit: SubmitHandler<ConfirmationFormData> = async formData => {
@@ -501,7 +510,7 @@ function Step5Content() {
       console.log(
         '[Step5Content] Submission successful. Attempting to navigate to submission page...'
       );
-      if (wizard.campaignId) {
+      if (wizard?.campaignId) {
         router.push(`/campaigns/wizard/submission?id=${wizard.campaignId}`);
         // Correct logger call (remove second arg or make it an object)
         logger.info('[Step5Content] Navigation to /campaigns/wizard/submission initiated.');
@@ -525,9 +534,11 @@ function Step5Content() {
   };
 
   // --- Render Logic ---
-  const { wizardState, isLoading, stepsConfig } = wizard;
+  const wizardState = wizard?.wizardState;
+  const isLoading = wizard?.isLoading ?? !wizard;
+  const stepsConfig = wizard?.stepsConfig ?? [];
 
-  if (isLoading && !wizardState && wizard.campaignId) return <WizardSkeleton step={5} />;
+  if (isLoading && !wizardState && wizard?.campaignId) return <WizardSkeleton step={5} />;
   if (!wizardState) {
     return (
       <div className="text-center py-10">
@@ -540,10 +551,10 @@ function Step5Content() {
   }
 
   const handleStepClick = (step: number) => {
-    if (wizard.campaignId) router.push(`/campaigns/wizard/step-${step}?id=${wizard.campaignId}`);
+    if (wizard?.campaignId) router.push(`/campaigns/wizard/step-${step}?id=${wizard.campaignId}`);
   };
   const handleBack = () => {
-    if (wizard.campaignId) router.push(`/campaigns/wizard/step-4?id=${wizard.campaignId}`);
+    if (wizard?.campaignId) router.push(`/campaigns/wizard/step-4?id=${wizard.campaignId}`);
   };
   const handleNext = form.handleSubmit(onSubmit);
 

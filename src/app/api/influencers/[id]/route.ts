@@ -1,5 +1,3 @@
-'use client'; // This directive might not be needed for API routes
-
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { PrismaClient, Prisma, Platform } from '@prisma/client'; // Import Platform enum
@@ -18,15 +16,15 @@ import { PlatformEnum } from '@/types/enums';
 
 const prisma = new PrismaClient();
 
-// Define params type for clarity
-interface RouteParams {
-  params: { id: string };
-}
-
 // Zod schema for ID validation (ensure it's a UUID)
 const IdSchema = z.string().uuid({ message: 'Invalid Influencer ID format (must be UUID)' });
 
-export async function GET(request: NextRequest, { params }: RouteParams) {
+// Define Params interface explicitly
+interface InfluencerRouteParams {
+  params: { id: string };
+}
+
+export async function GET(request: NextRequest, { params }: InfluencerRouteParams) {
   const { id } = params;
   logger.info(`[API /influencers/:id] GET request received for ID: ${id}`);
 

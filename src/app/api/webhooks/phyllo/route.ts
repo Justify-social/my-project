@@ -8,173 +8,123 @@ const prisma = new PrismaClient();
 
 const PHYLLO_WEBHOOK_SECRET = process.env.PHYLLO_WEBHOOK_SECRET;
 
-// --- Webhook Signature Verification ---
-async function verifySignature(signature: string | null, rawBody: string): Promise<boolean> {
-  if (!PHYLLO_WEBHOOK_SECRET) {
-    logger.error('[Webhook Phyllo] Missing PHYLLO_WEBHOOK_SECRET');
-    return false;
-  }
-  if (!signature) {
-    logger.warn('[Webhook Phyllo] Missing Phyllo-Signature header');
-    return false;
-  }
-  try {
-    const hmac = crypto.createHmac('sha256', PHYLLO_WEBHOOK_SECRET);
-    const digest = Buffer.from(hmac.update(rawBody).digest('hex'), 'utf8');
-    const checksum = Buffer.from(signature, 'utf8');
-    if (checksum.length !== digest.length || !crypto.timingSafeEqual(digest, checksum)) {
-      logger.warn('[Webhook Phyllo] Invalid signature');
-      return false;
-    }
-  } catch (error) {
-    logger.error('[Webhook Phyllo] Error verifying signature:', error);
-    return false;
-  }
-  return true;
-}
-
-// --- Interfaces ---
-interface PhylloAccountAddedPayload {
-  event: 'ACCOUNTS.ADDED';
-  user_id: string;
-  id: string;
-}
-interface PhylloAccountDetails {
-  id: string;
-  status: string;
-  platform?: Platform;
-  work_platform?: { name: string; id: string };
-}
-
-// --- POST Handler ---
+/**
+ * Handles incoming webhook events from Phyllo.
+ *
+ * Important: This endpoint must be publicly accessible and able to handle POST requests.
+ */
 export async function POST(request: NextRequest) {
-  logger.info('[Webhook Phyllo] Received POST request');
+  logger.info('[API /webhooks/phyllo] Received POST request');
 
-  // 1. Read raw body
-  let rawBody: string;
-  try {
-    rawBody = await request.text();
-  } catch (error) {
-    logger.error('[Webhook Phyllo] Error reading request body text:', error);
+  // --- 1. Verify Webhook Signature (CRITICAL FOR SECURITY) ---
+  const signatureHeader = request.headers.get('phyllo-signature');
+  const webhookSecret = process.env.PHYLLO_WEBHOOK_SECRET; // Ensure this is set in your env!
+
+  if (!signatureHeader || !webhookSecret) {
+    logger.error('[API /webhooks/phyllo] Missing signature header or webhook secret');
     return NextResponse.json(
-      { success: false, error: 'Failed to read request body' },
-      { status: 500 }
+      { success: false, error: 'Missing signature information' },
+      { status: 400 }
     );
   }
 
-  // 2. Verify Signature
-  const signature = request.headers.get('Phyllo-Signature');
-  const isVerified = await verifySignature(signature, rawBody);
-  if (!isVerified) {
-    return NextResponse.json({ success: false, error: 'Invalid signature' }, { status: 401 });
-  }
-  logger.debug('[Webhook Phyllo] Signature verified successfully');
-
-  // 3. Parse Payload
-  let payload: any;
   try {
-    payload = JSON.parse(rawBody);
-    logger.info(`[Webhook Phyllo] Parsed payload for event: ${payload?.event}`);
-  } catch (error) {
-    logger.error('[Webhook Phyllo] Error parsing JSON payload:', error);
-    return NextResponse.json({ success: false, error: 'Invalid payload' }, { status: 400 });
-  }
+    const requestBody = await request.text(); // Read raw body for verification
 
-  // 4. Handle ACCOUNTS.ADDED Event
-  if (payload?.event === 'ACCOUNTS.ADDED') {
-    const { user_id: phylloUserId, id: phylloAccountId } = payload as PhylloAccountAddedPayload;
-    logger.info(
-      `[Webhook Phyllo] Processing ACCOUNTS.ADDED for User: ${phylloUserId}, Account: ${phylloAccountId}`
-    );
+    const [timestampPart, signaturePart] = signatureHeader.split(',');
+    const timestamp = timestampPart?.split('=')[1];
+    const signature = signaturePart?.split('=')[1];
 
-    if (!phylloUserId || !phylloAccountId) {
-      logger.warn('[Webhook Phyllo] Missing user_id or account_id in ACCOUNTS.ADDED payload');
+    if (!timestamp || !signature) {
+      logger.error('[API /webhooks/phyllo] Invalid signature header format');
       return NextResponse.json(
-        { success: false, error: 'Missing required fields in payload' },
+        { success: false, error: 'Invalid signature header format' },
         { status: 400 }
       );
     }
 
-    try {
-      // a. Find Marketplace Influencer ID
-      const influencer = await prisma.marketplaceInfluencer.findUnique({
-        where: { phylloUserId: phylloUserId },
-        select: { id: true },
-      });
+    const signedPayload = `${timestamp}.${requestBody}`;
+    const expectedSignature = crypto
+      .createHmac('sha256', webhookSecret)
+      .update(signedPayload)
+      .digest('hex');
 
-      if (!influencer) {
-        logger.error(
-          `[Webhook Phyllo] Could not find MarketplaceInfluencer for Phyllo User ID: ${phylloUserId}. Cannot link account ${phylloAccountId}.`
-        );
-        return NextResponse.json({
-          success: true,
-          message: 'Internal mapping missing, event acknowledged.',
-        });
-      }
-      const marketplaceInfluencerId = influencer.id;
-
-      // b. Get Account Details from Phyllo
-      const accountDetails = await makePhylloRequest<PhylloAccountDetails>(
-        `/v1/accounts/${phylloAccountId}`
-      );
-
-      if (!accountDetails?.platform) {
-        logger.error(
-          `[Webhook Phyllo] Failed to fetch valid account details or platform for Phyllo Account: ${phylloAccountId}`
-        );
-        return NextResponse.json(
-          { success: false, error: 'Failed to retrieve account details from Phyllo' },
-          { status: 500 }
-        );
-      }
-
-      const platform = accountDetails.platform;
-      const status = accountDetails.status ?? 'CONNECTED';
-      const metadata = accountDetails as unknown as Prisma.JsonValue;
-
-      // c. Create/Update the Link Record
-      logger.info(
-        `[Webhook Phyllo] Creating/Updating PhylloAccountLink for MPI_ID: ${marketplaceInfluencerId}, PhylloAID: ${phylloAccountId}`
-      );
-      await prisma.phylloAccountLink.upsert({
-        where: { phylloAccountId: phylloAccountId },
-        create: {
-          marketplaceInfluencerId: marketplaceInfluencerId,
-          phylloAccountId: phylloAccountId,
-          phylloUserId: phylloUserId,
-          platform: platform,
-          status: status,
-          metadata: metadata === null ? undefined : metadata,
-          connectedAt: new Date(),
-        },
-        update: {
-          status: status,
-          metadata: metadata === null ? undefined : metadata,
-          updatedAt: new Date(),
-        },
-      });
-      logger.info(
-        `[Webhook Phyllo] Successfully processed ACCOUNTS.ADDED for Account: ${phylloAccountId}`
-      );
-    } catch (error) {
-      logger.error(
-        `[Webhook Phyllo] Error processing ACCOUNTS.ADDED for Account ${phylloAccountId}:`,
-        error
-      );
-      return NextResponse.json({
-        success: true,
-        message: 'Internal error processing event, acknowledged.',
-      });
-    }
-    // TODO: Handle other events like ACCOUNTS.REMOVED, IDENTITY.UPDATED etc.
-  } else {
-    logger.info(
-      `[Webhook Phyllo] Received unhandled event type: ${payload?.event}. Acknowledging.`
+    // Compare signatures securely to prevent timing attacks
+    const signaturesMatch = crypto.timingSafeEqual(
+      Buffer.from(signature),
+      Buffer.from(expectedSignature)
     );
-  }
 
-  // Acknowledge receipt to Phyllo
-  return NextResponse.json({ success: true });
+    if (!signaturesMatch) {
+      logger.warn('[API /webhooks/phyllo] Invalid webhook signature');
+      return NextResponse.json({ success: false, error: 'Invalid signature' }, { status: 403 });
+    }
+
+    logger.info('[API /webhooks/phyllo] Webhook signature verified successfully.');
+
+    // --- 2. Parse the Event Payload ---
+    const event = JSON.parse(requestBody); // Now parse the verified body
+    const eventType = event.event;
+    const eventId = event.id;
+    const eventData = event.data;
+
+    logger.info(`[API /webhooks/phyllo] Processing event: ${eventType} (ID: ${eventId})`, {
+      eventData,
+    });
+
+    // --- 3. Process the Event ---
+    // TODO: Implement logic based on the eventType
+    switch (eventType) {
+      case 'ACCOUNTS.CONNECTED':
+        // Handle account connected: Maybe create initial influencer record, fetch initial data
+        logger.info('Processing ACCOUNTS.CONNECTED', {
+          accountId: eventData.id,
+          userId: eventData.user.id,
+        });
+        // Example: await processAccountConnected(eventData);
+        break;
+      case 'PROFILES.DATA.AVAILABLE':
+        // Handle profile data available: Fetch profile analytics from Phyllo API, update influencer DB record
+        logger.info('Processing PROFILES.DATA.AVAILABLE', {
+          accountId: eventData.account_id,
+          userId: eventData.user.id,
+        });
+        // Example: await processProfileDataAvailable(eventData);
+        break;
+      // Add cases for other events you subscribe to:
+      // case 'IDENTITY.DATA.AVAILABLE': ...
+      // case 'ENGAGEMENT.DATA.AVAILABLE': ...
+      // case 'ACCOUNTS.DISCONNECTED': ...
+      default:
+        logger.warn(`[API /webhooks/phyllo] Received unhandled event type: ${eventType}`);
+        break;
+    }
+
+    // --- 4. Return Success Response ---
+    // Tell Phyllo the webhook was received successfully
+    return NextResponse.json({ success: true }, { status: 200 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error processing webhook';
+    logger.error(`[API /webhooks/phyllo] Error processing webhook: ${message}`, error);
+    // Return an error status, but be cautious - Phyllo might retry if you return 5xx frequently
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
+  }
 }
+
+// --- Example Placeholder Processing Functions ---
+// async function processAccountConnected(data: any) {
+//   // 1. Extract relevant IDs (accountId, userId, externalUserId)
+//   // 2. Find or create influencer record in your DB based on externalUserId
+//   // 3. Link the Phyllo accountId to your influencer record
+//   // 4. Optionally trigger initial data fetch from Phyllo API
+// }
+
+// async function processProfileDataAvailable(data: any) {
+//   // 1. Extract accountId, userId
+//   // 2. Find your internal influencer record linked to this accountId/userId
+//   // 3. Call Phyllo API (e.g., Get Profile Analytics) using the accountId
+//   // 4. Update your influencer record in the DB with the fetched data
+// }
+
 // Add empty export to ensure file is treated as a module
 export {};
