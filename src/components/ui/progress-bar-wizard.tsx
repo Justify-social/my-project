@@ -34,8 +34,6 @@ import { Icon } from '@/components/ui/icon/icon';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { useWizard } from '@/components/features/campaigns/WizardContext';
-import { toast } from 'react-hot-toast';
 
 // Define the structure for each step passed in
 export interface WizardStepConfig {
@@ -80,22 +78,17 @@ export function ProgressBarWizard({
   isNextDisabled = false,
   isNextLoading = false,
   submitButtonText = 'Submit',
-  getCurrentFormData,
   className,
-  onPrevious,
-  canGoPrevious = false,
-  isLoadingNext = false,
   onSave,
 }: ProgressBarWizardProps) {
   const totalSteps = steps.length;
-  const wizard = useWizard();
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSaveClick = async () => {
     if (!onSave) return;
     setIsSaving(true);
     try {
-      const success = await onSave();
+      await onSave();
     } catch (error) {
       console.error('Manual save failed:', error);
     } finally {

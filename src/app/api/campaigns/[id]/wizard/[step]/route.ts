@@ -53,12 +53,10 @@ export async function PATCH(
     console.log(`Received Step ${step} body:`, JSON.stringify(body, null, 2));
 
     // --- STEP-SPECIFIC VALIDATION AND MAPPING ---
-    // Use any temporarily for validation result and data types
-    // TODO: Fix schema imports/definitions and replace any
+    // Revert dataToSave back to any for now to resolve complex Prisma type issues
+    // TODO: Refactor this API route handler with proper Prisma type mapping
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const _validationResult: z.SafeParseReturnType<any, any> = { success: true, data: body }; // Temporarily assume success
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let dataToSave: any = body; // Temporarily use raw body - CHANGED TO LET
+    let dataToSave: any = body;
     const mappedData: Prisma.CampaignWizardUpdateInput = {
       updatedAt: new Date(),
       currentStep: step,
@@ -71,8 +69,10 @@ export async function PATCH(
     if (step >= 4) mappedData.step4Complete = true;
     if (step >= 5) mappedData.isComplete = true;
 
-    // Use the appropriate base schema for validation in each step
+    // Revert validationResult back to any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let validationResult: z.SafeParseReturnType<any, any>;
+
     switch (step) {
       case 1:
         validationResult = Step1BaseSchema.partial().safeParse(body);
@@ -87,7 +87,6 @@ export async function PATCH(
         validationResult = Step4BaseSchema.partial().safeParse(body);
         break;
       case 5:
-        // Assuming Step5BaseSchema exists and is appropriate for PATCH
         validationResult = Step5BaseSchema.partial().safeParse(body);
         break;
       default:
@@ -102,6 +101,7 @@ export async function PATCH(
         { status: 400 }
       );
     }
+    // Assign potentially 'any' type data
     dataToSave = validationResult.data;
 
     console.log(`Validated Step ${step} data:`, JSON.stringify(dataToSave, null, 2));

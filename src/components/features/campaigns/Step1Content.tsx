@@ -28,7 +28,6 @@ import { WizardSkeleton } from '@/components/ui/loading-skeleton';
 import { Icon } from '@/components/ui/icon/icon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -59,20 +58,6 @@ import { InfluencerCard } from '@/components/ui/card-influencer'; // Import Infl
 
 // --- Formatting Helpers ---
 
-/** Formats a number string into a currency-like string with commas. */
-const formatCurrencyInput = (value: string | number | undefined | null): string => {
-  if (value === null || value === undefined) return '';
-  const stringValue = String(value).replace(/[^\d]/g, ''); // Remove non-digits
-  if (stringValue === '') return '';
-  try {
-    // Use Intl.NumberFormat for robust formatting
-    return new Intl.NumberFormat('en-US').format(parseInt(stringValue, 10));
-  } catch (e) {
-    console.error('Error formatting number:', e);
-    return stringValue; // Fallback to unformatted number string on error
-  }
-};
-
 /** Parses a formatted currency string back into a raw number string. */
 const parseCurrencyInput = (formattedValue: string): string => {
   return formattedValue.replace(/[^\d]/g, ''); // Remove non-digits (commas, etc.)
@@ -86,11 +71,23 @@ interface InfluencerEntryProps {
   remove: (index: number) => void;
 }
 
+// Define proper type for Phyllo validation data
+interface PhylloValidationData {
+  id: string;
+  displayName: string;
+  platform: z.infer<typeof PlatformEnumBackend>; // Use specific type
+  handle: string;
+  followerCount?: number;
+  avatarUrl?: string;
+  verified?: boolean;
+}
+
 const InfluencerEntry: React.FC<InfluencerEntryProps> = ({ index, control, errors, remove }) => {
   const { watch } = useFormContext<Step1FormData>();
   // State for Phyllo validation
   const [isValidating, setIsValidating] = useState(false);
-  const [validationData, setValidationData] = useState<any | null>(null); // TODO: Define proper type for Phyllo data
+  // Use the defined interface instead of any
+  const [validationData, setValidationData] = useState<PhylloValidationData | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const watchedPlatform = watch(`Influencer.${index}.platform`);
@@ -257,27 +254,27 @@ const InfluencerEntry: React.FC<InfluencerEntryProps> = ({ index, control, error
 // Type for influencer data when preparing payload for context/API (already uses Backend enum)
 // type PayloadInfluencer = z.infer<typeof InfluencerSchema>; // REMOVED Unused Type
 // Type for influencer data coming from the context (uses Backend enum)
-type ContextInfluencer = z.infer<typeof InfluencerSchema>;
+// type ContextInfluencer = z.infer<typeof InfluencerSchema>;
 
 // --- Duration Helper ---
-const calculateDuration = (
-  startStr: string | null | undefined,
-  endStr: string | null | undefined
-): string => {
-  // Explicitly handle null/undefined/empty inputs
-  if (!startStr || !endStr) return '...';
-
-  const startDate = new Date(startStr);
-  const endDate = new Date(endStr);
-
-  // Check for invalid date parsing
-  if (!isValidDate(startDate) || !isValidDate(endDate) || endDate < startDate) {
-    return '...';
-  }
-
-  const days = differenceInDays(endDate, startDate) + 1; // Inclusive
-  return `${days} day${days !== 1 ? 's' : ''}`;
-};
+// const calculateDuration = (
+//   startStr: string | null | undefined,
+//   endStr: string | null | undefined
+// ): string => {
+//   // Explicitly handle null/undefined/empty inputs
+//   if (!startStr || !endStr) return '...';
+//
+//   const startDate = new Date(startStr);
+//   const endDate = new Date(endStr);
+//
+//   // Check for invalid date parsing
+//   if (!isValidDate(startDate) || !isValidDate(endDate) || endDate < startDate) {
+//     return '...';
+//   }
+//
+//   const days = differenceInDays(endDate, startDate) + 1; // Inclusive
+//   return `${days} day${days !== 1 ? 's' : ''}`;
+// };
 
 async function preparePayload(
   data: Step1FormData,
@@ -336,12 +333,13 @@ function Step1Content() {
   const router = useRouter();
   const initialDataLoaded = useRef(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // State for timezone detection
-  const [detectedTimezone, setDetectedTimezone] = useState<string | null>(null);
-  const [isDetectingTimezone, setIsDetectingTimezone] = useState<boolean>(false);
-  // State for currency conversion display
-  const [convertedTotalBudget, setConvertedTotalBudget] = useState<string | null>(null);
-  const [convertedSocialMediaBudget, setConvertedSocialMediaBudget] = useState<string | null>(null);
+  // Prefix unused state variables with _
+  const [_detectedTimezone, _setDetectedTimezone] = useState<string | null>(null);
+  const [_isDetectingTimezone, _setIsDetectingTimezone] = useState<boolean>(false);
+  const [_convertedTotalBudget, _setConvertedTotalBudget] = useState<string | null>(null);
+  const [_convertedSocialMediaBudget, _setConvertedSocialMediaBudget] = useState<string | null>(
+    null
+  );
 
   const form = useForm<Step1FormData>({
     resolver: zodResolver(Step1ValidationSchema),
@@ -486,10 +484,14 @@ function Step1Content() {
     keyName: 'fieldId',
   });
 
+  // Prefix unused contact useFieldArray results
   const {
-    fields: contactFields,
-    append: appendContact,
-    remove: removeContact,
+    // fields: contactFields, // Prefix if unused
+    // append: appendContact, // Prefix if unused
+    // remove: removeContact, // Prefix if unused
+    fields: _contactFields,
+    append: _appendContact,
+    remove: _removeContact,
   } = useFieldArray({
     control: form.control,
     name: 'additionalContacts',
@@ -597,8 +599,8 @@ function Step1Content() {
     const updateConvertedValues = async () => {
       if (selectedCurrency === 'USD') {
         if (isMounted) {
-          setConvertedTotalBudget(null);
-          setConvertedSocialMediaBudget(null);
+          _setConvertedTotalBudget(null);
+          _setConvertedSocialMediaBudget(null);
         }
         return;
       }
@@ -611,14 +613,14 @@ function Step1Content() {
           'USD'
         );
         if (isMounted) {
-          setConvertedTotalBudget(
+          _setConvertedTotalBudget(
             convertedTotal !== null
               ? `Approx. $${convertedTotal.toLocaleString()} USD`
               : 'Conversion unavailable'
           );
         }
       } else {
-        if (isMounted) setConvertedTotalBudget(null);
+        if (isMounted) _setConvertedTotalBudget(null);
       }
 
       // Convert Social Media Budget
@@ -629,14 +631,14 @@ function Step1Content() {
           'USD'
         );
         if (isMounted) {
-          setConvertedSocialMediaBudget(
+          _setConvertedSocialMediaBudget(
             convertedSocial !== null
               ? `Approx. $${convertedSocial.toLocaleString()} USD`
               : 'Conversion unavailable'
           );
         }
       } else {
-        if (isMounted) setConvertedSocialMediaBudget(null);
+        if (isMounted) _setConvertedSocialMediaBudget(null);
       }
     };
 
@@ -758,8 +760,22 @@ function Step1Content() {
                   name="timeZone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Time Zone *</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value || ''}>
+                      <FormLabel className="flex items-center">
+                        Time Zone *
+                        {_isDetectingTimezone && ( // Use prefixed state
+                          <Icon
+                            iconId="faCircleNotchLight"
+                            className="animate-spin h-3 w-3 ml-2 text-muted-foreground"
+                          />
+                        )}
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value || ''}
+                        disabled={_isDetectingTimezone}
+                      >
+                        {' '}
+                        {/* Use prefixed state */}
                         <FormControl>
                           <SelectTrigger className="w-full"></SelectTrigger>
                         </FormControl>
