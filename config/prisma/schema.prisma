@@ -43,6 +43,7 @@ model CampaignWizard {
   // - rationale: String? ("Why this content?")
   // - budget: Float?
   assets           Json[]
+  targetPlatforms  Platform[]      // Target platforms for influencer discovery
   step4Complete    Boolean         @default(false)
   userId           String?         @map("userId")
   user             User?           @relation(fields: [userId], references: [id])
@@ -356,35 +357,55 @@ enum InvitationStatus {
 model MarketplaceInfluencer {
   id                        String    @id @default(uuid()) // Internal Justify ID
   name                      String
-  handle                    String // Primary handle, need uniqueness constraint?
+  handle                    String 
   avatarUrl                 String?
-  platforms                 Platform[] // Platforms active on (from Phyllo)
-  followersCount            Int?      // Latest known follower count (from Phyllo)
-  justifyScore              Float?    // Calculated score (from Justify logic)
-  isPhylloVerified          Boolean?  // Verification status (from Phyllo Identity)
-  primaryAudienceLocation String?   // Quick summary field (from Phyllo Profile Analytics)
-  primaryAudienceAgeRange String?   // Quick summary field (from Phyllo Profile Analytics)
-  primaryAudienceGender     String?   // Quick summary field (from Phyllo Profile Analytics)
-  engagementRate            Float?    // Overall engagement rate (from Phyllo)
-  audienceQualityIndicator  String?   // High/Medium/Low (from Phyllo Profile Analytics)
-  bio                       String?   // Profile bio (from Phyllo)
-  contactEmail              String?   // Contact email (source TBD - Phyllo? Manual?)
-  // JSON fields for more detailed data from Phyllo
-  audienceDemographics      Json?     // Store detailed age/gender/location distributions
-  engagementMetrics         Json?     // Store detailed likes/comments etc.
-  // Timestamps
+  platforms                 Platform[] 
+  followersCount            Int?      
+  justifyScore              Float?    
+  isPhylloVerified          Boolean?  
+  primaryAudienceLocation String?   
+  primaryAudienceAgeRange String?   
+  primaryAudienceGender     String?   
+  engagementRate            Float?    
+  audienceQualityIndicator  String?   
+  bio                       String?   
+  contactEmail              String?   
+  phylloUserId              String?   @unique // Link to Phyllo User entity
+  audienceDemographics      Json?     
+  engagementMetrics         Json?     
   createdAt                 DateTime  @default(now())
   updatedAt                 DateTime  @updatedAt
-  phylloDataLastRefreshedAt DateTime? // Timestamp of last successful Phyllo data pull
+  phylloDataLastRefreshedAt DateTime? 
+  
+  phylloAccountLinks        PhylloAccountLink[] // Relation to linked Phyllo accounts
 
-  // Indexes based on MVP filters (Ticket 0.10)
-  @@index([justifyScore]) // Filtering by score range
-  @@index([followersCount]) // Filtering by follower range
-  @@index([primaryAudienceLocation]) // Filtering by location
-  @@index([primaryAudienceAgeRange]) // Filtering by age
-  @@index([isPhylloVerified]) // Filtering by verification status
-  @@index([platforms]) // Filtering by platform (if DB supports array index)
-  @@index([handle]) // For potential future search/lookup
-  // Consider compound indexes later if needed, e.g., @@index([primaryAudienceLocation, primaryAudienceAgeRange])
-  // Note: Uniqueness constraint on handle/platform might be too strict if storing multiple platform profiles per influencer concept
+  @@index([justifyScore]) 
+  @@index([followersCount]) 
+  @@index([primaryAudienceLocation]) 
+  @@index([primaryAudienceAgeRange]) 
+  @@index([isPhylloVerified]) 
+  @@index([platforms]) 
+  @@index([handle]) 
+  @@index([phylloUserId]) // Index for lookup
+}
+
+// New table for mapping MarketplaceInfluencer to specific Phyllo Platform Accounts
+model PhylloAccountLink {
+  id                      String   @id @default(uuid())
+  marketplaceInfluencerId String   // Foreign Key to MarketplaceInfluencer.id
+  phylloAccountId         String   @unique // The unique ID for the connected platform account from Phyllo
+  phylloUserId            String   // The Phyllo User ID this account belongs to (for consistency/lookup)
+  platform                Platform // The platform type (e.g., INSTAGRAM, TIKTOK)
+  status                  String   // Status of the link (e.g., "CONNECTED", "DISCONNECTED", "ERROR")
+  connectedAt             DateTime @default(now())
+  disconnectedAt          DateTime?
+  metadata                Json?    // Store extra info from Phyllo if needed (e.g., platform username)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  marketplaceInfluencer   MarketplaceInfluencer @relation(fields: [marketplaceInfluencerId], references: [id], onDelete: Cascade) // Relation back to our influencer
+
+  @@index([marketplaceInfluencerId])
+  @@index([phylloUserId]) // Useful for finding all accounts for a Phyllo user
+  @@index([status]) // Useful for finding active links
 }

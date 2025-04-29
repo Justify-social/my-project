@@ -80,7 +80,10 @@ async function getAccessToken(): Promise<string> {
 /**
  * Makes an authenticated request to the Phyllo API.
  */
-async function makePhylloRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+export async function makePhylloRequest<T>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T> {
   const token = await getAccessToken();
   if (!PHYLLO_BASE_URL) {
     throw new Error('PHYLLO_BASE_URL environment variable is not set.');
@@ -158,7 +161,7 @@ export async function checkPhylloConnection(): Promise<{
  * @param accountId The Phyllo Account ID associated with the influencer.
  * @returns Phyllo Account object or null if not found/error.
  */
-interface PhylloAccount {
+export interface PhylloAccount {
   id: string;
   status: string; // e.g., "CONNECTED", "DISCONNECTED", "SESSION_EXPIRED"
   work_platform: {
@@ -202,7 +205,7 @@ export async function getPhylloAccountIdentity(accountId: string): Promise<Phyll
  * Placeholder interface for the expected structure of the Profile Analytics API response.
  * NOTE: Verify exact field names and types against official Phyllo documentation.
  */
-interface PhylloProfileAnalytics {
+export interface PhylloProfileAnalytics {
   id: string; // Profile ID
   reputation?: {
     follower_count?: number;

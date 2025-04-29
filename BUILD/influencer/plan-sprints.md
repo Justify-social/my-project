@@ -20,7 +20,7 @@ Before a ticket from `plan.md` can be pulled into a Sprint Backlog, it should me
     *   **Action:** Review **Phase 0 & Foundational Phase 1 tickets** from `plan.md` as primary candidates for the Sprint 1 Backlog. These enable the parallel streams:
         *   **Core Setup:**
             *   `0.1: CHORE: Create Core Directory Structure` ✅ **(Done)**
-            *   `0.2: TYPE: Define InfluencerSummary Type (MVP)` ✅ **(Done)**
+            *   `0.2: TYPE: Define InfluencerSummary Type (MVP) ⁠` ✅ **(Done)**
             *   `0.3: TYPE: Define InfluencerProfileData Type (MVP)` ✅ **(Done)**
             *   `0.4: TYPE: Extend DraftCampaignData in WizardContext` ✅ **(Done)**
             *   `0.5: DATA: Create Mock Influencer Data File` ✅ **(Done)**
@@ -45,7 +45,7 @@ Before a ticket from `plan.md` can be pulled into a Sprint Backlog, it should me
             *   `0.9: CHORE: Implement Service Abstraction Layer` ✅ **(Done)**
             *   `1.2: FEAT(UI): Build InfluencerSummaryCard Component` ✅ **(Done)**
             *   `1.3: FEAT(UI): Setup Marketplace Page (`page.tsx`) & Initial State` ✅ **(Done)**
-            *   `1.4: FEAT(FE): Implement Initial Data Fetching on Marketplace Page` (**Blocked by BE Ticket 1.0 Deployment**)
+            *   `1.4: FEAT(FE): Implement Initial Data Fetching on Marketplace Page` ✅ **(Done)**
             *   `1.5: FEAT(UI): Create MarketplaceList Component` ✅ **(Done)**
     *   **Action:** **Clarify `TODOs` (Pre-Planning):** Resolve `TODOs` from Ticket 0.3 (incl. clarifying MVP fields) with Product Owner.
     *   **Action:** **Initiate UI Dependency Check (Pre-Planning):** Audit UI library (Ticket 1.2 Dep Check) and create `CHORE(UI)` tickets for gaps.
@@ -83,19 +83,27 @@ By following these steps, we move from the comprehensive `plan.md` to a concrete
 *Goal Suggestion: Implement frontend filtering connected to the live dev API, build out the core Influencer Profile page UI consuming live dev data, and refine initial backend endpoints based on integration feedback.*
 
 **Candidate Tickets (Review during Sprint 2 Planning):**
+*   **Critical Strategy:**
+    *   `TECH-DEBT: Define & Plan Phyllo Account ID Mapping Strategy` ❗ **(NEW - High Priority)**
+        *   **Strategy Defined:** Use a dedicated `PhylloAccountLink` mapping table and add `phylloUserId` to `MarketplaceInfluencer`.
+        *   **Mechanism:** Link `MarketplaceInfluencer.id` to `Phyllo User ID` via `external_id`. Phyllo User creation/linking triggered automatically during SDK token generation. Platform connections link via webhooks/callbacks populating `PhylloAccountLink`.
+        *   **Enrichment:** `/api/influencers/:id` will query `PhylloAccountLink` to find relevant `phylloAccountId`(s).
+        *   **MVP Handling:** Profile enrichment prioritizes connected accounts: Instagram > TikTok > YouTube.
+        *   **Next Steps:** Update Prisma Schema (✅ Done), Generate Client (✅ Done), Apply Migration (✅ Done), Create specific BE implementation tickets (✅ Done - BE-P1 to BE-P5 defined). Start implementing BE-P2.
 *   **Frontend Focus:**
-    *   `1.6: FEAT(UI): Implement Marketplace Filters UI`
-    *   `1.7: FEAT(FE): Connect Filters State & Actions`
-    *   `1.8: FEAT(FE): Connect Apply Filters to Data Fetching` (Requires BE Ticket 1.0 to support filters)
-    *   `2.1: FEAT: Setup Profile Page (`[id]/page.tsx`) & Data Fetching` (Connecting to BE Ticket 1.1)
-    *   `2.2: FEAT(UI): Build Profile Header Component`
-    *   `2.3: FEAT: Integrate Profile Header into Profile Page`
-    *   `2.4: FEAT(UI): Build Profile Details Tabs/Sections (MVP)`
-    *   `2.5: FEAT: Direct Influencer Contact Info Display (Elevated Priority)` (Requires BE support for `contactEmail` field)
+    *   `1.6: FEAT(UI): Implement Marketplace Filters UI` ✅ **(Done)**
+    *   `1.7: FEAT(FE): Connect Filters State & Actions` ✅ **(Done)**
+    *   `1.8: FEAT(FE): Connect Apply Filters to Data Fetching` ✅ **(Done)**
+    *   `2.1: FEAT: Setup Profile Page (`[id]/page.tsx`) & Data Fetching` ✅ **(Done)**
+    *   `2.2: FEAT(UI): Build Profile Header Component` ✅ **(Done)**
+    *   `2.3: FEAT: Integrate Profile Header into Profile Page` ✅ **(Done)**
+    *   `2.4: FEAT(UI): Build Profile Details Tabs/Sections (MVP)` ✅ **(Done)**
+    *   `2.5: FEAT: Direct Influencer Contact Info Display (Elevated Priority)` ✅ **(Done)**
     *   Any remaining/new `CHORE(UI)` tickets.
 *   **Backend Focus:**
-    *   Enhance `BE-TICKET 1.0 (GET /influencers)` to fully support filtering parameters defined in API Contract.
-    *   Enhance `BE-TICKET 1.1 (GET /influencers/:id)` to source and include `contactEmail` (for FE Ticket 2.5).
+    *   Enhance `GET /influencers` to fully support filtering parameters defined in API Contract. ✅ **(Done)**
+    *   Enhance `GET /influencers/:id` to source and include `contactEmail` (for FE Ticket 2.5). ✅ **(Done - Code Ready)**
+    *   `TECH-DEBT: Define & Plan Phyllo Account ID Mapping Strategy` ❗ **(NEW - High Priority)**
     *   Refine Phyllo data fetching logic (error handling, caching) based on initial integration feedback.
     *   Bug fixes arising from Sprint 1 integration.
     *   Begin investigation/design for Phyllo Webhook handling strategy.
@@ -105,22 +113,22 @@ By following these steps, we move from the comprehensive `plan.md` to a concrete
 
 ## Projected Sprint 3: Wizard Integration & Core Testing
 
-*Goal Suggestion: Fully integrate the Marketplace selection flow with the Campaign Wizard, implement the Wizard Review step display, and establish core E2E test coverage for the primary user journey.*
+*Goal Suggestion: Fully integrate the Marketplace selection flow **initiated from Wizard Step 1** with the Campaign Wizard, implement the Wizard Review step display, and establish core E2E test coverage for the primary user journey.*
 
 **Candidate Tickets (Review during Sprint 3 Planning):**
 *   **Frontend Focus / Refactor:**
-    *   `3.1: REFACTOR: Ensure WizardContext Stores Filter Criteria`
-    *   `4.2: FEAT: Implement Navigation from Wizard to Marketplace` (Specific UI component in Wizard)
-    *   `4.3: FEAT(FE): Pre-filter Marketplace Based on Wizard Context`
-    *   `4.4: FEAT(UI): Implement "Add Selected to Campaign" Button Logic`
-    *   `4.5: FEAT: Display Selected Influencers in Wizard Review Step` (Requires BE Ticket 0.8/Summaries API)
+    *   `3.1: REFACTOR: Ensure WizardContext Stores Filter Criteria` (Ensure Step 1 criteria like platforms can be stored).
+    *   `4.2: FEAT: Implement Navigation from Wizard **(Step 1)** to Marketplace` (Specific UI component in Wizard Step 1).
+    *   `4.3: FEAT(FE): Pre-filter Marketplace Based on Wizard Context` (Using criteria set in Step 1).
+    *   `4.4: FEAT(UI): Implement "Add Selected to Campaign" Button Logic` (Updates context, navigates back to **Review Step**).
+    *   `4.5: FEAT: Display Selected Influencers in Wizard Review Step` (Requires BE Ticket 0.8/Summaries API).
 *   **Backend Focus:**
     *   Implement `GET /api/influencers/summaries` endpoint (or ensure `GET /influencers` can handle multiple IDs) if needed for Ticket 4.5.
     *   Ensure filtering logic in `GET /influencers` robustly handles criteria passed from Wizard context (Ticket 4.3).
     *   Continue refining Phyllo data refresh/webhook strategy.
     *   Address bugs identified during Sprint 2 testing.
 *   **Testing Focus:**
-    *   Implement core E2E test suite for the **Journey 1: Wizard-First** flow (Wizard -> Marketplace -> Select -> Review).
+    *   Implement core E2E test suite for the **Journey 1: Wizard-First** flow (Wizard Step 1 -> Marketplace -> Select -> Wizard Review Step).
     *   Expand unit/integration test coverage for context interactions and API filtering logic.
 
 ## Projected Sprint 4: MVP Stabilization, Polish & Post-MVP Prep
@@ -141,5 +149,45 @@ By following these steps, we move from the comprehensive `plan.md` to a concrete
     *   Expand E2E test coverage (edge cases, different filter combinations, error conditions).
     *   Perform more thorough manual QA across browsers/devices.
     *   Initiate basic performance testing.
+
+---
+
+## Projected Sprint 5: Advanced Data & Vetting (High Priority - Kelly P.)
+
+*Goal Suggestion: Integrate critical post-MVP data points for deeper vetting and ROI analysis, leveraging Phyllo further.*
+
+**Candidate Tickets (Review during Sprint 5 Planning):**
+*   `5.2: FEAT: Sponsored Post Performance Metrics (High Priority Post-MVP)`
+*   `5.3: FEAT: Basic Brand Safety Flags/Content Check Integration (High Priority Post-MVP)`
+*   `5.8: FEAT: Podcast Influencer Support (High Priority Post-MVP)`
+*   (BE) Continued refinement of Phyllo data handling/webhooks.
+*   (FE/BE) Begin Phase X: Frontend Phyllo Connect SDK integration (Tickets X.1-X.3).
+*   Address bugs/refinements from Sprint 4.
+
+---
+
+## Projected Sprint 6: Workflow Enhancements & Alternative Journeys
+
+*Goal Suggestion: Enable the "Marketplace-First" user journey and add core workflow improvements like shortlisting.*
+
+**Candidate Tickets (Review during Sprint 6 Planning):**
+*   `5.4: FEAT: Add to Existing Campaign Flow`
+*   `5.7: FEAT: Influencer Shortlisting/Saving (Post-MVP)`
+*   `5.6: FEAT: Collaboration History / Saturation Indicator (Post-MVP)`
+*   (FE) Complete Phase X: Phyllo Connect SDK Integration if needed.
+*   Address bugs/refinements from Sprint 5.
+
+---
+
+## Projected Sprint 7: Advanced Insights & Refinement
+
+*Goal Suggestion: Focus on higher-level insights, technical debt reduction, and potential future features.*
+
+**Candidate Tickets (Review during Sprint 7 Planning):**
+*   `5.1: FEAT: Direct Influencer Contact Info Display` (Verify if needed beyond current implementation).
+*   `5.5: FEAT: Content Effectiveness Insights (Placeholder)` (Scoping & initial steps).
+*   `5.9: TECH-DEBT: Refactor Wizard/Marketplace State Coupling`.
+*   Further performance tuning, testing, and tech debt reduction.
+*   Address bugs/refinements from Sprint 6.
 
 ---

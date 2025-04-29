@@ -58,6 +58,7 @@ import { Badge } from '@/components/ui/badge';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocalization } from '@/hooks/useLocalization';
 import timezonesData from '@/lib/timezones.json';
+import { Checkbox } from '@/components/ui/checkbox';
 
 // --- Formatting Helpers ---
 
@@ -396,6 +397,7 @@ function Step1Content() {
       },
       additionalContacts: [],
       Influencer: [{ id: uuidv4(), platform: PlatformEnumBackend.Values.INSTAGRAM, handle: '' }],
+      targetPlatforms: [], // Initialize as empty array
     },
     mode: 'onChange',
   });
@@ -483,6 +485,7 @@ function Step1Content() {
         Influencer: wizardState.Influencer ?? [
           { id: uuidv4(), platform: PlatformEnumBackend.Values.INSTAGRAM, handle: '' },
         ],
+        targetPlatforms: wizardState.targetPlatforms ?? [], // Added targetPlatforms
       };
 
       setInitialFormState(initialData);
@@ -701,6 +704,28 @@ function Step1Content() {
   // Get the currency symbol based on the watched currency value
   const currencySymbol = getCurrencySymbol(watchedCurrency);
 
+  // --- Navigation Handler to Marketplace ---
+  const handleFindInMarketplace = () => {
+    // 1. Get relevant filter criteria from the current form state
+    const currentFormData = form.getValues();
+    const targetPlatforms = currentFormData.targetPlatforms;
+    // TODO: Extract other relevant Step 1 criteria (e.g., audience keywords/interests if available)
+
+    // 2. Update WizardContext
+    logger.info('[Step 1] Navigating to Marketplace. Setting context...', { targetPlatforms });
+    updateWizardState({
+      isFindingInfluencers: true,
+      targetPlatforms: targetPlatforms,
+      // Store other criteria if needed
+    });
+
+    // 3. Navigate
+    // Ensure campaignId is included in the path if we need to return to the same wizard instance
+    // Although the marketplace itself doesn't strictly need it, returning might.
+    // For now, just navigate to the base marketplace path.
+    router.push('/influencer-marketplace');
+  };
+
   if (isWizardLoading || localization.isLoading || !initialDataLoaded.current) {
     // Show skeleton while wizard context is loading OR localization is loading OR initial form data hasn't been loaded yet
     return <WizardSkeleton step={1} />;
@@ -780,6 +805,56 @@ function Step1Content() {
                           value={field.value ?? ''}
                         />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="md:col-span-2 pt-4">
+                <FormField
+                  control={form.control}
+                  name="targetPlatforms"
+                  render={() => (
+                    <FormItem>
+                      <div className="mb-4">
+                        <FormLabel className="text-base">Target Platforms</FormLabel>
+                        <FormDescription>
+                          Select the primary platforms for this campaign.
+                        </FormDescription>
+                      </div>
+                      <div className="flex flex-wrap gap-4">
+                        {PlatformEnumBackend.options.map(platformValue => (
+                          <FormField
+                            key={platformValue}
+                            control={form.control}
+                            name="targetPlatforms"
+                            render={({ field }) => {
+                              return (
+                                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={field.value?.includes(platformValue)}
+                                      onCheckedChange={checked => {
+                                        const updatedValue = field.value || [];
+                                        if (checked) {
+                                          field.onChange([...updatedValue, platformValue]);
+                                        } else {
+                                          field.onChange(
+                                            updatedValue.filter(v => v !== platformValue)
+                                          );
+                                        }
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">
+                                    {platformToFrontend(platformValue)}
+                                  </FormLabel>
+                                </FormItem>
+                              );
+                            }}
+                          />
+                        ))}
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -1198,18 +1273,35 @@ function Step1Content() {
             </CardContent>
           </Card>
 
-          {/* === Influencer Section === */}
+          {/* === Influencer Section (Corrected) === */}
           <Card>
             <CardHeader>
               <CardTitle>Influencer Selection</CardTitle>
               <CardDescription>
-                Add the social media platform and handle for each influencer.
+                Add influencers manually below, or find relevant influencers in the marketplace.
               </CardDescription>
             </CardHeader>
             <CardContent>
+              {/* Button to navigate to Marketplace */}
+              <div className="mb-6">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handleFindInMarketplace}
+                  className="w-full md:w-auto"
+                >
+                  <Icon iconId="faSearchLight" className="mr-2 h-4 w-4" />
+                  Find Influencers in Marketplace
+                </Button>
+              </div>
+
+              {/* Manual Influencer Entry Section */}
+              <h4 className="text-sm font-medium mb-3 text-muted-foreground border-t pt-4">
+                Manually Added Influencers
+              </h4>
               {influencerFields.map((field, index) => (
                 <InfluencerEntry
-                  key={field.fieldId} // Use fieldId provided by useFieldArray
+                  key={field.fieldId}
                   index={index}
                   control={form.control}
                   errors={form.formState.errors}
@@ -1224,13 +1316,13 @@ function Step1Content() {
                 onClick={() =>
                   appendInfluencer({
                     id: `new-${Date.now()}`,
-                    platform: PlatformEnumBackend.Values.INSTAGRAM, // Default platform
+                    platform: PlatformEnumBackend.Values.INSTAGRAM,
                     handle: '',
                   })
                 }
               >
                 <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" />
-                Add Influencer
+                Add Influencer Manually
               </Button>
             </CardContent>
           </Card>

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { PrismaClient, Platform, Prisma } from '@prisma/client'; // Import Prisma namespace
+import { PrismaClient, Platform, Prisma, MarketplaceInfluencer } from '@prisma/client'; // Import Prisma namespace
 import { logger } from '@/utils/logger';
 import { InfluencerSummary } from '@/types/influencer'; // Use our frontend type for response shaping
 import { calculatePagination } from '@/lib/paginationUtils'; // Corrected path
@@ -26,6 +26,11 @@ const InfluencerQuerySchema = z
     maxFollowers: z.coerce.number().int().positive().optional(),
     audienceAge: z.string().optional(), // Keep as string for now, refine filtering later
     audienceLocation: z.string().optional(), // Keep as string for now, refine filtering later
+    isPhylloVerified: z.preprocess(
+      // Handle string 'true'/'false' from query params
+      val => (val === 'true' ? true : val === 'false' ? false : undefined),
+      z.boolean().optional()
+    ),
     // sortBy: z.string().optional(), // Post-MVP
     // searchTerm: z.string().optional(), // Post-MVP
   })
@@ -88,7 +93,10 @@ export async function GET(request: NextRequest) {
     // Basic age filtering for now (exact match)
     whereClause.primaryAudienceAgeRange = filters.audienceAge;
   }
-  // TODO: Add isPhylloVerified filter if needed
+  // Add isPhylloVerified filter
+  if (filters.isPhylloVerified !== undefined) {
+    whereClause.isPhylloVerified = filters.isPhylloVerified;
+  }
 
   // TODO: Add sorting logic based on sortBy (Post-MVP)
 
@@ -96,8 +104,9 @@ export async function GET(request: NextRequest) {
     // --- Fetch Data & Count ---
     logger.debug('[API /influencers] Querying database with clause:', whereClause);
     const [totalInfluencers, dbInfluencers] = await prisma.$transaction([
-      prisma.MarketplaceInfluencer.count({ where: whereClause }),
-      prisma.MarketplaceInfluencer.findMany({
+      prisma.marketplaceInfluencer.count({ where: whereClause }), // Use camelCase
+      prisma.marketplaceInfluencer.findMany({
+        // Use camelCase
         where: whereClause,
         skip,
         take,
@@ -108,8 +117,21 @@ export async function GET(request: NextRequest) {
 
     // --- Data Enrichment & Score Calculation ---
     const enrichedInfluencers = dbInfluencers.map(
-      (inf: Prisma.MarketplaceInfluencer): InfluencerSummary => {
+      (inf: MarketplaceInfluencer): InfluencerSummary => {
         const justifyScore = calculateJustifyScoreV1(inf);
+
+        // Validate primaryAudienceGender
+        const validGenders = ['Male', 'Female', 'Other', 'Mixed'];
+        const gender = validGenders.includes(inf.primaryAudienceGender ?? '')
+          ? (inf.primaryAudienceGender as 'Male' | 'Female' | 'Other' | 'Mixed')
+          : undefined;
+
+        // Validate audienceQualityIndicator
+        const validIndicators = ['High', 'Medium', 'Low'];
+        const qualityIndicator = validIndicators.includes(inf.audienceQualityIndicator ?? '')
+          ? (inf.audienceQualityIndicator as 'High' | 'Medium' | 'Low')
+          : undefined;
+
         return {
           id: inf.id,
           name: inf.name,
@@ -121,9 +143,11 @@ export async function GET(request: NextRequest) {
           isPhylloVerified: inf.isPhylloVerified ?? false,
           primaryAudienceLocation: inf.primaryAudienceLocation ?? undefined,
           primaryAudienceAgeRange: inf.primaryAudienceAgeRange ?? undefined,
-          primaryAudienceGender: (inf.primaryAudienceGender as any) ?? undefined,
+          // Assign validated gender
+          primaryAudienceGender: gender,
           engagementRate: inf.engagementRate ?? undefined,
-          audienceQualityIndicator: (inf.audienceQualityIndicator as any) ?? undefined,
+          // Assign validated quality indicator
+          audienceQualityIndicator: qualityIndicator,
         };
       }
     );

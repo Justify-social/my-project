@@ -1,0 +1,25 @@
+# Ignore Node modules
+node_modules
+
+# Ignore build output
+.next
+out
+build
+
+# Ignore virtual environments
+graphiti-env
+.venv
+venv
+env
+
+# Ignore logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ignore config files sometimes generated
+.DS_Store
+
+# Ignore locked icon registry files
+public/static/*-icon-registry.json 

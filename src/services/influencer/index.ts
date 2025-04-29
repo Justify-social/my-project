@@ -1,25 +1,32 @@
 // src/services/influencer/index.ts
 
-// Attempting imports using relative paths as aliases seem problematic
-import * as mockService from '@/services/mock/mockInfluencerService';
+// Import types and logger
 import { InfluencerSummary, InfluencerProfileData } from '@/types/influencer';
 import { PlatformEnum } from '@/types/enums';
-import { logger } from '@/utils/logger'; // Assuming logger utility path
+import { logger } from '@/utils/logger';
+
+// Define the expected structure for filters passed to the service
+// Align this with the backend API query parameters
+export interface GetInfluencersFilters {
+  platforms?: PlatformEnum[];
+  minScore?: number;
+  maxScore?: number;
+  minFollowers?: number;
+  maxFollowers?: number;
+  audienceAge?: string;
+  audienceLocation?: string;
+  isPhylloVerified?: boolean;
+  // sortBy?: string; // Post-MVP
+  // searchTerm?: string; // Post-MVP
+}
 
 /**
  * Defines the interface for the influencer service.
- * Ensures both mock and real API implementations adhere to the same contract.
+ * Ensures the real API implementation adheres to the contract.
  */
 export interface IInfluencerService {
   getInfluencers(params: {
-    filters?: {
-      platform?: PlatformEnum[];
-      minScore?: number;
-      maxScore?: number;
-      minFollowers?: number;
-      maxFollowers?: number;
-      // TODO: Add other MVP filters from API contract
-    };
+    filters?: GetInfluencersFilters; // Use defined filter type
     pagination?: { page: number; limit: number };
   }): Promise<{
     influencers: InfluencerSummary[];
@@ -33,48 +40,112 @@ export interface IInfluencerService {
   getInfluencerSummariesByIds(ids: string[]): Promise<InfluencerSummary[]>;
 }
 
-// Placeholder for the real API service implementing the interface
-// This will eventually contain fetch calls to our backend API
+// --- Real API Service Implementation ---
+
+// Helper function to construct query strings safely
+const buildQueryString = (params: Record<string, any>): string => {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      if (Array.isArray(value)) {
+        // Handle array parameters (e.g., platforms=INSTAGRAM,TIKTOK)
+        if (value.length > 0) {
+          query.append(key, value.join(','));
+        }
+      } else {
+        query.append(key, String(value));
+      }
+    }
+  });
+  return query.toString();
+};
+
+// Implementation hitting our backend API endpoints
 const apiService: IInfluencerService = {
   getInfluencers: async params => {
-    logger.error('[influencerService] Real getInfluencers API not implemented yet.');
-    // Simulate API failure structure
-    // throw new Error('API_NOT_IMPLEMENTED: getInfluencers');
-    return {
-      influencers: [],
-      total: 0,
-      page: params.pagination?.page ?? 1,
-      limit: params.pagination?.limit ?? 12,
-    };
+    const { filters = {}, pagination = {} } = params;
+    const queryParams = { ...filters, ...pagination };
+    const queryString = buildQueryString(queryParams);
+    const url = `/api/influencers?${queryString}`;
+
+    logger.info(`[influencerService] Calling GET ${url}`);
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({})); // Try to parse error
+        throw new Error(
+          `API Error (${response.status}): ${errorData?.error || response.statusText}`
+        );
+      }
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(`API returned error: ${data.error || 'Unknown API error'}`);
+      }
+      // TODO: Add response validation with Zod later if needed
+      return {
+        influencers: data.influencers || [],
+        total: data.pagination?.totalInfluencers ?? 0,
+        page: data.pagination?.currentPage ?? 1,
+        limit: data.pagination?.limit ?? 12,
+      };
+    } catch (error) {
+      logger.error(`[influencerService] Failed getInfluencers call to ${url}:`, error);
+      throw error; // Re-throw for the caller to handle
+    }
   },
+
   getInfluencerById: async id => {
-    logger.error(
-      `[influencerService] Real getInfluencerById API not implemented yet for ID: ${id}`
-    );
-    // Simulate API failure structure
-    // throw new Error('API_NOT_IMPLEMENTED: getInfluencerById');
-    return null;
+    const url = `/api/influencers/${id}`;
+    logger.info(`[influencerService] Calling GET ${url}`);
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        if (response.status === 404) return null; // Not found is not an error here
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          `API Error (${response.status}): ${errorData?.error || response.statusText}`
+        );
+      }
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(`API returned error: ${data.error || 'Unknown API error'}`);
+      }
+      // TODO: Add response validation with Zod later if needed
+      return data.data as InfluencerProfileData | null; // Assuming data is nested under 'data' key
+    } catch (error) {
+      logger.error(`[influencerService] Failed getInfluencerById call to ${url}:`, error);
+      throw error; // Re-throw for the caller to handle
+    }
   },
+
   getInfluencerSummariesByIds: async ids => {
-    logger.error(
-      `[influencerService] Real getInfluencerSummariesByIds API not implemented yet for IDs: ${ids.join(', ')}`
-    );
-    // Simulate API failure structure
-    // throw new Error('API_NOT_IMPLEMENTED: getInfluencerSummariesByIds');
-    return [];
+    if (!ids || ids.length === 0) return [];
+    const queryString = buildQueryString({ ids }); // Assumes API accepts comma-separated IDs
+    const url = `/api/influencers/summaries?${queryString}`; // Assuming this endpoint exists
+
+    logger.info(`[influencerService] Calling GET ${url}`);
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          `API Error (${response.status}): ${errorData?.error || response.statusText}`
+        );
+      }
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(`API returned error: ${data.error || 'Unknown API error'}`);
+      }
+      // TODO: Add response validation with Zod later if needed
+      return data.influencers || []; // Assuming summaries are directly in `influencers` key
+    } catch (error) {
+      logger.error(`[influencerService] Failed getInfluencerSummariesByIds call to ${url}:`, error);
+      throw error; // Re-throw for the caller to handle
+    }
   },
 };
 
-// Ensure mockService conforms to the interface (TypeScript will check this)
-// We need to assert the type because the import itself might be unresolved by TS server initially
-const typedMockService: IInfluencerService = mockService as any;
+logger.info(`[influencerService] Initializing service (Using API implementation).`);
 
-// Determine whether to use the mock service or the real API service
-// Defaults to mock in development, uses real API otherwise (controlled by env var)
-// Use NEXT_PUBLIC_ prefix if this needs to be accessible client-side
-const useMock =
-  process.env.NEXT_PUBLIC_USE_MOCK_API === 'true' || process.env.NODE_ENV === 'development';
-
-logger.info(`[influencerService] Initializing service. Using mock API: ${useMock}`);
-
-export const influencerService: IInfluencerService = useMock ? typedMockService : apiService;
+// Export only the real API service implementation
+export const influencerService: IInfluencerService = apiService;

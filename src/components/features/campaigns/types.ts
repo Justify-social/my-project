@@ -284,6 +284,8 @@ const DraftCampaignDataBaseSchema = z
       .optional(),
     /** List of competitor brands/handles. */
     competitors: z.array(z.string()).nullable().optional(),
+    /** Target platforms for the campaign (e.g., Instagram, TikTok). Added for Marketplace filtering. */
+    targetPlatforms: z.array(PlatformEnumBackend).optional(),
     /** Flag indicating Step 3 completion. */
     step3Complete: z.boolean().default(false),
 
@@ -529,17 +531,17 @@ export const Step1BaseSchema = DraftCampaignDataBaseSchema.pick({
   additionalContacts: true,
   budget: true,
   Influencer: true,
+  targetPlatforms: true,
 });
 
 /** FULL Validation schema for Step 1: Basic Info (Used in UI) */
 export const Step1ValidationSchema = Step1BaseSchema.extend({
   primaryContact: ContactSchema.refine(contact => contact !== null, {
-    // Ensure primaryContact object exists
-    message: 'Primary contact is required.', // Add a message if needed
+    message: 'Primary contact is required.',
   }),
 }).refine(data => data.Influencer && data.Influencer.length >= 1, {
   message: 'Please add at least one influencer',
-  path: ['Influencer'], // Apply error message to the Influencer field array
+  path: ['Influencer'],
 });
 
 // Define Step1FormData explicitly for useForm typing clarity
@@ -548,16 +550,15 @@ export type Step1FormData = {
   businessGoal?: string | null;
   brand: string;
   website?: string | null;
-  startDate?: string | null; // Keep as string from schema
-  endDate?: string | null; // Keep as string from schema
+  startDate?: string | null;
+  endDate?: string | null;
   timeZone?: string | null;
-  primaryContact: z.infer<typeof ContactSchema>; // Non-null based on refinement
+  primaryContact: z.infer<typeof ContactSchema>;
   secondaryContact?: z.infer<typeof ContactSchema> | null;
-  // Explicitly define as array, matching base schema + refinement
   additionalContacts: Array<z.infer<typeof ContactSchema>>;
   budget?: z.infer<typeof BudgetSchema> | null;
-  // Explicitly define as array, matching base schema + refinement
   Influencer: Array<z.infer<typeof InfluencerSchema>>;
+  targetPlatforms?: z.infer<typeof PlatformEnumBackend>[];
 };
 
 // --- Step 2 ---
