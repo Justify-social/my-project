@@ -376,10 +376,113 @@ function Step1Content() {
     mode: 'onChange',
   });
 
+  // --- Timezone Detection Effect ---
   useEffect(() => {
-    if (!isLoading && wizardState && !initialDataLoaded.current) {
-      console.log('[Step1Content useEffect] Resetting form with wizardState:', wizardState);
+    async function performTimezoneDetection() {
+      _setIsDetectingTimezone(true);
+      logger.info('[Step 1] Attempting automatic timezone detection...');
+      let detectedTz: string | null = null;
+      let source: string = 'default';
 
+      // 1. Try external API (ipgeolocation.io) first (RECOMMENDED FOR PROD ACCURACY)
+      const apiKey = process.env.NEXT_PUBLIC_IPGEOLOCATION_API_KEY;
+      if (apiKey) {
+        source = 'ipgeolocation.io';
+        try {
+          const response = await fetch(`https://api.ipgeolocation.io/ipgeo?apiKey=${apiKey}`, {
+            signal: AbortSignal.timeout(3000),
+          });
+          if (!response.ok) throw new Error(`API Error: ${response.status}`);
+          const data = await response.json();
+          if (data?.time_zone?.name && timezonesData.some(tz => tz.value === data.time_zone.name)) {
+            detectedTz = data.time_zone.name;
+            logger.info(`[Step 1] Detected timezone via ${source}.`, { detected: detectedTz });
+          } else {
+            logger.warn(`[Step 1] ${source} returned invalid timezone: ${data?.time_zone?.name}`);
+          }
+        } catch (error) {
+          logger.warn(`[Step 1] Failed to detect timezone via ${source}.`, {
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      } else {
+        logger.warn(
+          '[Step 1] Skipping ipgeolocation.io check: NEXT_PUBLIC_IPGEOLOCATION_API_KEY not set.'
+        );
+      }
+
+      // 2. If external API failed or key missing, try Intl API
+      if (!detectedTz) {
+        source = 'Intl API';
+        try {
+          const intlTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+          // Validate against our list
+          if (intlTz && timezonesData.some(tz => tz.value === intlTz)) {
+            detectedTz = intlTz;
+            logger.info(`[Step 1] Detected timezone via ${source}.`, { detected: detectedTz });
+          } else {
+            logger.warn(`[Step 1] Intl timezone not valid or not found in local list: ${intlTz}`);
+          }
+        } catch (error) {
+          logger.warn(`[Step 1] Failed to detect timezone via ${source}.`, {
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      }
+
+      // 3. Fallback (already default, just log)
+      if (!detectedTz) {
+        source = 'fallback';
+        logger.info('[Step 1] Using fallback timezone UTC.');
+      }
+
+      logger.info('[Step 1] Timezone detection process complete.', {
+        finalDetected: detectedTz,
+        source,
+      });
+      _setDetectedTimezone(detectedTz);
+      _setIsDetectingTimezone(false);
+    }
+
+    // Trigger condition: Only run if not currently loading and NOT already detecting
+    // This runs once when isLoading becomes false. Subsequent state updates don't re-trigger.
+    if (!isLoading && !_isDetectingTimezone) {
+      logger.debug('[Timezone Detection Effect] Triggering detection.');
+      performTimezoneDetection();
+    }
+    // Depend only on isLoading to trigger once when loading finishes
+  }, [isLoading]);
+
+  // --- Form Reset Effect (Modified dependencies) ---
+  useEffect(() => {
+    logger.debug('[Timezone Reset Effect] Running...', {
+      isLoading,
+      _isDetectingTimezone,
+      initialDataLoaded: initialDataLoaded.current,
+    });
+    // Wait for wizard state loading AND timezone detection to be FINISHED
+    if (!isLoading && !_isDetectingTimezone && wizardState && !initialDataLoaded.current) {
+      // --- This block now runs only AFTER detection is complete ---
+      logger.info('[Timezone Reset Effect] Conditions met for form reset.');
+      let timezoneToUse = 'UTC';
+      const savedTimezone = wizardState?.timeZone;
+      // Use the detected timezone state variable which is now set
+      const isValidDetectedTz =
+        _detectedTimezone && timezonesData.some(tz => tz.value === _detectedTimezone);
+      logger.debug('[Timezone Reset Effect] Determining timezone:', {
+        savedTimezone,
+        _detectedTimezone,
+        isValidDetectedTz,
+      });
+      if (savedTimezone) {
+        timezoneToUse = savedTimezone;
+        logger.info('[Timezone Reset Effect] Using saved timezone.', { timezoneToUse });
+      } else if (isValidDetectedTz) {
+        timezoneToUse = _detectedTimezone; // Apply detected timezone
+        logger.info('[Timezone Reset Effect] Using detected timezone.', { timezoneToUse });
+      } else {
+        logger.info('[Timezone Reset Effect] Using default timezone (UTC).');
+      }
       const formattedData: Step1FormData = {
         name: wizardState?.name || '',
         businessGoal: wizardState?.businessGoal || '',
@@ -387,7 +490,8 @@ function Step1Content() {
         website: wizardState?.website || '',
         startDate: wizardState?.startDate || null,
         endDate: wizardState?.endDate || null,
-        timeZone: wizardState?.timeZone || 'UTC',
+        timeZone: timezoneToUse,
+        // Restore detailed mapping for complex types
         primaryContact: {
           firstName: wizardState?.primaryContact?.firstName || '',
           surname: wizardState?.primaryContact?.surname || '',
@@ -427,7 +531,6 @@ function Step1Content() {
         Influencer:
           Array.isArray(wizardState?.Influencer) && wizardState.Influencer.length > 0
             ? wizardState.Influencer.map((inf: unknown) => {
-                // Ensure properties are strings or provide defaults
                 const id =
                   typeof inf === 'object' &&
                   inf !== null &&
@@ -446,7 +549,6 @@ function Step1Content() {
                   typeof inf.handle === 'string'
                     ? inf.handle
                     : '';
-
                 return {
                   id: id,
                   platform: (platformValue && PlatformEnumBackend.safeParse(platformValue).success
@@ -463,16 +565,12 @@ function Step1Content() {
                 },
               ],
       };
-
-      console.log(
-        '[Step1Content useEffect] Calling form.reset with formatted data:',
-        formattedData
-      );
+      logger.info('[Timezone Reset Effect] Calling form.reset with formatted data:', formattedData);
       form.reset(formattedData as Step1FormData);
-      initialDataLoaded.current = true;
+      initialDataLoaded.current = true; // Mark initial load as complete here
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, wizardState, form.reset]);
+    // Depend on detection state change as well
+  }, [isLoading, wizardState, form.reset, _isDetectingTimezone, _detectedTimezone]);
 
   const {
     fields: influencerFields,
@@ -657,46 +755,86 @@ function Step1Content() {
   return (
     <FormProvider {...form}>
       <Form {...form}>
-        <form onSubmit={e => e.preventDefault()} className="space-y-8">
-          {/* ... Form Fields ... */}
-
-          {/* === Influencer Section === */}
+        <form onSubmit={e => e.preventDefault()} className="space-y-8 pb-[var(--footer-height)]">
+          {/* === Basic Info Section === */}
           <Card>
             <CardHeader>
-              <CardTitle>Influencer Selection</CardTitle>
-              <CardDescription>
-                Add the social media platform and handle for each influencer.
-              </CardDescription>
+              <CardTitle>Basic Information</CardTitle>
+              <CardDescription>Provide the fundamental details for your campaign.</CardDescription>
             </CardHeader>
-            <CardContent>
-              {influencerFields.map((field, index) => (
-                <InfluencerEntry
-                  key={field.fieldId} // Use fieldId provided by useFieldArray
-                  index={index}
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="md:col-span-2">
+                <FormField
                   control={form.control}
-                  errors={form.formState.errors}
-                  remove={removeInfluencer}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Campaign Name *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="E.g., Summer Skincare Launch" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              ))}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="mt-2"
-                onClick={() =>
-                  appendInfluencer({
-                    id: `new-${Date.now()}`,
-                    platform: PlatformEnumBackend.Values.INSTAGRAM, // Default platform
-                    handle: '',
-                  })
-                }
-              >
-                <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" />
-                Add Influencer
-              </Button>
+              </div>
+              <div className="md:col-span-2">
+                <FormField
+                  control={form.control}
+                  name="businessGoal"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Business Goal</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="E.g., Increase brand awareness by 15%"
+                          {...field}
+                          value={field.value ?? ''}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="md:col-span-1">
+                <FormField
+                  control={form.control}
+                  name="brand"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Brand Name *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Your Brand Name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="md:col-span-1">
+                <FormField
+                  control={form.control}
+                  name="website"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Website</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="https://yourbrand.com"
+                          {...field}
+                          value={field.value ?? ''}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </CardContent>
           </Card>
 
+          {/* === Schedule & Timezone Section === */}
           <Card>
             <CardHeader>
               <CardTitle>Schedule & Timezone</CardTitle>
@@ -754,7 +892,7 @@ function Step1Content() {
                   )}
                 />
               </div>
-              <div className="md:col-span-1">
+              <div className="md:col-span-1 pt-4">
                 <FormField
                   control={form.control}
                   name="timeZone"
@@ -774,10 +912,10 @@ function Step1Content() {
                         value={field.value || ''}
                         disabled={_isDetectingTimezone}
                       >
-                        {' '}
-                        {/* Use prefixed state */}
                         <FormControl>
-                          <SelectTrigger className="w-full"></SelectTrigger>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select timezone..." />
+                          </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {timezonesData.map(option => (
@@ -795,6 +933,325 @@ function Step1Content() {
                   )}
                 />
               </div>
+            </CardContent>
+          </Card>
+
+          {/* === Contacts Section === */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Contact Information</CardTitle>
+              <CardDescription>
+                Specify the primary and secondary points of contact for this campaign.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Primary Contact */}
+              <div className="p-4 border rounded-md bg-muted/30">
+                <h4 className="font-medium mb-3 text-sm text-muted-foreground">
+                  Primary Contact *
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="primaryContact.firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>First Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="primaryContact.surname"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Surname</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="primaryContact.email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input type="email" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="primaryContact.position"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Position</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select position..." />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {PositionEnum.options.map(option => (
+                              <SelectItem key={option} value={option}>
+                                {option}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Secondary Contact */}
+              <div className="p-4 border rounded-md bg-muted/30">
+                <h4 className="font-medium mb-3 text-sm text-muted-foreground">
+                  Secondary Contact (Optional)
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="secondaryContact.firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>First Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} value={field.value ?? ''} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="secondaryContact.surname"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Surname</FormLabel>
+                        <FormControl>
+                          <Input {...field} value={field.value ?? ''} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="secondaryContact.email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input type="email" {...field} value={field.value ?? ''} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="secondaryContact.position"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Position</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select position..." />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {PositionEnum.options.map(option => (
+                              <SelectItem key={option} value={option}>
+                                {option}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Additional Contacts */}
+              {/* TODO: Add logic for _contactFields, _appendContact, _removeContact if this section is uncommented */}
+              {/*
+               <div className="p-4 border rounded-md">
+                 <h4 className="font-medium mb-3 text-sm text-muted-foreground">Additional Contacts</h4>
+                 {_contactFields.map((field, index) => (
+                   <div key={field.id} className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4 items-end">
+                     <FormField control={form.control} name={`additionalContacts.${index}.firstName`} render={({ field }) => (<FormItem className="md:col-span-1"><FormLabel>First</FormLabel><FormControl><Input {...field} value={field.value ?? ''}/></FormControl></FormItem>)} />
+                     <FormField control={form.control} name={`additionalContacts.${index}.surname`} render={({ field }) => (<FormItem className="md:col-span-1"><FormLabel>Surname</FormLabel><FormControl><Input {...field} value={field.value ?? ''}/></FormControl></FormItem>)} />
+                     <FormField control={form.control} name={`additionalContacts.${index}.email`} render={({ field }) => (<FormItem className="md:col-span-1"><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
+                     <FormField control={form.control} name={`additionalContacts.${index}.position`} render={({ field }) => (<FormItem className="md:col-span-1"><FormLabel>Position</FormLabel><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger /></FormControl><SelectContent>{PositionEnum.options.map(option => (<SelectItem key={option} value={option}>{option}</SelectItem>))}</SelectContent></Select></FormItem>)} />
+                     <IconButtonAction iconBaseName="faTrashCan" hoverColorClass="text-destructive" ariaLabel="Remove Contact" onClick={() => _removeContact(index)} />
+                   </div>
+                 ))}
+                 <Button type="button" variant="outline" size="sm" onClick={() => _appendContact({ firstName: '', surname: '', email: '', position: PositionEnum.Values.Director })}> <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" /> Add Contact</Button>
+               </div>
+               */}
+            </CardContent>
+          </Card>
+
+          {/* === Budget Section === */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Budget</CardTitle>
+              <CardDescription>Set the budget for the campaign.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Currency Selection */}
+              <div className="md:col-span-1">
+                <FormField
+                  control={form.control}
+                  name="budget.currency"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Currency *</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select currency..." />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {CurrencyEnum.options.map(option => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Placeholder for alignment */}
+              <div className="md:col-span-1"></div>
+
+              {/* Total Budget */}
+              <div className="md:col-span-1">
+                <FormField
+                  control={form.control}
+                  name="budget.total"
+                  render={({ field: { onChange, ...fieldProps } }) => {
+                    const displayValue = String(fieldProps.value ?? ''); // Display raw number for now
+                    // const displayValue = formatCurrencyInput(fieldProps.value); // Use this if helper is restored
+                    return (
+                      <FormItem>
+                        <FormLabel>Total Budget *</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number" // Use number type
+                            placeholder="0"
+                            {...fieldProps}
+                            value={fieldProps.value ?? ''} // Bind directly to number value
+                            onChange={e => {
+                              const value = e.target.value;
+                              // Allow empty input or convert to number
+                              onChange(value === '' ? undefined : parseFloat(value));
+                            }}
+                          />
+                        </FormControl>
+                        {/* Display converted value from state */}
+                        {_convertedTotalBudget && (
+                          <FormDescription>{_convertedTotalBudget}</FormDescription>
+                        )}
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
+                />
+              </div>
+
+              {/* Social Media Budget */}
+              <div className="md:col-span-1">
+                <FormField
+                  control={form.control}
+                  name="budget.socialMedia"
+                  render={({ field: { onChange, ...fieldProps } }) => {
+                    const displayValue = String(fieldProps.value ?? ''); // Display raw number
+                    // const displayValue = formatCurrencyInput(fieldProps.value); // Use this if helper is restored
+                    return (
+                      <FormItem>
+                        <FormLabel>Social Media Budget *</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number" // Use number type
+                            placeholder="0"
+                            {...fieldProps}
+                            value={fieldProps.value ?? ''} // Bind directly to number value
+                            onChange={e => {
+                              const value = e.target.value;
+                              onChange(value === '' ? undefined : parseFloat(value));
+                            }}
+                          />
+                        </FormControl>
+                        {/* Display converted value from state */}
+                        {_convertedSocialMediaBudget && (
+                          <FormDescription>{_convertedSocialMediaBudget}</FormDescription>
+                        )}
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* === Influencer Section === */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Influencer Selection</CardTitle>
+              <CardDescription>
+                Add the social media platform and handle for each influencer.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {influencerFields.map((field, index) => (
+                <InfluencerEntry
+                  key={field.fieldId} // Use fieldId provided by useFieldArray
+                  index={index}
+                  control={form.control}
+                  errors={form.formState.errors}
+                  remove={removeInfluencer}
+                />
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() =>
+                  appendInfluencer({
+                    id: `new-${Date.now()}`,
+                    platform: PlatformEnumBackend.Values.INSTAGRAM, // Default platform
+                    handle: '',
+                  })
+                }
+              >
+                <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" />
+                Add Influencer
+              </Button>
             </CardContent>
           </Card>
 

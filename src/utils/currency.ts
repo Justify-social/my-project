@@ -16,43 +16,74 @@ const CACHE_DURATION_MS = 60 * 60 * 1000; // Cache for 1 hour
 async function getExchangeRates(
   baseCurrency: string
 ): Promise<{ [currency: string]: number } | null> {
-  const upperBaseCurrency = baseCurrency.toUpperCase();
+  // We only need rates relative to USD for display conversion, and the fallback API uses USD base
+  const targetBase = 'USD';
   const now = Date.now();
 
-  // Check cache first
-  const cachedEntry = rateCache.get(upperBaseCurrency);
+  // Check cache for USD base rates
+  const cachedEntry = rateCache.get(targetBase);
   if (cachedEntry && now - cachedEntry.timestamp < CACHE_DURATION_MS) {
-    logger.debug(`[Currency] Using cached rates for base: ${upperBaseCurrency}`);
+    logger.debug(`[Currency] Using cached rates for base: ${targetBase}`);
     return cachedEntry.rates;
   }
 
-  logger.info(`[Currency] Fetching fresh rates for base: ${upperBaseCurrency}`);
-  const endpoint = `https://api.exchangerate.host/latest?base=${upperBaseCurrency}`;
+  // Use the keyless fallback API endpoint
+  logger.info(`[Currency] Fetching fresh rates using fallback API (Base: ${targetBase})`);
+  const endpoint = `https://open.er-api.com/v6/latest/${targetBase}`;
+  let rawResponseText: string | null = null;
 
   try {
-    const response = await fetch(endpoint, { signal: AbortSignal.timeout(4000) }); // 4s timeout
+    const response = await fetch(endpoint, { signal: AbortSignal.timeout(4000) });
+
     if (!response.ok) {
+      rawResponseText = await response.text().catch(() => 'Failed to read error response text');
+      logger.error('[Currency] Fallback API request failed.', {
+        base: targetBase,
+        status: response.status,
+        statusText: response.statusText,
+        body: rawResponseText,
+      });
       throw new Error(`API Error: ${response.status} ${response.statusText}`);
     }
-    const data = await response.json();
 
-    if (!data || !data.rates || typeof data.rates !== 'object') {
-      throw new Error('Invalid API response structure');
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      rawResponseText = await response.text().catch(() => 'Failed to read non-json response text');
+      logger.error('[Currency] Received non-JSON response from fallback API.', {
+        base: targetBase,
+        contentType: contentType,
+        body: rawResponseText,
+      });
+      throw new Error(`Received non-JSON response: ${contentType}`);
     }
 
-    // Update cache
-    rateCache.set(upperBaseCurrency, { rates: data.rates, timestamp: now });
-    logger.debug(`[Currency] Updated cache for base: ${upperBaseCurrency}`);
+    rawResponseText = await response.text();
+    const data = JSON.parse(rawResponseText);
 
-    return data.rates;
+    // Check structure for open.er-api.com format (e.g., result: "success")
+    if (!data || data.result !== 'success' || !data.rates || typeof data.rates !== 'object') {
+      logger.error('[Currency] Invalid fallback API JSON structure received.', {
+        base: targetBase,
+        responseText: rawResponseText,
+      });
+      throw new Error('Invalid fallback API response structure');
+    }
+
+    // Update cache with USD base rates
+    rateCache.set(targetBase, { rates: data.rates, timestamp: now });
+    logger.debug(`[Currency] Updated cache for base: ${targetBase}`);
+
+    return data.rates; // Return rates relative to USD
   } catch (error) {
-    logger.error('[Currency] Failed to fetch exchange rates.', {
-      base: upperBaseCurrency,
+    // Log error details consistently
+    logger.error('[Currency] Failed to fetch, parse, or validate exchange rates.', {
+      base: targetBase,
       error: error instanceof Error ? error.message : String(error),
+      responseText: rawResponseText, // Log raw text if available from try block
     });
     // Return stale cache data if available and error occurred
     if (cachedEntry) {
-      logger.warn(`[Currency] Returning stale cache for ${upperBaseCurrency} due to fetch error.`);
+      logger.warn(`[Currency] Returning stale cache for ${targetBase} due to fetch error.`);
       return cachedEntry.rates;
     }
     return null;
@@ -73,30 +104,35 @@ export async function convertCurrencyUsingApi(
   fromCurrency: string,
   toCurrency: string
 ): Promise<number | null> {
-  if (isNaN(amount) || amount === 0) {
-    return 0; // No need to convert zero
-  }
+  if (isNaN(amount) || amount === 0) return 0;
+
   const upperFrom = fromCurrency.toUpperCase();
   const upperTo = toCurrency.toUpperCase();
 
-  if (upperFrom === upperTo) {
-    return amount; // No conversion needed
-  }
+  if (upperFrom === upperTo) return amount;
 
-  // Fetch rates using the 'from' currency as the base
-  const rates = await getExchangeRates(upperFrom);
+  // Fetch USD-based rates
+  const rates = await getExchangeRates('USD'); // Always fetch USD base now
 
   if (!rates) {
-    logger.warn(`[Currency] Could not get rates for base: ${upperFrom}`);
-    return null; // Failed to get rates
+    logger.warn(`[Currency] Could not get USD base rates for conversion`);
+    return null;
   }
 
-  const conversionRate = rates[upperTo];
-  if (conversionRate === undefined || conversionRate === null) {
-    logger.warn(`[Currency] Target currency rate not found: ${upperTo} in rates for ${upperFrom}`);
-    return null; // Target currency not found in rates
+  // Get rates relative to USD
+  const fromRate = rates[upperFrom]; // Rate of 1 USD in FromCurrency
+  const toRate = rates[upperTo]; // Rate of 1 USD in ToCurrency
+
+  if (fromRate === undefined || fromRate === null || toRate === undefined || toRate === null) {
+    logger.warn(
+      `[Currency] Missing rate for conversion: ${upperFrom}=${fromRate}, ${upperTo}=${toRate}`
+    );
+    return null;
   }
 
-  const convertedAmount = amount * conversionRate;
-  return parseFloat(convertedAmount.toFixed(2)); // Return rounded to 2 decimal places
+  // Convert: Amount * (ToRate / FromRate)
+  // Example: 100 GBP to EUR: 100 * (EUR_Rate / GBP_Rate)
+  // Rates are relative to USD, so: Amount * ( (EUR/USD) / (GBP/USD) )
+  const convertedAmount = amount * (toRate / fromRate);
+  return parseFloat(convertedAmount.toFixed(2));
 }

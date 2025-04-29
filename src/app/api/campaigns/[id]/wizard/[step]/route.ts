@@ -109,67 +109,60 @@ export async function PATCH(
     // --- Map validated data (needs correct types based on dataToSave) ---
     // TODO: Ensure correct type mapping after fixing validationResult/dataToSave types
     if (step === 1) {
-      if ('name' in dataToSave) mappedData.name = dataToSave.name;
-      if ('businessGoal' in dataToSave) mappedData.businessGoal = dataToSave.businessGoal;
-      if ('brand' in dataToSave) mappedData.brand = dataToSave.brand;
-      if ('website' in dataToSave) mappedData.website = dataToSave.website;
-      if ('startDate' in dataToSave && dataToSave.startDate)
-        mappedData.startDate = new Date(dataToSave.startDate);
-      if ('endDate' in dataToSave && dataToSave.endDate)
-        mappedData.endDate = new Date(dataToSave.endDate);
-      if ('timeZone' in dataToSave) mappedData.timeZone = dataToSave.timeZone;
-      if (
-        'budget' in dataToSave &&
-        typeof dataToSave.budget === 'object' &&
-        dataToSave.budget !== null
-      ) {
-        mappedData.budget = {
-          currency: dataToSave.budget.currency || 'USD',
-          total: dataToSave.budget.total || 0,
-          socialMedia: dataToSave.budget.socialMedia || 0,
-        };
+      if (dataToSave.name !== undefined) mappedData.name = dataToSave.name;
+      if (dataToSave.businessGoal !== undefined)
+        mappedData.businessGoal = dataToSave.businessGoal ?? null;
+      if (dataToSave.brand !== undefined) mappedData.brand = dataToSave.brand;
+      if (dataToSave.website !== undefined) mappedData.website = dataToSave.website ?? null;
+      if (dataToSave.startDate) mappedData.startDate = new Date(dataToSave.startDate);
+      if (dataToSave.endDate) mappedData.endDate = new Date(dataToSave.endDate);
+      if (dataToSave.timeZone !== undefined) mappedData.timeZone = dataToSave.timeZone ?? null;
+      if (dataToSave.budget !== undefined) {
+        mappedData.budget = dataToSave.budget ?? Prisma.JsonNull;
       }
-      if ('primaryContact' in dataToSave) mappedData.primaryContact = dataToSave.primaryContact;
-      if ('secondaryContact' in dataToSave)
-        mappedData.secondaryContact = dataToSave.secondaryContact;
-      if ('additionalContacts' in dataToSave)
-        mappedData.additionalContacts = dataToSave.additionalContacts;
-    }
-    // Add similar mapping blocks for step 2, 3, 4, 5 using 'in' checks
-    else if (step === 2) {
-      if ('primaryKPI' in dataToSave) mappedData.primaryKPI = dataToSave.primaryKPI;
-      if ('secondaryKPIs' in dataToSave) mappedData.secondaryKPIs = dataToSave.secondaryKPIs;
-      if ('features' in dataToSave) mappedData.features = dataToSave.features;
-      if ('messaging' in dataToSave) mappedData.messaging = dataToSave.messaging;
-      if ('expectedOutcomes' in dataToSave)
-        mappedData.expectedOutcomes = dataToSave.expectedOutcomes;
+      if (dataToSave.primaryContact !== undefined) {
+        mappedData.primaryContact = dataToSave.primaryContact ?? Prisma.JsonNull;
+      }
+      if (dataToSave.secondaryContact !== undefined) {
+        mappedData.secondaryContact = dataToSave.secondaryContact ?? Prisma.JsonNull;
+      }
+      if (dataToSave.additionalContacts !== undefined) {
+        mappedData.additionalContacts = dataToSave.additionalContacts ?? [];
+      }
+    } else if (step === 2) {
+      if (dataToSave.primaryKPI !== undefined)
+        mappedData.primaryKPI = dataToSave.primaryKPI ?? null;
+      if (dataToSave.secondaryKPIs !== undefined)
+        mappedData.secondaryKPIs = dataToSave.secondaryKPIs ?? [];
+      if (dataToSave.features !== undefined) mappedData.features = dataToSave.features ?? [];
+      if (dataToSave.messaging !== undefined)
+        mappedData.messaging = dataToSave.messaging ?? Prisma.JsonNull;
+      if (dataToSave.expectedOutcomes !== undefined)
+        mappedData.expectedOutcomes = dataToSave.expectedOutcomes ?? Prisma.JsonNull;
     } else if (step === 3) {
-      if (
-        'demographics' in dataToSave &&
-        typeof dataToSave.demographics === 'object' &&
-        dataToSave.demographics !== null
-      ) {
+      if (dataToSave.demographics !== undefined) {
         const existingDemographics =
           typeof mappedData.demographics === 'object' && mappedData.demographics !== null
             ? mappedData.demographics
             : {};
-        mappedData.demographics = { ...existingDemographics, ...dataToSave.demographics };
+        mappedData.demographics = dataToSave.demographics
+          ? { ...existingDemographics, ...dataToSave.demographics }
+          : Prisma.JsonNull;
       }
-      if ('locations' in dataToSave) mappedData.locations = dataToSave.locations;
-      if (
-        'targeting' in dataToSave &&
-        typeof dataToSave.targeting === 'object' &&
-        dataToSave.targeting !== null
-      ) {
+      if (dataToSave.locations !== undefined) mappedData.locations = dataToSave.locations ?? [];
+      if (dataToSave.targeting !== undefined) {
         const existingTargeting =
           typeof mappedData.targeting === 'object' && mappedData.targeting !== null
             ? mappedData.targeting
             : {};
-        mappedData.targeting = { ...existingTargeting, ...dataToSave.targeting };
+        mappedData.targeting = dataToSave.targeting
+          ? { ...existingTargeting, ...dataToSave.targeting }
+          : Prisma.JsonNull;
       }
-      if ('competitors' in dataToSave) mappedData.competitors = dataToSave.competitors;
+      if (dataToSave.competitors !== undefined)
+        mappedData.competitors = dataToSave.competitors ?? [];
     } else if (step === 4) {
-      if ('assets' in dataToSave) mappedData.assets = dataToSave.assets;
+      if (dataToSave.assets !== undefined) mappedData.assets = dataToSave.assets ?? [];
     } else if (step === 5) {
       if ('status' in dataToSave && dataToSave.status) {
         // Ensure Status enum is imported from @prisma/client

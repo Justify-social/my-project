@@ -10,7 +10,11 @@ import React, {
   useMemo,
 } from 'react';
 // Import the ACTUAL DraftCampaignData type from types.ts
-import { DraftCampaignData, DraftCampaignDataSchema } from '@/components/features/campaigns/types';
+import {
+  DraftCampaignData,
+  DraftCampaignDataSchema,
+  PositionEnum,
+} from '@/components/features/campaigns/types';
 // TODO: Replace WizardCampaignFormData with a proper type derived from schema.prisma CampaignWizard model in types.ts
 // import { CampaignFormData as WizardCampaignFormData } from '@/types/influencer';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -153,8 +157,56 @@ interface WizardContextType {
 }
 // --- End Type Definitions ---
 
-// Default initial state remains null
-const defaultWizardState: DraftCampaignData | null = null;
+// Default initial state - PROVIDE MINIMAL STRUCTURE
+const defaultWizardState: DraftCampaignData = {
+  // Ensure all potentially accessed top-level fields have defaults
+  id: undefined, // Use undefined for optional string instead of null
+  name: '',
+  businessGoal: null,
+  brand: '',
+  website: null,
+  startDate: null,
+  endDate: null,
+  timeZone: 'UTC', // Default timezone
+  primaryContact: { firstName: '', surname: '', email: '', position: PositionEnum.Values.Director },
+  secondaryContact: null, // Default to null
+  additionalContacts: [],
+  budget: { currency: 'USD', total: 0, socialMedia: 0 },
+  Influencer: [],
+  primaryKPI: null,
+  secondaryKPIs: [],
+  messaging: { mainMessage: '', hashtags: [], keyBenefits: [] },
+  expectedOutcomes: { memorability: '', purchaseIntent: '', brandPerception: '' },
+  features: [],
+  demographics: {
+    age18_24: 0,
+    age25_34: 0,
+    age35_44: 0,
+    age45_54: 0,
+    age55_64: 0,
+    age65plus: 0,
+    genders: [],
+    languages: [],
+  },
+  locations: [],
+  targeting: { interests: [], keywords: [] },
+  competitors: [],
+  assets: [],
+  guidelines: null,
+  requirements: [],
+  notes: null,
+  step1Complete: false,
+  step2Complete: false,
+  step3Complete: false,
+  step4Complete: false,
+  currentStep: 1,
+  isComplete: false,
+  isDraft: true,
+  status: 'DRAFT',
+  createdAt: null,
+  updatedAt: null,
+  userId: null,
+};
 
 const WizardContext = createContext<WizardContextType | undefined>(undefined);
 
@@ -167,8 +219,8 @@ export function WizardProvider({ children }: { children: ReactNode }) {
   const campaignId = searchParams?.get('id');
   const router = useRouter();
 
-  const [wizardState, setWizardState] = useState<DraftCampaignData | null>(defaultWizardState);
-  const [isLoading, setIsLoading] = useState<boolean>(!!campaignId);
+  const [wizardState, setWizardState] = useState<DraftCampaignData | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [autosaveEnabled, setAutosaveEnabled] = useState<boolean>(true);
   const [hasLoaded, setHasLoaded] = useState<boolean>(false);
@@ -234,9 +286,11 @@ export function WizardProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (campaignId && !hasLoaded) {
       loadCampaignData(campaignId);
-    } else if (!campaignId) {
-      setWizardState(defaultWizardState);
-      setIsLoading(false);
+    } else if (!campaignId && !hasLoaded) {
+      // Condition for NEW campaign
+      logger.info('[WizardContext] Initializing default state for new campaign.');
+      setWizardState(defaultWizardState); // Set the default object state
+      setIsLoading(false); // Set loading false AFTER setting default state
       setHasLoaded(true);
     }
   }, [campaignId, hasLoaded, loadCampaignData]);
@@ -288,6 +342,11 @@ export function WizardProvider({ children }: { children: ReactNode }) {
             currentStep: 1, // Created at step 1
           };
 
+          logger.debug(
+            '[WizardContext saveProgress] Sending creation payload:',
+            JSON.stringify(creationPayload, null, 2)
+          );
+
           logger.debug('Calling POST /api/campaigns with payload:', creationPayload);
           const response = await fetch('/api/campaigns', {
             method: 'POST',
@@ -334,7 +393,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
           logger.error('Error creating new campaign draft:', error);
           const message = error instanceof Error ? error.message : 'Unknown error';
           toast.error(`Error creating campaign: ${message}`);
-          return null; // Return null on creation failure
+          return null; // ADD EXPLICIT RETURN NULL HERE
         }
       }
       // --- End Campaign Creation Handling ---
