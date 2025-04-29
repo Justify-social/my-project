@@ -6,6 +6,12 @@
  * correctly and provide helpful diagnostics when they are not.
  */
 
+import { prisma } from '@/lib/prisma'; // Import prisma client
+import { serverConfig } from '@/config/server-config';
+import { logger } from '@/utils/logger'; // Assuming logger is needed server-side
+import Stripe from 'stripe';
+import { algoliasearch } from 'algoliasearch';
+
 /**
  * Enumeration of possible API error types for better error categorization
  */
@@ -469,740 +475,6 @@ export async function verifyExchangeRatesApi(): Promise<ApiVerificationResult> {
 }
 
 /**
- * Verify the Phyllo API
- * This function tests the Phyllo API used for influencer platform integrations
- */
-export async function verifyPhylloApi(): Promise<ApiVerificationResult> {
-  const apiName = 'Phyllo API';
-  const baseUrl = 'https://api.staging.getphyllo.com';
-  const endpoints = {
-    sdkToken: `${baseUrl}/v1/sdk-tokens`,
-    users: `${baseUrl}/v1/users`,
-    profiles: `${baseUrl}/v1/profiles`,
-    accounts: `${baseUrl}/v1/accounts`,
-  };
-
-  try {
-    console.info(`Testing ${apiName}`);
-
-    // First check if the host is reachable at all to rule out connectivity issues
-    const hostCheck = await isHostReachable('api.staging.getphyllo.com');
-
-    if (!hostCheck.reachable) {
-      console.error(`${apiName} host is unreachable`);
-      return {
-        success: false,
-        apiName,
-        endpoint: endpoints.sdkToken,
-        error: {
-          type: ApiErrorType.NETWORK_ERROR,
-          message: `Cannot connect to the API host. The service may be down or blocked by network policies.`,
-          details: { hostname: 'api.staging.getphyllo.com' },
-          isRetryable: true,
-        },
-      };
-    }
-
-    // Check for actual credentials
-    const hasClientId = process.env.PHYLLO_CLIENT_ID !== undefined;
-    const hasClientSecret = process.env.PHYLLO_CLIENT_SECRET !== undefined;
-
-    console.info(`${apiName} credential check:`, { hasClientId, hasClientSecret });
-
-    // In browser environment, we can't make direct API calls due to CORS
-    // But we can simulate what would happen based on the documentation
-
-    // Using example credentials from the Phyllo documentation
-    // Example auth from docs
-    const _exampleAuth =
-      'Basic MDMxNTM0NWYtMjgxMS00MGYwLThmNTItOTdmNTNmYTE0MWQxOjg5MjVhN2U0LTY1YjctNDZiYS1iYzk1LWY1YTMyYzFlYmVkOQ==';
-    const testUserId = '3b310265-f9a4-43a0-889b-2adc97084bd4';
-    const testAccountId = 'e90d7893-13a6-46a7-a958-2d041b02723a';
-
-    // Simulate fetching data
-    // These would be the real endpoints and requests if we weren't limited by CORS
-    const startTime = Date.now();
-
-    // Create detailed diagnostic data that simulates the full API flow
-    const diagnosticData = {
-      apiStatus: 'Operational',
-      endpoints: [
-        {
-          name: 'Create User',
-          url: endpoints.users,
-          method: 'POST',
-          status: '200 OK',
-          exampleRequest: {
-            name: 'Ed Adams',
-            external_id: 'Ed-1741123526424',
-          },
-          exampleResponse: {
-            id: testUserId,
-            name: 'Ed Adams',
-            external_id: 'Ed-1741123526424',
-            created_at: '2023-11-15T18:32:06.434Z',
-          },
-        },
-        {
-          name: 'Create SDK Token',
-          url: endpoints.sdkToken,
-          method: 'POST',
-          status: '200 OK',
-          exampleRequest: {
-            user_id: testUserId,
-            products: [
-              'IDENTITY',
-              'IDENTITY.AUDIENCE',
-              'ENGAGEMENT',
-              'ENGAGEMENT.AUDIENCE',
-              'INCOME',
-              'ACTIVITY',
-            ],
-          },
-          exampleResponse: {
-            id: '9b21c7d5-3d7e-4b6f-9e1a-2a7d1e8d821f',
-            sdk_token: 'eyJhbGciOi...NLPIMlPN5M',
-            user_id: testUserId,
-            created_at: '2023-11-15T18:33:22.105Z',
-          },
-        },
-        {
-          name: 'Get User Profile',
-          url: `${endpoints.profiles}?account_id=${testAccountId}`,
-          method: 'GET',
-          status: '200 OK',
-          exampleResponse: {
-            data: [
-              {
-                id: '7e248a96-5bc5-42aa-981d-93355d10f228',
-                created_at: '2025-03-04T21:27:19.395182',
-                updated_at: '2025-03-04T21:27:21.539206',
-                user: {
-                  id: testUserId,
-                  name: 'Ed',
-                },
-                account: {
-                  id: testAccountId,
-                  platform_username: 'do_you_ecom',
-                  username: 'do_you_ecom',
-                },
-                work_platform: {
-                  id: 'de55aeec-0dc8-4119-bf90-16b3d1f0c987',
-                  name: 'TikTok',
-                  logo_url: 'https://cdn.getphyllo.com/platforms_logo/logos/logo_tiktok.png',
-                },
-                username: 'do_you_ecom',
-                platform_username: 'do_you_ecom',
-                full_name: 'do you ecom',
-                url: 'https://vm.tiktok.com/ZGdfsWvrC/',
-                introduction:
-                  'Looking for influencers to post about our products. Free samples available',
-                image_url:
-                  'https://p16-sign-sg.tiktokcdn.com/tos-alisg-avt-0068/e885fcde86a7cb4afbe744f1aa5ee81e~tplv-tiktokx-cropcenter:1080:1080.jpeg',
-                reputation: {
-                  follower_count: 6,
-                  following_count: 15,
-                  content_count: 2,
-                  like_count: 12,
-                },
-              },
-            ],
-            metadata: {
-              offset: 0,
-              limit: 10,
-              from_date: null,
-              to_date: null,
-            },
-          },
-        },
-      ],
-      diagnostics: {
-        credentials: {
-          provided: hasClientId && hasClientSecret,
-          using: 'Example credentials for testing/documentation',
-        },
-        apiHostReachable: true,
-        latency: Date.now() - startTime,
-        corsRestrictions:
-          'This API requires server-side calls. Browser testing is limited due to CORS restrictions.',
-        environmentInfo: 'Using staging environment. For production use api.getphyllo.com instead.',
-      },
-      setup: {
-        requiredCredentials: ['PHYLLO_CLIENT_ID', 'PHYLLO_CLIENT_SECRET'],
-        requiredEnvironmentVariables: ['PHYLLO_CLIENT_ID', 'PHYLLO_CLIENT_SECRET'],
-        integrationSteps: [
-          '1. Create a user with a unique ID',
-          '2. Generate an SDK token for that user',
-          '3. Use the Connect SDK to let users connect their accounts',
-          '4. Fetch connected account data through the API',
-        ],
-        documentationUrl: 'https://docs.getphyllo.com',
-      },
-    };
-
-    return {
-      success: true,
-      apiName,
-      endpoint: endpoints.sdkToken,
-      latency: hostCheck.latency,
-      data: diagnosticData,
-    };
-  } catch (error) {
-    // Handle unexpected errors
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-
-    console.error(`${apiName} verification failed with unexpected error:`, errorMessage);
-
-    return {
-      success: false,
-      apiName,
-      endpoint: 'https://api.staging.getphyllo.com/v1/sdk-tokens',
-      error: {
-        type: ApiErrorType.UNKNOWN_ERROR,
-        message: errorMessage,
-        details: error,
-        isRetryable: false,
-      },
-    };
-  }
-}
-
-/**
- * Verify the Cint Exchange API
- *
- * The Cint Exchange API is used for market research and survey panel integration.
- * It allows connecting to consumer panels for research, collecting survey responses,
- * and managing market research campaigns.
- *
- * Required Environment Variables:
- * - CINT_API_KEY: API key for Cint authentication
- * - CINT_CLIENT_ID: Client ID for the Cint demand platform
- * - CINT_CLIENT_SECRET: Client secret for API authentication
- *
- * Base URL: https://api.cint.io
- */
-export async function verifyCintExchangeApi(): Promise<ApiVerificationResult> {
-  // API endpoints for the Cint Exchange API
-  const baseUrl = 'https://api.cint.io';
-  const endpoints = {
-    businessUnits: `${baseUrl}/demand/business-units`,
-    surveys: `${baseUrl}/demand/surveys`,
-    quotas: `${baseUrl}/demand/quotas`,
-    respondents: `${baseUrl}/demand/respondents`,
-    audiences: `${baseUrl}/demand/audiences`,
-    marketplaces: `${baseUrl}/demand/marketplaces`,
-  };
-
-  // Start time for latency measurement
-  const startTime = Date.now();
-
-  // First check if the host is reachable
-  console.log(`Checking if Cint API host is reachable...`);
-  const { reachable, latency: pingLatency } = await isHostReachable('api.cint.io');
-
-  if (!reachable) {
-    return {
-      success: false,
-      apiName: 'Cint Exchange API',
-      endpoint: baseUrl,
-      error: {
-        type: ApiErrorType.NETWORK_ERROR,
-        message: 'Cint API host is not reachable',
-        isRetryable: true,
-      },
-    };
-  }
-
-  console.log(`Cint API host is reachable (ping latency: ${pingLatency}ms)`);
-
-  // Check for Cint API credentials
-  const hasApiKey = process.env.CINT_API_KEY !== undefined;
-  const hasClientId = process.env.CINT_CLIENT_ID !== undefined;
-  const hasClientSecret = process.env.CINT_CLIENT_SECRET !== undefined;
-
-  console.log(`Cint API Credentials Status:
-    - API Key: ${hasApiKey ? 'Present' : 'Missing'}
-    - Client ID: ${hasClientId ? 'Present' : 'Missing'}
-    - Client Secret: ${hasClientSecret ? 'Present' : 'Missing'}`);
-
-  // Build diagnostic data object with simulated API responses
-  const diagnosticData = {
-    apiStatus: {
-      operational: reachable,
-      credentialsPresent: hasApiKey && hasClientId && hasClientSecret,
-      credentialsStatus: {
-        apiKey: hasApiKey ? 'Present' : 'Missing',
-        clientId: hasClientId ? 'Present' : 'Missing',
-        clientSecret: hasClientSecret ? 'Present' : 'Missing',
-      },
-      endpoints: endpoints,
-    },
-    configurationGuide: {
-      requiredEnvVars: [
-        {
-          key: 'CINT_API_KEY',
-          description: 'API key for authentication with Cint API',
-          present: hasApiKey,
-        },
-        {
-          key: 'CINT_CLIENT_ID',
-          description: 'Client ID for the Cint demand platform',
-          present: hasClientId,
-        },
-        {
-          key: 'CINT_CLIENT_SECRET',
-          description: 'Client secret for API authentication',
-          present: hasClientSecret,
-        },
-      ],
-      howToConfigureEnvVars:
-        'Add the following variables to your .env file:\n' +
-        'CINT_API_KEY=your_api_key_here\n' +
-        'CINT_CLIENT_ID=your_client_id_here\n' +
-        'CINT_CLIENT_SECRET=your_client_secret_here',
-    },
-    apiExampleRequests: {
-      // Example request to get business units
-      getBusinessUnits: {
-        endpoint: endpoints.businessUnits,
-        method: 'GET',
-        headers: {
-          Authorization: 'Bearer {{access_token}}',
-          'Content-Type': 'application/json',
-        },
-      },
-      // Example request to create a survey
-      createSurvey: {
-        endpoint: endpoints.surveys,
-        method: 'POST',
-        headers: {
-          Authorization: 'Bearer {{access_token}}',
-          'Content-Type': 'application/json',
-        },
-        body: {
-          name: 'Sample survey',
-          businessUnitId: 'business-unit-id',
-          status: 'Draft',
-          linkFormat: 'Direct',
-          quotas: [],
-        },
-      },
-      // Example request to get respondents
-      getRespondents: {
-        endpoint: endpoints.respondents,
-        method: 'GET',
-        headers: {
-          Authorization: 'Bearer {{access_token}}',
-          'Content-Type': 'application/json',
-        },
-      },
-    },
-    apiExampleResponses: {
-      // Example response for business units
-      businessUnits: {
-        data: [
-          {
-            id: 'bu-123456',
-            name: 'Example Business Unit',
-            status: 'Active',
-            clientId: 'client-123456',
-          },
-        ],
-        meta: {
-          totalRecords: 1,
-        },
-      },
-      // Example response for surveys
-      surveys: {
-        data: [
-          {
-            id: 'sv-123456',
-            name: 'Example Survey',
-            status: 'Draft',
-            businessUnitId: 'bu-123456',
-            createdDateTime: '2023-01-01T12:00:00Z',
-          },
-        ],
-        meta: {
-          totalRecords: 1,
-        },
-      },
-    },
-    apiDocumentation: {
-      description:
-        "The Cint Exchange API is a market research platform that connects to consumer panels for surveys and audience insights. It's essential for campaign targeting and market validation.",
-      useCase:
-        'Use Cint Exchange API for creating surveys, managing quotas, and collecting responses from targeted audience segments',
-      docsUrl: 'https://api-docs.cint.io',
-    },
-    apiCorsNotes: {
-      note: 'Due to CORS restrictions, complete API testing can only be done server-side. The host reachability check confirms the API endpoints are available.',
-    },
-    apiMetadata: {
-      environment: process.env.NODE_ENV || 'unknown',
-      testedAt: new Date().toISOString(),
-      testResult:
-        hasApiKey && hasClientId && hasClientSecret
-          ? 'Credentials present, host reachable'
-          : 'Configuration incomplete',
-    },
-  };
-
-  const endTime = Date.now();
-  const latency = endTime - startTime;
-
-  if (!hasApiKey || !hasClientId || !hasClientSecret) {
-    return {
-      success: false,
-      apiName: 'Cint Exchange API',
-      endpoint: baseUrl,
-      latency,
-      data: diagnosticData,
-      error: {
-        type: ApiErrorType.AUTHENTICATION_ERROR,
-        message:
-          'Missing Cint API credentials. Add CINT_API_KEY, CINT_CLIENT_ID, and CINT_CLIENT_SECRET to your .env file.',
-        details: {
-          missingCredentials: {
-            apiKey: !hasApiKey,
-            clientId: !hasClientId,
-            clientSecret: !hasClientSecret,
-          },
-          configGuide: diagnosticData.configurationGuide,
-        },
-        isRetryable: false,
-      },
-    };
-  }
-
-  // If we have credentials but can't make actual API calls due to CORS,
-  // return success with diagnostic data
-  return {
-    success: true,
-    apiName: 'Cint Exchange API',
-    endpoint: baseUrl,
-    latency,
-    data: diagnosticData,
-  };
-}
-
-/**
- * Verify the Stripe API
- * This function tests the Stripe API used for payment processing
- */
-export async function verifyStripeApi(): Promise<ApiVerificationResult> {
-  const apiName = 'Stripe API';
-  const baseUrl = 'https://api.stripe.com/v1';
-  const endpoint = `${baseUrl}/products`;
-
-  try {
-    console.info(`Testing ${apiName}`);
-
-    // First check if the host is reachable at all to rule out connectivity issues
-    const hostCheck = await isHostReachable('api.stripe.com');
-
-    if (!hostCheck.reachable) {
-      console.error(`${apiName} host is unreachable`);
-      return {
-        success: false,
-        apiName,
-        endpoint,
-        error: {
-          type: ApiErrorType.NETWORK_ERROR,
-          message: `Cannot connect to the API host. The service may be down or blocked by network policies.`,
-          details: { hostname: 'api.stripe.com' },
-          isRetryable: true,
-        },
-      };
-    }
-
-    // Check if API keys exist in environment variables
-    const hasSecretKey = process.env.STRIPE_SECRET_KEY !== undefined;
-    const hasPublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY !== undefined;
-    const hasWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET !== undefined;
-
-    if (!hasSecretKey || !hasPublishableKey) {
-      console.warn(`${apiName} verification warning: Missing API key(s)`);
-
-      return {
-        success: false,
-        apiName,
-        endpoint,
-        latency: hostCheck.latency,
-        error: {
-          type: ApiErrorType.AUTHENTICATION_ERROR,
-          message:
-            'Missing Stripe API key(s). Add STRIPE_SECRET_KEY and NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY to environment variables.',
-          details: null,
-          isRetryable: true,
-        },
-      };
-    }
-
-    // Since we can't actually make API calls from the browser due to CORS,
-    // we'll create a diagnostic object with the information we have
-    const diagnosticData = {
-      apiStatus: {
-        hostReachable: true,
-        credentialsPresent: {
-          secretKey: hasSecretKey,
-          publishableKey: hasPublishableKey,
-          webhookSecret: hasWebhookSecret,
-        },
-      },
-      testMode: process.env.STRIPE_SECRET_KEY?.startsWith('sk_test_'),
-      priceIds: {
-        essential: process.env.NEXT_PUBLIC_STRIPE_ESSENTIAL_PRICE_ID,
-        professional: process.env.NEXT_PUBLIC_STRIPE_PROFESSIONAL_PRICE_ID,
-        advanced: process.env.NEXT_PUBLIC_STRIPE_ADVANCED_PRICE_ID,
-      },
-      apiDocumentation: {
-        description: 'The Stripe API is used for payment processing and subscription management.',
-        useCase: 'Used for handling payments and subscriptions in the application.',
-        docsUrl: 'https://stripe.com/docs/api',
-      },
-      apiCorsNotes: {
-        note: 'Due to CORS restrictions, complete API testing can only be done server-side. The host reachability check confirms the API endpoints are available.',
-      },
-    };
-
-    return {
-      success: true,
-      apiName,
-      endpoint,
-      latency: hostCheck.latency,
-      data: diagnosticData,
-    };
-  } catch (error) {
-    // Handle unexpected errors
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-
-    console.error(`${apiName} verification failed with unexpected error:`, errorMessage);
-
-    return {
-      success: false,
-      apiName,
-      endpoint,
-      error: {
-        type: ApiErrorType.UNKNOWN_ERROR,
-        message: errorMessage,
-        details: error,
-        isRetryable: false,
-      },
-    };
-  }
-}
-
-/**
- * Verify the Uploadthing API
- * This function tests the Uploadthing API used for file uploads
- */
-export async function verifyUploadthingApi(): Promise<ApiVerificationResult> {
-  const apiName = 'Uploadthing API';
-  const baseUrl = 'https://uploadthing.com/api';
-  const endpoint = baseUrl;
-
-  try {
-    console.info(`Testing ${apiName}`);
-
-    // First check if the host is reachable at all to rule out connectivity issues
-    const hostCheck = await isHostReachable('uploadthing.com');
-
-    if (!hostCheck.reachable) {
-      console.error(`${apiName} host is unreachable`);
-      return {
-        success: false,
-        apiName,
-        endpoint,
-        error: {
-          type: ApiErrorType.NETWORK_ERROR,
-          message: `Cannot connect to the API host. The service may be down or blocked by network policies.`,
-          details: { hostname: 'uploadthing.com' },
-          isRetryable: true,
-        },
-      };
-    }
-
-    // Check if API key exists in environment variables
-    const hasToken = process.env.UPLOADTHING_TOKEN !== undefined;
-
-    if (!hasToken) {
-      console.warn(`${apiName} verification warning: Missing API token`);
-
-      return {
-        success: false,
-        apiName,
-        endpoint,
-        latency: hostCheck.latency,
-        error: {
-          type: ApiErrorType.AUTHENTICATION_ERROR,
-          message: 'Missing Uploadthing API token. Add UPLOADTHING_TOKEN to environment variables.',
-          details: null,
-          isRetryable: true,
-        },
-      };
-    }
-
-    // Since we can't actually make API calls from the browser due to CORS,
-    // we'll create a diagnostic object with the information we have
-    const diagnosticData = {
-      apiStatus: {
-        hostReachable: true,
-        tokenPresent: hasToken,
-      },
-      tokenInfo: {
-        present: hasToken,
-        isValid: hasToken && process.env.UPLOADTHING_TOKEN?.includes('sk_live_'),
-        expires: 'N/A - Cannot verify without API call',
-      },
-      apiDocumentation: {
-        description: 'The Uploadthing API is used for file uploads in the application.',
-        useCase: 'Used for handling file uploads, particularly for media content.',
-        docsUrl: 'https://docs.uploadthing.com/',
-      },
-      apiNotes: {
-        note: 'Due to CORS restrictions, complete API testing can only be done server-side. The host reachability check confirms the API endpoints are available.',
-      },
-    };
-
-    return {
-      success: true,
-      apiName,
-      endpoint,
-      latency: hostCheck.latency,
-      data: diagnosticData,
-    };
-  } catch (error) {
-    // Handle unexpected errors
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-
-    console.error(`${apiName} verification failed with unexpected error:`, errorMessage);
-
-    return {
-      success: false,
-      apiName,
-      endpoint,
-      error: {
-        type: ApiErrorType.UNKNOWN_ERROR,
-        message: errorMessage,
-        details: error,
-        isRetryable: false,
-      },
-    };
-  }
-}
-
-/**
- * Verify the Database connection
- * This function tests the database connection (without actually connecting)
- */
-export async function verifyDatabaseConnection(): Promise<ApiVerificationResult> {
-  const apiName = 'Database Connection';
-  // Prioritize POSTGRES_DATABASE_URL, fall back to DATABASE_URL
-  const dbVarName = process.env.POSTGRES_DATABASE_URL ? 'POSTGRES_DATABASE_URL' : 'DATABASE_URL';
-  const endpoint = process.env[dbVarName] || 'postgres://example.com'; // Use the determined var name
-  const actualDbUrl = process.env[dbVarName]; // Get the actual value
-
-  try {
-    console.info(`Testing ${apiName} using ${dbVarName}`);
-
-    // Extract hostname from the database URL
-    const dbUrl = new URL(endpoint);
-    const hostname = dbUrl.hostname;
-
-    // First check if the host is reachable at all to rule out connectivity issues
-    const hostCheck = await isHostReachable(hostname);
-
-    // Check if the prioritized DB URL exists
-    const hasDbUrl = actualDbUrl !== undefined && actualDbUrl.length > 0;
-
-    if (!hasDbUrl) {
-      console.warn(`${apiName} verification warning: Missing ${dbVarName}`);
-
-      return {
-        success: false,
-        apiName,
-        endpoint: dbVarName, // Indicate which variable was missing
-        error: {
-          type: ApiErrorType.AUTHENTICATION_ERROR,
-          message: `Missing ${dbVarName} in environment variables.`,
-          details: null,
-          isRetryable: true,
-        },
-      };
-    }
-
-    if (!hostCheck.reachable) {
-      console.error(`${apiName} host is unreachable`);
-      return {
-        success: false,
-        apiName,
-        endpoint: dbVarName, // Indicate which variable was used for endpoint
-        error: {
-          type: ApiErrorType.NETWORK_ERROR,
-          message: `Cannot connect to the database host (${hostname}). The service may be down or blocked by network policies.`,
-          details: { hostname },
-          isRetryable: true,
-        },
-      };
-    }
-
-    // Parse DB connection info for diagnostics
-    const databaseType = dbUrl.protocol.replace(':', '');
-    const databaseName = dbUrl.pathname.substring(1);
-    const host = dbUrl.hostname;
-    const port = dbUrl.port || (databaseType === 'postgres' ? '5432' : '3306');
-
-    // Create diagnostic data
-    const diagnosticData = {
-      connectionInfo: {
-        databaseType,
-        host,
-        port,
-        databaseName,
-        user: dbUrl.username,
-        parameters: Object.fromEntries(dbUrl.searchParams),
-      },
-      connectivity: {
-        hostReachable: hostCheck.reachable,
-        latency: hostCheck.latency,
-      },
-      notes: {
-        security:
-          'Database connection string contains sensitive credentials and should be kept secure.',
-        corsIssue:
-          'Full database connectivity testing requires server-side code and cannot be performed in the browser.',
-      },
-    };
-
-    return {
-      success: true,
-      apiName,
-      endpoint: `${databaseType}://${host}:${port}/${databaseName}`,
-      latency: hostCheck.latency,
-      data: diagnosticData,
-    };
-  } catch (error) {
-    // Handle unexpected errors
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-
-    console.error(`${apiName} verification failed with unexpected error:`, errorMessage);
-
-    return {
-      success: false,
-      apiName,
-      endpoint: dbVarName, // Indicate which variable was used for endpoint
-      error: {
-        type: ApiErrorType.UNKNOWN_ERROR,
-        message: errorMessage,
-        details: error,
-        isRetryable: false,
-      },
-    };
-  }
-}
-
-/**
  * Verify the GIPHY API
  * This function tests the GIPHY API used for GIF search and integration
  */
@@ -1214,7 +486,6 @@ export async function verifyGiphyApi(): Promise<ApiVerificationResult> {
   try {
     console.info(`Testing ${apiName}`);
 
-    // First check if the host is reachable at all to rule out connectivity issues
     const hostCheck = await isHostReachable(hostname);
 
     if (!hostCheck.reachable) {
@@ -1232,7 +503,6 @@ export async function verifyGiphyApi(): Promise<ApiVerificationResult> {
       };
     }
 
-    // Check if API key exists in environment variables
     const hasApiKey = process.env.NEXT_PUBLIC_GIPHY_API_KEY !== undefined;
 
     if (!hasApiKey) {
@@ -1252,19 +522,16 @@ export async function verifyGiphyApi(): Promise<ApiVerificationResult> {
       };
     }
 
-    // Try to do a real API call if we have an API key
     try {
-      // Construct URL with API key and search term
       const apiKey = process.env.NEXT_PUBLIC_GIPHY_API_KEY || '';
       const url = new URL(endpoint);
       url.searchParams.append('api_key', apiKey);
       url.searchParams.append('q', 'test');
       url.searchParams.append('limit', '1');
 
-      // Make an actual API call to GIPHY
       const startTime = Date.now();
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
 
       const response = await fetch(url.toString(), {
         method: 'GET',
@@ -1296,7 +563,6 @@ export async function verifyGiphyApi(): Promise<ApiVerificationResult> {
       } else {
         let errorType = ApiErrorType.UNKNOWN_ERROR;
 
-        // Determine error type based on status code
         if (response.status === 401 || response.status === 403) {
           errorType = ApiErrorType.AUTHENTICATION_ERROR;
         } else if (response.status === 404) {
@@ -1325,7 +591,6 @@ export async function verifyGiphyApi(): Promise<ApiVerificationResult> {
         };
       }
     } catch {
-      // If we get a CORS error, return a helpful message
       console.error(
         `${apiName} API call failed, likely due to CORS. Using host check result instead.`
       );
@@ -1343,7 +608,6 @@ export async function verifyGiphyApi(): Promise<ApiVerificationResult> {
       };
     }
   } catch (error) {
-    // Handle unexpected errors
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
     console.error(`${apiName} verification failed with unexpected error: ${errorMessage}`);
@@ -1363,61 +627,1064 @@ export async function verifyGiphyApi(): Promise<ApiVerificationResult> {
 }
 
 /**
- * Combined API verification function that tests all APIs
- * This is used by the API Verification tool to test all integrations at once
+ * SERVER-SIDE Verify the Database connection
+ * Attempts a simple query to confirm connectivity.
  */
-export async function verifyAllApis(): Promise<ApiVerificationResult[]> {
-  // Run all API verifications in parallel
-  const results = await Promise.allSettled([
-    verifyGeolocationApi(),
-    verifyExchangeRatesApi(),
-    verifyPhylloApi(),
-    verifyCintExchangeApi(),
-    verifyGiphyApi(),
-    verifyStripeApi(),
-    verifyUploadthingApi(),
-    verifyDatabaseConnection(),
-  ]);
+export async function verifyDatabaseConnectionServerSide(): Promise<ApiVerificationResult> {
+  const apiName = 'Database Connection';
+  const dbUrl = serverConfig.database.url;
+  const endpoint = dbUrl
+    ? `postgres://...${dbUrl.substring(dbUrl.lastIndexOf('@'))}`
+    : 'Database URL Missing';
 
-  // Map the results to handle any rejections
-  return results.map((result, index) => {
-    if (result.status === 'fulfilled') {
-      return result.value;
+  if (!dbUrl) {
+    return {
+      success: false,
+      apiName,
+      endpoint: 'Database URL Missing',
+      error: {
+        type: ApiErrorType.AUTHENTICATION_ERROR,
+        message: 'Missing database URL in server configuration.',
+        details: null,
+        isRetryable: false, // Cannot retry if config missing
+      },
+    };
+  }
+
+  const startTime = Date.now();
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    const latency = Date.now() - startTime;
+    logger.info(`[Server Verify] ${apiName} verification successful.`);
+    return {
+      success: true,
+      apiName,
+      endpoint: 'Prisma Client Query',
+      latency,
+      data: { status: 'Connected and responsive' },
+    };
+  } catch (error: unknown) {
+    const latency = Date.now() - startTime;
+    const errorMessage = error instanceof Error ? error.message : 'Unknown database error';
+    logger.error(`[Server Verify] ${apiName} verification failed:`, errorMessage);
+
+    let errorType = ApiErrorType.UNKNOWN_ERROR;
+    if (errorMessage.includes('authentication failed')) {
+      errorType = ApiErrorType.AUTHENTICATION_ERROR;
+    } else if (errorMessage.includes('timed out') || errorMessage.includes('timeout')) {
+      errorType = ApiErrorType.TIMEOUT_ERROR;
+    } else if (errorMessage.includes('host') || errorMessage.includes('connect')) {
+      errorType = ApiErrorType.NETWORK_ERROR;
+    }
+
+    return {
+      success: false,
+      apiName,
+      endpoint: 'Prisma Client Query',
+      latency,
+      error: {
+        type: errorType,
+        message: `Failed to execute test query: ${errorMessage}`,
+        details: error,
+        isRetryable:
+          errorType === ApiErrorType.NETWORK_ERROR || errorType === ApiErrorType.TIMEOUT_ERROR,
+      },
+    };
+  }
+}
+
+/**
+ * SERVER-SIDE Verify the Phyllo API
+ * This function tests the Phyllo API using server-side credentials.
+ */
+export async function verifyPhylloApi(): Promise<ApiVerificationResult> {
+  const apiName = 'Phyllo API';
+  const baseUrl = serverConfig.phyllo.baseUrl;
+  const testEndpoint = `${baseUrl}/v1/accounts`;
+  const clientId = serverConfig.phyllo.clientId;
+  const clientSecret = serverConfig.phyllo.clientSecret;
+
+  const startTime = Date.now();
+
+  if (!clientId || !clientSecret) {
+    console.warn(`${apiName} verification warning: Missing credentials in serverConfig`);
+    return {
+      success: false,
+      apiName,
+      endpoint: testEndpoint,
+      error: {
+        type: ApiErrorType.AUTHENTICATION_ERROR,
+        message: 'Missing Phyllo credentials in server configuration.',
+        details: 'Check server-config.ts and ensure vars are loaded from .env',
+        isRetryable: false,
+      },
+    };
+  }
+
+  try {
+    console.info(`[Server Verify] Testing ${apiName} endpoint: ${testEndpoint}`);
+    const encodedCredentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    const response = await fetch(testEndpoint, {
+      method: 'GET',
+      signal: controller.signal,
+      headers: {
+        Authorization: `Basic ${encodedCredentials}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    clearTimeout(timeoutId);
+    const latency = Date.now() - startTime;
+    const responseData = await response.json().catch(() => ({}));
+
+    if (response.ok) {
+      const isValidData = responseData && typeof responseData === 'object';
+      console.info(`[Server Verify] ${apiName} verification successful`, {
+        latency,
+        statusCode: response.status,
+        dataReceived: isValidData,
+      });
+
+      return {
+        success: true,
+        apiName,
+        endpoint: testEndpoint,
+        latency,
+        data: {
+          status: response.statusText,
+          recordCount: Array.isArray(responseData.data) ? responseData.data.length : undefined,
+          firstRecordId:
+            Array.isArray(responseData.data) && responseData.data[0]?.id
+              ? responseData.data[0].id
+              : undefined,
+        },
+      };
     } else {
-      // Return an error result for any APIs that threw exceptions
-      const apiNames = [
-        'IP Geolocation API',
-        'Exchange Rates API',
-        'Phyllo API',
-        'Cint Exchange API',
-        'GIPHY API',
-        'Stripe API',
-        'Uploadthing API',
-        'Database Connection',
-      ];
+      let errorType = ApiErrorType.UNKNOWN_ERROR;
+      if (response.status === 401 || response.status === 403) {
+        errorType = ApiErrorType.AUTHENTICATION_ERROR;
+      } else if (response.status === 404) {
+        errorType = ApiErrorType.NOT_FOUND_ERROR;
+      } else if (response.status === 429) {
+        errorType = ApiErrorType.RATE_LIMIT_ERROR;
+      } else if (response.status >= 500) {
+        errorType = ApiErrorType.SERVER_ERROR;
+      } else if (response.status >= 400) {
+        errorType = ApiErrorType.VALIDATION_ERROR;
+      }
+      const isRetryable = [ApiErrorType.RATE_LIMIT_ERROR, ApiErrorType.SERVER_ERROR].includes(
+        errorType
+      );
+
+      console.error(`[Server Verify] ${apiName} verification failed with HTTP ${response.status}`);
+
       return {
         success: false,
-        apiName: apiNames[index],
-        endpoint: 'unknown',
+        apiName,
+        endpoint: testEndpoint,
+        latency,
         error: {
-          type: ApiErrorType.UNKNOWN_ERROR,
-          message: `API verification failed with uncaught error: ${result.reason?.message || 'Unknown error'}`,
-          details: result.reason,
-          isRetryable: true,
+          type: errorType,
+          message: `API returned error status: ${response.status} ${response.statusText}`,
+          details: responseData,
+          isRetryable,
         },
       };
     }
-  });
+  } catch (fetchError) {
+    let errorType = ApiErrorType.NETWORK_ERROR;
+    let errorMessage = fetchError instanceof Error ? fetchError.message : 'Unknown network error';
+    let isRetryable = true;
+
+    if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+      errorType = ApiErrorType.TIMEOUT_ERROR;
+      errorMessage = 'API request timed out after 10000ms';
+      isRetryable = true;
+    }
+
+    console.error(
+      `[Server Verify] ${apiName} verification failed with network/fetch error: ${errorMessage}`
+    );
+
+    return {
+      success: false,
+      apiName,
+      endpoint: testEndpoint,
+      error: {
+        type: errorType,
+        message: errorMessage,
+        details: fetchError,
+        isRetryable,
+      },
+    };
+  }
+}
+
+/**
+ * SERVER-SIDE Verify the Stripe API
+ * Attempts to list Stripe products to confirm API key validity.
+ */
+export async function verifyStripeApiServerSide(): Promise<ApiVerificationResult> {
+  const apiName = 'Stripe API';
+  const endpoint = 'https://api.stripe.com/v1/products'; // Example endpoint
+  const secretKey = serverConfig.stripe.secretKey;
+
+  if (!secretKey) {
+    return {
+      success: false,
+      apiName,
+      endpoint,
+      error: {
+        type: ApiErrorType.AUTHENTICATION_ERROR,
+        message: 'Missing Stripe API secret key in server configuration.',
+        details: null,
+        isRetryable: false,
+      },
+    };
+  }
+
+  const startTime = Date.now();
+  try {
+    console.info(`[Server Verify] Testing ${apiName}`);
+    const stripe = new Stripe(secretKey, { apiVersion: '2025-02-24.acacia' }); // Use the specific apiVersion required by the installed Stripe library
+
+    // Make a simple read call, e.g., list products with a limit of 1
+    const productList = await stripe.products.list({ limit: 1 });
+    const latency = Date.now() - startTime;
+
+    console.info(`[Server Verify] ${apiName} verification successful`, {
+      latency,
+      productsFound: productList.data.length,
+    });
+
+    return {
+      success: true,
+      apiName,
+      endpoint,
+      latency,
+      data: {
+        status: 'Authenticated & Connected',
+        testMode: secretKey.startsWith('sk_test_'),
+        productsFound: productList.data.length,
+      },
+    };
+  } catch (error: unknown) {
+    const latency = Date.now() - startTime;
+    let errorType = ApiErrorType.UNKNOWN_ERROR;
+    let message = 'An unknown error occurred while verifying Stripe.';
+    let details: unknown = error;
+
+    if (error instanceof Stripe.errors.StripeAuthenticationError) {
+      errorType = ApiErrorType.AUTHENTICATION_ERROR;
+      message = 'Stripe authentication failed. Check your secret key.';
+      details = { stripeErrorCode: error.code, message: error.message };
+    } else if (error instanceof Stripe.errors.StripeRateLimitError) {
+      errorType = ApiErrorType.RATE_LIMIT_ERROR;
+      message = 'Stripe rate limit exceeded.';
+      details = { stripeErrorCode: error.code, message: error.message };
+    } else if (error instanceof Stripe.errors.StripeAPIError) {
+      // General API errors (5xx)
+      errorType = ApiErrorType.SERVER_ERROR;
+      message = `Stripe API error: ${error.message}`;
+      details = {
+        stripeErrorCode: error.code,
+        statusCode: error.statusCode,
+        message: error.message,
+      };
+    } else if (error instanceof Stripe.errors.StripeConnectionError) {
+      errorType = ApiErrorType.NETWORK_ERROR;
+      message = `Stripe connection error: ${error.message}`;
+      details = { message: error.message };
+    } else if (error instanceof Error) {
+      message = error.message;
+    }
+
+    console.error(`[Server Verify] ${apiName} verification failed:`, message);
+
+    return {
+      success: false,
+      apiName,
+      endpoint,
+      latency,
+      error: {
+        type: errorType,
+        message: message,
+        details: details,
+        isRetryable: errorType !== ApiErrorType.AUTHENTICATION_ERROR,
+      },
+    };
+  }
+}
+
+/**
+ * SERVER-SIDE Verify the Cint Exchange API
+ * Attempts to list business units using configured credentials.
+ */
+export async function verifyCintExchangeApiServerSide(): Promise<ApiVerificationResult> {
+  const apiName = 'Cint Exchange API';
+  const baseUrl = 'https://api.cint.io';
+  const testEndpoint = `${baseUrl}/demand/business-units`;
+
+  const apiKey = serverConfig.cint.apiKey;
+  const clientId = serverConfig.cint.clientId; // Needed if using OAuth
+  const clientSecret = serverConfig.cint.clientSecret; // Needed if using OAuth
+
+  // Refined Check: Ensure we have *either* API key *or* *both* OAuth creds
+  const hasApiKey = !!apiKey;
+  const hasOAuthCreds = !!clientId && !!clientSecret;
+
+  if (!hasApiKey && !hasOAuthCreds) {
+    logger.warn(
+      `[Server Verify] ${apiName} - Missing all credentials (API Key and OAuth ID/Secret)`
+    );
+    return {
+      success: false,
+      apiName,
+      endpoint: testEndpoint,
+      error: {
+        type: ApiErrorType.AUTHENTICATION_ERROR,
+        message: 'Missing Cint API credentials in server configuration.',
+        details:
+          'Check server-config.ts and ensure CINT_API_KEY (or CINT_CLIENT_ID/SECRET) is set.',
+        isRetryable: false,
+      },
+    };
+  }
+
+  const startTime = Date.now();
+  try {
+    console.info(`[Server Verify] Testing ${apiName} endpoint: ${testEndpoint}`);
+
+    let authToken = '';
+    let authMethod = ''; // To log which method was used
+
+    if (apiKey) {
+      authMethod = 'API Key';
+      // Assuming API Key is used in a custom header or as Bearer token
+      // Verify the correct header with Cint documentation (e.g., 'X-Api-Key')
+      authToken = `Bearer ${apiKey}`; // Placeholder - Adjust header as needed
+      console.info(`[Server Verify] Using ${authMethod} for Cint authentication.`);
+    } else {
+      // Attempt OAuth client credentials flow
+      authMethod = 'OAuth Client Credentials';
+      console.info(
+        `[Server Verify] API Key not found, attempting ${authMethod} for Cint authentication.`
+      );
+
+      const tokenUrl = `${baseUrl}/oauth/token`; // Standard token endpoint
+      const tokenStartTime = Date.now();
+
+      try {
+        const tokenController = new AbortController();
+        const tokenTimeoutId = setTimeout(() => tokenController.abort(), 8000); // Shorter timeout for token request
+
+        const tokenResponse = await fetch(tokenUrl, {
+          method: 'POST',
+          signal: tokenController.signal,
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            grant_type: 'client_credentials',
+            client_id: clientId || '',
+            client_secret: clientSecret || '',
+          }),
+        });
+
+        clearTimeout(tokenTimeoutId);
+        const tokenLatency = Date.now() - tokenStartTime;
+
+        if (!tokenResponse.ok) {
+          const errorData = await tokenResponse.json().catch(() => ({}));
+          logger.error(
+            `[Server Verify] Cint OAuth token request failed with status ${tokenResponse.status}`,
+            errorData
+          );
+          return {
+            success: false,
+            apiName,
+            endpoint: tokenUrl,
+            latency: tokenLatency,
+            error: {
+              type: ApiErrorType.AUTHENTICATION_ERROR,
+              message: `Failed to obtain Cint OAuth token: ${tokenResponse.status} ${tokenResponse.statusText}`,
+              details: errorData,
+              isRetryable: false, // Auth errors usually aren't retryable without credential changes
+            },
+          };
+        }
+
+        const tokenData = await tokenResponse.json();
+        if (!tokenData.access_token) {
+          logger.error('[Server Verify] Cint OAuth token response missing access_token', tokenData);
+          return {
+            success: false,
+            apiName,
+            endpoint: tokenUrl,
+            latency: tokenLatency,
+            error: {
+              type: ApiErrorType.VALIDATION_ERROR,
+              message: 'Cint OAuth token response did not contain an access_token.',
+              details: tokenData,
+              isRetryable: true, // Could be a temporary API issue
+            },
+          };
+        }
+
+        authToken = `Bearer ${tokenData.access_token}`;
+        logger.info(
+          `[Server Verify] Successfully obtained Cint OAuth token (took ${tokenLatency}ms).`
+        );
+      } catch (tokenFetchError) {
+        const tokenLatency = Date.now() - tokenStartTime;
+        let errorType = ApiErrorType.NETWORK_ERROR;
+        let errorMessage =
+          tokenFetchError instanceof Error
+            ? tokenFetchError.message
+            : 'Unknown network error during token fetch';
+
+        if (tokenFetchError instanceof Error && tokenFetchError.name === 'AbortError') {
+          errorType = ApiErrorType.TIMEOUT_ERROR;
+          errorMessage = 'Cint OAuth token request timed out after 8000ms';
+        }
+
+        logger.error(
+          `[Server Verify] Cint OAuth token fetch failed: ${errorMessage}`,
+          tokenFetchError
+        );
+        // Log more details from the fetchError if available
+        if (tokenFetchError instanceof Error) {
+          logger.error('[Server Verify] Cint Fetch Error Details:', {
+            name: tokenFetchError.name,
+            message: tokenFetchError.message,
+            cause: (tokenFetchError as any).cause,
+          });
+        }
+        return {
+          success: false,
+          apiName,
+          endpoint: tokenUrl,
+          latency: tokenLatency > 0 ? tokenLatency : undefined,
+          error: {
+            type: errorType,
+            message: errorMessage,
+            details: tokenFetchError,
+            isRetryable: true,
+          },
+        };
+      }
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    const response = await fetch(testEndpoint, {
+      method: 'GET',
+      signal: controller.signal,
+      headers: {
+        Authorization: authToken,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    clearTimeout(timeoutId);
+    const latency = Date.now() - startTime;
+    const responseData = await response.json().catch(() => ({}));
+
+    if (response.ok) {
+      console.info(`[Server Verify] ${apiName} verification successful`, {
+        latency,
+        authMethod, // Log the auth method used
+        statusCode: response.status,
+        recordCount: Array.isArray(responseData.data) ? responseData.data.length : undefined,
+      });
+      return {
+        success: true,
+        apiName,
+        endpoint: testEndpoint,
+        latency,
+        data: {
+          status: response.statusText,
+          recordCount: Array.isArray(responseData.data) ? responseData.data.length : undefined,
+          firstRecordId:
+            Array.isArray(responseData.data) && responseData.data[0]?.id
+              ? responseData.data[0].id
+              : undefined,
+        },
+      };
+    } else {
+      let errorType = ApiErrorType.UNKNOWN_ERROR;
+      if (response.status === 401 || response.status === 403) {
+        errorType = ApiErrorType.AUTHENTICATION_ERROR;
+      } else if (response.status === 404) {
+        errorType = ApiErrorType.NOT_FOUND_ERROR;
+      } else if (response.status >= 500) {
+        errorType = ApiErrorType.SERVER_ERROR;
+      }
+      const isRetryable = [ApiErrorType.SERVER_ERROR].includes(errorType);
+      console.error(`[Server Verify] ${apiName} verification failed with HTTP ${response.status}`);
+      return {
+        success: false,
+        apiName,
+        endpoint: testEndpoint,
+        latency,
+        error: {
+          type: errorType,
+          message: `API returned error status: ${response.status} ${response.statusText}`,
+          details: responseData,
+          isRetryable,
+        },
+      };
+    }
+  } catch (fetchError) {
+    const latency = Date.now() - startTime;
+    let errorType = ApiErrorType.NETWORK_ERROR;
+    let errorMessage = fetchError instanceof Error ? fetchError.message : 'Unknown network error';
+    let isRetryable = true;
+
+    if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+      errorType = ApiErrorType.TIMEOUT_ERROR;
+      errorMessage = 'API request timed out after 10000ms';
+      isRetryable = true;
+    }
+    console.error(
+      `[Server Verify] ${apiName} verification failed with network/fetch error:`,
+      errorMessage
+    );
+    return {
+      success: false,
+      apiName,
+      endpoint: testEndpoint,
+      latency: latency > 0 ? latency : undefined,
+      error: {
+        type: errorType,
+        message: errorMessage,
+        details: fetchError,
+        isRetryable,
+      },
+    };
+  }
+}
+
+/**
+ * SERVER-SIDE Verify the Uploadthing API
+ * Attempts a simple authenticated call using the API secret.
+ */
+export async function verifyUploadthingApiServerSide(): Promise<ApiVerificationResult> {
+  const apiName = 'Uploadthing API';
+  const baseUrl = 'https://uploadthing.com/api';
+  const testEndpoint = `${baseUrl}/whoami`; // Placeholder - find a real simple endpoint
+
+  const token = serverConfig.uploadthing.token; // Use the token from config
+
+  if (!token) {
+    return {
+      success: false,
+      apiName,
+      endpoint: testEndpoint,
+      error: {
+        type: ApiErrorType.AUTHENTICATION_ERROR,
+        message: 'Missing Uploadthing API token in server configuration.',
+        details: 'Check server-config.ts and ensure UPLOADTHING_TOKEN is set.',
+        isRetryable: false,
+      },
+    };
+  }
+
+  const startTime = Date.now();
+  try {
+    console.info(`[Server Verify] Testing ${apiName} endpoint: ${testEndpoint}`);
+
+    // Use standard Bearer token authorization
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    };
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    // Using POST for /whoami as per potential Uploadthing patterns
+    const response = await fetch(testEndpoint, {
+      method: 'POST', // Often POST even for status checks in Uploadthing
+      signal: controller.signal,
+      headers: headers,
+      body: JSON.stringify({}), // Send empty body for POST
+    });
+
+    clearTimeout(timeoutId);
+    const latency = Date.now() - startTime;
+    const responseData = await response.json().catch(() => ({}));
+
+    if (response.ok) {
+      console.info(`[Server Verify] ${apiName} verification successful`, {
+        latency,
+        statusCode: response.status,
+      });
+      return {
+        success: true,
+        apiName,
+        endpoint: testEndpoint,
+        latency,
+        data: {
+          status: response.statusText,
+          // Add relevant fields like account ID if present in responseData
+          responseData: responseData,
+        },
+      };
+    } else {
+      // Handle errors
+      let errorType = ApiErrorType.UNKNOWN_ERROR;
+      if (response.status === 401 || response.status === 403) {
+        errorType = ApiErrorType.AUTHENTICATION_ERROR;
+      } // Add other relevant codes
+      else if (response.status >= 500) {
+        errorType = ApiErrorType.SERVER_ERROR;
+      }
+      const isRetryable = [ApiErrorType.SERVER_ERROR].includes(errorType);
+      console.error(`[Server Verify] ${apiName} verification failed with HTTP ${response.status}`);
+      return {
+        success: false,
+        apiName,
+        endpoint: testEndpoint,
+        latency,
+        error: {
+          type: errorType,
+          message: `API returned error status: ${response.status} ${response.statusText}`,
+          details: responseData,
+          isRetryable,
+        },
+      };
+    }
+  } catch (fetchError) {
+    // ... (Standard Fetch/Timeout Error Handling) ...
+    const latency = Date.now() - startTime;
+    let errorType = ApiErrorType.NETWORK_ERROR;
+    let errorMessage = fetchError instanceof Error ? fetchError.message : 'Unknown network error';
+    let isRetryable = true;
+
+    if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+      errorType = ApiErrorType.TIMEOUT_ERROR;
+      errorMessage = 'API request timed out after 10000ms';
+      isRetryable = true;
+    }
+    console.error(
+      `[Server Verify] ${apiName} verification failed with network/fetch error:`,
+      errorMessage
+    );
+    return {
+      success: false,
+      apiName,
+      endpoint: testEndpoint,
+      latency: latency > 0 ? latency : undefined,
+      error: {
+        type: errorType,
+        message: errorMessage,
+        details: fetchError,
+        isRetryable,
+      },
+    };
+  }
+}
+
+/**
+ * SERVER-SIDE Verify the Algolia Search API
+ * Attempts to connect and potentially perform a basic index status check.
+ */
+export async function verifyAlgoliaApiServerSide(): Promise<ApiVerificationResult> {
+  const apiName = 'Algolia Search API';
+  const appId = serverConfig.algolia.appId;
+  const apiKey = serverConfig.algolia.apiKey; // Search-Only Key
+  const endpoint = `${appId}-dsn.algolia.net`; // General endpoint pattern
+
+  if (!appId || !apiKey) {
+    return {
+      success: false,
+      apiName,
+      endpoint,
+      error: {
+        type: ApiErrorType.AUTHENTICATION_ERROR,
+        message: 'Missing Algolia credentials in server configuration.',
+        details:
+          'Check server-config.ts and ensure NEXT_PUBLIC_ALGOLIA_APP_ID and NEXT_PUBLIC_ALGOLIA_API_KEY are set.',
+        isRetryable: false,
+      },
+    };
+  }
+
+  const startTime = Date.now();
+  try {
+    console.info(`[Server Verify] Testing ${apiName} with App ID: ${appId}`);
+
+    // Initialize Algolia client
+    const client = algoliasearch(appId, apiKey);
+
+    // Perform a simple operation, like listing indices or checking status
+    // Listing indices is a good general check
+    // Note: Requires listIndexes ACL permission on the API key used.
+    // If using the Search-Only key, this check might fail with an auth error.
+    // Consider using client.search() for a single index if listIndices fails.
+    const listIndicesResult = await client.listIndices();
+
+    const latency = Date.now() - startTime;
+
+    console.info(`[Server Verify] ${apiName} verification successful`, {
+      latency,
+      indicesCount: listIndicesResult.items.length,
+    });
+
+    return {
+      success: true,
+      apiName,
+      endpoint: endpoint, // Use the generated dsn hostname
+      latency,
+      data: {
+        status: 'Connected & Responsive',
+        indicesCount: listIndicesResult.items.length,
+        // Optionally list first few index names if needed
+        // indices: listIndicesResult.items.slice(0, 5).map(idx => idx.name),
+      },
+    };
+  } catch (error: unknown) {
+    const latency = Date.now() - startTime;
+    let errorType = ApiErrorType.UNKNOWN_ERROR;
+    let message = 'An unknown error occurred while verifying Algolia.';
+    let details: unknown = error;
+
+    // Basic error type mapping for Algolia client errors
+    if (error instanceof Error) {
+      message = error.message;
+      if (
+        message.includes('credentials') ||
+        message.includes('Unauthorized') ||
+        message.includes('401') ||
+        message.includes('403')
+      ) {
+        errorType = ApiErrorType.AUTHENTICATION_ERROR;
+      } else if (message.includes('connect') || message.includes('NetworkError')) {
+        errorType = ApiErrorType.NETWORK_ERROR;
+      } else if (message.includes('timeout')) {
+        errorType = ApiErrorType.TIMEOUT_ERROR;
+      }
+      // Add more specific Algolia error checks if needed
+      details = { errorMessage: message, stack: error.stack };
+    }
+
+    console.error(`[Server Verify] ${apiName} verification failed:`, message);
+
+    return {
+      success: false,
+      apiName,
+      endpoint: endpoint,
+      latency,
+      error: {
+        type: errorType,
+        message: message,
+        details: details,
+        isRetryable: [
+          ApiErrorType.NETWORK_ERROR,
+          ApiErrorType.TIMEOUT_ERROR,
+          ApiErrorType.SERVER_ERROR,
+        ].includes(errorType),
+      },
+    };
+  }
+}
+
+/**
+ * SERVER-SIDE Verify the Mux API
+ * Attempts to list assets using Token ID and Secret.
+ */
+export async function verifyMuxApiServerSide(): Promise<ApiVerificationResult> {
+  const apiName = 'Mux API';
+  const baseUrl = 'https://api.mux.com';
+  const testEndpoint = `${baseUrl}/video/v1/assets`;
+
+  const tokenId = serverConfig.mux.tokenId;
+  const tokenSecret = serverConfig.mux.tokenSecret;
+
+  if (!tokenId || !tokenSecret) {
+    return {
+      success: false,
+      apiName,
+      endpoint: testEndpoint,
+      error: {
+        type: ApiErrorType.AUTHENTICATION_ERROR,
+        message: 'Missing Mux Token ID or Token Secret in server configuration.',
+        details: 'Check server-config.ts and ensure MUX_TOKEN_ID and MUX_TOKEN_SECRET are set.',
+        isRetryable: false,
+      },
+    };
+  }
+
+  const startTime = Date.now();
+  try {
+    logger.info(`[Server Verify] Testing ${apiName} endpoint: ${testEndpoint}`);
+
+    const encodedCredentials = Buffer.from(`${tokenId}:${tokenSecret}`).toString('base64');
+    const headers = {
+      Authorization: `Basic ${encodedCredentials}`,
+      'Content-Type': 'application/json',
+    };
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    const url = new URL(testEndpoint);
+    url.searchParams.append('limit', '1'); // Limit results for efficiency
+
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      signal: controller.signal,
+      headers: headers,
+    });
+
+    clearTimeout(timeoutId);
+    const latency = Date.now() - startTime;
+    const responseData = await response.json().catch(() => ({}));
+
+    if (response.ok) {
+      logger.info(`[Server Verify] ${apiName} verification successful`, {
+        latency,
+        statusCode: response.status,
+        recordCount: Array.isArray(responseData.data) ? responseData.data.length : undefined,
+      });
+      return {
+        success: true,
+        apiName,
+        endpoint: testEndpoint,
+        latency,
+        data: {
+          status: response.statusText,
+          recordCount: Array.isArray(responseData.data) ? responseData.data.length : undefined,
+          firstRecordId:
+            Array.isArray(responseData.data) && responseData.data[0]?.id
+              ? responseData.data[0].id
+              : undefined,
+        },
+      };
+    } else {
+      let errorType = ApiErrorType.UNKNOWN_ERROR;
+      if (response.status === 401) {
+        // Mux uses 401 for auth errors
+        errorType = ApiErrorType.AUTHENTICATION_ERROR;
+      } else if (response.status >= 500) {
+        errorType = ApiErrorType.SERVER_ERROR;
+      } else if (response.status === 404) {
+        errorType = ApiErrorType.NOT_FOUND_ERROR;
+      } else if (response.status === 429) {
+        errorType = ApiErrorType.RATE_LIMIT_ERROR;
+      }
+
+      const isRetryable = [ApiErrorType.SERVER_ERROR, ApiErrorType.RATE_LIMIT_ERROR].includes(
+        errorType
+      );
+
+      logger.error(`[Server Verify] ${apiName} verification failed with HTTP ${response.status}`);
+      return {
+        success: false,
+        apiName,
+        endpoint: testEndpoint,
+        latency,
+        error: {
+          type: errorType,
+          message: `API returned error status: ${response.status} ${response.statusText}`,
+          details: responseData,
+          isRetryable,
+        },
+      };
+    }
+  } catch (fetchError) {
+    const latency = Date.now() - startTime;
+    let errorType = ApiErrorType.NETWORK_ERROR;
+    let errorMessage = fetchError instanceof Error ? fetchError.message : 'Unknown network error';
+    let isRetryable = true;
+
+    if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+      errorType = ApiErrorType.TIMEOUT_ERROR;
+      errorMessage = 'API request timed out after 10000ms';
+      isRetryable = true;
+    }
+    logger.error(
+      `[Server Verify] ${apiName} verification failed with network/fetch error:`,
+      errorMessage
+    );
+    return {
+      success: false,
+      apiName,
+      endpoint: testEndpoint,
+      latency: latency > 0 ? latency : undefined,
+      error: {
+        type: errorType,
+        message: errorMessage,
+        details: fetchError,
+        isRetryable,
+      },
+    };
+  }
+}
+
+/**
+ * SERVER-SIDE Verify the SendGrid API
+ * Attempts to retrieve account details using the API Key.
+ */
+export async function verifySendGridApiServerSide(): Promise<ApiVerificationResult> {
+  const apiName = 'SendGrid API';
+  const baseUrl = 'https://api.sendgrid.com';
+  const testEndpoint = `${baseUrl}/v3/user/account`;
+
+  const apiKey = serverConfig.sendgrid.apiKey;
+
+  if (!apiKey) {
+    return {
+      success: false,
+      apiName,
+      endpoint: testEndpoint,
+      error: {
+        type: ApiErrorType.AUTHENTICATION_ERROR,
+        message: 'Missing SendGrid API Key in server configuration.',
+        details: 'Check server-config.ts and ensure SENDGRID_API_KEY is set.',
+        isRetryable: false,
+      },
+    };
+  }
+
+  const startTime = Date.now();
+  try {
+    logger.info(`[Server Verify] Testing ${apiName} endpoint: ${testEndpoint}`);
+
+    const headers = {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    };
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    const response = await fetch(testEndpoint, {
+      method: 'GET',
+      signal: controller.signal,
+      headers: headers,
+    });
+
+    clearTimeout(timeoutId);
+    const latency = Date.now() - startTime;
+    const responseData = await response.json().catch(() => ({}));
+
+    if (response.ok) {
+      const accountEmail = responseData.email;
+      logger.info(`[Server Verify] ${apiName} verification successful`, {
+        latency,
+        statusCode: response.status,
+        accountEmail: accountEmail,
+      });
+
+      // Prepare data, add warning if email is missing
+      const dataPayload: {
+        status: string;
+        accountEmail?: string;
+        accountUsername?: string;
+        warning?: string;
+      } = {
+        status: response.statusText,
+        accountEmail: responseData.email,
+        accountUsername: responseData.username,
+      };
+      if (!accountEmail) {
+        const warningMessage = `Successful response (HTTP ${response.status}) but missing expected 'email' field.`;
+        logger.warn(`[Server Verify] ${apiName}: ${warningMessage}`, responseData);
+        dataPayload.warning = warningMessage; // Include warning in data for UI
+      }
+
+      return {
+        success: true,
+        apiName,
+        endpoint: testEndpoint,
+        latency,
+        data: dataPayload,
+        // Ensure no error object is sent on success
+        error: undefined,
+      };
+    } else {
+      let errorType = ApiErrorType.UNKNOWN_ERROR;
+      if (response.status === 401 || response.status === 403) {
+        errorType = ApiErrorType.AUTHENTICATION_ERROR;
+      } else if (response.status === 404) {
+        errorType = ApiErrorType.NOT_FOUND_ERROR;
+      } else if (response.status === 429) {
+        errorType = ApiErrorType.RATE_LIMIT_ERROR;
+      } else if (response.status >= 500) {
+        errorType = ApiErrorType.SERVER_ERROR;
+      } else if (response.status >= 400) {
+        errorType = ApiErrorType.VALIDATION_ERROR;
+      }
+
+      const isRetryable = [
+        ApiErrorType.SERVER_ERROR,
+        ApiErrorType.RATE_LIMIT_ERROR,
+        ApiErrorType.TIMEOUT_ERROR,
+        ApiErrorType.NETWORK_ERROR,
+      ].includes(errorType);
+
+      logger.error(
+        `[Server Verify] ${apiName} verification failed with HTTP ${response.status} or invalid data`
+      );
+      return {
+        success: false,
+        apiName,
+        endpoint: testEndpoint,
+        latency,
+        error: {
+          type: errorType,
+          message: `API returned error status: ${response.status} ${response.statusText}`,
+          details: responseData,
+          isRetryable,
+        },
+      };
+    }
+  } catch (fetchError) {
+    const latency = Date.now() - startTime;
+    let errorType = ApiErrorType.NETWORK_ERROR;
+    let errorMessage = fetchError instanceof Error ? fetchError.message : 'Unknown network error';
+    let isRetryable = true;
+
+    if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+      errorType = ApiErrorType.TIMEOUT_ERROR;
+      errorMessage = 'API request timed out after 10000ms';
+      isRetryable = true;
+    }
+    logger.error(
+      `[Server Verify] ${apiName} verification failed with network/fetch error:`,
+      errorMessage
+    );
+    return {
+      success: false,
+      apiName,
+      endpoint: testEndpoint,
+      latency: latency > 0 ? latency : undefined,
+      error: {
+        type: errorType,
+        message: errorMessage,
+        details: fetchError,
+        isRetryable,
+      },
+    };
+  }
 }
 
 export default {
+  verifyDatabaseConnectionServerSide,
+  verifyPhylloApi,
+  verifyStripeApiServerSide,
+  verifyCintExchangeApiServerSide,
+  verifyUploadthingApiServerSide,
   verifyGeolocationApi,
   verifyExchangeRatesApi,
-  verifyPhylloApi,
-  verifyCintExchangeApi,
   verifyGiphyApi,
-  verifyStripeApi,
-  verifyUploadthingApi,
-  verifyDatabaseConnection,
-  verifyAllApis,
+  verifyAlgoliaApiServerSide,
+  verifyMuxApiServerSide,
+  verifySendGridApiServerSide,
 };
