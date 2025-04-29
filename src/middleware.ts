@@ -4,8 +4,8 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 // Define routes that should bypass the protection check (public routes)
 const isPublicRoute = createRouteMatcher([
   '/api/webhook/(.*)', // Webhooks
-  '/signin(.*)', // Sign in routes
-  '/signup(.*)', // Sign up routes
+  '/sign-in(.*)',
+  '/sign-up(.*)', // Sign up routes
   // Add other public routes like '/pricing', '/about' here if needed
 ]);
 
