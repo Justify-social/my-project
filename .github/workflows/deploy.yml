@@ -31,6 +31,7 @@ jobs:
       - name: Build application
         run: npm run build
         env:
+          UPLOADTHING_TOKEN: ${{ secrets.UPLOADTHING_TOKEN }}
           NEXT_PUBLIC_API_URL: ${{ secrets.STAGING_API_URL }}
 
       - name: Run performance tests
@@ -75,6 +76,7 @@ jobs:
       - name: Build application
         run: npm run build
         env:
+          UPLOADTHING_TOKEN: ${{ secrets.UPLOADTHING_TOKEN }}
           NEXT_PUBLIC_API_URL: ${{ secrets.PRODUCTION_API_URL }}
 
       - name: Deploy to production
