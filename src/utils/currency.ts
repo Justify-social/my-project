@@ -14,7 +14,8 @@ const CACHE_DURATION_MS = 60 * 60 * 1000; // Cache for 1 hour
  * @returns Object containing rates relative to the base currency, or null on failure.
  */
 async function getExchangeRates(
-  baseCurrency: string
+  // Prefix unused parameter to satisfy lint rule
+  _baseCurrency: string
 ): Promise<{ [currency: string]: number } | null> {
   // We only need rates relative to USD for display conversion, and the fallback API uses USD base
   const targetBase = 'USD';
