@@ -52,29 +52,29 @@ export function OverallPerformanceSection({ influencer }: OverallPerformanceSect
         <div className="grid grid-cols-3 gap-4 text-center border-b pb-4">
           <div>
             <p className="text-sm text-muted-foreground">Likes</p>
-            <p className="text-2xl font-bold flex items-center justify-center gap-1">
+            <div className="text-2xl font-bold flex items-center justify-center gap-1">
               <Icon iconId="faHeartSolid" className="h-5 w-5 text-red-500" />
               {avgLikes !== undefined ? formatNumber(avgLikes) : <Skeleton className="h-6 w-12" />}
-            </p>
+            </div>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Comments</p>
-            <p className="text-2xl font-bold flex items-center justify-center gap-1">
+            <div className="text-2xl font-bold flex items-center justify-center gap-1">
               <Icon iconId="faCommentDotsSolid" className="h-5 w-5" />
               {avgComments !== undefined ? (
                 formatNumber(avgComments)
               ) : (
                 <Skeleton className="h-6 w-10" />
               )}
-            </p>
+            </div>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Shares / Post</p>
-            <p className="text-2xl font-bold flex items-center justify-center gap-1">
+            <div className="text-2xl font-bold flex items-center justify-center gap-1">
               <Icon iconId="faPaperPlaneSolid" className="h-5 w-5 text-blue-500" />
               {/* Using N/A directly as sharesPerPost is currently undefined */}
               {sharesPerPost !== undefined ? formatNumber(sharesPerPost) : 'N/A'}
-            </p>
+            </div>
           </div>
         </div>
 
@@ -82,13 +82,13 @@ export function OverallPerformanceSection({ influencer }: OverallPerformanceSect
         <div>
           <p className="text-xs text-muted-foreground mb-1">Audience interaction trend.</p>
           <div className="flex items-baseline gap-2 mb-4">
-            <p className="text-3xl font-bold">
+            <div className="text-3xl font-bold">
               {engagementRatePercent === 'N/A' ? (
                 <Skeleton className="h-8 w-16" />
               ) : (
                 engagementRatePercent
               )}
-            </p>
+            </div>
             {engagementRateChange && (
               <p className="text-sm text-green-600 font-medium">{engagementRateChange}</p>
             )}

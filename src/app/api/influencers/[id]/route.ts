@@ -32,12 +32,11 @@ type MarketplaceInfluencerWithLinks = MarketplaceInfluencer & {
   insightiqAccountLinks: InsightIQAccountLink[];
 };
 
-export async function GET(request: NextRequest, { params }: any) {
-  const { id } = params;
-  if (typeof id !== 'string') {
-    logger.error('[API /influencers/:id] Invalid params structure: id is missing or not a string');
-    return NextResponse.json({ success: false, error: 'Invalid request params' }, { status: 400 });
-  }
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  // Await the params object before accessing its properties
+  const awaitedParams = await params;
+  const id = awaitedParams.id;
+
   logger.info(`[API /influencers/:id] GET request received for ID: ${id}`);
 
   const validationResult = IdSchema.safeParse(id);
@@ -54,185 +53,106 @@ export async function GET(request: NextRequest, { params }: any) {
   }
 
   try {
-    // Use the explicitly defined type for the query result
-    const dbInfluencer: MarketplaceInfluencerWithLinks | null =
-      await prisma.marketplaceInfluencer.findUnique({
-        where: { id },
-        include: { insightiqAccountLinks: { where: { status: 'CONNECTED' } } },
-      });
-
-    if (!dbInfluencer) {
-      logger.warn(`[API /influencers/:id] Influencer not found in DB for ID: ${id}`);
-      return NextResponse.json({ success: false, error: 'Influencer not found' }, { status: 404 });
-    }
-
-    // --- 2. Find Linked & Prioritized InsightIQ Account --- (Uses renamed relation)
-    let insightiqAccountIdToUse: string | null = null;
-    if (dbInfluencer.insightiqAccountLinks && dbInfluencer.insightiqAccountLinks.length > 0) {
-      const linkedAccounts = dbInfluencer.insightiqAccountLinks;
-      // Prioritization: Instagram > TikTok > YouTube (MVP)
-      const instagramAccount = linkedAccounts.find(acc => acc.platform === Platform.INSTAGRAM);
-      const tiktokAccount = linkedAccounts.find(acc => acc.platform === Platform.TIKTOK);
-      const youtubeAccount = linkedAccounts.find(acc => acc.platform === Platform.YOUTUBE);
-
-      if (instagramAccount) insightiqAccountIdToUse = instagramAccount.insightiqAccountId;
-      else if (tiktokAccount) insightiqAccountIdToUse = tiktokAccount.insightiqAccountId;
-      else if (youtubeAccount) insightiqAccountIdToUse = youtubeAccount.insightiqAccountId;
-      else insightiqAccountIdToUse = linkedAccounts[0].insightiqAccountId; // Fallback
-
-      logger.info(
-        `[API /influencers/:id] Found ${linkedAccounts.length} connected InsightIQ accounts for ${id}. Using account ID: ${insightiqAccountIdToUse}`
-      );
-    } else {
-      logger.info(`[API /influencers/:id] No active InsightIQ account links found for ${id}.`);
-    }
-
-    // --- 3. Fetch InsightIQ Data (if account found) ---
+    // --- Directly fetch from InsightIQ using the validated ID ---
+    logger.info(
+      `[API /influencers/:id] Attempting to fetch profile directly from InsightIQ for ID: ${id}`
+    );
     let profile: InsightIQProfile | null = null;
-    let audience: InsightIQGetAudienceResponse | null = null;
-
-    // Determine the InsightIQ *Profile* ID to fetch profile details.
-    // TODO: Confirm how to get the correct InsightIQ *Profile* ID. Using DB ID as placeholder.
-    const profileIdToFetch = dbInfluencer.id;
-
-    if (profileIdToFetch) {
-      try {
-        profile = await getInsightIQProfileById(profileIdToFetch);
-      } catch (profileError) {
-        logger.error(
-          `[API /influencers/:id] Error fetching InsightIQ profile for ID ${profileIdToFetch}:`,
-          profileError
-        );
-      }
-    }
-
-    if (insightiqAccountIdToUse) {
-      try {
-        audience = await getInsightIQAudience(insightiqAccountIdToUse);
-        logger.info(
-          `[API /influencers/:id] Successfully fetched data from InsightIQ for account ${insightiqAccountIdToUse}.`
-        );
-      } catch (iqError) {
-        logger.error(
-          `[API /influencers/:id] Error fetching data from InsightIQ for account ${insightiqAccountIdToUse}:`,
-          iqError
-        );
-        audience = null;
-      }
-    }
-
-    // --- 4. Calculate Score ---
-    // TODO: Update scoring logic to incorporate fetched InsightIQ data (profile, audience)
-    const justifyScore = calculateJustifyScoreV1(dbInfluencer);
-
-    // --- 5. Construct Response (Merge DB & InsightIQ Data) ---
-    const safeParseJson = (jsonString: Prisma.JsonValue | null | undefined): any | null => {
-      if (typeof jsonString === 'string') {
-        try {
-          return JSON.parse(jsonString);
-        } catch {
-          return null;
-        }
-      }
-      return jsonString ?? null;
-    };
-
-    const audienceDemographics: AudienceDemographics | null = audience
-      ? {
-          countries: audience.countries,
-          cities: audience.cities,
-          gender_age_distribution: audience.gender_age_distribution,
-        }
-      : safeParseJson(dbInfluencer.audienceDemographics);
-
-    // Map InsightIQ engagement metrics - PLACEHOLDER MAPPING - NEEDS VERIFICATION
-    const engagementMetrics: EngagementMetrics | null =
-      profile?.reputation || safeParseJson(dbInfluencer.engagementMetrics)
-        ? {
-            averageLikes:
-              profile?.reputation?.follower_count ??
-              safeParseJson(dbInfluencer.engagementMetrics)?.averageLikes ??
-              null, // EXAMPLE: Incorrect mapping - Needs actual field from profile/engagement endpoint
-            averageComments:
-              profile?.reputation?.content_count ??
-              safeParseJson(dbInfluencer.engagementMetrics)?.averageComments ??
-              null, // EXAMPLE: Incorrect mapping
-            averageViews:
-              profile?.reputation?.subscriber_count ??
-              safeParseJson(dbInfluencer.engagementMetrics)?.averageViews ??
-              null, // EXAMPLE: Incorrect mapping
-            averageShares: null, // EXAMPLE: Need source
-          }
-        : null;
-
-    const isInsightIQVerified = profile?.is_verified ?? dbInfluencer.isInsightIQVerified ?? false;
-
-    const getPrimaryAudienceDetail = <T extends { value: number }, K extends keyof T>(
-      arr: T[] | null | undefined,
-      key: K
-    ): T[K] | null => {
-      if (!arr || arr.length === 0) return null;
-      // Explicitly type accumulator and item in reduce
-      const primary = arr.reduce(
-        (max: T, item: T) => ((item.value ?? 0) > (max.value ?? 0) ? item : max),
-        arr[0]
+    try {
+      profile = await getInsightIQProfileById(id);
+      logger.info(
+        `[API /influencers/:id] Successfully fetched InsightIQ profile for ID ${id}. Profile name: ${profile?.full_name}`
       );
-      return primary && key in primary ? primary[key] : null;
-    };
-
-    // Use helper, ensuring type compatibility. Cast explicitly if needed after check.
-    let primaryLocation: string | null = null;
-    const locationCode = getPrimaryAudienceDetail(audience?.countries, 'code');
-    if (typeof locationCode === 'string') {
-      primaryLocation = locationCode;
+    } catch (profileError: any) {
+      logger.error(
+        `[API /influencers/:id] Error fetching InsightIQ profile for ID ${id}:`,
+        profileError?.message || profileError
+      );
+      if (profileError?.status === 404 || profileError?.message?.includes('Not Found')) {
+        logger.warn(`[API /influencers/:id] InsightIQ profile not found for ID: ${id}`);
+        return NextResponse.json(
+          { success: false, error: 'Influencer not found' },
+          { status: 404 }
+        );
+      } else {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Failed to fetch influencer details from provider',
+            details: profileError?.message,
+          },
+          { status: 500 }
+        );
+      }
     }
-    primaryLocation = primaryLocation ?? dbInfluencer.primaryAudienceLocation ?? null;
 
-    // TODO: Add logic to derive primaryAgeRange and primaryAudienceGender from audience.gender_age_distribution
-    const primaryAgeRange = dbInfluencer.primaryAudienceAgeRange ?? null;
-    const primaryGender =
-      (dbInfluencer.primaryAudienceGender as 'Male' | 'Female' | 'Other' | 'Mixed' | null) ?? null;
+    if (!profile) {
+      logger.error(
+        `[API /influencers/:id] InsightIQ profile fetch succeeded but profile data is null/empty for ID: ${id}`
+      );
+      return NextResponse.json(
+        { success: false, error: 'Failed to retrieve valid influencer details from provider' },
+        { status: 500 }
+      );
+    }
+
+    // --- Fetch Audience Data (Deferred for MVP) ---
+    let audience: InsightIQGetAudienceResponse | null = null;
+    logger.warn(
+      `[API /influencers/:id] Skipping Audience fetch for MVP as DB link lookup was removed.`
+    );
+
+    // --- Calculate Score (Deferred for MVP) ---
+    const justifyScore = null; // Placeholder for MVP
+    logger.warn(
+      `[API /influencers/:id] Skipping Score calculation for MVP as DB data is not used.`
+    );
+
+    // --- Construct Response (using ONLY InsightIQ `profile` data) ---
+    const audienceDemographics: AudienceDemographics | null = null; // Cannot fetch for MVP
+    const engagementMetrics: EngagementMetrics | null = null; // Cannot fetch detailed audience for MVP
+
+    // Corrected mapping based on InsightIQProfile type
+    const isVerified = profile.is_verified ?? false;
+    const primaryLocation = profile.country ?? null; // Use profile.country
+    const primaryAgeRange = null; // Placeholder - Requires Audience data
+    const primaryGender = null; // Placeholder - Requires Audience data
+    const engagementRate = null; // Not directly available in profile type
+    const audienceQualityIndicator = null; // Placeholder - Requires Audience data or specific profile fields
 
     const responsePayload: InfluencerProfileData = {
-      id: dbInfluencer.id,
-      name: profile?.full_name ?? dbInfluencer.name,
-      handle: profile?.platform_username ?? dbInfluencer.handle,
-      avatarUrl: profile?.image_url ?? dbInfluencer.avatarUrl ?? '',
-      platforms: dbInfluencer.platforms as PlatformEnum[],
-      followersCount: profile?.reputation?.follower_count ?? dbInfluencer.followersCount ?? 0,
+      id: id, // Use the requested ID
+      name: profile.full_name ?? null,
+      handle: profile.platform_username ?? null,
+      avatarUrl: profile.image_url ?? null,
+      platforms: profile.work_platform ? ([profile.work_platform.name] as PlatformEnum[]) : [], // Example mapping - needs refinement
+      followersCount: profile.reputation?.follower_count ?? null,
       justifyScore: justifyScore,
-      isInsightIQVerified: isInsightIQVerified, // Uses renamed field
-      primaryAudienceLocation: primaryLocation,
+      isVerified: isVerified, // Corrected property name
+      primaryAudienceLocation: primaryLocation, // Corrected source
       primaryAudienceAgeRange: primaryAgeRange, // Placeholder
       primaryAudienceGender: primaryGender, // Placeholder
-      engagementRate: null, // Placeholder - needs actual InsightIQ field/calculation
-      audienceQualityIndicator:
-        (dbInfluencer.audienceQualityIndicator as 'High' | 'Medium' | 'Low' | null) ?? null,
-      insightiqUserId: dbInfluencer.insightiqUserId, // Uses renamed field
-      bio: profile?.introduction ?? dbInfluencer.bio ?? undefined,
-      contactEmail:
-        profile?.emails?.find(e => e.type === 'WORK')?.email_id ??
-        dbInfluencer.contactEmail ??
-        undefined,
-      audienceDemographics: audienceDemographics,
-      engagementMetrics: engagementMetrics, // Placeholder mapping
-      website: profile?.website ?? undefined,
-      category: profile?.category ?? undefined,
+      engagementRate: engagementRate, // Corrected source (null for now)
+      audienceQualityIndicator: audienceQualityIndicator, // Placeholder
+      bio: profile.introduction ?? null,
+      contactEmail: profile.emails?.find(e => e.type === 'WORK')?.email_id ?? null,
+      audienceDemographics: audienceDemographics, // Null for MVP
+      engagementMetrics: engagementMetrics, // Null for MVP
+      website: profile.website ?? null,
+      category: profile.category ?? null,
     };
-
-    // --- TODO: DATA STALENESS NOTE ---
-    // The data returned here is based on the last known state in the DB.
-    // It might be stale compared to InsightIQ until webhook processing is implemented
-    // to handle asynchronous updates (profile changes, new content, etc.).
-    // Consider adding a direct InsightIQ fetch here for freshness if needed immediately,
-    // but be mindful of rate limits and performance.
 
     return NextResponse.json({ success: true, data: responsePayload });
   } catch (error: unknown) {
+    // Catch unexpected errors outside the specific InsightIQ fetch block
     const message = error instanceof Error ? error.message : 'Unknown internal error';
-    logger.error(`[API /influencers/:id] Error fetching influencer ${id}:`, message);
+    logger.error(
+      `[API /influencers/:id] Unexpected error processing influencer ${id}:`,
+      message,
+      error
+    );
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch influencer details', details: message },
+      { success: false, error: 'Failed to process influencer details', details: message },
       { status: 500 }
     );
   }

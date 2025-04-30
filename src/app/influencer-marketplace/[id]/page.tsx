@@ -110,74 +110,74 @@ export default function InfluencerProfilePage() {
   }, [id, fetchData]); // Re-run if ID or fetchData changes
 
   return (
-    // Assuming ConditionalLayout handles overall page structure like nav/footer
-    <ConditionalLayout>
-      <div className="p-4 md:p-6 space-y-4">
-        {/* Top Bar: Back Button & Actions */}
-        <div className="flex justify-between items-center">
-          <Button variant="outline" size="sm" onClick={() => router.back()}>
-            <Icon iconId="faArrowLeftLight" className="mr-2 h-4 w-4" />
-            Back to Marketplace
-          </Button>
-          {/* Placeholder for Action Buttons - Render conditionally based on data load? */}
-          {!isLoading && !error && influencer && (
-            <div className="flex items-center gap-2">
-              {/* Buttons based on individual-influencer-profile.png (brand view) */}
-              <Button variant="outline" size="sm">
-                Remove Influencer
-              </Button>
-              <Button variant="outline" size="sm">
-                Edit Profile
-              </Button>
-              <Button variant="outline" size="sm">
-                Download Report
-              </Button>
-              <Button size="sm">Add to Campaign</Button>
-            </div>
-          )}
-        </div>
-
-        {/* Content Area: Loading, Error, or Profile Structure */}
-        {isLoading ? (
-          <ProfileSkeleton />
-        ) : error ? (
-          <ErrorDisplay message={error} />
-        ) : influencer ? (
-          <div className="space-y-6">
-            {/* --- Render Profile Header --- */}
-            <ProfileHeader influencer={influencer} />
-
-            {/* --- Profile Details Tabs --- */}
-            <Tabs defaultValue="performance" className="w-full">
-              <TabsList className="grid w-full grid-cols-4 mb-4">
-                {' '}
-                {/* Adjust grid-cols based on number of tabs */}
-                <TabsTrigger value="performance">Performance</TabsTrigger>
-                <TabsTrigger value="certifications">Certifications</TabsTrigger>
-                <TabsTrigger value="risk">Risk Score</TabsTrigger>
-                <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
-                {/* TODO: Add Audience/Content tabs later */}
-              </TabsList>
-              <TabsContent value="performance">
-                <OverallPerformanceSection influencer={influencer} />
-              </TabsContent>
-              <TabsContent value="certifications">
-                <CertificationStatusSection influencer={influencer} />
-              </TabsContent>
-              <TabsContent value="risk">
-                <RiskScoreSection influencer={influencer} />
-              </TabsContent>
-              <TabsContent value="campaigns">
-                <RecentCampaignsSection influencer={influencer} />
-              </TabsContent>
-              {/* TODO: Add Audience/Content TabsContent later */}
-            </Tabs>
+    // REMOVE ConditionalLayout wrapper - it's provided by RootLayout
+    // <ConditionalLayout>
+    <div className="p-4 md:p-6 space-y-4">
+      {/* Top Bar: Back Button & Actions */}
+      <div className="flex justify-between items-center">
+        <Button variant="outline" size="sm" onClick={() => router.back()}>
+          <Icon iconId="faArrowLeftLight" className="mr-2 h-4 w-4" />
+          Back to Marketplace
+        </Button>
+        {/* Placeholder for Action Buttons - Render conditionally based on data load? */}
+        {!isLoading && !error && influencer && (
+          <div className="flex items-center gap-2">
+            {/* Buttons based on individual-influencer-profile.png (brand view) */}
+            <Button variant="outline" size="sm">
+              Remove Influencer
+            </Button>
+            <Button variant="outline" size="sm">
+              Edit Profile
+            </Button>
+            <Button variant="outline" size="sm">
+              Download Report
+            </Button>
+            <Button size="sm">Add to Campaign</Button>
           </div>
-        ) : (
-          // Should not happen if error handles not found, but as fallback
-          <ErrorDisplay message={'Influencer data could not be loaded.'} />
         )}
       </div>
-    </ConditionalLayout>
+
+      {/* Content Area: Loading, Error, or Profile Structure */}
+      {isLoading ? (
+        <ProfileSkeleton />
+      ) : error ? (
+        <ErrorDisplay message={error} />
+      ) : influencer ? (
+        <div className="space-y-6">
+          {/* --- Render Profile Header --- */}
+          <ProfileHeader influencer={influencer} />
+
+          {/* --- Profile Details Tabs --- */}
+          <Tabs defaultValue="performance" className="w-full">
+            <TabsList className="grid w-full grid-cols-4 mb-4">
+              {' '}
+              {/* Adjust grid-cols based on number of tabs */}
+              <TabsTrigger value="performance">Performance</TabsTrigger>
+              <TabsTrigger value="certifications">Certifications</TabsTrigger>
+              <TabsTrigger value="risk">Risk Score</TabsTrigger>
+              <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
+              {/* TODO: Add Audience/Content tabs later */}
+            </TabsList>
+            <TabsContent value="performance">
+              <OverallPerformanceSection influencer={influencer} />
+            </TabsContent>
+            <TabsContent value="certifications">
+              <CertificationStatusSection influencer={influencer} />
+            </TabsContent>
+            <TabsContent value="risk">
+              <RiskScoreSection influencer={influencer} />
+            </TabsContent>
+            <TabsContent value="campaigns">
+              <RecentCampaignsSection influencer={influencer} />
+            </TabsContent>
+            {/* TODO: Add Audience/Content TabsContent later */}
+          </Tabs>
+        </div>
+      ) : (
+        // Should not happen if error handles not found, but as fallback
+        <ErrorDisplay message={'Influencer data could not be loaded.'} />
+      )}
+    </div>
+    // </ConditionalLayout>
   );
 }

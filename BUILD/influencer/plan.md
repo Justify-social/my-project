@@ -442,12 +442,6 @@ src/
     *   **Goal:** Finalize request/response schemas for `GET /influencers`, `GET /influencers/:id`.
     *   **Action:** Create/update OpenAPI spec file (e.g., `/docs/api/influencer-marketplace.yaml`). Gain sign-off from FE/BE leads. **CRITICAL FIRST STEP** before parallel development to avoid integration issues.
     *   **Verification:** Contracts are documented and agreed upon.
-*   **Ticket 0.5: `DATA: Create Mock Influencer Data File`**
-    *   **Goal:** Generate realistic mock data covering different scenarios.
-    *   **Action:** Create `src/data/mock/influencers.ts`. Export a constant array (`mockInfluencerDatabase: InfluencerProfileData[]`) containing at least 15-20 diverse mock influencers conforming to `InfluencerProfileData` (using fields defined in Ticket 0.3). Include variations in scores, verification status, platforms, audience data, followersCount, etc. Ensure `id` is unique.
-    *   **Customer Focus:** Ensure mock data includes examples reflecting Kelly P.'s concerns: some verified (`isInsightIQVerified: true`), some not; varying `justifyScore` values; diverse audience demographics (including 45+ ranges); influencers on different platforms (IG, YT, TK).
-    *   **Files Created:** `src/data/mock/influencers.ts`.
-    *   **Verification:** File exports the array correctly. Data includes diverse examples reflecting user needs.
 *   **Ticket 0.6: `FEAT: Implement Mock Influencer Service - getInfluencers Function`**
     *   **Goal:** Simulate fetching a paginated and filtered list of influencer summaries **based on agreed API contract**.
     *   **Action:** Create `src/services/mock/mockInfluencerService.ts`.
@@ -638,13 +632,13 @@ src/
     *   **Files Modified:** `src/app/influencer-marketplace/page.tsx`, `src/components/features/influencers/MarketplaceFilters.tsx`.
     *   **Verification:** Applying filters refetches data using API filter params. List updates.
 *   **Ticket 1.9: `BE-FEAT: Implement MVP Justify Score v1 Calculation` (Revised)** (Title and Action updated for InsightIQ, notes dependency)
-    *   **Goal:** Provide an initial, simple Justify Score based on available InsightIQ data.
-    *   **Action:** In the backend logic (likely within the service layer providing data for `GET /influencers` and `GET /influencers/:id`):
-        *   Define a simple V1 algorithm (e.g., weighted combination of `isInsightIQVerified` status, `audienceQualityIndicator`, basic engagement rate).
-        *   Calculate and return the `justifyScore` field. Document the V1 algorithm.
-        *   Handle missing input data gracefully (e.g., return `null` score or calculate based on available data).
-    *   **Dependencies:** Ticket 1.0, Ticket 1.1 (needs InsightIQ data available).
-    *   **Verification:** API responses include a calculated `justifyScore`. Calculation logic is documented and handles missing inputs.
+    *   **Goal:** Provide an initial, simple Justify Score based on **live InsightIQ data fetched within the request**.
+    *   **Action:** In the backend logic (within the API route handlers `GET /influencers`, `GET /influencers/:id` after fetching from InsightIQ):
+        *   Define a simple V1 algorithm (e.g., weighted combination of `isInsightIQVerified` status, `audienceQualityIndicator`, basic engagement rate from the *live fetched data*).
+        *   Calculate and return the `justifyScore` field along with the mapped InsightIQ data. Document the V1 algorithm.
+        *   Handle missing input data from the live fetch gracefully.
+    *   **Dependencies:** Ticket 1.0, Ticket 1.1 (needs live InsightIQ data available within the request).
+    *   **Verification:** API responses include a calculated `justifyScore` based on live data. Calculation logic is documented and handles missing inputs.
 
 ---
 
@@ -845,106 +839,13 @@ src/
 
 **Phased Data Freshness Strategy (MVP & Post-MVP):**
 
-*   **MVP Approach (Current):**
-    *   **Initial Load:** Data for the Marketplace list (`GET /api/influencers`) and Profile pages (`GET /api/influencers/:id`) will be fetched **directly** from InsightIQ via the Justify backend **on demand** when the user accesses these pages.
-    *   **Limitation:** Data will **not** automatically update after the initial load. Information like follower counts, verification status, or new content metrics **may become stale** until the user revisits the page or a manual refresh mechanism is implemented.
-    *   **Reason:** Implementation of the InsightIQ webhook handler (needed for real-time updates) is **blocked** pending detailed documentation from InsightIQ (event types, payload schemas, signature verification).
+*   **MVP Approach (Current - REVISED for SSOT):**
+    *   **Data Fetch:** Data for the Marketplace list (`GET /api/influencers`) and Profile pages (`GET /api/influencers/:id`) is fetched **directly from the InsightIQ Sandbox API** via the Justify backend **on every page load/request**.
+    *   **SSOT:** InsightIQ Sandbox is the single source of truth for data displayed. There is no intermediate database caching or storage of this data in the Justify system for the MVP.
+    *   **Freshness:** Data displayed is as fresh as the InsightIQ Sandbox API provides at the moment of the request.
+    *   **Limitation:** Performance depends entirely on InsightIQ API responsiveness. Rate limits must be handled carefully by the backend. No offline/cached data is available if InsightIQ is down.
+    *   **Reason:** Aligns with the "InsightIQ as SSOT" and "Simplicity" principles for the MVP, avoiding mock data and premature database complexity.
 *   **Post-MVP / Post-Docs Approach (Planned):**
-    *   **Webhook Implementation:** Once detailed documentation is available, the webhook handler (`/api/webhooks/insightiq`) will be implemented.
-    *   **Asynchronous Updates:** The handler will process incoming webhook events from InsightIQ, queueing updates.
-    *   **Bulk Retrieval:** Asynchronous workers will use InsightIQ's bulk retrieval APIs (e.g., `/v1/contents/search`) based on IDs from webhooks.
-    *   **DB Updates:** The Justify database will be updated asynchronously, ensuring data freshness.
-    *   **Benefit:** Provides near real-time data updates, improves efficiency, and reduces reliance on direct polling.
-
-*   **API Contract Schemas (MVP - Requires Verification Against Official InsightIQ Docs):**
-    *   **`GET /api/influencers`**
-        *   **Request Query Params:** (Params likely remain similar, but verify exact filter support in InsightIQ)
-            *   `page?: number` (default: 1)
-            *   `limit?: number` (default: 12)
-            *   `platforms?: PlatformEnum[]` // Verify filter support in InsightIQ Docs
-            *   `minScore?: number` // Verify handling in backend logic
-            *   `maxScore?: number` // Verify handling in backend logic
-            *   `minFollowers?: number` // Verify exact InsightIQ filter param name & type
-            *   `maxFollowers?: number` // Verify exact InsightIQ filter param name & type
-            *   `audienceAge?: string` // Verify exact InsightIQ filter param name & value format
-            *   `audienceLocation?: string` // Verify exact InsightIQ filter param name & value format
-            *   `searchTerm?: string` (Post-MVP?)
-            *   `sortBy?: string` (Post-MVP?)
-        *   **Response Body (200 OK) - Target Schema (Verify fields against InsightIQ):**
-            ```json
-            {
-              "influencers": [
-                // Matches InfluencerSummary type defined in Ticket 0.2 (subject to InsightIQ data)
-                {
-                  "id": string, // Justify DB ID
-                  "name": string, // [InsightIQ API] Verify exact field name & type
-                  "handle": string, // [InsightIQ API] Verify exact field name & type
-                  "avatarUrl": string, // [InsightIQ API] Verify exact field name & type
-                  "platforms": PlatformEnum[], // [InsightIQ API] Verify exact field name & type
-                  "followersCount": number, // [InsightIQ API] Verify exact field name & type
-                  "justifyScore": number | null, // Calculated by Justify backend (Ticket 1.9)
-                  "isVerified": boolean, // [InsightIQ API] Verify source & field name (Replaces is**InsightIQ**Verified)
-                  "primaryAudienceLocation": string, // [InsightIQ API] Verify exact field name & type
-                  "primaryAudienceAgeRange": string, // [InsightIQ API] Verify exact field name & type
-                  "primaryAudienceGender": "Male" | "Female" | "Other" | "Mixed" | null, // [InsightIQ API] Verify exact field name & type/enum values
-                  "engagementRate": number | null, // [InsightIQ API] Verify exact field name & type
-                  "audienceQualityIndicator": "High" | "Medium" | "Low" | null // [InsightIQ API] Verify exact field name & type/enum values (or logic)
-                  // Add flag/timestamp here if BE needs to signal InsightIQ data staleness/error?
-                }
-                // ... more influencers
-              ],
-              "pagination": { ... }
-            }
-            ```
-    *   **`GET /api/influencers/:id`**
-        *   **Request Path Params:** `id: string`
-        *   **Response Body (200 OK) - Target Schema (Verify fields against InsightIQ):**
-            ```json
-            {
-              // Inherited fields from InfluencerSummary - Verify all as above against InsightIQ
-              "id": string,
-              "name": string, // [InsightIQ API] Verify...
-              "handle": string, // [InsightIQ API] Verify...
-              "avatarUrl": string, // [InsightIQ API] Verify...
-              "platforms": PlatformEnum[], // [InsightIQ API] Verify...
-              "followersCount": number, // [InsightIQ API] Verify...
-              "justifyScore": number | null,
-              "isVerified": boolean, // [InsightIQ API] Verify...
-              "primaryAudienceLocation": string, // [InsightIQ API] Verify...
-              "primaryAudienceAgeRange": string, // [InsightIQ API] Verify...
-              "primaryAudienceGender": "Male" | "Female" | "Other" | "Mixed" | null, // [InsightIQ API] Verify...
-              "engagementRate": number | null, // [InsightIQ API] Verify...
-              "audienceQualityIndicator": "High" | "Medium" | "Low" | null, // [InsightIQ API] Verify...
-              // Specific InfluencerProfileData fields:
-              "bio": string | null, // [InsightIQ API] Verify exact field name & type
-              "contactEmail": string | null, // [InsightIQ API? Other Source?] Verify source, exact field name & type
-              "audienceDemographics": { // [InsightIQ API] Verify...
-                "ageDistribution": Record<string, number> | null, 
-                "genderDistribution": Record<string, number> | null, 
-                "locationDistribution": Record<string, number> | null 
-              } | null,
-              "engagementMetrics": { // [InsightIQ API] Verify...
-                "averageLikes": number | null, 
-                "averageComments": number | null 
-              } | null
-              // Add other verified fields here
-              // Add flag/timestamp here if BE needs to signal InsightIQ data staleness/error?
-            }
-            ```
-    *   **`GET /api/influencers/summaries?ids=id1,id2,...`** (Alternative to POST for Wizard Review)
-        *   **Request Query Params:** `ids: string[]` (comma-separated)
-        *   **Response Body (200 OK):**
-            ```json
-            {
-              "influencers": InfluencerSummary[] // Matches structure defined above (based on InsightIQ data)
-            }
-            ```
-        *   **Error Responses (Examples for all endpoints - Update for InsightIQ):**
-            *   **Note:** Verify specific error codes/messages returned by **InsightIQ API**.
-            *   `400 Bad Request`: (Likely same)
-            *   `401 Unauthorized`: (InsightIQ uses this for failed Basic Auth)
-            *   `403 Forbidden`: (Likely same)
-            *   `404 Not Found`: (Likely same)
-            *   `429 Too Many Requests`: (**InsightIQ Specific** - Check for `Retry-After` header)
-            *   `500 Internal Server Error`: (Likely same)
-            *   `503 Service Unavailable`: (Used if InsightIQ is down/unreachable)
+    *   **Webhook Implementation:** (As before - implement webhooks for asynchronous updates).
+    *   **Database Caching/Storage:** Introduce database storage (`MarketplaceInfluencer` table) to cache fetched InsightIQ data, reducing direct API calls on every load and providing resilience if InsightIQ is temporarily unavailable. Webhooks update this stored data.
+    *   **Benefit:** Improves performance, adds resilience, enables more complex backend filtering/aggregation not possible directly via InsightIQ API filters.
