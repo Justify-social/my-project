@@ -19108,7 +19108,6 @@ components:
             risk_rating: LOW
             total_content_count: 100
             flagged_content_count: 2
-           url: 'https://example.com/report.pdf'
           error:
             erorr_type: INTERNAL_SERVER_ERROR
             error_code: internal_server_error
