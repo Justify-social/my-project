@@ -70,11 +70,7 @@ Before a ticket from `plan.md` can be pulled into a Sprint Backlog, it should me
 
 3.  **Facilitate Sprint 1 Planning Meeting (Focus on Refactoring Prep & Unblocking):**
     *   **Goal:** Create the Sprint Backlog for the initial **InsightIQ refactoring phase & standalone Marketplace UI foundations.**
-    *   **Sprint 1 Goal Suggestion (Revised for Refactoring & Decoupling):** *\"Complete preparatory refactoring for InsightIQ migration: update configurations, rename/adapt service layer and API route structures, remove deprecated Phyllo code, and establish placeholder structures for InsightIQ integration, pending documentation arrival. Begin building core standalone Marketplace UI elements (List, Card, Filters).\"*
-    *   **Process:**
-        *   Present the **updated `plan.md`**, the **`insightiq.md` refactoring roadmap**, and the **Decoupling decision**.\n        *   Discuss the candidate tickets for this preparatory refactoring (Tasks 1.x, 2.1, 2.2, 3.1, 3.3, 7.1 from `insightiq.md`). Ensure DoR is met for these *preparatory* tasks.
-        *   Explicitly track the **Action Item: Obtain InsightIQ Documentation**.
-        *   Team selects preparatory refactoring work for the Sprint Backlog.
+    *   **Sprint 1 Goal Suggestion (Revised for Refactoring & Decoupling):** *\"Complete preparatory refactoring for InsightIQ migration: update configurations, rename/adapt service layer and API route structures, remove deprecated Phyllo code, and establish placeholder structures for InsightIQ integration, pending documentation arrival. Begin building core standalone Marketplace UI elements (List, Card, Filters).\"*\n    *   **Process:**\n        *   Present the **updated `plan.md`**, the **`insightiq.md` refactoring roadmap**, and the **Decoupling decision**.\n        *   Discuss the candidate tickets for this preparatory refactoring (Tasks 1.x, 2.1, 2.2, 3.1, 3.3, 7.1 from `insightiq.md`). Ensure DoR is met for these *preparatory* tasks.\n        *   Explicitly track the **Action Item: Obtain InsightIQ Documentation**. (Crucial for Webhook Implementation)\n        *   Team selects preparatory refactoring work for the Sprint Backlog.\n\n**(Sprint 2 onwards needs complete replanning based on InsightIQ Documentation)**\n\n**Data Freshness Approach Note:**\n\n*   **Initial Phase (MVP/Sprint 2+):** Data will be fetched directly via InsightIQ APIs when needed (Marketplace load, Profile view). This means data **may become stale** between user visits as **webhook processing is deferred** due to missing detailed documentation (event types, payloads, signature verification) from InsightIQ.\n*   **Future Phase (Post-Docs):** Once detailed webhook documentation is available, implement the webhook handler (`Task 3.4` in `refactor-insight-iq.md`) to enable asynchronous data updates for improved freshness and efficiency.\n\n## Projected Sprint 2: InsightIQ Integration Begins (Requires Docs)\n\n*Goal Suggestion: Implement core InsightIQ API calls within the service layer, populate initial data via **direct API calls**, connect backend APIs to frontend, and begin displaying basic data **in the standalone Marketplace & Profile pages.** Complete core Marketplace UI (Filters, Profile sections).*\n\n**Candidate Tickets (REQUIRES INSIGHTIQ DOCS - examples based on `insightiq.md` & `plan.md` - standalone focus):**\n*   **Critical Strategy:**\n    *   `TECH-DEBT: Define & Plan InsightIQ Account ID Mapping Strategy` ❗\n*   **Frontend Focus (Standalone Marketplace):**\n    *   Complete `1.6 - 1.8: FEAT: Wire up Filters UI to BE`\n    *   Complete `2.1 - 2.5: FEAT: Build/Test Profile Page with BE Data`\n*   **Backend Focus:**\n    *   `Task 2.3 (\`insightiq.md\`): Implement functional InsightIQ service calls (getIdentity, getAnalytics, etc.)` ❗ **(CRITICAL)**\n    *   `Task 3.5 (\`insightiq.md\`): Implement data mapping in GET /influencers & GET /influencers/:id` ❗ **(CRITICAL)**\n    *   Enhance endpoints for filtering/contactEmail (using InsightIQ data).\n*   **Backend Deferred (Pending Webhook Docs):**\n    *   `Task 3.4 (\`insightiq.md\`): Implement Webhook Handler Logic & Testing for InsightIQ Events` ❗ **(CRITICAL)**\n*   **Testing Focus:**\n    *   Unit tests for InsightIQ service calls & **API endpoint logic**.\n    *   E2E tests for list/profile rendering *with data*.\n
 
 4.  **Create Actionable Tickets in Project Management Tool:**
     *   **Action:** Transfer the **preparatory refactoring tickets** committed to in Sprint Planning from `insightiq.md` (and potentially `plan.md` chores) into your team's tool.
@@ -91,9 +87,25 @@ Before a ticket from `plan.md` can be pulled into a Sprint Backlog, it should me
 
 **(Sprint 2 onwards needs complete replanning based on InsightIQ Documentation)**
 
+**Current Debugging Focus (2025-04-30 - Updated):**
+*   **Issue:** Frontend (`/influencer-marketplace`) successfully fetches from the backend (`/api/influencers`) but receives an empty list (`Found 0 influencers`).
+*   **Hypothesis:** The backend route handler for `/api/influencers` is either not implemented correctly, not calling the appropriate InsightIQ endpoint, not using the sandbox environment, or failing to map the response.
+*   **Next Steps (Backend Priority):**
+    1.  **Verify `/api/influencers` Handler:** Ensure it targets the **InsightIQ Sandbox URL**.
+    2.  **Target Correct Endpoint:** Modify the handler to call `GET /v1/profiles` on the InsightIQ sandbox API.
+    3.  **Log Raw Response:** Add detailed logging within the backend handler to output the *exact* JSON response received from the InsightIQ `GET /v1/profiles` call.
+    4.  **Implement Mapping:** Ensure the handler correctly maps the fields from the InsightIQ `Profile` objects in the response array to the Justify `InfluencerSummary` type required by the frontend.
+    5.  **Return Data:** Send the mapped `influencers` array back to the frontend.
+*   **Goal:** Display *any* influencer profiles returned by the InsightIQ sandbox `GET /v1/profiles` endpoint in the Marketplace UI list.
+
+**Data Freshness Approach Note:**
+
+*   **Initial Phase (MVP/Sprint 2+):** Data will be fetched directly via InsightIQ APIs when needed (Marketplace load, Profile view). This means data **may become stale** between user visits as **webhook processing is deferred** due to missing detailed documentation (event types, payloads, signature verification) from InsightIQ.
+*   **Future Phase (Post-Docs):** Once detailed webhook documentation is available, implement the webhook handler (`Task 3.4` in `refactor-insight-iq.md`) to enable asynchronous data updates for improved freshness and efficiency.
+
 ## Projected Sprint 2: InsightIQ Integration Begins (Requires Docs)
 
-*Goal Suggestion: Implement core InsightIQ API calls within the service layer, populate initial data via webhooks/sync, connect backend APIs to frontend, and begin displaying basic data **in the standalone Marketplace & Profile pages.** Complete core Marketplace UI (Filters, Profile sections).* 
+*Goal Suggestion: Implement core InsightIQ API calls within the service layer, populate initial data via **direct API calls**, connect backend APIs to frontend, and begin displaying basic data **in the standalone Marketplace & Profile pages.** Complete core Marketplace UI (Filters, Profile sections).* 
 
 **Candidate Tickets (REQUIRES INSIGHTIQ DOCS - examples based on `insightiq.md` & `plan.md` - standalone focus):**
 *   **Critical Strategy:**
@@ -103,11 +115,12 @@ Before a ticket from `plan.md` can be pulled into a Sprint Backlog, it should me
     *   Complete `2.1 - 2.5: FEAT: Build/Test Profile Page with BE Data`
 *   **Backend Focus:**
     *   `Task 2.3 (\`insightiq.md\`): Implement functional InsightIQ service calls (getIdentity, getAnalytics, etc.)` ❗ **(CRITICAL)**
-    *   `Task 3.4 (\`insightiq.md\`): Implement Webhook Handler Logic & Testing for InsightIQ Events` ❗ **(CRITICAL)**
     *   `Task 3.5 (\`insightiq.md\`): Implement data mapping in GET /influencers & GET /influencers/:id` ❗ **(CRITICAL)**
     *   Enhance endpoints for filtering/contactEmail (using InsightIQ data).
+*   **Backend Deferred (Pending Webhook Docs):**
+    *   `Task 3.4 (\`insightiq.md\`): Implement Webhook Handler Logic & Testing for InsightIQ Events` ❗ **(CRITICAL)**
 *   **Testing Focus:**
-    *   Unit tests for InsightIQ service calls & webhook logic.
+    *   Unit tests for InsightIQ service calls & **API endpoint logic**.
     *   E2E tests for list/profile rendering *with data*.
 
 ## Projected Sprint 3: MVP Stabilization & Post-MVP Prep (Wizard Integration Deferred)

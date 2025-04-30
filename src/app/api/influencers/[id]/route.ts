@@ -220,6 +220,13 @@ export async function GET(request: NextRequest, { params }: any) {
       category: profile?.category ?? undefined,
     };
 
+    // --- TODO: DATA STALENESS NOTE ---
+    // The data returned here is based on the last known state in the DB.
+    // It might be stale compared to InsightIQ until webhook processing is implemented
+    // to handle asynchronous updates (profile changes, new content, etc.).
+    // Consider adding a direct InsightIQ fetch here for freshness if needed immediately,
+    // but be mindful of rate limits and performance.
+
     return NextResponse.json({ success: true, data: responsePayload });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown internal error';

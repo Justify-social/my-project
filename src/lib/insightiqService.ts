@@ -10,16 +10,16 @@ import {
   InsightIQSDKTokenResponse,
   InsightIQSDKTokenRequest,
   InsightIQGetAudienceResponse,
+  // InsightIQProfileList, // Type doesn't seem to exist, will define inline for now
 } from '@/types/insightiq';
 
-// Basic check for necessary configuration
-if (!serverConfig.insightiq.clientId || !serverConfig.insightiq.clientSecret) {
-  logger.error(
-    '[InsightIQService] InsightIQ Client ID or Secret is missing in server configuration.'
-  );
-  // Decide if we should throw an error here to prevent startup/runtime without credentials
-  // throw new Error('InsightIQ Client ID or Secret is missing.');
-}
+// --- TODO: WEBHOOK DEPENDENCY NOTE ---
+// The data fetched via direct API calls (e.g., getInsightIQProfileById)
+// represents a snapshot at the time of the call. InsightIQ uses webhooks
+// to notify about asynchronous updates (profile changes, new content, etc.).
+// A webhook handler (`/api/webhooks/insightiq`) is needed to process these
+// updates and keep the application data fresh. Without it, data displayed
+// to the user may become stale.
 
 /**
  * Generates the Basic Auth header value for InsightIQ.
@@ -281,6 +281,60 @@ export async function getInsightIQAudience(
       logger.error(`Error fetching InsightIQ audience data for ${accountId}:`, error);
       return null;
     }
+  }
+}
+
+/**
+ * Fetches a list of profiles from InsightIQ with pagination.
+ * Endpoint: GET /v1/profiles
+ *
+ * @param params Object containing limit and offset for pagination.
+ * @returns The response containing a list of InsightIQ Profiles or null on error.
+ */
+// Define an inline type for the expected list response structure
+interface InsightIQProfileListResponse {
+  data: InsightIQProfile[];
+  metadata?: {
+    // Assuming metadata structure based on spec examples
+    offset: number;
+    limit: number;
+    total?: number; // Make total optional as it might not always be present
+    // Add other potential metadata fields if known
+  };
+}
+
+export async function getInsightIQProfiles(params: {
+  limit: number;
+  offset: number;
+}): Promise<InsightIQProfileListResponse | null> {
+  // Use the inline type
+  const { limit, offset } = params;
+  logger.info(
+    `[InsightIQService] Fetching InsightIQ profiles list with limit: ${limit}, offset: ${offset}`
+  );
+  // Construct query parameters
+  const queryParams = new URLSearchParams({
+    limit: limit.toString(),
+    offset: offset.toString(),
+  });
+  const endpoint = `/v1/profiles?${queryParams.toString()}`;
+
+  try {
+    // Use the inline type for the expected response
+    const response = await makeInsightIQRequest<InsightIQProfileListResponse>(endpoint);
+    // TODO: Add validation using Zod maybe?
+    if (!response?.data || !Array.isArray(response.data)) {
+      logger.warn(
+        '[InsightIQService] getInsightIQProfiles received unexpected data format.',
+        response
+      );
+      return null; // Or throw an error depending on desired handling
+    }
+    return response;
+  } catch (error: any) {
+    logger.error(`[InsightIQService] Error fetching InsightIQ profiles list:`, error);
+    // Depending on desired resilience, we might return null or re-throw
+    return null; // Return null to avoid breaking downstream processes
   }
 }
 

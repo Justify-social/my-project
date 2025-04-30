@@ -207,7 +207,7 @@ export interface InfluencerSummary {
   platforms: PlatformEnum[]; // Assumes mapping logic exists based on InsightIQProfile.work_platform.name or separate source
   followersCount: number | null; // From InsightIQProfile.reputation.follower_count
   justifyScore: number | null; // Calculated by Justify backend
-  isInsightIQVerified: boolean | null; // From InsightIQProfile.is_verified
+  isVerified: boolean;
   primaryAudienceLocation?: string | null; // Possibly derived from InsightIQDemographicsAttributes.countries
   primaryAudienceAgeRange?: string | null; // Possibly derived from InsightIQDemographicsAttributes.gender_age_distribution
   primaryAudienceGender?: 'Male' | 'Female' | 'Other' | 'Mixed' | null; // Possibly derived from InsightIQDemographicsAttributes.gender_age_distribution

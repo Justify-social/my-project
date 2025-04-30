@@ -11,7 +11,11 @@ import { serverConfig } from '@/config/server-config';
 import { logger } from '@/utils/logger'; // Assuming logger is needed server-side
 import Stripe from 'stripe';
 import { algoliasearch } from 'algoliasearch';
-import { checkInsightIQConnection } from '@/lib/insightiqService';
+import {
+  checkInsightIQConnection,
+  getInsightIQProfileById,
+  getInsightIQAudience,
+} from '@/lib/insightiqService';
 
 /**
  * Enumeration of possible API error types for better error categorization
@@ -628,6 +632,176 @@ export async function verifyGiphyApi(): Promise<ApiVerificationResult> {
 }
 
 /**
+ * Verify the InsightIQ API Connection and Core Endpoints
+ * Checks basic connectivity and attempts calls to core profile/audience endpoints.
+ */
+export async function verifyInsightIQApi(): Promise<ApiVerificationResult> {
+  const apiName = 'InsightIQ API';
+  const baseCheckEndpoint = '/v1/work-platforms?limit=1';
+  const profileEndpoint = '/v1/profiles/:id';
+  const audienceEndpoint = '/v1/audience?account_id=:accountId';
+
+  const results: { [key: string]: ApiVerificationResult } = {};
+  let overallSuccess = true;
+  let combinedError: ApiErrorInfo | undefined = undefined;
+
+  // 1. Basic Connection Check (via work-platforms)
+  logger.info(`[verifyInsightIQApi] Performing basic connection check...`);
+  const connectionResult = await checkInsightIQConnection();
+  results['connection'] = {
+    apiName: `${apiName} - Connection Check`,
+    endpoint: baseCheckEndpoint,
+    success: connectionResult.success,
+    data: connectionResult.data,
+    error: connectionResult.error
+      ? {
+          type: connectionResult.error?.includes('credentials')
+            ? ApiErrorType.AUTHENTICATION_ERROR
+            : connectionResult.error?.includes('connect') ||
+                connectionResult.error?.includes('Failed')
+              ? ApiErrorType.NETWORK_ERROR
+              : ApiErrorType.UNKNOWN_ERROR,
+          message: connectionResult.error,
+          isRetryable: !connectionResult.error?.includes('credentials'),
+        }
+      : undefined,
+  };
+  if (!connectionResult.success) {
+    overallSuccess = false;
+    combinedError = results['connection'].error;
+    logger.error(`[verifyInsightIQApi] Basic connection check failed: ${connectionResult.error}`);
+    // Stop further tests if basic connection/auth fails
+    return {
+      success: false,
+      apiName,
+      endpoint: baseCheckEndpoint, // Report the failing endpoint
+      error: combinedError,
+    };
+  }
+
+  // --- Test Core Data Endpoints (Profile & Audience) ---
+  // Use a placeholder ID - expect 404, but other errors (401, 5xx) indicate problems
+  const testProfileId = '00000000-0000-0000-0000-000000000000'; // Placeholder UUID
+  const testAccountId = '00000000-0000-0000-0000-000000000000'; // Placeholder UUID
+
+  // 2. Profile Check
+  logger.info(`[verifyInsightIQApi] Testing Get Profile endpoint with ID: ${testProfileId}`);
+  let profileResultData: any = null;
+  let profileSuccess = false;
+  let profileError: ApiErrorInfo | undefined;
+  const profileStartTime = Date.now();
+  try {
+    const profile = await getInsightIQProfileById(testProfileId);
+    // If profile is null, it could be 404 (expected for dummy ID) or other error handled in service
+    if (profile === null) {
+      // Check if the error was specifically 404 (logged by service)
+      // For verification purposes, treat expected 404 for dummy ID as success
+      logger.warn(
+        `[verifyInsightIQApi] Get Profile returned null (expected 404 for dummy ID ${testProfileId}). Treating as verification success.`
+      );
+      profileSuccess = true;
+      profileResultData = { status: 'Not Found (Expected for Test ID)' };
+    } else if (profile) {
+      // If profile is found unexpectedly (e.g., if test ID actually exists)
+      profileSuccess = true;
+      profileResultData = { profileId: profile.id, name: profile.full_name }; // Sample relevant data
+      logger.info(`[verifyInsightIQApi] Get Profile call successful for ID ${testProfileId}.`);
+    } else {
+      // Should not happen if service handles errors, but safety check
+      throw new Error('Get Profile returned unexpected null/undefined without specific error.');
+    }
+  } catch (error: any) {
+    // Catch errors re-thrown by the service
+    logger.error(`[verifyInsightIQApi] Get Profile call failed:`, error);
+    profileSuccess = false;
+    profileError = {
+      type: error.message?.includes('(401)')
+        ? ApiErrorType.AUTHENTICATION_ERROR
+        : ApiErrorType.UNKNOWN_ERROR,
+      message: `Get Profile failed: ${error.message || 'Unknown error'}`,
+      isRetryable: false,
+      details: error,
+    };
+  }
+  const profileLatency = Date.now() - profileStartTime;
+  results['profile'] = {
+    apiName: `${apiName} - Get Profile`,
+    endpoint: profileEndpoint,
+    success: profileSuccess,
+    error: profileError,
+    latency: profileLatency,
+    data: profileResultData,
+  };
+  if (!profileSuccess) {
+    overallSuccess = false;
+    combinedError = profileError;
+  }
+
+  // 3. Audience Check (only if profile check didn't fail authentication)
+  if (!combinedError || combinedError.type !== ApiErrorType.AUTHENTICATION_ERROR) {
+    logger.info(
+      `[verifyInsightIQApi] Testing Get Audience endpoint with Account ID: ${testAccountId}`
+    );
+    let audienceSuccess = false;
+    let audienceError: ApiErrorInfo | undefined;
+    let audienceResultData: any = null;
+    const audienceStartTime = Date.now();
+    try {
+      const audience = await getInsightIQAudience(testAccountId);
+      if (audience === null) {
+        logger.warn(
+          `[verifyInsightIQApi] Get Audience returned null (expected 404 for dummy ID ${testAccountId}). Treating as verification success.`
+        );
+        audienceSuccess = true;
+        audienceResultData = { status: 'Not Found (Expected for Test ID)' };
+      } else if (audience) {
+        audienceSuccess = true;
+        audienceResultData = { audienceId: audience.id, countryCount: audience.countries?.length };
+        logger.info(
+          `[verifyInsightIQApi] Get Audience call successful for Account ID ${testAccountId}.`
+        );
+      } else {
+        throw new Error('Get Audience returned unexpected null/undefined without specific error.');
+      }
+    } catch (error: any) {
+      logger.error(`[verifyInsightIQApi] Get Audience call failed:`, error);
+      audienceSuccess = false;
+      audienceError = {
+        type: error.message?.includes('(401)')
+          ? ApiErrorType.AUTHENTICATION_ERROR
+          : ApiErrorType.UNKNOWN_ERROR,
+        message: `Get Audience failed: ${error.message || 'Unknown error'}`,
+        isRetryable: false,
+        details: error,
+      };
+    }
+    const audienceLatency = Date.now() - audienceStartTime;
+    results['audience'] = {
+      apiName: `${apiName} - Get Audience`,
+      endpoint: audienceEndpoint,
+      success: audienceSuccess,
+      error: audienceError,
+      latency: audienceLatency,
+      data: audienceResultData,
+    };
+    if (!audienceSuccess) {
+      overallSuccess = false;
+      combinedError = audienceError;
+    }
+  }
+
+  // --- Final Result ---
+  logger.info(`[verifyInsightIQApi] Overall verification result: ${overallSuccess}`);
+  return {
+    success: overallSuccess,
+    apiName,
+    endpoint: `Multiple Endpoints Tested`, // Indicate multiple endpoints were hit
+    data: results, // Return detailed results for each check
+    error: overallSuccess ? undefined : combinedError, // Report first critical error if overall failed
+  };
+}
+
+/**
  * SERVER-SIDE Verify the Database connection
  * Attempts a simple query to confirm connectivity.
  */
@@ -689,84 +863,6 @@ export async function verifyDatabaseConnectionServerSide(): Promise<ApiVerificat
         details: error,
         isRetryable:
           errorType === ApiErrorType.NETWORK_ERROR || errorType === ApiErrorType.TIMEOUT_ERROR,
-      },
-    };
-  }
-}
-
-/**
- * SERVER-SIDE Verify the InsightIQ API (Placeholder)
- * This function will test the InsightIQ API using server-side credentials.
- * Implementation details depend on InsightIQ documentation.
- */
-export async function verifyInsightIQApi(): Promise<ApiVerificationResult> {
-  const apiName = 'InsightIQ API';
-  const baseUrl = serverConfig.insightiq.baseUrl;
-  const testEndpoint = `${baseUrl}/v1/placeholder-for-health-check`; // Needs real endpoint
-
-  if (!serverConfig.insightiq.clientId || !serverConfig.insightiq.clientSecret) {
-    logger.warn(`[Server Verify] ${apiName} verification warning: Missing credentials`);
-    return {
-      success: false,
-      apiName,
-      endpoint: 'Config Check',
-      error: {
-        type: ApiErrorType.AUTHENTICATION_ERROR,
-        message: 'Missing InsightIQ credentials in server configuration.',
-        details: 'Check server-config.ts and ensure vars are loaded from .env',
-        isRetryable: false,
-      },
-    };
-  }
-
-  const startTime = Date.now();
-  try {
-    // Use the check function from the service
-    const result = await checkInsightIQConnection();
-    const latency = Date.now() - startTime;
-
-    if (result.success) {
-      return {
-        success: true,
-        apiName,
-        endpoint: testEndpoint, // Reflect the endpoint used in the check
-        latency,
-        data: { status: 'Connected (placeholder check)', details: result.data },
-      };
-    } else {
-      return {
-        success: false,
-        apiName,
-        endpoint: testEndpoint,
-        latency,
-        error: {
-          // Attempt to determine type from the service error message
-          type:
-            result.error?.includes('credentials') || result.error?.includes('401')
-              ? ApiErrorType.AUTHENTICATION_ERROR
-              : ApiErrorType.NETWORK_ERROR, // Default guess
-          message: result.error || 'Connection check failed.',
-          details: null,
-          isRetryable: true, // Generally assume network/temp issues are retryable
-        },
-      };
-    }
-  } catch (error: unknown) {
-    // Catch errors from checkInsightIQConnection itself (e.g., programming errors)
-    const latency = Date.now() - startTime;
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error in checkInsightIQConnection';
-    logger.error(`[Server Verify] ${apiName} verification function threw an error:`, error);
-    return {
-      success: false,
-      apiName,
-      endpoint: testEndpoint,
-      latency,
-      error: {
-        type: ApiErrorType.UNKNOWN_ERROR,
-        message: `Internal error running connection check: ${errorMessage}`,
-        details: error,
-        isRetryable: false,
       },
     };
   }

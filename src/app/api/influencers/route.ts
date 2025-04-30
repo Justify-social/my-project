@@ -1,58 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { PrismaClient, Platform, Prisma, MarketplaceInfluencer } from '@prisma/client'; // Import Prisma namespace
+// Removed Prisma imports as we're fetching directly from InsightIQ for now
+// import { PrismaClient, Platform, Prisma, MarketplaceInfluencer } from '@prisma/client';
 import { logger } from '@/lib/logger';
-import { InfluencerSummary } from '@/types/influencer'; // Use our frontend type for response shaping
-import { calculatePagination } from '@/lib/paginationUtils'; // Corrected path
-import { calculateJustifyScoreV1 } from '@/lib/scoringService'; // Import scoring function - Correct name
+import { InfluencerSummary } from '@/types/influencer'; // Use our frontend type
+import { calculatePagination } from '@/lib/paginationUtils';
+// Removed Justify Score import for now, will add back when mapping is stable
+// import { calculateJustifyScoreV1 } from '@/lib/scoringService';
 import { PlatformEnum } from '@/types/enums';
-// TODO: Import insightiqService functions when enrichment is added
-// import { getInsightIQProfileById } from '@/lib/insightiqService'; // Example
+// Use named export for the new function
+// Import the Profile type directly from its definition file
+import { getInsightIQProfiles } from '@/lib/insightiqService';
+import { InsightIQProfile } from '@/types/insightiq'; // Corrected import path for the type
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient(); // No prisma needed for direct fetch
 
-// Updated Zod schema to use insightiq field names
-const InfluencerQuerySchema = z
-  .object({
-    page: z.coerce.number().int().positive().optional().default(1),
-    limit: z.coerce.number().int().positive().max(50).optional().default(12),
-    platforms: z.preprocess(
-      val =>
-        typeof val === 'string' ? val.split(',').map(p => p.trim().toUpperCase()) : undefined,
-      z.array(z.nativeEnum(Platform)).optional()
-    ),
-    minScore: z.coerce.number().min(0).max(100).optional(),
-    maxScore: z.coerce.number().min(0).max(100).optional(),
-    minFollowers: z.coerce.number().int().nonnegative().optional(),
-    maxFollowers: z.coerce.number().int().positive().optional(),
-    audienceAge: z.string().optional(), // Keep as string for now, refine filtering later
-    audienceLocation: z.string().optional(), // Keep as string for now, refine filtering later
-    isInsightIQVerified: z.preprocess(
-      // Renamed from isPhylloVerified
-      val => (val === 'true' ? true : val === 'false' ? false : undefined),
-      z.boolean().optional()
-    ),
-    // sortBy: z.string().optional(), // Post-MVP
-    // searchTerm: z.string().optional(), // Post-MVP
-  })
-  .refine(data => !data.maxScore || !data.minScore || data.maxScore >= data.minScore, {
-    message: 'maxScore must be greater than or equal to minScore',
-    path: ['maxScore'],
-  })
-  .refine(
-    data => !data.maxFollowers || !data.minFollowers || data.maxFollowers >= data.minFollowers,
-    {
-      message: 'maxFollowers must be greater than or equal to minFollowers',
-      path: ['maxFollowers'],
-    }
-  );
+// Simplified Zod schema for direct InsightIQ call (MVP focuses on pagination)
+const InfluencerQuerySchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().positive().max(100).optional().default(12),
+});
+
+// Helper function to map InsightIQ Platform name to our enum
+function mapPlatformNameToEnum(platformName?: string | null): PlatformEnum | null {
+  if (!platformName) return null;
+  // Using direct comparison with potential PlatformEnum values (assuming title-case)
+  if (platformName === PlatformEnum.Instagram) return PlatformEnum.Instagram;
+  if (platformName === PlatformEnum.YouTube) return PlatformEnum.YouTube;
+  if (platformName === PlatformEnum.TikTok) return PlatformEnum.TikTok;
+  // Add other mappings if needed
+  // Fallback check for uppercase, though primary check is title-case
+  const upperCaseName = platformName.toUpperCase();
+  if (upperCaseName === 'INSTAGRAM') return PlatformEnum.Instagram;
+  if (upperCaseName === 'YOUTUBE') return PlatformEnum.YouTube;
+  if (upperCaseName === 'TIKTOK') return PlatformEnum.TikTok;
+
+  logger.warn(`[mapPlatformNameToEnum] Unknown platform name: ${platformName}`);
+  return null;
+}
 
 export async function GET(request: NextRequest) {
   logger.info('[API /influencers] GET request received');
   const { searchParams } = new URL(request.url);
   const queryParams = Object.fromEntries(searchParams.entries());
 
-  // --- Input Validation ---
+  // --- Input Validation (Simplified for pagination) ---
   const validationResult = InfluencerQuerySchema.safeParse(queryParams);
   if (!validationResult.success) {
     logger.warn('[API /influencers] Invalid query parameters:', validationResult.error.flatten());
@@ -66,95 +58,90 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const { page, limit, ...filters } = validationResult.data;
-  const { skip, take } = calculatePagination(page, limit);
+  const { page, limit } = validationResult.data;
+  const offset = (page - 1) * limit;
 
-  // --- Database Query Construction ---
-  const whereClause: Prisma.MarketplaceInfluencerWhereInput = {};
-
-  if (filters.platforms && filters.platforms.length > 0) {
-    // Cast frontend enum to Prisma enum if necessary, or ensure they are compatible
-    // Assuming they are compatible string enums for now
-    whereClause.platforms = { hasSome: filters.platforms as Platform[] };
-  }
-  if (filters.minScore !== undefined || filters.maxScore !== undefined) {
-    whereClause.justifyScore = {};
-    if (filters.minScore !== undefined) whereClause.justifyScore.gte = filters.minScore;
-    if (filters.maxScore !== undefined) whereClause.justifyScore.lte = filters.maxScore;
-  }
-  if (filters.minFollowers !== undefined || filters.maxFollowers !== undefined) {
-    whereClause.followersCount = {};
-    if (filters.minFollowers !== undefined) whereClause.followersCount.gte = filters.minFollowers;
-    if (filters.maxFollowers !== undefined) whereClause.followersCount.lte = filters.maxFollowers;
-  }
-  if (filters.audienceLocation) {
-    // Basic location filtering for now (exact match)
-    whereClause.primaryAudienceLocation = filters.audienceLocation;
-  }
-  if (filters.audienceAge) {
-    // Basic age filtering for now (exact match)
-    whereClause.primaryAudienceAgeRange = filters.audienceAge;
-  }
-  // Use renamed isInsightIQVerified filter
-  if (filters.isInsightIQVerified !== undefined) {
-    whereClause.isInsightIQVerified = filters.isInsightIQVerified;
-  }
-
-  // TODO: Add sorting logic based on sortBy (Post-MVP)
+  logger.info(
+    `[API /influencers] Requesting page ${page}, limit ${limit}, offset ${offset} from InsightIQ`
+  );
 
   try {
-    // --- Fetch Data & Count ---
-    logger.debug('[API /influencers] Querying database with clause:', whereClause);
-    const [totalInfluencers, dbInfluencers] = await prisma.$transaction([
-      prisma.marketplaceInfluencer.count({ where: whereClause }),
-      prisma.marketplaceInfluencer.findMany({
-        where: whereClause,
-        skip,
-        take,
-        orderBy: { justifyScore: 'desc' },
-      }),
-    ]);
+    // Call the new function
+    const insightiqResponse = await getInsightIQProfiles({ limit, offset });
 
-    // --- Data Enrichment & Score Calculation ---
-    const enrichedInfluencers = dbInfluencers.map(
-      (inf: MarketplaceInfluencer): InfluencerSummary => {
-        const justifyScore = calculateJustifyScoreV1(inf);
+    // Log response, handle null case explicitly
+    if (insightiqResponse) {
+      logger.debug({
+        message: '[API /influencers] Raw response from getInsightIQProfiles',
+        response: insightiqResponse, // Pass the actual response object here
+      });
+    } else {
+      // Log only a message if the response is null
+      logger.warn({ message: '[API /influencers] getInsightIQProfiles returned null.' });
+    }
 
-        const validGenders = ['Male', 'Female', 'Other', 'Mixed'];
-        const gender = validGenders.includes(inf.primaryAudienceGender ?? '')
-          ? (inf.primaryAudienceGender as 'Male' | 'Female' | 'Other' | 'Mixed')
-          : undefined;
+    if (!insightiqResponse?.data || !Array.isArray(insightiqResponse.data)) {
+      // Corrected: Only log the message string when the structure is wrong
+      logger.warn('[API /influencers] Unexpected response structure from InsightIQ.');
+      return NextResponse.json({
+        success: true,
+        influencers: [],
+        pagination: { currentPage: page, limit, totalInfluencers: 0, totalPages: 0 },
+      });
+    }
 
-        const validIndicators = ['High', 'Medium', 'Low'];
-        const qualityIndicator = validIndicators.includes(inf.audienceQualityIndicator ?? '')
-          ? (inf.audienceQualityIndicator as 'High' | 'Medium' | 'Low')
-          : undefined;
+    // --- Map InsightIQ Profiles to InfluencerSummary ---
+    const mappedInfluencers: InfluencerSummary[] = insightiqResponse.data
+      // Use the correctly imported InsightIQProfile type
+      .map((profile: InsightIQProfile): InfluencerSummary | null => {
+        if (!profile || !profile.id || !profile.work_platform) {
+          // Simplified logger warning call
+          logger.warn({
+            message: '[API /influencers] Skipping profile due to missing essential data',
+            profileId: profile?.id || 'unknown',
+          });
+          return null;
+        }
 
+        const platformEnum = mapPlatformNameToEnum(profile.work_platform.name);
+        const platforms = platformEnum ? [platformEnum] : [];
+
+        // isVerified field is now present in InfluencerSummary type
         return {
-          id: inf.id,
-          name: inf.name,
-          handle: inf.handle,
-          avatarUrl: inf.avatarUrl ?? '',
-          // Cast Prisma Platform[] to frontend PlatformEnum[]
-          platforms: inf.platforms as PlatformEnum[],
-          followersCount: inf.followersCount ?? 0,
-          justifyScore: justifyScore,
-          isInsightIQVerified: inf.isInsightIQVerified ?? false,
-          primaryAudienceLocation: inf.primaryAudienceLocation ?? undefined,
-          primaryAudienceAgeRange: inf.primaryAudienceAgeRange ?? undefined,
-          primaryAudienceGender: gender,
-          engagementRate: inf.engagementRate ?? undefined,
-          audienceQualityIndicator: qualityIndicator,
-          insightiqUserId: inf.insightiqUserId,
+          id: profile.id,
+          name: profile.full_name || profile.platform_username || 'Unknown Name',
+          handle: profile.platform_username || 'unknown_handle',
+          avatarUrl: profile.image_url || '',
+          platforms: platforms,
+          followersCount: profile.reputation?.follower_count ?? 0,
+          justifyScore: 50, // Placeholder
+          isVerified: profile.is_verified ?? false, // Map directly
+          primaryAudienceLocation: profile.country || null,
+          primaryAudienceAgeRange: null,
+          primaryAudienceGender: null,
+          engagementRate: null,
+          audienceQualityIndicator: null,
         };
-      }
-    );
+      })
+      // Explicitly type summary parameter here
+      .filter(
+        (summary: InfluencerSummary | null): summary is InfluencerSummary => summary !== null
+      );
 
-    // --- Format Response ---
+    // --- Determine Pagination ---
+    const totalInfluencersFromMeta = insightiqResponse.metadata?.total; // Assuming 'total' might be the field
+    const totalInfluencers =
+      typeof totalInfluencersFromMeta === 'number'
+        ? totalInfluencersFromMeta
+        : offset + mappedInfluencers.length + (mappedInfluencers.length === limit ? 1 : 0); // Fallback estimation
+
     const totalPages = Math.ceil(totalInfluencers / limit);
+
+    logger.info(`[API /influencers] Successfully mapped ${mappedInfluencers.length} influencers.`);
+
     const responsePayload = {
       success: true,
-      influencers: enrichedInfluencers,
+      influencers: mappedInfluencers,
       pagination: {
         currentPage: page,
         limit: limit,
@@ -162,18 +149,22 @@ export async function GET(request: NextRequest) {
         totalPages: totalPages,
       },
     };
-
     return NextResponse.json(responsePayload);
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown internal error';
-    logger.error('[API /influencers] Error fetching influencers:', {
+    const message =
+      error instanceof Error ? error.message : 'Unknown internal error during InsightIQ call';
+    logger.error('[API /influencers] Error fetching or processing profiles from InsightIQ:', {
       error: message,
       originalError: error,
       query: queryParams,
     });
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch influencers', details: message },
-      { status: 500 }
+      {
+        success: false,
+        error: 'Failed to fetch influencers from external provider',
+        details: message,
+      },
+      { status: 503 }
     );
   }
 }
