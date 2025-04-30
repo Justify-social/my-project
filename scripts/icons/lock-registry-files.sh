@@ -2,7 +2,7 @@
 
 # Script to make registry files read-only to ensure they remain the source of truth
 # This applies multiple protection methods for macOS
-# IMPORTANT: Requires sudo privileges for chflags and ACLs.
+# IMPORTANT: Requires sudo privileges for chflags and ACLs. Run with 'sudo ./scripts/icons/lock-registry-files.sh'
 
 set -e # Exit immediately if a command exits with a non-zero status.
 
@@ -18,12 +18,11 @@ REGISTRY_FILES=(
   "public/static/solid-icon-registry.json"
 )
 
-BACKUP_DIR="public/static/icon-registry-backup"
+# BACKUP_DIR="public/static/icon-registry-backup"
 
-# Create backup directory
-# Use sudo for mkdir as well, in case parent dir is restricted
-echo "Creating backup directory (if not exists) with sudo: $BACKUP_DIR"
-sudo mkdir -p "$BACKUP_DIR"
+# Create backup directory - COMMENTED OUT
+# echo "Creating backup directory (if not exists) with sudo: $BACKUP_DIR"
+# sudo mkdir -p "$BACKUP_DIR"
 
 # Filter out files that don't exist
 existing_files=()
@@ -42,17 +41,30 @@ fi
 
 echo "Processing ${#existing_files[@]} registry files..."
 
-# --- Backup Step ---
-echo "--> Backing up files (using sudo)..."
-for file in "${existing_files[@]}"; do
-  sudo cp "$file" "$BACKUP_DIR/$(basename "$file").backup"
-  if [ $? -ne 0 ]; then
-      echo "Error: Failed to backup $file using sudo" >&2
-      # Consider more robust cleanup/rollback here if needed
-      exit 1
-  fi
-done
-echo "  Backup complete. Backups in $BACKUP_DIR"
+# --- Backup Step - COMMENTED OUT ---
+# echo "--> Backing up files to $BACKUP_DIR (using sudo)..."
+# backup_count=0
+# for file in "${existing_files[@]}"; do
+#   backup_file="$BACKUP_DIR/$(basename "$file").backup"
+#   echo "  - Backing up '$file' to '$backup_file'..."
+#   sudo cp "$file" "$backup_file"
+#   if [ $? -ne 0 ]; then
+#       echo "❌ Error: Failed to backup '$file' using sudo. Please check permissions and sudo access." >&2
+#       # Consider more robust cleanup/rollback here if needed
+#       exit 1
+#   else
+#       ((backup_count++))
+#   fi
+# done
+#
+# if [ $backup_count -eq 0 ]; then
+#     echo "⚠️ No files were backed up. This might be because no existing registry files were found."
+# else
+#     echo "✅ Backup complete. $backup_count files backed up to $BACKUP_DIR"
+#     # Optional: List the backup files - uncomment if desired
+#     # echo "  Contents of backup directory:"
+#     # sudo ls -l "$BACKUP_DIR"
+# fi
 
 # --- Locking Steps ---
 
@@ -99,6 +111,7 @@ fi
 echo ""
 echo "✅ Successfully locked ${#existing_files[@]} registry files (chflags immutable set)."
 echo ""
+echo "Remember to run this script with 'sudo ./scripts/icons/lock-registry-files.sh'"
 echo "To unlock in the future, run unlock-registry-files.sh (or manually adjust commands for specific files):"
 echo "  sudo chflags noschg [filename] ...    # Remove immutable flag"
 echo "  sudo chmod -a 'everyone deny write' [filename] ... # Remove ACL (if set)"

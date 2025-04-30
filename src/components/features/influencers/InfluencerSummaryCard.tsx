@@ -22,13 +22,12 @@ interface InfluencerSummaryCardProps {
   className?: string;
 }
 
-// Map PlatformEnum to FontAwesome icon names (adjust as needed based on icon-registry.json)
-// Using iconId prop as verified from component definition
+// Map PlatformEnum to the correct IDs from brands-icon-registry.json
 const platformIconMap: Record<PlatformEnum, string> = {
-  [PlatformEnum.Instagram]: 'instagram', // Assuming these map to IDs in icon registry
-  [PlatformEnum.TikTok]: 'tiktok',
-  [PlatformEnum.YouTube]: 'youtube',
-  // Add mappings for other platforms
+  [PlatformEnum.Instagram]: 'brandsInstagram', // Corrected ID
+  [PlatformEnum.TikTok]: 'brandsTiktok', // Corrected ID
+  [PlatformEnum.YouTube]: 'brandsYoutube', // Corrected ID
+  // TODO: Add mappings for other platforms (e.g., Twitter/X, Facebook, LinkedIn) if they are added to PlatformEnum
 };
 
 export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
@@ -96,13 +95,13 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
           {influencer.platforms?.map(platform => (
             <Icon
               key={platform}
-              iconId={platformIconMap[platform] || 'faQuestionCircleLight'} // Use iconId prop & provide fallback
+              iconId={platformIconMap[platform] || 'faQuestionCircleLight'} // Use correct map, keep fallback
               className="h-4 w-4 text-gray-500 dark:text-gray-400"
               aria-label={platform}
               size="sm" // Added size prop for consistency
             />
           ))}
-          {influencer.isInsightIQVerified && (
+          {influencer.isVerified && (
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -111,9 +110,8 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
                     variant="secondary"
                     className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-1.5 py-0.5 text-xs border-transparent"
                   >
-                    <Icon iconId="faCheckCircleSolid" className="h-3 w-3 mr-1" size="xs" />{' '}
-                    {/* Use iconId prop */}
-                    Verified
+                    {/* Use iconId prop - Corrected ID */}
+                    <Icon iconId="faCircleCheckSolid" className="h-3 w-3 mr-1" size="xs" /> Verified
                   </Badge>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -151,9 +149,9 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  {/* Use iconId prop */}
+                  {/* Use iconId prop - Use Justify App Icon */}
                   <span className="inline-block ml-1 cursor-help">
-                    <Icon iconId="faInfoCircleLight" className="h-3 w-3 text-gray-400" size="xs" />
+                    <Icon iconId="appJustify" className="h-3 w-3 text-gray-400" size="xs" />
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>

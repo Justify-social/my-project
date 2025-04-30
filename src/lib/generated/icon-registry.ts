@@ -72,6 +72,13 @@ export const iconRegistryData: IconRegistryData = {
     },
     {
       category: 'app',
+      id: 'appJustify',
+      name: 'Justify',
+      faVersion: null,
+      path: '/icons/app/appJustify.svg',
+    },
+    {
+      category: 'app',
       id: 'appMmm',
       name: 'Mmm',
       faVersion: null,
