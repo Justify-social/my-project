@@ -15,10 +15,10 @@ interface CertificationStatusSectionProps {
 // Placeholder structure removed
 
 export function CertificationStatusSection({ influencer }: CertificationStatusSectionProps) {
-  const { isInsightIQVerified } = influencer;
+  const { isVerified } = influencer;
 
   // For now, only display the InsightIQ verification status
-  if (!isInsightIQVerified) {
+  if (!isVerified) {
     // Optionally show a message that the influencer is not verified,
     // or simply render nothing if only verified badges are desired.
     return null;

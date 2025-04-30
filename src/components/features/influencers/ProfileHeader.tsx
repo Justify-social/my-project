@@ -46,7 +46,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     handle,
     bio,
     platforms,
-    isInsightIQVerified, // Correct property name
+    isVerified, // Corrected property name
     justifyScore,
     audienceQualityIndicator,
     contactEmail, // Destructure contactEmail
@@ -142,7 +142,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             </span>
           </div>
           {/* Verification Badge */}
-          {isInsightIQVerified && (
+          {isVerified && (
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>

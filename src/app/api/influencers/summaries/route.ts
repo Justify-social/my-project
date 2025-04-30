@@ -111,7 +111,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         platforms: mapPlatformsToFrontend(inf.platforms as PlatformBackend[]),
         followersCount: inf.followersCount ?? 0,
         justifyScore: justifyScore,
-        isInsightIQVerified: inf.isInsightIQVerified ?? false,
+        isVerified: inf.isInsightIQVerified ?? false,
         primaryAudienceLocation: inf.primaryAudienceLocation ?? undefined,
         primaryAudienceAgeRange: inf.primaryAudienceAgeRange ?? undefined,
         primaryAudienceGender: gender,
