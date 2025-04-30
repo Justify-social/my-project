@@ -50,9 +50,9 @@ export function RiskScoreSection({ influencer }: RiskScoreSectionProps) {
 
   const riskChangeIcon =
     riskChange !== undefined && riskChange < 0
-      ? 'faArrowDown'
+      ? 'faArrowDownLight'
       : riskChange !== undefined && riskChange > 0
-        ? 'faArrowUp'
+        ? 'faArrowUpLight'
         : '';
 
   // TODO: Add logic to determine overall risk level (Low, Medium, High) based on score

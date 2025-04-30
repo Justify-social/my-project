@@ -14,6 +14,11 @@ export enum PlatformEnum {
   Instagram = 'INSTAGRAM', // Using uppercase to match Prisma schema convention
   TikTok = 'TIKTOK',
   YouTube = 'YOUTUBE',
+  Twitter = 'TWITTER',
+  Facebook = 'FACEBOOK',
+  Twitch = 'TWITCH',
+  Pinterest = 'PINTEREST',
+  LinkedIn = 'LINKEDIN',
   // Add other platforms as needed
 }
 

@@ -24,13 +24,14 @@ interface ProfileHeaderProps {
 const getPlatformIcon = (platform: PlatformEnum): string => {
   switch (platform) {
     case PlatformEnum.Instagram:
-      return 'faInstagram'; // Replace with actual icon ID
+      return 'brandsInstagram'; // Corrected ID
     case PlatformEnum.YouTube:
-      return 'faYoutube'; // Replace with actual icon ID
+      return 'brandsYoutube'; // Corrected ID
     case PlatformEnum.TikTok:
-      return 'faTiktok'; // Replace with actual icon ID
+      return 'brandsTiktok'; // Corrected ID
+    // TODO: Add other platform mappings
     default:
-      return 'faQuestionCircle'; // Default icon
+      return 'faCircleQuestionLight'; // Corrected fallback icon ID
   }
 };
 

@@ -200,20 +200,24 @@ import {
  * Aligned with expected data from InsightIQ Profile/Analytics.
  */
 export interface InfluencerSummary {
-  id: string; // Justify DB ID
+  id: string; // Use InsightIQ platform_username for list keys, profile will fetch using this handle
   name: string | null; // From InsightIQProfile.full_name or name
   handle: string | null; // From InsightIQProfile.platform_username
   avatarUrl: string | null; // From InsightIQProfile.image_url
-  platforms: PlatformEnum[]; // Assumes mapping logic exists based on InsightIQProfile.work_platform.name or separate source
+  platforms: PlatformEnum[]; // The platform searched for
   followersCount: number | null; // From InsightIQProfile.reputation.follower_count
   justifyScore: number | null; // Calculated by Justify backend
-  isVerified: boolean;
-  primaryAudienceLocation?: string | null; // Possibly derived from InsightIQDemographicsAttributes.countries
-  primaryAudienceAgeRange?: string | null; // Possibly derived from InsightIQDemographicsAttributes.gender_age_distribution
-  primaryAudienceGender?: 'Male' | 'Female' | 'Other' | 'Mixed' | null; // Possibly derived from InsightIQDemographicsAttributes.gender_age_distribution
-  engagementRate?: number | null; // Possibly derived from InsightIQProfile.reputation.engagementRate or ContentEngagement
-  audienceQualityIndicator?: 'High' | 'Medium' | 'Low' | null; // Logic TBD based on available InsightIQ metrics (e.g., follower types)
-  insightiqUserId?: string | null; // Added for internal linking
+  isVerified: boolean; // From profile.is_verified
+  isBusinessAccount?: boolean | null; // From profile.is_business (useful indicator)
+  primaryAudienceLocation?: string | null; // Best guess from profile.country
+  primaryAudienceAgeRange?: string | null; // Requires Audience API
+  primaryAudienceGender?: 'Male' | 'Female' | 'Other' | 'Mixed' | null; // Requires Audience API
+  engagementRate?: number | null; // Requires Engagement API/Calculation
+  audienceQualityIndicator?: 'High' | 'Medium' | 'Low' | null; // Requires specific metric
+  insightiqUserId?: string | null; // From profile.user.id (if available in search)
+  insightiqAccountId?: string | null; // From profile.account.id (if available in search)
+  workPlatformId?: string | null; // InsightIQ Work Platform UUID
+  platformProfileName?: string | null; // From profile.platform_profile_name or full_name
 }
 
 /**

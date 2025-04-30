@@ -12,6 +12,9 @@ import {
   InsightIQGetAudienceResponse,
   // InsightIQProfileList, // Type doesn't seem to exist, will define inline for now
 } from '@/types/insightiq';
+import { PlatformEnum } from '@/types/enums'; // Import PlatformEnum
+// Import the new utility function
+import { getInsightIQWorkPlatformId } from './insightiqUtils';
 
 // --- TODO: WEBHOOK DEPENDENCY NOTE ---
 // The data fetched via direct API calls (e.g., getInsightIQProfileById)
@@ -303,38 +306,174 @@ interface InsightIQProfileListResponse {
   };
 }
 
+// Define a type for the filters accepted by getInsightIQProfiles
+// This should align with the filters parsed in the API route
+interface InsightIQProfileFilters {
+  platforms?: PlatformEnum[];
+  follower_count?: { min?: number; max?: number };
+  is_verified?: boolean;
+  // Add other potential InsightIQ filter fields based on openapi.v1.yml
+}
+
+// Fetches a list or searches profiles from InsightIQ
+// Uses POST /v1/social/creators/profiles/search for filtering capabilities
 export async function getInsightIQProfiles(params: {
   limit: number;
   offset: number;
+  filters?: InsightIQProfileFilters; // Use the filters defined earlier
 }): Promise<InsightIQProfileListResponse | null> {
-  // Use the inline type
-  const { limit, offset } = params;
+  const { limit, offset, filters } = params;
   logger.info(
-    `[InsightIQService] Fetching InsightIQ profiles list with limit: ${limit}, offset: ${offset}`
+    `[InsightIQService] Fetching/Searching InsightIQ profiles with limit: ${limit}, offset: ${offset}, filters: ${JSON.stringify(filters)}`
   );
-  // Construct query parameters
-  const queryParams = new URLSearchParams({
-    limit: limit.toString(),
-    offset: offset.toString(),
-  });
-  const endpoint = `/v1/profiles?${queryParams.toString()}`;
+
+  // --- Map Justify Filters to InsightIQ Search Request Body ---
+  // NOTE: This mapping requires knowledge of the actual field names in CreatorSearchRequest
+  const searchRequestBody: any = {
+    limit: limit,
+    offset: offset,
+    sort_by: { field: 'FOLLOWER_COUNT', order: 'DESCENDING' }, // Default sort, adjust as needed
+  };
+
+  // Add filters only if the filters object is provided and has keys
+  if (filters && Object.keys(filters).length > 0) {
+    // Map follower count (Matches CreatorSearchRequest schema)
+    if (filters.follower_count) {
+      searchRequestBody.follower_count = {};
+      if (filters.follower_count.min !== undefined) {
+        searchRequestBody.follower_count.min = filters.follower_count.min;
+      }
+      if (filters.follower_count.max !== undefined) {
+        searchRequestBody.follower_count.max = filters.follower_count.max;
+      }
+    }
+
+    // Map verification status (Matches CreatorSearchRequest schema)
+    if (filters.is_verified !== undefined) {
+      searchRequestBody.is_verified = filters.is_verified;
+    }
+
+    // Map platforms to work_platform_id (Matches CreatorSearchRequest schema)
+    let platformMapped = false;
+    if (filters.platforms && filters.platforms.length > 0) {
+      if (filters.platforms.length > 1) {
+        logger.warn(
+          '[InsightIQService] InsightIQ search API likely only supports one work_platform_id. Using the first requested platform for filtering.'
+        );
+      }
+      const platformUuid = getInsightIQWorkPlatformId(filters.platforms[0]);
+      if (platformUuid) {
+        searchRequestBody.work_platform_id = platformUuid;
+        platformMapped = true;
+      } else {
+        logger.warn(
+          `[InsightIQService] Could not map platform ${filters.platforms[0]} to UUID. Skipping platform filter.`
+        );
+      }
+    }
+
+    // --- WORKAROUND CHECK: Add default platform ID IF platform filter was NOT specified by the user ---
+    if (!platformMapped) {
+      const defaultPlatformUuid = getInsightIQWorkPlatformId(PlatformEnum.Instagram);
+      if (defaultPlatformUuid) {
+        searchRequestBody.work_platform_id = defaultPlatformUuid;
+        logger.debug(
+          `[InsightIQService] No platform filter applied by user, defaulting to work_platform_id: ${defaultPlatformUuid} (Instagram)`
+        );
+      } else {
+        logger.error('[InsightIQService] Could not get default platform UUID for Instagram!');
+      }
+    }
+    // --- End Workaround Check ---
+
+    // TODO: Map other filters (e.g., audience_locations, audience_age based on CreatorSearchRequest)
+  } else {
+    // --- NO FILTERS PROVIDED: Ensure default platform ID is added ---
+    const defaultPlatformUuid = getInsightIQWorkPlatformId(PlatformEnum.Instagram);
+    if (defaultPlatformUuid) {
+      searchRequestBody.work_platform_id = defaultPlatformUuid;
+      logger.debug(
+        `[InsightIQService] No filters applied, defaulting to work_platform_id: ${defaultPlatformUuid} (Instagram)`
+      );
+    } else {
+      logger.error('[InsightIQService] Could not get default platform UUID for Instagram!');
+    }
+  }
+
+  const endpoint = '/v1/social/creators/profiles/search';
 
   try {
-    // Use the inline type for the expected response
-    const response = await makeInsightIQRequest<InsightIQProfileListResponse>(endpoint);
-    // TODO: Add validation using Zod maybe?
+    // Use POST method and send filters in the body
+    const response = await makeInsightIQRequest<InsightIQProfileListResponse>(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(searchRequestBody),
+    });
+
+    // Validate response structure (basic check)
     if (!response?.data || !Array.isArray(response.data)) {
       logger.warn(
-        '[InsightIQService] getInsightIQProfiles received unexpected data format.',
+        '[InsightIQService] getInsightIQProfiles (search) received unexpected data format.',
         response
       );
-      return null; // Or throw an error depending on desired handling
+      return null;
     }
+    // Ensure metadata format aligns if needed for pagination, response might be CreatorSearchResponse
+    // For now, assume it aligns with InsightIQProfileListResponse structure
     return response;
   } catch (error: any) {
-    logger.error(`[InsightIQService] Error fetching InsightIQ profiles list:`, error);
-    // Depending on desired resilience, we might return null or re-throw
-    return null; // Return null to avoid breaking downstream processes
+    logger.error(`[InsightIQService] Error fetching/searching InsightIQ profiles list:`, error);
+    return null;
+  }
+}
+
+// Function to fetch profile using identifier (username/url) and platformId
+// Calls POST /v1/social/creators/profiles/analytics
+export async function fetchProfileByIdentifier(
+  identifier: string,
+  platformId: string
+): Promise<InsightIQProfile | null> {
+  logger.info(
+    `[InsightIQService] Fetching profile analytics for identifier: ${identifier}, platformId: ${platformId}`
+  );
+  const endpoint = '/v1/social/creators/profiles/analytics';
+  const requestBody = {
+    identifier: identifier, // Use username/url as identifier
+    work_platform_id: platformId,
+  };
+
+  try {
+    // Assuming the analytics response includes the full profile data needed
+    // Type might need adjustment if response schema differs significantly from InsightIQProfile
+    const response = await makeInsightIQRequest<any>(endpoint, {
+      // Use any for now, refine type later
+      method: 'POST',
+      body: JSON.stringify(requestBody),
+    });
+
+    // Extract profile data from the response - structure needs verification from actual API call or spec detail
+    // Based on CreatorProfileAnalyticsResponse schema, profile data is nested
+    const profileData = response?.profile as InsightIQProfile;
+
+    if (!profileData) {
+      logger.warn(
+        `[InsightIQService] No profile data found in analytics response for identifier: ${identifier}`
+      );
+      return null;
+    }
+
+    // TODO: Potentially validate profileData structure with Zod
+    return profileData;
+  } catch (error: any) {
+    // Distinguish between 404 (Not Found) and other errors
+    if (error.message?.includes('(404)')) {
+      logger.warn(
+        `[InsightIQService] Profile not found via analytics for identifier: ${identifier}`
+      );
+      return null;
+    }
+    // Add specific handling for other potential errors from this endpoint if needed
+    logger.error(`[InsightIQService] Error fetching profile analytics for ${identifier}:`, error);
+    return null; // Return null on error for now
   }
 }
 

@@ -37,10 +37,10 @@ Before a ticket from `plan.md` can be pulled into a Sprint Backlog, it should me
             *   `0.9: CHORE: Implement Service Abstraction Layer` ✅
             *   Tasks 1.x, 2.1, 2.2, 3.1, 3.3, 7.1, 7.2, 7.3 from `insightiq.md` (Config, Renaming, Basic Service/Verifier) ✅
         *   **Backend Foundation (Focus on Direct InsightIQ Sandbox Integration - In Progress):**
-            *   **(Refactored) Task 1.0/1.1 (`plan.md` based on InsightIQ): BE-FEAT: Implement GET /influencers & GET /influencers/:id routes:** 🚧 **(In Progress - Primary Focus)** - *Implement logic to fetch live data directly from InsightIQ Sandbox API (using `openapi.v1.yml`), map response to Justify types (`InfluencerSummary`, `InfluencerProfileData`), handle errors.*
-            *   **(Refactored) Task 1.9 (`plan.md` based on InsightIQ): BE-FEAT: Adapt Justify Score Calculation (Use Live Data):** 🅿️ **(Blocked by 1.0/1.1)** - *Calculate score based on live InsightIQ response data within the API handlers.*
+            *   **(Refactored) Task 1.0/1.1 (`plan.md` based on InsightIQ): BE-FEAT: Implement GET /influencers & GET /influencers/:id routes:** ✅ **(Implementation Done - Pending Testing/Deployment)** - *Logic implemented to fetch live data directly from InsightIQ Sandbox API, map response to Justify types, handle errors, accept basic filters.*
+            *   **(Refactored) Task 1.9 (`plan.md` based on InsightIQ): BE-FEAT: Adapt Justify Score Calculation (Use Live Data):** ✅ **(Implementation Done - Pending Testing)** - *Implemented V1 score calculation in `scoringService.ts` using live `InsightIQProfile` data (`is_verified`, `follower_count`). Integrated into API route handlers.*
             *   **(NEW/Refactored) Task 3.4 (`insightiq.md`): Implement Webhook Handler structure & logic:** ❌ **(Blocked by InsightIQ Webhook Docs)**
-        *   **Frontend Foundation (Standalone Marketplace Focus - Partially Ready for Integration):**
+        *   **Frontend Foundation (Standalone Marketplace Focus - Ready for Integration Testing):**
             *   `1.2: FEAT(UI): Build InfluencerSummaryCard Component` ✅
             *   `1.3: FEAT(UI): Setup Marketplace Page (`page.tsx`) & Initial State` ✅
             *   `1.4: FEAT(FE): Implement Initial Data Fetching on Marketplace Page` ✅ **(NOTE: Ready to connect to live BE)**
@@ -73,57 +73,59 @@ Before a ticket from `plan.md` can be pulled into a Sprint Backlog, it should me
 **Ticket ID:** SPRINT1-BE-01
 **Title:** Implement Core Backend APIs with Live InsightIQ Sandbox Data
 **Assignee/Team:** BE Team
-**Status:** To Do
-**Description:** Implement the core logic for `GET /api/influencers` and `GET /api/influencers/:id`. Use `insightiqService` to call relevant InsightIQ Sandbox endpoints (referencing `openapi.v1.yml`). Correctly map InsightIQ API responses to Justify types (`InfluencerSummary`, `InfluencerProfileData`). Implement basic error handling for InsightIQ calls. Implement basic filtering pass-through for the list endpoint if supported by InsightIQ API. Deploy functional endpoints to dev/staging.
+**Status:** Done (Implementation Verified - Pending Final Testing & Deployment)
+**Description:** Implement the core logic for `GET /api/influencers` and `GET /api/influencers/[identifier]`. Use `insightiqService` to call relevant InsightIQ Sandbox endpoints. Correctly map InsightIQ API responses to Justify types. Implement robust error handling. Implement filtering pass-through using the POST search endpoint body (including platform filter mapping; Added default platform ID for initial load). Implement V1 Justify Score calculation. **Refactored profile lookup to use identifier + platformId.** Deploy functional endpoints to dev/staging.
 **Acceptance Criteria:**
-    - API routes return `200 OK` with correctly mapped data for valid requests to InsightIQ Sandbox.
-    - API routes return appropriate error codes (e.g., 404, 503) if InsightIQ fetch fails or ID not found.
-    - Basic filtering (if applicable) works.
+    - API routes return `200 OK` with correctly mapped data including calculated Justify Score for valid requests to InsightIQ Sandbox.
+    - API routes return appropriate error codes (e.g., 401, 404, 429, 503) based on InsightIQ responses, using the standard error format.
+    - Basic filtering (including platform filter) works.
+    - Initial load (no filters) returns data (defaulting to Instagram).
+    - **Profile lookup using identifier + platformId works.**
     - Deployed to dev/staging.
 **Dependencies:** `openapi.v1.yml`
 
 **Ticket ID:** SPRINT1-LEAD-01
 **Title:** Finalize & Sign-off on Justify API Contracts
 **Assignee/Team:** FE Lead, BE Lead
-**Status:** To Do
-**Description:** Review the `openapi.v1.yml` specification. Schedule and hold a meeting to formally agree on the exact request/response schemas for the Justify backend APIs (`GET /api/influencers`, `GET /api/influencers/:id`) that the frontend will consume. Document the signed-off contract (can reference `openapi.v1.yml` with notes on Justify-specific mapping).
+**Status:** Done
+**Description:** Review the `openapi.v1.yml` specification **and the draft proposal in `insightiq-contracts.md`**. Schedule and hold a meeting to formally agree on the exact request/response schemas for the Justify backend APIs (`GET /api/influencers`, `GET /api/influencers/:id`) that the frontend will consume. Document the signed-off contract (update `insightiq-contracts.md`).
 **Acceptance Criteria:**
     - Meeting held.
-    - Final Justify API request/response schemas for core endpoints are agreed upon and documented/referenced.
+    - Final Justify API request/response schemas for core endpoints are agreed upon and documented/referenced **in `insightiq-contracts.md`**.
     - Sign-off obtained from both leads.
 **Dependencies:** `openapi.v1.yml`
 
 **Ticket ID:** SPRINT1-FE-01
 **Title:** Integrate Marketplace List/Filters with Live Backend API
 **Assignee/Team:** FE Team
-**Status:** Blocked
-**Description:** Update `MarketplacePage` (`page.tsx`) and related components (`MarketplaceList`, `MarketplaceFilters`) to fetch data from the live `GET /api/influencers` backend endpoint via `influencerService`. Ensure live data renders correctly. Implement filter parameter passing to the backend API call. Handle loading and error states gracefully based on backend responses.
+**Status:** Done (Implementation Verified - Pending Final Testing & Deployment)
+**Description:** Update `MarketplacePage` (`page.tsx`) and related components (`MarketplaceList`, `MarketplaceFilters`) to fetch data from the live `GET /api/influencers` backend endpoint via `influencerService`. Ensure live data renders correctly according to the finalized API contract. Implement filter parameter passing (aligned with current BE schema) to the backend API call. Handle loading and error states gracefully based on backend responses. **Updated navigation to use identifier + platformId.**
 **Acceptance Criteria:**
     - Marketplace list displays live data from the backend/InsightIQ Sandbox.
     - Filtering UI correctly passes parameters to the backend API call and updates the list.
     - Loading and error states are handled correctly.
-**Dependencies:** SPRINT1-BE-01 (API Implementation), SPRINT1-LEAD-01 (API Contract Sign-off)
+    - **Clicking 'View Profile' navigates correctly using identifier + platformId.**
+**Dependencies:** SPRINT1-BE-01 (API Implementation - Done), SPRINT1-LEAD-01 (API Contract Sign-off - Done)
 
 **Ticket ID:** SPRINT1-FE-02
 **Title:** Integrate Profile Page with Live Backend API
 **Assignee/Team:** FE Team
-**Status:** Blocked
-**Description:** Update `ProfilePage` (`[id]/page.tsx`) and related components (`ProfileHeader`, profile sections) to fetch data from the live `GET /api/influencers/:id` backend endpoint via `influencerService`. Ensure all profile details (including contact info - Ticket 2.5) render correctly based on the live data and agreed contract. Handle loading and error states (e.g., influencer not found).
+**Status:** Done (Implementation Verified - Pending Final Testing & Deployment)
+**Description:** Update `ProfilePage` (`[username]/page.tsx`) and related components (`ProfileHeader`, profile sections) to fetch data from the live `GET /api/influencers/:identifier` backend endpoint via `influencerService` using **identifier + platformId**. Ensure all profile details render correctly based on the live data and finalized API contract. Handle loading and error states using structured error messages if provided by BE.
 **Acceptance Criteria:**
-    - Profile page displays live data for a valid ID from the backend/InsightIQ Sandbox.
-    - Loading and error states (including 404 Not Found) are handled correctly.
-**Dependencies:** SPRINT1-BE-01 (API Implementation), SPRINT1-LEAD-01 (API Contract Sign-off)
+    - Profile page displays live data for a valid identifier + platformId from the backend/InsightIQ Sandbox.
+    - Loading and error states (including 404 Not Found) are handled correctly, displaying informative messages.
+**Dependencies:** SPRINT1-BE-01 (API Implementation - Done), SPRINT1-LEAD-01 (API Contract Sign-off - Done)
 
 ---
 
 **Current Debugging Focus (2025-04-30 - RESOLVED & UPDATED):**
-*   **Issue 1:** Profile page (`/influencer-marketplace/[id]`) rendered with excessive whitespace due to nested `ConditionalLayout`. **[✔ RESOLVED - Removed inner wrapper]**
-*   **Issue 2:** API route (`/api/influencers/[id]`) threw error due to incorrect async `params` handling. **[✔ RESOLVED - Code updated & committed]**
-*   **Issue 3:** Profile page showed "Influencer not found" error. Frontend calls `GET /api/influencers/:id`.
-    *   **Root Cause Analysis:** Was likely caused by Issue 2 (API error preventing data fetch) or potentially the backend logic not correctly fetching/mapping from InsightIQ yet.
-    *   **Current Status:** With Issue 2 resolved, the API route *should* function correctly if the backend implementation (fetching/mapping from InsightIQ Sandbox) is complete and the ID exists in the Sandbox.
-*   **Next Steps (Focus shifts to Implementation & Integration):** Now tracked via JIRA-Style tickets above.
-*   **Goal:** Achieve a stable end-to-end flow where the frontend successfully displays influencer list and profile data fetched live from the InsightIQ Sandbox via the Justify backend API.
+*   **Issue 1:** Profile page (`/influencer-marketplace/[id]`) rendered with excessive whitespace due to nested `ConditionalLayout`. **[✔ RESOLVED]**
+*   **Issue 2:** API route (`/api/influencers/[id]`) threw error due to incorrect async `params` handling. **[✔ RESOLVED]**
+*   **Issue 3:** Profile page showed "Influencer not found" error due to identifier mismatch (username vs UUID). **[✔ RESOLVED - Refactored to use identifier + platformId]**
+*   **Issue 4:** List page showed no influencers due to InsightIQ search API requiring `work_platform_id`. **[✔ RESOLVED - Added default platform ID workaround]**
+*   **Next Steps:** Proceed with Sprint 2 tasks (Testing, Filter Refinement, ID Mapping Strategy, Webhook Investigation).
+*   **Goal:** Achieve a stable end-to-end flow where the frontend successfully displays influencer list and profile data fetched live from the InsightIQ Sandbox via the Justify backend API. **[✔ ACHIEVED - Ready for Testing]**
 
 **Data Freshness Approach Note:**
 
@@ -136,21 +138,21 @@ Before a ticket from `plan.md` can be pulled into a Sprint Backlog, it should me
 
 **Candidate Tickets (REQUIRES Backend APIs from Sprint 1 - examples based on `plan.md` - standalone focus):**
 *   **Critical Strategy:**
-    *   `TECH-DEBT: Define & Plan InsightIQ Account ID Mapping Strategy` ❗
+    *   `TECH-DEBT: Define & Plan InsightIQ Account ID Mapping Strategy` ✅ **(Decision Made & Schema Updated)**
 *   **Frontend Focus (Standalone Marketplace):**
-    *   Complete `1.4: FEAT(FE): Implement Data Fetching` (Test against live BE)
-    *   Complete `1.5: FEAT(UI): Create MarketplaceList Component` (Test rendering live BE data)
-    *   Complete `1.6 - 1.8: FEAT: Wire up Filters UI to BE` (Implement filter passing to BE API call)
-    *   Complete `2.1 - 2.5: FEAT: Build/Test Profile Page with BE Data` (Test against live BE)
+    *   Complete `1.4: FEAT(FE): Implement Data Fetching` (Test against live BE) 🅿️
+    *   Complete `1.5: FEAT(UI): Create MarketplaceList Component` (Test rendering live BE data) 🅿️
+    *   Complete `1.6 - 1.8: FEAT: Wire up Filters UI to BE` (Test against live BE) 🅿️
+    *   Complete `2.1 - 2.5: FEAT: Build/Test Profile Page with BE Data` (Test against live BE) 🅿️
 *   **Backend Focus:**
-    *   Support FE integration, fix bugs in API handlers (Modified 1.0, 1.1).
-    *   Refine data mapping based on FE needs/testing and signed-off contracts.
-    *   Implement basic filtering pass-through to InsightIQ API if supported & agreed in contracts.
+    *   Support FE integration, fix bugs in API handlers (Modified 1.0, 1.1). 🅿️
+    *   Refine data mapping based on FE needs/testing and signed-off contracts. 🅿️
+    *   Implement/Verify filtering pass-through to InsightIQ API. 🚧 **(In Progress - Refined BE filter construction)**
 *   **Backend Deferred (Pending Webhook Docs):**
-    *   `Task 3.4 (\\`insightiq.md\\`): Implement Webhook Handler Logic & Testing for InsightIQ Events` ❗ **(CRITICAL)**
+    *   `Task 3.4 (\`insightiq.md\`): Implement Webhook Handler Logic & Testing for InsightIQ Events` ❌ **(Blocked)**
 *   **Testing Focus:**
-    *   Unit tests for FE components rendering live data structures.
-    *   E2E tests for list/profile rendering *with live data from InsightIQ Sandbox via BE*.\\n
+    *   Unit tests for FE components rendering live data structures. 🅿️
+    *   E2E tests for list/profile rendering *with live data from InsightIQ Sandbox via BE*.\\n 🅿️
 
 4.  **Create Actionable Tickets in Project Management Tool:**
     *   **Action:** Ensure tickets reflect the current priorities (BE API implementation, FE integration). Update statuses based on recent progress.
@@ -252,19 +254,3 @@ Before a ticket from `plan.md` can be pulled into a Sprint Backlog, it should me
 *   `CHORE: Finalize Monitoring & Logging Configuration`
 *   `CHORE: Verify CI/CD Pipeline for Production Deployment`
 *   `CHORE: Document Rollback Procedures`
-*   `DOCS: Draft Initial Technical Documentation (InsightIQ Integration)`
-*   `DOCS: Outline User Guide Structure`
-*   Critical Bug Fixes.
-
-## Future Sprints (Sprint 8+): Freemium Implementation & Full Documentation
-
-*Goal Suggestion: Implement Freemium model, complete documentation.*
-
-**Candidate Areas (Details TBD closer to phase):**
-*   Feature Access Manager.
-*   Plan Comparison UI.
-*   Billing system integration.
-*   Complete User Guides & Tech Docs.
-*   Bug fixing & refinement.
-
----

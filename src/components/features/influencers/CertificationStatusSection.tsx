@@ -32,7 +32,7 @@ export function CertificationStatusSection({ influencer }: CertificationStatusSe
       <CardContent className="space-y-3">
         {/* Display Justify Verified based on isInsightIQVerified */}
         <div className={`flex items-start gap-4 p-4 rounded-lg bg-sky-100 text-sky-800`}>
-          <Icon iconId={'faBadgeCheck'} className="h-8 w-8 mt-1 flex-shrink-0" />
+          <Icon iconId={'faCircleCheckSolid'} className="h-8 w-8 mt-1 flex-shrink-0" />
           <div>
             <h4 className="font-semibold">Justify Verified Influencer</h4>
             {/* TODO: Add verification date if available in data */}

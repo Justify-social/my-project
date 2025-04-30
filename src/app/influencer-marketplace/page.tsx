@@ -32,16 +32,16 @@ import {
   SheetDescription,
 } from '@/components/ui/sheet';
 
-// Define the shape of filters state
+// Define the shape of filters state - Aligned with current BE capabilities
 export interface FiltersState {
   platforms?: PlatformEnum[];
-  minScore?: number;
-  maxScore?: number;
+  // minScore?: number; // Deferred until BE supports Justify Score filtering
+  // maxScore?: number; // Deferred
   minFollowers?: number;
   maxFollowers?: number;
-  audienceAge?: string;
-  audienceLocation?: string;
-  isInsightIQVerified?: boolean; // Keep renamed field
+  // audienceAge?: string; // Deferred until BE supports audience filtering
+  // audienceLocation?: string; // Deferred
+  isVerified?: boolean; // Renamed to match API schema (boolean type handled by Zod transform)
 }
 
 function MarketplacePage() {
@@ -113,8 +113,13 @@ function MarketplacePage() {
   }, []);
 
   const handleViewProfile = useCallback(
-    (id: string) => {
-      router.push(`/influencer-marketplace/${id}`);
+    (id: string, platformId?: string | null) => {
+      if (!platformId) {
+        logger.warn('[MarketplacePage] Attempted to view profile without platformId for:', id);
+        toast.error('Cannot view profile: Platform information missing.');
+        return;
+      }
+      router.push(`/influencer-marketplace/${id}?platformId=${platformId}`);
     },
     [router]
   );
@@ -188,7 +193,7 @@ function MarketplacePage() {
 
       {error && (
         <Alert variant="destructive" className="mb-4">
-          <Icon iconId="faExclamationTriangle" className="h-4 w-4" />
+          <Icon iconId="faTriangleExclamationLight" className="h-4 w-4" />
           <AlertTitle>Error Loading Influencers</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
@@ -200,7 +205,7 @@ function MarketplacePage() {
         error={error}
         selectedIds={selectedIds}
         onSelectToggle={handleSelectToggle}
-        onViewProfile={handleViewProfile}
+        onViewProfile={(id, platformId) => handleViewProfile(id, platformId)}
         itemsPerPage={limit}
       />
 

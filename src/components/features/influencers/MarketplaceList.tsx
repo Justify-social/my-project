@@ -13,7 +13,7 @@ interface MarketplaceListProps {
   error: string | null;
   selectedIds: string[];
   onSelectToggle: (id: string) => void;
-  onViewProfile: (id: string) => void;
+  onViewProfile: (id: string, platformId?: string | null) => void;
   itemsPerPage?: number; // Used for rendering skeletons
 }
 
@@ -69,7 +69,7 @@ export const MarketplaceList: React.FC<MarketplaceListProps> = ({
           influencer={influencer}
           isSelected={selectedIds.includes(influencer.id)}
           onSelectToggle={onSelectToggle}
-          onViewProfile={onViewProfile}
+          onViewProfile={id => onViewProfile(id, influencer.workPlatformId)}
         />
       ))}
     </div>

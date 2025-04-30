@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation'; // Hooks for App Router
+import { useParams, useRouter, useSearchParams } from 'next/navigation'; // Hooks for App Router
 import { influencerService } from '@/services/influencer';
 import { InfluencerProfileData } from '@/types/influencer';
 import ConditionalLayout from '@/components/layouts/conditional-layout'; // Assuming layout component
@@ -61,53 +61,69 @@ const ErrorDisplay = ({ message }: { message: string }) => (
 
 export default function InfluencerProfilePage() {
   const router = useRouter();
-  const params = useParams(); // Get dynamic params
-  const id = params?.id as string; // Extract ID, assert as string (add validation)
+  const params = useParams();
+  const searchParams = useSearchParams(); // Hook to get query params
+
+  // Extract username from route, platformId from query
+  const username = params?.username as string;
+  const platformId = searchParams?.get('platformId');
 
   const [influencer, setInfluencer] = useState<InfluencerProfileData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Data Fetching Logic
-  const fetchData = useCallback(async (influencerId: string) => {
-    // Basic ID validation (more robust validation like UUID check can be added)
-    if (!influencerId) {
-      logger.warn('[ProfilePage] Invalid or missing influencer ID');
-      setError('Invalid Influencer ID.');
+  // Data Fetching Logic - now uses username and platformId
+  const fetchData = useCallback(async (identifier: string, pId: string | null) => {
+    // Validate both identifier and platformId
+    if (!identifier || !pId) {
+      logger.warn('[ProfilePage] Invalid or missing identifier or platformId', { identifier, pId });
+      setError('Invalid identifier or platformId for profile lookup.');
       setIsLoading(false);
       return;
     }
 
-    logger.info(`[ProfilePage] Fetching data for ID: ${influencerId}`);
+    logger.info(`[ProfilePage] Fetching data for identifier: ${identifier}, platformId: ${pId}`);
     setIsLoading(true);
     setError(null);
     setInfluencer(null); // Clear previous data
 
     try {
-      const response = await influencerService.getInfluencerById(influencerId);
+      // Call the new service function (assuming it exists)
+      const response = await influencerService.getInfluencerByIdentifier(identifier, pId);
       if (response) {
-        logger.info(`[ProfilePage] Data fetched successfully for ID: ${influencerId}`);
+        logger.info(`[ProfilePage] Data fetched successfully for identifier: ${identifier}`);
         setInfluencer(response);
       } else {
-        logger.warn(`[ProfilePage] Influencer not found for ID: ${influencerId}`);
+        logger.warn(`[ProfilePage] Influencer not found for identifier: ${identifier}`);
         setError('Influencer not found.');
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to load influencer profile.';
-      logger.error(`[ProfilePage] Error fetching data for ID ${influencerId}:`, message);
-      setError(message);
+      // Log the raw error for debugging
+      logger.error(`[ProfilePage] Error fetching data for identifier: ${identifier}:`, err);
+
+      // Attempt to parse structured error from backend
+      let displayError = 'Failed to load influencer profile.'; // Default message
+      if (typeof err === 'object' && err !== null && 'error' in err) {
+        // Assuming the service layer might pass through the structured error
+        const structuredError = err as { error?: string; details?: string };
+        displayError = `${structuredError.error || 'Error'}${structuredError.details ? `: ${structuredError.details}` : ''}`;
+      } else if (err instanceof Error) {
+        displayError = err.message;
+      }
+      setError(displayError);
     } finally {
       setIsLoading(false);
     }
   }, []); // Empty dependency array, fetchData instance doesn't change
 
-  // Fetch data when ID changes
+  // Fetch data when username or platformId changes
   useEffect(() => {
-    if (id) {
-      // Ensure ID is available before fetching
-      fetchData(id);
+    if (username && platformId) {
+      // Ensure both are available before fetching
+      fetchData(username, platformId);
     }
-  }, [id, fetchData]); // Re-run if ID or fetchData changes
+    // Add platformId to dependency array
+  }, [username, platformId, fetchData]);
 
   return (
     // REMOVE ConditionalLayout wrapper - it's provided by RootLayout

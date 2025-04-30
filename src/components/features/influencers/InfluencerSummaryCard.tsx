@@ -18,7 +18,7 @@ interface InfluencerSummaryCardProps {
   influencer: InfluencerSummary;
   isSelected: boolean;
   onSelectToggle: (id: string) => void;
-  onViewProfile: (id: string) => void;
+  onViewProfile: (id: string, platformId?: string | null) => void;
   className?: string;
 }
 
@@ -27,7 +27,12 @@ const platformIconMap: Record<PlatformEnum, string> = {
   [PlatformEnum.Instagram]: 'brandsInstagram', // Corrected ID
   [PlatformEnum.TikTok]: 'brandsTiktok', // Corrected ID
   [PlatformEnum.YouTube]: 'brandsYoutube', // Corrected ID
-  // TODO: Add mappings for other platforms (e.g., Twitter/X, Facebook, LinkedIn) if they are added to PlatformEnum
+  [PlatformEnum.Twitter]: 'brandsXTwitter', // Corrected ID (Assuming XTwitter)
+  [PlatformEnum.Facebook]: 'brandsFacebook', // Corrected ID
+  [PlatformEnum.Twitch]: 'brandsTwitch', // Corrected ID
+  [PlatformEnum.Pinterest]: 'brandsPinterest', // Corrected ID
+  [PlatformEnum.LinkedIn]: 'brandsLinkedin', // Corrected ID
+  // Add other platforms as needed
 };
 
 export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
@@ -189,7 +194,7 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
             variant="outline"
             size="sm"
             className="w-full"
-            onClick={() => onViewProfile(influencer.id)}
+            onClick={() => onViewProfile(influencer.id, influencer.workPlatformId)}
           >
             View Profile
           </Button>

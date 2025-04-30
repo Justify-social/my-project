@@ -6,15 +6,16 @@ import { PlatformEnum } from '@/types/enums';
 import { logger } from '@/utils/logger';
 
 // Define the expected structure for filters passed to the service
-// Align this with the backend API query parameters
+// Align this with the backend API query parameters currently supported
 export interface GetInfluencersFilters {
   platforms?: PlatformEnum[];
-  minScore?: number;
-  maxScore?: number;
+  // minScore?: number; // Deferred
+  // maxScore?: number; // Deferred
   minFollowers?: number;
   maxFollowers?: number;
-  audienceAge?: string;
-  audienceLocation?: string;
+  // audienceAge?: string; // Deferred
+  // audienceLocation?: string; // Deferred
+  isVerified?: boolean; // Renamed to match API
   // sortBy?: string; // Post-MVP
   // searchTerm?: string; // Post-MVP
 }
@@ -35,6 +36,11 @@ export interface IInfluencerService {
   }>;
 
   getInfluencerById(id: string): Promise<InfluencerProfileData | null>;
+
+  getInfluencerByIdentifier(
+    identifier: string,
+    platformId: string
+  ): Promise<InfluencerProfileData | null>;
 
   getInfluencerSummariesByIds(ids: string[]): Promise<InfluencerSummary[]>;
 }
@@ -114,6 +120,31 @@ const apiService: IInfluencerService = {
     } catch (error) {
       logger.error(`[influencerService] Failed getInfluencerById call to ${url}:`, error);
       throw error; // Re-throw for the caller to handle
+    }
+  },
+
+  getInfluencerByIdentifier: async (identifier, platformId) => {
+    // Construct query params for the backend API
+    const queryString = buildQueryString({ platformId });
+    const url = `/api/influencers/${identifier}?${queryString}`;
+    logger.info(`[influencerService] Calling GET ${url}`);
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        if (response.status === 404) return null; // Not found
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          `API Error (${response.status}): ${errorData?.error || response.statusText}`
+        );
+      }
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(`API returned error: ${data.error || 'Unknown API error'}`);
+      }
+      return data.data as InfluencerProfileData | null;
+    } catch (error) {
+      logger.error(`[influencerService] Failed getInfluencerByIdentifier call to ${url}:`, error);
+      throw error; // Re-throw
     }
   },
 
