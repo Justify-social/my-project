@@ -2,7 +2,7 @@ name: Deployment
 
 on:
   workflow_run:
-    workflows: ["Tests", "Lint", "E2E Tests"]
+    workflows: ['Tests', 'Lint', 'E2E Tests']
     branches: [main]
     types: [completed]
 

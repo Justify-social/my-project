@@ -1,34 +1,44 @@
 # **Plan: Influencer Marketplace Implementation (MVP)**
 
-**Scrum Leader Overview:** This document provides a highly granular, step-by-step plan for building the Minimum Viable Product (MVP) of the Influencer Marketplace. Our goal is speed, robustness, and seamless integration with the existing Campaign Wizard, leveraging our current codebase and UI library effectively. We will use a frontend-first approach with mock data initially. **This plan incorporates direct feedback from potential users like Kelly Parkerson (Marketing Director, Paleo Valley) to ensure we build features that solve real-world problems.**
+**Scrum Leader Overview:** This document provides a highly granular, step-by-step plan for building the Minimum Viable Product (MVP) of the Influencer Marketplace. Our goal is speed, robustness, and seamless integration with the existing Campaign Wizard, leveraging our current codebase and UI library effectively. **NOTE:** The primary data provider, formerly **InsightIQ** (previously branded as Phyllo), has been rebranded to **InsightIQ**. This plan reflects the integration with InsightIQ, assuming its API capabilities largely mirror the previous provider's, pending detailed documentation review. **This plan incorporates direct feedback from potential users like Kelly Parkerson (Marketing Director, Paleo Valley) to ensure we build features that solve real-world problems.**
+
+**--- PIVOT NOTE (2023-06-20) ---**
+**Current Focus:** We are temporarily pivoting from the ticket execution below to prioritize the critical refactoring required for the InsightIQ integration.
+**Guidance:** The detailed steps for this refactoring phase are outlined in `BUILD/influencer/refactor-insight-iq.md`.
+**Resumption:** Once the refactoring tasks in `refactor-insight-iq.md` are complete (especially those unblocked by obtaining full InsightIQ documentation), we will resume the MVP implementation following the phases and tickets detailed in this document (`plan.md`) and `plan-sprints.md`.
+**--- DECOUPLING NOTE (2023-06-21) ---**
+**Scope Adjustment:** For the initial MVP, the Influencer Marketplace will be developed as a standalone feature, decoupled from the Campaign Wizard. The integration flow described in "Journey 1: Wizard-First" and the related context passing (`WizardContext`) will be deferred post-MVP. The Marketplace will focus solely on discovery and vetting.
+**----------------------------------**
 
 **Core User Value Proposition (Brand Marketer Persona - "Marketing Director Maya" / Reflecting Kelly P. Needs):**
 
 *   **Efficient Discovery:** Dramatically reduce the time spent manually searching for influencers by providing a curated list pre-filtered based on specific campaign goals and **verified audience criteria** (addressing Kelly's need for research efficiency).
-*   **Relevant Matching (Beyond Vanity Metrics):** Move beyond unreliable metrics like EMV (which Kelly called "a load of pants") to find influencers whose **verified audience demographics**, **engagement quality** (represented by Justify Score using Phyllo inputs), and platform focus genuinely align with campaign objectives and drive *action*, not just impressions.
-*   **Increased Trust & Reduced Risk:** Quickly identify influencers who have connected verification sources (via Phyllo, indicated by `isPhylloVerified`) and assess **audience authenticity** (using Phyllo Profile Analytics data via backend), providing confidence before outreach (addressing Kelly's need for background checks/bot detection).
+*   **Relevant Matching (Beyond Vanity Metrics):** Move beyond unreliable metrics like EMV (which Kelly called "a load of pants") to find influencers whose **verified audience demographics**, **engagement quality** (represented by Justify Score using **InsightIQ** inputs), and platform focus genuinely align with campaign objectives and drive *action*, not just impressions.
+*   **Increased Trust & Reduced Risk:** Quickly identify influencers who have connected verification sources (via **InsightIQ**, indicated by `isVerified` - **TBC based on InsightIQ data**) and assess **audience authenticity** (using **InsightIQ** Profile Analytics data via backend), providing confidence before outreach (addressing Kelly's need for background checks/bot detection).
 *   **Seamless Workflow:** Integrate influencer selection directly into the existing campaign creation process, eliminating the need to manage separate lists or spreadsheets during the crucial planning phase.
 *   **Informed Decisions:** Provide key data points (audience breakdown, verification, score) directly within the discovery and profile views, enabling marketers like Kelly to make faster, more confident decisions on influencer suitability.
 
 **Success Metrics (MVP):**
 
-*   **Adoption Rate:** % of new campaigns created via the Wizard that utilize the "Find Influencers in Marketplace" flow.
-*   **Task Completion:** Successful completion rate of the Wizard -> Marketplace -> Select -> Wizard flow.
-*   **User Satisfaction (Qualitative):** Direct feedback from initial internal users/beta testers (especially those mirroring Kelly's role) via demos and surveys focusing on perceived **efficiency gain**, **data trustworthiness (verification)**, **relevance of results**, and overall ease of use.
-*   **(Post-MVP Metric):** Reduction in average time spent from starting a campaign brief to having a finalized list of selected influencers.
+*   **Adoption Rate:** ~~% of new campaigns created via the Wizard that utilize the "Find Influencers in Marketplace" flow.~~ **Revised:** Usage rate of the standalone Influencer Marketplace page by target users.
+*   **Task Completion:** ~~Successful completion rate of the Wizard -> Marketplace -> Select -> Wizard flow.~~ **Revised:** Successful navigation and interaction within the Marketplace (search, filter, view profile).
+*   **User Satisfaction (Qualitative):** Direct feedback from initial internal users/beta testers (especially those mirroring Kelly's role) via demos and surveys focusing on perceived **efficiency gain**, **data trustworthiness (verification)**, **relevance of results**, and overall ease of use **within the standalone Marketplace**.
+*   **(Post-MVP Metric):** Reduction in average time spent from starting a campaign brief to having a finalized list of selected influencers **(will require integration)**.
 
 **MVP Scope Note:** While the overall platform vision includes a Freemium model (`idea.md`), the initial MVP implementation detailed below focuses on delivering the core marketplace functionality. Feature gating and specific plan limitations will be addressed Post-MVP.
 
 **Architectural Integration Diagram:**
+
+*(Diagram remains structurally the same, **but the MVP will not implement the CW -> MP or MP -> CW_Review navigation/context passing paths.**)*
 
 ```mermaid
 graph TD
     subgraph "User Flow & Routing"
         U[User] --> CW[Campaign Wizard (/campaigns/wizard/...)]
         U --> MP[Marketplace Page (/influencer-marketplace)]
-        CW -- Navigates w/ Context --> MP
+        // CW -- Navigates w/ Context --> MP // DEFERRED POST-MVP
         MP -- Navigates --> PP[Profile Page (/influencer-marketplace/:id)]
-        MP -- Navigates Back w/ Context --> CW_Review[Campaign Wizard Review Step]
+        // MP -- Navigates Back w/ Context --> CW_Review[Campaign Wizard Review Step] // DEFERRED POST-MVP
     end
 
     subgraph "Existing Campaign Wizard"
@@ -103,6 +113,7 @@ graph TD
 ```
 
 **Diagram Explanation:**
+*(Explanation remains structurally the same, **noting that the connection between Wizard and Marketplace via context/navigation is deferred post-MVP.**)*
 
 1.  **User Flow:** Users start either in the existing `Campaign Wizard` or directly on the new `Marketplace Page`. The Wizard navigates *to* the Marketplace, passing filter criteria via the shared `WizardContext`. The Marketplace navigates back *to* the Wizard review step after selection, updating the context.
 2.  **UI Components:** Both existing (`Campaign Wizard`) and new (`Marketplace`, `Profile`) UI heavily rely on the central `UI Component Library`. New feature-specific components (`MarketplaceList`, `InfluencerSummaryCard`, etc.) are built using these primitives.
@@ -110,46 +121,43 @@ graph TD
 4.  **Services:** All data fetching goes through the `Influencer Service` abstraction layer, allowing easy switching between the initial `Mock Service` (using `Mock Data`) and the future real `API Service`.
 5.  **Types:** Shared `Types` ensure data consistency across the application.
 
-**Accelerated Production Strategy:**
+To achieve a faster path to a production-ready, valuable MVP using real **InsightIQ** data, the following adjustments are required:
 
-To achieve a faster path to a production-ready, valuable MVP using real Phyllo data, the following adjustments to a strict frontend-first approach are required:
-
-1.  **API Contracts First (CRITICAL):** Before significant coding in FE or BE, finalize the request/response contracts for core MVP endpoints (`GET /influencers`, `GET /influencers/:id`). This is **Task Zero**.
-2.  **Parallel Development Streams:** Frontend UI development (components, page layouts) and Backend API development (endpoints, DB, Phyllo integration) **MUST** occur concurrently from the start.
-3.  **Prioritized Backend Implementation:** Backend focuses first on delivering `GET /influencers` and `GET /influencers/:id` populated with priority Phyllo data (`Identity API` for verification, `Profile Analytics` for core demographics/metrics).
+1.  **API Contracts First (CRITICAL):** Before significant coding in FE or BE, finalize the request/response contracts for core MVP endpoints (`GET /influencers`, `GET /influencers/:id`) **based on InsightIQ documentation**. This is **Task Zero (Renewed)**.
+2.  **Parallel Development Streams:** Frontend UI development (components, page layouts) and Backend API development (endpoints, DB, **InsightIQ** integration) **MUST** occur concurrently from the start, **once InsightIQ docs are available**.
+3.  **Prioritized Backend Implementation:** Backend focuses first on delivering `GET /influencers` and `GET /influencers/:id` populated with priority **InsightIQ** data (**TBD based on InsightIQ Docs** - e.g., equivalent of Identity API for verification, Profile Analytics for demographics/metrics).
 4.  **Incremental Frontend Integration:** Frontend integrates with *live* backend endpoints deployed to `dev`/`staging` environment *as soon as possible*, reducing reliance on prolonged mock data usage. The `influencerService` abstraction facilitates this switch.
 5.  **Strict MVP Scope:** Adhere rigorously to the defined MVP features. Enhancements like advanced filters, detailed safety reports, etc., are deferred to Post-MVP (Phase 5).
 
-**Communication Protocol:** Frequent (min. weekly) FE/BE sync meetings are required to review API contract adherence, discuss integration progress, and resolve blocking issues quickly.
+**Communication Protocol:** Frequent (min. weekly) FE/BE sync meetings are required to review **InsightIQ** API contract adherence, discuss integration progress, and resolve blocking issues quickly.
 
 **Refined User Journeys & Integration Flow:**
 
 This feature needs to support two primary entry points:
 
-1.  **Journey 1: Wizard-First (New Campaign)**
-    *   **Entry:** User starts the Campaign Wizard (`/campaigns/wizard/...`).
-    *   **Action:** User defines campaign goals, target audience, platforms etc. in early steps.
-    *   **Transition:** User reaches the "Select Influencers" step (or similar) and clicks "Find Influencers in Marketplace".
-    *   **Context Passing:** Relevant filter criteria (platforms, audience demographics) **MUST** be saved to `WizardContext` *before* navigation.
-The `isFindingInfluencers` flag in `WizardContext` is set to `true`.
-    *   **Marketplace Load:** The Marketplace (`/influencer-marketplace`) loads, reads `WizardContext`, sees the `isFindingInfluencers` flag, extracts criteria, sets initial filters, and fetches the pre-filtered list (See Ticket 4.3).
-    *   **Marketplace Action:** User browses, filters further, selects influencers.
-    *   **Context Update:** User clicks "Add X Influencers to Campaign". The selected `influencerIds` **MUST** be saved to `WizardContext` (See Ticket 4.4).
-    *   **Return:** User is navigated back to the Wizard Review step.
-    *   **Wizard Display:** The Review step reads the `selectedInfluencerIds` from context and displays the influencer summaries (See Ticket 4.5).
+1.  **Journey 1: Wizard-First (New Campaign) - DEFERRED POST-MVP**
+    *   ~~**Entry:** User starts the Campaign Wizard (`/campaigns/wizard/...`).~~
+    *   ~~**Action:** User defines campaign goals, target audience, platforms etc. in early steps.~~
+    *   ~~**Transition:** User reaches the "Select Influencers" step (or similar) and clicks "Find Influencers in Marketplace".~~
+    *   ~~**Context Passing:** Relevant filter criteria (platforms, audience demographics) **MUST** be saved to `WizardContext` *before* navigation. The `isFindingInfluencers` flag in `WizardContext` is set to `true`.~~
+    *   ~~**Marketplace Load:** The Marketplace (`/influencer-marketplace`) loads, reads `WizardContext`, sees the `isFindingInfluencers` flag, extracts criteria, sets initial filters, and fetches the pre-filtered list (See Ticket 4.3).~~
+    *   ~~**Marketplace Action:** User browses, filters further, selects influencers.~~
+    *   ~~**Context Update:** User clicks "Add X Influencers to Campaign". The selected `influencerIds` **MUST** be saved to `WizardContext` (See Ticket 4.4).~~
+    *   ~~**Return:** User is navigated back to the Wizard Review step.~~
+    *   ~~**Wizard Display:** The Review step reads the `selectedInfluencerIds` from context and displays the influencer summaries (See Ticket 4.5).~~
 
-2.  **Journey 2: Marketplace-First (Discovery / Existing Campaign - Post-MVP)**
+2.  **Journey 2: Marketplace-First (Discovery / MVP Focus)**
     *   **Entry:** User navigates directly to the Influencer Marketplace (`/influencer-marketplace`).
-    *   **Context:** `WizardContext` likely won't have relevant filter criteria or the `isFindingInfluencers` flag set.
-    *   **Marketplace Load:** Marketplace loads with default filters (or previously saved user preferences - Post-MVP) and fetches the initial unfiltered/default list.
-    *   **Marketplace Action:** User browses, filters, selects influencers.
-    *   **Integration (MVP Scope Limited):** For the MVP, the "Add X Influencers to Campaign" button might be disabled or simply store selected IDs locally if not originating from the Wizard. The primary MVP focus is the Wizard-First journey.
-    *   **Integration (Post-MVP):** This button would trigger a modal or flow to select which *existing* campaign to add these influencers to, likely involving a call to a backend endpoint (`POST /api/campaigns/:id/influencers`) rather than updating `WizardContext`.
+    *   **Context:** `WizardContext` is **not used** by the Marketplace in the MVP.
+    *   **Marketplace Load:** Marketplace loads with default filters (or potentially user preferences - Post-MVP) and fetches the initial list.
+    *   **Marketplace Action:** User browses, filters, views profiles, potentially saves/shortlists influencers (**Shortlisting is Post-MVP - Ticket 5.7**).
+    *   **Integration (MVP):** No direct integration for adding selected influencers to a campaign. Users will need to manually note desired influencers and add them separately in the Campaign Wizard or via other means.
+    *   **Integration (Post-MVP):** An "Add to Campaign" flow would be introduced, likely involving selecting an existing campaign or initiating a new one.
 
-**Key Integration Logic:**
+**Key Integration Logic (MVP):**
 
-*   The Marketplace page component **MUST** check `WizardContext` on load to determine the entry journey and apply initial filters accordingly.
-*   The selection mechanism **MUST** update `WizardContext` *only* if the journey originated from the Wizard.
+*   The Marketplace page component **does not** check or interact with `WizardContext` on load.
+*   The selection mechanism within the Marketplace (if implemented for shortlisting) **does not** update `WizardContext`.
 
 **New File Directory Structure:**
 
@@ -185,11 +193,12 @@ src/
 │   └── mock/                 # <--- NEW (or existing?)
 │       └── influencers.ts    # <--- NEW
 ├── services/
-│   ├── influencer/           # <--- NEW
-│   │   └── index.ts          # <--- NEW (Abstraction Layer)
-│   └── mock/                 # <--- NEW (or existing?)
-│       └── mockInfluencerService.ts # <--- NEW
-│   └── ... (other services)
+│   ├── influencer/           # <--- Existing
+│   │   └── index.ts          # <--- Existing (Abstraction Layer)
+│   └── mock/                 # <--- Existing
+│   │   └── mockInfluencerService.ts # <--- Existing
+│   └── lib/                    # <--- Existing lib folder likely
+│       └── insightiqService.ts # <--- NEW (Renamed from phylloService)
 ├── types/
 │   ├── influencer.ts         # <--- NEW (or existing, to be modified)
 │   ├── enums.ts              # Existing (potentially modified)
@@ -197,122 +206,117 @@ src/
 └── ... (other top-level dirs like lib, styles, etc.)
 ```
 
-**Backend Design & API Considerations (MVP Focus):**
+**Backend Design & API Considerations (MVP Focus - Updated for InsightIQ):**
 
-*   **API Contract Definition (SSOT):**
-    *   **Requirement:** Before significant backend implementation begins, the exact request/response schemas for the core MVP API endpoints **MUST** be formally defined and agreed upon by Frontend and Backend leads.
+*   **API Contract Definition (SSOT):** (Requires InsightIQ docs)
+    *   **Requirement:** Before significant backend implementation begins, the exact request/response schemas for the core MVP API endpoints **MUST** be formally defined and agreed upon by Frontend and Backend leads **based on InsightIQ API documentation.**
     *   **Endpoints (MVP):** `GET /influencers`, `GET /influencers/:id`, `GET /influencers/summaries` (for wizard review step - might be combined with GET /influencers), `POST /campaigns/:id/influencers` (Post-MVP for adding to existing campaigns, but contract useful).
     *   **Recommendation:** Use OpenAPI (Swagger) specification format stored in a shared location (e.g., `/docs/api/influencer-marketplace.yaml`). Reference this spec file within relevant backend tickets.
-    *   **Action:** Assign task to Backend Lead/Architect to create initial API spec draft.
-*   **Phyllo Integration Strategy (Backend Responsibility):**
-    *   **Data Flow:** The backend database is the SSOT for influencer data displayed in the UI. The backend service is responsible for enriching this database with Phyllo data.
-    *   **Verification Status (`isPhylloVerified`):** Primarily updated via Phyllo webhooks processed by the backend.
-    *   **Data Refresh Strategy (Backend Task):** Define and implement strategy. **Preference:** Use Phyllo webhooks where available (e.g., for profile updates, identity changes) for near real-time updates. Supplement with periodic background jobs (e.g., daily/hourly) polling `Profile Analytics API` for potentially less frequent updates (e.g., follower counts, detailed metrics) or as a fallback if webhooks fail. Document expected data latency.
-    *   **Error/Staleness Handling (Backend Task & API Contract):** Backend MUST gracefully handle Phyllo API errors (timeouts, 5xx) or webhook processing failures. Define API contract behavior: Does the Justify API return `null` for Phyllo-sourced fields on error? Does it return potentially stale data with a timestamp/flag? Does it return a specific error code? Frontend needs to handle this response (Ticket 1.4, 2.1).
-    *   **Rate Limit & Cost Management (Backend Task):** Implement caching (e.g., Redis or memory cache with TTL) for frequently accessed Phyllo data (Profile Analytics) to minimize API calls. Monitor Phyllo API usage against subscribed limits/costs. Implement backoff/retry logic for Phyllo API calls respecting rate limits.
-    *   **Frontend Interaction:** The frontend interacts *only* with the Justify backend API (`/api/influencers/...`), not directly with Phyllo for marketplace data.
-    *   **Connection Flow:** Triggering the Phyllo connection process itself is likely Post-MVP (e.g., in an Influencer Portal or Profile Settings).
-    *   **Action:** Assign task to Backend Lead to detail the specific Phyllo webhook/sync strategy.
-*   **Backend Data Aggregation:** The Justify backend API (`/api/influencers`, `/api/influencers/:id`) serves as an aggregation layer. It will fetch necessary data from its own database, which should be kept up-to-date with relevant information sourced *by the backend* from Phyllo APIs, primarily:
-    *   `Profile Analytics API`: For audience demographics, follower counts, engagement metrics, follower quality insights, platform presence.
-    *   `Identity API` (via Linkage SDK): To determine `isPhylloVerified` status.
-    *   `Engagement Metrics API`: For specific like/comment/view counts if not included in Profile Analytics.
-    *   `Brand Safety / Social Screening API` (Post-MVP): For risk scores/flags.
-    *   The backend **MUST** handle caching, rate limiting, and error handling when interacting with Phyllo APIs.
-*   **API Error Handling:**
-    *   **Backend:** Implement consistent JSON error response formats across all API endpoints (e.g., `{ "status": 404, "error": "NotFound", "message": "Influencer not found" }`). This includes errors originating from Phyllo API calls.
-    *   **Error Categories:** Define and handle distinct error categories: Input Validation (400), Authentication (401), Authorization (403), Resource Not Found (404), External Service Errors (e.g., Phyllo 5xx -> return 503), Internal Server Errors (500). Log server errors appropriately.
-    *   **Frontend:** Service layer (`influencerService`) and page components (`MarketplacePage`, `ProfilePage`) **MUST** gracefully handle potential API errors (4xx, 5xx, network errors) returned by `fetchData` calls. Update UI state (`error`) accordingly.
-    *   **UI:** Display user-friendly error messages (using existing Alert/Banner components) instead of technical details (See Tickets 1.4, 3.1). Differentiate messages where possible (e.g., "No matching influencers found" vs. "Failed to load data").
-*   **Security Considerations:**
+    *   **Action:** Assign task to Backend Lead/Architect to create initial **InsightIQ-based** API spec draft **once InsightIQ docs are available.**
+*   **InsightIQ Integration Strategy (Backend Responsibility):** (Correctly outlines strategy, notes dependency on docs)
+    *   **Data Flow:** The backend database is the SSOT for influencer data displayed in the UI. The backend service is responsible for enriching this database with **InsightIQ** data.
+    *   **Verification Status (`isVerified` - TBC):** Primarily updated via **InsightIQ** webhooks processed by the backend.
+    *   **Data Refresh Strategy (Backend Task):** Define and implement strategy. **Preference:** Use **InsightIQ** webhooks where available (e.g., for profile updates, identity changes) for near real-time updates. Supplement with periodic background jobs polling **InsightIQ APIs** (e.g., Profile Analytics equivalent) or as a fallback if webhooks fail. Document expected data latency.
+    *   **Error/Staleness Handling (Backend Task & API Contract):** Backend MUST gracefully handle **InsightIQ** API errors (timeouts, 429, 5xx) or webhook processing failures. Define API contract behavior: Does the Justify API return `null` for **InsightIQ**-sourced fields on error? Does it return potentially stale data with a timestamp/flag? Does it return a specific error code? Frontend needs to handle this response (Ticket 1.4, 2.1).
+    *   **Rate Limit & Cost Management (Backend Task):** Implement caching (e.g., Redis or memory cache with TTL) for frequently accessed **InsightIQ** data (Profile Analytics equivalent) to minimize API calls. Monitor **InsightIQ** API usage against subscribed limits/costs (**note: staging has 10 credits**). Implement backoff/retry logic for **InsightIQ** API calls respecting rate limits (especially **429 Retry-After** header).
+    *   **Frontend Interaction:** The frontend interacts *only* with the Justify backend API (`/api/influencers/...`), not directly with **InsightIQ** for marketplace data.
+    *   **Connection Flow:** Triggering the **InsightIQ** connection process itself is likely Post-MVP (e.g., in an Influencer Portal or Profile Settings), **requires InsightIQ SDK/Flow documentation**.
+    *   **Action:** Assign task to Backend Lead to detail the specific **InsightIQ** webhook/sync strategy **once docs are available**.
+*   **Backend Data Aggregation:** (Correctly notes InsightIQ as source, pending docs for details)
+    *   The Justify backend API (`/api/influencers`, `/api/influencers/:id`) serves as an aggregation layer. It will fetch necessary data from its own database, which should be kept up-to-date with relevant information sourced *by the backend* from **InsightIQ** APIs, primarily (**pending verification against InsightIQ docs**):
+        *   Equivalent of `Profile Analytics API`: For audience demographics, follower counts, engagement metrics, follower quality insights, platform presence.
+        *   Equivalent of `Identity API` (via Connection SDK?): To determine verification status.
+        *   Equivalent of `Engagement Metrics API`: For specific metrics if needed.
+        *   Equivalent of `Brand Safety / Social Screening API` (Post-MVP).
+        *   The backend **MUST** handle caching, rate limiting (**InsightIQ: 2 req/sec**), and error handling when interacting with **InsightIQ** APIs (using **Basic Auth**).
+*   **API Error Handling:** (Correctly notes InsightIQ error codes)
+    *   **Backend:** Implement consistent JSON error response formats. This includes errors originating from **InsightIQ** API calls.
+    *   **Error Categories:** Define and handle distinct error categories: Input Validation (400), Authentication (**401 for InsightIQ**), Authorization (403), Resource Not Found (404), External Service Errors (e.g., **InsightIQ 429/5xx** -> return 503), Internal Server Errors (500). Log server errors appropriately.
+    *   **Frontend:** Service layer (`influencerService`) and page components (`MarketplacePage`, `ProfilePage`) **MUST** gracefully handle potential API errors. Update UI state (`error`) accordingly.
+    *   **UI:** Display user-friendly error messages.
+*   **Security Considerations:** (Remains valid)
     *   **Authentication:** All new API endpoints **MUST** be protected by the existing authentication middleware.
     *   **Authorization:** Implement checks to ensure users can only perform actions within their allowed scope (e.g., can a user fetch *any* influencer profile? Can they only add influencers to campaigns they own/manage? Define rules with Product Owner).
     *   **Action:** Add specific authorization checks to backend tickets post-MVP or as required by defined rules.
-*   **Configuration Management:**
+*   **Configuration Management:** (Correctly notes InsightIQ secrets)
     *   Values like pagination limits, default filter options, or external service URLs/keys **MUST NOT** be hardcoded.
     *   Use environment variables (`.env`) for secrets (API keys) and potentially a dedicated configuration file (`src/config/marketplace.ts`?) for non-sensitive, feature-specific settings.
 
-*   **API Contract Schemas (MVP - Requires Human Verification Against Official Phyllo Docs):**
-    *   **Introduction:** This section defines the agreed-upon interface between the Justify Frontend and Backend for the Influencer Marketplace MVP. Backend implementation MUST adhere to this structure. Field names and types marked with `// Verify...` require confirmation against the official Phyllo API documentation ([https://docs.getphyllo.com/](https://docs.getphyllo.com/)) to ensure alignment with the data source.
+*   **API Contract Schemas (MVP - Requires Verification Against Official InsightIQ Docs):**
+    *   **Introduction:** (Correctly updated)
+        *   This section defines the **target** interface between the Justify Frontend and Backend for the Influencer Marketplace MVP. Backend implementation MUST adhere to this structure **once mapped to InsightIQ capabilities**. Field names and types marked with `// Verify...` require confirmation against the official **InsightIQ** API documentation to ensure alignment.
     *   **`GET /api/influencers`**
-        *   **Request Query Params:**
+        *   **Request Query Params:** (Params likely remain similar, but verify exact filter support in InsightIQ)
             *   `page?: number` (default: 1)
             *   `limit?: number` (default: 12)
-            *   `platforms?: PlatformEnum[]` // Verify exact enum values & query format in Phyllo Docs
+            *   `platforms?: PlatformEnum[]` // Verify filter support in InsightIQ Docs
             *   `minScore?: number` // Verify handling in backend logic
             *   `maxScore?: number` // Verify handling in backend logic
-            *   `minFollowers?: number` // Verify exact Phyllo filter param name & type in Phyllo Docs
-            *   `maxFollowers?: number` // Verify exact Phyllo filter param name & type in Phyllo Docs
-            *   `audienceAge?: string` // Verify exact Phyllo filter param name & value format in Phyllo Docs
-            *   `audienceLocation?: string` // Verify exact Phyllo filter param name & value format in Phyllo Docs
-            *   `searchTerm?: string` (for name/handle search - Post-MVP?)
-            *   `sortBy?: string` (e.g., 'score_desc', 'followers_asc' - Post-MVP?)
-        *   **Response Body (200 OK):**
+            *   `minFollowers?: number` // Verify exact InsightIQ filter param name & type
+            *   `maxFollowers?: number` // Verify exact InsightIQ filter param name & type
+            *   `audienceAge?: string` // Verify exact InsightIQ filter param name & value format
+            *   `audienceLocation?: string` // Verify exact InsightIQ filter param name & value format
+            *   `searchTerm?: string` (Post-MVP?)
+            *   `sortBy?: string` (Post-MVP?)
+        *   **Response Body (200 OK) - Target Schema (Verify fields against InsightIQ):**
             ```json
             {
               "influencers": [
-                // Matches InfluencerSummary type defined in Ticket 0.2
+                // Matches InfluencerSummary type defined in Ticket 0.2 (subject to InsightIQ data)
                 {
                   "id": string, // Justify DB ID
-                  "name": string, // [Profile Analytics API] Verify exact field name & type in Phyllo Docs
-                  "handle": string, // [Profile Analytics API] Verify exact field name & type in Phyllo Docs
-                  "avatarUrl": string, // [Profile Analytics API] Verify exact field name & type in Phyllo Docs
-                  "platforms": PlatformEnum[], // [Profile Analytics API] Verify exact field name & type in Phyllo Docs
-                  "followersCount": number, // [Profile Analytics API] Verify exact field name & type in Phyllo Docs
+                  "name": string, // [InsightIQ API] Verify exact field name & type
+                  "handle": string, // [InsightIQ API] Verify exact field name & type
+                  "avatarUrl": string, // [InsightIQ API] Verify exact field name & type
+                  "platforms": PlatformEnum[], // [InsightIQ API] Verify exact field name & type
+                  "followersCount": number, // [InsightIQ API] Verify exact field name & type
                   "justifyScore": number | null, // Calculated by Justify backend (Ticket 1.9)
-                  "isPhylloVerified": boolean, // [Identity API] Verify exact field name & type in Phyllo Docs
-                  "primaryAudienceLocation": string, // [Profile Analytics API] Verify exact field name & type in Phyllo Docs
-                  "primaryAudienceAgeRange": string, // [Profile Analytics API] Verify exact field name & type in Phyllo Docs
-                  "primaryAudienceGender": "Male" | "Female" | "Other" | "Mixed" | null, // [Profile Analytics API] Verify exact field name & type/enum values in Phyllo Docs
-                  "engagementRate": number | null, // [Profile Analytics API or Engagement Metrics API] Verify exact field name & type in Phyllo Docs
-                  "audienceQualityIndicator": "High" | "Medium" | "Low" | null // [Profile Analytics API] Verify exact field name & type/enum values (or logic) in Phyllo Docs
-                  // Add flag/timestamp here if BE needs to signal Phyllo data staleness/error for specific fields?
+                  "isVerified": boolean, // [InsightIQ API] Verify source & field name (Replaces is**InsightIQ**Verified)
+                  "primaryAudienceLocation": string, // [InsightIQ API] Verify exact field name & type
+                  "primaryAudienceAgeRange": string, // [InsightIQ API] Verify exact field name & type
+                  "primaryAudienceGender": "Male" | "Female" | "Other" | "Mixed" | null, // [InsightIQ API] Verify exact field name & type/enum values
+                  "engagementRate": number | null, // [InsightIQ API] Verify exact field name & type
+                  "audienceQualityIndicator": "High" | "Medium" | "Low" | null // [InsightIQ API] Verify exact field name & type/enum values (or logic)
+                  // Add flag/timestamp here if BE needs to signal InsightIQ data staleness/error?
                 }
                 // ... more influencers
               ],
-              "pagination": {
-                "currentPage": number,
-                "limit": number,
-                "totalInfluencers": number,
-                "totalPages": number
-              }
+              "pagination": { ... }
             }
             ```
     *   **`GET /api/influencers/:id`**
         *   **Request Path Params:** `id: string`
-        *   **Response Body (200 OK):** // Matches InfluencerProfileData type defined in Ticket 0.3
+        *   **Response Body (200 OK) - Target Schema (Verify fields against InsightIQ):**
             ```json
             {
-              // Inherited fields from InfluencerSummary - Verify all as above
+              // Inherited fields from InfluencerSummary - Verify all as above against InsightIQ
               "id": string,
-              "name": string, // [Profile Analytics API] Verify...
-              "handle": string, // [Profile Analytics API] Verify...
-              "avatarUrl": string, // [Profile Analytics API] Verify...
-              "platforms": PlatformEnum[], // [Profile Analytics API] Verify...
-              "followersCount": number, // [Profile Analytics API] Verify...
+              "name": string, // [InsightIQ API] Verify...
+              "handle": string, // [InsightIQ API] Verify...
+              "avatarUrl": string, // [InsightIQ API] Verify...
+              "platforms": PlatformEnum[], // [InsightIQ API] Verify...
+              "followersCount": number, // [InsightIQ API] Verify...
               "justifyScore": number | null,
-              "isPhylloVerified": boolean, // [Identity API] Verify...
-              "primaryAudienceLocation": string, // [Profile Analytics API] Verify...
-              "primaryAudienceAgeRange": string, // [Profile Analytics API] Verify...
-              "primaryAudienceGender": "Male" | "Female" | "Other" | "Mixed" | null, // [Profile Analytics API] Verify...
-              "engagementRate": number | null, // [Profile Analytics API or Engagement Metrics API] Verify...
-              "audienceQualityIndicator": "High" | "Medium" | "Low" | null, // [Profile Analytics API] Verify...
+              "isVerified": boolean, // [InsightIQ API] Verify...
+              "primaryAudienceLocation": string, // [InsightIQ API] Verify...
+              "primaryAudienceAgeRange": string, // [InsightIQ API] Verify...
+              "primaryAudienceGender": "Male" | "Female" | "Other" | "Mixed" | null, // [InsightIQ API] Verify...
+              "engagementRate": number | null, // [InsightIQ API] Verify...
+              "audienceQualityIndicator": "High" | "Medium" | "Low" | null, // [InsightIQ API] Verify...
               // Specific InfluencerProfileData fields:
-              "bio": string | null, // [Profile Analytics API] Verify exact field name & type in Phyllo Docs
-              "contactEmail": string | null, // [Profile Analytics API? Other Source?] Verify source, exact field name & type in Phyllo Docs
-              "audienceDemographics": {
-                "ageDistribution": Record<string, number> | null, // [Profile Analytics API] Verify...
-                "genderDistribution": Record<string, number> | null, // [Profile Analytics API] Verify...
-                "locationDistribution": Record<string, number> | null // [Profile Analytics API] Verify...
-                // Add other verified demographics here
+              "bio": string | null, // [InsightIQ API] Verify exact field name & type
+              "contactEmail": string | null, // [InsightIQ API? Other Source?] Verify source, exact field name & type
+              "audienceDemographics": { // [InsightIQ API] Verify...
+                "ageDistribution": Record<string, number> | null, 
+                "genderDistribution": Record<string, number> | null, 
+                "locationDistribution": Record<string, number> | null 
               } | null,
-              "engagementMetrics": {
-                "averageLikes": number | null, // [Profile Analytics API or Engagement Metrics API] Verify...
-                "averageComments": number | null // [Profile Analytics API or Engagement Metrics API] Verify...
-                // Add other verified metrics here
+              "engagementMetrics": { // [InsightIQ API] Verify...
+                "averageLikes": number | null, 
+                "averageComments": number | null 
               } | null
               // Add other verified fields here
-              // Add flag/timestamp here if BE needs to signal Phyllo data staleness/error?
+              // Add flag/timestamp here if BE needs to signal InsightIQ data staleness/error?
             }
             ```
     *   **`GET /api/influencers/summaries?ids=id1,id2,...`** (Alternative to POST for Wizard Review)
@@ -320,17 +324,18 @@ src/
         *   **Response Body (200 OK):**
             ```json
             {
-              "influencers": InfluencerSummary[] // Matches structure defined above for GET /api/influencers
+              "influencers": InfluencerSummary[] // Matches structure defined above (based on InsightIQ data)
             }
             ```
-        *   **Error Responses (Examples for all endpoints):**
-            *   **Note:** Verify specific error codes/messages returned directly by Phyllo API in their documentation to ensure comprehensive backend handling.
-            *   `400 Bad Request`: `{ "status": 400, "error": "BadRequest", "message": "Invalid filter parameter: minScore must be a number." }` (Validation Error)
-            *   `401 Unauthorized`: `{ "status": 401, "error": "Unauthorized", "message": "Authentication required." }`
-            *   `403 Forbidden`: `{ "status": 403, "error": "Forbidden", "message": "User does not have permission to access this resource." }`
-            *   `404 Not Found`: `{ "status": 404, "error": "NotFound", "message": "Influencer with id X not found." }`
-            *   `500 Internal Server Error`: `{ "status": 500, "error": "InternalServerError", "message": "An unexpected error occurred." }`
-            *   `503 Service Unavailable`: `{ "status": 503, "error": "ServiceUnavailable", "message": "External service (Phyllo/DB) unavailable." }`
+        *   **Error Responses (Examples for all endpoints - Update for InsightIQ):**
+            *   **Note:** Verify specific error codes/messages returned by **InsightIQ API**.
+            *   `400 Bad Request`: (Likely same)
+            *   `401 Unauthorized`: (InsightIQ uses this for failed Basic Auth)
+            *   `403 Forbidden`: (Likely same)
+            *   `404 Not Found`: (Likely same)
+            *   `429 Too Many Requests`: (**InsightIQ Specific** - Check for `Retry-After` header)
+            *   `500 Internal Server Error`: (Likely same)
+            *   `503 Service Unavailable`: (Used if InsightIQ is down/unreachable)
 
 **Assumptions about Existing Codebase (Review & Confirm):**
 
@@ -345,7 +350,7 @@ src/
 
 *   **Permissions/Roles:** How does this feature align with existing user roles in Justify? Does viewing profiles or adding to campaigns require specific permissions? Ensure Clerk auth checks incorporate necessary role validation (Backend task).
 *   **Usage Analytics:** Identify key user actions within the marketplace flow (e.g., filter applied, profile viewed, added to campaign) and implement tracking events using the existing analytics system (e.g., Mixpanel) (Frontend task).
-*   **Billing/Usage Limits (Post-MVP):** Consider how Phyllo API call volume (Profile Analytics, etc.) might impact different subscription tiers or usage limits in the future.
+*   **Billing/Usage Limits (Post-MVP):** Consider how **InsightIQ** API call volume might impact tiers or limits (**Staging limit: 10 credits**).
 *   **Future Feedback Loops (Post-MVP):** Plan for how insights (e.g., high-performing influencers for certain campaign types) might eventually feedback into other parts of Justify (e.g., Campaign Wizard recommendations).
 
 **Design System & Single Source of Truth (SSOT):**
@@ -361,9 +366,9 @@ src/
 
 ---
 
-**Phase 0: Foundation & Backend Kickoff**
+**Phase 0: Foundation & Backend Kickoff (Updated for InsightIQ Context)**
 
-*Goal: Set up FE files/types/mocks, define API contracts, **initiate Backend API & Phyllo integration development**.*
+*Goal: Set up FE files/types/mocks, define **InsightIQ** API contracts, **initiate Backend API & InsightIQ integration development**.*
 
 *   **Ticket 0.1: `CHORE: Create Core Directory Structure`**
     *   **Goal:** Establish the folder hierarchy for the new feature.
@@ -388,13 +393,13 @@ src/
           avatarUrl: string;
           platforms: PlatformEnum[];
           followersCount: number; // Use consistent naming (e.g., followerCount or followers)
-          justifyScore: number; // Assumed 0-100 // Likely calculated by Justify backend, using Phyllo inputs (Addresses Kelly's need for effectiveness metric over EMV)
-          isPhylloVerified: boolean; // Direct flag from Phyllo via Identity API (Addresses Kelly's need for verification/credibility)
-          primaryAudienceLocation: string; // e.g., "United States", "UK" // From Phyllo Profile Analytics (Addresses Kelly's need for audience alignment)
-          primaryAudienceAgeRange: string; // e.g., "25-34" // From Phyllo Profile Analytics (Addresses Kelly's need for audience alignment, e.g., 45+ targeting)
+          justifyScore: number; // Assumed 0-100 // Likely calculated by Justify backend, using InsightIQ inputs
+          isInsightIQVerified: boolean; // Direct flag from InsightIQ Identity API (via Profile.is_verified)
+          primaryAudienceLocation: string; // e.g., "United States", "UK" // From InsightIQ Profile Analytics
+          primaryAudienceAgeRange: string; // e.g., "25-34" // From InsightIQ Profile Analytics
           primaryAudienceGender?: 'Male' | 'Female' | 'Other' | 'Mixed'; // Optional for summary
           engagementRate?: number; // Optional for summary, e.g., 3.5 (%)
-          audienceQualityIndicator?: 'High' | 'Medium' | 'Low'; // Simple flag based on Phyllo follower quality analysis (Addresses Kelly's concern about fake followers)
+          audienceQualityIndicator?: 'High' | 'Medium' | 'Low'; // Simple flag based on InsightIQ follower quality analysis
         }
         ```
     *   **Files Modified:** `src/types/influencer.ts`, potentially `src/types/enums.ts`.
@@ -404,16 +409,16 @@ src/
     *   **Action:** In `src/types/influencer.ts`, define `InfluencerProfileData` interface, extending `InfluencerSummary`:
         ```typescript
         export interface AudienceDemographics {
-          ageDistribution: Record<string, number>; // e.g., { '18-24': 25, '25-34': 45, ... } // From Phyllo Profile Analytics (Essential for Kelly's audience targeting)
-          genderDistribution: Record<string, number>; // e.g., { 'Female': 65, 'Male': 30, ... } // From Phyllo Profile Analytics (Essential for Kelly's audience targeting)
-          locationDistribution: Record<string, number>; // e.g., { 'USA': 40, 'UK': 20, ... } // From Phyllo Profile Analytics (Essential for Kelly's audience targeting)
-          // TODO: Add other relevant MVP demographics if needed (e.g., top interests array?) - Consult Product Owner // Phyllo Profile Analytics likely source
+          ageDistribution: Record<string, number>; // e.g., { '18-24': 25, '25-34': 45, ... } // From InsightIQ Profile Analytics (Essential for Kelly's audience targeting)
+          genderDistribution: Record<string, number>; // e.g., { 'Female': 65, 'Male': 30, ... } // From InsightIQ Profile Analytics (Essential for Kelly's audience targeting)
+          locationDistribution: Record<string, number>; // e.g., { 'USA': 40, 'UK': 20, ... } // From InsightIQ Profile Analytics (Essential for Kelly's audience targeting)
+          // TODO: Add other relevant MVP demographics if needed (e.g., top interests array?) - Consult Product Owner // InsightIQ Profile Analytics likely source
         }
 
         export interface EngagementMetrics {
-           averageLikes?: number; // From Phyllo Profile Analytics or Engagement Metrics API
-           averageComments?: number; // From Phyllo Profile Analytics or Engagement Metrics API
-           // TODO: Add other relevant MVP metrics if needed - Consult Product Owner // Phyllo likely source
+           averageLikes?: number; // From InsightIQ Profile Analytics or Engagement Metrics API
+           averageComments?: number; // From InsightIQ Profile Analytics or Engagement Metrics API
+           // TODO: Add other relevant MVP metrics if needed - Consult Product Owner // InsightIQ likely source
         }
 
         export interface InfluencerProfileData extends InfluencerSummary {
@@ -440,7 +445,7 @@ src/
 *   **Ticket 0.5: `DATA: Create Mock Influencer Data File`**
     *   **Goal:** Generate realistic mock data covering different scenarios.
     *   **Action:** Create `src/data/mock/influencers.ts`. Export a constant array (`mockInfluencerDatabase: InfluencerProfileData[]`) containing at least 15-20 diverse mock influencers conforming to `InfluencerProfileData` (using fields defined in Ticket 0.3). Include variations in scores, verification status, platforms, audience data, followersCount, etc. Ensure `id` is unique.
-    *   **Customer Focus:** Ensure mock data includes examples reflecting Kelly P.'s concerns: some verified (`isPhylloVerified: true`), some not; varying `justifyScore` values; diverse audience demographics (including 45+ ranges); influencers on different platforms (IG, YT, TK).
+    *   **Customer Focus:** Ensure mock data includes examples reflecting Kelly P.'s concerns: some verified (`isInsightIQVerified: true`), some not; varying `justifyScore` values; diverse audience demographics (including 45+ ranges); influencers on different platforms (IG, YT, TK).
     *   **Files Created:** `src/data/mock/influencers.ts`.
     *   **Verification:** File exports the array correctly. Data includes diverse examples reflecting user needs.
 *   **Ticket 0.6: `FEAT: Implement Mock Influencer Service - getInfluencers Function`**
@@ -517,41 +522,40 @@ src/
     *   **Action:** Ensure Prisma schema changes (Ticket 0.2, 0.3) are applied. Create basic repository patterns or DB service functions. Set up basic Next.js API route handlers (`route.ts`) for `/api/influencers` and `/api/influencers/[id]`. Implement basic health check response.
     *   **Dependencies:** Tickets 0.3.
     *   **Verification:** Database tables exist. API routes return basic success/error responses.
-*   **Ticket 0.12: `BE-SETUP: Implement Phyllo Service Initial Connection`**
-    *   **Goal:** Establish authenticated connection capability to Phyllo API.
-    *   **Action:** Implement authentication logic within `src/lib/phylloService.ts` (create if needed) using environment variables for API keys (Ticket 0.13). Implement basic health check or simple Phyllo API call (e.g., get account status) to verify connection.
-    *   **Dependencies:** Phyllo API credentials (via Ticket 0.13).
-    *   **Verification:** Backend service can successfully authenticate with Phyllo API.
-*   **Ticket 0.13: `CHORE(Config): Setup Phyllo API Key Management`**
-    *   **Goal:** Securely configure Phyllo API keys.
-    *   **Action:** Add `PHYLLO_API_KEY`, `PHYLLO_SECRET` (or similar) to `.env.template` / `.env.example`. Ensure these are loaded correctly via environment variables and accessible to the `phylloService`. Use platform secret management for production.
-    *   **Verification:** Keys are configured and usable by the `phylloService`.
-*   **Ticket 0.14: `CHORE(API): Verify Existing Phyllo User/Token Endpoints`**
-    *   **Goal:** Ensure existing endpoints (`/api/phyllo/create-user`, `/api/phyllo/sdk-token`) meet requirements for Marketplace/future connection flows.
+*   **Ticket 0.12: `BE-SETUP: Implement InsightIQ Service Initial Connection` (Revised)** (Title and Action updated for InsightIQ)
+    *   **Goal:** Establish authenticated connection capability to InsightIQ API.
+    *   **Action:** Implement authentication logic within `src/lib/insightiqService.ts` (create if needed) using environment variables for API keys (Ticket 0.13). Implement basic health check or simple InsightIQ API call (e.g., get account status) to verify connection.
+    *   **Dependencies:** InsightIQ API credentials (via Ticket 0.13).
+    *   **Verification:** Backend service can successfully authenticate with InsightIQ API.
+*   **Ticket 0.13: `CHORE(Config): Setup InsightIQ API Key Management` (Revised)** (Title and Action updated for InsightIQ)
+    *   **Goal:** Securely configure InsightIQ API keys.
+    *   **Action:** Add `INSIGHTIQ_API_KEY`, `INSIGHTIQ_SECRET` (or similar) to `.env.template` / `.env.example`. Ensure these are loaded correctly via environment variables and accessible to the `insightiqService`. Use platform secret management for production.
+    *   **Verification:** Keys are configured and usable by the `insightiqService`.
+*   **Ticket 0.14: `CHORE(API): Verify/Refactor Existing Connection Endpoints for InsightIQ` (Revised)** (Title and Action updated for InsightIQ, notes dependency)
+    *   **Goal:** Ensure existing endpoints (`/api/insightiq/create-user`, `/api/insightiq/sdk-token`) meet requirements for Marketplace/future connection flows.
     *   **Action:**
-        *   Review `/api/phyllo/create-user/route.ts`: Verify it correctly maps Justify internal user ID to Phyllo `external_id` and stores the returned Phyllo `user_id`.
-        *   Review `/api/phyllo/sdk-token/route.ts`: Verify it accepts the Phyllo `user_id`, specifies the correct `products` array needed for Marketplace data (`IDENTITY`, `IDENTITY.AUDIENCE`, `ENGAGEMENT`, etc.), and returns the `sdk_token`.
-        *   Check error handling in both endpoints.
-        *   Refactor/update if necessary to meet requirements.
-    *   **Dependencies:** Access to review existing code.
-    *   **Verification:** Endpoints are confirmed or updated to correctly create Phyllo users, generate SDK tokens with required products, and handle errors.
+        *   Review/Rename `/api/**insightiq**/create-user` -> `/api/insightiq/create-user`. Verify if InsightIQ has an equivalent concept or if user mapping is handled differently. (**Blocked by Docs**)
+        *   Review/Rename `/api/**insightiq**/sdk-token` -> `/api/insightiq/sdk-token`. Verify if InsightIQ uses an SDK token flow or a different mechanism for its connection SDK (if any). Update required `products` (if applicable). (**Blocked by Docs**)
+        *   Refactor implementation to call InsightIQ endpoints via `insightiqService`.
+    *   **Dependencies:** Access to review existing code, **InsightIQ Docs**.
+    *   **Verification:** Endpoints (if needed) are confirmed or updated to correctly interact with InsightIQ for user mapping/connection flow. 
 
 ---
 
-**Phase 1: Marketplace UI & Initial Integration**
+**Phase 1: Marketplace UI & Initial Integration (Updated for InsightIQ Context)**
 
-*Goal: Build the core Marketplace page UI, connect to mock or **early live dev APIs**, implement basic selection state.*
+*Goal: Build the core Marketplace page UI, connect to mock or **early live InsightIQ dev APIs**, implement basic selection state.*
 
-*   **Ticket 1.0: `BE-FEAT: Implement GET /influencers v1 (Core Data + Phyllo Verification)`**
-    *   **Goal:** Create the primary backend endpoint delivering essential data for the list view, integrating initial Phyllo data.
-    *   **Action:** Implement `GET /api/influencers` route handler based on **finalized API Contract (Ticket 0.5.1)**. **Apply Input Validation (Zod).** Fetch data from local DB (Ticket 0.11). Implement basic filtering/pagination logic (using indexes from Ticket 0.10). **Integrate calls via `phylloService` (Ticket 0.12) to fetch `isPhylloVerified` status** (using Phyllo Identity API) and basic `Profile Analytics` data (followers, platforms). Handle caching/errors for Phyllo calls. Deploy to dev/staging ASAP.
+*   **Ticket 1.0: `BE-FEAT: Implement GET /influencers v1 (Core Data + InsightIQ Verification)` (Revised)** (Title and Action updated for InsightIQ, notes dependency)
+    *   **Goal:** Create the primary backend endpoint delivering essential data for the list view, integrating initial InsightIQ data.
+    *   **Action:** Implement `GET /api/influencers` route handler based on **finalized API Contract (Ticket 0.5.1)**. **Apply Input Validation (Zod).** Fetch data from local DB (Ticket 0.11). Implement basic filtering/pagination logic (using indexes from Ticket 0.10). **Integrate calls via `insightiqService` (Ticket 0.12) to fetch `isInsightIQVerified` status** (using InsightIQ Identity API) and basic `Profile Analytics` data (followers, platforms). Handle caching/errors for InsightIQ calls. Deploy to dev/staging ASAP.
     *   **Dependencies:** Tickets 0.5.1, 0.10, 0.11, 0.12, 0.13.
-    *   **Verification:** Endpoint returns data matching contract. Input validation works. Includes `isPhylloVerified`, followers, platforms sourced from Phyllo (or indicates if fetch failed). Basic filtering works.
-*   **Ticket 1.1: `BE-FEAT: Implement GET /influencers/:id v1 (Core Profile Data)`**
-    *   **Goal:** Create the endpoint for fetching detailed profile data, including core Phyllo analytics.
-    *   **Action:** Implement `GET /api/influencers/:id` route handler based on **finalized API Contract**. **Apply Input Validation (Zod for ID format).** Fetch data from local DB. **Integrate calls via `phylloService` to fetch detailed `Profile Analytics` data** (Audience Demographics, Engagement Metrics, Follower Quality). Integrate `Identity API` call for `isPhylloVerified`. Handle caching/errors. Deploy to dev/staging ASAP.
+    *   **Verification:** Endpoint returns data matching contract. Input validation works. Includes `isInsightIQVerified`, followers, platforms sourced from InsightIQ (or indicates if fetch failed). Basic filtering works.
+*   **Ticket 1.1: `BE-FEAT: Implement GET /influencers/:id v1 (Core Profile Data)` (Revised)** (Title and Action updated for InsightIQ, notes dependency)
+    *   **Goal:** Create the endpoint for fetching detailed profile data, including core InsightIQ analytics.
+    *   **Action:** Implement `GET /api/influencers/:id` route handler based on **finalized API Contract**. **Apply Input Validation (Zod for ID format).** Fetch data from local DB. **Integrate calls via `insightiqService` to fetch detailed `Profile Analytics` data** (Audience Demographics, Engagement Metrics, Follower Quality). Integrate `Identity API` call for `isInsightIQVerified`. Handle caching/errors. Deploy to dev/staging ASAP.
     *   **Dependencies:** Tickets 0.5.1, 0.11, 0.12, 0.13.
-    *   **Verification:** Endpoint returns detailed data matching contract, including demographics and engagement metrics sourced from Phyllo.
+    *   **Verification:** Endpoint returns detailed data matching contract, including demographics and engagement metrics sourced from InsightIQ.
 *   **Ticket 1.2: `FEAT(UI): Build InfluencerSummaryCard Component`**
     *   **Goal:** Create the core reusable UI card for displaying influencer summary info in a **Grid Layout**.
     *   **Action:** Create `src/components/features/influencers/InfluencerSummaryCard.tsx`.
@@ -564,13 +568,13 @@ src/
                 *   Name (`<p>` or `<h4>`, bold).
                 *   Handle (`<p>`, smaller text, secondary color).
                 *   Platform Icons: Map `influencer.platforms`. Use existing `Icon` component for each platform. Ensure icons exist (See Dependency Check).
-                *   Verification: If `influencer.isPhylloVerified`, display a verification `Badge` ("Verified") or `Icon`. (**Data Source Note:** `isPhylloVerified` comes via backend from Phyllo Identity API).
+                *   Verification: If `influencer.isInsightIQVerified`, display a verification `Badge` ("Verified") or `Icon`. (**Data Source Note:** `isInsightIQVerified` comes via backend from InsightIQ Identity API).
                 *   Audience Tags: Display `primaryAudienceAgeRange`, `primaryAudienceGender` (if available), `primaryAudienceLocation` using `Badge` components for quick scanning.
-            *   Bottom section (metrics): Display Followers (`followersCount`), **Justify Score** (`justifyScore` - include `Tooltip` or `InfoIcon` explaining key factors), Audience Quality (`audienceQualityIndicator` - use `Badge`), Engagement Rate (`engagementRate`), using Text/Labels. Format numbers. (**Data Source Note:** Score calculated by backend; Quality from Phyllo Profile Analytics; Engagement from Phyllo).
+            *   Bottom section (metrics): Display Followers (`followersCount`), **Justify Score** (`justifyScore` - include `Tooltip` or `InfoIcon` explaining key factors), Audience Quality (`audienceQualityIndicator` - use `Badge`), Engagement Rate (`engagementRate`), using Text/Labels. Format numbers. (**Data Source Note:** Score calculated by backend; Quality from InsightIQ Profile Analytics; Engagement from InsightIQ).
             *   Action section: "View Profile" `Button` (`variant="outline"` or similar). `onClick` calls `onViewProfile(influencer.id)`.
         *   **Visual Reference:** Aim for layout in `list-view.png`.
         *   **Accessibility:** Ensure checkbox has label association. Ensure interactive elements are focusable.
-        *   **Customer Focus:** This card directly addresses Kelly P.'s need to see verification status (`isPhylloVerified`) and effectiveness indicators (`justifyScore`, audience highlights) upfront, de-emphasizing raw follower counts.
+        *   **Customer Focus:** This card directly addresses Kelly P.'s need to see verification status (`isInsightIQVerified`) and effectiveness indicators (`justifyScore`, audience highlights) upfront, de-emphasizing raw follower counts.
         *   **Integration Mandate:** **Develop against the agreed API Contract structure.** Test initially with mock service if needed, but **switch to live dev/staging endpoint (Ticket 1.0) via `influencerService` IMMEDIATELY upon availability.**
     *   **Files Created:** `src/components/features/influencers/InfluencerSummaryCard.tsx`.
     *   **Dependency Check:** Verify existence of `Card`, `Checkbox`, `Avatar`, `Icon`, `Badge`, `Button` in `src/components/ui`. Specifically check if `Icon` supports platform logos (IG, YT, TK etc.) and a verification icon (e.g., check-circle). **If icons missing, create `TICKET: CHORE(UI): Add missing platform/verification icons`**.
@@ -633,20 +637,19 @@ src/
     *   **Action:** In `MarketplacePage`, implement `handleApplyFilters` to call `fetchData(1)` with current `filters` state. Connect Apply button. Modify `fetchData` to pass `filters` to `influencerService.getInfluencers`.
     *   **Files Modified:** `src/app/influencer-marketplace/page.tsx`, `src/components/features/influencers/MarketplaceFilters.tsx`.
     *   **Verification:** Applying filters refetches data using API filter params. List updates.
-*   **Ticket 1.9: `BE-FEAT: Implement MVP Justify Score v1 Calculation`**
-    *   **Goal:** Provide an initial, simple Justify Score based on available Phyllo data.
+*   **Ticket 1.9: `BE-FEAT: Implement MVP Justify Score v1 Calculation` (Revised)** (Title and Action updated for InsightIQ, notes dependency)
+    *   **Goal:** Provide an initial, simple Justify Score based on available InsightIQ data.
     *   **Action:** In the backend logic (likely within the service layer providing data for `GET /influencers` and `GET /influencers/:id`):
-        *   Define a simple V1 algorithm (e.g., weighted combination of `isPhylloVerified` status, `audienceQualityIndicator`, basic engagement rate).
+        *   Define a simple V1 algorithm (e.g., weighted combination of `isInsightIQVerified` status, `audienceQualityIndicator`, basic engagement rate).
         *   Calculate and return the `justifyScore` field. Document the V1 algorithm.
         *   Handle missing input data gracefully (e.g., return `null` score or calculate based on available data).
-    *   **Dependencies:** Ticket 1.0, Ticket 1.1 (needs Phyllo data available).
+    *   **Dependencies:** Ticket 1.0, Ticket 1.1 (needs InsightIQ data available).
     *   **Verification:** API responses include a calculated `justifyScore`. Calculation logic is documented and handles missing inputs.
 
 ---
 
-**Phase 2: Profile Page UI & Contact Info**
-
-*Goal: Build the detailed influencer profile page UI, connect to mock or **early live dev APIs**, **display contact info**.*
+**Phase 2: Profile Page UI & Contact Info (Updated for InsightIQ Context)**
+*(**Action:** Added annotation to explicitly state Data Source notes need update based on InsightIQ docs)*
 
 *   **Ticket 2.1: `FEAT: Setup Profile Page (`[id]/page.tsx`) & Data Fetching`**
     *   **Goal:** Create the dynamic page, extract ID, fetch profile data, handle loading/errors.
@@ -674,7 +677,7 @@ src/
             *   Use layout (Flexbox/Grid) for structure.
             *   Left side: `Avatar`.
             *   Middle section: Name, Handle, Bio (`influencer.bio`).
-            *   Right section: **Justify Score** display (with `Tooltip`/`InfoIcon`), Verification `Badge`/`Icon`, Audience Quality `Badge`, Platform `Icon`s. (**Data Source Note:** Score from backend; Verification from Phyllo Identity; Quality from Phyllo Profile Analytics; Bio likely from Phyllo Profile Analytics).
+            *   Right section: **Justify Score** display (with `Tooltip`/`InfoIcon`), Verification `Badge`/`Icon`, Audience Quality `Badge`, Platform `Icon`s. (**Data Source Note:** Score from backend; Verification from InsightIQ Identity; Quality from InsightIQ Profile Analytics; Bio likely from InsightIQ Profile Analytics).
             *   Action button: "Select Influencer" / "Deselect Influencer" `Button` or `Checkbox` based on `isSelected`. `onClick={() => onSelectToggle(influencer.id)}`.
         *   **Visual Reference:** Match top section of `individual-influencer-profile.png`.
         *   **Dependency Check:** Reuses UI components. Potentially a small dedicated Score display component.
@@ -707,21 +710,12 @@ src/
 ---
 
 **Phase 3: Campaign Wizard Integration**
-
-*Goal: Connect the functional marketplace (**ideally using early live data**) back to the campaign creation process.*
-
-*   **Ticket 3.1: `REFACTOR: Ensure WizardContext Stores Filter Criteria`**
-    *   **Goal:** Ensure the wizard state stores filter criteria.
-    *   **Action:** Modify `WizardContext` to include `filters` and `isFindingInfluencers` fields.
-    *   **Files Modified:** `src/contexts/WizardContext.tsx`.
-    *   **Verification:** Context type is updated with the new fields. Default values handled correctly in context provider.
-    *   **Integration Testing Note:** E2E tests (See Testing Strategy) must specifically cover scenarios involving browser back/forward navigation between Wizard and Marketplace to ensure `isFindingInfluencers` flag and `selectedInfluencerIds` state in `WizardContext` remain consistent and are handled correctly.
+*(No changes needed here, depends on previous phases)*
 
 ---
 
 **Phase 4: Post-MVP Features (Addressing Specific User Needs)**
-
-*Goal: Enhance the marketplace based on deeper user requirements identified (e.g., from Kelly P. discussion).*
+*(**Action:** Updated references in Action steps from Phyllo -> InsightIQ or generic external provider)*
 
 *   **Ticket 4.1: `FEAT: Implement Post-MVP Features`**
     *   **Goal:** Implement additional features and refine existing ones.
@@ -734,15 +728,15 @@ src/
 *   **Ticket 5.1: `FEAT: Direct Influencer Contact Info Display`**
     *   **Goal:** Display verified email addresses for influencers (if available/permissioned).
     *   **Context:** Addresses Kelly P.'s strong preference for direct email outreach over DMs.
-    *   **Action:** Requires backend API update to potentially fetch/store this (maybe via Phyllo Profile Analytics or separate source). Update `InfluencerProfileData` type. Display contact info securely on the profile page.
+    *   **Action:** Requires backend API update to potentially fetch/store this (maybe via InsightIQ Profile Analytics or separate source). Update `InfluencerProfileData` type. Display contact info securely on the profile page.
 *   **Ticket 5.2: `FEAT: Sponsored Post Performance Metrics (High Priority Post-MVP)`**
     *   **Goal:** Show metrics specifically for sponsored content (e.g., CTR, potentially conversion hints).
     *   **Context:** **Critical Value:** Addresses Kelly P.'s need to validate influencer pricing and ROI based on *paid* campaign effectiveness, moving beyond unreliable EMV.
-    *   **Action:** Requires significant backend work to identify sponsored posts (via Phyllo Profile/Content APIs?) and potentially track associated links/codes. Update `InfluencerProfileData`. Display metrics on profile page.
+    *   **Action:** Requires significant backend work to identify sponsored posts (via InsightIQ Profile/Content APIs?) and potentially track associated links/codes. Update `InfluencerProfileData`. Display metrics on profile page.
 *   **Ticket 5.3: `FEAT: Basic Brand Safety Flags/Content Check Integration (High Priority Post-MVP)`**
     *   **Goal:** Integrate initial brand safety checks.
     *   **Context:** Addresses Kelly P.'s need for automated background checks/controversial post detection, reducing manual vetting time and risk.
-    *   **Action:** Backend integrates with Phyllo Brand Safety API (Basic report initially?). Update `InfluencerProfileData` with a risk score or flags. Display indicators on profile/summary card.
+    *   **Action:** Backend integrates with InsightIQ Brand Safety API (Basic report initially?). Update `InfluencerProfileData` with a risk score or flags. Display indicators on profile/summary card.
 *   **Ticket 5.4: `FEAT: Add to Existing Campaign Flow`**
     *   **Goal:** Allow users entering the marketplace directly to add selected influencers to an existing campaign.
     *   **Context:** Enables the high-value "Marketplace-First" user journey for ongoing discovery and campaign staffing.
@@ -750,7 +744,7 @@ src/
 *   **Ticket 5.5: `FEAT: Content Effectiveness Insights (Placeholder)`**
     *   **Goal:** Lay groundwork for future content/messaging analysis.
     *   **Context:** Addresses Kelly P.'s identified gap in knowing which messages work best.
-    *   **Action:** This is complex. Initial step might involve displaying top-performing *content types* (e.g., Reels vs. Stories) based on Phyllo data. True A/B testing is likely a larger epic.
+    *   **Action:** This is complex. Initial step might involve displaying top-performing *content types* (e.g., Reels vs. Stories) based on InsightIQ data. True A/B testing is likely a larger epic.
 *   **Ticket 5.6: `FEAT: Collaboration History / Saturation Indicator (Post-MVP)`**
     *   **Goal:** Show recent brand collaborations to assess potential saturation.
     *   **Context:** Addresses Kelly P.'s concern about influencers working with too many brands.
@@ -761,7 +755,7 @@ src/
 *   **Ticket 5.8: `FEAT: Podcast Influencer Support (High Priority Post-MVP)`**
     *   **Goal:** Specifically filter for and display data relevant to podcasters.
     *   **Context:** Addresses Kelly P.'s heavy use of podcasting and need for relevant metrics.
-    *   **Action:** Update filters. Backend needs to identify podcasters (via Phyllo?). Display relevant podcast metrics (e.g., listenership estimates if available via Phyllo Profile Analytics).
+    *   **Action:** Update filters. Backend needs to identify podcasters (via InsightIQ?). Display relevant podcast metrics (e.g., listenership estimates if available via InsightIQ Profile Analytics).
 *   **Ticket 5.9: `TECH-DEBT: Refactor Wizard/Marketplace State Coupling`**
     *   **Goal:** Decouple state management between Campaign Wizard and Marketplace.
     *   **Context:** Current MVP uses `WizardContext` directly, creating tight coupling.
@@ -769,35 +763,26 @@ src/
 
 ---
 
-**Phase X: Frontend Phyllo Connect SDK Integration (Run Concurrently / As Needed)**
+**Phase X: Frontend InsightIQ Connect SDK Integration (Revised)**
+*(Section accurately reflects InsightIQ context and dependency on docs)*
 
-*Goal: Implement the user-facing workflow for connecting social accounts via Phyllo.*
-*Note: The specific UI trigger (e.g., button in Settings, Onboarding step) for initiating this flow needs to be defined separately based on overall application design.*
+*Goal: Implement the user-facing workflow for connecting social accounts via **InsightIQ (if applicable)**.*
+*Note: Assumes InsightIQ provides a similar SDK flow. **Requires InsightIQ Docs.***
 
-*   **Ticket X.1: `FEAT(FE): Setup Phyllo Connect Web SDK Script & Hook`**
-    *   **Goal:** Integrate the Phyllo Connect JavaScript SDK script and create an abstraction.
-    *   **Action:**
-        *   Add Phyllo Connect `<script>` tag to the main layout or relevant page.
-        *   Create a reusable React hook (`usePhylloConnect`) or service (`phylloConnectWebService.ts`) to encapsulate SDK initialization (`PhylloConnect.initialize`) and event handling.
+*   **Ticket X.1: `FEAT(FE): Setup InsightIQ Connect Web SDK Script & Hook (If Available)`**
+    *   **Goal:** Integrate the **InsightIQ** Connect JavaScript SDK script (if it exists) and create an abstraction.
+    *   **Action:** Add **InsightIQ** SDK `<script>` tag. Create `useInsightIQConnect` hook or `insightiqConnectWebService.ts`.
     *   **Verification:** SDK script loads. Hook/service structure exists.
-*   **Ticket X.2: `FEAT(FE): Implement Phyllo Connect Initialization & Launch`**
-    *   **Goal:** Trigger the connection flow using existing backend endpoints.
-    *   **Action:**
-        *   In the component responsible for triggering the connection:
-            *   Ensure the Justify user's Phyllo `user_id` is available (may require fetching user profile data that includes this ID, potentially retrieved after calling `/api/phyllo/create-user`).
-            *   Call the **existing** Justify backend endpoint `POST /api/phyllo/sdk-token` to fetch the `sdk_token`.
-            *   Use the fetched `sdk_token` and Phyllo `user_id` to initialize the SDK via the hook/service from Ticket X.1.
-            *   Call the SDK's `open()` method to launch the Phyllo Connect UI.
-    *   **Dependencies:** Existing `/api/phyllo/sdk-token` endpoint (verified in Ticket 0.14), Phyllo `user_id` available on FE, Ticket X.1.
-    *   **Verification:** Phyllo Connect modal/popup launches successfully upon trigger.
-*   **Ticket X.3: `FEAT(FE): Implement Phyllo Connect Callbacks & Backend Notification`**
-    *   **Goal:** Handle the results of the connection attempt and notify the backend.
-    *   **Action:**
-        *   Implement handlers within the `usePhylloConnect` hook/service for SDK callbacks: `onAccountConnected`, `onAccountDisconnected`, `onTokenExpired`, `onExit`, `onConnectionFailure`.
-        *   Update UI state based on callbacks (e.g., show success/error messages, close modal).
-        *   **Crucially:** The `onAccountConnected` handler **MUST** notify the Justify backend that a new connection occurred (e.g., by calling a new dedicated backend API endpoint like `POST /api/phyllo/connections` or similar) so the backend can potentially trigger Phyllo webhooks or initial data syncs for that connection.
-    *   **Dependencies:** Ticket X.1, potentially a new backend endpoint for connection notification.
-    *   **Verification:** Callbacks are correctly handled. UI provides appropriate feedback. Backend is notified upon successful connection.
+*   **Ticket X.2: `FEAT(FE): Implement InsightIQ Connect Initialization & Launch (If Available)`**
+    *   **Goal:** Trigger the connection flow using backend endpoints (adapted for InsightIQ).
+    *   **Action:** Call backend (e.g., `/api/insightiq/create-user`, `/api/insightiq/sdk-token` or equivalents) to get config needed by **InsightIQ SDK**. Initialize and open SDK.
+    *   **Dependencies:** Backend endpoints adapted for InsightIQ (Ticket 0.14-Revised), **InsightIQ SDK Docs**.
+    *   **Verification:** InsightIQ connection UI launches successfully.
+*   **Ticket X.3: `FEAT(FE): Implement InsightIQ Connect Callbacks & Backend Notification (If Available)`**
+    *   **Goal:** Handle connection results and notify backend.
+    *   **Action:** Implement handlers for **InsightIQ SDK** callbacks. Update UI. Notify backend (e.g., `POST /api/insightiq/connections`).
+    *   **Dependencies:** Ticket X.1, **InsightIQ SDK & Webhook Docs**.
+    *   **Verification:** Callbacks handled. Backend notified.
 
 **Definition of Done (DoD) for MVP Tickets:**
 
@@ -810,8 +795,8 @@ src/
 *   **Ticket 0.7:** Function correctly finds and returns profile data or null.
 *   **Ticket 0.8:** Function returns correct summaries for the given IDs.
 *   **Ticket 0.9:** File exports `influencerService`. `useMock` logic is correct. Placeholder `apiService` exists. TypeScript checks pass for interface conformity.
-*   **Ticket 1.0:** Endpoint returns data matching contract. Includes `isPhylloVerified`, followers, platforms sourced from Phyllo (or indicates if fetch failed). Basic filtering works.
-*   **Ticket 1.1:** Endpoint returns detailed data matching contract, including demographics and engagement metrics sourced from Phyllo.
+*   **Ticket 1.0:** Endpoint returns data matching contract. Includes `isInsightIQVerified`, followers, platforms sourced from InsightIQ (or indicates if fetch failed). Basic filtering works.
+*   **Ticket 1.1:** Endpoint returns detailed data matching contract, including demographics and engagement metrics sourced from InsightIQ.
 *   **Ticket 1.2:** Page renders with title. State variables are initialized. Handler functions exist.
 *   **Ticket 1.3:** Data is fetched on load. Loading state works. `influencers` state is populated. `totalInfluencers` is set.
 *   **Ticket 1.4:** API or network errors during fetch update the `error` state and are handled by the `MarketplaceList` component. **Audience Quality badge is displayed.**
@@ -834,11 +819,11 @@ src/
 *   **Ticket 5.9:** Wizard/Marketplace state coupling refactored.
 *   **Ticket 0.10:** File exists with basic structure.
 *   **Ticket 0.11:** Database tables exist. API routes return basic success/error responses.
-*   **Ticket 0.12:** Backend service can successfully authenticate with Phyllo API.
-*   **Ticket 0.13:** Keys are configured and usable by the `phylloService`.
-*   **Ticket 0.14:** Endpoints are confirmed or updated to correctly create Phyllo users, generate SDK tokens with required products, and handle errors.
+*   **Ticket 0.12:** Backend service can successfully authenticate with InsightIQ API.
+*   **Ticket 0.13:** Keys are configured and usable by the `insightiqService`.
+*   **Ticket 0.14:** Endpoints are confirmed or updated to correctly create InsightIQ users, generate SDK tokens with required products, and handle errors.
 *   **Ticket X.1:** SDK script loads. Hook/service structure exists.
-*   **Ticket X.2:** Phyllo Connect modal/popup launches successfully upon trigger.
+*   **Ticket X.2:** InsightIQ Connect modal/popup launches successfully upon trigger.
 *   **Ticket X.3:** Callbacks are correctly handled. UI provides appropriate feedback. Backend is notified upon successful connection.
 
 **Risks and Mitigations:**
@@ -853,7 +838,7 @@ src/
 | **Type Consistency Issues**               | Medium     | Medium | Strict TypeScript usage; Use `IInfluencerService` interface; **Mandate API input validation (Zod)** in MVP.         |
 | **Profile/Marketplace State Sync**        | Low (MVP)  | Low    | **Decision:** No sync for MVP (Ticket 3.3 clarification). Revisit if user feedback requires it Post-MVP.              |
 | **Navigation Edge Cases (Back Button)**   | Medium     | Medium | Robust flag handling in `MarketplacePage` `useEffect` (Ticket 4.3); Cover back/forward nav in E2E tests.            |
-| **Phyllo Data Freshness/Latency**         | Medium     | Medium | BE defines refresh strategy (webhooks+polling); Document latency expectations; Consider UI indicators for stale data if needed. |
-| **Phyllo API Errors/Downtime**            | Medium     | High   | BE robust error handling (retries, logging); Define API contract for missing/stale data; FE graceful handling (Ticket 1.4, 2.1). |
-| **Phyllo API Costs/Rate Limits**          | Medium     | High   | BE implements caching; Monitor usage dashboards; Alerting on high usage/cost.                                |
+| **InsightIQ Data Freshness/Latency**         | Medium     | Medium | BE defines refresh strategy (webhooks+polling); Document latency expectations; Consider UI indicators for stale data if needed. |
+| **InsightIQ API Errors/Downtime**            | Medium     | High   | BE robust error handling (retries, logging); Define API contract for missing/stale data; FE graceful handling (Ticket 1.4, 2.1). |
+| **InsightIQ API Costs/Rate Limits**          | Medium     | High   | BE implements caching; Monitor usage dashboards; Alerting on high usage/cost.                                |
 | **API Error Handling Gaps (FE/BE)**       | Medium     | High   | Define error categories; Consistent BE formats; Robust FE handling/display (Tickets 1.4, 2.1); Add checks to DoD. |

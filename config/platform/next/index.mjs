@@ -1,6 +1,6 @@
 /**
  * Next.js Platform Configuration
- * 
+ *
  * This file composes all Next.js specific configurations from modules
  * into a single configuration object that can be used by next.config.js
  */
@@ -14,7 +14,7 @@ import { mergeConfigurations } from '../../utils.js';
 // Import the bundle analyzer
 import _withBundleAnalyzer from '@next/bundle-analyzer';
 const withBundleAnalyzer = _withBundleAnalyzer({
-  enabled: process.env.ANALYZE === 'true'
+  enabled: process.env.ANALYZE === 'true',
 });
 
 /**
@@ -58,7 +58,7 @@ const finalNextConfig = { ...baseNextConfig };
 
 // Apply the webpack configuration function
 if (mergeableConfigs.webpack) {
-  const originalWebpack = finalNextConfig.webpack || ((config) => config);
+  const originalWebpack = finalNextConfig.webpack || (config => config);
   finalNextConfig.webpack = (config, options) => {
     // First apply the webpack part from pathsConfig
     const configWithPathAliases = pathsConfig.webpack(config, options);
@@ -76,4 +76,4 @@ if (mergeableConfigs.experimental) {
 }
 
 // Wrap the final config and use default export for ES Modules
-export default withBundleAnalyzer(finalNextConfig); 
+export default withBundleAnalyzer(finalNextConfig);

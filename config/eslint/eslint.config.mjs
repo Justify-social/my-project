@@ -1,9 +1,9 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import nextjs from '@next/eslint-plugin-next'
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { FlatCompat } from '@eslint/eslintrc';
+import reactHooks from 'eslint-plugin-react-hooks';
+import reactRefresh from 'eslint-plugin-react-refresh';
+import nextjs from '@next/eslint-plugin-next';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -50,24 +50,33 @@ const eslintConfig = [
       'config/**',
     ],
     rules: {
-      '@typescript-eslint/no-unused-vars': ['warn', {
-        'argsIgnorePattern': '^_',
-        'varsIgnorePattern': '^_'
-      }],
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
       '@typescript-eslint/no-explicit-any': 'warn',
       'react/no-unescaped-entities': 'off',
       'react/display-name': 'off',
       'jsx-a11y/role-has-required-aria-props': 'off',
       'react-hooks/exhaustive-deps': 'warn',
       'prefer-const': 'warn',
-      'no-restricted-imports': ['error', {
-        'paths': [{
-          'name': '@/components/ui/icon',
-          'message': 'Import Icon directly from "@/components/ui/icon/icon" instead for proper app icon handling.'
-        }]
-      }],
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@/components/ui/icon',
+              message:
+                'Import Icon directly from "@/components/ui/icon/icon" instead for proper app icon handling.',
+            },
+          ],
+        },
+      ],
       '@typescript-eslint/no-empty-interface': 'off',
-    }
+    },
   },
   {
     plugins: {
@@ -77,7 +86,7 @@ const eslintConfig = [
     rules: {
       ...reactHooks.configs.recommended.rules,
     },
-  }
+  },
 ];
 
 export default eslintConfig;

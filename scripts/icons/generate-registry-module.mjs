@@ -6,31 +6,31 @@ const PUBLIC_STATIC_DIR = path.join(process.cwd(), 'public/static');
 const OUTPUT_DIR = path.join(process.cwd(), 'src/lib/generated');
 const OUTPUT_FILE = path.join(OUTPUT_DIR, 'icon-registry.ts');
 const REGISTRY_FILES = [
-    'app-icon-registry.json',
-    'brands-icon-registry.json',
-    'kpis-icon-registry.json',
-    'light-icon-registry.json',
-    'solid-icon-registry.json'
+  'app-icon-registry.json',
+  'brands-icon-registry.json',
+  'kpis-icon-registry.json',
+  'light-icon-registry.json',
+  'solid-icon-registry.json',
 ];
 
 // Helper to load JSON safely
-const loadRegistryJson = (fileName) => {
-    const filePath = path.join(PUBLIC_STATIC_DIR, fileName);
-    try {
-        if (fs.existsSync(filePath)) {
-            const fileContent = fs.readFileSync(filePath, 'utf-8');
-            const data = JSON.parse(fileContent);
-            if (data && Array.isArray(data.icons)) {
-                return data;
-            }
-            console.warn(`[GenerateRegistry] Invalid format in ${fileName}`);
-        } else {
-            console.warn(`[GenerateRegistry] Registry file not found: ${fileName}`);
-        }
-    } catch (error) {
-        console.error(`[GenerateRegistry] Error loading ${fileName}:`, error.message);
+const loadRegistryJson = fileName => {
+  const filePath = path.join(PUBLIC_STATIC_DIR, fileName);
+  try {
+    if (fs.existsSync(filePath)) {
+      const fileContent = fs.readFileSync(filePath, 'utf-8');
+      const data = JSON.parse(fileContent);
+      if (data && Array.isArray(data.icons)) {
+        return data;
+      }
+      console.warn(`[GenerateRegistry] Invalid format in ${fileName}`);
+    } else {
+      console.warn(`[GenerateRegistry] Registry file not found: ${fileName}`);
     }
-    return { icons: [] };
+  } catch (error) {
+    console.error(`[GenerateRegistry] Error loading ${fileName}:`, error.message);
+  }
+  return { icons: [] };
 };
 
 console.log('Generating icon registry module...');
@@ -38,9 +38,9 @@ console.log('Generating icon registry module...');
 // Consolidate icons
 let allIcons = [];
 REGISTRY_FILES.forEach(fileName => {
-    console.log(`  Loading ${fileName}...`);
-    const registry = loadRegistryJson(fileName);
-    allIcons = allIcons.concat(registry.icons);
+  console.log(`  Loading ${fileName}...`);
+  const registry = loadRegistryJson(fileName);
+  allIcons = allIcons.concat(registry.icons);
 });
 
 console.log(`  Consolidated ${allIcons.length} icons.`);
@@ -65,10 +65,10 @@ export const iconRegistryData: IconRegistryData = ${JSON.stringify({ icons: allI
 
 // Ensure output directory exists
 if (!fs.existsSync(OUTPUT_DIR)) {
-    console.log(`  Creating output directory: ${OUTPUT_DIR}`);
-    fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+  console.log(`  Creating output directory: ${OUTPUT_DIR}`);
+  fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 }
 
 // Write the output file
 fs.writeFileSync(OUTPUT_FILE, outputContent, 'utf-8');
-console.log(`✅ Icon registry module written to ${OUTPUT_FILE}`); 
+console.log(`✅ Icon registry module written to ${OUTPUT_FILE}`);

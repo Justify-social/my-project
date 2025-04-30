@@ -2,12 +2,12 @@
 
 /**
  * Configuration Files Organizer
- * 
+ *
  * This script organizes configuration files in the project root by:
  * 1. Creating a config directory with subdirectories for different types of configs
  * 2. Moving configuration files to their appropriate directories
  * 3. Creating proper redirect files to maintain backward compatibility
- * 
+ *
  * Usage:
  *   node scripts/config-organizer.mjs --dry-run  # Preview changes
  *   node scripts/config-organizer.mjs            # Actually make changes
@@ -35,271 +35,271 @@ const colors = {
   blue: '\x1b[34m',
   cyan: '\x1b[36m',
   magenta: '\x1b[35m',
-  bold: '\x1b[1m'
+  bold: '\x1b[1m',
 };
 
 // Helper log functions
-const log = (msg) => console.log(msg);
-const info = (msg) => console.log(`${colors.blue}ℹ ${colors.reset}${msg}`);
-const success = (msg) => console.log(`${colors.green}✓ ${colors.reset}${msg}`);
-const warning = (msg) => console.log(`${colors.yellow}⚠ ${colors.reset}${msg}`);
-const error = (msg) => console.error(`${colors.red}✗ ${colors.reset}${msg}`);
-const verbose = (msg) => VERBOSE && console.log(`  ${msg}`);
+const log = msg => console.log(msg);
+const info = msg => console.log(`${colors.blue}ℹ ${colors.reset}${msg}`);
+const success = msg => console.log(`${colors.green}✓ ${colors.reset}${msg}`);
+const warning = msg => console.log(`${colors.yellow}⚠ ${colors.reset}${msg}`);
+const error = msg => console.error(`${colors.red}✗ ${colors.reset}${msg}`);
+const verbose = msg => VERBOSE && console.log(`  ${msg}`);
 
 // Configuration structure
 const CONFIG_STRUCTURE = {
-  'eslint': 'ESLint configuration',
-  'typescript': 'TypeScript configuration',
-  'tailwind': 'Tailwind CSS configuration',
-  'jest': 'Jest testing configuration',
-  'cypress': 'Cypress testing configuration',
-  'prettier': 'Prettier code formatting',
-  'nextjs': 'Next.js configuration',
-  'vercel': 'Vercel deployment configuration',
-  'sentry': 'Sentry error tracking',
-  'env': 'Environment variables',
-  'docs': 'Documentation files'
+  eslint: 'ESLint configuration',
+  typescript: 'TypeScript configuration',
+  tailwind: 'Tailwind CSS configuration',
+  jest: 'Jest testing configuration',
+  cypress: 'Cypress testing configuration',
+  prettier: 'Prettier code formatting',
+  nextjs: 'Next.js configuration',
+  vercel: 'Vercel deployment configuration',
+  sentry: 'Sentry error tracking',
+  env: 'Environment variables',
+  docs: 'Documentation files',
 };
 
 // Files to organize
 const FILES_TO_ORGANIZE = [
   // ESLint
-  { 
-    source: '.eslintrc.js', 
+  {
+    source: '.eslintrc.js',
     target: 'config/eslint/eslintrc.js',
     createRedirect: true,
     redirectContent: `// This file is now located at config/eslint/eslintrc.js
 // This is a redirect file for backward compatibility
-module.exports = require('./config/eslint/eslintrc.js');`
+module.exports = require('./config/eslint/eslintrc.js');`,
   },
-  { 
-    source: '.eslintrc.json', 
+  {
+    source: '.eslintrc.json',
     target: 'config/eslint/eslintrc.json',
     createRedirect: true,
     redirectContent: `// This file is now located at config/eslint/eslintrc.json
 // This is a redirect file for backward compatibility
-module.exports = require('./config/eslint/eslintrc.json');`
+module.exports = require('./config/eslint/eslintrc.json');`,
   },
-  { 
-    source: 'eslint.config.mjs', 
+  {
+    source: 'eslint.config.mjs',
     target: 'config/eslint/eslint.config.mjs',
     createRedirect: true,
     redirectContent: `// This file is now located at config/eslint/eslint.config.mjs
 // This is a redirect file for backward compatibility
 import config from './config/eslint/eslint.config.mjs';
-export default config;`
+export default config;`,
   },
-  { 
-    source: '.eslintignore', 
+  {
+    source: '.eslintignore',
     target: 'config/eslint/.eslintignore',
-    createRedirect: false
+    createRedirect: false,
   },
-  
+
   // TypeScript
-  { 
-    source: 'tsconfig.json', 
+  {
+    source: 'tsconfig.json',
     target: 'config/typescript/tsconfig.json',
     createRedirect: true,
     redirectContent: `// This file is now located at config/typescript/tsconfig.json
 // This is a redirect file for backward compatibility
 {
   "extends": "./config/typescript/tsconfig.json"
-}`
+}`,
   },
   // jsconfig.json is deprecated in favor of tsconfig.json for TypeScript projects
-  { 
-    source: 'jsconfig.json', 
+  {
+    source: 'jsconfig.json',
     target: 'config/typescript/jsconfig.json',
     createRedirect: false,
-    deprecateFile: true
+    deprecateFile: true,
   },
-  { 
-    source: 'tsconfig.tsbuildinfo', 
+  {
+    source: 'tsconfig.tsbuildinfo',
     target: 'config/typescript/tsconfig.tsbuildinfo',
-    createRedirect: false
+    createRedirect: false,
   },
-  
+
   // Tailwind
-  { 
-    source: 'tailwind.config.js', 
+  {
+    source: 'tailwind.config.js',
     target: 'config/tailwind/tailwind.config.js',
     createRedirect: true,
     redirectContent: `// This file is a redirect to the configuration in config/tailwind/
 // For backward compatibility
 import tailwindConfig from './config/tailwind/tailwind.config.js';
 
-export default tailwindConfig;`
+export default tailwindConfig;`,
   },
-  { 
-    source: 'tailwind.config.ts', 
+  {
+    source: 'tailwind.config.ts',
     target: 'config/tailwind/tailwind.config.ts',
     createRedirect: true,
     redirectContent: `// This file is a redirect to the configuration in config/tailwind/
 // For backward compatibility
 import config from './config/tailwind/tailwind.config';
-export default config;`
+export default config;`,
   },
-  { 
-    source: 'postcss.config.mjs', 
+  {
+    source: 'postcss.config.mjs',
     target: 'config/tailwind/postcss.config.mjs',
     createRedirect: true,
     redirectContent: `// This file is now located at config/tailwind/postcss.config.mjs
 // This is a redirect file for backward compatibility
 import config from './config/tailwind/postcss.config.mjs';
-export default config;`
+export default config;`,
   },
-  
+
   // Jest
-  { 
-    source: 'jest.config.js', 
+  {
+    source: 'jest.config.js',
     target: 'config/jest/jest.config.js',
     createRedirect: true,
     redirectContent: `// This file is now located at config/jest/jest.config.js
 // This is a redirect file for backward compatibility
-module.exports = require('./config/jest/jest.config.js');`
+module.exports = require('./config/jest/jest.config.js');`,
   },
-  { 
-    source: 'jest.setup.js', 
+  {
+    source: 'jest.setup.js',
     target: 'config/jest/jest.setup.js',
     createRedirect: true,
     redirectContent: `// This file is now located at config/jest/jest.setup.js
 // This is a redirect file for backward compatibility
-module.exports = require('./config/jest/jest.setup.js');`
+module.exports = require('./config/jest/jest.setup.js');`,
   },
-  
+
   // Cypress
-  { 
-    source: 'cypress.config.js', 
+  {
+    source: 'cypress.config.js',
     target: 'config/cypress/cypress.config.js',
     createRedirect: true,
     redirectContent: `// This file is now located at config/cypress/cypress.config.js
 // This is a redirect file for backward compatibility
-module.exports = require('./config/cypress/cypress.config.js');`
+module.exports = require('./config/cypress/cypress.config.js');`,
   },
-  
+
   // Prettier
-  { 
-    source: '.prettierrc.json', 
+  {
+    source: '.prettierrc.json',
     target: 'config/prettier/.prettierrc.json',
     createRedirect: true,
     redirectContent: `{
   "extends": "./config/prettier/.prettierrc.json"
-}`
+}`,
   },
-  
+
   // Next.js
-  { 
-    source: 'next.config.js', 
+  {
+    source: 'next.config.js',
     target: 'config/nextjs/next.config.js',
     createRedirect: true,
     redirectContent: `// This file is now located at config/nextjs/next.config.js
 // This is a redirect file for backward compatibility
-module.exports = require('./config/nextjs/next.config.js');`
+module.exports = require('./config/nextjs/next.config.js');`,
   },
-  { 
-    source: 'next-env.d.ts', 
+  {
+    source: 'next-env.d.ts',
     target: 'config/nextjs/next-env.d.ts',
     createRedirect: true,
     redirectContent: `// This file is now located at config/nextjs/next-env.d.ts
 // This is a redirect file for backward compatibility
-/// <reference path="./config/nextjs/next-env.d.ts" />`
+/// <reference path="./config/nextjs/next-env.d.ts" />`,
   },
-  
+
   // Vercel
-  { 
-    source: 'vercel.json', 
+  {
+    source: 'vercel.json',
     target: 'config/vercel/vercel.json',
     createRedirect: true,
     redirectContent: `{
   "extends": "./config/vercel/vercel.json"
-}`
+}`,
   },
-  
+
   // Sentry
-  { 
-    source: 'sentry.config.ts', 
+  {
+    source: 'sentry.config.ts',
     target: 'config/sentry/sentry.config.ts',
     createRedirect: true,
     redirectContent: `// This file is now located at config/sentry/sentry.config.ts
 // This is a redirect file for backward compatibility
-export * from './config/sentry/sentry.config';`
+export * from './config/sentry/sentry.config';`,
   },
-  { 
-    source: 'sentry.edge.config.ts', 
+  {
+    source: 'sentry.edge.config.ts',
     target: 'config/sentry/sentry.edge.config.ts',
     createRedirect: true,
     redirectContent: `// This file is now located at config/sentry/sentry.edge.config.ts
 // This is a redirect file for backward compatibility
-export * from './config/sentry/sentry.edge.config';`
+export * from './config/sentry/sentry.edge.config';`,
   },
-  { 
-    source: 'sentry.server.config.ts', 
+  {
+    source: 'sentry.server.config.ts',
     target: 'config/sentry/sentry.server.config.ts',
     createRedirect: true,
     redirectContent: `// This file is now located at config/sentry/sentry.server.config.ts
 // This is a redirect file for backward compatibility
-export * from './config/sentry/sentry.server.config';`
+export * from './config/sentry/sentry.server.config';`,
   },
-  
+
   // Environment
-  { 
-    source: '.env', 
+  {
+    source: '.env',
     target: 'config/env/.env',
     createRedirect: false,
-    createSymlink: true
+    createSymlink: true,
   },
-  { 
-    source: '.env.local', 
+  {
+    source: '.env.local',
     target: 'config/env/.env.local',
     createRedirect: false,
-    createSymlink: true
+    createSymlink: true,
   },
-  
+
   // Documentation files
-  { 
-    source: 'error-fix.md', 
+  {
+    source: 'error-fix.md',
     target: 'docs/troubleshooting/error-fix.md',
-    createRedirect: false
+    createRedirect: false,
   },
-  { 
-    source: 'icon-fix.md', 
+  {
+    source: 'icon-fix.md',
     target: 'docs/troubleshooting/icon-fix.md',
-    createRedirect: false
+    createRedirect: false,
   },
-  
+
   // Data files
-  { 
-    source: 'components.json', 
+  {
+    source: 'components.json',
     target: 'config/ui/components.json',
     createRedirect: true,
     redirectContent: `{
   "extends": "./config/ui/components.json"
-}`
+}`,
   },
-  { 
-    source: 'feature-components.json', 
+  {
+    source: 'feature-components.json',
     target: 'config/ui/feature-components.json',
-    createRedirect: false
+    createRedirect: false,
   },
-  { 
-    source: 'icon-registry-small.json', 
+  {
+    source: 'icon-registry-small.json',
     target: 'config/ui/icon-registry-small.json',
-    createRedirect: false
+    createRedirect: false,
   },
-  
+
   // Cache files to delete
-  { 
-    source: '.component-registry-cache.json', 
+  {
+    source: '.component-registry-cache.json',
     target: '.cache/component-registry-cache.json',
     createRedirect: false,
-    moveToCache: true
+    moveToCache: true,
   },
-  { 
-    source: 'ui-component-validation-report.json', 
+  {
+    source: 'ui-component-validation-report.json',
     target: '.cache/ui-component-validation-report.json',
     createRedirect: false,
-    moveToCache: true
-  }
+    moveToCache: true,
+  },
 ];
 
 // Track metrics
@@ -326,7 +326,7 @@ function createDirectoryStructure() {
       warning('[DRY RUN] Would create directory: config/');
     }
   }
-  
+
   // Create cache directory
   const cacheDir = path.join(ROOT_DIR, '.cache');
   if (!fs.existsSync(cacheDir)) {
@@ -342,7 +342,7 @@ function createDirectoryStructure() {
       warning('[DRY RUN] Would create directory: .cache/');
     }
   }
-  
+
   // Create docs directory
   const docsDir = path.join(ROOT_DIR, 'docs');
   if (!fs.existsSync(docsDir)) {
@@ -358,7 +358,7 @@ function createDirectoryStructure() {
       warning('[DRY RUN] Would create directory: docs/');
     }
   }
-  
+
   // Create docs subdirectories
   const troubleshootingDir = path.join(ROOT_DIR, 'docs/troubleshooting');
   if (!fs.existsSync(troubleshootingDir)) {
@@ -378,16 +378,19 @@ function createDirectoryStructure() {
   // Create subdirectories for each config type
   for (const [dir, description] of Object.entries(CONFIG_STRUCTURE)) {
     const fullPath = path.join(ROOT_DIR, `config/${dir}`);
-    
+
     if (!fs.existsSync(fullPath)) {
       if (!DRY_RUN) {
         try {
           fs.mkdirSync(fullPath, { recursive: true });
-          
+
           // Add README to describe the directory
           const readmePath = path.join(fullPath, 'README.md');
-          fs.writeFileSync(readmePath, `# ${dir.charAt(0).toUpperCase() + dir.slice(1)} Configuration\n\n${description}\n`);
-          
+          fs.writeFileSync(
+            readmePath,
+            `# ${dir.charAt(0).toUpperCase() + dir.slice(1)} Configuration\n\n${description}\n`
+          );
+
           success(`Created directory: config/${dir}/`);
           dirsCreated++;
         } catch (err) {
@@ -403,17 +406,25 @@ function createDirectoryStructure() {
 
 // Move a file to its new location
 function moveFile(fileConfig) {
-  const { source, target, createRedirect, redirectContent, createSymlink, moveToCache, deprecateFile } = fileConfig;
-  
+  const {
+    source,
+    target,
+    createRedirect,
+    redirectContent,
+    createSymlink,
+    moveToCache,
+    deprecateFile,
+  } = fileConfig;
+
   const sourcePath = path.join(ROOT_DIR, source);
   const targetPath = path.join(ROOT_DIR, target);
-  
+
   // Skip if source doesn't exist
   if (!fs.existsSync(sourcePath)) {
     verbose(`Source file not found: ${source}`);
     return false;
   }
-  
+
   // Create target directory if it doesn't exist
   const targetDir = path.dirname(targetPath);
   if (!fs.existsSync(targetDir)) {
@@ -428,14 +439,14 @@ function moveFile(fileConfig) {
       }
     }
   }
-  
+
   // Skip if it's a deprecated file
   if (deprecateFile) {
     if (DRY_RUN) {
       warning(`[DRY RUN] Would remove deprecated file: ${source}`);
       return true;
     }
-    
+
     try {
       fs.unlinkSync(sourcePath);
       success(`Removed deprecated file: ${source}`);
@@ -446,7 +457,7 @@ function moveFile(fileConfig) {
       return false;
     }
   }
-  
+
   // Special handling for cache files
   if (moveToCache) {
     if (DRY_RUN) {
@@ -454,22 +465,22 @@ function moveFile(fileConfig) {
       filesMoved++;
       return true;
     }
-    
+
     try {
       // Create target directory if needed
       if (!fs.existsSync(path.dirname(targetPath))) {
         fs.mkdirSync(path.dirname(targetPath), { recursive: true });
       }
-      
+
       // Copy file
       fs.copyFileSync(sourcePath, targetPath);
-      
+
       // Remove original
       fs.unlinkSync(sourcePath);
-      
+
       success(`Moved cache file: ${source} to ${target}`);
       filesMoved++;
-      
+
       // Add to .gitignore
       const gitignorePath = path.join(ROOT_DIR, '.gitignore');
       if (fs.existsSync(gitignorePath)) {
@@ -480,7 +491,7 @@ function moveFile(fileConfig) {
           success('Added .cache/ to .gitignore');
         }
       }
-      
+
       return true;
     } catch (err) {
       error(`Failed to move cache file ${source}: ${err.message}`);
@@ -488,7 +499,7 @@ function moveFile(fileConfig) {
       return false;
     }
   }
-  
+
   // Handle symlinks for env files
   if (createSymlink) {
     if (DRY_RUN) {
@@ -496,22 +507,22 @@ function moveFile(fileConfig) {
       symlinkCreated++;
       return true;
     }
-    
+
     try {
       // Create target directory if needed
       if (!fs.existsSync(path.dirname(targetPath))) {
         fs.mkdirSync(path.dirname(targetPath), { recursive: true });
       }
-      
+
       // Copy file content to target
       fs.copyFileSync(sourcePath, targetPath);
-      
+
       // Create symlink (original location symlinks to the new location)
       if (fs.existsSync(sourcePath)) {
         fs.unlinkSync(sourcePath);
       }
       fs.symlinkSync(targetPath, sourcePath);
-      
+
       success(`Created symlink: ${target} <- ${source}`);
       symlinkCreated++;
       return true;
@@ -521,29 +532,29 @@ function moveFile(fileConfig) {
       return false;
     }
   }
-  
+
   // Regular file move
   if (DRY_RUN) {
     warning(`[DRY RUN] Would move: ${source} to ${target}`);
     filesMoved++;
-    
+
     if (createRedirect) {
       warning(`[DRY RUN] Would create redirect: ${source}`);
       redirectsCreated++;
     }
-    
+
     return true;
   }
-  
+
   try {
     // Create target directory if needed
     if (!fs.existsSync(path.dirname(targetPath))) {
       fs.mkdirSync(path.dirname(targetPath), { recursive: true });
     }
-    
+
     // Copy the file to new location
     fs.copyFileSync(sourcePath, targetPath);
-    
+
     // Create redirect file or remove original
     if (createRedirect && redirectContent) {
       fs.writeFileSync(sourcePath, redirectContent);
@@ -552,7 +563,7 @@ function moveFile(fileConfig) {
     } else {
       fs.unlinkSync(sourcePath);
     }
-    
+
     success(`Moved: ${source} to ${target}`);
     filesMoved++;
     return true;
@@ -569,22 +580,22 @@ function updateImports() {
     warning(`[DRY RUN] Would update imports in source files`);
     return;
   }
-  
+
   // Not implemented yet - would need to scan all source files and update imports
   // This is a complex task and would require parsing JS/TS files
-  
+
   info(`Import updating is not implemented yet`);
 }
 
 // Create a PROJECT_STRUCTURE.md file
 function createProjectStructureDocs() {
   const docPath = path.join(ROOT_DIR, 'docs/PROJECT_STRUCTURE.md');
-  
+
   if (DRY_RUN) {
     warning(`[DRY RUN] Would create project structure documentation: docs/PROJECT_STRUCTURE.md`);
     return;
   }
-  
+
   const docContent = `# Project Structure
 
 This document describes the overall structure of the project, focusing on the organization of configuration files.
@@ -674,7 +685,7 @@ Documentation files are organized in the \`docs/\` directory:
     if (!fs.existsSync(docsDir)) {
       fs.mkdirSync(docsDir, { recursive: true });
     }
-    
+
     fs.writeFileSync(docPath, docContent);
     success(`Created project structure documentation: docs/PROJECT_STRUCTURE.md`);
   } catch (err) {
@@ -686,20 +697,20 @@ Documentation files are organized in the \`docs/\` directory:
 // Update README.md to include the new structure
 function updateReadme() {
   const readmePath = path.join(ROOT_DIR, 'README.md');
-  
+
   if (!fs.existsSync(readmePath)) {
     warning(`README.md not found, skipping update`);
     return;
   }
-  
+
   if (DRY_RUN) {
     warning(`[DRY RUN] Would update README.md with project structure information`);
     return;
   }
-  
+
   try {
     let readme = fs.readFileSync(readmePath, 'utf8');
-    
+
     const structureSection = `
 ## Project Structure
 
@@ -713,7 +724,7 @@ This project has been organized with a clean directory structure:
 
 See \`docs/PROJECT_STRUCTURE.md\` for more details on the project organization.
 `;
-    
+
     // Check if the section already exists
     if (!readme.includes('## Project Structure')) {
       readme += structureSection;
@@ -732,30 +743,30 @@ See \`docs/PROJECT_STRUCTURE.md\` for more details on the project organization.
 async function main() {
   console.log(`\n${colors.bold}${colors.cyan}Configuration Files Organizer${colors.reset}`);
   console.log(`${colors.cyan}=============================${colors.reset}\n`);
-  
+
   if (DRY_RUN) {
     warning('Running in DRY RUN mode - no changes will be made');
   }
-  
+
   // Create directory structure
   info('Creating directory structure...');
   createDirectoryStructure();
-  
+
   // Move configuration files
   console.log(`\n${colors.bold}Moving configuration files...${colors.reset}`);
   for (const fileConfig of FILES_TO_ORGANIZE) {
     moveFile(fileConfig);
   }
-  
+
   // Update imports if needed
   console.log(`\n${colors.bold}Updating imports...${colors.reset}`);
   updateImports();
-  
+
   // Create project structure documentation
   console.log(`\n${colors.bold}Creating documentation...${colors.reset}`);
   createProjectStructureDocs();
   updateReadme();
-  
+
   // Results
   console.log(`\n${colors.bold}${colors.green}Organization Results:${colors.reset}`);
   if (DRY_RUN) {
@@ -769,15 +780,19 @@ async function main() {
     console.log(`- Created: ${symlinkCreated} symlinks`);
     console.log(`- Created: ${dirsCreated} directories`);
   }
-  
+
   if (errors > 0) {
     console.log(`- Errors: ${errors}`);
   }
-  
+
   if (DRY_RUN) {
-    console.log(`\n${colors.bold}To actually perform these operations, run the script without --dry-run${colors.reset}`);
+    console.log(
+      `\n${colors.bold}To actually perform these operations, run the script without --dry-run${colors.reset}`
+    );
   } else {
-    console.log(`\n${colors.bold}${colors.green}Project structure has been successfully organized!${colors.reset}`);
+    console.log(
+      `\n${colors.bold}${colors.green}Project structure has been successfully organized!${colors.reset}`
+    );
     console.log(`See docs/PROJECT_STRUCTURE.md for details on the new organization.`);
   }
 }
@@ -786,4 +801,4 @@ async function main() {
 main().catch(err => {
   error(`Unhandled error: ${err.message}`);
   process.exit(1);
-}); 
+});

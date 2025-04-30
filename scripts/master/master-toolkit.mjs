@@ -2,13 +2,13 @@
 
 /**
  * Master Toolkit - Unified Script Interface
- * 
+ *
  * This script provides a single entry point for all script functionality across the project.
  * It coordinates the execution of specialized scripts in each category, presenting a unified interface.
- * 
+ *
  * Usage:
  *   node scripts/master/master-toolkit.mjs <category> <command> [options]
- * 
+ *
  * Categories:
  *   icons        - Icon management tools
  *   ui           - UI component management tools
@@ -17,7 +17,7 @@
  *   cleanup      - Cleanup and maintenance tools
  *   linting      - Code quality tools
  *   db           - Database tools
- * 
+ *
  * Example:
  *   node scripts/master/master-toolkit.mjs icons audit
  *   node scripts/master/master-toolkit.mjs config organize
@@ -43,7 +43,7 @@ const categories = {
   },
   ui: {
     backup: 'ui/backup-ui-components.js',
-    registry: async (args) => {
+    registry: async args => {
       const subCommand = args[0] || 'help';
 
       switch (subCommand) {
@@ -88,7 +88,7 @@ Example:
   ${chalk.yellow('node scripts/master/master-toolkit.mjs ui analyze')}
   ${chalk.yellow('node scripts/master/master-toolkit.mjs ui registry generate')}
 `);
-    }
+    },
   },
   config: {
     organize: 'config/config-organizer.mjs',
@@ -139,7 +139,9 @@ For help with a specific command:
 `);
   } else {
     console.log(`Unknown category: ${category}`);
-    console.log(`Run 'node scripts/master/master-toolkit.mjs help' for a list of valid categories.`);
+    console.log(
+      `Run 'node scripts/master/master-toolkit.mjs help' for a list of valid categories.`
+    );
   }
 
   process.exit(0);
@@ -169,7 +171,7 @@ function executeScript(scriptPath, args) {
   });
 
   // Handle exit
-  child.on('exit', (code) => {
+  child.on('exit', code => {
     process.exit(code);
   });
 }
@@ -212,4 +214,4 @@ function main() {
   executeScript(categories[category][command], scriptArgs);
 }
 
-main(); 
+main();

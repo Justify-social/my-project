@@ -7,7 +7,7 @@ import { Icon } from '@/components/ui/icon/icon';
 
 interface CertificationStatusSectionProps {
   influencer: InfluencerProfileData;
-  // Note: Specific certification details (beyond Phyllo verification)
+  // Note: Specific certification details (beyond InsightIQ verification)
   // are not currently in InfluencerProfileData.
   // This component will likely need enhancing when certification data structure is defined.
 }
@@ -15,10 +15,10 @@ interface CertificationStatusSectionProps {
 // Placeholder structure removed
 
 export function CertificationStatusSection({ influencer }: CertificationStatusSectionProps) {
-  const { isPhylloVerified } = influencer;
+  const { isInsightIQVerified } = influencer;
 
-  // For now, only display the Phyllo verification status
-  if (!isPhylloVerified) {
+  // For now, only display the InsightIQ verification status
+  if (!isInsightIQVerified) {
     // Optionally show a message that the influencer is not verified,
     // or simply render nothing if only verified badges are desired.
     return null;
@@ -30,13 +30,13 @@ export function CertificationStatusSection({ influencer }: CertificationStatusSe
         <CardTitle>Certification Status</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {/* Display Justify Verified based on isPhylloVerified */}
+        {/* Display Justify Verified based on isInsightIQVerified */}
         <div className={`flex items-start gap-4 p-4 rounded-lg bg-sky-100 text-sky-800`}>
           <Icon iconId={'faBadgeCheck'} className="h-8 w-8 mt-1 flex-shrink-0" />
           <div>
             <h4 className="font-semibold">Justify Verified Influencer</h4>
             {/* TODO: Add verification date if available in data */}
-            <p className="text-sm">Verified via Phyllo</p>
+            <p className="text-sm">Verified via InsightIQ</p>
           </div>
         </div>
 

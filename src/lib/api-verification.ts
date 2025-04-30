@@ -11,6 +11,7 @@ import { serverConfig } from '@/config/server-config';
 import { logger } from '@/utils/logger'; // Assuming logger is needed server-side
 import Stripe from 'stripe';
 import { algoliasearch } from 'algoliasearch';
+import { checkInsightIQConnection } from '@/lib/insightiqService';
 
 /**
  * Enumeration of possible API error types for better error categorization
@@ -694,130 +695,78 @@ export async function verifyDatabaseConnectionServerSide(): Promise<ApiVerificat
 }
 
 /**
- * SERVER-SIDE Verify the Phyllo API
- * This function tests the Phyllo API using server-side credentials.
+ * SERVER-SIDE Verify the InsightIQ API (Placeholder)
+ * This function will test the InsightIQ API using server-side credentials.
+ * Implementation details depend on InsightIQ documentation.
  */
-export async function verifyPhylloApi(): Promise<ApiVerificationResult> {
-  const apiName = 'Phyllo API';
-  const baseUrl = serverConfig.phyllo.baseUrl;
-  const testEndpoint = `${baseUrl}/v1/accounts`;
-  const clientId = serverConfig.phyllo.clientId;
-  const clientSecret = serverConfig.phyllo.clientSecret;
+export async function verifyInsightIQApi(): Promise<ApiVerificationResult> {
+  const apiName = 'InsightIQ API';
+  const baseUrl = serverConfig.insightiq.baseUrl;
+  const testEndpoint = `${baseUrl}/v1/placeholder-for-health-check`; // Needs real endpoint
 
-  const startTime = Date.now();
-
-  if (!clientId || !clientSecret) {
-    console.warn(`${apiName} verification warning: Missing credentials in serverConfig`);
+  if (!serverConfig.insightiq.clientId || !serverConfig.insightiq.clientSecret) {
+    logger.warn(`[Server Verify] ${apiName} verification warning: Missing credentials`);
     return {
       success: false,
       apiName,
-      endpoint: testEndpoint,
+      endpoint: 'Config Check',
       error: {
         type: ApiErrorType.AUTHENTICATION_ERROR,
-        message: 'Missing Phyllo credentials in server configuration.',
+        message: 'Missing InsightIQ credentials in server configuration.',
         details: 'Check server-config.ts and ensure vars are loaded from .env',
         isRetryable: false,
       },
     };
   }
 
+  const startTime = Date.now();
   try {
-    console.info(`[Server Verify] Testing ${apiName} endpoint: ${testEndpoint}`);
-    const encodedCredentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-    const response = await fetch(testEndpoint, {
-      method: 'GET',
-      signal: controller.signal,
-      headers: {
-        Authorization: `Basic ${encodedCredentials}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    clearTimeout(timeoutId);
+    // Use the check function from the service
+    const result = await checkInsightIQConnection();
     const latency = Date.now() - startTime;
-    const responseData = await response.json().catch(() => ({}));
 
-    if (response.ok) {
-      const isValidData = responseData && typeof responseData === 'object';
-      console.info(`[Server Verify] ${apiName} verification successful`, {
-        latency,
-        statusCode: response.status,
-        dataReceived: isValidData,
-      });
-
+    if (result.success) {
       return {
         success: true,
         apiName,
-        endpoint: testEndpoint,
+        endpoint: testEndpoint, // Reflect the endpoint used in the check
         latency,
-        data: {
-          status: response.statusText,
-          recordCount: Array.isArray(responseData.data) ? responseData.data.length : undefined,
-          firstRecordId:
-            Array.isArray(responseData.data) && responseData.data[0]?.id
-              ? responseData.data[0].id
-              : undefined,
-        },
+        data: { status: 'Connected (placeholder check)', details: result.data },
       };
     } else {
-      let errorType = ApiErrorType.UNKNOWN_ERROR;
-      if (response.status === 401 || response.status === 403) {
-        errorType = ApiErrorType.AUTHENTICATION_ERROR;
-      } else if (response.status === 404) {
-        errorType = ApiErrorType.NOT_FOUND_ERROR;
-      } else if (response.status === 429) {
-        errorType = ApiErrorType.RATE_LIMIT_ERROR;
-      } else if (response.status >= 500) {
-        errorType = ApiErrorType.SERVER_ERROR;
-      } else if (response.status >= 400) {
-        errorType = ApiErrorType.VALIDATION_ERROR;
-      }
-      const isRetryable = [ApiErrorType.RATE_LIMIT_ERROR, ApiErrorType.SERVER_ERROR].includes(
-        errorType
-      );
-
-      console.error(`[Server Verify] ${apiName} verification failed with HTTP ${response.status}`);
-
       return {
         success: false,
         apiName,
         endpoint: testEndpoint,
         latency,
         error: {
-          type: errorType,
-          message: `API returned error status: ${response.status} ${response.statusText}`,
-          details: responseData,
-          isRetryable,
+          // Attempt to determine type from the service error message
+          type:
+            result.error?.includes('credentials') || result.error?.includes('401')
+              ? ApiErrorType.AUTHENTICATION_ERROR
+              : ApiErrorType.NETWORK_ERROR, // Default guess
+          message: result.error || 'Connection check failed.',
+          details: null,
+          isRetryable: true, // Generally assume network/temp issues are retryable
         },
       };
     }
-  } catch (fetchError) {
-    let errorType = ApiErrorType.NETWORK_ERROR;
-    let errorMessage = fetchError instanceof Error ? fetchError.message : 'Unknown network error';
-    let isRetryable = true;
-
-    if (fetchError instanceof Error && fetchError.name === 'AbortError') {
-      errorType = ApiErrorType.TIMEOUT_ERROR;
-      errorMessage = 'API request timed out after 10000ms';
-      isRetryable = true;
-    }
-
-    console.error(
-      `[Server Verify] ${apiName} verification failed with network/fetch error: ${errorMessage}`
-    );
-
+  } catch (error: unknown) {
+    // Catch errors from checkInsightIQConnection itself (e.g., programming errors)
+    const latency = Date.now() - startTime;
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error in checkInsightIQConnection';
+    logger.error(`[Server Verify] ${apiName} verification function threw an error:`, error);
     return {
       success: false,
       apiName,
       endpoint: testEndpoint,
+      latency,
       error: {
-        type: errorType,
-        message: errorMessage,
-        details: fetchError,
-        isRetryable,
+        type: ApiErrorType.UNKNOWN_ERROR,
+        message: `Internal error running connection check: ${errorMessage}`,
+        details: error,
+        isRetryable: false,
       },
     };
   }
@@ -1677,7 +1626,7 @@ export async function verifySendGridApiServerSide(): Promise<ApiVerificationResu
 
 export default {
   verifyDatabaseConnectionServerSide,
-  verifyPhylloApi,
+  verifyInsightIQApi,
   verifyStripeApiServerSide,
   verifyCintExchangeApiServerSide,
   verifyUploadthingApiServerSide,

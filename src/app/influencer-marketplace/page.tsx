@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useWizard } from '@/components/features/campaigns/WizardContext';
+// import { useWizard } from '@/components/features/campaigns/WizardContext'; // REMOVE Wizard Context
 import { influencerService } from '@/services/influencer';
 import { InfluencerSummary } from '@/types/influencer';
 import { PlatformEnum } from '@/types/enums';
@@ -41,44 +41,35 @@ export interface FiltersState {
   maxFollowers?: number;
   audienceAge?: string;
   audienceLocation?: string;
-  isPhylloVerified?: boolean;
+  isInsightIQVerified?: boolean; // Keep renamed field
 }
 
 function MarketplacePage() {
   const router = useRouter();
-  const wizard = useWizard();
+  // const wizard = useWizard(); // REMOVE
 
-  const isWizardJourney = useMemo(
-    () => wizard?.wizardState?.isFindingInfluencers === true,
-    [wizard?.wizardState?.isFindingInfluencers]
-  );
+  // REMOVE isWizardJourney logic
+  // const isWizardJourney = useMemo(
+  //   () => wizard?.wizardState?.isFindingInfluencers === true,
+  //   [wizard?.wizardState?.isFindingInfluencers]
+  // );
 
-  // Component State (Keep appliedFilters separate)
+  // Component State
   const [influencers, setInfluencers] = useState<InfluencerSummary[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]); // Keep selection state for now
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalInfluencers, setTotalInfluencers] = useState<number>(0);
   const [limit, setLimit] = useState<number>(12);
   const [isFiltersSheetOpen, setIsFiltersSheetOpen] = useState<boolean>(false);
+  // Initialize appliedFilters to empty object (no context dependency)
   const [appliedFilters, setAppliedFilters] = useState<FiltersState>(() => {
-    if (isWizardJourney && wizard?.wizardState) {
-      const initialFilters: FiltersState = {};
-      if (wizard.wizardState.targetPlatforms && wizard.wizardState.targetPlatforms.length > 0) {
-        initialFilters.platforms = wizard.wizardState.targetPlatforms as PlatformEnum[];
-      }
-      logger.info(
-        '[MarketplacePage] Initializing appliedFilters from Wizard context',
-        initialFilters
-      );
-      return initialFilters;
-    }
     logger.info('[MarketplacePage] Initializing with default empty appliedFilters.');
     return {};
   });
 
-  // --- Data Fetching ---
+  // --- Data Fetching (Remains the same, uses appliedFilters state) ---
   const fetchData = useCallback(
     async (page = 1, filtersToUse: FiltersState) => {
       logger.info(`[MarketplacePage] Fetching data for page ${page}`, { filters: filtersToUse });
@@ -137,7 +128,6 @@ function MarketplacePage() {
     [totalInfluencers, limit]
   );
 
-  // Apply filters handler - Called by MarketplaceFilters via onApply prop
   const handleApplyFilters = useCallback((filtersFromComponent: FiltersState) => {
     logger.info('[MarketplacePage] Applying filters:', filtersFromComponent);
     setAppliedFilters(filtersFromComponent);
@@ -145,43 +135,19 @@ function MarketplacePage() {
     setIsFiltersSheetOpen(false);
   }, []);
 
-  // Reset filters handler - Called by MarketplaceFilters via onReset prop
   const handleResetFilters = useCallback(() => {
     logger.info('[MarketplacePage] Resetting filters.');
-    const initialFilters =
-      isWizardJourney && wizard?.wizardState
-        ? {
-            platforms: wizard.wizardState.targetPlatforms as PlatformEnum[],
-          }
-        : {};
-    setAppliedFilters(initialFilters);
+    // Reset to empty object, no context dependency
+    setAppliedFilters({});
     setCurrentPage(1);
     setIsFiltersSheetOpen(false);
-  }, [isWizardJourney, wizard?.wizardState]);
+  }, []);
 
-  // Handler for adding selected influencers back to the wizard
-  const handleAddToCampaign = useCallback(() => {
-    if (isWizardJourney && wizard && selectedIds.length > 0) {
-      logger.info(
-        `[MarketplacePage] Adding ${selectedIds.length} influencers to campaign via Wizard context.`
-      );
-      wizard.updateWizardState({ selectedInfluencerIds: selectedIds, isFindingInfluencers: false });
-      if (wizard.campaignId) {
-        router.push(`/campaigns/wizard/step-5?id=${wizard.campaignId}`);
-      } else {
-        logger.error(
-          '[MarketplacePage] Cannot navigate back to wizard: campaignId is missing from context.'
-        );
-        toast.error('Error returning to campaign wizard (missing campaign ID).');
-      }
-    } else {
-      logger.warn(
-        '[MarketplacePage] AddToCampaign called outside of wizard journey or no selection/context.'
-      );
-    }
-  }, [wizard, selectedIds, router, isWizardJourney]);
+  // REMOVE handleAddToCampaign callback
+  // const handleAddToCampaign = useCallback(() => {
+  //   // ... removed logic ...
+  // }, [wizard, selectedIds, router, isWizardJourney]);
 
-  // Calculate total pages
   const totalPages = Math.ceil(totalInfluencers / limit);
 
   // --- Render Logic ---
@@ -189,6 +155,7 @@ function MarketplacePage() {
     <div className="container mx-auto px-4 py-6">
       <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
         <h1 className="text-2xl font-semibold">Influencer Marketplace</h1>
+        {/* Keep only the Filters button */}
         <div className="flex items-center gap-2">
           <Sheet open={isFiltersSheetOpen} onOpenChange={setIsFiltersSheetOpen}>
             <SheetTrigger asChild>
@@ -214,11 +181,8 @@ function MarketplacePage() {
             </SheetContent>
           </Sheet>
 
-          {isWizardJourney && (
-            <Button onClick={handleAddToCampaign} disabled={selectedIds.length === 0}>
-              Add {selectedIds.length > 0 ? `(${selectedIds.length}) ` : ''}to Campaign
-            </Button>
-          )}
+          {/* REMOVE Add to Campaign Button */}
+          {/* {isWizardJourney && ( ... )} */}
         </div>
       </div>
 
@@ -233,41 +197,33 @@ function MarketplacePage() {
       <MarketplaceList
         influencers={influencers}
         isLoading={isLoading}
-        error={null}
+        error={error}
         selectedIds={selectedIds}
         onSelectToggle={handleSelectToggle}
         onViewProfile={handleViewProfile}
         itemsPerPage={limit}
       />
 
-      {totalPages > 1 && !isLoading && (
-        <div className="mt-6 flex justify-center">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  className={currentPage <= 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                  aria-disabled={currentPage <= 1}
-                />
-              </PaginationItem>
-              <PaginationItem>
-                <span className="px-4 py-2 text-sm font-medium">
-                  Page {currentPage} of {totalPages}
-                </span>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationNext
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  className={
-                    currentPage >= totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'
-                  }
-                  aria-disabled={currentPage >= totalPages}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
+      {totalPages > 1 && (
+        <Pagination className="mt-6">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => handlePageChange(currentPage - 1)}
+                aria-disabled={currentPage <= 1}
+                className={currentPage <= 1 ? 'pointer-events-none opacity-50' : undefined}
+              />
+            </PaginationItem>
+            {/* Add page numbers if needed */}
+            <PaginationItem>
+              <PaginationNext
+                onClick={() => handlePageChange(currentPage + 1)}
+                aria-disabled={currentPage >= totalPages}
+                className={currentPage >= totalPages ? 'pointer-events-none opacity-50' : undefined}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       )}
     </div>
   );

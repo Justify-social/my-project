@@ -10,15 +10,27 @@ logger.info(
   `[Server Config] Reading UPLOADTHING_TOKEN: ${uploadthingTokenFromEnv ? 'Found (length: ' + uploadthingTokenFromEnv.length + ')' : 'Not Found'}`
 ); // Log the token
 
+// Determine InsightIQ Base URL based on environment
+const getInsightIQBaseUrl = () => {
+  if (process.env.NODE_ENV === 'production') {
+    return process.env.INSIGHTIQ_PROD_URL || 'https://api.insightiq.ai'; // Default Prod URL
+  } else {
+    // Default to Sandbox for development and other non-prod environments
+    return process.env.INSIGHTIQ_SANDBOX_URL || 'https://api.sandbox.insightiq.ai';
+  }
+};
+
 /**
  * Configuration object specifically for server-side environment variables.
  * Reads variables at module load time when the server starts.
  */
 export const serverConfig = {
-  phyllo: {
-    clientId: process.env.NEXT_PUBLIC_PHYLLO_CLIENT_ID,
-    clientSecret: process.env.PHYLLO_SECRET,
-    baseUrl: process.env.PHYLLO_BASE_URL || 'https://api.staging.getphyllo.com',
+  // Removed Phyllo config
+  insightiq: {
+    clientId: process.env.INSIGHTIQ_CLIENT_ID,
+    clientSecret: process.env.INSIGHTIQ_SECRET,
+    baseUrl: getInsightIQBaseUrl(),
+    webhookSecret: process.env.INSIGHTIQ_WEBHOOK_SECRET, // Added for future use
   },
   stripe: {
     secretKey: process.env.STRIPE_SECRET_KEY,
@@ -58,8 +70,9 @@ export const serverConfig = {
 
 // Optional: Log loaded config during server startup (won't run per-request)
 logger.info('[Server Config] Loaded server configuration', {
-  phylloClientIdSet: !!serverConfig.phyllo.clientId,
-  phylloSecretSet: !!serverConfig.phyllo.clientSecret,
+  insightiqClientIdSet: !!serverConfig.insightiq.clientId,
+  insightiqSecretSet: !!serverConfig.insightiq.clientSecret,
+  insightiqWebhookSecretSet: !!serverConfig.insightiq.webhookSecret, // Log presence of webhook secret
   stripeKeySet: !!serverConfig.stripe.secretKey,
   cintKeySet: !!serverConfig.cint.apiKey, // Check Cint API Key
   uploadthingSecretSet: !!serverConfig.uploadthing.secret, // Check Uploadthing Secret

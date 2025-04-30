@@ -6,8 +6,9 @@
 // Add other enums as needed, e.g., UserRole, Status etc. if they aren't defined elsewhere
 
 /**
- * Represents the supported social media platforms.
- * Values should align with Prisma schema and potentially Phyllo identifiers.
+ * Represents the different social media platforms supported.
+ * Ensure consistency across frontend, backend, and database.
+ * Values should align with Prisma schema and potentially InsightIQ identifiers.
  */
 export enum PlatformEnum {
   Instagram = 'INSTAGRAM', // Using uppercase to match Prisma schema convention

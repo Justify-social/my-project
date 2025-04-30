@@ -10,8 +10,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 
 export default function SubmissionContent() {
-  const { wizardState, isLoading } = useWizard();
+  const wizardContext = useWizard();
   const router = useRouter();
+
+  if (!wizardContext) {
+    return null;
+  }
+
+  const { wizardState, isLoading } = wizardContext;
 
   const campaignId = wizardState?.id;
   const campaignName = wizardState?.name || 'your campaign';

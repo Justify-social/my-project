@@ -15,16 +15,18 @@ export function calculateJustifyScoreV1(
   let maxScorePossible = 0;
   let factorsUsed = 0;
 
-  // Factor 1: Phyllo Verification (Weight: 30 points)
-  maxScorePossible += 30;
-  if (influencer.isPhylloVerified === true) {
-    score += 30;
-    factorsUsed++;
-  } else if (influencer.isPhylloVerified === false) {
-    // Potentially penalize unverified? For V1, just no bonus.
-    // score -= 5; // Example penalty
-    factorsUsed++;
+  // Factor 1: InsightIQ Verification (Weight: 30 points)
+  let verificationScore = 0;
+  if (influencer.isInsightIQVerified === true) {
+    verificationScore = 30;
+  } else if (influencer.isInsightIQVerified === false) {
+    verificationScore = 0; // Explicitly 0 if not verified
+  } else {
+    verificationScore = 5; // Assign a small score if status is null/unknown, indicating potential but unverified
   }
+  maxScorePossible += 30;
+  score += verificationScore;
+  factorsUsed++;
 
   // Factor 2: Audience Quality (Weight: 40 points)
   maxScorePossible += 40;

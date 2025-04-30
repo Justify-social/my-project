@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon/icon'; // Use direct path for clarity
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import { getInitials } from '@/lib/utils'; // Import from utils
 
 interface InfluencerSummaryCardProps {
   influencer: InfluencerSummary;
@@ -20,16 +21,6 @@ interface InfluencerSummaryCardProps {
   onViewProfile: (id: string) => void;
   className?: string;
 }
-
-// Helper to get initials for Avatar fallback
-const getInitials = (name: string) => {
-  if (!name) return '';
-  return name
-    .split(' ')
-    .map(n => n[0])
-    .join('')
-    .toUpperCase();
-};
 
 // Map PlatformEnum to FontAwesome icon names (adjust as needed based on icon-registry.json)
 // Using iconId prop as verified from component definition
@@ -86,8 +77,8 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
         <div className="flex items-center mb-3">
           <Avatar className="h-12 w-12 mr-3 flex-shrink-0">
             {/* Using standard img tag as next/image caused issues previously */}
-            <AvatarImage src={influencer.avatarUrl} alt={influencer.name} />
-            <AvatarFallback>{getInitials(influencer.name)}</AvatarFallback>
+            <AvatarImage src={influencer.avatarUrl ?? undefined} alt={influencer.name ?? ''} />
+            <AvatarFallback>{getInitials(influencer.name ?? '')}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             {' '}
@@ -111,7 +102,7 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
               size="sm" // Added size prop for consistency
             />
           ))}
-          {influencer.isPhylloVerified && (
+          {influencer.isInsightIQVerified && (
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -126,7 +117,7 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
                   </Badge>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Account connection verified via Phyllo.</p>
+                  <p>Account connection verified via InsightIQ.</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

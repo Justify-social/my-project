@@ -2,10 +2,10 @@
 
 /**
  * Cleanup Obsolete Scripts
- * 
+ *
  * This script removes or migrates obsolete script files in the deleted-scripts directory
  * that have been moved to their canonical locations according to SSOT principles.
- * 
+ *
  * Usage:
  *   node config/ui/scripts/cleanup-obsolete-scripts.mjs [--dry-run]
  */
@@ -32,83 +32,84 @@ const colors = {
   blue: '\x1b[34m',
   cyan: '\x1b[36m',
   magenta: '\x1b[35m',
-  bold: '\x1b[1m'
+  bold: '\x1b[1m',
 };
 
 // Helper log functions
-const log = (msg) => console.log(msg);
-const info = (msg) => console.log(`${colors.blue}ℹ ${colors.reset}${msg}`);
-const success = (msg) => console.log(`${colors.green}✓ ${colors.reset}${msg}`);
-const warning = (msg) => console.log(`${colors.yellow}⚠ ${colors.reset}${msg}`);
-const error = (msg) => console.error(`${colors.red}✗ ${colors.reset}${msg}`);
+const log = msg => console.log(msg);
+const info = msg => console.log(`${colors.blue}ℹ ${colors.reset}${msg}`);
+const success = msg => console.log(`${colors.green}✓ ${colors.reset}${msg}`);
+const warning = msg => console.log(`${colors.yellow}⚠ ${colors.reset}${msg}`);
+const error = msg => console.error(`${colors.red}✗ ${colors.reset}${msg}`);
 
 // List of files that have been migrated to their canonical locations
 const MIGRATED_FILES = [
   {
     oldPath: 'deleted-scripts/fix-duplicate-exports.js',
     newPath: 'config/ui/scripts/fix-duplicate-exports.mjs',
-    action: 'migrated'
+    action: 'migrated',
   },
   {
     oldPath: 'deleted-scripts/fix-icon-maps.js',
     newPath: 'config/ui/scripts/fix-icon-maps.mjs',
-    action: 'migrated'
+    action: 'migrated',
   },
   {
     oldPath: 'deleted-scripts/validate-icon-maps.js',
     newPath: 'config/ui/scripts/validate-icon-maps.mjs',
-    action: 'migrated'
+    action: 'migrated',
   },
   {
     oldPath: 'deleted-scripts/add-default-exports.js',
     action: 'obsolete',
-    reason: 'Functionality has been integrated into fix-duplicate-exports.mjs'
+    reason: 'Functionality has been integrated into fix-duplicate-exports.mjs',
   },
   {
     oldPath: 'deleted-scripts/add-style-exports.js',
     action: 'obsolete',
-    reason: 'Style exports are now handled by the component registry system'
+    reason: 'Style exports are now handled by the component registry system',
   },
   {
     oldPath: 'deleted-scripts/check-server-errors.js',
     action: 'obsolete',
-    reason: 'Server errors are now handled by the component validation system'
+    reason: 'Server errors are now handled by the component validation system',
   },
   {
     oldPath: 'deleted-scripts/component-validation.js',
     action: 'obsolete',
-    reason: 'Component validation is now handled by scripts/ui/validate-component-paths.mjs'
+    reason: 'Component validation is now handled by scripts/ui/validate-component-paths.mjs',
   },
   {
     oldPath: 'deleted-scripts/component-import-fixer.js',
     action: 'obsolete',
-    reason: 'Component imports are now handled by the ESLint config and webpack'
+    reason: 'Component imports are now handled by the ESLint config and webpack',
   },
   {
     oldPath: 'deleted-scripts/fix-component-exports.js',
     action: 'obsolete',
-    reason: 'Component exports are now standardized by the component registry system'
+    reason: 'Component exports are now standardized by the component registry system',
   },
   {
     oldPath: 'deleted-scripts/generate-ui-registry.js',
     action: 'obsolete',
-    reason: 'UI Registry generation is now handled by component-registry-manager.mjs'
+    reason: 'UI Registry generation is now handled by component-registry-manager.mjs',
   },
   {
     oldPath: 'deleted-scripts/validate-component-exports.js',
     action: 'obsolete',
-    reason: 'Component export validation is now handled by the TypeScript compiler'
+    reason: 'Component export validation is now handled by the TypeScript compiler',
   },
   {
     oldPath: 'deleted-scripts/validate-component-registry.js',
     action: 'obsolete',
-    reason: 'Component registry validation is now handled by config/start-up/validate-component-registry.mjs'
+    reason:
+      'Component registry validation is now handled by config/start-up/validate-component-registry.mjs',
   },
   {
     oldPath: 'deleted-scripts/validate-components.js',
     action: 'obsolete',
-    reason: 'Component validation is now handled by scripts/ui/validate-component-paths.mjs'
-  }
+    reason: 'Component validation is now handled by scripts/ui/validate-component-paths.mjs',
+  },
 ];
 
 /**
@@ -131,7 +132,7 @@ function deleteFile(filePath) {
       info(`Would delete file: ${filePath}`);
       return true;
     }
-    
+
     fs.unlinkSync(filePath);
     success(`Deleted file: ${filePath}`);
     return true;
@@ -146,18 +147,18 @@ function deleteFile(filePath) {
  */
 function processFiles() {
   let deletedCount = 0;
-  
+
   for (const file of MIGRATED_FILES) {
     const fullOldPath = path.join(process.cwd(), file.oldPath);
-    
+
     if (!fileExists(fullOldPath)) {
       info(`File not found: ${file.oldPath}`);
       continue;
     }
-    
+
     if (file.action === 'migrated') {
       const fullNewPath = path.join(process.cwd(), file.newPath);
-      
+
       if (fileExists(fullNewPath)) {
         info(`File has been migrated: ${file.oldPath} -> ${file.newPath}`);
         if (deleteFile(fullOldPath)) {
@@ -173,7 +174,7 @@ function processFiles() {
       }
     }
   }
-  
+
   return deletedCount;
 }
 
@@ -185,28 +186,28 @@ async function main() {
 ${colors.bold}Cleanup Obsolete Scripts${colors.reset}
 ${DRY_RUN ? colors.yellow + '[DRY RUN - No files will be deleted]' + colors.reset : ''}
   `);
-  
+
   if (!fileExists(DELETED_SCRIPTS_DIR)) {
     error(`Deleted scripts directory not found: ${DELETED_SCRIPTS_DIR}`);
     process.exit(1);
   }
-  
+
   info(`Processing files in ${DELETED_SCRIPTS_DIR}...`);
-  
+
   const deletedCount = processFiles();
-  
+
   if (DRY_RUN) {
     success(`Found ${deletedCount} files that would be deleted (dry run)`);
     log(`\nRun without --dry-run to actually delete files.`);
   } else {
     success(`Deleted ${deletedCount} obsolete files`);
-    
+
     // Check if the deleted-scripts directory is now empty
     try {
       const remainingFiles = fs.readdirSync(DELETED_SCRIPTS_DIR);
       if (remainingFiles.length === 0) {
         info(`The deleted-scripts directory is now empty`);
-        
+
         if (DRY_RUN) {
           info(`Would remove empty directory: ${DELETED_SCRIPTS_DIR}`);
         } else {
@@ -225,4 +226,4 @@ ${DRY_RUN ? colors.yellow + '[DRY RUN - No files will be deleted]' + colors.rese
 main().catch(err => {
   error(`Error: ${err.message}`);
   process.exit(1);
-}); 
+});

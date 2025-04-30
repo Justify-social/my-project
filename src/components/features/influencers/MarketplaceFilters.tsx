@@ -35,7 +35,7 @@ export interface FilterValues {
   maxFollowers?: number;
   audienceAge?: string;
   audienceLocation?: string;
-  isPhylloVerified?: boolean;
+  isInsightIQVerified?: boolean;
 }
 
 interface MarketplaceFiltersProps {
@@ -217,15 +217,15 @@ export function MarketplaceFilters({
             />
           </div>
 
-          {/* Phyllo Verified Filter - Controlled Component */}
-          <div className="flex items-center space-x-2 pt-2">
+          {/* InsightIQ Verified Filter - Controlled Component */}
+          <div className="flex items-center space-x-2">
             <Checkbox
-              id="isPhylloVerified"
-              name="isPhylloVerified"
-              checked={localFilters.isPhylloVerified ?? false}
-              onCheckedChange={checked => handleCheckboxChange(checked, 'isPhylloVerified')}
+              id="isInsightIQVerified"
+              name="isInsightIQVerified"
+              checked={localFilters.isInsightIQVerified ?? false}
+              onCheckedChange={checked => handleCheckboxChange(checked, 'isInsightIQVerified')}
             />
-            <Label htmlFor="isPhylloVerified">Phyllo Verified Only</Label>
+            <Label htmlFor="isInsightIQVerified">InsightIQ Verified Only</Label>
           </div>
         </div>
 

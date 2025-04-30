@@ -357,55 +357,55 @@ enum InvitationStatus {
 model MarketplaceInfluencer {
   id                        String    @id @default(uuid()) // Internal Justify ID
   name                      String
-  handle                    String 
+  handle                    String
   avatarUrl                 String?
-  platforms                 Platform[] 
-  followersCount            Int?      
-  justifyScore              Float?    
-  isPhylloVerified          Boolean?  
-  primaryAudienceLocation String?   
-  primaryAudienceAgeRange String?   
-  primaryAudienceGender     String?   
-  engagementRate            Float?    
-  audienceQualityIndicator  String?   
-  bio                       String?   
-  contactEmail              String?   
-  phylloUserId              String?   @unique // Link to Phyllo User entity
-  audienceDemographics      Json?     
-  engagementMetrics         Json?     
+  platforms                 Platform[]
+  followersCount            Int?
+  justifyScore              Float?
+  isInsightIQVerified       Boolean?  // Renamed from isPhylloVerified
+  primaryAudienceLocation String?
+  primaryAudienceAgeRange String?
+  primaryAudienceGender     String?
+  engagementRate            Float?
+  audienceQualityIndicator  String?
+  bio                       String?
+  contactEmail              String?
+  insightiqUserId           String?   @unique // Renamed from phylloUserId, Link to InsightIQ User concept
+  audienceDemographics      Json?
+  engagementMetrics         Json?
   createdAt                 DateTime  @default(now())
   updatedAt                 DateTime  @updatedAt
-  phylloDataLastRefreshedAt DateTime? 
-  
-  phylloAccountLinks        PhylloAccountLink[] // Relation to linked Phyllo accounts
+  insightiqDataLastRefreshedAt DateTime? // Renamed from phylloDataLastRefreshedAt
 
-  @@index([justifyScore]) 
-  @@index([followersCount]) 
-  @@index([primaryAudienceLocation]) 
-  @@index([primaryAudienceAgeRange]) 
-  @@index([isPhylloVerified]) 
-  @@index([platforms]) 
-  @@index([handle]) 
-  @@index([phylloUserId]) // Index for lookup
+  insightiqAccountLinks     InsightIQAccountLink[] // Renamed relation
+
+  @@index([justifyScore])
+  @@index([followersCount])
+  @@index([primaryAudienceLocation])
+  @@index([primaryAudienceAgeRange])
+  @@index([isInsightIQVerified]) // Updated index field name
+  @@index([platforms])
+  @@index([handle])
+  @@index([insightiqUserId]) // Updated index field name
 }
 
-// New table for mapping MarketplaceInfluencer to specific Phyllo Platform Accounts
-model PhylloAccountLink {
+// Renamed table for mapping MarketplaceInfluencer to specific InsightIQ Platform Accounts
+model InsightIQAccountLink { // Renamed from PhylloAccountLink
   id                      String   @id @default(uuid())
   marketplaceInfluencerId String   // Foreign Key to MarketplaceInfluencer.id
-  phylloAccountId         String   @unique // The unique ID for the connected platform account from Phyllo
-  phylloUserId            String   // The Phyllo User ID this account belongs to (for consistency/lookup)
+  insightiqAccountId      String   @unique // Renamed from phylloAccountId, The unique ID for the connected platform account from InsightIQ
+  insightiqUserId         String   // Renamed from phylloUserId, The InsightIQ User ID this account belongs to (for consistency/lookup)
   platform                Platform // The platform type (e.g., INSTAGRAM, TIKTOK)
   status                  String   // Status of the link (e.g., "CONNECTED", "DISCONNECTED", "ERROR")
   connectedAt             DateTime @default(now())
   disconnectedAt          DateTime?
-  metadata                Json?    // Store extra info from Phyllo if needed (e.g., platform username)
+  metadata                Json?    // Store extra info from InsightIQ if needed (e.g., platform username)
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
 
   marketplaceInfluencer   MarketplaceInfluencer @relation(fields: [marketplaceInfluencerId], references: [id], onDelete: Cascade) // Relation back to our influencer
 
   @@index([marketplaceInfluencerId])
-  @@index([phylloUserId]) // Useful for finding all accounts for a Phyllo user
+  @@index([insightiqUserId]) // Updated index field name
   @@index([status]) // Useful for finding active links
 }

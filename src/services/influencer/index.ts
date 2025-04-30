@@ -15,7 +15,6 @@ export interface GetInfluencersFilters {
   maxFollowers?: number;
   audienceAge?: string;
   audienceLocation?: string;
-  isPhylloVerified?: boolean;
   // sortBy?: string; // Post-MVP
   // searchTerm?: string; // Post-MVP
 }

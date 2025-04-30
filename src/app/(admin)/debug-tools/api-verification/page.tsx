@@ -4,7 +4,7 @@ import React, { useState, useCallback } from 'react';
 import {
   verifyGeolocationApi,
   verifyExchangeRatesApi,
-  verifyPhylloApi,
+  verifyInsightIQApi,
   verifyCintExchangeApiServerSide,
   verifyGiphyApi,
   verifyStripeApiServerSide,
@@ -47,8 +47,8 @@ const ApiVerificationPage: React.FC = () => {
       'Used to determine user location for targeted campaigns and localized content. Helps optimize campaign delivery to specific regions.',
     exchange:
       'Powers currency conversion for budgeting in the Campaign Wizard. Ensures accurate financial calculations across different currencies.',
-    phyllo:
-      'Integrates with influencer platforms to verify accounts and retrieve metrics. Critical for influencer-based campaigns.',
+    insightiq:
+      'Integrates with influencer platforms (via InsightIQ) to verify accounts and retrieve metrics. Critical for influencer-based campaigns.',
     giphy:
       'Powers GIF search and integration for campaign creative content. Provides access to an extensive library of animated content.',
     cint: 'Market research platform that connects to consumer panels for surveys and audience insights. Essential for campaign targeting and market validation.',

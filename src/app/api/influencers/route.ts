@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { PrismaClient, Platform, Prisma, MarketplaceInfluencer } from '@prisma/client'; // Import Prisma namespace
-import { logger } from '@/utils/logger';
+import { logger } from '@/lib/logger';
 import { InfluencerSummary } from '@/types/influencer'; // Use our frontend type for response shaping
 import { calculatePagination } from '@/lib/paginationUtils'; // Corrected path
-import { calculateJustifyScoreV1 } from '@/lib/scoringService'; // Import scoring function
-// TODO: Import phylloService functions when enrichment is added
-// import { getPhylloAccountIdentity } from '@/lib/phylloService';
+import { calculateJustifyScoreV1 } from '@/lib/scoringService'; // Import scoring function - Correct name
+import { PlatformEnum } from '@/types/enums';
+// TODO: Import insightiqService functions when enrichment is added
+// import { getInsightIQProfileById } from '@/lib/insightiqService'; // Example
 
 const prisma = new PrismaClient();
 
-// Define Zod schema for query parameter validation based on API contract
+// Updated Zod schema to use insightiq field names
 const InfluencerQuerySchema = z
   .object({
     page: z.coerce.number().int().positive().optional().default(1),
@@ -26,8 +27,8 @@ const InfluencerQuerySchema = z
     maxFollowers: z.coerce.number().int().positive().optional(),
     audienceAge: z.string().optional(), // Keep as string for now, refine filtering later
     audienceLocation: z.string().optional(), // Keep as string for now, refine filtering later
-    isPhylloVerified: z.preprocess(
-      // Handle string 'true'/'false' from query params
+    isInsightIQVerified: z.preprocess(
+      // Renamed from isPhylloVerified
       val => (val === 'true' ? true : val === 'false' ? false : undefined),
       z.boolean().optional()
     ),
@@ -69,11 +70,12 @@ export async function GET(request: NextRequest) {
   const { skip, take } = calculatePagination(page, limit);
 
   // --- Database Query Construction ---
-  const whereClause: Prisma.MarketplaceInfluencerWhereInput = {}; // Use Prisma type
+  const whereClause: Prisma.MarketplaceInfluencerWhereInput = {};
 
   if (filters.platforms && filters.platforms.length > 0) {
-    // Prisma needs `hasSome` for array fields
-    whereClause.platforms = { hasSome: filters.platforms };
+    // Cast frontend enum to Prisma enum if necessary, or ensure they are compatible
+    // Assuming they are compatible string enums for now
+    whereClause.platforms = { hasSome: filters.platforms as Platform[] };
   }
   if (filters.minScore !== undefined || filters.maxScore !== undefined) {
     whereClause.justifyScore = {};
@@ -93,9 +95,9 @@ export async function GET(request: NextRequest) {
     // Basic age filtering for now (exact match)
     whereClause.primaryAudienceAgeRange = filters.audienceAge;
   }
-  // Add isPhylloVerified filter
-  if (filters.isPhylloVerified !== undefined) {
-    whereClause.isPhylloVerified = filters.isPhylloVerified;
+  // Use renamed isInsightIQVerified filter
+  if (filters.isInsightIQVerified !== undefined) {
+    whereClause.isInsightIQVerified = filters.isInsightIQVerified;
   }
 
   // TODO: Add sorting logic based on sortBy (Post-MVP)
@@ -104,14 +106,12 @@ export async function GET(request: NextRequest) {
     // --- Fetch Data & Count ---
     logger.debug('[API /influencers] Querying database with clause:', whereClause);
     const [totalInfluencers, dbInfluencers] = await prisma.$transaction([
-      prisma.marketplaceInfluencer.count({ where: whereClause }), // Use camelCase
+      prisma.marketplaceInfluencer.count({ where: whereClause }),
       prisma.marketplaceInfluencer.findMany({
-        // Use camelCase
         where: whereClause,
         skip,
         take,
-        orderBy: { justifyScore: 'desc' }, // Default sort for MVP
-        // TODO: Select only necessary fields for summary?
+        orderBy: { justifyScore: 'desc' },
       }),
     ]);
 
@@ -120,13 +120,11 @@ export async function GET(request: NextRequest) {
       (inf: MarketplaceInfluencer): InfluencerSummary => {
         const justifyScore = calculateJustifyScoreV1(inf);
 
-        // Validate primaryAudienceGender
         const validGenders = ['Male', 'Female', 'Other', 'Mixed'];
         const gender = validGenders.includes(inf.primaryAudienceGender ?? '')
           ? (inf.primaryAudienceGender as 'Male' | 'Female' | 'Other' | 'Mixed')
           : undefined;
 
-        // Validate audienceQualityIndicator
         const validIndicators = ['High', 'Medium', 'Low'];
         const qualityIndicator = validIndicators.includes(inf.audienceQualityIndicator ?? '')
           ? (inf.audienceQualityIndicator as 'High' | 'Medium' | 'Low')
@@ -137,17 +135,17 @@ export async function GET(request: NextRequest) {
           name: inf.name,
           handle: inf.handle,
           avatarUrl: inf.avatarUrl ?? '',
-          platforms: inf.platforms,
+          // Cast Prisma Platform[] to frontend PlatformEnum[]
+          platforms: inf.platforms as PlatformEnum[],
           followersCount: inf.followersCount ?? 0,
           justifyScore: justifyScore,
-          isPhylloVerified: inf.isPhylloVerified ?? false,
+          isInsightIQVerified: inf.isInsightIQVerified ?? false,
           primaryAudienceLocation: inf.primaryAudienceLocation ?? undefined,
           primaryAudienceAgeRange: inf.primaryAudienceAgeRange ?? undefined,
-          // Assign validated gender
           primaryAudienceGender: gender,
           engagementRate: inf.engagementRate ?? undefined,
-          // Assign validated quality indicator
           audienceQualityIndicator: qualityIndicator,
+          insightiqUserId: inf.insightiqUserId,
         };
       }
     );
@@ -168,7 +166,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(responsePayload);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown internal error';
-    logger.error('[API /influencers] Error fetching influencers:', message);
+    logger.error('[API /influencers] Error fetching influencers:', {
+      error: message,
+      originalError: error,
+      query: queryParams,
+    });
     return NextResponse.json(
       { success: false, error: 'Failed to fetch influencers', details: message },
       { status: 500 }

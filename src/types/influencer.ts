@@ -188,55 +188,64 @@ export interface CampaignFormData {
 }
 
 import { PlatformEnum } from './enums'; // Assuming PlatformEnum exists
+// Import InsightIQ specific types for reference
+import {
+  InsightIQProfile,
+  InsightIQDemographicsAttributes,
+  InsightIQContentEngagement,
+} from './insightiq';
 
 /**
  * Core data needed for displaying influencers in lists/cards.
- * Reflects MVP data points and addresses Kelly P. needs (verification, score, audience).
+ * Aligned with expected data from InsightIQ Profile/Analytics.
  */
 export interface InfluencerSummary {
   id: string; // Justify DB ID
-  name: string;
-  handle: string;
-  avatarUrl: string;
-  platforms: PlatformEnum[]; // TODO: Confirm exact source & structure from Phyllo Profile Analytics
-  followersCount: number; // TODO: Confirm exact source & structure from Phyllo Profile Analytics
-  justifyScore: number | null; // Calculated by Justify backend (Ticket 1.9)
-  isPhylloVerified: boolean; // From Phyllo Identity API via Justify Backend
-  primaryAudienceLocation?: string; // Optional for summary. e.g., "United States" // TODO: Confirm exact source & structure from Phyllo Profile Analytics
-  primaryAudienceAgeRange?: string; // Optional for summary. e.g., "25-34" // TODO: Confirm exact source & structure from Phyllo Profile Analytics
-  primaryAudienceGender?: 'Male' | 'Female' | 'Other' | 'Mixed'; // Optional for summary // TODO: Confirm exact source, structure & enum values from Phyllo Profile Analytics
-  engagementRate?: number; // Optional for summary, e.g., 3.5 (%) // TODO: Confirm exact source & structure from Phyllo Profile Analytics or Engagement Metrics API
-  audienceQualityIndicator?: 'High' | 'Medium' | 'Low'; // Optional for summary. Simple flag based on Phyllo follower quality analysis // TODO: Confirm exact source, structure & logic from Phyllo Profile Analytics
-  // TODO: Consider adding a 'lastRefreshedAt' timestamp if backend signals Phyllo data staleness?
+  name: string | null; // From InsightIQProfile.full_name or name
+  handle: string | null; // From InsightIQProfile.platform_username
+  avatarUrl: string | null; // From InsightIQProfile.image_url
+  platforms: PlatformEnum[]; // Assumes mapping logic exists based on InsightIQProfile.work_platform.name or separate source
+  followersCount: number | null; // From InsightIQProfile.reputation.follower_count
+  justifyScore: number | null; // Calculated by Justify backend
+  isInsightIQVerified: boolean | null; // From InsightIQProfile.is_verified
+  primaryAudienceLocation?: string | null; // Possibly derived from InsightIQDemographicsAttributes.countries
+  primaryAudienceAgeRange?: string | null; // Possibly derived from InsightIQDemographicsAttributes.gender_age_distribution
+  primaryAudienceGender?: 'Male' | 'Female' | 'Other' | 'Mixed' | null; // Possibly derived from InsightIQDemographicsAttributes.gender_age_distribution
+  engagementRate?: number | null; // Possibly derived from InsightIQProfile.reputation.engagementRate or ContentEngagement
+  audienceQualityIndicator?: 'High' | 'Medium' | 'Low' | null; // Logic TBD based on available InsightIQ metrics (e.g., follower types)
+  insightiqUserId?: string | null; // Added for internal linking
 }
 
 /**
- * Detailed audience demographic data.
+ * Detailed audience demographic data, aligned with InsightIQGetAudienceResponse.
  */
-export interface AudienceDemographics {
-  ageDistribution?: Record<string, number>; // e.g., { '18-24': 25, '25-34': 45, ... } // TODO: Confirm exact source & structure from Phyllo Profile Analytics
-  genderDistribution?: Record<string, number>; // e.g., { 'Female': 65, 'Male': 30, ... } // TODO: Confirm exact source & structure from Phyllo Profile Analytics
-  locationDistribution?: Record<string, number>; // e.g., { 'USA': 40, 'UK': 20, ... } // TODO: Confirm exact source & structure from Phyllo Profile Analytics
-  // TODO: Add other relevant MVP demographics if needed (e.g., top interests array?) - Requires BE support & Phyllo source confirmation
+export interface AudienceDemographics extends InsightIQDemographicsAttributes {
+  // Inherits countries, cities, gender_age_distribution from InsightIQ type
+  // Add any Justify-specific derived fields if needed
 }
 
 /**
- * Detailed engagement metrics.
+ * Detailed engagement metrics, aligned with InsightIQ schemas.
  */
 export interface EngagementMetrics {
-  averageLikes?: number; // TODO: Confirm exact source & structure from Phyllo Profile Analytics or Engagement Metrics API
-  averageComments?: number; // TODO: Confirm exact source & structure from Phyllo Profile Analytics or Engagement Metrics API
-  // TODO: Add other relevant MVP metrics if needed - Requires BE support & Phyllo source confirmation
+  // Potentially derived from InsightIQProfile.reputation or InsightIQContentEngagement
+  averageLikes?: number | null;
+  averageComments?: number | null;
+  averageViews?: number | null;
+  averageShares?: number | null;
+  // Add other relevant metrics derived from InsightIQ data
 }
 
 /**
  * Full data required for the influencer profile page.
+ * Combines summary data with specific details likely from InsightIQProfile and InsightIQGetAudienceResponse.
  */
 export interface InfluencerProfileData extends InfluencerSummary {
-  bio?: string | null; // TODO: Confirm exact source & structure from Phyllo Profile Analytics
-  contactEmail?: string | null; // Direct contact (Elevated Priority - Ticket 2.5). Requires BE support & source confirmation (Phyllo? Internal DB?).
-  audienceDemographics?: AudienceDemographics | null;
-  engagementMetrics?: EngagementMetrics | null;
-  // TODO: Add other MVP fields like pastCampaignHighlights?: { campaignName: string; brandName: string }[]; - Requires BE support & source confirmation
-  // TODO: Add brand safety flags/score post-MVP
+  bio?: string | null; // From InsightIQProfile.introduction
+  contactEmail?: string | null; // From InsightIQProfile.emails (needs logic to find WORK email)
+  audienceDemographics?: AudienceDemographics | null; // Populated from GET /v1/audience or similar
+  engagementMetrics?: EngagementMetrics | null; // Populated/derived from relevant InsightIQ data
+  // Add other fields based on InsightIQProfile as needed (e.g., website, category)
+  website?: string | null; // From InsightIQProfile.website
+  category?: string | null; // From InsightIQProfile.category
 }

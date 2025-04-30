@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { PrismaClient, Prisma } from '@prisma/client';
-import { logger } from '@/utils/logger';
+import { logger } from '@/lib/logger';
 import { InfluencerSummary } from '@/types/influencer';
 import { calculateJustifyScoreV1 } from '@/lib/scoringService';
 import { PlatformEnum } from '@/types/enums';
 import { Platform as PlatformBackend } from '@prisma/client';
-// TODO: Add Phyllo enrichment if needed for summaries
+// TODO: Add InsightIQ enrichment if needed for summaries
 
 const prisma = new PrismaClient();
 
@@ -62,14 +62,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   logger.info(`[API /influencers/summaries] Fetching summaries for IDs: ${idsToFetch.join(', ')}`);
 
   try {
-    // --- Database Query ---
+    // --- Fetch Data from DB ---
     const dbInfluencers = await prisma.marketplaceInfluencer.findMany({
       where: {
         id: {
           in: idsToFetch,
         },
       },
-      // Select needed fields, including platforms
       select: {
         id: true,
         name: true,
@@ -77,23 +76,24 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         avatarUrl: true,
         platforms: true,
         followersCount: true,
-        isPhylloVerified: true,
+        isInsightIQVerified: true,
         primaryAudienceLocation: true,
         primaryAudienceAgeRange: true,
         primaryAudienceGender: true,
         engagementRate: true,
         audienceQualityIndicator: true,
-        // Include fields needed by calculateJustifyScoreV1
+        insightiqUserId: true,
       },
+      orderBy: { justifyScore: 'desc' },
     });
 
     logger.debug(`[API /influencers/summaries] Found ${dbInfluencers.length} influencers in DB.`);
 
-    // --- Data Enrichment & Score Calculation ---
-    const enrichedInfluencers = dbInfluencers.map((inf): InfluencerSummary => {
-      const justifyScore = calculateJustifyScoreV1(inf);
+    // --- Map to Summary Type & Calculate Score ---
+    const summaries: InfluencerSummary[] = dbInfluencers.map(inf => {
+      const justifyScore = calculateJustifyScoreV1(inf as any);
 
-      // Basic validation copied from GET /influencers (refactor to shared util?)
+      // Validate enums
       const validGenders = ['Male', 'Female', 'Other', 'Mixed'];
       const gender = validGenders.includes(inf.primaryAudienceGender ?? '')
         ? (inf.primaryAudienceGender as 'Male' | 'Female' | 'Other' | 'Mixed')
@@ -111,18 +111,19 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         platforms: mapPlatformsToFrontend(inf.platforms as PlatformBackend[]),
         followersCount: inf.followersCount ?? 0,
         justifyScore: justifyScore,
-        isPhylloVerified: inf.isPhylloVerified ?? false,
+        isInsightIQVerified: inf.isInsightIQVerified ?? false,
         primaryAudienceLocation: inf.primaryAudienceLocation ?? undefined,
         primaryAudienceAgeRange: inf.primaryAudienceAgeRange ?? undefined,
         primaryAudienceGender: gender,
         engagementRate: inf.engagementRate ?? undefined,
         audienceQualityIndicator: qualityIndicator,
+        insightiqUserId: inf.insightiqUserId,
       };
     });
 
     // Reorder results to match input ID order if necessary (optional)
     const orderedInfluencers = idsToFetch
-      .map(id => enrichedInfluencers.find(inf => inf.id === id))
+      .map(id => summaries.find(inf => inf.id === id))
       .filter((inf): inf is InfluencerSummary => inf !== undefined);
 
     // --- Format Response ---
@@ -134,7 +135,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json(responsePayload);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown internal error';
-    logger.error(`[API /influencers/summaries] Error fetching summaries:`, message);
+    logger.error(`[API /influencers/summaries] Error fetching summaries:`, {
+      error: message,
+      originalError: error,
+      requestedIds: idsToFetch,
+    });
     return NextResponse.json(
       { success: false, error: 'Failed to fetch influencer summaries', details: message },
       { status: 500 }

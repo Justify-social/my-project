@@ -2,14 +2,14 @@
 
 /**
  * Comprehensive Icon Rendering Verification Script
- * 
+ *
  * This script provides a complete analysis of icon usage and rendering in the application:
  * 1. Validates all registry icons (SVG files exist and are properly formatted)
  * 2. Scans codebase for icon references and identifies missing mappings
  * 3. Identifies FontAwesome references not in registry
  * 4. Analyzes usage patterns to ensure consistent icon implementation
  * 5. Checks actual rendering paths to prevent 404 errors
- * 
+ *
  * Usage:
  *   node scripts/icons/verify-icon-rendering.mjs             # Basic verification
  *   node scripts/icons/verify-icon-rendering.mjs --verbose   # Detailed output
@@ -43,7 +43,7 @@ const REGISTRY_FILES = [
   'brands-icon-registry.json',
   'kpis-icon-registry.json',
   'light-icon-registry.json',
-  'solid-icon-registry.json'
+  'solid-icon-registry.json',
 ];
 
 // FontAwesome patterns to detect (Currently unused in logic below)
@@ -67,7 +67,7 @@ const stats = {
   unusedIcons: new Set(),
   filesScanned: 0,
   filesWithIcons: 0,
-  processingTime: 0
+  processingTime: 0,
 };
 
 // Issues tracking
@@ -129,9 +129,11 @@ function loadAllRegistries() {
             // Also add standard formatting (e.g., "faUser")
             const parts = cleanVersion.split('-');
             if (parts.length > 1) {
-              const standardName = 'fa' + parts.map((part, i) =>
-                i === 0 ? part : part.charAt(0).toUpperCase() + part.slice(1)
-              ).join('');
+              const standardName =
+                'fa' +
+                parts
+                  .map((part, i) => (i === 0 ? part : part.charAt(0).toUpperCase() + part.slice(1)))
+                  .join('');
               faNameToIdMap.set(standardName, icon.id);
             }
           }
@@ -228,7 +230,7 @@ function verifyIcon(icon) {
     id: icon.id,
     category: icon.category,
     valid: true,
-    issues: []
+    issues: [],
   };
 
   // Check for required fields
@@ -317,7 +319,7 @@ function processResults(results) {
       issues.push({
         id: result.id,
         category: result.category,
-        issues: result.issues
+        issues: result.issues,
       });
     }
   }
@@ -336,7 +338,7 @@ async function findIconReferences() {
     `!${SRC_DIR}/**/*.test.{ts,tsx,js,jsx}`,
     `!${SRC_DIR}/**/*.spec.{ts,tsx,js,jsx}`,
     `!${SRC_DIR}/**/*.stories.{ts,tsx,js,jsx}`,
-    `!**/node_modules/**`
+    `!**/node_modules/**`,
   ]);
 
   stats.filesScanned = files.length;
@@ -366,7 +368,11 @@ async function findIconReferences() {
             iconReferences.get(iconName).push(filePath);
 
             // Check if it's a FontAwesome reference
-            if (iconName.startsWith('fa') && !iconName.endsWith('Light') && !iconName.endsWith('Solid')) {
+            if (
+              iconName.startsWith('fa') &&
+              !iconName.endsWith('Light') &&
+              !iconName.endsWith('Solid')
+            ) {
               if (!faNameToIdMap.has(iconName)) {
                 missingFaIcons.add(iconName);
               }
@@ -405,7 +411,11 @@ async function findIconReferences() {
             iconReferences.get(iconName).push(filePath);
 
             // Check if it's a FontAwesome reference
-            if (iconName.startsWith('fa') && !iconName.endsWith('Light') && !iconName.endsWith('Solid')) {
+            if (
+              iconName.startsWith('fa') &&
+              !iconName.endsWith('Light') &&
+              !iconName.endsWith('Solid')
+            ) {
               if (!faNameToIdMap.has(iconName)) {
                 missingFaIcons.add(iconName);
               }
@@ -444,7 +454,9 @@ async function findIconReferences() {
   console.log(chalk.green(`Found icon references in ${stats.filesWithIcons} files`));
   console.log(chalk.gray(`  - ${iconReferences.size} unique icon names referenced`));
   console.log(chalk.gray(`  - ${stats.usedIcons.size} registered icons used`));
-  console.log(chalk.yellow(`  - ${stats.missingMappings.size} icon references without registry entries`));
+  console.log(
+    chalk.yellow(`  - ${stats.missingMappings.size} icon references without registry entries`)
+  );
   console.log(chalk.yellow(`  - ${missingFaIcons.size} FontAwesome icons missing from registry`));
   console.log(chalk.gray(`  - ${stats.unusedIcons.size} registered icons not used in code`));
 }
@@ -490,7 +502,9 @@ async function verifyIconHttpPaths() {
   }
 
   if (missing.length > 0) {
-    console.log(chalk.yellow(`\nFound ${missing.length} missing icon files that would cause 404 errors:`));
+    console.log(
+      chalk.yellow(`\nFound ${missing.length} missing icon files that would cause 404 errors:`)
+    );
     missing.slice(0, 20).forEach(p => console.log(chalk.gray(`  - ${p}`)));
     if (missing.length > 20) {
       console.log(chalk.gray(`  ... and ${missing.length - 20} more.`));
@@ -521,20 +535,20 @@ function suggestMissingFaIcons() {
 
     // Create a suggested light version entry
     const lightEntry = {
-      category: "light",
+      category: 'light',
       id: `${faName}Light`,
       name: baseName.replace(/([a-z])([A-Z])/g, '$1 $2'),
       faVersion: `fal fa-${kebabName}`,
-      path: `/icons/light/${kebabName}.svg`
+      path: `/icons/light/${kebabName}.svg`,
     };
 
     // Create a suggested solid version entry
     const solidEntry = {
-      category: "solid",
+      category: 'solid',
       id: `${faName}Solid`,
       name: baseName.replace(/([a-z])([A-Z])/g, '$1 $2'),
       faVersion: `fas fa-${kebabName}`,
-      path: `/icons/solid/${kebabName}.svg`
+      path: `/icons/solid/${kebabName}.svg`,
     };
 
     console.log(chalk.cyan(`\nFor icon "${faName}" (${kebabName}):`));
@@ -545,7 +559,9 @@ function suggestMissingFaIcons() {
   });
 
   if (FIX_MODE) {
-    console.log(chalk.yellow('\nWould you like to add these icons to the registry? (not implemented yet)'));
+    console.log(
+      chalk.yellow('\nWould you like to add these icons to the registry? (not implemented yet)')
+    );
     // TODO: Implement auto-fix for missing FontAwesome icons
   }
 }
@@ -569,7 +585,9 @@ function printSummary() {
   console.log(`Icons in registry not used: ${chalk.yellow(stats.unusedIcons.size)}`);
   console.log(`Icon references missing from registry: ${chalk.red(stats.missingMappings.size)}`);
   console.log(`FontAwesome icons missing from registry: ${chalk.red(missingFaIcons.size)}`);
-  console.log(`Verification success rate: ${chalk.cyan(Math.round((stats.validIcons / stats.totalIcons) * 100))}%`);
+  console.log(
+    `Verification success rate: ${chalk.cyan(Math.round((stats.validIcons / stats.totalIcons) * 100))}%`
+  );
   console.log(`Processing time: ${chalk.gray(stats.processingTime.toFixed(2))} ms`);
 
   // Issues with registry icons
@@ -578,48 +596,68 @@ function printSummary() {
 
     if (VERBOSE) {
       issues.forEach((issue, idx) => {
-        console.log(chalk.gray(`\n${idx + 1}. Icon ID: ${chalk.cyan(issue.id)} (${issue.category})`));
+        console.log(
+          chalk.gray(`\n${idx + 1}. Icon ID: ${chalk.cyan(issue.id)} (${issue.category})`)
+        );
         issue.issues.forEach(i => console.log(`   - ${i}`));
       });
     } else {
       // Show just the first 5 issues
       issues.slice(0, 5).forEach((issue, idx) => {
-        console.log(chalk.gray(`\n${idx + 1}. Icon ID: ${chalk.cyan(issue.id)} (${issue.category})`));
+        console.log(
+          chalk.gray(`\n${idx + 1}. Icon ID: ${chalk.cyan(issue.id)} (${issue.category})`)
+        );
         issue.issues.forEach(i => console.log(`   - ${i}`));
       });
 
       if (issues.length > 5) {
-        console.log(chalk.gray(`\n... and ${issues.length - 5} more issues. Use --verbose to see all.`));
+        console.log(
+          chalk.gray(`\n... and ${issues.length - 5} more issues. Use --verbose to see all.`)
+        );
       }
     }
   }
 
   // Issues with missing mappings
   if (stats.missingMappings.size > 0) {
-    console.log(chalk.yellow(`\nIcon references with no registry entry (top ${Math.min(10, stats.missingMappings.size)}):`));
+    console.log(
+      chalk.yellow(
+        `\nIcon references with no registry entry (top ${Math.min(10, stats.missingMappings.size)}):`
+      )
+    );
 
-    Array.from(stats.missingMappings).slice(0, 10).forEach(name => {
-      const files = iconReferences.get(name) || [];
-      console.log(chalk.gray(`  - "${name}" used in ${files.length} file(s)`));
-      if (VERBOSE && files.length > 0) {
-        files.slice(0, 3).forEach(file => {
-          console.log(chalk.gray(`      - ${path.relative(PROJECT_ROOT, file)}`));
-        });
-        if (files.length > 3) {
-          console.log(chalk.gray(`      ... and ${files.length - 3} more files`));
+    Array.from(stats.missingMappings)
+      .slice(0, 10)
+      .forEach(name => {
+        const files = iconReferences.get(name) || [];
+        console.log(chalk.gray(`  - "${name}" used in ${files.length} file(s)`));
+        if (VERBOSE && files.length > 0) {
+          files.slice(0, 3).forEach(file => {
+            console.log(chalk.gray(`      - ${path.relative(PROJECT_ROOT, file)}`));
+          });
+          if (files.length > 3) {
+            console.log(chalk.gray(`      ... and ${files.length - 3} more files`));
+          }
         }
-      }
-    });
+      });
 
     if (stats.missingMappings.size > 10) {
-      console.log(chalk.gray(`  ... and ${stats.missingMappings.size - 10} more. Use --verbose for details.`));
+      console.log(
+        chalk.gray(`  ... and ${stats.missingMappings.size - 10} more. Use --verbose for details.`)
+      );
     }
   }
 
   if (issues.length > 0 || stats.missingMappings.size > 0 || missingFaIcons.size > 0) {
-    console.log(chalk.yellow('\nIcon rendering issues were found. These should be fixed to prevent visual bugs.'));
+    console.log(
+      chalk.yellow(
+        '\nIcon rendering issues were found. These should be fixed to prevent visual bugs.'
+      )
+    );
   } else {
-    console.log(chalk.green('\nAll icons verified successfully! They will render correctly when referenced.'));
+    console.log(
+      chalk.green('\nAll icons verified successfully! They will render correctly when referenced.')
+    );
   }
 }
 
@@ -631,7 +669,9 @@ async function main() {
   console.log(chalk.gray('---------------------------------------------'));
 
   if (FIX_MODE) {
-    console.log(chalk.yellow('Running in FIX mode - will attempt to fix issues automatically where possible'));
+    console.log(
+      chalk.yellow('Running in FIX mode - will attempt to fix issues automatically where possible')
+    );
   }
 
   const startTime = performance.now();
@@ -664,7 +704,8 @@ async function main() {
   printSummary();
 
   // Exit with appropriate code based on critical issues
-  const hasCriticalIssues = stats.invalidIcons > 0 ||
+  const hasCriticalIssues =
+    stats.invalidIcons > 0 ||
     stats.missingFiles > 0 ||
     missingFaIcons.size > 0 ||
     missingPaths.length > 0;
@@ -676,4 +717,4 @@ async function main() {
 main().catch(err => {
   console.error(chalk.red('\nError:'), err);
   process.exit(1);
-}); 
+});

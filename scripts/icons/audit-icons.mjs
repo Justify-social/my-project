@@ -2,7 +2,7 @@
 
 /**
  * Icon Registry Audit Script
- * 
+ *
  * This script audits the icon registry files and validates icon usage across the codebase.
  * It checks for:
  * - Missing icons
@@ -30,7 +30,7 @@ const REGISTRY_FILES = {
   solid: path.join(CATEGORIES_DIR, 'solid-icon-registry.json'),
   brands: path.join(CATEGORIES_DIR, 'brands-icon-registry.json'),
   app: path.join(CATEGORIES_DIR, 'app-icon-registry.json'),
-  kpis: path.join(CATEGORIES_DIR, 'kpis-icon-registry.json')
+  kpis: path.join(CATEGORIES_DIR, 'kpis-icon-registry.json'),
 };
 
 // Parse command line arguments
@@ -38,7 +38,7 @@ const args = process.argv.slice(2);
 const options = {
   verbose: args.includes('--verbose'),
   fix: args.includes('--fix'),
-  debugOnly: args.includes('--debug-only')
+  debugOnly: args.includes('--debug-only'),
 };
 
 // Color formatting for console
@@ -49,7 +49,7 @@ const colors = {
   yellow: '\x1b[33m',
   blue: '\x1b[34m',
   magenta: '\x1b[35m',
-  cyan: '\x1b[36m'
+  cyan: '\x1b[36m',
 };
 
 /**
@@ -58,7 +58,9 @@ const colors = {
 function loadRegistry(type) {
   const filePath = REGISTRY_FILES[type];
   if (!fs.existsSync(filePath)) {
-    console.warn(`${colors.yellow}Warning: Registry file for '${type}' does not exist at ${filePath}${colors.reset}`);
+    console.warn(
+      `${colors.yellow}Warning: Registry file for '${type}' does not exist at ${filePath}${colors.reset}`
+    );
     return null;
   }
 
@@ -66,7 +68,9 @@ function loadRegistry(type) {
     const content = fs.readFileSync(filePath, 'utf8');
     return JSON.parse(content);
   } catch (error) {
-    console.error(`${colors.red}Error loading registry file for '${type}': ${error.message}${colors.reset}`);
+    console.error(
+      `${colors.red}Error loading registry file for '${type}': ${error.message}${colors.reset}`
+    );
     return null;
   }
 }
@@ -74,7 +78,8 @@ function loadRegistry(type) {
 /**
  * Checks if all SVG files referenced in a registry actually exist
  */
-function validateSVGFiles(registry /*, type */) { // Parameter correctly removed here
+function validateSVGFiles(registry /*, type */) {
+  // Parameter correctly removed here
   if (!registry) return { valid: false, missing: [] };
 
   const missing = [];
@@ -89,7 +94,7 @@ function validateSVGFiles(registry /*, type */) { // Parameter correctly removed
 
   return {
     valid: missing.length === 0,
-    missing
+    missing,
   };
 }
 
@@ -130,7 +135,7 @@ function validateIconReferences(iconRefs, registries) {
 
   // Collect all icon IDs from registries
   // Here, 'type' was genuinely unused, so keep it removed from destructuring
-  for (const [/* type */, registry] of Object.entries(registries)) {
+  for (const [, /* type */ registry] of Object.entries(registries)) {
     if (registry && registry.icons) {
       for (const icon of registry.icons) {
         registryIcons.add(icon.id);
@@ -147,7 +152,7 @@ function validateIconReferences(iconRefs, registries) {
 
   return {
     valid: missing.length === 0,
-    missing
+    missing,
   };
 }
 
@@ -189,7 +194,9 @@ async function auditIcons() {
 
     if (!result.valid) {
       allFilesValid = false;
-      console.log(`${colors.red}✗ ${type}: Missing ${result.missing.length} SVG files${colors.reset}`);
+      console.log(
+        `${colors.red}✗ ${type}: Missing ${result.missing.length} SVG files${colors.reset}`
+      );
 
       if (options.verbose) {
         for (const { id, path } of result.missing) {
@@ -208,7 +215,9 @@ async function auditIcons() {
 
   const refValidation = validateIconReferences(iconRefs, registries);
   if (!refValidation.valid) {
-    console.log(`${colors.red}✗ Missing ${refValidation.missing.length} icons referenced in code${colors.reset}`);
+    console.log(
+      `${colors.red}✗ Missing ${refValidation.missing.length} icons referenced in code${colors.reset}`
+    );
 
     if (options.verbose || refValidation.missing.length < 10) {
       for (const iconId of refValidation.missing) {
@@ -216,7 +225,9 @@ async function auditIcons() {
       }
     }
   } else {
-    console.log(`${colors.green}✓ All icon references have corresponding registry entries${colors.reset}`);
+    console.log(
+      `${colors.green}✓ All icon references have corresponding registry entries${colors.reset}`
+    );
   }
 
   // Summary

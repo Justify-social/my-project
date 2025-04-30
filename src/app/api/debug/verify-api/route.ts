@@ -9,7 +9,7 @@ import { logger } from '@/utils/logger';
 
 // Import ALL verification functions (server & client-side)
 import {
-  verifyPhylloApi, // Renamed from verifyPhylloApiServer alias
+  verifyInsightIQApi, // Use the new InsightIQ verifier
   verifyStripeApiServerSide, // Placeholder name
   verifyCintExchangeApiServerSide, // Placeholder name
   verifyUploadthingApiServerSide, // Placeholder name
@@ -31,7 +31,7 @@ const ApiNameSchema = z.object({
 
 // List of all verification functions to run for 'Test All'
 const ALL_API_VERIFIERS = [
-  { name: 'phyllo', func: verifyPhylloApi },
+  { name: 'insightiq', func: verifyInsightIQApi }, // Updated name and function
   { name: 'stripe', func: verifyStripeApiServerSide },
   { name: 'cint', func: verifyCintExchangeApiServerSide },
   { name: 'uploadthing', func: verifyUploadthingApiServerSide },

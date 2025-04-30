@@ -2,16 +2,16 @@
 
 /**
  * Tree Shake - Aggressively identifies and removes deprecated files
- * 
+ *
  * This script performs an aggressive tree shake of the project:
  * 1. Identifies files that might be deprecated
  * 2. Runs various checks to confirm deprecation status
  * 3. Creates backups of files before removal
  * 4. Removes confirmed deprecated files
- * 
+ *
  * Usage:
  *   node scripts/cleanup/tree-shake.mjs [--dry-run] [--verbose]
- * 
+ *
  * Options:
  *   --dry-run     Show what would be removed without making changes
  *   --verbose     Show detailed information during processing
@@ -30,7 +30,11 @@ const config = {
   verbose: process.argv.includes('--verbose'),
   force: process.argv.includes('--force'),
   noBackup: process.argv.includes('--no-backup'),
-  backupDir: path.resolve(process.cwd(), 'archives', `tree-shake-backup-${new Date().toISOString().replace(/[:.]/g, '-')}`),
+  backupDir: path.resolve(
+    process.cwd(),
+    'archives',
+    `tree-shake-backup-${new Date().toISOString().replace(/[:.]/g, '-')}`
+  ),
 };
 
 // Patterns for identifying potentially deprecated files
@@ -42,7 +46,11 @@ const deprecatedPatterns = [
   { type: 'legacy', pattern: /setup-components\.js$/, locations: ['.'] },
 
   // Files replaced by new structure
-  { type: 'structure', pattern: /validate-component-registry\.js$/, locations: ['config/start-up', 'scripts'] },
+  {
+    type: 'structure',
+    pattern: /validate-component-registry\.js$/,
+    locations: ['config/start-up', 'scripts'],
+  },
 
   // Old script backups
   { type: 'backup', pattern: /\.(old|bak|backup)$/, locations: ['scripts'] },
@@ -52,16 +60,12 @@ const deprecatedPatterns = [
 ];
 
 // Files to check for references before removal
-const checkForReferences = [
-  'package.json',
-  'scripts/README.md',
-  '.github/workflows',
-];
+const checkForReferences = ['package.json', 'scripts/README.md', '.github/workflows'];
 
 // Setup readline interface for user confirmation
 const rl = createInterface({
   input: process.stdin,
-  output: process.stdout
+  output: process.stdout,
 });
 
 // Stats tracking
@@ -124,12 +128,16 @@ async function checkReferences(filePath) {
       // For directories, grep recursively
       if (fs.statSync(checkPath).isDirectory()) {
         try {
-          const result = execSync(`grep -r "${fileBasename}" ${checkPath}`, { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] });
+          const result = execSync(`grep -r "${fileBasename}" ${checkPath}`, {
+            encoding: 'utf8',
+            stdio: ['pipe', 'pipe', 'ignore'],
+          });
           if (result) {
             verboseLog(`Found reference to ${fileBasename} in ${checkPath}`);
             return true;
           }
-        } catch { // Removed unused _e variable
+        } catch {
+          // Removed unused _e variable
           // grep returns non-zero exit code if no matches found
           verboseLog(`No references to ${fileBasename} found in ${checkPath}`);
         }
@@ -215,7 +223,7 @@ function findFilesMatchingPattern(dir, pattern) {
  * Confirm with the user before removing files
  */
 function confirmRemoval(files) {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     if (config.force) {
       resolve(true);
       return;
@@ -226,7 +234,7 @@ function confirmRemoval(files) {
       console.log(`  - ${path} (${reason})`);
     }
 
-    rl.question('\nProceed with removal? (y/N) ', (answer) => {
+    rl.question('\nProceed with removal? (y/N) ', answer => {
       resolve(answer.toLowerCase() === 'y');
     });
   });
@@ -344,4 +352,4 @@ async function main() {
 main().catch(error => {
   console.error('Error:', error);
   process.exit(1);
-}); 
+});

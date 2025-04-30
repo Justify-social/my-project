@@ -2,12 +2,12 @@
 
 /**
  * Fix Duplicate Exports Script
- * 
+ *
  * This script scans UI component files for duplicate default exports
  * and fixes them following a consistent pattern:
  * - For index.ts files: prefer `export { default } from './Component'`
  * - Remove any redundant `export default Component` statements
- * 
+ *
  * Usage:
  *   node config/ui/scripts/fix-duplicate-exports.js [--dry-run]
  */
@@ -35,15 +35,15 @@ const colors = {
   blue: '\x1b[34m',
   cyan: '\x1b[36m',
   magenta: '\x1b[35m',
-  bold: '\x1b[1m'
+  bold: '\x1b[1m',
 };
 
 // Helper log functions
-const log = (msg) => console.log(msg);
-const info = (msg) => console.log(`${colors.blue}ℹ ${colors.reset}${msg}`);
-const success = (msg) => console.log(`${colors.green}✓ ${colors.reset}${msg}`);
-const warning = (msg) => console.log(`${colors.yellow}⚠ ${colors.reset}${msg}`);
-const error = (msg) => console.error(`${colors.red}✗ ${colors.reset}${msg}`);
+const log = msg => console.log(msg);
+const info = msg => console.log(`${colors.blue}ℹ ${colors.reset}${msg}`);
+const success = msg => console.log(`${colors.green}✓ ${colors.reset}${msg}`);
+const warning = msg => console.log(`${colors.yellow}⚠ ${colors.reset}${msg}`);
+const error = msg => console.error(`${colors.red}✗ ${colors.reset}${msg}`);
 
 /**
  * Check for and fix duplicate default exports
@@ -51,29 +51,26 @@ const error = (msg) => console.error(`${colors.red}✗ ${colors.reset}${msg}`);
 function fixDuplicateExports(filePath) {
   try {
     const content = fs.readFileSync(filePath, 'utf8');
-    
+
     // Check for export { default } from './Component'
     const hasNamedDefaultExport = content.includes('export { default }');
-    
+
     // Check for export default Component
     const hasDirectDefaultExport = /export\s+default\s+\w+;/.test(content);
-    
+
     // Check for import Component from './Component'
     const componentImportMatch = content.match(/import\s+(\w+)\s+from\s+['"][^'"]+['"]/);
-    
+
     // Only fix if both patterns exist
     if (hasNamedDefaultExport && hasDirectDefaultExport && componentImportMatch) {
       const componentName = componentImportMatch[1];
-      
+
       // Remove the import statement and direct default export
       let newContent = content;
-      
+
       // Replace direct default export (more specific pattern first)
-      newContent = newContent.replace(
-        new RegExp(`export\\s+default\\s+${componentName};`), 
-        ''
-      );
-      
+      newContent = newContent.replace(new RegExp(`export\\s+default\\s+${componentName};`), '');
+
       // If content changed, file needs fixing
       if (newContent !== content) {
         if (DRY_RUN) {
@@ -85,7 +82,7 @@ function fixDuplicateExports(filePath) {
         return true;
       }
     }
-    
+
     return false;
   } catch (error) {
     warning(`Error processing ${filePath}: ${error.message}`);
@@ -98,13 +95,13 @@ function fixDuplicateExports(filePath) {
  */
 function findComponentFiles(dir) {
   const indexFiles = [];
-  
+
   function scanDirectory(currentDir) {
     const entries = fs.readdirSync(currentDir, { withFileTypes: true });
-    
+
     for (const entry of entries) {
       const fullPath = path.join(currentDir, entry.name);
-      
+
       if (entry.isDirectory()) {
         scanDirectory(fullPath);
       } else if (entry.name === 'index.ts') {
@@ -112,7 +109,7 @@ function findComponentFiles(dir) {
       }
     }
   }
-  
+
   scanDirectory(dir);
   return indexFiles;
 }
@@ -125,22 +122,22 @@ async function main() {
 ${colors.bold}Duplicate Exports Fixer${colors.reset}
 ${DRY_RUN ? colors.yellow + '[DRY RUN - No changes will be made]' + colors.reset : ''}
   `);
-  
+
   let totalFixed = 0;
-  
+
   // Process each component category
   for (const category of COMPONENT_CATEGORIES) {
     const categoryPath = path.join(UI_COMPONENTS_ROOT, category);
     info(`Processing ${category} components...`);
-    
+
     if (!fs.existsSync(categoryPath)) {
       warning(`Category directory not found: ${categoryPath}`);
       continue;
     }
-    
+
     const componentFiles = findComponentFiles(categoryPath);
     info(`Found ${componentFiles.length} index.ts files in ${category}`);
-    
+
     let fixedInCategory = 0;
     for (const file of componentFiles) {
       if (fixDuplicateExports(file)) {
@@ -148,10 +145,10 @@ ${DRY_RUN ? colors.yellow + '[DRY RUN - No changes will be made]' + colors.reset
         totalFixed++;
       }
     }
-    
+
     info(`Fixed ${fixedInCategory} files in ${category}`);
   }
-  
+
   if (totalFixed > 0) {
     if (DRY_RUN) {
       success(`Found ${totalFixed} files with duplicate exports (dry run)`);
@@ -167,4 +164,4 @@ ${DRY_RUN ? colors.yellow + '[DRY RUN - No changes will be made]' + colors.reset
 main().catch(err => {
   error(`Error: ${err.message}`);
   process.exit(1);
-}); 
+});
