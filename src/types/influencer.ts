@@ -220,6 +220,7 @@ export interface InfluencerSummary {
   platformProfileName?: string | null; // From profile.platform_profile_name or full_name
   profileId?: string | null; // Unique platform identifier (from profile.external_id from /search endpoint)
   platformSpecificId?: string | null; // Potentially stores platform_profile_id if ever available (low priority now)
+  platformEnum?: PlatformEnum | null; // Add this field
 }
 
 /**

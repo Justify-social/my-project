@@ -36,8 +36,14 @@ const InfluencerQuerySchema = z.object({
     .string()
     .transform(val => val.toLowerCase() === 'true')
     .optional(), // Expect 'true' or 'false' string
+  // Add searchTerm
+  searchTerm: z.string().optional(),
+  // Add audienceQuality
+  audienceQuality: z.enum(['High', 'Medium', 'Low']).optional(),
   // TODO: Add other filters as needed (e.g., audienceLocation, audienceAge)
-  // minScore: z.coerce.number().min(0).max(100).optional(), // Justify Score filtering is BE logic
+  // Uncomment Score filters
+  minScore: z.coerce.number().min(0).max(100).optional(),
+  maxScore: z.coerce.number().min(0).max(100).optional(),
 });
 
 // Remove helper function, now handled in mapping service
@@ -64,12 +70,13 @@ export async function GET(request: NextRequest) {
 
   const { page, limit, ...filters } = validationResult.data; // Separate filters from pagination
 
+  // filters object now contains searchTerm if provided
   logger.info(`[API /influencers] Requesting page ${page}, limit ${limit} with filters:`, filters);
 
   try {
-    // Call the centralized service function
+    // Call the centralized service function, passing the whole filters object
     const result = await influencerService.getProcessedInfluencerList({
-      filters, // Pass validated filters
+      filters, // Pass validated filters (including searchTerm)
       pagination: { page, limit }, // Pass pagination
     });
 

@@ -249,6 +249,18 @@ src/
         *   **Request Query Params:** (Params likely remain similar, but verify exact filter support in InsightIQ)
             *   `page?: number` (default: 1)
             *   `limit?: number` (default: 12)
+            *   `platforms?: PlatformEnum[]` // Implemented (BE handles multi-platform aggregation)
+            *   `minScore?: number` // Implemented (Backend filtering)
+            *   `maxScore?: number` // Implemented (Backend filtering)
+            *   `minFollowers?: number` // Implemented (Passed to InsightIQ)
+            *   `maxFollowers?: number` // Implemented (Passed to InsightIQ)
+            *   `audienceAge?: string` // UI Only - BE Filter Not Implemented
+            *   `audienceLocation?: string` // UI Only - BE Filter Not Implemented
+            *   `isVerified?: boolean` // Implemented (Passed to InsightIQ)
+            *   `audienceQuality?: 'High' | 'Medium' | 'Low'` // Implemented (Backend filtering)
+            *   `searchTerm?: string` // Implemented (Passed to InsightIQ as description_keywords)
+            *   `sortBy?: string` (Post-MVP?)
+        *   **Response Body (200 OK) - Target Schema (Verify fields against InsightIQ):**
             *   `platforms?: PlatformEnum[]` // Verify filter support in InsightIQ Docs
             *   `minScore?: number` // Verify handling in backend logic
             *   `maxScore?: number` // Verify handling in backend logic
@@ -370,169 +382,20 @@ src/
 
 *Goal: Set up FE files/types/mocks, define **InsightIQ** API contracts, **initiate Backend API & InsightIQ integration development**.*
 
-*   **Ticket 0.1: `CHORE: Create Core Directory Structure`**
-    *   **Goal:** Establish the folder hierarchy for the new feature.
-    *   **Action:** Create the following directories if they don't exist:
-        *   `src/app/influencer-marketplace/`
-        *   `src/app/influencer-marketplace/[id]/`
-        *   `src/components/features/influencers/`
-        *   `src/services/influencer/`
-        *   `src/data/mock/`
-    *   **Files Created:** New folders.
-    *   **Verification:** Directory structure matches plan.
-*   **Ticket 0.2: `TYPE: Define InfluencerSummary Type (MVP)`**
-    *   **Goal:** Specify the exact data fields needed for displaying influencers in lists/cards.
-    *   **Action:** In `src/types/influencer.ts` (or create if needed), define the `InfluencerSummary` interface:
-        ```typescript
-        import { PlatformEnum } from './enums'; // Assuming PlatformEnum exists
-
-        export interface InfluencerSummary {
-          id: string;
-          name: string;
-          handle: string;
-          avatarUrl: string;
-          platforms: PlatformEnum[];
-          followersCount: number; // Use consistent naming (e.g., followerCount or followers)
-          justifyScore: number; // Assumed 0-100 // Likely calculated by Justify backend, using InsightIQ inputs
-          isInsightIQVerified: boolean; // Direct flag from InsightIQ Identity API (via Profile.is_verified)
-          primaryAudienceLocation: string; // e.g., "United States", "UK" // From InsightIQ Profile Analytics
-          primaryAudienceAgeRange: string; // e.g., "25-34" // From InsightIQ Profile Analytics
-          primaryAudienceGender?: 'Male' | 'Female' | 'Other' | 'Mixed'; // Optional for summary
-          engagementRate?: number; // Optional for summary, e.g., 3.5 (%)
-          audienceQualityIndicator?: 'High' | 'Medium' | 'Low'; // Simple flag based on InsightIQ follower quality analysis
-        }
-        ```
-    *   **Files Modified:** `src/types/influencer.ts`, potentially `src/types/enums.ts`.
-    *   **Verification:** Type definition matches required fields for `list-view.png` mock. `PlatformEnum` is referenced correctly or defined if new.
-*   **Ticket 0.3: `TYPE: Define InfluencerProfileData Type (MVP)`**
-    *   **Goal:** Specify the data fields for the detailed influencer profile page.
-    *   **Action:** In `src/types/influencer.ts`, define `InfluencerProfileData` interface, extending `InfluencerSummary`:
-        ```typescript
-        export interface AudienceDemographics {
-          ageDistribution: Record<string, number>; // e.g., { '18-24': 25, '25-34': 45, ... } // From InsightIQ Profile Analytics (Essential for Kelly's audience targeting)
-          genderDistribution: Record<string, number>; // e.g., { 'Female': 65, 'Male': 30, ... } // From InsightIQ Profile Analytics (Essential for Kelly's audience targeting)
-          locationDistribution: Record<string, number>; // e.g., { 'USA': 40, 'UK': 20, ... } // From InsightIQ Profile Analytics (Essential for Kelly's audience targeting)
-          // TODO: Add other relevant MVP demographics if needed (e.g., top interests array?) - Consult Product Owner // InsightIQ Profile Analytics likely source
-        }
-
-        export interface EngagementMetrics {
-           averageLikes?: number; // From InsightIQ Profile Analytics or Engagement Metrics API
-           averageComments?: number; // From InsightIQ Profile Analytics or Engagement Metrics API
-           // TODO: Add other relevant MVP metrics if needed - Consult Product Owner // InsightIQ likely source
-        }
-
-        export interface InfluencerProfileData extends InfluencerSummary {
-          bio?: string;
-          audienceDemographics?: AudienceDemographics;
-          engagementMetrics?: EngagementMetrics;
-          // TODO: Add other MVP fields: e.g., pastCampaignHighlights?: { campaignName: string; brandName: string }[]; - Consult Product Owner
-          // Add safety flags later if part of MVP profile view
-        }
-        ```
-    *   **Files Modified:** `src/types/influencer.ts`.
-    *   **Verification:** Type definition includes necessary fields for `individual-influencer-profile.png`. `TODO`s added for Product Owner clarification on MVP scope.
-*   **Ticket 0.4: `TYPE: Extend DraftCampaignData in WizardContext`**
-    *   **Goal:** Enable the wizard state to store selected influencer IDs and navigation flag.
-    *   **Action:** Locate the `DraftCampaignData` type (or equivalent managing wizard state). Add:
-        *   `selectedInfluencerIds?: string[];`
-        *   `isFindingInfluencers?: boolean;`
-    *   **Files Modified:** `src/contexts/WizardContext.tsx` or related type file (e.g., `src/components/features/campaigns/types.ts`).
-    *   **Verification:** Context type is updated with the new fields. Default values handled correctly in context provider.
-*   **Ticket 0.5.1: `CHORE(API): Define API Contracts (MVP)`**
-    *   **Goal:** Finalize request/response schemas for `GET /influencers`, `GET /influencers/:id`.
-    *   **Action:** Create/update OpenAPI spec file (e.g., `/docs/api/influencer-marketplace.yaml`). Gain sign-off from FE/BE leads. **CRITICAL FIRST STEP** before parallel development to avoid integration issues.
-    *   **Verification:** Contracts are documented and agreed upon.
-*   **Ticket 0.6: `FEAT: Implement Mock Influencer Service - getInfluencers Function`**
-    *   **Goal:** Simulate fetching a paginated and filtered list of influencer summaries **based on agreed API contract**.
-    *   **Action:** Create `src/services/mock/mockInfluencerService.ts`.
-        *   Import `mockInfluencerDatabase`, `InfluencerSummary`, `InfluencerProfileData`.
-        *   Implement `async getInfluencers(params: { filters?: { platform?: PlatformEnum[]; minScore?: number; maxScore?: number; minFollowers?: number; maxFollowers?: number /* Add other simple MVP filters */ }; pagination?: { page: number; limit: number } }): Promise<{ influencers: InfluencerSummary[]; total: number; page: number; limit: number }>`
-        *   Inside, implement filtering logic on `mockInfluencerDatabase` based on `params.filters`. Handle potential missing filter values.
-        *   Implement pagination logic based on `params.pagination`. Calculate `total` based on filtered results *before* pagination.
-        *   **Crucially:** Map the full `InfluencerProfileData` objects from the filtered/paginated results to `InfluencerSummary` objects, only including the fields defined in the `InfluencerSummary` type.
-        *   Simulate network delay (`await new Promise(resolve => setTimeout(resolve, 300));`).
-        *   Return the structured response: `{ influencers, total, page: params.pagination?.page ?? 1, limit: params.pagination?.limit ?? 12 }`.
-    *   **Files Created/Modified:** `src/services/mock/mockInfluencerService.ts`.
-    *   **Verification:** Function handles filtering and pagination correctly. Returns data in the specified shape, mapping to `InfluencerSummary`.
-*   **Ticket 0.7: `FEAT: Implement Mock Influencer Service - getInfluencerById Function`**
-    *   **Goal:** Simulate fetching the full profile data for a single influencer.
-    *   **Action:** In `src/services/mock/mockInfluencerService.ts`.
-        *   Import `InfluencerProfileData`.
-        *   Implement `async getInfluencerById(id: string): Promise<InfluencerProfileData | null>`
-        *   Find the influencer in `mockInfluencerDatabase` by `id`.
-        *   Simulate network delay.
-        *   Return the found object (full `InfluencerProfileData`) or `null`.
-    *   **Files Modified:** `src/services/mock/mockInfluencerService.ts`.
-    *   **Verification:** Function correctly finds and returns profile data or null.
-*   **Ticket 0.8: `FEAT: Implement Mock Influencer Service - getInfluencerSummariesByIds Function`**
-    *   **Goal:** Simulate fetching summary data for multiple specific influencers (needed for Wizard review) **based on agreed API contract**.
-    *   **Action:** In `src/services/mock/mockInfluencerService.ts`.
-        *   Import `InfluencerSummary`.
-        *   Implement `async getInfluencerSummariesByIds(ids: string[]): Promise<InfluencerSummary[]>`
-        *   Filter `mockInfluencerDatabase` to find influencers whose `id` is in the input `ids` array.
-        *   Map the found `InfluencerProfileData` objects to `InfluencerSummary` objects.
-        *   Simulate network delay.
-        *   Return the array of summaries.
-    *   **Files Modified:** `src/services/mock/mockInfluencerService.ts`.
-    *   **Verification:** Function returns correct summaries for the given IDs.
-*   **Ticket 0.9: `CHORE: Implement Service Abstraction Layer`**
-    *   **Goal:** Create the index file to easily switch between mock and **early real API endpoints**.
-    *   **Action:** Create `src/services/influencer/index.ts`.
-        ```typescript
-        import * as mockService from '../mock/mockInfluencerService';
-        import { InfluencerSummary, InfluencerProfileData, AudienceDemographics, EngagementMetrics } from '@/types/influencer'; // Adjust path as needed
-        import { PlatformEnum } from '@/types/enums'; // Adjust path as needed
-
-        // Define the interface for the service based on mock service functions
-        interface IInfluencerService {
-          getInfluencers(params: { filters?: { platform?: PlatformEnum[]; minScore?: number; maxScore?: number; minFollowers?: number; maxFollowers?: number }; pagination?: { page: number; limit: number } }): Promise<{ influencers: InfluencerSummary[]; total: number; page: number; limit: number }>;
-          getInfluencerById(id: string): Promise<InfluencerProfileData | null>;
-          getInfluencerSummariesByIds(ids: string[]): Promise<InfluencerSummary[]>;
-        }
-
-        // Placeholder for the real API service implementing the interface
-        const apiService: IInfluencerService = {
-          getInfluencers: async (params) => { console.error('Real getInfluencers API not implemented'); return { influencers: [], total: 0, page: 1, limit: 12 }; },
-          getInfluencerById: async (id) => { console.error('Real getInfluencerById API not implemented'); return null; },
-          getInfluencerSummariesByIds: async (ids) => { console.error('Real getInfluencerSummariesByIds API not implemented'); return []; },
-        };
-
-        // Ensure mockService conforms to the interface (TypeScript will help here)
-        const typedMockService: IInfluencerService = mockService;
-
-        const useMock = process.env.NEXT_PUBLIC_USE_MOCK_API === 'true' || process.env.NODE_ENV === 'development'; // Default to mock in dev
-
-        export const influencerService: IInfluencerService = useMock ? typedMockService : apiService;
-        ```
-    *   **Files Created:** `src/services/influencer/index.ts`.
-    *   **Verification:** File exports `influencerService`. `useMock` logic is correct. Placeholder `apiService` exists. TypeScript checks pass for interface conformity.
-*   **Ticket 0.10: `CHORE(DB): Define Initial Database Indexes`**
-    *   **Goal:** Ensure efficient querying of the `influencers` table/collection based on MVP filters.
-    *   **Action:** Analyze MVP filter parameters (`platforms`, `justifyScore`, `followersCount`, `audienceLocation`, `audienceAge`). Define appropriate single-column and potentially composite indexes in the Prisma schema or database directly. Document the initial indexing strategy.
-    *   **Files Modified:** `prisma/schema.prisma` (potentially, using `@@index` or `@db.index`)
-    *   **Verification:** Index definitions are added and match filter requirements.
-*   **Ticket 0.11: `BE-SETUP: Initialize Influencer DB Models & Basic API Routes`**
-    *   **Goal:** Set up the basic database structure and API routing for influencers.
-    *   **Action:** Ensure Prisma schema changes (Ticket 0.2, 0.3) are applied. Create basic repository patterns or DB service functions. Set up basic Next.js API route handlers (`route.ts`) for `/api/influencers` and `/api/influencers/[id]`. Implement basic health check response.
-    *   **Dependencies:** Tickets 0.3.
-    *   **Verification:** Database tables exist. API routes return basic success/error responses.
-*   **Ticket 0.12: `BE-SETUP: Implement InsightIQ Service Initial Connection` (Revised)** (Title and Action updated for InsightIQ)
-    *   **Goal:** Establish authenticated connection capability to InsightIQ API.
-    *   **Action:** Implement authentication logic within `src/lib/insightiqService.ts` (create if needed) using environment variables for API keys (Ticket 0.13). Implement basic health check or simple InsightIQ API call (e.g., get account status) to verify connection.
-    *   **Dependencies:** InsightIQ API credentials (via Ticket 0.13).
-    *   **Verification:** Backend service can successfully authenticate with InsightIQ API.
-*   **Ticket 0.13: `CHORE(Config): Setup InsightIQ API Key Management` (Revised)** (Title and Action updated for InsightIQ)
-    *   **Goal:** Securely configure InsightIQ API keys.
-    *   **Action:** Add `INSIGHTIQ_API_KEY`, `INSIGHTIQ_SECRET` (or similar) to `.env.template` / `.env.example`. Ensure these are loaded correctly via environment variables and accessible to the `insightiqService`. Use platform secret management for production.
-    *   **Verification:** Keys are configured and usable by the `insightiqService`.
-*   **Ticket 0.14: `CHORE(API): Verify/Refactor Existing Connection Endpoints for InsightIQ` (Revised)** (Title and Action updated for InsightIQ, notes dependency)
-    *   **Goal:** Ensure existing endpoints (`/api/insightiq/create-user`, `/api/insightiq/sdk-token`) meet requirements for Marketplace/future connection flows.
-    *   **Action:**
-        *   Review/Rename `/api/**insightiq**/create-user` -> `/api/insightiq/create-user`. Verify if InsightIQ has an equivalent concept or if user mapping is handled differently. (**Blocked by Docs**)
-        *   Review/Rename `/api/**insightiq**/sdk-token` -> `/api/insightiq/sdk-token`. Verify if InsightIQ uses an SDK token flow or a different mechanism for its connection SDK (if any). Update required `products` (if applicable). (**Blocked by Docs**)
-        *   Refactor implementation to call InsightIQ endpoints via `insightiqService`.
-    *   **Dependencies:** Access to review existing code, **InsightIQ Docs**.
-    *   **Verification:** Endpoints (if needed) are confirmed or updated to correctly interact with InsightIQ for user mapping/connection flow. 
+*   **Ticket 0.1: `CHORE: Create Core Directory Structure`** - ✅ Done
+*   **Ticket 0.2: `TYPE: Define InfluencerSummary Type (MVP)`** - ✅ Done
+*   **Ticket 0.3: `TYPE: Define InfluencerProfileData Type (MVP)`** - ✅ Done
+*   **Ticket 0.4: `TYPE: Extend DraftCampaignData in WizardContext`** - ✅ Done (But integration deferred)
+*   **Ticket 0.5.1: `CHORE(API): Define API Contracts (MVP)`** - ✅ Done
+*   **Ticket 0.6: `FEAT: Implement Mock Influencer Service - getInfluencers Function`** - ✅ Done (Superseded by real service)
+*   **Ticket 0.7: `FEAT: Implement Mock Influencer Service - getInfluencerById Function`** - ✅ Done (Superseded by real service)
+*   **Ticket 0.8: `FEAT: Implement Mock Influencer Service - getInfluencerSummariesByIds Function`** - ✅ Done (Superseded by real service)
+*   **Ticket 0.9: `CHORE: Implement Service Abstraction Layer`** - ✅ Done
+*   **Ticket 0.10: `CHORE(DB): Define Initial Database Indexes`** - ✅ Done
+*   **Ticket 0.11: `BE-SETUP: Initialize Influencer DB Models & Basic API Routes`** - ✅ Done
+*   **Ticket 0.12: `BE-SETUP: Implement InsightIQ Service Initial Connection` (Revised)** - ✅ Done
+*   **Ticket 0.13: `CHORE(Config): Setup InsightIQ API Key Management` (Revised)** - ✅ Done
+*   **Ticket 0.14: `CHORE(API): Verify/Refactor Existing Connection Endpoints for InsightIQ` (Revised)** - ❌ Deferred (Blocked by InsightIQ Docs)
 
 ---
 
@@ -540,105 +403,26 @@ src/
 
 *Goal: Build the core Marketplace page UI, connect to mock or **early live InsightIQ dev APIs**, implement basic selection state.*
 
-*   **Ticket 1.0: `BE-FEAT: Implement GET /influencers v1 (Core Data + InsightIQ Verification)` (Revised)** (Title and Action updated for InsightIQ, notes dependency)
-    *   **Goal:** Create the primary backend endpoint delivering essential data for the list view, integrating initial InsightIQ data.
-    *   **Action:** Implement `GET /api/influencers` route handler based on **finalized API Contract (Ticket 0.5.1)**. **Apply Input Validation (Zod).** Fetch data from local DB (Ticket 0.11). Implement basic filtering/pagination logic (using indexes from Ticket 0.10). **Integrate calls via `insightiqService` (Ticket 0.12) to fetch `isInsightIQVerified` status** (using InsightIQ Identity API) and basic `Profile Analytics` data (followers, platforms). Handle caching/errors for InsightIQ calls. Deploy to dev/staging ASAP.
-    *   **Dependencies:** Tickets 0.5.1, 0.10, 0.11, 0.12, 0.13.
-    *   **Verification:** Endpoint returns data matching contract. Input validation works. Includes `isInsightIQVerified`, followers, platforms sourced from InsightIQ (or indicates if fetch failed). Basic filtering works.
-*   **Ticket 1.1: `BE-FEAT: Implement GET /influencers/:id v1 (Core Profile Data)` (Revised)** (Title and Action updated for InsightIQ, notes dependency)
-    *   **Goal:** Create the endpoint for fetching detailed profile data, including core InsightIQ analytics.
-    *   **Action:** Implement `GET /api/influencers/:id` route handler based on **finalized API Contract**. **Apply Input Validation (Zod for ID format).** Fetch data from local DB. **Integrate calls via `insightiqService` to fetch detailed `Profile Analytics` data** (Audience Demographics, Engagement Metrics, Follower Quality). Integrate `Identity API` call for `isInsightIQVerified`. Handle caching/errors. Deploy to dev/staging ASAP.
-    *   **Dependencies:** Tickets 0.5.1, 0.11, 0.12, 0.13.
-    *   **Verification:** Endpoint returns detailed data matching contract, including demographics and engagement metrics sourced from InsightIQ.
+*   **Ticket 1.0: `BE-FEAT: Implement GET /influencers v1 (Core Data + InsightIQ Verification)` (Revised)**
+    *   **Status:** ✅ Done (Implementation Verified, includes multi-platform aggregation, backend filters for Score/Quality, passes other filters to InsightIQ. Pending final testing)
+*   **Ticket 1.1: `BE-FEAT: Implement GET /influencers/:id v1 (Core Profile Data)` (Revised)**
+    *   **Status:** 🚧 Blocked (Implementation complete, but blocked by InsightIQ API mismatch issue)
 *   **Ticket 1.2: `FEAT(UI): Build InfluencerSummaryCard Component`**
-    *   **Goal:** Create the core reusable UI card for displaying influencer summary info in a **Grid Layout**.
-    *   **Action:** Create `src/components/features/influencers/InfluencerSummaryCard.tsx`.
-        *   **Props:** `influencer: InfluencerSummary`, `isSelected: boolean`, `onSelectToggle: (id: string) => void`, `onViewProfile: (id: string) => void`.
-        *   **Implementation:**
-            *   Use `Card` as the base container. Apply appropriate padding/styling.
-            *   Top section: Use `Checkbox` aligned left. Checkbox state controlled by `isSelected` prop. `onChange` calls `onSelectToggle(influencer.id)`.
-            *   Middle section (main content): Use layout (Flexbox/Grid) to arrange:
-                *   `Avatar` component (src=`influencer.avatarUrl`, alt=`influencer.name`).
-                *   Name (`<p>` or `<h4>`, bold).
-                *   Handle (`<p>`, smaller text, secondary color).
-                *   Platform Icons: Map `influencer.platforms`. Use existing `Icon` component for each platform. Ensure icons exist (See Dependency Check).
-                *   Verification: If `influencer.isInsightIQVerified`, display a verification `Badge` ("Verified") or `Icon`. (**Data Source Note:** `isInsightIQVerified` comes via backend from InsightIQ Identity API).
-                *   Audience Tags: Display `primaryAudienceAgeRange`, `primaryAudienceGender` (if available), `primaryAudienceLocation` using `Badge` components for quick scanning.
-            *   Bottom section (metrics): Display Followers (`followersCount`), **Justify Score** (`justifyScore` - include `Tooltip` or `InfoIcon` explaining key factors), Audience Quality (`audienceQualityIndicator` - use `Badge`), Engagement Rate (`engagementRate`), using Text/Labels. Format numbers. (**Data Source Note:** Score calculated by backend; Quality from InsightIQ Profile Analytics; Engagement from InsightIQ).
-            *   Action section: "View Profile" `Button` (`variant="outline"` or similar). `onClick` calls `onViewProfile(influencer.id)`.
-        *   **Visual Reference:** Aim for layout in `list-view.png`.
-        *   **Accessibility:** Ensure checkbox has label association. Ensure interactive elements are focusable.
-        *   **Customer Focus:** This card directly addresses Kelly P.'s need to see verification status (`isInsightIQVerified`) and effectiveness indicators (`justifyScore`, audience highlights) upfront, de-emphasizing raw follower counts.
-        *   **Integration Mandate:** **Develop against the agreed API Contract structure.** Test initially with mock service if needed, but **switch to live dev/staging endpoint (Ticket 1.0) via `influencerService` IMMEDIATELY upon availability.**
-    *   **Files Created:** `src/components/features/influencers/InfluencerSummaryCard.tsx`.
-    *   **Dependency Check:** Verify existence of `Card`, `Checkbox`, `Avatar`, `Icon`, `Badge`, `Button` in `src/components/ui`. Specifically check if `Icon` supports platform logos (IG, YT, TK etc.) and a verification icon (e.g., check-circle). **If icons missing, create `TICKET: CHORE(UI): Add missing platform/verification icons`**.
-    *   **Verification:** Component renders correctly against **API Contract structure** (mock or early live data). Interactions trigger callbacks. Layout matches mockup grid view. Audience tags are displayed.
+    *   **Status:** ✅ Done (Verified badge hover fixed)
 *   **Ticket 1.3: `FEAT(UI): Setup Marketplace Page (`page.tsx`) & Initial State`**
-    *   **Goal:** Create the page file, manage core state for list display and selection.
-    *   **Action:** Create `src/app/influencer-marketplace/page.tsx`.
-        *   Add `'use client'`. Import `React`, `useState`, `useEffect`, `useRouter`, `influencerService`, `InfluencerSummary`.
-        *   Define state variables using `useState`:
-            *   `influencers: InfluencerSummary[] = []`
-            *   `isLoading: boolean = true`
-            *   `error: string | null = null`
-            *   `selectedIds: string[] = []`
-            *   `currentPage: number = 1`
-            *   `totalInfluencers: number = 0`
-            *   `limit: number = 12` // Or fetch from config/constants
-        *   Implement `handleSelectToggle(id: string)`: Toggles `id` in `selectedIds` array.
-        *   Implement `handleViewProfile(id: string)`: Uses `router.push(`/influencer-marketplace/${id}`)`.
-        *   Render basic page structure: Use `ConditionalLayout`, add page title (e.g., "Influencer Marketplace"), add placeholders for Filters button, "Add to Campaign" button, the list, and pagination.
-        *   Pass props: `key={inf.id}`, `influencer={inf}`, `isSelected={selectedIds.includes(inf.id)}`, `onSelectToggle`, `onViewProfile`.
-        *   **Layout Note:** This implementation focuses on a **Grid layout** for the MVP. A List/Table view toggle is a Post-MVP enhancement.
-        *   **Integration Mandate:** Like Ticket 1.2, **develop against API Contract and connect to live dev/staging endpoint (Ticket 1.0) via `influencerService` ASAP.**
-    *   **Files Created:** `src/app/influencer-marketplace/page.tsx`.
-    *   **Verification:** Page renders with title. State variables are initialized. Handler functions exist.
+    *   **Status:** ✅ Done (Includes search state management)
 *   **Ticket 1.4: `FEAT(FE): Implement Initial Data Fetching on Marketplace Page`**
-    *   **Goal:** Load the first page of influencers when the page mounts.
-    *   **Action:** In `MarketplacePage` (`page.tsx`):
-        *   Create `fetchData = async (page = 1) => { ... }` function.
-        *   Inside `fetchData`:
-            *   Set `isLoading(true)`, `setError(null)`.
-            *   `try { ... } catch (err) { setError(...); } finally { setIsLoading(false); }`.
-            *   Call `influencerService.getInfluencers({ pagination: { page, limit } /* Add filters later */ })`.
-            *   On success: update `setInfluencers`, `setCurrentPage(page)`, `setTotalInfluencers(response.total)`.
-        *   Call `fetchData(1)` inside a `useEffect(() => { ... }, []);` hook (empty dependency array for initial load).
-    *   **Files Modified:** `src/app/influencer-marketplace/page.tsx`.
-    *   **Verification:** Data is fetched on load. Loading state works. `influencers` state is populated. `totalInfluencers` is set.
-    *   **Error Handling:** Verify that API or network errors during fetch update the `error` state and are handled by the `MarketplaceList` component (Ticket 1.4).
-    *   **Integration Mandate:** Fetch logic **must** call the backend via `influencerService`. Test against live dev/staging endpoint (Ticket 1.0).
+    *   **Status:** ✅ Done (Handles `appliedFilters` and `appliedSearchTerm`)
 *   **Ticket 1.5: `FEAT(UI): Create MarketplaceList Component`**
-    *   **Goal:** Render the list of influencer cards and handle loading/error states **from live dev API or mock fallback**.
-    *   **Action:** Create `src/components/features/influencers/MarketplaceList.tsx`.
-        *   **Props:** `influencers: InfluencerSummary[]`, `isLoading: boolean`, `error: string | null`, `selectedIds: string[]`, `onSelectToggle: (id: string) => void`, `onViewProfile: (id: string) => void`, `itemsPerPage: number`.
-        *   **Implementation:**
-            *   If `isLoading`, render a grid of `itemsPerPage` `LoadingSkeleton` components shaped like `InfluencerSummaryCard`.
-            *   If `error`, display a user-friendly error message component (e.g., AlertBanner from UI library) showing the `error`
-    *   **Files Created:** `src/components/features/influencers/MarketplaceList.tsx`.
-    *   **Dependency Check:** `LoadingSkeleton` component exists. AlertBanner/ErrorMessage component exists.
+    *   **Status:** ✅ Done
 *   **Ticket 1.6: `FEAT(UI): Implement Marketplace Filters UI`**
-    *   **Goal:** Build the filter drawer UI.
-    *   **Action:** Create `src/components/features/influencers/MarketplaceFilters.tsx`. Implement UI with controls for Platform, Score, Followers, Audience Age, Location.
-    *   **Dependencies:** `Drawer`, `Select`, `Slider`, `Input`, `Button`.
-    *   **Verification:** Drawer opens/closes. Controls are present.
+    *   **Status:** ✅ Done (Includes Search, Multi-platform Checkboxes, Audience Quality. Fixed footer layout)
 *   **Ticket 1.7: `FEAT(FE): Connect Filters State & Actions`**
-    *   **Goal:** Manage filter state and connect UI controls.
-    *   **Action:** In `MarketplacePage` (`page.tsx`), add `filters` state (`FiltersState`) and `handleFilterChange`, `handleResetFilters`. Pass down to `MarketplaceFilters`. Wire up controls in `MarketplaceFilters` to display/update state.
-    *   **Files Modified:** `src/app/influencer-marketplace/page.tsx`, `src/components/features/influencers/MarketplaceFilters.tsx`.
-    *   **Verification:** Filter controls display and update state correctly.
+    *   **Status:** ✅ Done (Handles local state and apply/reset logic)
 *   **Ticket 1.8: `FEAT(FE): Connect Apply Filters to Data Fetching`**
-    *   **Goal:** Refetch data with applied filters.
-    *   **Action:** In `MarketplacePage`, implement `handleApplyFilters` to call `fetchData(1)` with current `filters` state. Connect Apply button. Modify `fetchData` to pass `filters` to `influencerService.getInfluencers`.
-    *   **Files Modified:** `src/app/influencer-marketplace/page.tsx`, `src/components/features/influencers/MarketplaceFilters.tsx`.
-    *   **Verification:** Applying filters refetches data using API filter params. List updates.
-*   **Ticket 1.9: `BE-FEAT: Implement MVP Justify Score v1 Calculation` (Revised)** (Title and Action updated for InsightIQ, notes dependency)
-    *   **Goal:** Provide an initial, simple Justify Score based on **live InsightIQ data fetched within the request**.
-    *   **Action:** In the backend logic (within the API route handlers `GET /influencers`, `GET /influencers/:id` after fetching from InsightIQ):
-        *   Define a simple V1 algorithm (e.g., weighted combination of `isInsightIQVerified` status, `audienceQualityIndicator`, basic engagement rate from the *live fetched data*).
-        *   Calculate and return the `justifyScore` field along with the mapped InsightIQ data. Document the V1 algorithm.
-        *   Handle missing input data from the live fetch gracefully.
-    *   **Dependencies:** Ticket 1.0, Ticket 1.1 (needs live InsightIQ data available within the request).
-    *   **Verification:** API responses include a calculated `justifyScore` based on live data. Calculation logic is documented and handles missing inputs.
+    *   **Status:** ✅ Done (Confirmed applies only on click, passes filters & search term)
+*   **Ticket 1.9: `BE-FEAT: Implement MVP Justify Score v1 Calculation` (Revised)**
+    *   **Status:** ✅ Done (Implemented, filtering logic added in service layer)
 
 ---
 
@@ -646,60 +430,15 @@ src/
 *(**Action:** Added annotation to explicitly state Data Source notes need update based on InsightIQ docs)*
 
 *   **Ticket 2.1: `FEAT: Setup Profile Page (`[id]/page.tsx`) & Data Fetching`**
-    *   **Goal:** Create the dynamic page, extract ID, fetch profile data, handle loading/errors.
-    *   **Action:** Create `src/app/influencer-marketplace/[id]/page.tsx`.
-        *   Add `'use client'`. Import `React`, `useState`, `useEffect`, `useRouter`, `influencerService`, `InfluencerSummary`.
-        *   Define state variables using `useState`:
-            *   `influencer: InfluencerSummary | null = null`
-            *   `isLoading: boolean = true`
-            *   `error: string | null = null`
-        *   Implement `fetchData = async () => { ... }` function.
-        *   Inside `fetchData`:
-            *   Set `isLoading(true)`, `setError(null)`.
-            *   `try { ... } catch (err) { setError(...); } finally { setIsLoading(false); }`.
-            *   Call `influencerService.getInfluencerById(id)`.
-            *   On success: update `setInfluencer`.
-        *   Call `fetchData()` inside a `useEffect(() => { ... }, []);` hook (empty dependency array for initial load).
-        *   Render: Use `ConditionalLayout`. Add a "Back" `Button` (`onClick={() => router.back()}`). Handle `isLoading` (render `LoadingSkeleton` for profile shape) and `error` (render error message) states. Render placeholder for profile content.
-        *   **Dependency Check:** `LoadingSkeleton` (needs a profile shape variant?), Error message component.
-        *   **Verification:** Page fetches data based on URL ID. Loading state works. Back button works. Error state (`isLoading=false, error!=null`) displays a user-friendly error message (e.g., "Influencer not found" or "Failed to load profile").
+    *   **Status:** ✅ Done (Implementation complete, but blocked by BE/API issue)
 *   **Ticket 2.2: `FEAT(UI): Build Profile Header Component`**
-    *   **Goal:** Display the top summary section visually matching `individual-influencer-profile.png`.
-    *   **Action:** Create `src/components/features/influencers/ProfileHeader.tsx`.
-        *   **Props:** `influencer: InfluencerSummary`, `isSelected: boolean`, `onSelectToggle: (id: string) => void`.
-        *   **Implementation:**
-            *   Use layout (Flexbox/Grid) for structure.
-            *   Left side: `Avatar`.
-            *   Middle section: Name, Handle, Bio (`influencer.bio`).
-            *   Right section: **Justify Score** display (with `Tooltip`/`InfoIcon`), Verification `Badge`/`Icon`, Audience Quality `Badge`, Platform `Icon`s. (**Data Source Note:** Score from backend; Verification from InsightIQ Identity; Quality from InsightIQ Profile Analytics; Bio likely from InsightIQ Profile Analytics).
-            *   Action button: "Select Influencer" / "Deselect Influencer" `Button` or `Checkbox` based on `isSelected`. `onClick={() => onSelectToggle(influencer.id)}`.
-        *   **Visual Reference:** Match top section of `individual-influencer-profile.png`.
-        *   **Dependency Check:** Reuses UI components. Potentially a small dedicated Score display component.
-        *   **Verification:** Component renders correctly with profile data. Select button works.
+    *   **Status:** ✅ Done
 *   **Ticket 2.3: `FEAT: Integrate Profile Header into Profile Page`**
-    *   **Goal:** Show the header with fetched data and manage selection state for this profile.
-    *   **Action:** In `ProfilePage` (`[id]/page.tsx`):
-        *   Modify the existing `influencer` state to include `isSelectedOnProfile` field.
-        *   Implement `handleSelectToggle(id: string)` function to toggle `isSelectedOnProfile` and update `selectedIds` state.
-        *   **Files Modified:** `src/app/influencer-marketplace/[id]/page.tsx`.
-        *   **Verification:** Header renders below the Back button when data is loaded. Selection state on the profile page is managed locally.
-        *   **Sync Clarification:** Verify that clicking the select button on the profile *only* affects the local `isSelectedOnProfile` state and does not modify the `selectedIds` state on the main marketplace page or `WizardContext`.
+    *   **Status:** ✅ Done
 *   **Ticket 2.4: `FEAT(UI): Build Profile Details Tabs/Sections (MVP)`**
-    *   **Goal:** Display core profile details (Bio, Audience, Performance) using Tabs.
-    *   **Action:**
-        *   Create `src/components/features/influencers/ProfileAboutSection.tsx`, `ProfileAudienceSection.tsx`, and `ProfilePerformanceSection.tsx`.
-        *   Implement `ProfileAboutSection` to display `influencer.bio`.
-        *   Implement `ProfileAudienceSection` to display `influencer.audienceDemographics`.
-        *   Implement `ProfilePerformanceSection` to display `influencer.engagementMetrics`.
-    *   **Dependency Check:** `Tabs`, Chart component (Bar chart), `Table`, `Card`. Ensure charts can handle the `Record<string, number>` data format.
-    *   **Verification:** Tabs render below the header. Each tab displays the correct section component with data (or empty/loading state). Charts/tables visualize data correctly.
+    *   **Status:** ✅ Done
 *   **Ticket 2.5: `FEAT: Direct Influencer Contact Info Display (Elevated Priority)`**
-    *   **Goal:** Display verified email addresses for influencers if available/permissioned.
-    *   **Context:** Directly addresses Kelly P.'s strong preference for email outreach.
-    *   **Action:** Requires backend API update to `GET /influencers/:id` to include `contactEmail?: string` (sourced securely, requires careful thought on data source/permissions - **Backend Task**). Update `InfluencerProfileData` type. Display the email clearly (e.g., under name/handle or in an 'About'/'Contact' section) within the profile page. Add a 'Copy Email' button.
-    *   **Files Modified:** `src/types/influencer.ts`, `src/app/influencer-marketplace/[id]/page.tsx` (or relevant section component).
-    *   **Dependency Check:** Copy `Icon`, `Button`.
-    *   **Verification:** Email displays correctly when present in data. Copy button works.
+    *   **Status:** 🅿️ Blocked (Requires reliable profile data fetch)
 
 ---
 

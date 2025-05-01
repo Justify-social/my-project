@@ -21,6 +21,24 @@ import { RecentCampaignsSection } from '@/components/features/influencers/Recent
 // import { LoadingSkeleton } from '@/components/ui/loading-skeleton'; // TODO: Import Skeleton component
 // import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert" // TODO: Import Alert component
 // TODO: Import ProfileHeader and Profile Details components later (Tickets 2.2, 2.4)
+import { PlatformEnum } from '@/types/enums'; // Need this type
+
+// Helper function to get enum key from value (case-insensitive)
+function getPlatformEnumFromString(value: string | null): PlatformEnum | null {
+  if (!value) return null;
+  const upperValue = value.toUpperCase(); // Match against uppercase enum values
+  for (const key in PlatformEnum) {
+    // Check if the key is a valid enum member (not a number for reverse mapping)
+    // and if its value matches the input string (case-insensitive)
+    if (
+      isNaN(Number(key)) &&
+      PlatformEnum[key as keyof typeof PlatformEnum].toUpperCase() === upperValue
+    ) {
+      return PlatformEnum[key as keyof typeof PlatformEnum];
+    }
+  }
+  return null; // Not found
+}
 
 // Define a simple skeleton placeholder
 const ProfileSkeleton = () => (
@@ -62,80 +80,87 @@ const ErrorDisplay = ({ message }: { message: string }) => (
 export default function InfluencerProfilePage() {
   const router = useRouter();
   const params = useParams();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams(); // Need this again for platform
 
   // Extract handle from path parameter
   const handle = params?.username ? decodeURIComponent(params.username as string) : null;
-  // Extract platformId from query parameter
-  const platformId = searchParams?.get('platformId') || null;
+  // Read 'platform' query param as string
+  const platformString = searchParams?.get('platform') || null;
+
+  // Use the helper function for conversion
+  const platformEnum = getPlatformEnumFromString(platformString);
 
   const [influencer, setInfluencer] = useState<InfluencerProfileData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Data Fetching Logic - Uses handle and platformId
-  const fetchData = useCallback(async (fetchHandle: string, fetchPlatformId: string) => {
-    if (!fetchHandle || !fetchPlatformId) {
-      logger.warn('[ProfilePage] Missing required handle or platformId', {
-        handle: fetchHandle,
-        platformId: fetchPlatformId,
-      });
-      setError('Invalid handle or platform ID for profile lookup.');
-      setIsLoading(false);
-      return;
-    }
-
-    logger.info(
-      `[ProfilePage] Fetching analytics data for handle: ${fetchHandle}, platformId: ${fetchPlatformId}`
-    );
-    setIsLoading(true);
-    setError(null);
-    setInfluencer(null); // Clear previous data
-
-    // Construct the NEW backend API endpoint URL
-    const queryParams = new URLSearchParams();
-    queryParams.append('identifier', fetchHandle); // Pass handle as 'identifier' query param
-    queryParams.append('platformId', fetchPlatformId);
-    const apiUrl = `/api/influencers/analytics?${queryParams.toString()}`;
-
-    logger.debug(`[ProfilePage] Constructed Analytics API URL: ${apiUrl}`);
-
-    try {
-      // We will use GET for simplicity here, assuming the new backend route handles GET
-      // If POST is strictly needed for the backend route, adjust this fetch call
-      const response = await fetch(apiUrl);
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        logger.error(`[ProfilePage] Analytics API error response: ${response.status}`, errorData);
-        setError(`Failed to load profile analytics: ${errorData?.error || response.statusText}`);
+  // Data Fetching Logic - Updated to use handle AND platformEnum for new API route
+  const fetchData = useCallback(
+    async (fetchHandle: string, fetchPlatformEnum: PlatformEnum | null) => {
+      // Check handle and platformEnum
+      if (!fetchHandle || !fetchPlatformEnum) {
+        logger.warn('[ProfilePage] Missing required handle or valid platformEnum', {
+          handle: fetchHandle,
+          platformEnum: fetchPlatformEnum,
+        });
+        setError('Invalid parameters for profile lookup.');
+        setIsLoading(false);
         return;
       }
-      const data = await response.json();
-      // Assuming the analytics API returns the full profile data structure needed
-      if (data.success && data.data) {
-        logger.info(`[ProfilePage] Analytics data fetched successfully for handle: ${fetchHandle}`);
-        // TODO: Potentially map the analytics response to InfluencerProfileData if needed
-        setInfluencer(data.data as InfluencerProfileData);
-      } else {
-        logger.warn(`[ProfilePage] Analytics data not found for handle: ${fetchHandle}`, data);
-        setError('Influencer analytics not found.');
+
+      logger.info(
+        `[ProfilePage] Fetching profile data for handle: ${fetchHandle}, platform: ${fetchPlatformEnum}`
+      );
+      setIsLoading(true);
+      setError(null);
+      setInfluencer(null);
+
+      // Construct API URL using handle and platform enum string
+      const queryParams = new URLSearchParams();
+      queryParams.append('handle', fetchHandle);
+      queryParams.append('platform', fetchPlatformEnum);
+      const apiUrl = `/api/influencers/fetch-profile?${queryParams.toString()}`;
+
+      logger.debug(`[ProfilePage] Constructed Profile API URL: ${apiUrl}`);
+
+      try {
+        const response = await fetch(apiUrl); // Using GET
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          logger.error(`[ProfilePage] Profile API error response: ${response.status}`, errorData);
+          setError(`Failed to load profile: ${errorData?.error || response.statusText}`);
+          return;
+        }
+        const data = await response.json();
+        if (data.success && data.data) {
+          logger.info(`[ProfilePage] Profile data fetched successfully for handle: ${fetchHandle}`);
+          setInfluencer(data.data as InfluencerProfileData);
+        } else {
+          logger.warn(`[ProfilePage] Profile data not found for handle: ${fetchHandle}`, data);
+          setError('Influencer profile not found.');
+        }
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Network or fetch error';
+        logger.error(`[ProfilePage] Fetch profile error for handle ${fetchHandle}:`, err);
+        setError(`Failed to load profile: ${message}`);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Network or fetch error';
-      logger.error(`[ProfilePage] Fetch analytics error for handle ${fetchHandle}:`, err);
-      setError(`Failed to load profile analytics: ${message}`);
-    } finally {
+    },
+    []
+  );
+
+  // Fetch data when handle OR platformEnum changes
+  useEffect(() => {
+    if (handle && platformEnum) {
+      fetchData(handle, platformEnum);
+    } else if (handle && !platformEnum && platformString) {
+      // Handle case where platform string was invalid
+      logger.error(`[ProfilePage] Invalid platform query parameter received: ${platformString}`);
+      setError(`Invalid platform specified: ${platformString}`);
       setIsLoading(false);
     }
-  }, []);
-
-  // Fetch data when handle or platformId changes
-  useEffect(() => {
-    if (handle && platformId) {
-      fetchData(handle, platformId);
-    }
-    // Ensure fetchData is stable or included if it depends on changing state
-  }, [handle, platformId, fetchData]);
+  }, [handle, platformEnum, platformString, fetchData]);
 
   // Log the platformSpecificId once influencer data is loaded
   useEffect(() => {

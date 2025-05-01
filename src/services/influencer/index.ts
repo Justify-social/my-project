@@ -9,10 +9,16 @@ import { Platform as PlatformBackend, PrismaClient } from '@prisma/client';
 // Import needed service and mapping functions
 import {
   getInsightIQProfiles,
-  getSingleInsightIQProfileAnalytics,
   getProfileUniqueId,
+  getInsightIQProfileById,
+  searchInsightIQProfilesByParams,
+  fetchDetailedProfile,
 } from '@/lib/insightiqService';
-import { InsightIQProfile, InsightIQSearchProfile } from '@/types/insightiq';
+import {
+  InsightIQProfile,
+  InsightIQSearchProfile,
+  InsightIQProfileWithAnalytics,
+} from '@/types/insightiq';
 import {
   mapInsightIQProfileToInfluencerProfileData,
   mapInsightIQProfileToInfluencerSummary,
@@ -30,6 +36,10 @@ export interface GetInfluencersFilters {
   maxFollowers?: number;
   isVerified?: boolean;
   locations?: string[];
+  searchTerm?: string;
+  audienceQuality?: 'High' | 'Medium' | 'Low';
+  minScore?: number;
+  maxScore?: number;
 }
 
 // Define necessary InsightIQ filter type inline
@@ -38,6 +48,9 @@ interface InsightIQProfileFilters {
   follower_count?: { min?: number; max?: number };
   is_verified?: boolean;
   locations?: string[]; // Align with GetInfluencersFilters
+  searchTerm?: string;
+  // NOTE: InsightIQ search doesn't directly filter by audience quality.
+  // This filtering will happen on our backend using stored/calculated data.
 }
 
 /**
@@ -46,7 +59,7 @@ interface InsightIQProfileFilters {
  */
 export interface IInfluencerService {
   getInfluencers(params: {
-    filters?: GetInfluencersFilters; // Use defined filter type
+    filters?: GetInfluencersFilters; // Use defined filter type (now includes searchTerm, audienceQuality, Score)
     pagination?: { page: number; limit: number };
   }): Promise<{
     influencers: InfluencerSummary[];
@@ -70,7 +83,7 @@ export interface IInfluencerService {
 
   // Add interface for the new list function
   getProcessedInfluencerList(params: {
-    filters?: GetInfluencersFilters;
+    filters?: GetInfluencersFilters; // Use defined filter type (now includes searchTerm, audienceQuality, Score)
     pagination?: { page: number; limit: number };
   }): Promise<{
     influencers: InfluencerSummary[];
@@ -81,6 +94,16 @@ export interface IInfluencerService {
 
   // Add interface for summaries by IDs
   getProcessedInfluencerSummariesByIds(ids: string[]): Promise<InfluencerSummary[]>;
+
+  // NEW method taking handle and platform string
+  getAndMapProfileByHandleAndPlatform(
+    handle: string,
+    platform: string
+  ): Promise<InfluencerProfileData | null>;
+
+  // Mark old one as deprecated explicitly if keeping it
+  /** @deprecated Use getAndMapProfileByHandleAndPlatform */
+  getAndMapProfileByHandle(handle: string): Promise<InfluencerProfileData | null>;
 
   // Add interfaces for persistence methods
   saveProfileIdToDatabase(
@@ -97,29 +120,22 @@ export interface IInfluencerService {
   >; // Map unique ID -> stored data
 }
 
-// --- Helper to get the unique ID (INTERNAL) ---
-// REMOVE THIS INTERNAL VERSION - Use the exported one from insightiqService
-/*
-const getProfileUniqueId = (profile: InsightIQProfile | InsightIQSearchProfile): string => {
-  if (profile.platform_username && profile.work_platform?.id) {
-    return `${profile.platform_username}:::${profile.work_platform.id}`;
-  }
-  if (profile.url && profile.work_platform?.id) {
-    try {
-      const urlObject = new URL(profile.url);
-      const pathSegments = urlObject.pathname.split('/').filter(Boolean);
-      const username = pathSegments[pathSegments.length - 1];
-      if (username) {
-        return `${username}:::${profile.work_platform.id}`;
-      }
-    } catch (e) {
-      logger.warn(`[getProfileUniqueId] Failed to parse username from URL: ${profile.url}`);
+// Helper function to find PlatformEnum by its string value (case-insensitive)
+function findPlatformEnumByValue(value: string | null): PlatformEnum | null {
+  if (!value) return null;
+  const upperValue = value.toUpperCase(); // Normalize input
+  for (const key of Object.keys(PlatformEnum)) {
+    // Check if the key is a valid enum member (not a number for reverse mapping)
+    // and if its value matches the input string (case-insensitive)
+    if (
+      isNaN(Number(key)) &&
+      PlatformEnum[key as keyof typeof PlatformEnum].toUpperCase() === upperValue
+    ) {
+      return PlatformEnum[key as keyof typeof PlatformEnum];
     }
   }
-  logger.error(`[getProfileUniqueId] Profile lacks usable unique identifier`, { profile });
-  throw new Error('Profile lacks required identifiers (username or URL and platform ID)');
-};
-*/
+  return null; // Not found
+}
 
 // --- Real API Service Implementation ---
 
@@ -200,10 +216,12 @@ const apiService: IInfluencerService = {
   },
 
   getInfluencerByIdentifier: async (identifier, platformId) => {
-    // Construct query params for the backend API
-    const queryString = buildQueryString({ platformId });
-    const url = `/api/influencers/${identifier}?${queryString}`;
-    logger.info(`[influencerService] Calling GET ${url}`);
+    logger.warn(
+      '[influencerService] getInfluencerByIdentifier is deprecated. Use getAndMapProfileByHandle.'
+    );
+    // Construct the NEW API route URL (by-handle)
+    const url = `/api/influencers/by-handle/${encodeURIComponent(identifier)}`;
+    logger.info(`[influencerService] Calling GET ${url} (via deprecated function)`);
     try {
       const response = await fetch(url);
       if (!response.ok) {
@@ -227,73 +245,20 @@ const apiService: IInfluencerService = {
   async getProcessedInfluencerProfileByIdentifier(
     identifier: string
   ): Promise<InfluencerProfileData | null> {
-    logger.info(`[influencerService] Processing DETAILED request for identifier: ${identifier}`);
-    try {
-      if (!identifier) {
-        logger.warn(`[influencerService] Missing identifier`);
-        return null;
-      }
-
-      const profile: InsightIQProfile | null = await getSingleInsightIQProfileAnalytics(identifier);
-
-      if (!profile) {
-        logger.warn(`[influencerService] Detailed fetch failed for identifier: ${identifier}`);
-        return null;
-      }
-
-      const returnedHandle = profile.platform_username;
-      let requestedHandle: string | null = null;
-      if (identifier.includes(':::')) {
-        requestedHandle = identifier.split(':::')[0];
-      }
-
-      if (
-        requestedHandle &&
-        (!returnedHandle || requestedHandle.toLowerCase() !== returnedHandle.toLowerCase())
-      ) {
-        logger.error(
-          `[getProcessedInfluencerProfileByIdentifier] Mismatch Error! Requested handle '${requestedHandle}' (from identifier: ${identifier}) but fetch returned profile with handle: '${returnedHandle}'`
-        );
-        return null;
-      }
-
-      const profileData = mapInsightIQProfileToInfluencerProfileData(profile, identifier);
-      if (!profileData) {
-        logger.warn(
-          `[getProcessedInfluencerProfileByIdentifier] map function returned null for identifier: ${identifier}`
-        );
-        return null;
-      }
-
-      if (profileData.platformSpecificId) {
-        await this.saveProfileIdToDatabase({
-          id: profileData.id,
-          handle:
-            profile.platform_username ?? requestedHandle ?? identifier.split(':::')[0] ?? 'unknown',
-          platformSpecificId: profileData.platformSpecificId,
-          name: profileData.name,
-          avatarUrl: profileData.avatarUrl,
-          platforms: profileData.platforms,
-          audienceQualityIndicator: profileData.audienceQualityIndicator,
-        });
-      } else {
-        logger.warn(
-          `[influencerService] Detailed profile fetch for ${identifier} did NOT return platformSpecificId. Cannot save to DB.`
-        );
-      }
-
-      return profileData;
-    } catch (error) {
-      logger.error(
-        `[influencerService] Error processing detailed profile for ${identifier}:`,
-        error
-      );
-      throw error;
+    logger.warn(
+      '[influencerService] getProcessedInfluencerProfileByIdentifier is deprecated. Use getAndMapProfileByHandle.'
+    );
+    // Simple pass-through for now, assuming identifier might contain handle
+    let handle = identifier;
+    if (identifier.includes(':::')) {
+      handle = identifier.split(':::')[0];
     }
+    if (!handle) return null;
+    return this.getAndMapProfileByHandle(handle);
   },
 
   async getProcessedInfluencerList(params: {
-    filters?: GetInfluencersFilters;
+    filters?: GetInfluencersFilters; // Includes searchTerm, audienceQuality, Score
     pagination?: { page: number; limit: number };
   }): Promise<{
     influencers: InfluencerSummary[];
@@ -306,34 +271,90 @@ const apiService: IInfluencerService = {
       const { filters = {}, pagination = { page: 1, limit: 12 } } = params;
       const offset = (pagination.page - 1) * pagination.limit;
 
-      const insightIQFilters: InsightIQProfileFilters = {
-        platforms: filters.platforms,
+      // --- Handle Multi-Platform Search ---
+      const platformEnums =
+        filters.platforms && filters.platforms.length > 0
+          ? filters.platforms
+          : [PlatformEnum.Instagram]; // Default to Instagram if none selected
+
+      logger.info(`[getProcessedInfluencerList] Targeting platforms: ${platformEnums.join(', ')}`);
+
+      const platformIds = platformEnums
+        .map(pe => getInsightIQWorkPlatformId(pe))
+        .filter((id): id is string => id !== null);
+
+      if (platformIds.length === 0) {
+        logger.error('[getProcessedInfluencerList] No valid platform IDs found after mapping.');
+        return { influencers: [], total: 0, page: pagination.page, limit: pagination.limit };
+      }
+
+      // Prepare filters to pass to each InsightIQ call (excluding platforms)
+      const commonInsightIQFilters: Omit<InsightIQProfileFilters, 'platforms'> = {
         follower_count: {
           min: filters.minFollowers,
           max: filters.maxFollowers,
         },
         is_verified: filters.isVerified,
         locations: filters.locations,
+        searchTerm: filters.searchTerm,
       };
 
-      const insightIQResponse = await getInsightIQProfiles({
-        limit: pagination.limit,
-        offset: offset,
-        filters: insightIQFilters,
-      });
-
-      if (!insightIQResponse?.data) {
-        logger.warn('[influencerService] Received null or empty data from getInsightIQProfiles');
-        return { influencers: [], total: 0, page: pagination.page, limit: pagination.limit };
-      }
-
-      logger.info(
-        `[influencerService] Received ${insightIQResponse.data.length} profiles from InsightIQ /search`
+      // Fetch data from InsightIQ in parallel for each platform
+      const platformPromises = platformIds.map(platformId =>
+        getInsightIQProfiles({
+          limit: pagination.limit * platformIds.length, // Fetch more per platform initially for better merging/pagination
+          offset: offset, // Offset needs rethinking for true multi-source pagination
+          filters: {
+            ...commonInsightIQFilters,
+            platforms: [platformEnums[platformIds.indexOf(platformId)]],
+          }, // Pass single platform enum for mapping inside
+        }).catch(error => {
+          logger.error(
+            `[getProcessedInfluencerList] Error fetching from platform ${platformId}:`,
+            error
+          );
+          return null; // Return null on error for this platform
+        })
       );
 
+      const platformResults = await Promise.all(platformPromises);
+
+      // Process results, aggregate, and deduplicate
+      let combinedInfluencerData: InsightIQSearchProfile[] = [];
+      let combinedTotal = 0;
+      const handledHandles = new Set<string>(); // Simple deduplication by handle
+
+      platformResults.forEach((result, index) => {
+        if (result?.data) {
+          logger.info(
+            `[getProcessedInfluencerList] Received ${result.data.length} profiles from platform ${platformIds[index]}`
+          );
+          combinedTotal += result.metadata?.total ?? result.data.length; // Sum totals
+          result.data.forEach(profile => {
+            const handle = profile.platform_username?.toLowerCase();
+            // Deduplicate based on handle (simple strategy)
+            if (handle && !handledHandles.has(handle)) {
+              combinedInfluencerData.push(profile);
+              handledHandles.add(handle);
+            }
+          });
+        } else {
+          logger.warn(
+            `[getProcessedInfluencerList] No data or error fetching from platform ${platformIds[index]}`
+          );
+        }
+      });
+
+      logger.info(
+        `[getProcessedInfluencerList] Combined ${combinedInfluencerData.length} unique profiles from ${platformIds.length} platforms. Approx Total: ${combinedTotal}`
+      );
+
+      // Sort combined results (example: by follower count)
+      combinedInfluencerData.sort((a, b) => (b.follower_count ?? 0) - (a.follower_count ?? 0));
+
+      // Map combined data to summaries
       const summaries: InfluencerSummary[] = [];
-      insightIQResponse.data.forEach((profileFromSearch: InsightIQSearchProfile) => {
-        const profile = profileFromSearch;
+      combinedInfluencerData.forEach(profile => {
         try {
           const id = getProfileUniqueId(profile);
           const summaryBase = mapInsightIQProfileToInfluencerSummary(profile);
@@ -341,57 +362,70 @@ const apiService: IInfluencerService = {
             summaries.push({
               ...summaryBase,
               id: id,
-              profileId: id,
-              workPlatformId: profile.work_platform?.id ?? null,
             });
           }
         } catch (e) {
-          logger.warn(
-            `[getProcessedInfluencerList] Skipping profile due to error in getProfileUniqueId or mapping`,
-            { error: e, profileData: profile }
-          );
+          logger.warn(`[getProcessedInfluencerList] Skipping profile during final mapping`, {
+            error: e,
+            profileData: profile,
+          });
         }
       });
 
+      // Enrich with DB data (audience quality, etc.)
       const uniqueIdsFromList = summaries.map(s => s.id).filter(Boolean);
       if (uniqueIdsFromList.length > 0) {
-        // Fetch stored data (platformSpecificId and audienceQualityIndicator)
         const storedDataMap = await this.getStoredDataFromDatabase(uniqueIdsFromList);
         summaries.forEach((summary: InfluencerSummary) => {
           const storedData = summary.id ? storedDataMap[summary.id] : null;
-          if (storedData) {
-            // Populate platformSpecificId if not already present
-            if (!summary.platformSpecificId && storedData.platformSpecificId) {
-              summary.platformSpecificId = storedData.platformSpecificId;
+          if (storedData?.audienceQualityIndicator) {
+            const validIndicators = ['High', 'Medium', 'Low'];
+            if (validIndicators.includes(storedData.audienceQualityIndicator)) {
+              summary.audienceQualityIndicator = storedData.audienceQualityIndicator as
+                | 'High'
+                | 'Medium'
+                | 'Low';
             }
-            // Populate audienceQualityIndicator if available
-            if (storedData.audienceQualityIndicator) {
-              // Validate against expected enum values before assigning
-              const validIndicators = ['High', 'Medium', 'Low'];
-              if (validIndicators.includes(storedData.audienceQualityIndicator)) {
-                summary.audienceQualityIndicator = storedData.audienceQualityIndicator as
-                  | 'High'
-                  | 'Medium'
-                  | 'Low';
-                logger.debug(
-                  `[getProcessedInfluencerList] Found stored Audience Quality (${summary.audienceQualityIndicator}) for ${summary.id}`
-                );
-              } else {
-                logger.warn(
-                  `[getProcessedInfluencerList] Found invalid stored Audience Quality ('${storedData.audienceQualityIndicator}') for ${summary.id}`
-                );
-              }
-            }
+          }
+          // Add platformSpecificId enrichment if needed
+          if (!summary.platformSpecificId && storedData?.platformSpecificId) {
+            summary.platformSpecificId = storedData.platformSpecificId;
           }
         });
       }
 
+      // --- Apply Backend Filtering (Audience Quality & Score) ---
+      let filteredSummaries = summaries;
+
+      /* // Temporarily comment out backend filtering
+      // Apply Audience Quality Filter
+      if (filters.audienceQuality) {
+        const qualityFilter = filters.audienceQuality;
+        logger.info(`[getProcessedInfluencerList] Applying backend filter for Audience Quality: ${qualityFilter}`);
+        filteredSummaries = filteredSummaries.filter(summary => {
+          const indicator = summary.audienceQualityIndicator;
+          if (!indicator) return false;
+          if (qualityFilter === 'High') return indicator === 'High';
+          if (qualityFilter === 'Medium') return indicator === 'Medium' || indicator === 'High';
+          return true;
+        });
+        logger.info(`[getProcessedInfluencerList] ${filteredSummaries.length} summaries remain after Audience Quality filter.`);
+      }
+      */ // End temporary comment out
+      // --------------------------------------------------
+
+      // Apply pagination to the *final filtered* list
+      const paginatedSummaries = filteredSummaries.slice(offset, offset + pagination.limit);
+
       logger.info(
-        `[influencerService] Successfully processed ${summaries.length} influencers for list.`
+        `[influencerService] Successfully processed. Returning ${paginatedSummaries.length} influencers for page ${pagination.page}.`
       );
+
+      // Note: `combinedTotal` is an approximation due to deduplication and backend filtering.
+      // Accurate pagination requires a more complex count strategy.
       return {
-        influencers: summaries,
-        total: insightIQResponse.metadata?.total ?? summaries.length,
+        influencers: paginatedSummaries,
+        total: combinedTotal, // Using approximated total for now
         page: pagination.page,
         limit: pagination.limit,
       };
@@ -474,6 +508,134 @@ const apiService: IInfluencerService = {
       logger.error(`[influencerService] Failed getInfluencerSummariesByIds call to ${url}:`, error);
       throw error;
     }
+  },
+
+  // Update implementation to handle platform string correctly
+  async getAndMapProfileByHandleAndPlatform(
+    handle: string,
+    platform: string
+  ): Promise<InfluencerProfileData | null> {
+    logger.info(
+      `[influencerService] Processing profile request for handle: ${handle}, platform string: ${platform}`
+    );
+
+    // Convert platform string to enum using the helper
+    const platformEnum = findPlatformEnumByValue(platform); // Use helper
+    if (!platformEnum) {
+      logger.error(`[influencerService] Invalid platform string received: ${platform}`);
+      throw new Error(`Invalid platform specified: ${platform}`); // Throw error for API route to catch
+    }
+
+    // Get the reliable platform UUID using the enum
+    const reliablePlatformUuid = getInsightIQWorkPlatformId(platformEnum);
+    if (!reliablePlatformUuid) {
+      logger.error(`[influencerService] Could not map platform enum ${platformEnum} to UUID.`);
+      throw new Error(`Internal configuration error for platform: ${platformEnum}`);
+    }
+
+    logger.info(
+      `[influencerService] Mapped platform ${platformEnum} to reliable UUID: ${reliablePlatformUuid}`
+    );
+
+    try {
+      // Call the InsightIQ service function with handle and RELIABLE UUID
+      const detailedProfile: InsightIQProfileWithAnalytics | null = await fetchDetailedProfile(
+        handle,
+        reliablePlatformUuid
+      );
+
+      if (!detailedProfile) {
+        logger.warn(
+          `[influencerService] fetchDetailedProfile returned null for handle: ${handle}.`
+        );
+        return null;
+      }
+
+      // --- Calculate Audience Quality Indicator --- //
+      let calculatedIndicator: 'High' | 'Medium' | 'Low' | null = null;
+      const credibilityScore = detailedProfile.audience?.credibility_score;
+      logger.debug(
+        `[influencerService] Extracted credibility score for ${handle}: ${credibilityScore}`
+      );
+
+      if (typeof credibilityScore === 'number' && credibilityScore !== null) {
+        if (credibilityScore >= 0.8) {
+          calculatedIndicator = 'High';
+        } else if (credibilityScore >= 0.5) {
+          calculatedIndicator = 'Medium';
+        } else {
+          calculatedIndicator = 'Low';
+        }
+        logger.info(
+          `[influencerService] Calculated Audience Quality for ${handle}: ${calculatedIndicator} (Score: ${credibilityScore})`
+        );
+      } else {
+        logger.warn(
+          `[influencerService] Credibility score not found or invalid for ${handle}. Indicator remains null.`
+        );
+      }
+      // --- End Calculate Indicator ---
+
+      // Map the fetched profile data
+      const identifierForMapping = detailedProfile.external_id ?? handle; // Prefer external_id
+      const profileData = mapInsightIQProfileToInfluencerProfileData(
+        detailedProfile,
+        identifierForMapping
+      );
+
+      if (!profileData) {
+        logger.error(
+          `[influencerService] Failed to map detailedProfile to InfluencerProfileData for handle: ${handle}`
+        );
+        return null;
+      }
+
+      // --- Save to Database (including indicator) --- //
+      try {
+        const idForDb = identifierForMapping;
+        const platformSpecificIdForDb = profileData.platformSpecificId;
+
+        if (idForDb && platformSpecificIdForDb) {
+          await this.saveProfileIdToDatabase({
+            id: idForDb,
+            handle: profileData.handle,
+            platformSpecificId: platformSpecificIdForDb,
+            name: profileData.name,
+            avatarUrl: profileData.avatarUrl,
+            platforms: profileData.platforms,
+            audienceQualityIndicator: calculatedIndicator,
+          });
+        } else {
+          logger.warn(
+            `[influencerService] Skipping DB save for ${handle} due to missing idForDb or platformSpecificIdForDb after mapping.`
+          );
+        }
+      } catch (dbError) {
+        logger.error(
+          `[influencerService] Failed to save profile data to DB for ${handle}:`,
+          dbError
+        );
+      }
+      // --- End Save to Database ---
+
+      return profileData;
+    } catch (error) {
+      logger.error(
+        `[influencerService] Error in getAndMapProfileByHandleAndPlatform for ${handle}:`,
+        error
+      );
+      throw error; // Re-throw for the API route
+    }
+  },
+
+  // Deprecated implementation
+  /** @deprecated Use getAndMapProfileByHandleAndPlatform */
+  async getAndMapProfileByHandle(handle: string): Promise<InfluencerProfileData | null> {
+    logger.warn(
+      '[influencerService] Calling deprecated getAndMapProfileByHandle. Use getAndMapProfileByHandleAndPlatform.'
+    );
+    // Cannot reliably call new function without platformId
+    return null;
   },
 
   async saveProfileIdToDatabase(

@@ -135,14 +135,11 @@ export const mapInsightIQProfileToInfluencerProfileData = (
  * Maps an InsightIQProfile object (potentially from a search result) to the frontend InfluencerSummary structure.
  * Handles potential missing fields in search results.
  * @param profile - The profile data received from InsightIQ search.
- * @param filteredPlatform - The platform enum value used to filter the search, if any.
- * @returns InfluencerSummary object or null if essential data (like handle) is missing.
+ * @returns InfluencerSummary object (omitting id) plus platformEnum, or null platformEnum if mapping fails.
  */
 export const mapInsightIQProfileToInfluencerSummary = (
   profile: InsightIQSearchProfile
-): Omit<InfluencerSummary, 'id'> => {
-  // Helper accepts InsightIQSearchProfile
-  // const uniqueId = getProfileUniqueId(profile);
+): Omit<InfluencerSummary, 'id' | 'platformEnum'> & { platformEnum: PlatformEnum | null } => {
   // Platform enum mapping helper
   const platformEnum = mapInsightIQPlatformToEnum(profile.work_platform?.name);
   // Derive handle
@@ -150,35 +147,37 @@ export const mapInsightIQProfileToInfluencerSummary = (
     profile.platform_username ?? (profile.url ? profile.url.split('/').pop() : null) ?? null;
 
   if (!platformEnum) {
-    // Handle case where platform couldn't be mapped (should be rare)
+    // Handle case where platform couldn't be mapped
     logger.warn(`[mapInsightIQProfileToInfluencerSummary] Could not map platform for profile`, {
       profile,
     });
-    // Return a minimal object or throw error? For now, return minimal with warning.
+    // Return minimal object matching the adjusted return type
     return {
       name: profile.full_name ?? handle ?? 'Unknown',
       handle: handle,
       avatarUrl: profile.image_url ?? null,
-      platforms: [], // Empty platform
+      platforms: [], // Empty platform list
       followersCount: profile.follower_count ?? null,
-      justifyScore: 50, // Default score if platform unknown
+      justifyScore: 50, // Default score
       isVerified: profile.is_verified ?? false,
       platformProfileName: profile.full_name ?? handle,
-      profileId: profile.external_id ?? null, // Use external_id if present
-      platformSpecificId: null, // Cannot get this from search
+      profileId: profile.external_id ?? null,
+      platformSpecificId: null,
       workPlatformId: profile.work_platform?.id ?? null,
-      isBusinessAccount: profile.platform_account_type === 'BUSINESS', // Map account type
+      isBusinessAccount: profile.platform_account_type === 'BUSINESS',
       primaryAudienceLocation: profile.creator_location?.country ?? null,
       engagementRate: profile.engagement_rate ?? null,
+      platformEnum: null, // Explicitly return null for platformEnum
     };
   }
 
   // Map fields based on available data from /search response
-  const summary: Omit<InfluencerSummary, 'id'> = {
+  // Adjust the type of summary to match the return type
+  const summary: Omit<InfluencerSummary, 'id' | 'platformEnum'> & { platformEnum: PlatformEnum } = {
     name: profile.full_name ?? handle ?? 'Unknown Name',
     handle: handle,
     avatarUrl: profile.image_url ?? null,
-    platforms: [platformEnum],
+    platforms: [platformEnum], // Keep original platform array for display
     followersCount: profile.follower_count ?? null,
     justifyScore: calculateJustifyScore(profile),
     isVerified: profile.is_verified ?? false,
@@ -187,13 +186,14 @@ export const mapInsightIQProfileToInfluencerSummary = (
     primaryAudienceAgeRange: null,
     primaryAudienceGender: null,
     engagementRate: profile.engagement_rate ?? null,
-    audienceQualityIndicator: null,
+    audienceQualityIndicator: null, // Keep as null for now
     insightiqUserId: null,
     insightiqAccountId: null,
     workPlatformId: profile.work_platform?.id ?? null,
     platformProfileName: profile.full_name ?? handle,
     profileId: profile.external_id ?? null,
     platformSpecificId: null,
+    platformEnum: platformEnum, // Add the mapped enum
   };
 
   return summary;

@@ -37,6 +37,7 @@ interface InsightIQProfileFilters {
   is_verified?: boolean;
   locations?: string[]; // e.g., ['US', 'CA']
   // Add other potential filters based on CreatorSearchRequest schema if needed
+  searchTerm?: string;
 }
 
 // Define a type matching the relevant fields from the CreatorSearchResponse data array
@@ -144,6 +145,12 @@ export async function makeInsightIQRequest<T>(
       },
     });
 
+    // Log the request-id header if present
+    const requestId = response.headers.get('request-id');
+    if (requestId) {
+      logger.debug(`[InsightIQService] Received request-id: ${requestId} for ${url}`);
+    }
+
     // Handle Rate Limiting (429)
     if (response.status === 429) {
       if (retries > 0) {
@@ -170,8 +177,9 @@ export async function makeInsightIQRequest<T>(
       } catch (e) {
         // Ignore if parsing fails, keep raw text
       }
+      // Log request-id with error
       logger.warn(
-        `[InsightIQService] API Error: ${response.status} ${response.statusText} for ${url} - Body: ${errorBody}`
+        `[InsightIQService] API Error: ${response.status} ${response.statusText} for ${url} - RequestID: ${requestId || 'N/A'} - Body: ${errorBody}`
       );
       // Consider creating a custom error class for better handling downstream
       throw new Error(
@@ -388,10 +396,6 @@ export const getProfileUniqueId = (profile: InsightIQSearchProfile | InsightIQPr
   const platformId = profile.work_platform?.id;
 
   if (handle && platformId) {
-    logger.warn(
-      `[getProfileUniqueId] Falling back to composite ID for handle: ${handle}. External ID missing.`,
-      { profileData: { url: profile.url, handle: handle, platformId: platformId } }
-    );
     // Using ::: as a separator to make parsing easier later if needed
     return `${handle}:::${platformId}`;
   }
@@ -427,11 +431,12 @@ interface InfluencerSearchParams {
   is_verified?: boolean;
   platform_username?: string; // For detail fetch
   external_id?: string; // For detail fetch
+  searchTerm?: string;
 }
 
 // --- Internal Search Function ---
-// Renamed to avoid conflict, NOT exported
-async function _searchInsightIQProfiles(
+// Renamed and EXPORTED for use by service layer
+export async function searchInsightIQProfilesByParams(
   params: InfluencerSearchParams
 ): Promise<CreatorSearchResponse | null> {
   const { limit = 100, offset = 0, ...filters } = params;
@@ -474,16 +479,34 @@ async function _searchInsightIQProfiles(
     }
   }
 
-  // ** FIX: Try wrapping platform_username in an object **
-  if (filters.platform_username) {
-    // Based on error msg: "Input should be a valid dictionary or object"
-    // This is speculative based on the error, API docs are unclear.
-    // REVERTING this speculative fix as the core issue is endpoint usage
-    requestBody.platform_username = filters.platform_username;
-    // logger.warn('[searchInsightIQProfiles] Wrapping platform_username filter in object due to API error', { value: filters.platform_username });
+  // Map searchTerm if present
+  if (filters.searchTerm) {
+    // ONLY map to description_keywords for general text search
+    const searchTermLower = filters.searchTerm.toLowerCase();
+    requestBody.description_keywords = [searchTermLower];
+    logger.debug(
+      `[searchInsightIQProfiles] Adding description_keywords filter (lowercased):`,
+      requestBody.description_keywords
+    );
   }
 
-  logger.debug(`[searchInsightIQProfiles] Calling ${endpoint} with body:`, requestBody);
+  // Handle explicit platform_username filter if needed for other use cases (like detail fetch intermediate search)
+  // This should NOT be used for the general marketplace search term now.
+  if (filters.platform_username) {
+    // This case might still be needed if the intermediate search in fetchDetailedProfile relies on it.
+    // Let's keep it for that specific scenario but ensure it's not triggered by the general searchTerm.
+    if (!filters.searchTerm) {
+      // Only apply if searchTerm isn't already setting it (which it isn't anymore)
+      // Ensure this specific username filter is also lowercased if InsightIQ might be case-sensitive
+      requestBody.platform_username = { value: filters.platform_username.toLowerCase() };
+      logger.debug(
+        `[searchInsightIQProfiles] Applying specific platform_username filter (lowercased):`,
+        requestBody.platform_username
+      );
+    }
+  }
+
+  logger.debug(`[searchInsightIQProfiles] Calling ${endpoint} with FINAL body:`, requestBody);
 
   try {
     const response = await axios.post<CreatorSearchResponse>(url, requestBody, {
@@ -539,128 +562,169 @@ export async function getInsightIQProfiles(params: {
     min_followers: params.filters?.follower_count?.min,
     max_followers: params.filters?.follower_count?.max,
     is_verified: params.filters?.is_verified,
-    // locations: params.filters?.locations, // Requires mapping
+    locations: params.filters?.locations,
+    searchTerm: params.filters?.searchTerm,
   };
   // Call the INTERNAL search function
-  return _searchInsightIQProfiles(apiParams);
+  return searchInsightIQProfilesByParams(apiParams);
 }
 
-// ** REVISED Function for DETAIL view - Uses /analytics endpoint **
-export async function getSingleInsightIQProfileAnalytics(
-  identifier: string // Can be external_id (preferred) or handle:::platformId composite
+// ** EXPORTED Function for DETAIL view - Refactored for SSOT **
+// Renaming to fetchDetailedProfile and accepting platformId
+export async function fetchDetailedProfile(
+  handle: string,
+  platformId: string // Accept the potentially unreliable platformId initially
 ): Promise<InsightIQProfileWithAnalytics | null> {
   // Return the extended profile type
-  logger.info(`[InsightIQService] Fetching single profile analytics for identifier: ${identifier}`);
+  logger.info(
+    `[InsightIQService] Fetching detailed profile for handle: ${handle}, initial platformId: ${platformId}`
+  );
 
-  let handle: string | null = null;
-  let platformId: string | null = null;
-  let externalId: string | null = null;
+  // 1. Perform intermediate search by handle to find reliable IDs
+  let reliablePlatformId: string | null = null;
+  let reliableExternalId: string | null = null;
 
-  // Parse the identifier
-  if (identifier.includes(':::')) {
-    const parts = identifier.split(':::');
-    if (parts.length === 2) {
-      handle = parts[0];
-      platformId = parts[1]; // This might be the unreliable work_platform_id
-    } else {
-      logger.error(`[InsightIQService] Invalid composite key format: "${identifier}".`);
-      return null;
-    }
-  } else {
-    // Assume it might be an external_id or potentially just a handle (less likely)
-    // Let's try treating it as an external_id first for the /profiles/{id} endpoint
-    // If that fails or doesn't contain audience, we might need more info (platformId)
-    // For now, focus on getting analytics via /analytics POST which needs handle+platformId or just identifier
-    // The /analytics endpoint might accept external_id directly in the identifier field, needs API confirmation.
-    // Let's assume for now the identifier for /analytics MUST be handle/url if platformId is provided.
+  logger.info(
+    `[InsightIQService] Performing intermediate search by handle '${handle}' to find reliable IDs.`
+  );
+  try {
+    const searchParams: InfluencerSearchParams = { platform_username: handle, limit: 5 };
+    // Use the EXPORTED search function
+    const intermediateSearchResponse = await searchInsightIQProfilesByParams(searchParams);
 
-    // PROBLEM: If we only have external_id, we don't have platformId to call /analytics reliably.
-    // If we only have a handle, we don't have platformId.
-    // The composite key handle:::platformId is the most complete identifier we construct from search.
-
-    // Revised logic: Always try to parse handle & platformId. If identifier is not composite, we can't call /analytics reliably without platformId.
-    logger.warn(
-      `[InsightIQService] Received non-composite identifier "${identifier}". Cannot reliably determine platformId needed for /analytics endpoint. Attempting GET /profiles/{id}.`
-    );
-    externalId = identifier;
-    // Fall through to attempt GET /v1/profiles/{id}
-  }
-
-  // --- Try POST /v1/social/creators/profiles/analytics first if we have handle & platformId ---
-  if (handle && platformId) {
-    logger.info(
-      `[InsightIQService] Attempting fetch via POST /analytics for handle: ${handle}, platformId: ${platformId}`
-    );
-    const endpoint = '/v1/social/creators/profiles/analytics';
-    const requestBody = {
-      identifier: handle, // Use handle as the identifier for this endpoint
-      work_platform_id: platformId,
-    };
-    try {
-      // Use makeInsightIQRequest for POST
-      const response = await makeInsightIQRequest<CreatorProfileAnalyticsResponse>(endpoint, {
-        method: 'POST',
-        body: JSON.stringify(requestBody),
-      });
-
-      if (response?.profile) {
-        logger.info(
-          `[InsightIQService] Successfully fetched profile via POST /analytics for handle: ${handle}`
-        );
-        // IMPORTANT: The profile object nested in the analytics response should contain the audience data
-        return response.profile;
-      } else {
-        logger.warn(
-          `[InsightIQService] POST /analytics for handle ${handle} returned unexpected structure or null profile.`
-        );
-        return null;
-      }
-    } catch (error: any) {
-      logger.error(
-        `[InsightIQService] Error fetching profile via POST /analytics for handle ${handle}:`,
-        error
+    if (intermediateSearchResponse?.data && intermediateSearchResponse.data.length > 0) {
+      const matchingProfile = intermediateSearchResponse.data.find(
+        p => p.platform_username?.toLowerCase() === handle?.toLowerCase()
       );
-      // Don't fall through if this specific attempt fails, return null
-      return null;
-    }
-  }
-
-  // --- Fallback: Try GET /v1/profiles/{id} if we determined identifier might be an external_id ---
-  if (externalId) {
-    logger.info(
-      `[InsightIQService] Attempting fetch via GET /profiles/${externalId}. Note: This might lack audience data.`
-    );
-    try {
-      const profile = await getInsightIQProfileById(externalId); // This returns InsightIQProfile
-      if (profile) {
+      if (matchingProfile) {
+        reliableExternalId = matchingProfile.external_id ?? null;
+        reliablePlatformId = matchingProfile.work_platform?.id ?? null;
         logger.info(
-          `[InsightIQService] Successfully fetched profile using GET /profiles/${externalId}`
+          `[InsightIQService] Intermediate search found match for handle '${handle}'. ExternalID: ${reliableExternalId}, PlatformID: ${reliablePlatformId}`
         );
-        // We need to return InsightIQProfileWithAnalytics, but audience will likely be missing
-        // Cast it, but acknowledge audience might be null
-        return profile as InsightIQProfileWithAnalytics;
       } else {
         logger.warn(
-          `[InsightIQService] Profile fetch using GET /profiles/${externalId} returned null.`
+          `[InsightIQService] Intermediate search completed, but no exact handle match found for '${handle}' in results.`
         );
+        if (intermediateSearchResponse.data.length === 1) {
+          logger.warn(
+            `[InsightIQService] Using first result from intermediate search as potential match.`
+          );
+          reliableExternalId = intermediateSearchResponse.data[0].external_id ?? null;
+          reliablePlatformId = intermediateSearchResponse.data[0].work_platform?.id ?? null;
+        }
+      }
+    } else {
+      logger.warn(
+        `[InsightIQService] Intermediate search by handle '${handle}' returned no results.`
+      );
+    }
+  } catch (searchError) {
+    logger.error(
+      `[InsightIQService] Error during intermediate search for handle '${handle}':`,
+      searchError
+    );
+  }
+
+  // 2. Determine the platformId to use for the /analytics call
+  const platformIdToUse = reliablePlatformId ?? platformId; // Prefer reliable ID, fallback to initial one
+  if (!reliablePlatformId) {
+    logger.warn(`[InsightIQService] Using potentially unreliable platformId: ${platformIdToUse}`);
+  }
+
+  // 3. Final Fetch Strategy: Prioritize POST /analytics
+  logger.info(
+    `[InsightIQService] Attempting fetch via POST /analytics using handle '${handle}' and platformId '${platformIdToUse}'`
+  );
+  const profileFromAnalytics = await callAnalyticsEndpoint(handle, platformIdToUse);
+
+  if (profileFromAnalytics) {
+    // Validate handle match if needed
+    if (profileFromAnalytics.platform_username?.toLowerCase() !== handle.toLowerCase()) {
+      logger.error(
+        `CRITICAL MISMATCH: Requested handle ${handle} but /analytics returned ${profileFromAnalytics.platform_username}`
+      );
+      // If mismatch occurs even with potentially corrected platformId, something is wrong upstream or with API
+      return null;
+    }
+    logger.info(`[InsightIQService] Successfully fetched via /analytics for handle ${handle}`);
+    return profileFromAnalytics;
+  }
+
+  // 4. Fallback: If analytics failed, AND we have a reliable externalId, try GET /profiles
+  logger.warn(`[InsightIQService] POST /analytics failed for handle ${handle}.`);
+  if (reliableExternalId) {
+    logger.warn(
+      `[InsightIQService] Falling back to GET /profiles/${reliableExternalId} (may lack audience data).`
+    );
+    try {
+      const profile = await getInsightIQProfileById(reliableExternalId);
+      if (profile) {
+        // Check handle match here too for safety
+        if (profile.platform_username?.toLowerCase() !== handle.toLowerCase()) {
+          logger.error(
+            `CRITICAL MISMATCH: GET /profiles/${reliableExternalId} returned handle ${profile.platform_username} instead of requested ${handle}`
+          );
+          return null;
+        }
+        logger.info(
+          `[InsightIQService] Successfully fetched via fallback GET /profiles/${reliableExternalId}`
+        );
+        return profile as InsightIQProfileWithAnalytics; // Cast, accepting audience might be missing
+      } else {
+        logger.error(`[InsightIQService] Fallback GET /profiles/${reliableExternalId} failed.`);
         return null;
       }
     } catch (error) {
       logger.error(
-        `[InsightIQService] Error fetching profile with GET /profiles/${externalId}:`,
+        `[InsightIQService] Error during fallback GET /profiles/${reliableExternalId}:`,
         error
       );
       return null;
     }
   }
 
-  // If we reach here, we couldn't determine how to fetch
-  logger.error(`[InsightIQService] Could not determine fetch method for identifier: ${identifier}`);
+  // 5. If all methods failed:
+  logger.error(`[InsightIQService] All fetch methods failed for handle '${handle}'.`);
   return null;
 }
 
-// Deprecate or remove the old search-based detail function if no longer needed
-// export async function getSingleInsightIQProfileBySearch(...) { ... }
+// Helper function to call the /analytics endpoint
+async function callAnalyticsEndpoint(
+  handle: string,
+  platformId: string
+): Promise<InsightIQProfileWithAnalytics | null> {
+  logger.info(
+    `[InsightIQService] Calling POST /analytics using handle '${handle}' and platformId '${platformId}'`
+  );
+  const endpoint = '/v1/social/creators/profiles/analytics';
+  const requestBody = {
+    identifier: handle,
+    work_platform_id: platformId,
+  };
+  try {
+    const response = await makeInsightIQRequest<CreatorProfileAnalyticsResponse>(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(requestBody),
+    });
+    if (response?.profile) {
+      logger.info(
+        `[InsightIQService] Successfully fetched profile via POST /analytics for handle: ${handle}`
+      );
+      // Optional: Add handle validation here if needed
+      return response.profile;
+    } else {
+      logger.warn(`[InsightIQService] POST /analytics for handle ${handle} returned null profile.`);
+      return null;
+    }
+  } catch (error: any) {
+    logger.error(
+      `[InsightIQService] Error fetching profile via POST /analytics for handle ${handle}:`,
+      error
+    );
+    return null;
+  }
+}
 
 // TODO: Add other required functions based on analysis of InsightIQ usage and InsightIQ spec
 // e.g., getInsightIQContents(accountId), etc.

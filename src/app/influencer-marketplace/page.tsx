@@ -31,6 +31,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet';
+import { Input } from '@/components/ui/input';
 
 // Define the shape of filters state - Aligned with current BE capabilities
 export interface FiltersState {
@@ -42,6 +43,8 @@ export interface FiltersState {
   // audienceAge?: string; // Deferred until BE supports audience filtering
   // audienceLocation?: string; // Deferred
   isVerified?: boolean; // Renamed to match API schema (boolean type handled by Zod transform)
+  // Add Audience Quality
+  audienceQuality?: 'High' | 'Medium' | 'Low';
 }
 
 function MarketplacePage() {
@@ -68,17 +71,27 @@ function MarketplacePage() {
     logger.info('[MarketplacePage] Initializing with default empty appliedFilters.');
     return {};
   });
+  // Add state for search term (live input)
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  // Add state for the search term that triggers the API call
+  const [appliedSearchTerm, setAppliedSearchTerm] = useState<string>('');
 
-  // --- Data Fetching (Remains the same, uses appliedFilters state) ---
+  // --- Data Fetching ---
   const fetchData = useCallback(
-    async (page = 1, filtersToUse: FiltersState) => {
-      logger.info(`[MarketplacePage] Fetching data for page ${page}`, { filters: filtersToUse });
+    // Use appliedSearchTerm for the API call
+    async (page = 1, filtersToUse: FiltersState, currentAppliedSearchTerm: string) => {
+      // Log the term being used for THIS specific fetch
+      logger.info(
+        `[MarketplacePage] >>> fetchData called with search: '${currentAppliedSearchTerm}'`,
+        { page, filters: filtersToUse }
+      );
       setIsLoading(true);
       setError(null);
       try {
+        // Pass filters AND appliedSearchTerm to the service call
         const response = await influencerService.getInfluencers({
           pagination: { page, limit },
-          filters: filtersToUse,
+          filters: { ...filtersToUse, searchTerm: currentAppliedSearchTerm }, // Use appliedSearchTerm
         });
         setInfluencers(response.influencers);
         setCurrentPage(response.page);
@@ -104,10 +117,17 @@ function MarketplacePage() {
     [limit]
   );
 
-  // Fetch data on initial load & when appliedFilters or currentPage change
+  // Fetch data on initial load & when appliedFilters, appliedSearchTerm or currentPage change
   useEffect(() => {
-    fetchData(currentPage, appliedFilters);
-  }, [currentPage, appliedFilters, fetchData]);
+    // Log when the effect triggers and the value it sees
+    logger.info(`[MarketplacePage] --- useEffect triggered for Fetch ---`, {
+      currentPage,
+      appliedFilters,
+      appliedSearchTerm,
+    });
+    // Pass appliedFilters AND appliedSearchTerm to fetchData
+    fetchData(currentPage, appliedFilters, appliedSearchTerm);
+  }, [currentPage, appliedFilters, appliedSearchTerm, fetchData]); // Watch appliedSearchTerm, not searchTerm
 
   // --- Event Handlers ---
   const handleSelectToggle = useCallback((id: string) => {
@@ -117,42 +137,27 @@ function MarketplacePage() {
   }, []);
 
   const handleViewProfile = useCallback(
-    (identifier: string) => {
-      if (!identifier) {
-        logger.error('[MarketplacePage] handleViewProfile called without an identifier!');
-        toast.error('Cannot view profile: Missing required identifier.');
+    // Accept handle and platformEnum string
+    (handle: string | null, platformEnum: PlatformEnum | null) => {
+      if (!handle || !platformEnum) {
+        logger.error('[MarketplacePage] handleViewProfile called without handle or platformEnum!', {
+          handle,
+          platformEnum,
+        });
+        toast.error('Cannot view profile: Missing required identifiers.');
         return;
       }
 
-      // Determine the handle for the path segment
-      // If composite key, extract handle. Otherwise, use identifier (assuming external_id doesn't contain special chars, or handle lookup needed)
-      // For simplicity now, let's assume we still want the handle in the URL path if possible.
-      let pathSegment = identifier; // Default to the identifier itself
-      let handleForPath = identifier; // Fallback if not composite
-      if (identifier.includes(':::')) {
-        handleForPath = identifier.split(':::')[0];
-      } else {
-        // If it's an external_id, we ideally need the handle for a clean URL path.
-        // This might require looking up the handle from the influencer data if available here,
-        // or accepting potentially less clean URLs like /influencer-marketplace/[external_id]?...
-        // For now, we use the identifier itself, which might be the external_id.
-        logger.warn(`[MarketplacePage] Using external_id potentially in URL path: ${identifier}`);
-        handleForPath = identifier; // Using external_id in path for now
-      }
-      pathSegment = handleForPath; // Use derived handle or the identifier itself
-
-      // Construct query params - Pass the FULL identifier
+      // Construct query params with platform enum string
       const queryParams = new URLSearchParams();
-      queryParams.append('identifier', identifier);
-
-      const queryString = queryParams.toString();
-      // Construct the destination URL using handle/identifier in path and full identifier in query
-      const destinationUrl = `/influencer-marketplace/${encodeURIComponent(pathSegment)}?${queryString}`;
+      // Convert enum value to string for URL param
+      queryParams.append('platform', platformEnum);
+      const destinationUrl = `/influencer-marketplace/${encodeURIComponent(handle)}?${queryParams.toString()}`;
 
       logger.debug('[MarketplacePage] Navigating to profile:', {
         destinationUrl,
-        identifierPassed: identifier,
-        pathSegmentUsed: pathSegment,
+        handle: handle,
+        platform: platformEnum,
       });
 
       router.push(destinationUrl);
@@ -169,18 +174,32 @@ function MarketplacePage() {
     [totalInfluencers, limit]
   );
 
-  const handleApplyFilters = useCallback((filtersFromComponent: FiltersState) => {
-    logger.info('[MarketplacePage] Applying filters:', filtersFromComponent);
-    setAppliedFilters(filtersFromComponent);
-    setCurrentPage(1);
-    setIsFiltersSheetOpen(false);
-  }, []);
+  const handleApplyFilters = useCallback(
+    (filtersFromComponent: FiltersState) => {
+      // Log BEFORE setting appliedSearchTerm
+      logger.info(
+        '[MarketplacePage] handleApplyFilters: Applying filters and current searchTerm:',
+        { filters: filtersFromComponent, searchTerm }
+      );
+      setAppliedFilters(filtersFromComponent);
+      // Apply the current search term when filters are applied
+      setAppliedSearchTerm(searchTerm);
+      // Log AFTER setting appliedSearchTerm to confirm the update is registered for the next effect run
+      logger.info(
+        `[MarketplacePage] handleApplyFilters: Set appliedSearchTerm to: '${searchTerm}'`
+      );
+      setCurrentPage(1); // Reset page when filters change
+      setIsFiltersSheetOpen(false);
+    },
+    [searchTerm]
+  ); // Add searchTerm dependency here
 
   const handleResetFilters = useCallback(() => {
-    logger.info('[MarketplacePage] Resetting filters.');
-    // Reset to empty object, no context dependency
+    logger.info('[MarketplacePage] Resetting filters and search term.');
     setAppliedFilters({});
-    setCurrentPage(1);
+    setSearchTerm(''); // Clear the input field state
+    setAppliedSearchTerm(''); // Clear the state that triggers API calls
+    setCurrentPage(1); // Reset page
     setIsFiltersSheetOpen(false);
   }, []);
 
@@ -217,6 +236,9 @@ function MarketplacePage() {
                   currentFilters={appliedFilters}
                   onApplyFilters={handleApplyFilters}
                   onResetFilters={handleResetFilters}
+                  // Pass down live search term state and handler
+                  searchTerm={searchTerm}
+                  onSearchTermChange={setSearchTerm}
                 />
               </div>
             </SheetContent>
@@ -241,7 +263,24 @@ function MarketplacePage() {
         error={error}
         selectedIds={selectedIds}
         onSelectToggle={handleSelectToggle}
-        onViewProfile={handleViewProfile}
+        onViewProfile={identifier => {
+          const clickedInfluencer = influencers.find(inf => inf.id === identifier);
+          // Explicitly check handle AND platformEnum before calling
+          if (clickedInfluencer && clickedInfluencer.handle && clickedInfluencer.platformEnum) {
+            handleViewProfile(clickedInfluencer.handle, clickedInfluencer.platformEnum);
+          } else {
+            logger.error(
+              '[MarketplacePage] Could not find influencer data or required fields (handle, platformEnum) for id:',
+              {
+                identifier,
+                influencerExists: !!clickedInfluencer,
+                handle: clickedInfluencer?.handle,
+                platformEnum: clickedInfluencer?.platformEnum,
+              }
+            );
+            toast.error('Error navigating to profile.');
+          }
+        }}
         itemsPerPage={limit}
       />
 

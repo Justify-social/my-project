@@ -36,6 +36,7 @@ export interface FilterValues {
   audienceAge?: string;
   audienceLocation?: string;
   isInsightIQVerified?: boolean;
+  audienceQuality?: 'High' | 'Medium' | 'Low';
 }
 
 interface MarketplaceFiltersProps {
@@ -44,6 +45,8 @@ interface MarketplaceFiltersProps {
   currentFilters: FilterValues; // Receive the applied filters from parent
   onApplyFilters: (newFilters: FilterValues) => void;
   onResetFilters: () => void;
+  searchTerm: string;
+  onSearchTermChange: (term: string) => void;
 }
 
 export function MarketplaceFilters({
@@ -52,6 +55,8 @@ export function MarketplaceFilters({
   currentFilters,
   onApplyFilters,
   onResetFilters,
+  searchTerm,
+  onSearchTermChange,
 }: MarketplaceFiltersProps) {
   // Use local state synced with props for controlled components
   const [localFilters, setLocalFilters] = React.useState<FilterValues>(currentFilters);
@@ -63,10 +68,18 @@ export function MarketplaceFilters({
 
   // --- Handlers for updating local state ---
 
-  // Handle platform changes (assuming single select for now)
-  const handlePlatformChange = (value: string) => {
-    // If multi-select is implemented later, this needs adjustment
-    setLocalFilters(prev => ({ ...prev, platforms: value ? [value as PlatformEnum] : undefined }));
+  // Handle platform checkbox changes
+  const handlePlatformChange = (platform: PlatformEnum, checked: boolean | 'indeterminate') => {
+    setLocalFilters(prev => {
+      const currentPlatforms = prev.platforms ?? [];
+      if (checked === true) {
+        // Add platform if not already present
+        return { ...prev, platforms: [...currentPlatforms, platform] };
+      } else {
+        // Remove platform
+        return { ...prev, platforms: currentPlatforms.filter(p => p !== platform) };
+      }
+    });
   };
 
   // Handle score range changes from Slider
@@ -98,6 +111,14 @@ export function MarketplaceFilters({
     }));
   };
 
+  // Handle Audience Quality changes
+  const handleAudienceQualityChange = (value: string) => {
+    // Map empty string OR our specific 'any' value back to undefined
+    const qualityValue =
+      value === '' || value === 'any' ? undefined : (value as 'High' | 'Medium' | 'Low');
+    setLocalFilters(prev => ({ ...prev, audienceQuality: qualityValue }));
+  };
+
   // --- Action Handlers ---
 
   const handleApply = () => {
@@ -110,34 +131,56 @@ export function MarketplaceFilters({
     logger.debug('[MarketplaceFilters] Resetting filters');
     onResetFilters(); // Parent handles resetting the activeFilters state
     // localFilters will update via useEffect when currentFilters prop changes
+    onSearchTermChange(''); // Explicitly clear search term on reset
+    onOpenChange(false); // Close sheet
+  };
+
+  // Handle search input change directly via prop function
+  const handleSearchInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onSearchTermChange(event.target.value);
   };
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="w-80 md:w-96 h-full flex flex-col overflow-y-auto" side="right">
-        <SheetHeader>
+      <SheetContent className="w-80 md:w-96 h-full flex flex-col" side="right">
+        <SheetHeader className="mb-4 border-b pb-4 px-4 pt-4">
           <SheetTitle>Filter Influencers</SheetTitle>
           <SheetDescription>Refine the list based on your criteria.</SheetDescription>
         </SheetHeader>
 
-        <div className="p-4 flex-grow space-y-6">
-          {/* Platforms Filter - Controlled Component */}
+        <div className="p-4 flex-grow space-y-6 overflow-y-auto">
+          {/* Search Term Input */}
           <div className="space-y-2">
-            <Label htmlFor="platforms">Platforms</Label>
-            <Select
-              value={localFilters.platforms?.[0] ?? ''} // Use empty string for uncontrolled state when undefined
-              onValueChange={handlePlatformChange}
-            >
-              <SelectTrigger id="platforms">
-                <SelectValue placeholder="Select a platform..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={PlatformEnum.Instagram}>Instagram</SelectItem>
-                <SelectItem value={PlatformEnum.YouTube}>YouTube</SelectItem>
-                <SelectItem value={PlatformEnum.TikTok}>TikTok</SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">Select a platform.</p>
+            <Label htmlFor="search-term">Search by Name/Keyword</Label>
+            <Input
+              id="search-term"
+              placeholder="e.g., cooking, tech blogger..."
+              value={searchTerm}
+              onChange={handleSearchInputChange}
+            />
+            <p className="text-xs text-muted-foreground">
+              Searches name, handle, bio, and content keywords.
+            </p>
+          </div>
+
+          {/* Platforms Filter - Checkboxes */}
+          <div className="space-y-2">
+            <Label>Platforms</Label>
+            <div className="flex flex-col space-y-1">
+              {[PlatformEnum.Instagram, PlatformEnum.YouTube, PlatformEnum.TikTok].map(platform => (
+                <div key={platform} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`platform-${platform}`}
+                    checked={localFilters.platforms?.includes(platform) ?? false}
+                    onCheckedChange={checked => handlePlatformChange(platform, checked)}
+                  />
+                  <Label htmlFor={`platform-${platform}`} className="font-normal">
+                    {platform} {/* Display enum value directly */}
+                  </Label>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground">Select one or more platforms.</p>
           </div>
 
           {/* Justify Score Filter - Controlled Component */}
@@ -227,9 +270,30 @@ export function MarketplaceFilters({
             />
             <Label htmlFor="isInsightIQVerified">InsightIQ Verified Only</Label>
           </div>
+
+          {/* Audience Quality Filter - Controlled Component */}
+          <div className="space-y-2">
+            <Label htmlFor="audienceQuality">Audience Quality</Label>
+            <Select
+              name="audienceQuality"
+              value={localFilters.audienceQuality ?? ''}
+              onValueChange={handleAudienceQualityChange}
+            >
+              <SelectTrigger id="audienceQuality">
+                <SelectValue placeholder="Select quality..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="any">Any</SelectItem>
+                <SelectItem value="Medium">Medium or High</SelectItem>
+                <SelectItem value="High">High Only</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
-        <SheetFooter className="mt-auto pt-4 border-t border-border sticky bottom-0 bg-background py-4 px-4 flex flex-row justify-end gap-2">
+        {/* Footer remains fixed at the bottom */}
+        {/* Apply fixed height, adjust padding, ensure vertical centering */}
+        <SheetFooter className="h-[65px] border-t border-border bg-background px-4 flex items-center justify-end gap-2 flex-shrink-0">
           <Button onClick={handleApply}>Apply Filters</Button>
           <Button variant="outline" onClick={handleReset}>
             Reset Filters

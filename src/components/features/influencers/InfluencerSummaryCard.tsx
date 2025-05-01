@@ -117,7 +117,8 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
                   {/* Use secondary variant, style manually for success appearance */}
                   <Badge
                     variant="secondary"
-                    className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-1.5 py-0.5 text-xs border-transparent"
+                    // Add pointer-events-none and force non-hover colors
+                    className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-1.5 py-0.5 text-xs border-transparent pointer-events-none hover:bg-green-100 hover:text-green-800 dark:hover:bg-green-900 dark:hover:text-green-200"
                   >
                     {/* Use iconId prop - Corrected ID */}
                     <Icon iconId="faCircleCheckSolid" className="h-3 w-3 mr-1" size="xs" /> Verified

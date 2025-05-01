@@ -74,13 +74,14 @@ Before a ticket from `plan.md` can be pulled into a Sprint Backlog, it should me
 **Title:** Implement Core Backend APIs with Live InsightIQ Sandbox Data
 **Assignee/Team:** BE Team
 **Status:** Done (Implementation Verified - Pending Final Testing & Deployment)
-**Description:** Implement the core logic for `GET /api/influencers` and `GET /api/influencers/[identifier]`. Use `insightiqService` to call relevant InsightIQ Sandbox endpoints. Correctly map InsightIQ API responses to Justify types. Implement robust error handling. Implement filtering pass-through using the POST search endpoint body (including platform filter mapping; Added default platform ID for initial load). Implement V1 Justify Score calculation. **Refactored profile lookup to use identifier + platformId.** Deploy functional endpoints to dev/staging.
+**Description:** Implement the core logic for `GET /api/influencers` and `GET /api/influencers/[identifier]`. Use `insightiqService` to call relevant InsightIQ Sandbox endpoints. Correctly map InsightIQ API responses to Justify types. Implement robust error handling. Implement filtering pass-through using the POST search endpoint body (including platform filter mapping; Added default platform ID for initial load). Implement V1 Justify Score calculation. Refactored profile lookup to use identifier + platformId. Deploy functional endpoints to dev/staging.
+**NOTE:** Further testing/deployment blocked pending feedback from InsightIQ support regarding inconsistent data returned by the `/analytics` endpoint (profile mismatch issue).
 **Acceptance Criteria:**
     - API routes return `200 OK` with correctly mapped data including calculated Justify Score for valid requests to InsightIQ Sandbox.
     - API routes return appropriate error codes (e.g., 401, 404, 429, 503) based on InsightIQ responses, using the standard error format.
     - Basic filtering (including platform filter) works.
     - Initial load (no filters) returns data (defaulting to Instagram).
-    - **Profile lookup using identifier + platformId works.**
+    - Profile lookup using identifier + platformId works.
     - Deployed to dev/staging.
 **Dependencies:** `openapi.v1.yml`
 
@@ -99,23 +100,45 @@ Before a ticket from `plan.md` can be pulled into a Sprint Backlog, it should me
 **Title:** Integrate Marketplace List/Filters with Live Backend API
 **Assignee/Team:** FE Team
 **Status:** Done (Implementation Verified - Pending Final Testing & Deployment)
-**Description:** Update `MarketplacePage` (`page.tsx`) and related components (`MarketplaceList`, `MarketplaceFilters`) to fetch data from the live `GET /api/influencers` backend endpoint via `influencerService`. Ensure live data renders correctly according to the finalized API contract. Implement filter parameter passing (aligned with current BE schema) to the backend API call. Handle loading and error states gracefully based on backend responses. **Updated navigation to use identifier + platformId.**
+**Description:** Update `MarketplacePage` (`page.tsx`) and related components (`MarketplaceList`, `MarketplaceFilters`) to fetch data from the live `GET /api/influencers` backend endpoint via `influencerService`. Ensure live data renders correctly according to the finalized API contract. Implement filter parameter passing (aligned with current BE schema) to the backend API call. Handle loading and error states gracefully based on backend responses. Updated navigation to use identifier + platformId. Explicitly verify dynamic filter functionality end-to-end (including multi-platform UI, audience quality, score, followers, verified, search). Confirmed filter application only occurs on 'Apply Filters' click.
 **Acceptance Criteria:**
     - Marketplace list displays live data from the backend/InsightIQ Sandbox.
-    - Filtering UI correctly passes parameters to the backend API call and updates the list.
+    - Filtering UI correctly passes parameters to the backend API call and updates the list **only on apply**.
     - Loading and error states are handled correctly.
-    - **Clicking 'View Profile' navigates correctly using identifier + platformId.**
+    - Clicking 'View Profile' navigates correctly using identifier + platformId.
 **Dependencies:** SPRINT1-BE-01 (API Implementation - Done), SPRINT1-LEAD-01 (API Contract Sign-off - Done)
 
 **Ticket ID:** SPRINT1-FE-02
 **Title:** Integrate Profile Page with Live Backend API
 **Assignee/Team:** FE Team
 **Status:** Done (Implementation Verified - Pending Final Testing & Deployment)
-**Description:** Update `ProfilePage` (`[username]/page.tsx`) and related components (`ProfileHeader`, profile sections) to fetch data from the live `GET /api/influencers/:identifier` backend endpoint via `influencerService` using **identifier + platformId**. Ensure all profile details render correctly based on the live data and finalized API contract. Handle loading and error states using structured error messages if provided by BE.
+**Description:** Update `ProfilePage` (`[username]/page.tsx`) and related components (`ProfileHeader`, profile sections) to fetch data from the live `GET /api/influencers/:identifier` backend endpoint via `influencerService` using identifier + platformId. Ensure all profile details render correctly based on the live data and finalized API contract. Handle loading and error states using structured error messages if provided by BE.
+**NOTE:** Final validation blocked pending feedback from InsightIQ support regarding inconsistent data returned by the `/analytics` endpoint (profile mismatch issue).
 **Acceptance Criteria:**
     - Profile page displays live data for a valid identifier + platformId from the backend/InsightIQ Sandbox.
     - Loading and error states (including 404 Not Found) are handled correctly, displaying informative messages.
 **Dependencies:** SPRINT1-BE-01 (API Implementation - Done), SPRINT1-LEAD-01 (API Contract Sign-off - Done)
+
+**Ticket ID:** SPRINT1-FE-03
+**Title:** FEAT: Add Search Bar to Marketplace Filters
+**Assignee/Team:** FE Team
+**Status:** ✅ Done (Implementation Verified - Pending Testing)
+**Description:** Add a search input field to the `MarketplaceFilters` component. Connect this input to a new `searchTerm` state in `MarketplacePage`, deferring API call until apply. Update filter application logic (`handleApplyFilters`, `fetchData`) to include the `appliedSearchTerm`. Requires corresponding backend update (SPRINT1-BE-02). Added descriptive text for search scope.
+**Acceptance Criteria:**
+    - Search input field is present in the filter UI with helper text.
+    - Typing in the search field updates the `searchTerm` state but does not trigger API call.
+    - Applying filters passes the `appliedSearchTerm` to the backend API call.
+**Dependencies:** SPRINT1-BE-02 (Backend Search Implementation - Done)
+
+**Ticket ID:** SPRINT1-BE-02
+**Title:** BE-FEAT: Implement Search Term Filtering for GET /influencers
+**Assignee/Team:** BE Team
+**Status:** ✅ Done (Implementation Verified - Pending Testing)
+**Description:** Update the `GET /api/influencers` endpoint to accept a `searchTerm` query parameter. Pass this term to the `insightiqService`. Update `insightiqService` (`searchInsightIQProfilesByParams`) to map the `searchTerm` primarily to the `description_keywords` field in the InsightIQ `POST /v1/social/creators/profiles/search` request. Update API contract documentation.
+**Acceptance Criteria:**
+    - API accepts `searchTerm` query parameter.
+    - Backend successfully calls InsightIQ search with the term mapped to `description_keywords`.
+**Dependencies:** InsightIQ API documentation for search filters.
 
 ---
 
@@ -125,9 +148,10 @@ Before a ticket from `plan.md` can be pulled into a Sprint Backlog, it should me
 *   **Issue 3:** Profile page showed "Influencer not found" error due to identifier mismatch (username vs UUID). **[✔ RESOLVED - Refactored to use identifier + platformId]**
 *   **Issue 4:** List page showed no influencers due to InsightIQ search API requiring `work_platform_id`. **[✔ RESOLVED - Added default platform ID workaround]**
 *   **Issue 5:** Profile page API call resulted in scoring function warning (`Cannot calculate score for profile without ID`). **[✔ RESOLVED - Scoring function updated]**
-*   **Issue 6:** Profile page API call sometimes logs success for a different profile than requested (e.g., arianagrande -> Cristiano Ronaldo). **[🚧 DIAGNOSING - Added logging. Likely related to params issue.]**
-*   **Next Steps:** Verify fix for `params` error. Continue with Sprint 2 tasks (Testing, Filter Refinement, ID Mapping Strategy, Webhook Investigation).
-*   **Goal:** Achieve a stable end-to-end flow where the frontend successfully displays influencer list and profile data fetched live from the InsightIQ Sandbox via the Justify backend API. **[🚧 PENDING - Final Verification]**
+*   **Issue 6:** Profile page API call sometimes logs success for a different profile than requested (e.g., arianagrande -> Cristiano Ronaldo). **[🚧 BLOCKER - Requires InsightIQ Support Response]**
+*   **Issue 7:** Search functionality effectiveness limited by InsightIQ API's apparent lack of dedicated name/handle search field (using `description_keywords`). **[Mitigated - Focused query, Added UI description]**
+*   **Next Steps:** **Thoroughly test Marketplace List page filters and search.** Await feedback from InsightIQ support on profile fetch inconsistency (Issue 6). Plan Sprint 2 including testing tasks and potentially implementing missing filters (Audience Age/Location) if blocker persists.
+*   **Goal:** Achieve a stable end-to-end flow where the frontend successfully displays influencer list and profile data fetched live from the InsightIQ Sandbox via the Justify backend API. **[🚧 PENDING - Blocked by Issue 6]**
 
 **Data Freshness Approach Note:**
 
