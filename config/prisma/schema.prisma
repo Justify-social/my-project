@@ -227,6 +227,15 @@ model User {
   sentInvitations     TeamInvitation[]           @relation("InvitationSender")
   memberOfTeams       TeamMember[]               @relation("TeamMember")
   ownedTeamMembers    TeamMember[]               @relation("TeamOwner")
+
+  // --- DB-1: Stripe Integration Fields ---
+  stripeCustomerId String? @unique @map("stripe_customer_id") // Store Stripe Customer ID (for BE-1.5)
+  // Add other user-level billing fields if needed (e.g., subscription status, plan ID)
+  // Example:
+  // stripeSubscriptionId String? @unique @map("stripe_subscription_id")
+  // stripePriceId      String? @map("stripe_price_id")
+  // stripeCurrentPeriodEnd DateTime? @map("stripe_current_period_end")
+  // --- END DB-1 ---
 }
 
 model NotificationPrefs {

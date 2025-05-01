@@ -1,0 +1,40 @@
+import { NextRequest, NextResponse } from 'next/server';
+// Temporarily comment out unused imports for minimal test
+// import { influencerService } from '@/services/influencer'; 
+// import { Platform } from '@prisma/client';
+// import { logger } from '@/utils/logger';
+
+// Minimal GET handler for build testing
+export async function GET(request: NextRequest, { params }: { params: { handle: string } }): Promise<NextResponse> {
+  const handle = params.handle ? decodeURIComponent(params.handle) : 'unknown';
+  console.log(`Minimal GET received for handle: ${handle}`);
+  return NextResponse.json({ receivedHandle: handle });
+
+  /* --- Original Code Commented Out ---
+  const { searchParams } = new URL(request.url);
+  const platformString = searchParams.get('platform');
+
+  logger.info(`[API /influencers/by-handle] GET request received { handle: ${handle}, platform: ${platformString} }`);
+
+  if (!handle) {
+      return NextResponse.json({ error: 'Handle parameter is required' }, { status: 400 });
+  }
+  const validPlatforms: Set<string> = new Set(Object.values(Platform));
+  if (!platformString || !validPlatforms.has(platformString.toUpperCase())) {
+      return NextResponse.json({ error: `Invalid or missing platform parameter. Valid platforms are: ${Object.values(Platform).join(', ')}` }, { status: 400 });
+  }
+  const platform = platformString.toUpperCase() as Platform; 
+  try {
+      const influencerProfile = await influencerService.getAndMapProfileByHandleAndPlatform(handle, platform);
+      if (influencerProfile) {
+          return NextResponse.json({ success: true, data: influencerProfile });
+      } else {
+          logger.warn(`[API /influencers/by-handle] Profile not found for handle: ${handle}, platform: ${platform}`);
+          return NextResponse.json({ error: 'Influencer profile not found' }, { status: 404 });
+      }
+  } catch (error: any) {
+      logger.error(`[API /influencers/by-handle] Error fetching profile for handle: ${handle}, platform: ${platform}`, error);
+      return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+  --- End Original Code --- */
+}
