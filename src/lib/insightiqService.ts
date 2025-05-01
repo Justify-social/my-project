@@ -441,6 +441,9 @@ export async function fetchProfileByIdentifier(
     work_platform_id: platformId,
   };
 
+  // Log the request body being sent
+  logger.debug('[InsightIQService] Calling profiles/analytics endpoint with body:', requestBody);
+
   try {
     // Assuming the analytics response includes the full profile data needed
     // Type might need adjustment if response schema differs significantly from InsightIQProfile
@@ -449,6 +452,9 @@ export async function fetchProfileByIdentifier(
       method: 'POST',
       body: JSON.stringify(requestBody),
     });
+
+    // Log the full raw response received
+    logger.debug('[InsightIQService] Raw response from profiles/analytics:', response);
 
     // Extract profile data from the response - structure needs verification from actual API call or spec detail
     // Based on CreatorProfileAnalyticsResponse schema, profile data is nested

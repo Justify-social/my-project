@@ -119,13 +119,15 @@ Before a ticket from `plan.md` can be pulled into a Sprint Backlog, it should me
 
 ---
 
-**Current Debugging Focus (2025-04-30 - RESOLVED & UPDATED):**
+**Current Debugging Focus (2025-04-30 -> 2025-04-30):**
 *   **Issue 1:** Profile page (`/influencer-marketplace/[id]`) rendered with excessive whitespace due to nested `ConditionalLayout`. **[✔ RESOLVED]**
-*   **Issue 2:** API route (`/api/influencers/[id]`) threw error due to incorrect async `params` handling. **[✔ RESOLVED]**
+*   **Issue 2:** API route (`/api/influencers/[id]` -> `/[identifier]`) threw error due to incorrect async `params` handling. **[✔ RESOLVED - Signature Corrected Again]**
 *   **Issue 3:** Profile page showed "Influencer not found" error due to identifier mismatch (username vs UUID). **[✔ RESOLVED - Refactored to use identifier + platformId]**
 *   **Issue 4:** List page showed no influencers due to InsightIQ search API requiring `work_platform_id`. **[✔ RESOLVED - Added default platform ID workaround]**
-*   **Next Steps:** Proceed with Sprint 2 tasks (Testing, Filter Refinement, ID Mapping Strategy, Webhook Investigation).
-*   **Goal:** Achieve a stable end-to-end flow where the frontend successfully displays influencer list and profile data fetched live from the InsightIQ Sandbox via the Justify backend API. **[✔ ACHIEVED - Ready for Testing]**
+*   **Issue 5:** Profile page API call resulted in scoring function warning (`Cannot calculate score for profile without ID`). **[✔ RESOLVED - Scoring function updated]**
+*   **Issue 6:** Profile page API call sometimes logs success for a different profile than requested (e.g., arianagrande -> Cristiano Ronaldo). **[🚧 DIAGNOSING - Added logging. Likely related to params issue.]**
+*   **Next Steps:** Verify fix for `params` error. Continue with Sprint 2 tasks (Testing, Filter Refinement, ID Mapping Strategy, Webhook Investigation).
+*   **Goal:** Achieve a stable end-to-end flow where the frontend successfully displays influencer list and profile data fetched live from the InsightIQ Sandbox via the Justify backend API. **[🚧 PENDING - Final Verification]**
 
 **Data Freshness Approach Note:**
 
@@ -138,7 +140,7 @@ Before a ticket from `plan.md` can be pulled into a Sprint Backlog, it should me
 
 **Candidate Tickets (REQUIRES Backend APIs from Sprint 1 - examples based on `plan.md` - standalone focus):**
 *   **Critical Strategy:**
-    *   `TECH-DEBT: Define & Plan InsightIQ Account ID Mapping Strategy` ✅ **(Decision Made & Schema Updated)**
+    *   `TECH-DEBT: Define & Plan InsightIQ Account ID Mapping Strategy` 🚧 **(In Progress - Discussion Started)**
 *   **Frontend Focus (Standalone Marketplace):**
     *   Complete `1.4: FEAT(FE): Implement Data Fetching` (Test against live BE) 🅿️
     *   Complete `1.5: FEAT(UI): Create MarketplaceList Component` (Test rendering live BE data) 🅿️
@@ -171,7 +173,7 @@ Before a ticket from `plan.md` can be pulled into a Sprint Backlog, it should me
 
 ## Projected Sprint 3: MVP Stabilization & Post-MVP Prep (Wizard Integration Deferred)
 
-*Goal Suggestion: Stabilize and polish the core **standalone Marketplace MVP** flow based on testing feedback, improve performance/robustness, and conduct initial backend investigation for high-priority Post-MVP features based on InsightIQ.*
+*Goal Suggestion: Stabilize and polish the core **standalone Marketplace MVP** flow based on testing feedback, improve performance/robustness, and conduct initial backend investigation for high-priority Post-MVP features based on InsightIQ.* 
 
 **Candidate Tickets (Review during Sprint 3 Planning):**
 *   **Frontend Focus:**

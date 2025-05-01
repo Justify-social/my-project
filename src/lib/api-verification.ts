@@ -970,163 +970,142 @@ export async function verifyStripeApiServerSide(): Promise<ApiVerificationResult
  */
 export async function verifyCintExchangeApiServerSide(): Promise<ApiVerificationResult> {
   const apiName = 'Cint Exchange API';
-  const baseUrl = 'https://api.cint.io';
-  const testEndpoint = `${baseUrl}/demand/business-units`;
+  // Corrected endpoints based on Cint support information
+  const authUrl = 'https://auth.lucidhq.com/oauth/token';
+  const apiBaseUrl = 'https://api.luc.id';
+  const testResourceEndpoint = `${apiBaseUrl}/accounts`; // Use /accounts for testing
 
-  const apiKey = serverConfig.cint.apiKey;
-  const clientId = serverConfig.cint.clientId; // Needed if using OAuth
-  const clientSecret = serverConfig.cint.clientSecret; // Needed if using OAuth
+  const clientId = serverConfig.cint.clientId;
+  const clientSecret = serverConfig.cint.clientSecret;
 
-  // Refined Check: Ensure we have *either* API key *or* *both* OAuth creds
-  const hasApiKey = !!apiKey;
-  const hasOAuthCreds = !!clientId && !!clientSecret;
-
-  if (!hasApiKey && !hasOAuthCreds) {
-    logger.warn(
-      `[Server Verify] ${apiName} - Missing all credentials (API Key and OAuth ID/Secret)`
-    );
+  // Check for necessary OAuth credentials
+  if (!clientId || !clientSecret) {
+    logger.warn(`[Server Verify] ${apiName} - Missing OAuth Client ID or Secret`);
     return {
       success: false,
       apiName,
-      endpoint: testEndpoint,
+      endpoint: authUrl, // Point to the auth URL as the point of failure
       error: {
         type: ApiErrorType.AUTHENTICATION_ERROR,
-        message: 'Missing Cint API credentials in server configuration.',
-        details:
-          'Check server-config.ts and ensure CINT_API_KEY (or CINT_CLIENT_ID/SECRET) is set.',
+        message: 'Missing Cint Client ID or Secret in server configuration.',
+        details: 'Check server-config.ts and ensure CINT_CLIENT_ID and CINT_CLIENT_SECRET are set.',
         isRetryable: false,
       },
     };
   }
 
   const startTime = Date.now();
+  let authToken = '';
+  const authMethod = 'OAuth Client Credentials';
+
+  // --- Step 1: Authenticate and get Token ---
+  logger.info(`[Server Verify] Attempting ${authMethod} for Cint authentication via ${authUrl}.`);
+  const tokenStartTime = Date.now();
   try {
-    console.info(`[Server Verify] Testing ${apiName} endpoint: ${testEndpoint}`);
+    const tokenController = new AbortController();
+    const tokenTimeoutId = setTimeout(() => tokenController.abort(), 8000);
 
-    let authToken = '';
-    let authMethod = ''; // To log which method was used
+    // Use the request structure provided by Cint support
+    const tokenResponse = await fetch(authUrl, {
+      method: 'POST',
+      signal: tokenController.signal,
+      headers: {
+        'Content-Type': 'application/json', // Correct Content-Type
+      },
+      // Correct request body structure
+      body: JSON.stringify({
+        client_id: clientId,
+        client_secret: clientSecret,
+        grant_type: 'client_credentials',
+        lucid_scopes: 'app:api', // Added scope
+        audience: 'https://api.luc.id', // Added audience
+      }),
+    });
 
-    if (apiKey) {
-      authMethod = 'API Key';
-      // Assuming API Key is used in a custom header or as Bearer token
-      // Verify the correct header with Cint documentation (e.g., 'X-Api-Key')
-      authToken = `Bearer ${apiKey}`; // Placeholder - Adjust header as needed
-      console.info(`[Server Verify] Using ${authMethod} for Cint authentication.`);
-    } else {
-      // Attempt OAuth client credentials flow
-      authMethod = 'OAuth Client Credentials';
-      console.info(
-        `[Server Verify] API Key not found, attempting ${authMethod} for Cint authentication.`
+    clearTimeout(tokenTimeoutId);
+    const tokenLatency = Date.now() - tokenStartTime;
+
+    if (!tokenResponse.ok) {
+      const errorData = await tokenResponse.json().catch(() => ({}));
+      logger.error(
+        `[Server Verify] Cint OAuth token request failed with status ${tokenResponse.status}`,
+        errorData
       );
-
-      const tokenUrl = `${baseUrl}/oauth/token`; // Standard token endpoint
-      const tokenStartTime = Date.now();
-
-      try {
-        const tokenController = new AbortController();
-        const tokenTimeoutId = setTimeout(() => tokenController.abort(), 8000); // Shorter timeout for token request
-
-        const tokenResponse = await fetch(tokenUrl, {
-          method: 'POST',
-          signal: tokenController.signal,
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: new URLSearchParams({
-            grant_type: 'client_credentials',
-            client_id: clientId || '',
-            client_secret: clientSecret || '',
-          }),
-        });
-
-        clearTimeout(tokenTimeoutId);
-        const tokenLatency = Date.now() - tokenStartTime;
-
-        if (!tokenResponse.ok) {
-          const errorData = await tokenResponse.json().catch(() => ({}));
-          logger.error(
-            `[Server Verify] Cint OAuth token request failed with status ${tokenResponse.status}`,
-            errorData
-          );
-          return {
-            success: false,
-            apiName,
-            endpoint: tokenUrl,
-            latency: tokenLatency,
-            error: {
-              type: ApiErrorType.AUTHENTICATION_ERROR,
-              message: `Failed to obtain Cint OAuth token: ${tokenResponse.status} ${tokenResponse.statusText}`,
-              details: errorData,
-              isRetryable: false, // Auth errors usually aren't retryable without credential changes
-            },
-          };
-        }
-
-        const tokenData = await tokenResponse.json();
-        if (!tokenData.access_token) {
-          logger.error('[Server Verify] Cint OAuth token response missing access_token', tokenData);
-          return {
-            success: false,
-            apiName,
-            endpoint: tokenUrl,
-            latency: tokenLatency,
-            error: {
-              type: ApiErrorType.VALIDATION_ERROR,
-              message: 'Cint OAuth token response did not contain an access_token.',
-              details: tokenData,
-              isRetryable: true, // Could be a temporary API issue
-            },
-          };
-        }
-
-        authToken = `Bearer ${tokenData.access_token}`;
-        logger.info(
-          `[Server Verify] Successfully obtained Cint OAuth token (took ${tokenLatency}ms).`
-        );
-      } catch (tokenFetchError) {
-        const tokenLatency = Date.now() - tokenStartTime;
-        let errorType = ApiErrorType.NETWORK_ERROR;
-        let errorMessage =
-          tokenFetchError instanceof Error
-            ? tokenFetchError.message
-            : 'Unknown network error during token fetch';
-
-        if (tokenFetchError instanceof Error && tokenFetchError.name === 'AbortError') {
-          errorType = ApiErrorType.TIMEOUT_ERROR;
-          errorMessage = 'Cint OAuth token request timed out after 8000ms';
-        }
-
-        logger.error(
-          `[Server Verify] Cint OAuth token fetch failed: ${errorMessage}`,
-          tokenFetchError
-        );
-        // Log more details from the fetchError if available
-        if (tokenFetchError instanceof Error) {
-          logger.error('[Server Verify] Cint Fetch Error Details:', {
-            name: tokenFetchError.name,
-            message: tokenFetchError.message,
-            cause: (tokenFetchError as any).cause,
-          });
-        }
-        return {
-          success: false,
-          apiName,
-          endpoint: tokenUrl,
-          latency: tokenLatency > 0 ? tokenLatency : undefined,
-          error: {
-            type: errorType,
-            message: errorMessage,
-            details: tokenFetchError,
-            isRetryable: true,
-          },
-        };
-      }
+      return {
+        success: false,
+        apiName,
+        endpoint: authUrl,
+        latency: tokenLatency,
+        error: {
+          type: ApiErrorType.AUTHENTICATION_ERROR,
+          message: `Failed to obtain Cint OAuth token: ${tokenResponse.status} ${tokenResponse.statusText}`,
+          details: errorData,
+          isRetryable: false,
+        },
+      };
     }
 
+    const tokenData = await tokenResponse.json();
+    if (!tokenData.access_token) {
+      logger.error('[Server Verify] Cint OAuth token response missing access_token', tokenData);
+      return {
+        success: false,
+        apiName,
+        endpoint: authUrl,
+        latency: tokenLatency,
+        error: {
+          type: ApiErrorType.VALIDATION_ERROR,
+          message: 'Cint OAuth token response did not contain an access_token.',
+          details: tokenData,
+          isRetryable: true,
+        },
+      };
+    }
+
+    authToken = `Bearer ${tokenData.access_token}`;
+    logger.info(`[Server Verify] Successfully obtained Cint OAuth token (took ${tokenLatency}ms).`);
+  } catch (tokenFetchError) {
+    const tokenLatency = Date.now() - tokenStartTime;
+    let errorType = ApiErrorType.NETWORK_ERROR;
+    let errorMessage =
+      tokenFetchError instanceof Error
+        ? tokenFetchError.message
+        : 'Unknown network error during token fetch';
+
+    if (tokenFetchError instanceof Error && tokenFetchError.name === 'AbortError') {
+      errorType = ApiErrorType.TIMEOUT_ERROR;
+      errorMessage = 'Cint OAuth token request timed out after 8000ms';
+    }
+
+    logger.error(`[Server Verify] Cint OAuth token fetch failed: ${errorMessage}`, tokenFetchError);
+    if (tokenFetchError instanceof Error) {
+      logger.error('[Server Verify] Cint Fetch Error Details:', {
+        name: tokenFetchError.name,
+        message: tokenFetchError.message,
+        cause: (tokenFetchError as any).cause,
+      });
+    }
+    return {
+      success: false,
+      apiName,
+      endpoint: authUrl,
+      latency: tokenLatency > 0 ? tokenLatency : undefined,
+      error: {
+        type: errorType,
+        message: errorMessage,
+        details: tokenFetchError,
+        isRetryable: true,
+      },
+    };
+  }
+
+  // --- Step 2: Make a Test API Call with the Token ---
+  logger.info(`[Server Verify] Testing ${apiName} resource endpoint: ${testResourceEndpoint}`);
+  try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-    const response = await fetch(testEndpoint, {
+    const response = await fetch(testResourceEndpoint, {
       method: 'GET',
       signal: controller.signal,
       headers: {
@@ -1136,33 +1115,44 @@ export async function verifyCintExchangeApiServerSide(): Promise<ApiVerification
     });
 
     clearTimeout(timeoutId);
-    const latency = Date.now() - startTime;
+    const totalLatency = Date.now() - startTime; // Use overall start time for total latency
     const responseData = await response.json().catch(() => ({}));
 
     if (response.ok) {
-      console.info(`[Server Verify] ${apiName} verification successful`, {
-        latency,
-        authMethod, // Log the auth method used
+      // Determine actual number of accounts returned, checking for common response structures
+      let recordCount: number | undefined = undefined;
+      if (Array.isArray(responseData)) {
+        recordCount = responseData.length;
+      } else if (Array.isArray(responseData.data)) {
+        recordCount = responseData.data.length;
+      } else if (Array.isArray(responseData.accounts)) {
+        // Check specific structure from OpenAPI spec
+        recordCount = responseData.accounts.length;
+      }
+
+      logger.info(`[Server Verify] ${apiName} resource verification successful`, {
+        latency: totalLatency,
+        authMethod,
         statusCode: response.status,
-        recordCount: Array.isArray(responseData.data) ? responseData.data.length : undefined,
+        recordCount: recordCount,
       });
       return {
         success: true,
         apiName,
-        endpoint: testEndpoint,
-        latency,
+        endpoint: testResourceEndpoint, // Report the resource endpoint tested
+        latency: totalLatency,
         data: {
-          status: response.statusText,
-          recordCount: Array.isArray(responseData.data) ? responseData.data.length : undefined,
-          firstRecordId:
-            Array.isArray(responseData.data) && responseData.data[0]?.id
-              ? responseData.data[0].id
-              : undefined,
+          status: `Authenticated via ${authMethod}. ${response.statusText}`,
+          accountCount: recordCount, // Report count if found
+          // Optionally include sample data if needed, be mindful of size/sensitivity
+          // firstAccountId: recordCount && recordCount > 0 ? responseData?.accounts?.[0]?.id : undefined,
         },
       };
     } else {
+      // Handle API resource call errors
       let errorType = ApiErrorType.UNKNOWN_ERROR;
       if (response.status === 401 || response.status === 403) {
+        // 401 could mean token expired or incorrect, 403 might be permissions
         errorType = ApiErrorType.AUTHENTICATION_ERROR;
       } else if (response.status === 404) {
         errorType = ApiErrorType.NOT_FOUND_ERROR;
@@ -1170,40 +1160,50 @@ export async function verifyCintExchangeApiServerSide(): Promise<ApiVerification
         errorType = ApiErrorType.SERVER_ERROR;
       }
       const isRetryable = [ApiErrorType.SERVER_ERROR].includes(errorType);
-      console.error(`[Server Verify] ${apiName} verification failed with HTTP ${response.status}`);
+      logger.error(
+        `[Server Verify] ${apiName} resource verification failed with HTTP ${response.status}`
+      );
       return {
         success: false,
         apiName,
-        endpoint: testEndpoint,
-        latency,
+        endpoint: testResourceEndpoint,
+        latency: totalLatency,
         error: {
           type: errorType,
-          message: `API returned error status: ${response.status} ${response.statusText}`,
+          message: `API resource call failed: ${response.status} ${response.statusText}`,
           details: responseData,
           isRetryable,
         },
       };
     }
   } catch (fetchError) {
-    const latency = Date.now() - startTime;
+    // Handle fetch errors for the resource call
+    const totalLatency = Date.now() - startTime;
     let errorType = ApiErrorType.NETWORK_ERROR;
     let errorMessage = fetchError instanceof Error ? fetchError.message : 'Unknown network error';
     let isRetryable = true;
 
     if (fetchError instanceof Error && fetchError.name === 'AbortError') {
       errorType = ApiErrorType.TIMEOUT_ERROR;
-      errorMessage = 'API request timed out after 10000ms';
+      errorMessage = 'API resource request timed out after 10000ms';
       isRetryable = true;
     }
-    console.error(
-      `[Server Verify] ${apiName} verification failed with network/fetch error:`,
+    logger.error(
+      `[Server Verify] ${apiName} verification failed with network/fetch error on resource call:`,
       errorMessage
     );
+    if (fetchError instanceof Error) {
+      logger.error('[Server Verify] Cint Resource Fetch Error Details:', {
+        name: fetchError.name,
+        message: fetchError.message,
+        cause: (fetchError as any).cause,
+      });
+    }
     return {
       success: false,
       apiName,
-      endpoint: testEndpoint,
-      latency: latency > 0 ? latency : undefined,
+      endpoint: testResourceEndpoint, // Report resource endpoint as failing point
+      latency: totalLatency > 0 ? totalLatency : undefined,
       error: {
         type: errorType,
         message: errorMessage,

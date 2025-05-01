@@ -11,9 +11,12 @@ import { logger } from '@/utils/logger';
 export function calculateJustifyScoreV1(
   profile: Partial<InsightIQProfile> // Accept partial profile data
 ): number | null {
-  // Basic check: require profile ID for logging
-  if (!profile.id) {
-    logger.warn(`[ScoringV1] Cannot calculate score for profile without ID.`);
+  // Use username or full name for logging if ID is missing
+  const logIdentifier = profile.id ?? profile.platform_username ?? profile.full_name ?? 'unknown';
+
+  // Basic check: require some identifier for logging
+  if (logIdentifier === 'unknown') {
+    logger.warn(`[ScoringV1] Cannot calculate score for profile without identifier.`);
     return null;
   }
 
@@ -46,7 +49,7 @@ export function calculateJustifyScoreV1(
   // Require at least one factor to provide a score
   if (factorsUsed === 0) {
     logger.debug(
-      `[ScoringV1] Insufficient data for profile ${profile.id}. Factors used: ${factorsUsed}`
+      `[ScoringV1] Insufficient data for profile ${logIdentifier}. Factors used: ${factorsUsed}`
     );
     return null;
   }
@@ -55,7 +58,7 @@ export function calculateJustifyScoreV1(
   const finalScore = Math.max(0, Math.min(MAX_SCORE, Math.round(score)));
 
   logger.debug(
-    `[ScoringV1] Calculated score for profile ${profile.id}: ${finalScore} (Factors: ${factorsUsed})`,
+    `[ScoringV1] Calculated score for profile ${logIdentifier}: ${finalScore} (Factors: ${factorsUsed})`,
     { isVerified: profile.is_verified, followers: followers }
   );
   return finalScore;

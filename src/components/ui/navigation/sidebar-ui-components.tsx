@@ -143,7 +143,7 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
 
         {/* Back to App Link - Apply standard styling */}
         <Link
-          href="/dashboard"
+          href="/debug-tools"
           className={cn(
             'flex items-center py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group',
             'text-foreground hover:text-accent hover:bg-accent/5'

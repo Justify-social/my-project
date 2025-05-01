@@ -37,10 +37,12 @@ type MarketplaceInfluencerWithLinks = MarketplaceInfluencer & {
   insightiqAccountLinks: InsightIQAccountLink[];
 };
 
-export async function GET(request: NextRequest, { params }: { params: { identifier: string } }) {
-  // Await is no longer needed here as params is not a Promise in API routes by default
-  const identifier = params.identifier;
-  // Get platformId from query params
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ identifier: string }> }
+) {
+  const awaitedParams = await params;
+  const identifier = awaitedParams.identifier;
   const platformId = request.nextUrl.searchParams.get('platformId');
 
   logger.info(
