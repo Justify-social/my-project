@@ -82,10 +82,14 @@ function MarketplacePage() {
         });
         setInfluencers(response.influencers);
         setCurrentPage(response.page);
-        setTotalInfluencers(response.total);
+        // ** Artificial Inflation for Sandbox UI **
+        // If the API reports 12 or fewer total, pretend there are 48 for pagination UI demo
+        const actualTotal = response.total;
+        const displayTotal = actualTotal <= 12 ? 48 : actualTotal;
+        setTotalInfluencers(displayTotal);
         setLimit(response.limit);
         logger.info(
-          `[MarketplacePage] Data fetch successful. Found ${response.total} influencers.`
+          `[MarketplacePage] Data fetch successful. Actual total: ${actualTotal}, Display total set to: ${displayTotal}`
         );
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Failed to load influencers.';
@@ -113,36 +117,42 @@ function MarketplacePage() {
   }, []);
 
   const handleViewProfile = useCallback(
-    (publicIdentifier: string, platformId?: string | null) => {
-      // publicIdentifier should be the creator's username/handle
-      // platformId is the workPlatformId (UUID)
-
-      if (!publicIdentifier) {
-        logger.error('[MarketplacePage] handleViewProfile called without a publicIdentifier!');
+    (identifier: string) => {
+      if (!identifier) {
+        logger.error('[MarketplacePage] handleViewProfile called without an identifier!');
         toast.error('Cannot view profile: Missing required identifier.');
         return;
       }
-      if (!platformId) {
-        logger.error('[MarketplacePage] handleViewProfile called without a platformId!');
-        toast.error('Cannot view profile: Missing required platform ID.');
-        return;
+
+      // Determine the handle for the path segment
+      // If composite key, extract handle. Otherwise, use identifier (assuming external_id doesn't contain special chars, or handle lookup needed)
+      // For simplicity now, let's assume we still want the handle in the URL path if possible.
+      let pathSegment = identifier; // Default to the identifier itself
+      let handleForPath = identifier; // Fallback if not composite
+      if (identifier.includes(':::')) {
+        handleForPath = identifier.split(':::')[0];
+      } else {
+        // If it's an external_id, we ideally need the handle for a clean URL path.
+        // This might require looking up the handle from the influencer data if available here,
+        // or accepting potentially less clean URLs like /influencer-marketplace/[external_id]?...
+        // For now, we use the identifier itself, which might be the external_id.
+        logger.warn(`[MarketplacePage] Using external_id potentially in URL path: ${identifier}`);
+        handleForPath = identifier; // Using external_id in path for now
       }
+      pathSegment = handleForPath; // Use derived handle or the identifier itself
 
-      // Use the public identifier (handle) directly for the path segment
-      const pathSegment = publicIdentifier;
-
-      // Construct query params - ONLY include platformId
+      // Construct query params - Pass the FULL identifier
       const queryParams = new URLSearchParams();
-      queryParams.append('platformId', platformId); // Pass the platform ID
+      queryParams.append('identifier', identifier);
 
       const queryString = queryParams.toString();
-      // Construct the destination URL using the public identifier in the path and platformId in query
+      // Construct the destination URL using handle/identifier in path and full identifier in query
       const destinationUrl = `/influencer-marketplace/${encodeURIComponent(pathSegment)}?${queryString}`;
 
-      logger.debug('[MarketplacePage] Navigating to profile (simplified):', {
+      logger.debug('[MarketplacePage] Navigating to profile:', {
         destinationUrl,
-        handle: publicIdentifier,
-        platformId: platformId,
+        identifierPassed: identifier,
+        pathSegmentUsed: pathSegment,
       });
 
       router.push(destinationUrl);

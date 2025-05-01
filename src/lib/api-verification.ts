@@ -970,13 +970,14 @@ export async function verifyStripeApiServerSide(): Promise<ApiVerificationResult
  */
 export async function verifyCintExchangeApiServerSide(): Promise<ApiVerificationResult> {
   const apiName = 'Cint Exchange API';
-  // Corrected endpoints based on Cint support information
-  const authUrl = 'https://auth.lucidhq.com/oauth/token';
-  const apiBaseUrl = 'https://api.luc.id';
+  // Corrected endpoints based on Cint Developer Portal Documentation
+  const authUrl = 'https://auth.lucidhq.com/oauth/token'; // Corrected Auth URL
+  const apiBaseUrl = 'https://api.cint.com/v1'; // Base URL from OpenAPI spec seems correct for resource calls
   const testResourceEndpoint = `${apiBaseUrl}/accounts`; // Use /accounts for testing
 
   const clientId = serverConfig.cint.clientId;
   const clientSecret = serverConfig.cint.clientSecret;
+  const audience = 'https://api.luc.id'; // Audience specified in docs
 
   // Check for necessary OAuth credentials
   if (!clientId || !clientSecret) {
@@ -1005,20 +1006,20 @@ export async function verifyCintExchangeApiServerSide(): Promise<ApiVerification
     const tokenController = new AbortController();
     const tokenTimeoutId = setTimeout(() => tokenController.abort(), 8000);
 
-    // Use the request structure provided by Cint support
+    // Use the request structure shown in the Cint developer documentation
     const tokenResponse = await fetch(authUrl, {
       method: 'POST',
       signal: tokenController.signal,
       headers: {
-        'Content-Type': 'application/json', // Correct Content-Type
+        'Content-Type': 'application/json', // Use JSON content type as per docs
       },
-      // Correct request body structure
+      // Use JSON body as per docs example
       body: JSON.stringify({
         client_id: clientId,
         client_secret: clientSecret,
         grant_type: 'client_credentials',
-        lucid_scopes: 'app:api', // Added scope
-        audience: 'https://api.luc.id', // Added audience
+        lucid_scopes: 'app:api', // Use lucid_scopes as per docs
+        audience: audience, // Add audience as per docs
       }),
     });
 

@@ -14,12 +14,13 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { cn } from '@/lib/utils';
 import { getInitials } from '@/lib/utils'; // Import from utils
 import { useRouter } from 'next/navigation';
+import { logger } from '@/utils/logger'; // Import logger
 
 interface InfluencerSummaryCardProps {
   influencer: InfluencerSummary;
   isSelected: boolean;
   onSelectToggle: (id: string) => void;
-  onViewProfile: (publicIdentifier: string, platformId?: string | null) => void;
+  onViewProfile: (identifier: string) => void;
   className?: string;
 }
 
@@ -198,8 +199,18 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
             size="sm"
             className="w-full"
             onClick={() => {
-              const publicIdentifier = influencer.handle || influencer.id;
-              onViewProfile(publicIdentifier, influencer.workPlatformId);
+              // influencer.id now holds the stable identifier (external_id or composite)
+              // Pass this single identifier to the handler
+              if (influencer.id) {
+                // Ensure id exists before calling
+                onViewProfile(influencer.id);
+              } else {
+                logger.error(
+                  '[InfluencerSummaryCard] Missing influencer.id, cannot view profile.',
+                  { influencerData: influencer }
+                );
+                // Optionally show an error to the user
+              }
             }}
           >
             View Profile

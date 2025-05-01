@@ -205,22 +205,40 @@ export async function getInsightIQProfileById(profileId: string): Promise<Insigh
     logger.warn('[InsightIQService] getInsightIQProfileById called with empty profileId.');
     return null;
   }
-  logger.info(`[InsightIQService] Fetching InsightIQ profile for profileId: ${profileId}`);
+  // Check if profileId looks like a UUID (InsightIQ standard ID format)
+  // Simple check, might need refinement based on actual ID formats
+  const looksLikeUuid =
+    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(profileId);
+  if (!looksLikeUuid) {
+    logger.warn(
+      `[InsightIQService] getInsightIQProfileById called with potentially invalid ID format: ${profileId}. Attempting fetch anyway.`
+    );
+    // Decide whether to return null or attempt fetch. Attempting fetch for now.
+    // return null;
+  }
+
+  logger.info(`[InsightIQService] Fetching InsightIQ profile via GET /v1/profiles/${profileId}`);
   const endpoint = `/v1/profiles/${profileId}`;
   try {
-    const rawResponse = await makeInsightIQRequest<any>(endpoint); // Use <any> for raw logging
+    // Use makeInsightIQRequest to fetch the single profile
+    const profileResponse = await makeInsightIQRequest<InsightIQProfile>(endpoint, {
+      method: 'GET',
+    });
     // Log the raw response from GET /v1/profiles/{id}
-    logger.debug('[getInsightIQProfileById] Raw response:', { responseData: rawResponse });
-    const profileResponse = rawResponse as InsightIQProfile | null; // Cast after logging
-    return profileResponse;
+    logger.debug('[getInsightIQProfileById] Raw response:', { responseData: profileResponse });
+    return profileResponse; // Return the fetched profile directly
   } catch (error: any) {
     // Distinguish between 404 (Not Found) and other errors
     if (error.message?.includes('(404)')) {
-      logger.warn(`[InsightIQService] InsightIQ profile not found for profileId: ${profileId}`);
+      logger.warn(
+        `[InsightIQService] InsightIQ profile not found via GET /v1/profiles/${profileId}`
+      );
       return null;
     } else {
-      logger.error(`[InsightIQService] Error fetching InsightIQ profile for ${profileId}:`, error);
-      // Depending on desired resilience, we might return null or re-throw
+      logger.error(
+        `[InsightIQService] Error fetching InsightIQ profile ${profileId} via GET /v1/profiles:`,
+        error
+      );
       return null; // Return null to avoid breaking downstream processes
     }
   }
@@ -346,31 +364,42 @@ export async function getInsightIQAudience(
 }
 
 // --- Helper to get the unique ID (EXPORTED) ---
-export const getProfileUniqueId = (profile: InsightIQProfile): string => {
+// Returns the most stable unique identifier available for linking/fetching.
+// Prioritizes external_id, falls back to handle:::work_platform_id
+export const getProfileUniqueId = (profile: InsightIQSearchProfile | InsightIQProfile): string => {
+  // Prioritize external_id if it exists (should be the stable platform profile ID)
   if (profile.external_id) {
     return profile.external_id;
   }
-  if (profile.url && profile.work_platform?.id) {
-    try {
-      const urlObject = new URL(profile.url);
-      const pathSegments = urlObject.pathname.split('/').filter(Boolean);
-      const username = pathSegments[pathSegments.length - 1];
-      if (username && /^[a-zA-Z0-9._-]+$/.test(username)) {
-        // Basic handle validation
-        return `${username}_${profile.work_platform.id}`;
-      }
-    } catch (e) {
-      logger.warn(`[getProfileUniqueId] Failed to parse username from URL: ${profile.url}`);
-    }
+
+  // Fallback: Construct composite key from platform_username and work_platform.id
+  // This is less reliable if work_platform.id from search is inconsistent.
+  const handle = profile.platform_username ?? (profile.url ? profile.url.split('/').pop() : null);
+  const platformId = profile.work_platform?.id;
+
+  if (handle && platformId) {
+    logger.warn(
+      `[getProfileUniqueId] Falling back to composite ID for handle: ${handle}. External ID missing.`,
+      { profileData: { url: profile.url, handle: handle, platformId: platformId } }
+    );
+    // Using ::: as a separator to make parsing easier later if needed
+    return `${handle}:::${platformId}`;
   }
-  logger.error(`[getProfileUniqueId] Profile lacks usable unique identifier`, {
-    profileData: {
-      id: profile.id,
-      url: profile.url,
-      external_id: profile.external_id,
-      work_platform_id: profile.work_platform?.id,
-    },
-  });
+
+  // If neither external_id nor handle+platformId is available
+  logger.error(
+    `[getProfileUniqueId] Profile lacks usable unique identifier (external_id or handle+platformId)`,
+    {
+      profileData: {
+        id: 'id' in profile ? profile.id : undefined, // Check if 'id' exists
+        url: profile.url,
+        external_id: profile.external_id,
+        platform_username: profile.platform_username,
+        work_platform_id: profile.work_platform?.id,
+      },
+    }
+  );
+  // Throwing error because we cannot reliably link/fetch without an ID
   throw new Error(
     'Profile lacks required identifiers (external_id or derivable handle+platformId)'
   );
@@ -500,69 +529,118 @@ export async function getInsightIQProfiles(params: {
 
 // ** REVISED Function for DETAIL view - Uses /analytics endpoint **
 export async function getSingleInsightIQProfileAnalytics(
-  identifier: string, // Username or URL
-  workPlatformId: string
-): Promise<InsightIQSearchProfile | null> {
-  // Still returning InsightIQSearchProfile for compatibility, might need adjustment
-  logger.info(
-    `[InsightIQService] Fetching detail via POST /analytics for identifier: ${identifier}, platform: ${workPlatformId}`
-  );
+  identifier: string // Can be external_id (preferred) or username:::platformId composite
+  // Deprecate direct platformId argument if identifier contains it or is external_id
+  // platformId?: string | null // Optional: Still accept for direct username/platform search if needed
+): Promise<InsightIQProfile | null> {
+  // Return the full InsightIQProfile now
+  logger.info(`[InsightIQService] Fetching single profile analytics for identifier: ${identifier}`);
 
-  const endpoint = '/v1/social/creators/profiles/analytics';
-  const requestBody = {
-    identifier: identifier,
-    work_platform_id: workPlatformId,
-  };
+  // 1. Check if the identifier looks like an external_id (UUID or similar format expected for InsightIQ profile ID)
+  // Simple UUID check for now. Refine based on actual external_id format.
+  const looksLikeExternalId =
+    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(
+      identifier
+    ) || !identifier.includes(':::'); // Assume non-composite IDs are external_ids for now
 
-  try {
-    const response = await makeInsightIQRequest<any>(endpoint, {
-      // Use <any> initially
-      method: 'POST',
-      body: JSON.stringify(requestBody),
-    });
-
-    logger.debug(`[getSingleInsightIQProfileAnalytics] Raw response:`, response);
-
-    // ** IMPORTANT: Need to map the /analytics response to InsightIQSearchProfile **
-    // The response structure from /analytics is different from /search.
-    // We need to extract the relevant fields to match the expected return type.
-    if (response && response.profile) {
-      // Basic mapping - This might need significant expansion based on the actual response
-      const mappedProfile: InsightIQSearchProfile = {
-        platform_username: response.profile.platform_username,
-        full_name: response.profile.full_name,
-        url: response.profile.url,
-        image_url: response.profile.image_url,
-        follower_count: response.profile.follower_count,
-        subscriber_count: response.profile.subscriber_count,
-        work_platform: response.work_platform, // /analytics includes this at the top level
-        introduction: response.profile.introduction,
-        engagement_rate: response.profile.engagement_rate,
-        creator_location: response.profile.location, // Map location
-        is_verified: response.profile.is_verified,
-        platform_account_type: response.profile.platform_account_type,
-        external_id: response.profile.external_id, // Include external_id if available
-        // Add other relevant fields from CreatorProfileAnalyticsResponse.profile
-      };
-      return mappedProfile;
-    } else {
-      logger.warn(
-        `[InsightIQService] Profile not found or invalid response from POST ${endpoint} for identifier: ${identifier}`
-      );
-      return null; // Not found or invalid response
-    }
-  } catch (error: any) {
-    // Check for 404 specifically if the API uses it for not found on POST
-    if (error.message?.includes('(404)')) {
-      logger.warn(
-        `[InsightIQService] Profile not found via POST ${endpoint} for identifier: ${identifier}`
+  if (looksLikeExternalId) {
+    logger.info(
+      `[InsightIQService] Identifier "${identifier}" appears to be an external_id. Fetching via GET /v1/profiles/{id}.`
+    );
+    try {
+      const profile = await getInsightIQProfileById(identifier);
+      if (profile) {
+        logger.info(
+          `[InsightIQService] Successfully fetched profile using external_id: ${identifier}`
+        );
+        return profile;
+      } else {
+        logger.warn(
+          `[InsightIQService] Profile fetch using external_id "${identifier}" returned null. Might not exist or ID format mismatch.`
+        );
+        // Optionally fallback to search? For now, return null if direct fetch fails.
+        return null;
+      }
+    } catch (error) {
+      logger.error(
+        `[InsightIQService] Error fetching profile with external_id ${identifier}:`,
+        error
       );
       return null;
     }
-    logger.error(`[getSingleInsightIQProfileAnalytics] Error: ${error.message}`, {
-      errorData: error?.response?.data,
-    });
-    return null; // Error
+  }
+
+  // 2. If not an external_id, assume it's a composite key "username:::platformId"
+  logger.info(
+    `[InsightIQService] Identifier "${identifier}" appears to be a composite key. Falling back to search.`
+  );
+  const parts = identifier.split(':::');
+  if (parts.length !== 2) {
+    logger.error(
+      `[InsightIQService] Invalid composite key format: "${identifier}". Expected "username:::platformId".`
+    );
+    return null;
+  }
+  const username = parts[0];
+  const platformId = parts[1]; // This might be the unreliable work_platform_id
+
+  if (!username || !platformId) {
+    logger.error(
+      `[InsightIQService] Invalid composite key parsed: username='${username}', platformId='${platformId}'`
+    );
+    return null;
+  }
+
+  logger.warn(
+    `[InsightIQService] Searching using potentially unreliable composite key: username=${username}, platformId=${platformId}`
+  );
+
+  // Fallback: Use the internal search function with username and platformId
+  // This still uses the potentially unreliable platformId from the search results.
+  // This is a fallback and ideally should be avoided by ensuring external_id is always used.
+  try {
+    const searchParams: InfluencerSearchParams = {
+      platform_username: username,
+      work_platform_id: platformId,
+      limit: 1, // We expect only one result
+    };
+    const searchResponse = await _searchInsightIQProfiles(searchParams);
+
+    if (searchResponse?.data && searchResponse.data.length > 0) {
+      if (searchResponse.data.length > 1) {
+        logger.warn(
+          `[InsightIQService] Search fallback found multiple profiles for ${username} / ${platformId}. Returning first result.`
+        );
+      }
+      const foundProfile = searchResponse.data[0];
+      // IMPORTANT: The search result (InsightIQSearchProfile) might lack fields present in InsightIQProfile.
+      // We need the *full* profile. If the search result has an external_id, fetch the full profile using that.
+      if (foundProfile.external_id) {
+        logger.info(
+          `[InsightIQService] Search fallback found profile with external_id ${foundProfile.external_id}. Fetching full profile.`
+        );
+        return getInsightIQProfileById(foundProfile.external_id);
+      } else {
+        // If search result *also* lacks external_id, we cannot get the full profile easily.
+        logger.error(
+          `[InsightIQService] Search fallback profile for ${username} / ${platformId} also lacks external_id. Cannot fetch full profile data.`
+        );
+        // Returning the partial search profile is incorrect as the return type is InsightIQProfile.
+        // Return null or throw error? Returning null for now.
+        return null;
+      }
+    } else {
+      logger.warn(
+        `[InsightIQService] Search fallback found no profile for ${username} / ${platformId}`
+      );
+      return null;
+    }
+  } catch (error) {
+    logger.error(
+      `[InsightIQService] Error during search fallback for ${username} / ${platformId}:`,
+      error
+    );
+    return null;
   }
 }
 

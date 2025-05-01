@@ -7,7 +7,11 @@ import { logger } from '@/utils/logger';
 import { Platform as PlatformBackend, PrismaClient } from '@prisma/client';
 // TODO: Add InsightIQ enrichment if needed for summaries
 // Import needed service and mapping functions
-import { getInsightIQProfiles, getSingleInsightIQProfileAnalytics } from '@/lib/insightiqService';
+import {
+  getInsightIQProfiles,
+  getSingleInsightIQProfileAnalytics,
+  getProfileUniqueId,
+} from '@/lib/insightiqService';
 import { InsightIQProfile, InsightIQSearchProfile } from '@/types/insightiq';
 import {
   mapInsightIQProfileToInfluencerProfileData,
@@ -61,8 +65,7 @@ export interface IInfluencerService {
   getInfluencerSummariesByIds(ids: string[]): Promise<InfluencerSummary[]>;
 
   getProcessedInfluencerProfileByIdentifier(
-    identifier: string,
-    platformId: string
+    identifier: string
   ): Promise<InfluencerProfileData | null>;
 
   // Add interface for the new list function
@@ -93,6 +96,8 @@ export interface IInfluencerService {
 }
 
 // --- Helper to get the unique ID (INTERNAL) ---
+// REMOVE THIS INTERNAL VERSION - Use the exported one from insightiqService
+/*
 const getProfileUniqueId = (profile: InsightIQProfile | InsightIQSearchProfile): string => {
   if (profile.platform_username && profile.work_platform?.id) {
     return `${profile.platform_username}:::${profile.work_platform.id}`;
@@ -112,6 +117,7 @@ const getProfileUniqueId = (profile: InsightIQProfile | InsightIQSearchProfile):
   logger.error(`[getProfileUniqueId] Profile lacks usable unique identifier`, { profile });
   throw new Error('Profile lacks required identifiers (username or URL and platform ID)');
 };
+*/
 
 // --- Real API Service Implementation ---
 
@@ -217,47 +223,42 @@ const apiService: IInfluencerService = {
   },
 
   async getProcessedInfluencerProfileByIdentifier(
-    identifier: string,
-    platformId: string
+    identifier: string
   ): Promise<InfluencerProfileData | null> {
-    logger.info(
-      `[influencerService] Processing DETAILED request for identifier: ${identifier}, platformId: ${platformId}`
-    );
+    logger.info(`[influencerService] Processing DETAILED request for identifier: ${identifier}`);
     try {
-      if (!identifier || !platformId) {
-        logger.warn(`[influencerService] Missing identifier or platformId`, {
-          identifier,
-          platformId,
-        });
+      if (!identifier) {
+        logger.warn(`[influencerService] Missing identifier`);
         return null;
       }
 
-      const profile: InsightIQSearchProfile | null = await getSingleInsightIQProfileAnalytics(
-        identifier,
-        platformId
-      );
+      const profile: InsightIQProfile | null = await getSingleInsightIQProfileAnalytics(identifier);
 
       if (!profile) {
-        logger.warn(
-          `[influencerService] Detailed fetch failed for identifier: ${identifier}, platformId: ${platformId}`
-        );
+        logger.warn(`[influencerService] Detailed fetch failed for identifier: ${identifier}`);
         return null;
       }
 
-      const derivedUniqueId = getProfileUniqueId(profile);
-      const derivedUsername = derivedUniqueId.split(':::')[0];
+      const returnedHandle = profile.platform_username;
+      let requestedHandle: string | null = null;
+      if (identifier.includes(':::')) {
+        requestedHandle = identifier.split(':::')[0];
+      }
 
-      if (identifier !== derivedUsername) {
+      if (
+        requestedHandle &&
+        (!returnedHandle || requestedHandle.toLowerCase() !== returnedHandle.toLowerCase())
+      ) {
         logger.error(
-          `[getProcessedInfluencerProfileByIdentifier] CRITICAL MISMATCH! Requested identifier: ${identifier}, but fetch returned profile deriving to username: ${derivedUsername}`
+          `[getProcessedInfluencerProfileByIdentifier] Mismatch Error! Requested handle '${requestedHandle}' (from identifier: ${identifier}) but fetch returned profile with handle: '${returnedHandle}'`
         );
         return null;
       }
 
-      const profileData = mapInsightIQProfileToInfluencerProfileData(profile, derivedUniqueId);
+      const profileData = mapInsightIQProfileToInfluencerProfileData(profile, identifier);
       if (!profileData) {
         logger.warn(
-          `[getProcessedInfluencerProfileByIdentifier] map function returned null for ${derivedUniqueId}`
+          `[getProcessedInfluencerProfileByIdentifier] map function returned null for identifier: ${identifier}`
         );
         return null;
       }
@@ -265,7 +266,8 @@ const apiService: IInfluencerService = {
       if (profileData.platformSpecificId) {
         await this.saveProfileIdToDatabase({
           id: profileData.id,
-          handle: profile.platform_username ?? identifier,
+          handle:
+            profile.platform_username ?? requestedHandle ?? identifier.split(':::')[0] ?? 'unknown',
           platformSpecificId: profileData.platformSpecificId,
           name: profileData.name,
           avatarUrl: profileData.avatarUrl,

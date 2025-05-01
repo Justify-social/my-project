@@ -70,13 +70,14 @@ const mapPlatformsToFrontend = (backendPlatforms: PlatformBackend[]): PlatformEn
 };
 
 /**
- * Maps an InsightIQProfile object to the frontend InfluencerProfileData structure.
- * @param profile - The profile data received from InsightIQ.
- * @param uniqueId - The original identifier used for the request (for the 'id' field).
+ * Maps an InsightIQProfile object (full profile data) to the frontend InfluencerProfileData structure.
+ * Handles mapping fields available in the full profile.
+ * @param profile - The full profile data received from InsightIQ (e.g., via GET /v1/profiles/{id}).
+ * @param uniqueId - The identifier used for the request (external_id or composite key), used as fallback and ID.
  * @returns InfluencerProfileData object.
  */
 export const mapInsightIQProfileToInfluencerProfileData = (
-  profile: InsightIQSearchProfile,
+  profile: InsightIQProfile,
   uniqueId: string
 ): InfluencerProfileData => {
   const handle =
@@ -84,26 +85,48 @@ export const mapInsightIQProfileToInfluencerProfileData = (
   const name = profile.full_name ?? handle ?? uniqueId ?? 'Unknown Name';
   const platformEnum = mapInsightIQPlatformToEnum(profile.work_platform?.name);
 
-  // Map ONLY fields available in InsightIQSearchProfile
   const profileData: InfluencerProfileData = {
     id: uniqueId,
     name: name,
     handle: handle,
     avatarUrl: profile.image_url ?? null,
     platforms: platformEnum ? [platformEnum] : [],
-    followersCount: profile.follower_count ?? null,
-    isVerified: profile.is_verified ?? false,
-    primaryAudienceLocation: profile.creator_location?.country ?? null,
-    bio: profile.introduction ?? null,
-    engagementRate: profile.engagement_rate ?? null,
+    followersCount: profile.follower_count ?? profile.reputation?.follower_count ?? null,
     justifyScore: calculateJustifyScore(profile),
-    audienceDemographics: null,
-    isBusinessAccount: profile.platform_account_type === 'BUSINESS',
+    isVerified: profile.is_verified ?? false,
+    isBusinessAccount: profile.is_business ?? profile.platform_account_type === 'BUSINESS',
+    primaryAudienceLocation: profile.country ?? profile.creator_location?.country ?? null,
+    primaryAudienceAgeRange: null,
+    primaryAudienceGender: null,
+    engagementRate: profile.engagement_rate ?? null,
+    audienceQualityIndicator: null,
+    insightiqUserId: profile.user?.id ?? null,
+    insightiqAccountId: profile.account?.id ?? null,
     workPlatformId: profile.work_platform?.id ?? null,
-    platformProfileName: profile.full_name ?? handle,
-    profileId: uniqueId,
-    platformSpecificId: profile.external_id ?? null,
+    platformProfileName: profile.platform_profile_name ?? name,
+    profileId: profile.external_id ?? uniqueId,
+    platformSpecificId: profile.platform_profile_id ?? profile.external_id ?? null,
+    bio: profile.introduction ?? null,
+    contactEmail:
+      profile.emails?.find(e => e.type === 'WORK')?.email_id ??
+      profile.emails?.[0]?.email_id ??
+      null,
+    audienceDemographics: null,
+    engagementMetrics: null,
+    website: profile.website ?? null,
+    category: profile.category ?? null,
   };
+
+  if (!profileData.profileId) {
+    logger.warn(
+      `[mapInsightIQProfileToInfluencerProfileData] Mapped profile is missing profileId (external_id). Identifier: ${uniqueId}`
+    );
+  }
+  if (!profileData.platformSpecificId) {
+    logger.warn(
+      `[mapInsightIQProfileToInfluencerProfileData] Mapped profile is missing platformSpecificId (platform_profile_id). Identifier: ${uniqueId}`
+    );
+  }
 
   return profileData;
 };
@@ -249,8 +272,9 @@ export const mapPrismaInfluencerToSummary = (
   return summary;
 };
 
-// Helper to calculate score based on available search data
-const calculateJustifyScore = (profile: InsightIQSearchProfile): number => {
+// Helper to calculate score based on available data (Search or Full Profile)
+// Might need refinement if full profile offers better metrics for scoring.
+const calculateJustifyScore = (profile: InsightIQSearchProfile | InsightIQProfile): number => {
   const followerScore = Math.min(profile.follower_count ?? 0, 1000000000) / 10000000;
   const engagementScore = (profile.engagement_rate ?? 0) * 1000;
   const verifiedBonus = profile.is_verified ? 10 : 0;
