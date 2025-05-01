@@ -1,15 +1,41 @@
-import { PrismaClient, Status, Platform, Influencer, Prisma } from '@prisma/client';
+import {
+  PrismaClient,
+  Status,
+  Platform as PrismaPlatform,
+  Influencer,
+  Prisma,
+} from '@prisma/client';
 import type { CalendarEvent } from '@/components/ui/calendar-upcoming';
 import type { CampaignData } from '@/components/ui/card-upcoming-campaign';
 import { startOfDay, endOfDay, addMonths, isSameDay } from 'date-fns';
+// Import the SSOT PlatformEnum
+import { PlatformEnum } from '@/types/enums';
+// Import logger
+import { logger } from '@/lib/logger';
 
 const prisma = new PrismaClient();
 
-// Helper to convert Platform enum to string
-function mapPlatformEnumToString(platformEnum: Platform): string {
-  // Simple mapping, adjust casing if needed by UI
-  return platformEnum.toString();
-}
+// Helper to map Prisma Platform enum to SSOT PlatformEnum
+// Returns null if mapping is not found
+const mapPrismaPlatformToEnum = (
+  prismaPlatform: PrismaPlatform | null | undefined
+): PlatformEnum | null => {
+  if (!prismaPlatform) return null;
+  switch (prismaPlatform) {
+    case PrismaPlatform.INSTAGRAM:
+      return PlatformEnum.Instagram;
+    case PrismaPlatform.YOUTUBE:
+      return PlatformEnum.YouTube;
+    case PrismaPlatform.TIKTOK:
+      return PlatformEnum.TikTok;
+    // Add other Prisma Platform values if they exist and map to PlatformEnum
+    default:
+      logger.warn(
+        `[mapPrismaPlatformToEnum] Unknown Prisma platform type encountered: ${prismaPlatform}`
+      );
+      return null;
+  }
+};
 
 // Helper to convert Status enum to string
 function mapStatusEnumToString(statusEnum: Status): string {
@@ -46,11 +72,13 @@ export async function getUpcomingEvents(userId: string): Promise<CalendarEvent[]
     return (campaignsWithInfluencers as CampaignWithInfluencers[]).map(
       (campaign): CalendarEvent => {
         const influencers: Influencer[] = campaign.Influencer || [];
+        // Map Prisma Platform to PlatformEnum, then get unique string values
         const platforms = [
           ...new Set(
             influencers
-              .map((inf: Influencer) => mapPlatformEnumToString(inf.platform))
-              .filter((p: string): p is string => !!p)
+              .map((inf: Influencer) => mapPrismaPlatformToEnum(inf.platform as PrismaPlatform)) // Map to SSOT enum
+              .filter((p): p is PlatformEnum => p !== null) // Filter out nulls
+              .map(p => p.toString()) // Convert enum back to string if needed by UI
           ),
         ];
         const platformString = platforms.join(', ');
@@ -144,9 +172,14 @@ export async function getUpcomingCampaigns(userId: string): Promise<CampaignData
     // Use the specific type here
     return (campaignsWithInfluencers as CampaignWithPrimaryInfluencer[]).map(
       (campaign): CampaignData => {
-        // Type assertion might be needed if TS can't infer from include+select+take
-        const primaryInfluencer: { handle: string; platform: Platform } | undefined =
+        const primaryInfluencer: { handle: string; platform: PrismaPlatform } | undefined =
           campaign.Influencer?.[0];
+
+        // Map Prisma Platform to SSOT PlatformEnum, then to string if needed
+        const mappedPlatformEnum = primaryInfluencer
+          ? mapPrismaPlatformToEnum(primaryInfluencer.platform)
+          : null;
+        const platformString = mappedPlatformEnum ? mappedPlatformEnum.toString() : 'N/A';
 
         let budgetAmount: number | undefined = undefined;
         try {
@@ -179,7 +212,7 @@ export async function getUpcomingCampaigns(userId: string): Promise<CampaignData
         return {
           id: campaign.id,
           title: campaign.name,
-          platform: primaryInfluencer ? mapPlatformEnumToString(primaryInfluencer.platform) : 'N/A',
+          platform: platformString,
           startDate: campaign.startDate,
           endDate: campaign.endDate ?? undefined,
           status: mapStatusEnumToString(campaign.status ?? Status.DRAFT),

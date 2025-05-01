@@ -124,7 +124,16 @@ export interface InsightIQProfile {
   platform_profile_published_at?: string | null; // date-time
   is_verified?: boolean | null;
   is_business?: boolean | null;
+  // Add fields found in /search response
+  engagement_rate?: number | null;
+  creator_location?: {
+    city?: string | null;
+    state?: string | null;
+    country?: string | null;
+  } | null;
+  follower_count?: number | null; // Added from /search response
   // NOTE: Audience demographics might come from a separate endpoint like /v1/audience
+  is_official_artist?: boolean | null;
 }
 
 // Type for the response of GET /v1/profiles/{id}
@@ -186,3 +195,27 @@ import {
 export type MarketplaceInfluencerWithLinks = PrismaMarketplaceInfluencer & {
   insightiqAccountLinks: PrismaInsightIQAccountLink[];
 };
+
+// ADD This Interface for the /search endpoint response data structure
+export interface InsightIQSearchProfile {
+  external_id?: string | null;
+  platform_username?: string | null;
+  full_name?: string | null;
+  url?: string | null;
+  image_url?: string | null;
+  follower_count?: number | null;
+  subscriber_count?: number | null;
+  work_platform?: { id: string; name: string; logo_url: string };
+  introduction?: string | null;
+  engagement_rate?: number | null;
+  creator_location?: {
+    city?: string | null;
+    state?: string | null;
+    country?: string | null;
+  } | null;
+  is_verified?: boolean | null;
+  platform_account_type?: string | null;
+  // Add other fields from CreatorProfileBasicDetails if needed...
+}
+
+// Interface for a single Work Platform

@@ -5,7 +5,9 @@
  * between UI Form Values and API Payloads.
  */
 
-import { Platform, Position, KPI, Feature, Currency } from '@prisma/client';
+import { Platform as PrismaPlatform, Position, KPI, Feature, Currency } from '@prisma/client';
+// Import SSOT Enum
+import { PlatformEnum } from '@/types/enums';
 
 // --- Modern Form Value & API Payload Types ---
 
@@ -47,10 +49,11 @@ export interface AudienceFormValues {
   competitors?: string[];
 }
 
-export interface InfluencerFormValues {
+// Rename to avoid conflict with marketplace types
+export interface CampaignInfluencerFormValues {
   name?: string;
   handle: string;
-  platform: Platform;
+  platform: PlatformEnum; // USE SSOT ENUM
   url?: string;
   posts?: number | string;
   videos?: number | string;
@@ -82,7 +85,7 @@ export interface CampaignFormValues {
   secondaryKPIs?: KPI[];
   features?: Feature[];
   audience?: AudienceFormValues;
-  influencers?: InfluencerFormValues[];
+  influencers?: CampaignInfluencerFormValues[]; // Use renamed type
   creativeAssets?: CreativeAssetFormValues[];
   creativeRequirements?: CreativeRequirementFormValues[];
 }
@@ -125,10 +128,11 @@ export interface AudienceApiPayload {
   competitors?: string[];
 }
 
-export interface InfluencerApiPayload {
+// Rename to avoid conflict with marketplace types
+export interface CampaignInfluencerApiPayload {
   name?: string;
   handle: string;
-  platform: Platform;
+  platform: PlatformEnum; // USE SSOT ENUM
   url?: string;
   posts?: number;
   videos?: number;
@@ -160,7 +164,7 @@ export interface CampaignApiPayload {
   secondaryKPIs?: KPI[];
   features?: Feature[];
   audience?: AudienceApiPayload;
-  influencers?: InfluencerApiPayload[];
+  influencers?: CampaignInfluencerApiPayload[]; // Use renamed type
   creativeAssets?: CreativeAssetApiPayload[];
   creativeRequirements?: CreativeRequirementApiPayload[];
 }
@@ -256,13 +260,13 @@ export function transformAudienceData(audienceData: AudienceFormValues): Audienc
 }
 
 /**
- * Transform influencer form data to API payload format
- * @param influencerData Influencer form values
- * @returns API-compatible influencer payload
+ * Transform campaign influencer form data to API payload format
+ * @param influencerData Campaign Influencer form values
+ * @returns API-compatible campaign influencer payload
  */
 export function transformInfluencerData(
-  influencerData: InfluencerFormValues
-): InfluencerApiPayload {
+  influencerData: CampaignInfluencerFormValues
+): CampaignInfluencerApiPayload {
   return {
     name: influencerData.name || '',
     handle: influencerData.handle,
@@ -310,40 +314,8 @@ export function transformCreativeRequirementData(
  * Enum handling utilities for consistent casing
  */
 export const EnumUtils = {
-  // Platform enum utilities
-  Platform: {
-    toString(platform: Platform): string {
-      switch (platform) {
-        case 'INSTAGRAM':
-          return 'Instagram';
-        case 'YOUTUBE':
-          return 'YouTube';
-        case 'TIKTOK':
-          return 'TikTok';
-        default:
-          return 'Instagram';
-      }
-    },
-
-    fromString(platform: string): Platform {
-      switch (platform.toLowerCase()) {
-        case 'instagram':
-          return 'INSTAGRAM' as Platform;
-        case 'youtube':
-          return 'YOUTUBE' as Platform;
-        case 'tiktok':
-          return 'TIKTOK' as Platform;
-        default:
-          return 'INSTAGRAM' as Platform;
-      }
-    },
-
-    options: () => [
-      { value: 'INSTAGRAM' as Platform, label: 'Instagram' },
-      { value: 'YOUTUBE' as Platform, label: 'YouTube' },
-      { value: 'TIKTOK' as Platform, label: 'TikTok' },
-    ],
-  },
+  // REMOVE Platform enum utilities
+  // Platform: { ... },
 
   // Position enum utilities
   Position: {

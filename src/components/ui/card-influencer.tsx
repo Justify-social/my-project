@@ -13,7 +13,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Icon } from './icon/icon';
 import { cn } from '@/lib/utils';
-import { PlatformEnumBackend } from '@/components/features/campaigns/types'; // Adjust path as needed
+import { PlatformEnum } from '@/types/enums';
 import { z } from 'zod';
 
 // Helper function to format large numbers (e.g., follower counts)
@@ -24,19 +24,22 @@ const formatNumber = (num: number | undefined | null): string => {
   return num.toString();
 };
 
-// Mapping platforms to FontAwesome icons (adjust IDs as needed)
-// Update IDs to match brands-icon-registry.json (e.g., add 'brands' prefix)
-const platformIcons: Record<z.infer<typeof PlatformEnumBackend>, string> = {
-  INSTAGRAM: 'brandsInstagram',
-  TIKTOK: 'brandsTiktok',
-  YOUTUBE: 'brandsYoutube',
-  // TODO: Add mappings for other platforms if they exist in PlatformEnumBackend
-  // e.g., FACEBOOK: "brandsFacebook", X: "brandsXTwitter", LINKEDIN: "brandsLinkedin"
+// Update mapping to use PlatformEnum
+const platformIcons: Record<PlatformEnum, string> = {
+  [PlatformEnum.Instagram]: 'brandsInstagram',
+  [PlatformEnum.TikTok]: 'brandsTiktok',
+  [PlatformEnum.YouTube]: 'brandsYoutube',
+  [PlatformEnum.Twitter]: 'brandsXTwitter',
+  [PlatformEnum.Facebook]: 'brandsFacebook',
+  [PlatformEnum.Twitch]: 'brandsTwitch',
+  [PlatformEnum.Pinterest]: 'brandsPinterest',
+  [PlatformEnum.LinkedIn]: 'brandsLinkedin',
+  // Add other PlatformEnum members if they exist
 };
 
 export interface InfluencerCardProps {
-  /** Platform the influencer is on (Backend Enum value) */
-  platform: z.infer<typeof PlatformEnumBackend>;
+  /** Platform the influencer is on (use SSOT enum) */
+  platform: PlatformEnum;
   /** Influencer's handle/username */
   handle: string;
   /** Optional display name */

@@ -13,12 +13,13 @@ import { Icon } from '@/components/ui/icon/icon'; // Use direct path for clarity
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { getInitials } from '@/lib/utils'; // Import from utils
+import { useRouter } from 'next/navigation';
 
 interface InfluencerSummaryCardProps {
   influencer: InfluencerSummary;
   isSelected: boolean;
   onSelectToggle: (id: string) => void;
-  onViewProfile: (id: string, platformId?: string | null) => void;
+  onViewProfile: (publicIdentifier: string, platformId?: string | null) => void;
   className?: string;
 }
 
@@ -42,6 +43,8 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
   onViewProfile,
   className,
 }) => {
+  const router = useRouter();
+
   // Determine badge styling based on quality
   let qualityBadgeStyles = '';
   if (influencer.audienceQualityIndicator === 'High') {
@@ -194,7 +197,10 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
             variant="outline"
             size="sm"
             className="w-full"
-            onClick={() => onViewProfile(influencer.id, influencer.workPlatformId)}
+            onClick={() => {
+              const publicIdentifier = influencer.handle || influencer.id;
+              onViewProfile(publicIdentifier, influencer.workPlatformId);
+            }}
           >
             View Profile
           </Button>

@@ -376,6 +376,8 @@ model MarketplaceInfluencer {
   createdAt                 DateTime  @default(now())
   updatedAt                 DateTime  @updatedAt
   insightiqDataLastRefreshedAt DateTime? // Renamed from phylloDataLastRefreshedAt
+  searchIdentifier          String?   @unique // Unique identifier derived from /search API (external_id or composite key)
+  platformSpecificId        String?   // Actual platform_profile_id from InsightIQ detail view (SSOT)
 
   insightiqAccountLinks     InsightIQAccountLink[] // Renamed relation
 

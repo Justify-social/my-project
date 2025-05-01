@@ -16,14 +16,11 @@ import {
   Step1ValidationSchema,
   Step1FormData,
   DraftCampaignData,
-  PlatformEnumFrontend,
-  PlatformEnumBackend,
   CurrencyEnum,
   PositionEnum,
-  platformToFrontend,
-  PlatformSchema,
   BudgetSchema,
 } from '@/components/features/campaigns/types';
+import { PlatformEnum } from '@/types/enums';
 import { WizardSkeleton } from '@/components/ui/loading-skeleton';
 import { Icon } from '@/components/ui/icon/icon';
 import { Button } from '@/components/ui/button';
@@ -99,26 +96,16 @@ const InfluencerEntry: React.FC<InfluencerEntryProps> = ({ index, control, error
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Platform *</FormLabel>
-                <Select
-                  onValueChange={frontendValue => {
-                    try {
-                      const backendValue = PlatformSchema.parse(frontendValue);
-                      field.onChange(backendValue);
-                    } catch {
-                      field.onChange(undefined);
-                    }
-                  }}
-                  value={field.value ? platformToFrontend(field.value) : undefined}
-                >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select platform" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {PlatformEnumFrontend.options.map(platform => (
-                      <SelectItem key={platform} value={platform}>
-                        {platform}
+                    {Object.values(PlatformEnum).map(platformValue => (
+                      <SelectItem key={platformValue} value={platformValue}>
+                        {getPlatformDisplayName(platformValue)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -259,6 +246,30 @@ const getCurrencySymbol = (currencyCode?: string | null): string => {
   }
 };
 
+// Helper function to get display name for PlatformEnum
+const getPlatformDisplayName = (platform: PlatformEnum): string => {
+  switch (platform) {
+    case PlatformEnum.Instagram:
+      return 'Instagram';
+    case PlatformEnum.YouTube:
+      return 'YouTube';
+    case PlatformEnum.TikTok:
+      return 'TikTok';
+    case PlatformEnum.Twitter:
+      return 'Twitter/X';
+    case PlatformEnum.Facebook:
+      return 'Facebook';
+    case PlatformEnum.Twitch:
+      return 'Twitch';
+    case PlatformEnum.Pinterest:
+      return 'Pinterest';
+    case PlatformEnum.LinkedIn:
+      return 'LinkedIn';
+    default:
+      return platform; // Fallback to the key name
+  }
+};
+
 function Step1Content() {
   const {
     wizardState,
@@ -292,7 +303,7 @@ function Step1Content() {
         position: PositionEnum.Values.Director,
       },
       additionalContacts: [],
-      Influencer: [{ id: uuidv4(), platform: PlatformEnumBackend.Values.INSTAGRAM, handle: '' }],
+      Influencer: [{ id: uuidv4(), platform: PlatformEnum.Instagram, handle: '' }],
     },
     mode: 'onChange',
   });
@@ -377,9 +388,10 @@ function Step1Content() {
           total: parseFloat(wizardState.budget?.total?.toString() || '0') || 0,
           socialMedia: parseFloat(wizardState.budget?.socialMedia?.toString() || '0') || 0,
         },
-        Influencer: wizardState.Influencer ?? [
-          { id: uuidv4(), platform: PlatformEnumBackend.Values.INSTAGRAM, handle: '' },
-        ],
+        Influencer:
+          wizardState.Influencer && wizardState.Influencer.length > 0
+            ? wizardState.Influencer
+            : [{ id: uuidv4(), platform: PlatformEnum.Instagram, handle: '' }], // Ensure it's just the array
       };
 
       setInitialFormState(initialData);
@@ -1121,7 +1133,7 @@ function Step1Content() {
                 onClick={() =>
                   appendInfluencer({
                     id: `new-${Date.now()}`,
-                    platform: PlatformEnumBackend.Values.INSTAGRAM, // Default platform
+                    platform: PlatformEnum.Instagram,
                     handle: '',
                   })
                 }

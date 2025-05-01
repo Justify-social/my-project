@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { PrismaClient, Prisma } from '@prisma/client';
+// Keep logger import
 import { logger } from '@/lib/logger';
-import { InfluencerSummary } from '@/types/influencer';
-import { calculateJustifyScoreV1 } from '@/lib/scoringService';
-import { PlatformEnum } from '@/types/enums';
+import { InfluencerSummary } from '@/types/influencer'; // Use our frontend type
+// Remove unused score/enum imports
+// import { calculateJustifyScoreV1 } from '@/lib/scoringService';
+// import { PlatformEnum } from '@/types/enums';
 import { Platform as PlatformBackend } from '@prisma/client';
-// TODO: Add InsightIQ enrichment if needed for summaries
+// Import the service
+import { influencerService } from '@/services/influencer';
 
-const prisma = new PrismaClient();
+// Remove Prisma client import, as it's handled by the service now
+// const prisma = new PrismaClient();
 
 // Zod schema for validating comma-separated UUIDs in query param
 const IdsSchema = z.preprocess(
@@ -18,23 +21,8 @@ const IdsSchema = z.preprocess(
     .min(1, { message: 'At least one ID must be provided' })
 );
 
-// Helper to map Backend Platform array to Frontend PlatformEnum array
-const mapPlatformsToFrontend = (backendPlatforms: PlatformBackend[]): PlatformEnum[] => {
-  return backendPlatforms
-    .map(bp => {
-      switch (bp) {
-        case PlatformBackend.INSTAGRAM:
-          return PlatformEnum.Instagram;
-        case PlatformBackend.YOUTUBE:
-          return PlatformEnum.YouTube;
-        case PlatformBackend.TIKTOK:
-          return PlatformEnum.TikTok;
-        default:
-          return null; // Handle potential unknown backend platforms
-      }
-    })
-    .filter((fe): fe is PlatformEnum => fe !== null); // Filter out nulls and assert type
-};
+// Remove mapping helper (centralized)
+// const mapPlatformsToFrontend = ...
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   logger.info('[API /influencers/summaries] GET request received');
@@ -62,78 +50,31 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   logger.info(`[API /influencers/summaries] Fetching summaries for IDs: ${idsToFetch.join(', ')}`);
 
   try {
-    // --- Fetch Data from DB ---
-    const dbInfluencers = await prisma.marketplaceInfluencer.findMany({
-      where: {
-        id: {
-          in: idsToFetch,
-        },
-      },
-      select: {
-        id: true,
-        name: true,
-        handle: true,
-        avatarUrl: true,
-        platforms: true,
-        followersCount: true,
-        isInsightIQVerified: true,
-        primaryAudienceLocation: true,
-        primaryAudienceAgeRange: true,
-        primaryAudienceGender: true,
-        engagementRate: true,
-        audienceQualityIndicator: true,
-        insightiqUserId: true,
-      },
-      orderBy: { justifyScore: 'desc' },
-    });
-
-    logger.debug(`[API /influencers/summaries] Found ${dbInfluencers.length} influencers in DB.`);
-
-    // --- Map to Summary Type & Calculate Score ---
-    const summaries: InfluencerSummary[] = dbInfluencers.map(inf => {
-      const justifyScore = calculateJustifyScoreV1(inf as any);
-
-      // Validate enums
-      const validGenders = ['Male', 'Female', 'Other', 'Mixed'];
-      const gender = validGenders.includes(inf.primaryAudienceGender ?? '')
-        ? (inf.primaryAudienceGender as 'Male' | 'Female' | 'Other' | 'Mixed')
-        : undefined;
-      const validIndicators = ['High', 'Medium', 'Low'];
-      const qualityIndicator = validIndicators.includes(inf.audienceQualityIndicator ?? '')
-        ? (inf.audienceQualityIndicator as 'High' | 'Medium' | 'Low')
-        : undefined;
-
-      return {
-        id: inf.id,
-        name: inf.name,
-        handle: inf.handle,
-        avatarUrl: inf.avatarUrl ?? '',
-        platforms: mapPlatformsToFrontend(inf.platforms as PlatformBackend[]),
-        followersCount: inf.followersCount ?? 0,
-        justifyScore: justifyScore,
-        isVerified: inf.isInsightIQVerified ?? false,
-        primaryAudienceLocation: inf.primaryAudienceLocation ?? undefined,
-        primaryAudienceAgeRange: inf.primaryAudienceAgeRange ?? undefined,
-        primaryAudienceGender: gender,
-        engagementRate: inf.engagementRate ?? undefined,
-        audienceQualityIndicator: qualityIndicator,
-        insightiqUserId: inf.insightiqUserId,
-      };
-    });
-
-    // Reorder results to match input ID order if necessary (optional)
-    const orderedInfluencers = idsToFetch
-      .map(id => summaries.find(inf => inf.id === id))
-      .filter((inf): inf is InfluencerSummary => inf !== undefined);
+    // --- Call Service Layer ---
+    const orderedSummaries =
+      await influencerService.getProcessedInfluencerSummariesByIds(idsToFetch);
 
     // --- Format Response ---
     const responsePayload = {
       success: true,
-      influencers: orderedInfluencers,
+      influencers: orderedSummaries,
     };
 
     return NextResponse.json(responsePayload);
+
+    /* OLD LOGIC REMOVED:
+    // --- Fetch Data from DB ---
+    const dbInfluencers = await prisma.marketplaceInfluencer.findMany({ ... });
+    logger.debug(...);
+    // --- Map to Summary Type & Calculate Score ---
+    const summaries: InfluencerSummary[] = dbInfluencers.map(inf => { ... });
+    // Reorder results ...
+    const orderedInfluencers = ...;
+    // --- Format Response ---
+    const responsePayload = { ... };
+    */
   } catch (error: unknown) {
+    // Keep general error handling for unexpected service errors
     const message = error instanceof Error ? error.message : 'Unknown internal error';
     logger.error(`[API /influencers/summaries] Error fetching summaries:`, {
       error: message,

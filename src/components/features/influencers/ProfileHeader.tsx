@@ -139,7 +139,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             <span className="text-xs text-muted-foreground">Justify Score</span>
             {/* TODO: Add Tooltip explaining the score */}
             <span className="text-2xl font-bold">
-              {justifyScore !== null ? justifyScore.toFixed(1) : 'N/A'}
+              {typeof justifyScore === 'number' ? justifyScore.toFixed(1) : 'N/A'}
             </span>
           </div>
           {/* Verification Badge */}

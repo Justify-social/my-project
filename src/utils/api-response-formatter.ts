@@ -11,7 +11,9 @@
  */
 import { DateService } from './date-service';
 import { logger } from './logger';
-import { User } from '@prisma/client'; // Import User type
+import { User, Platform as PrismaPlatform } from '@prisma/client'; // Import User type and Prisma Platform
+import { PlatformEnum } from '@/types/enums'; // Import the SSOT PlatformEnum
+import { v4 as uuidv4 } from 'uuid'; // Import uuid for default influencer
 
 /**
  * Standardizes an API response by normalizing data formats
@@ -26,24 +28,6 @@ export function standardizeApiResponse(data: unknown) {
   if (!data) return null;
 
   const result = { ...(data as Record<string, unknown>) };
-
-  // Handle the Influencer relation from Prisma model
-  if (result.Influencer && Array.isArray(result.Influencer)) {
-    // logger.debug('Found Influencer relation in API response:', result.Influencer);
-
-    // Copy the Influencer relation to the influencers field expected by the frontend
-    result.influencers = result.Influencer.map((inf: Record<string, unknown>) => ({
-      id: inf.id,
-      platform: inf.platform,
-      handle: inf.handle,
-      platformId: inf.platformId,
-    }));
-
-    // logger.debug('Mapped Influencer relation to influencers array:', result.influencers);
-
-    // Remove the original Influencer field to avoid confusion
-    delete result.Influencer;
-  }
 
   // Parse JSON string fields
   [
@@ -219,10 +203,18 @@ export function standardizeApiResponse(data: unknown) {
     }
   });
 
-  // Ensure influencers has at least one empty item if it's empty
+  // Ensure influencers array has a default item if empty, using PlatformEnum
   if (Array.isArray(result.influencers) && result.influencers.length === 0) {
-    // logger.debug('Adding default empty influencer item to empty array');
-    result.influencers = [{ platform: '', handle: '' }];
+    logger.debug('[standardizeApiResponse] Adding default empty influencer item to empty array');
+    // Ensure this default object matches the expected type (e.g., CampaignInfluencerFormValues structure)
+    result.influencers = [
+      {
+        id: `default-${uuidv4()}`,
+        platform: PlatformEnum.Instagram, // Use SSOT Enum
+        handle: '',
+        // Add other default fields if required by the expected type
+      },
+    ];
   }
 
   // Log standardized response for debugging

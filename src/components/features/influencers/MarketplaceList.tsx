@@ -6,6 +6,7 @@ import { InfluencerSummaryCard } from './InfluencerSummaryCard';
 import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Icon } from '@/components/ui/icon/icon'; // Use direct path
+import { logger } from '@/lib/logger';
 
 interface MarketplaceListProps {
   influencers: InfluencerSummary[];
@@ -63,15 +64,28 @@ export const MarketplaceList: React.FC<MarketplaceListProps> = ({
   // Success State: Render Influencer Cards
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {influencers.map(influencer => (
-        <InfluencerSummaryCard
-          key={influencer.id}
-          influencer={influencer}
-          isSelected={selectedIds.includes(influencer.id)}
-          onSelectToggle={onSelectToggle}
-          onViewProfile={id => onViewProfile(id, influencer.workPlatformId)}
-        />
-      ))}
+      {influencers.map(influencer => {
+        // Log the data being used to render the card and construct the callback
+        logger.debug('[MarketplaceList] Rendering card for:', {
+          id: influencer.id,
+          handle: influencer.handle,
+          platform: influencer.platforms ? influencer.platforms[0] : 'N/A',
+          workPlatformId: influencer.workPlatformId,
+        });
+
+        // Ensure handle exists, fallback to id if absolutely necessary (though handle should be preferred)
+        const publicIdentifier = influencer.handle || influencer.id;
+
+        return (
+          <InfluencerSummaryCard
+            key={influencer.id}
+            influencer={influencer}
+            isSelected={selectedIds.includes(influencer.id)}
+            onSelectToggle={onSelectToggle}
+            onViewProfile={onViewProfile}
+          />
+        );
+      })}
     </div>
   );
 };

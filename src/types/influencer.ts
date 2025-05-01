@@ -216,8 +216,10 @@ export interface InfluencerSummary {
   audienceQualityIndicator?: 'High' | 'Medium' | 'Low' | null; // Requires specific metric
   insightiqUserId?: string | null; // From profile.user.id (if available in search)
   insightiqAccountId?: string | null; // From profile.account.id (if available in search)
-  workPlatformId?: string | null; // InsightIQ Work Platform UUID
+  workPlatformId?: string | null; // InsightIQ Work Platform UUID (from profile.work_platform.id)
   platformProfileName?: string | null; // From profile.platform_profile_name or full_name
+  profileId?: string | null; // Unique platform identifier (from profile.external_id from /search endpoint)
+  platformSpecificId?: string | null; // Potentially stores platform_profile_id if ever available (low priority now)
 }
 
 /**
@@ -249,7 +251,7 @@ export interface InfluencerProfileData extends InfluencerSummary {
   contactEmail?: string | null; // From InsightIQProfile.emails (needs logic to find WORK email)
   audienceDemographics?: AudienceDemographics | null; // Populated from GET /v1/audience or similar
   engagementMetrics?: EngagementMetrics | null; // Populated/derived from relevant InsightIQ data
-  // Add other fields based on InsightIQProfile as needed (e.g., website, category)
   website?: string | null; // From InsightIQProfile.website
   category?: string | null; // From InsightIQProfile.category
+  // Note: profileId and platformSpecificId are inherited from InfluencerSummary
 }

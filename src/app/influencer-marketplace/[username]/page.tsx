@@ -62,68 +62,89 @@ const ErrorDisplay = ({ message }: { message: string }) => (
 export default function InfluencerProfilePage() {
   const router = useRouter();
   const params = useParams();
-  const searchParams = useSearchParams(); // Hook to get query params
+  const searchParams = useSearchParams();
 
-  // Extract username from route, platformId from query
-  const username = params?.username as string;
-  const platformId = searchParams?.get('platformId');
+  // Extract handle from path parameter
+  const handle = params?.username ? decodeURIComponent(params.username as string) : null;
+  // Extract platformId from query parameter
+  const platformId = searchParams?.get('platformId') || null;
 
   const [influencer, setInfluencer] = useState<InfluencerProfileData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Data Fetching Logic - now uses username and platformId
-  const fetchData = useCallback(async (identifier: string, pId: string | null) => {
-    // Validate both identifier and platformId
-    if (!identifier || !pId) {
-      logger.warn('[ProfilePage] Invalid or missing identifier or platformId', { identifier, pId });
-      setError('Invalid identifier or platformId for profile lookup.');
+  // Data Fetching Logic - Uses handle and platformId
+  const fetchData = useCallback(async (fetchHandle: string, fetchPlatformId: string) => {
+    if (!fetchHandle || !fetchPlatformId) {
+      logger.warn('[ProfilePage] Missing required handle or platformId', {
+        handle: fetchHandle,
+        platformId: fetchPlatformId,
+      });
+      setError('Invalid handle or platform ID for profile lookup.');
       setIsLoading(false);
       return;
     }
 
-    logger.info(`[ProfilePage] Fetching data for identifier: ${identifier}, platformId: ${pId}`);
+    logger.info(
+      `[ProfilePage] Fetching analytics data for handle: ${fetchHandle}, platformId: ${fetchPlatformId}`
+    );
     setIsLoading(true);
     setError(null);
     setInfluencer(null); // Clear previous data
 
+    // Construct the NEW backend API endpoint URL
+    const queryParams = new URLSearchParams();
+    queryParams.append('identifier', fetchHandle); // Pass handle as 'identifier' query param
+    queryParams.append('platformId', fetchPlatformId);
+    const apiUrl = `/api/influencers/analytics?${queryParams.toString()}`;
+
+    logger.debug(`[ProfilePage] Constructed Analytics API URL: ${apiUrl}`);
+
     try {
-      // Call the new service function (assuming it exists)
-      const response = await influencerService.getInfluencerByIdentifier(identifier, pId);
-      if (response) {
-        logger.info(`[ProfilePage] Data fetched successfully for identifier: ${identifier}`);
-        setInfluencer(response);
+      // We will use GET for simplicity here, assuming the new backend route handles GET
+      // If POST is strictly needed for the backend route, adjust this fetch call
+      const response = await fetch(apiUrl);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        logger.error(`[ProfilePage] Analytics API error response: ${response.status}`, errorData);
+        setError(`Failed to load profile analytics: ${errorData?.error || response.statusText}`);
+        return;
+      }
+      const data = await response.json();
+      // Assuming the analytics API returns the full profile data structure needed
+      if (data.success && data.data) {
+        logger.info(`[ProfilePage] Analytics data fetched successfully for handle: ${fetchHandle}`);
+        // TODO: Potentially map the analytics response to InfluencerProfileData if needed
+        setInfluencer(data.data as InfluencerProfileData);
       } else {
-        logger.warn(`[ProfilePage] Influencer not found for identifier: ${identifier}`);
-        setError('Influencer not found.');
+        logger.warn(`[ProfilePage] Analytics data not found for handle: ${fetchHandle}`, data);
+        setError('Influencer analytics not found.');
       }
     } catch (err: unknown) {
-      // Log the raw error for debugging
-      logger.error(`[ProfilePage] Error fetching data for identifier: ${identifier}:`, err);
-
-      // Attempt to parse structured error from backend
-      let displayError = 'Failed to load influencer profile.'; // Default message
-      if (typeof err === 'object' && err !== null && 'error' in err) {
-        // Assuming the service layer might pass through the structured error
-        const structuredError = err as { error?: string; details?: string };
-        displayError = `${structuredError.error || 'Error'}${structuredError.details ? `: ${structuredError.details}` : ''}`;
-      } else if (err instanceof Error) {
-        displayError = err.message;
-      }
-      setError(displayError);
+      const message = err instanceof Error ? err.message : 'Network or fetch error';
+      logger.error(`[ProfilePage] Fetch analytics error for handle ${fetchHandle}:`, err);
+      setError(`Failed to load profile analytics: ${message}`);
     } finally {
       setIsLoading(false);
     }
-  }, []); // Empty dependency array, fetchData instance doesn't change
+  }, []);
 
-  // Fetch data when username or platformId changes
+  // Fetch data when handle or platformId changes
   useEffect(() => {
-    if (username && platformId) {
-      // Ensure both are available before fetching
-      fetchData(username, platformId);
+    if (handle && platformId) {
+      fetchData(handle, platformId);
     }
-    // Add platformId to dependency array
-  }, [username, platformId, fetchData]);
+    // Ensure fetchData is stable or included if it depends on changing state
+  }, [handle, platformId, fetchData]);
+
+  // Log the platformSpecificId once influencer data is loaded
+  useEffect(() => {
+    if (influencer) {
+      logger.info(
+        `[ProfilePage] Influencer data loaded. platformSpecificId: ${influencer.platformSpecificId}, profileId (unique ID): ${influencer.profileId}`
+      );
+    }
+  }, [influencer]);
 
   return (
     // REMOVE ConditionalLayout wrapper - it's provided by RootLayout

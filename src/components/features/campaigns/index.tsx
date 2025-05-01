@@ -7,7 +7,7 @@ import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
 import { cn } from '@/lib/utils';
 import { Influencer } from '@/types/influencer';
 import { InfluencerCard } from '@/components/ui/card-influencer';
-import { PlatformSchema, PlatformEnumBackend } from './types';
+import { PlatformEnum } from '@/types/enums';
 import { z } from 'zod';
 
 export interface MarketplaceListProps {
@@ -72,20 +72,12 @@ const MarketplaceList: React.FC<MarketplaceListProps> = ({
       )}
     >
       {influencers.map(influencer => {
-        let platformEnum: z.infer<typeof PlatformEnumBackend> | undefined;
-        try {
-          platformEnum = PlatformSchema.parse(influencer.platform);
-        } catch {
-          platformEnum = undefined;
-          console.warn(
-            `Invalid platform string for influencer ${influencer.id}: ${influencer.platform}`
-          );
-        }
+        const platformValue = influencer.platform as PlatformEnum;
 
-        return platformEnum ? (
+        return platformValue ? (
           <div key={influencer.id} onClick={() => onInfluencerSelect(influencer)}>
             <InfluencerCard
-              platform={platformEnum}
+              platform={platformValue}
               handle={influencer.username}
               displayName={influencer.name}
               avatarUrl={influencer.avatar}

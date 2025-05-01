@@ -113,13 +113,39 @@ function MarketplacePage() {
   }, []);
 
   const handleViewProfile = useCallback(
-    (id: string, platformId?: string | null) => {
-      if (!platformId) {
-        logger.warn('[MarketplacePage] Attempted to view profile without platformId for:', id);
-        toast.error('Cannot view profile: Platform information missing.');
+    (publicIdentifier: string, platformId?: string | null) => {
+      // publicIdentifier should be the creator's username/handle
+      // platformId is the workPlatformId (UUID)
+
+      if (!publicIdentifier) {
+        logger.error('[MarketplacePage] handleViewProfile called without a publicIdentifier!');
+        toast.error('Cannot view profile: Missing required identifier.');
         return;
       }
-      router.push(`/influencer-marketplace/${id}?platformId=${platformId}`);
+      if (!platformId) {
+        logger.error('[MarketplacePage] handleViewProfile called without a platformId!');
+        toast.error('Cannot view profile: Missing required platform ID.');
+        return;
+      }
+
+      // Use the public identifier (handle) directly for the path segment
+      const pathSegment = publicIdentifier;
+
+      // Construct query params - ONLY include platformId
+      const queryParams = new URLSearchParams();
+      queryParams.append('platformId', platformId); // Pass the platform ID
+
+      const queryString = queryParams.toString();
+      // Construct the destination URL using the public identifier in the path and platformId in query
+      const destinationUrl = `/influencer-marketplace/${encodeURIComponent(pathSegment)}?${queryString}`;
+
+      logger.debug('[MarketplacePage] Navigating to profile (simplified):', {
+        destinationUrl,
+        handle: publicIdentifier,
+        platformId: platformId,
+      });
+
+      router.push(destinationUrl);
     },
     [router]
   );
@@ -205,7 +231,7 @@ function MarketplacePage() {
         error={error}
         selectedIds={selectedIds}
         onSelectToggle={handleSelectToggle}
-        onViewProfile={(id, platformId) => handleViewProfile(id, platformId)}
+        onViewProfile={handleViewProfile}
         itemsPerPage={limit}
       />
 
