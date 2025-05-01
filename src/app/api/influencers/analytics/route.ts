@@ -4,10 +4,11 @@ import { logger } from '@/utils/logger';
 import {
   getSingleInsightIQProfileAnalytics, // Updated service function
 } from '@/lib/insightiqService';
-import { InsightIQProfile } from '@/types/insightiq'; // Corrected import path for the type
+import { InsightIQProfile, InsightIQProfileWithAnalytics } from '@/types/insightiq'; // Corrected import path for the type
 import {
   mapInsightIQProfileToInfluencerProfileData, // Mapping function
 } from '@/lib/data-mapping/influencer';
+import { influencerService } from '@/services/influencer'; // Corrected import path for the service
 
 // Schema to validate the SINGLE identifier query parameter
 const AnalyticsQuerySchema = z.object({
@@ -57,10 +58,10 @@ export async function GET(request: NextRequest) {
   // --- InsightIQ API Call (via service) ---
   try {
     // Call the updated service function with the single identifier
-    const insightIQProfile: InsightIQProfile | null = await getSingleInsightIQProfileAnalytics(
-      identifier // Pass the identifier (external_id or composite)
-      // platformId // REMOVED
-    );
+    const insightIQProfile: InsightIQProfileWithAnalytics | null =
+      await getSingleInsightIQProfileAnalytics(
+        identifier // Pass the identifier (external_id or composite)
+      );
 
     if (insightIQProfile) {
       // ** SSOT Validation Step (Adjusted) **
@@ -97,10 +98,34 @@ export async function GET(request: NextRequest) {
         `[API /influencers/analytics] Successfully fetched profile data for identifier: ${identifier}`
       );
 
-      // ** Map the full InsightIQProfile to frontend InfluencerProfileData **
-      // Use the existing mapping function
-      // Ensure mapInsightIQProfileToInfluencerProfileData handles the full InsightIQProfile type correctly
-      const profileData = mapInsightIQProfileToInfluencerProfileData(insightIQProfile, identifier); // Pass identifier as uniqueId?
+      // --- Calculate Audience Quality Indicator --- NEW
+      let calculatedIndicator: 'High' | 'Medium' | 'Low' | null = null;
+      const credibilityScore = insightIQProfile.audience?.credibility_score;
+      logger.debug(
+        `[API /influencers/analytics] Extracted credibility score for ${identifier}: ${credibilityScore}`
+      );
+
+      if (typeof credibilityScore === 'number' && credibilityScore !== null) {
+        if (credibilityScore >= 0.8) {
+          calculatedIndicator = 'High';
+        } else if (credibilityScore >= 0.5) {
+          calculatedIndicator = 'Medium';
+        } else {
+          calculatedIndicator = 'Low';
+        }
+        logger.info(
+          `[API /influencers/analytics] Calculated Audience Quality for ${identifier}: ${calculatedIndicator} (Score: ${credibilityScore})`
+        );
+      } else {
+        logger.warn(
+          `[API /influencers/analytics] Credibility score not found or invalid for ${identifier}. Indicator remains null.`
+        );
+      }
+      // --- End Calculate Indicator ---
+
+      // Map the full InsightIQProfile to frontend InfluencerProfileData
+      // We pass the original identifier received by the API route as the uniqueId for mapping
+      const profileData = mapInsightIQProfileToInfluencerProfileData(insightIQProfile, identifier);
 
       if (!profileData) {
         logger.error(
@@ -111,6 +136,33 @@ export async function GET(request: NextRequest) {
           { status: 500 } // Internal server error
         );
       }
+
+      // --- Save to Database (including indicator) --- NEW
+      try {
+        // Only save if we have the necessary IDs from the mapped data
+        if (profileData.id && profileData.platformSpecificId) {
+          await influencerService.saveProfileIdToDatabase({
+            id: profileData.id,
+            handle: profileData.handle,
+            platformSpecificId: profileData.platformSpecificId,
+            name: profileData.name,
+            avatarUrl: profileData.avatarUrl,
+            platforms: profileData.platforms,
+            audienceQualityIndicator: calculatedIndicator, // Pass the calculated indicator
+          });
+        } else {
+          logger.warn(
+            `[API /influencers/analytics] Skipping DB save for ${identifier} due to missing id or platformSpecificId after mapping.`
+          );
+        }
+      } catch (dbError) {
+        // Log DB error but don't fail the API response just for this
+        logger.error(
+          `[API /influencers/analytics] Failed to save profile data to DB for ${identifier}:`,
+          dbError
+        );
+      }
+      // --- End Save to Database ---
 
       // Return the mapped data suitable for the frontend
       return NextResponse.json({ success: true, data: profileData });

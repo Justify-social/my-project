@@ -218,4 +218,69 @@ export interface InsightIQSearchProfile {
   // Add other fields from CreatorProfileBasicDetails if needed...
 }
 
+// Interface for the audience object within CreatorProfileAnalyticsResponse
+interface InsightIQAudienceAnalytics {
+  ethnicities?: { name: string; value: number }[] | null;
+  languages?: { code: string; value: number }[] | null;
+  brand_affinity?: { name: string; value: number }[] | null;
+  interests?: { name: string; value: number }[] | null;
+  follower_types?: { name: string; value: number }[] | null; // e.g., REAL, SUSPICIOUS
+  lookalikes?: InsightIQSearchProfile[] | null;
+  credibility_score?: number | null;
+  credibility_score_band?: { min?: number; max?: string; total_profile_count?: number }[] | null;
+  significant_followers_percentage?: number | null;
+  significant_followers?: InsightIQSearchProfile | null; // Or array?
+  countries?: InsightIQDemographicsCountry[] | null;
+  cities?: InsightIQDemographicsCity[] | null;
+  gender_age_distribution?: InsightIQDemographicsGenderAge[] | null;
+}
+
+// Extend InsightIQProfile to include the audience object from analytics
+// Note: This might overlap/conflict with fields already added from /search. Review carefully.
+export interface InsightIQProfileWithAnalytics extends InsightIQProfile {
+  // Fields potentially duplicated or richer in analytics response
+  average_likes?: number | null;
+  average_comments?: number | null;
+  average_views?: number | null;
+  average_reels_views?: number | null;
+  // engagement_rate is already optional in InsightIQProfile
+  content_count?: number | null;
+  sponsored_posts_performance?: number | null;
+  reputation_history?:
+    | {
+        month?: string | null;
+        follower_count?: number | null;
+        subscriber_count?: number | null;
+        following_count?: number | null;
+        average_likes?: number | null;
+      }[]
+    | null;
+  location?: {
+    // Note: OpenAPI shows location here, different from creator_location
+    city?: string | null;
+    state?: string | null;
+    country?: string | null;
+  } | null;
+  top_hashtags?: { name: string }[] | null;
+  top_mentions?: { name: string }[] | null;
+  top_interests?: { name: string }[] | null;
+  brand_affinity?: { name: string; value: number }[] | null; // Different structure?
+  top_contents?: any[] | null; // Define CreatorContentBasicDetails later if needed
+  recent_contents?: any[] | null;
+  posts_hidden_likes_percentage_value?: number | null;
+  sponsored_contents?: any[] | null;
+  lookalikes?: InsightIQSearchProfile[] | null;
+  contact_details?: { type?: string | null; value?: string | null }[] | null;
+  // The crucial audience object
+  audience?: InsightIQAudienceAnalytics | null;
+}
+
+// Type for the response of POST /v1/social/creators/profiles/analytics
+export interface CreatorProfileAnalyticsResponse {
+  id: string; // ID of the analytics report
+  work_platform: InsightIQWorkPlatformAttribute;
+  profile: InsightIQProfileWithAnalytics; // The nested profile object with audience data
+  // Add other top-level fields like pricing if needed later
+}
+
 // Interface for a single Work Platform

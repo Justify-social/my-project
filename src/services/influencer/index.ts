@@ -87,12 +87,14 @@ export interface IInfluencerService {
     profileData: Pick<
       InfluencerProfileData,
       'id' | 'handle' | 'platformSpecificId' | 'name' | 'avatarUrl' | 'platforms'
-    > // Add 'id' (unique identifier)
+    > & { audienceQualityIndicator?: string | null }
   ): Promise<void>;
 
-  getProfileIdsFromDatabase(
+  getStoredDataFromDatabase(
     uniqueIds: string[] // Lookup by unique ID (external_id or composite)
-  ): Promise<Record<string, string | null>>; // Map unique ID -> platformSpecificId
+  ): Promise<
+    Record<string, { platformSpecificId: string | null; audienceQualityIndicator: string | null }>
+  >; // Map unique ID -> stored data
 }
 
 // --- Helper to get the unique ID (INTERNAL) ---
@@ -272,6 +274,7 @@ const apiService: IInfluencerService = {
           name: profileData.name,
           avatarUrl: profileData.avatarUrl,
           platforms: profileData.platforms,
+          audienceQualityIndicator: profileData.audienceQualityIndicator,
         });
       } else {
         logger.warn(
@@ -352,10 +355,33 @@ const apiService: IInfluencerService = {
 
       const uniqueIdsFromList = summaries.map(s => s.id).filter(Boolean);
       if (uniqueIdsFromList.length > 0) {
-        const storedPlatformIds = await this.getProfileIdsFromDatabase(uniqueIdsFromList);
+        // Fetch stored data (platformSpecificId and audienceQualityIndicator)
+        const storedDataMap = await this.getStoredDataFromDatabase(uniqueIdsFromList);
         summaries.forEach((summary: InfluencerSummary) => {
-          if (summary.id && !summary.platformSpecificId && storedPlatformIds[summary.id]) {
-            summary.platformSpecificId = storedPlatformIds[summary.id];
+          const storedData = summary.id ? storedDataMap[summary.id] : null;
+          if (storedData) {
+            // Populate platformSpecificId if not already present
+            if (!summary.platformSpecificId && storedData.platformSpecificId) {
+              summary.platformSpecificId = storedData.platformSpecificId;
+            }
+            // Populate audienceQualityIndicator if available
+            if (storedData.audienceQualityIndicator) {
+              // Validate against expected enum values before assigning
+              const validIndicators = ['High', 'Medium', 'Low'];
+              if (validIndicators.includes(storedData.audienceQualityIndicator)) {
+                summary.audienceQualityIndicator = storedData.audienceQualityIndicator as
+                  | 'High'
+                  | 'Medium'
+                  | 'Low';
+                logger.debug(
+                  `[getProcessedInfluencerList] Found stored Audience Quality (${summary.audienceQualityIndicator}) for ${summary.id}`
+                );
+              } else {
+                logger.warn(
+                  `[getProcessedInfluencerList] Found invalid stored Audience Quality ('${storedData.audienceQualityIndicator}') for ${summary.id}`
+                );
+              }
+            }
           }
         });
       }
@@ -454,9 +480,10 @@ const apiService: IInfluencerService = {
     profileData: Pick<
       InfluencerProfileData,
       'id' | 'handle' | 'platformSpecificId' | 'name' | 'avatarUrl' | 'platforms'
-    >
+    > & { audienceQualityIndicator?: string | null }
   ): Promise<void> {
-    const { id, handle, platformSpecificId, name, avatarUrl, platforms } = profileData;
+    const { id, handle, platformSpecificId, name, avatarUrl, platforms, audienceQualityIndicator } =
+      profileData;
 
     if (!platformSpecificId || !id) {
       logger.warn(
@@ -467,7 +494,7 @@ const apiService: IInfluencerService = {
     }
 
     logger.info(
-      `[influencerService] Attempting to upsert DB record using uniqueId ${id} with platformSpecificId ${platformSpecificId}`
+      `[influencerService] Attempting to upsert DB record using uniqueId ${id} with platformSpecificId ${platformSpecificId} and quality: ${audienceQualityIndicator}`
     );
 
     try {
@@ -481,6 +508,7 @@ const apiService: IInfluencerService = {
           handle: handle ?? '',
           avatarUrl: avatarUrl,
           platforms: platforms?.map(p => p as PlatformBackend) ?? [],
+          audienceQualityIndicator: audienceQualityIndicator,
           updatedAt: new Date(),
         },
         create: {
@@ -490,6 +518,7 @@ const apiService: IInfluencerService = {
           name: name ?? handle ?? id,
           avatarUrl: avatarUrl,
           platforms: platforms?.map(p => p as PlatformBackend) ?? [],
+          audienceQualityIndicator: audienceQualityIndicator,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -500,35 +529,58 @@ const apiService: IInfluencerService = {
     }
   },
 
-  async getProfileIdsFromDatabase(uniqueIds: string[]): Promise<Record<string, string | null>> {
+  async getStoredDataFromDatabase(
+    uniqueIds: string[]
+  ): Promise<
+    Record<string, { platformSpecificId: string | null; audienceQualityIndicator: string | null }>
+  > {
     logger.info(
-      `[influencerService] Fetching platformSpecificIds for ${uniqueIds.length} searchIdentifiers`
+      `[influencerService] Fetching stored data (platformSpecificId, audienceQualityIndicator) for ${uniqueIds.length} searchIdentifiers`
     );
     if (uniqueIds.length === 0) return {};
+
+    // Define the expected structure for the return map
+    const initialMap: Record<
+      string,
+      { platformSpecificId: string | null; audienceQualityIndicator: string | null }
+    > = {};
+    uniqueIds.forEach(
+      uid => (initialMap[uid] = { platformSpecificId: null, audienceQualityIndicator: null })
+    );
+
     try {
       const influencers = await prisma.marketplaceInfluencer.findMany({
         where: {
           searchIdentifier: { in: uniqueIds },
         },
+        // Select both fields
         select: {
           searchIdentifier: true,
           platformSpecificId: true,
+          audienceQualityIndicator: true, // Add this field
         },
       });
-      const idMap: Record<string, string | null> = {};
-      uniqueIds.forEach(uid => (idMap[uid] = null));
+
+      // Populate the map with fetched data
       influencers.forEach(inf => {
-        if (inf.searchIdentifier && inf.platformSpecificId) {
-          idMap[inf.searchIdentifier] = inf.platformSpecificId;
+        if (inf.searchIdentifier) {
+          initialMap[inf.searchIdentifier] = {
+            platformSpecificId: inf.platformSpecificId ?? null,
+            audienceQualityIndicator: inf.audienceQualityIndicator ?? null, // Add this field
+          };
         }
       });
+
+      const foundCount = Object.values(initialMap).filter(
+        d => d.platformSpecificId || d.audienceQualityIndicator
+      ).length;
       logger.debug(
-        `[influencerService] Found ${Object.values(idMap).filter(Boolean).length} stored platformSpecificIds`
+        `[influencerService] Found stored data for ${foundCount} out of ${uniqueIds.length} identifiers.`
       );
-      return idMap;
+      return initialMap;
     } catch (error) {
-      logger.error(`[influencerService] Failed to fetch profileIds:`, error);
-      return {};
+      logger.error(`[influencerService] Failed to fetch stored data:`, error);
+      return initialMap; // Return the initial map (all nulls) on error
     }
   },
 };

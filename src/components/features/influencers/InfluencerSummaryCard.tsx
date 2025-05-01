@@ -170,24 +170,10 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
             </TooltipProvider>
           </div>
 
-          <div className="font-medium text-gray-700 dark:text-gray-300">Audience Quality:</div>
-          <div className="text-right">
-            {influencer.audienceQualityIndicator ? (
-              <div
-                // Apply base badge styles and custom styles
-                className={cn(badgeVariants({ variant: 'default' }), qualityBadgeStyles, 'text-xs')}
-                data-testid="tier-badge"
-              >
-                {influencer.audienceQualityIndicator}
-              </div>
-            ) : (
-              <span className="text-gray-500 dark:text-gray-400">N/A</span>
-            )}
-          </div>
-
           <div className="font-medium text-gray-700 dark:text-gray-300">Engagement Rate:</div>
           <div className="text-right text-gray-900 dark:text-white">
-            {influencer.engagementRate ? `${influencer.engagementRate.toFixed(1)}%` : 'N/A'}
+            {/* Display with 2 decimal places if available */}
+            {influencer.engagementRate ? `${(influencer.engagementRate * 100).toFixed(2)}%` : 'N/A'}
           </div>
         </div>
         {/* Action Button */}
