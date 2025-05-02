@@ -12,12 +12,19 @@ logger.info(
 
 // Determine InsightIQ Base URL based on environment
 const getInsightIQBaseUrl = () => {
+  let baseUrl;
   if (process.env.NODE_ENV === 'production') {
-    return process.env.INSIGHTIQ_PROD_URL || 'https://api.insightiq.ai'; // Default Prod URL
+    baseUrl = process.env.INSIGHTIQ_PROD_URL || 'https://api.insightiq.ai'; // Default Prod URL
   } else {
     // Default to Sandbox for development and other non-prod environments
-    return process.env.INSIGHTIQ_SANDBOX_URL || 'https://api.sandbox.insightiq.ai';
+    baseUrl = process.env.INSIGHTIQ_SANDBOX_URL || 'https://api.sandbox.insightiq.ai';
   }
+  // Sanitize the base URL to remove any comments or extraneous text
+  baseUrl = baseUrl.split('#')[0].trim();
+  // Ensure the base URL does not end with a slash
+  baseUrl = baseUrl.replace(/\/+$/, '');
+  console.log(`[Server Config] Using InsightIQ Base URL: ${baseUrl}`);
+  return baseUrl;
 };
 
 /**
@@ -41,6 +48,7 @@ export const serverConfig = {
     apiKey: process.env.CINT_API_KEY,
     clientId: process.env.CINT_CLIENT_ID,
     clientSecret: process.env.CINT_CLIENT_SECRET,
+    accountId: process.env.CINT_ACCOUNT_ID,
   },
   uploadthing: {
     secret: uploadthingSecretFromEnv, // Keep secret for potential other uses
@@ -75,6 +83,9 @@ logger.info('[Server Config] Loaded server configuration', {
   insightiqWebhookSecretSet: !!serverConfig.insightiq.webhookSecret, // Log presence of webhook secret
   stripeKeySet: !!serverConfig.stripe.secretKey,
   cintKeySet: !!serverConfig.cint.apiKey, // Check Cint API Key
+  cintClientIdSet: !!serverConfig.cint.clientId, // Check Cint Client ID
+  cintClientSecretSet: !!serverConfig.cint.clientSecret, // Check Cint Client Secret
+  cintAccountIdSet: !!serverConfig.cint.accountId, // Check Cint Account ID
   uploadthingSecretSet: !!serverConfig.uploadthing.secret, // Check Uploadthing Secret
   uploadthingTokenSet: !!serverConfig.uploadthing.token, // Check Uploadthing Token
   dbUrlSet: !!serverConfig.database.url, // Check DB URL

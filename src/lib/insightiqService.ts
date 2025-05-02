@@ -16,6 +16,8 @@ import { PlatformEnum } from '@/types/enums'; // Import PlatformEnum
 // Import the new utility function
 import { getInsightIQWorkPlatformId } from './insightiqUtils';
 import axios from 'axios'; // Using axios as suggested by Grok for easier handling
+// Remove the ApiErrorType import if no longer needed elsewhere after revert
+// import { ApiErrorType } from '@/lib/api-verification';
 
 // --- Add Necessary Type Definitions Inline ---
 
@@ -102,6 +104,12 @@ function getInsightIQBasicAuthHeader(): string {
     // This check is slightly redundant due to the top-level check, but good practice
     throw new Error('InsightIQ Client ID or Secret is missing in server configuration.');
   }
+  logger.info(
+    `[InsightIQService] Using Client ID: ${clientId.substring(0, 8)}... for authentication`
+  );
+  logger.info(
+    `[InsightIQService] Client Secret loaded, first 4 chars (hashed for security): ${clientSecret.substring(0, 4).replace(/./g, '*')}... , length: ${clientSecret.length}`
+  );
   const credentials = `${clientId}:${clientSecret}`;
   return `Basic ${Buffer.from(credentials).toString('base64')}`;
 }
@@ -137,13 +145,18 @@ export async function makeInsightIQRequest<T>(
   logger.debug(`[InsightIQService] Making request to: ${options.method || 'GET'} ${url}`);
 
   try {
-    const response = await fetch(url, {
+    // **** ADD EXTREME DEBUG LOGGING (REMOVE AFTER TESTING) ****
+    const fetchOptions = {
       ...options,
       headers: {
         ...defaultHeaders,
         ...options.headers,
       },
-    });
+    };
+    console.log('[EXTREME DEBUG] Fetch Headers:', JSON.stringify(fetchOptions.headers));
+    // **** END EXTREME DEBUG LOGGING ****
+
+    const response = await fetch(url, fetchOptions); // Use the constructed options
 
     // Log the request-id header if present
     const requestId = response.headers.get('request-id');
@@ -273,9 +286,12 @@ export async function checkInsightIQConnection(): Promise<{
   error?: string;
 }> {
   logger.info('[InsightIQService] Checking InsightIQ API connection...');
-  const endpoint = '/v1/work-platforms?limit=1'; // Simple GET request
+  // Ensure endpoint is clean and does not contain comments
+  const endpoint = '/v1/work-platforms?limit=1'; // Re-ensure this is the correct, clean path
   try {
+    // Revert back to using makeInsightIQRequest
     const response = await makeInsightIQRequest<InsightIQWorkPlatformList>(endpoint);
+
     // Check if data array exists and has items (or is empty, which is still success)
     const success = !!response && Array.isArray(response.data);
     if (success) {
@@ -290,6 +306,7 @@ export async function checkInsightIQConnection(): Promise<{
     }
   } catch (error: any) {
     logger.error('[InsightIQService] InsightIQ API connection check failed:', error);
+    // Use the original error handling logic that relies on makeInsightIQRequest's error
     const errorMessage = error?.message?.includes('InsightIQ API Error')
       ? error.message // Pass specific API error
       : 'Failed to connect to InsightIQ API. Check credentials and base URL.';

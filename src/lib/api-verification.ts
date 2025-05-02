@@ -6,6 +6,9 @@
  * correctly and provide helpful diagnostics when they are not.
  */
 
+// SERVER-ONLY FILE
+// Ensure this file is only imported in server-side code (API routes, Server Components, Server Actions)
+
 import { prisma } from '@/lib/prisma'; // Import prisma client
 import { serverConfig } from '@/config/server-config';
 import { logger } from '@/utils/logger'; // Assuming logger is needed server-side
@@ -17,41 +20,9 @@ import {
   getInsightIQAudience,
 } from '@/lib/insightiqService';
 
-/**
- * Enumeration of possible API error types for better error categorization
- */
-export enum ApiErrorType {
-  AUTHENTICATION_ERROR = 'Authentication Error',
-  VALIDATION_ERROR = 'Validation Error',
-  RATE_LIMIT_ERROR = 'Rate Limit Error',
-  SERVER_ERROR = 'Server Error',
-  NETWORK_ERROR = 'Network Error',
-  TIMEOUT_ERROR = 'Timeout Error',
-  NOT_FOUND_ERROR = 'Not Found Error',
-  UNKNOWN_ERROR = 'Unknown Error',
-}
-
-/**
- * Interface defining error information for API verification
- */
-export interface ApiErrorInfo {
-  type: ApiErrorType;
-  message: string;
-  details?: unknown;
-  isRetryable: boolean;
-}
-
-/**
- * Interface defining the result of API verification
- */
-export interface ApiVerificationResult {
-  success: boolean;
-  apiName: string;
-  endpoint: string;
-  latency?: number;
-  data?: unknown;
-  error?: ApiErrorInfo;
-}
+// Import types from the new shared file
+import type { ApiVerificationResult, ApiErrorInfo } from './api-verification-types';
+import { ApiErrorType } from './api-verification-types';
 
 /**
  * Special function to check if a host is reachable without triggering CORS issues
@@ -802,8 +773,7 @@ export async function verifyInsightIQApi(): Promise<ApiVerificationResult> {
 }
 
 /**
- * SERVER-SIDE Verify the Database connection
- * Attempts a simple query to confirm connectivity.
+ * Verify Database Connection (Server-Side Only)
  */
 export async function verifyDatabaseConnectionServerSide(): Promise<ApiVerificationResult> {
   const apiName = 'Database Connection';
@@ -1003,24 +973,46 @@ export async function verifyCintExchangeApiServerSide(): Promise<ApiVerification
   logger.info(`[Server Verify] Attempting ${authMethod} for Cint authentication via ${authUrl}.`);
   const tokenStartTime = Date.now();
   try {
+    // Use application/json content type as per documentation example
     const tokenController = new AbortController();
     const tokenTimeoutId = setTimeout(() => tokenController.abort(), 8000);
 
-    // Use the request structure shown in the Cint developer documentation
+    // --- Debug Logging START ---
+    logger.info(
+      `[Server Verify] Cint - Using Client ID: ${clientId ? clientId.substring(0, 4) + '...' : 'MISSING'}`
+    ); // Log partial ID for security
+    logger.info(
+      `[Server Verify] Cint - Client Secret Loaded: ${clientSecret ? 'Yes (length: ' + clientSecret.length + ')' : 'NO'}`
+    );
+    // --- Debug Logging END ---
+
+    // Prepare request body as JSON to match documentation example
+    const requestBody = {
+      client_id: clientId,
+      client_secret: clientSecret,
+      grant_type: 'client_credentials',
+      lucid_scopes: 'app:api',
+      audience: audience,
+    };
+
+    logger.info(
+      `[Server Verify] Cint - Request Body: ${JSON.stringify(requestBody, (key, value) => (key === 'client_secret' ? 'REDACTED' : value))}`
+    );
+
+    const accountId = serverConfig.cint.accountId;
+    const headers = {
+      'Content-Type': 'application/json',
+      'Cint-API-Version': '2025-02-17',
+      ...(accountId && { 'X-Account-ID': accountId }),
+    };
+
+    logger.info(`[Server Verify] Cint - Request Headers: ${JSON.stringify(headers)}`);
+
     const tokenResponse = await fetch(authUrl, {
       method: 'POST',
       signal: tokenController.signal,
-      headers: {
-        'Content-Type': 'application/json', // Use JSON content type as per docs
-      },
-      // Use JSON body as per docs example
-      body: JSON.stringify({
-        client_id: clientId,
-        client_secret: clientSecret,
-        grant_type: 'client_credentials',
-        lucid_scopes: 'app:api', // Use lucid_scopes as per docs
-        audience: audience, // Add audience as per docs
-      }),
+      headers: headers,
+      body: JSON.stringify(requestBody),
     });
 
     clearTimeout(tokenTimeoutId);
@@ -1106,12 +1098,23 @@ export async function verifyCintExchangeApiServerSide(): Promise<ApiVerification
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
 
+    // Get Account ID from config
+    const accountId = serverConfig.cint.accountId; // Read accountId from serverConfig
+
+    if (!accountId) {
+      logger.warn(`[Server Verify] ${apiName} - Missing Account ID in server configuration.`);
+      // Consider if this should be a fatal error for verification
+      // For now, proceed without the header but log warning
+    }
+
     const response = await fetch(testResourceEndpoint, {
       method: 'GET',
       signal: controller.signal,
       headers: {
         Authorization: authToken,
         'Content-Type': 'application/json',
+        // Add the X-Account-ID header if accountId is available
+        ...(accountId && { 'X-Account-ID': accountId }),
       },
     });
 
@@ -1244,9 +1247,9 @@ export async function verifyUploadthingApiServerSide(): Promise<ApiVerificationR
   try {
     console.info(`[Server Verify] Testing ${apiName} endpoint: ${testEndpoint}`);
 
-    // Use standard Bearer token authorization
+    // Revert to standard Bearer token authorization while investigating token value/docs
     const headers = {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${token}`, // Revert to Bearer token
       'Content-Type': 'application/json',
     };
 

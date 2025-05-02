@@ -1,20 +1,13 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import {
-  verifyGeolocationApi,
-  verifyExchangeRatesApi,
-  verifyInsightIQApi,
-  verifyCintExchangeApiServerSide,
-  verifyGiphyApi,
-  verifyStripeApiServerSide,
-  verifyUploadthingApiServerSide,
-  verifyDatabaseConnectionServerSide,
-  verifyAlgoliaApiServerSide,
-  ApiVerificationResult,
-  ApiErrorType,
-} from '@/lib/api-verification';
-import { logger } from '@/lib/logger';
+// Import types/enums from the new client-safe file
+import type { ApiVerificationResult } from '@/lib/api-verification-types';
+import { ApiErrorType } from '@/lib/api-verification-types';
+// If logger is used *only* for client-side logging (e.g., button clicks), it might be okay,
+// but ensure it doesn't import server-only modules like prisma.
+// For safety, we can comment it out if unsure.
+// import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon/icon';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -62,28 +55,28 @@ const ApiVerificationPage: React.FC = () => {
       'Powers application search functionality, including campaigns, influencers, etc. Requires Search API Key.',
   };
 
-  const testAllApis = async () => {
+  const testAllApis = useCallback(async () => {
     setIsLoading(true);
     setResults([]);
-
+    // logger?.info(`[ApiVerificationPage] Sending request to verify ALL APIs`); // Use optional chaining if logger kept
+    console.log(`[ApiVerificationPage] Sending request to verify ALL APIs`); // Fallback log
     try {
-      logger.info(`[ApiVerificationPage] Sending request to verify ALL APIs`);
       const response = await fetch('/api/debug/verify-api', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({}),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}), // Empty body, backend doesn't need specific input for full check
       });
 
       const result = await response.json();
 
       if (!response.ok || !result.success) {
         const errorMsg = result.error || `API route failed with status ${response.status}`;
-        logger.error(`[ApiVerificationPage] Backend verification route failed for ALL APIs:`, {
-          message: errorMsg,
-          details: result.details,
-        });
+        // logger?.error(...)
+        console.error(
+          `[ApiVerificationPage] Backend verification route failed:`,
+          errorMsg,
+          result.details
+        );
         setResults([
           {
             success: false,
@@ -98,9 +91,8 @@ const ApiVerificationPage: React.FC = () => {
           },
         ]);
       } else {
-        logger.info(`[ApiVerificationPage] Received verification results for ALL APIs:`, {
-          count: result.data?.length,
-        });
+        // logger?.info(...)
+        console.log('[ApiVerificationPage] Received verification results.');
         const receivedResults: ApiVerificationResult[] = Array.isArray(result.data)
           ? result.data
           : [];
@@ -117,9 +109,8 @@ const ApiVerificationPage: React.FC = () => {
         setLastTestedTimes(newLastTested);
       }
     } catch (error) {
-      logger.error(`[ApiVerificationPage] Fetch error calling verification route for ALL APIs:`, {
-        error: error instanceof Error ? error.message : JSON.stringify(error),
-      });
+      // logger?.error(...)
+      console.error('[ApiVerificationPage] Fetch error calling verification route:', error);
       setResults([
         {
           success: false,
@@ -136,7 +127,7 @@ const ApiVerificationPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   // Format latency as "123 ms"
   const formatLatency = (latency?: number) => {
@@ -160,6 +151,7 @@ const ApiVerificationPage: React.FC = () => {
 
   // Get error type badge class
   const getErrorTypeBadgeClass = (errorType?: ApiErrorType) => {
+    // Use ApiErrorType for comparisons
     switch (errorType) {
       case ApiErrorType.NETWORK_ERROR:
       case ApiErrorType.TIMEOUT_ERROR:

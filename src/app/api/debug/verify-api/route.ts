@@ -7,22 +7,24 @@ import { logger } from '@/utils/logger';
 // dotenv.config({ path: '.env' });
 // *************************************
 
-// Import ALL verification functions (server & client-side)
+// Import verification FUNCTIONS from the server-only file
 import {
-  verifyInsightIQApi, // Use the new InsightIQ verifier
-  verifyStripeApiServerSide, // Placeholder name
-  verifyCintExchangeApiServerSide, // Placeholder name
-  verifyUploadthingApiServerSide, // Placeholder name
-  verifyDatabaseConnectionServerSide, // New server-side DB check
+  verifyInsightIQApi,
+  verifyStripeApiServerSide,
+  verifyCintExchangeApiServerSide,
+  verifyUploadthingApiServerSide,
+  verifyDatabaseConnectionServerSide,
   verifyGeolocationApi,
   verifyExchangeRatesApi,
   verifyGiphyApi,
   verifyAlgoliaApiServerSide,
   verifyMuxApiServerSide,
   verifySendGridApiServerSide,
-  ApiVerificationResult,
-  ApiErrorType,
-} from '@/lib/api-verification'; // Use original file path
+} from '@/lib/api-verification';
+
+// Import shared TYPES/ENUMS from the client-safe file
+import type { ApiVerificationResult } from '@/lib/api-verification-types';
+import { ApiErrorType } from '@/lib/api-verification-types';
 
 // Schema now allows apiName to be optional or 'all'
 const ApiNameSchema = z.object({
