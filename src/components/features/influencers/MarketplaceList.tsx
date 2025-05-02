@@ -32,7 +32,7 @@ export const MarketplaceList: React.FC<MarketplaceListProps> = ({
     return (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {Array.from({ length: itemsPerPage }).map((_, index) => (
-          <LoadingSkeleton key={`skeleton-${index}`} className="h-[350px] w-full" /> // Adjust height to match card
+          <LoadingSkeleton key={`skeleton-${index}`} className="h-[275px] w-full" />
         ))}
       </div>
     );

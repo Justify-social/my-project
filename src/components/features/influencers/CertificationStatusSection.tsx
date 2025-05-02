@@ -35,8 +35,6 @@ export function CertificationStatusSection({ influencer }: CertificationStatusSe
           <Icon iconId={'faCircleCheckSolid'} className="h-8 w-8 mt-1 flex-shrink-0" />
           <div>
             <h4 className="font-semibold">Justify Verified Influencer</h4>
-            {/* TODO: Add verification date if available in data */}
-            <p className="text-sm">Verified via InsightIQ</p>
           </div>
         </div>
 

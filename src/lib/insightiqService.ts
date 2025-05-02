@@ -128,7 +128,7 @@ const mockInsightIQProfile = {
   platform_profile_name: 'Sandbox Dummy User',
   platform_profile_id: 'mock-platform-id-sandbox',
   platform_profile_published_at: null,
-  is_verified: false,
+  is_verified: true,
   is_business: false,
   engagement_rate: 0.01,
   creator_location: null,

@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge, badgeVariants } from '@/components/ui/badge';
 import { Icon } from '@/components/ui/icon/icon'; // Assuming Icon component path
 import { Button } from '@/components/ui/button'; // Import Button for Copy action
+import { IconButtonAction } from '@/components/ui/button-icon-action'; // Correct import name
 import { toast } from 'sonner'; // Assuming sonner for toast notifications
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Card, CardContent } from '@/components/ui/card';
@@ -108,14 +109,17 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           <p className="text-sm text-muted-foreground">@{handle}</p>
           {bio && <p className="text-sm text-muted-foreground mt-1 line-clamp-3">{bio}</p>}
 
-          {/* Contact Email - Updated Section */}
+          {/* Contact Email - Use IconButtonAction */}
           {contactEmail && (
             <div className="flex items-center gap-2 pt-1">
               <Icon iconId="faEnvelopeLight" className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm text-muted-foreground truncate">{contactEmail}</span>
-              <Button variant="ghost" size="icon" onClick={handleCopyEmail} aria-label="Copy email">
-                <Icon iconId="faCopyLight" className="h-3.5 w-3.5" />
-              </Button>
+              <IconButtonAction
+                iconBaseName="faCopy"
+                hoverColorClass="text-accent"
+                onClick={handleCopyEmail}
+                ariaLabel="Copy email"
+              />
             </div>
           )}
 
@@ -133,42 +137,45 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         </div>
 
         {/* Right Section: Score, Verification, Quality */}
-        <div className="w-full md:w-auto space-y-3 md:text-right pt-2 md:pt-0">
-          {/* Justify Score */}
-          <div className="flex flex-col items-end">
-            <span className="text-xs text-muted-foreground">Justify Score</span>
-            {/* TODO: Add Tooltip explaining the score */}
-            <span className="text-2xl font-bold">
-              {typeof justifyScore === 'number' ? justifyScore.toFixed(1) : 'N/A'}
-            </span>
+        <div className="w-full md:w-auto space-y-3 md:text-right pt-2 md:pt-0 flex flex-col items-end">
+          {/* Justify Score - Enhanced Display inside its own container */}
+          <div className="flex flex-col items-center justify-center bg-muted p-3 rounded-lg min-w-[100px]">
+            <span className="text-xs text-muted-foreground mb-1">Justify Score</span>
+            <div className="flex items-center justify-center gap-2">
+              <Icon iconId="appJustify" className="h-5 w-5 text-primary" /> {/* App Icon */}
+              <span className="text-2xl font-bold text-primary">
+                {typeof justifyScore === 'number' ? justifyScore.toFixed(1) : 'N/A'}
+              </span>
+            </div>
           </div>
+
           {/* Verification Badge */}
           {isVerified && (
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Badge
-                    variant="secondary"
-                    className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-0.5 text-xs border-transparent"
+                    variant="secondary" // Keep base variant or change if needed
+                    // Apply sky blue background/text, remove green classes
+                    className="bg-sky-100 text-sky-800 px-2 py-0.5 text-xs border-transparent cursor-default"
                   >
-                    <Icon iconId="faCheckCircleSolid" className="h-3 w-3 mr-1" size="xs" />
-                    Verified
+                    <Icon iconId="faCircleCheckSolid" className="h-3 w-3 mr-1" size="xs" />
+                    {/* Update Text */}
+                    Justify Verified Influencer
                   </Badge>
                 </TooltipTrigger>
                 <TooltipContent>
+                  {/* Keep tooltip explanation */}
                   <p>Account connection verified via InsightIQ.</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           )}
+
           {/* Audience Quality Badge */}
           {audienceQualityIndicator && (
-            <Badge variant="outline">
-              {/* TODO: Add Icon for quality? */}
-              {`Audience: ${audienceQualityIndicator}`}
-            </Badge>
+            <Badge variant="outline">{`Audience: ${audienceQualityIndicator}`}</Badge>
           )}
-          {/* TODO: Add Select/Deselect button if needed here (Ticket 2.3) */}
         </div>
       </CardContent>
     </Card>
