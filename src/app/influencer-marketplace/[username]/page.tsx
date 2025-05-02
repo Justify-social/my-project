@@ -22,6 +22,19 @@ import { RecentCampaignsSection } from '@/components/features/influencers/Recent
 // import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert" // TODO: Import Alert component
 // TODO: Import ProfileHeader and Profile Details components later (Tickets 2.2, 2.4)
 import { PlatformEnum } from '@/types/enums'; // Need this type
+// --- Import Alert Dialog for Risk Report ---
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
 
 // Helper function to get enum key from value (case-insensitive)
 function getPlatformEnumFromString(value: string | null): PlatformEnum | null {
@@ -93,6 +106,8 @@ export default function InfluencerProfilePage() {
   const [influencer, setInfluencer] = useState<InfluencerProfileData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  // --- Add State for Risk Report Dialog ---
+  const [isRequestingReport, setIsRequestingReport] = useState(false);
 
   // Data Fetching Logic - Updated to use handle AND platformEnum for new API route
   const fetchData = useCallback(
@@ -171,6 +186,38 @@ export default function InfluencerProfilePage() {
     }
   }, [influencer]);
 
+  // --- Handler for Risk Report (Simplified for Sandbox Testing) ---
+  const handleRequestRiskReport = async () => {
+    // Basic check for influencer data still useful
+    if (!influencer?.id) {
+      logger.error('[ProfilePage] Cannot request risk report: Missing influencer ID.');
+      toast.error('Cannot request report: Influencer identifier is missing.');
+      return;
+    }
+    setIsRequestingReport(true);
+
+    const sampleReportUrl = '/Jonathan+Mark+Doe.pdf'; // Relative path in /public
+
+    // Directly simulate the async process and show PDF
+    const generatingToastId = toast.loading('Generating sample report...');
+
+    try {
+      // Simulate delay for Sandbox/testing
+      await new Promise(resolve => setTimeout(resolve, 4000)); // Use await with Promise for cleaner async simulation
+
+      toast.success('Sample report ready. Opening...', { id: generatingToastId });
+      window.open(sampleReportUrl, '_blank');
+    } catch (error) {
+      // Catch potential errors from setTimeout or window.open, though unlikely
+      logger.error('[ProfilePage] Error during simulated report generation:', error);
+      toast.error('An unexpected error occurred while preparing the sample report.', {
+        id: generatingToastId,
+      });
+    } finally {
+      setIsRequestingReport(false); // Re-enable button after process completes or fails
+    }
+  };
+
   return (
     // REMOVE ConditionalLayout wrapper - it's provided by RootLayout
     // <ConditionalLayout>
@@ -181,20 +228,50 @@ export default function InfluencerProfilePage() {
           <Icon iconId="faArrowLeftLight" className="mr-2 h-4 w-4" />
           Back to Marketplace
         </Button>
-        {/* Placeholder for Action Buttons - Render conditionally based on data load? */}
+        {/* Action Buttons - Rendered when data is loaded */}
         {!isLoading && !error && influencer && (
           <div className="flex items-center gap-2">
-            {/* Buttons based on individual-influencer-profile.png (brand view) */}
+            {/* Enable Buttons */}
             <Button variant="outline" size="sm">
               Remove Influencer
             </Button>
             <Button variant="outline" size="sm">
               Edit Profile
             </Button>
-            <Button variant="outline" size="sm">
-              Download Report
+
+            {/* Risk Report Dialog */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" disabled={isRequestingReport}>
+                  {isRequestingReport ? 'Requesting...' : 'Request Risk Report'}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Request Influencer Risk Report</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action will trigger a background check to review the influencer's profile
+                    and content for any potential risks, such as inappropriate material or harmful
+                    associations, based on set criteria. The full report will be generated once the
+                    check is complete.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={isRequestingReport}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleRequestRiskReport}
+                    disabled={isRequestingReport}
+                  >
+                    Confirm & Request Report
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Enable Add to Campaign Button */}
+            <Button size="sm" className="bg-accent hover:bg-accent/90 text-white">
+              Add to Campaign
             </Button>
-            <Button size="sm">Add to Campaign</Button>
           </div>
         )}
       </div>

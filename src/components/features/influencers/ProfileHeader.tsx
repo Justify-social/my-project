@@ -155,17 +155,15 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Badge
-                    variant="secondary" // Keep base variant or change if needed
-                    // Apply sky blue background/text, remove green classes
-                    className="bg-sky-100 text-sky-800 px-2 py-0.5 text-xs border-transparent cursor-default"
+                    variant="secondary"
+                    // Apply sky blue colors AND force no change on hover
+                    className="bg-sky-100 text-sky-800 hover:bg-sky-100 hover:text-sky-800 px-2 py-0.5 text-xs border-transparent cursor-default"
                   >
                     <Icon iconId="faCircleCheckSolid" className="h-3 w-3 mr-1" size="xs" />
-                    {/* Update Text */}
                     Justify Verified Influencer
                   </Badge>
                 </TooltipTrigger>
                 <TooltipContent>
-                  {/* Keep tooltip explanation */}
                   <p>Account connection verified via InsightIQ.</p>
                 </TooltipContent>
               </Tooltip>

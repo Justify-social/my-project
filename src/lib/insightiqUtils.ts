@@ -33,4 +33,31 @@ export function getInsightIQWorkPlatformId(platformEnum: PlatformEnum): string |
   return uuid ?? null;
 }
 
+// --- NEW Utility: Get Platform URL Prefix ---
+// Based on standard profile URL structures
+const platformUrlPrefixMap: Record<PlatformEnum, string> = {
+  [PlatformEnum.Instagram]: 'https://www.instagram.com/',
+  [PlatformEnum.YouTube]: 'https://www.youtube.com/@', // Common format now, might need channel ID variant
+  [PlatformEnum.TikTok]: 'https://www.tiktok.com/@',
+  [PlatformEnum.Twitter]: 'https://twitter.com/', // Or x.com
+  [PlatformEnum.Facebook]: 'https://www.facebook.com/', // Note: FB often uses IDs not handles
+  [PlatformEnum.Twitch]: 'https://www.twitch.tv/',
+  [PlatformEnum.Pinterest]: 'https://www.pinterest.com/',
+  [PlatformEnum.LinkedIn]: 'https://www.linkedin.com/in/', // Common for personal profiles
+};
+
+/**
+ * Gets the standard URL prefix for a given platform.
+ * Useful for constructing profile URLs from handles/usernames.
+ * @param platformEnum The PlatformEnum value.
+ * @returns The URL prefix string or null if not mapped.
+ */
+export function getPlatformUrlPrefix(platformEnum: PlatformEnum): string | null {
+  const prefix = platformUrlPrefixMap[platformEnum];
+  if (!prefix) {
+    logger.warn(`[InsightIQ Utils] No URL prefix mapping found for PlatformEnum: ${platformEnum}`);
+  }
+  return prefix ?? null;
+}
+
 // Add other InsightIQ related utility functions here if needed

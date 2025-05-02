@@ -818,3 +818,42 @@ async function callAnalyticsEndpoint(
 
 // TODO: Add other required functions based on analysis of InsightIQ usage and InsightIQ spec
 // e.g., getInsightIQContents(accountId), etc.
+
+// Make sure this function is exported
+export async function submitSocialProfileScreeningRequest(
+  profileUrl: string,
+  workPlatformId: string
+): Promise<{ jobId: string | null; error?: string }> {
+  logger.info(
+    `[InsightIQService] Submitting social profile screening for URL: ${profileUrl}, Platform ID: ${workPlatformId}`
+  );
+  const endpoint = '/v1/safety/social-profile-screening';
+  const requestBody = {
+    profile_url: profileUrl,
+    work_platform_id: workPlatformId,
+    // flagging_criteria_id: "YOUR_CRITERIA_ID", // Optional: Add if using custom criteria
+  };
+
+  try {
+    // Use makeInsightIQRequest which handles auth, errors, retries
+    const response = await makeInsightIQRequest<{ id: string; status: string }>(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(requestBody),
+    });
+
+    // Check response format and status (expecting 202 Accepted with job ID)
+    if (response && response.id && response.status === 'IN_PROGRESS') {
+      logger.info(`[InsightIQService] Screening request accepted. Job ID: ${response.id}`);
+      return { jobId: response.id };
+    } else {
+      logger.error(
+        '[InsightIQService] Unexpected response format or status from screening submission:',
+        response
+      );
+      return { jobId: null, error: 'Unexpected response from InsightIQ' };
+    }
+  } catch (error: any) {
+    logger.error(`[InsightIQService] Error submitting screening request for ${profileUrl}:`, error);
+    return { jobId: null, error: error.message || 'Failed to submit screening request' };
+  }
+}

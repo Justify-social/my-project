@@ -118,10 +118,13 @@ export interface IInfluencerService {
   ): Promise<
     Record<string, { platformSpecificId: string | null; audienceQualityIndicator: string | null }>
   >; // Map unique ID -> stored data
+
+  // Add definition for the new risk report request method
+  requestRiskReport(identifier: string, platform: string): Promise<boolean>;
 }
 
 // Helper function to find PlatformEnum by its string value (case-insensitive)
-function findPlatformEnumByValue(value: string | null): PlatformEnum | null {
+export function findPlatformEnumByValue(value: string | null): PlatformEnum | null {
   if (!value) return null;
   const upperValue = value.toUpperCase(); // Normalize input
   for (const key of Object.keys(PlatformEnum)) {
@@ -705,6 +708,42 @@ const apiService: IInfluencerService = {
     } catch (error) {
       logger.error(`[influencerService] Failed to fetch stored data:`, error);
       return initialMap; // Return the initial map (all nulls) on error
+    }
+  },
+
+  // Add implementation for the new risk report request method
+  async requestRiskReport(identifier: string, platform: string): Promise<boolean> {
+    const url = '/api/influencers/request-risk-report'; // New backend endpoint
+    logger.info(
+      `[influencerService] Calling POST ${url} for identifier: ${identifier}, platform: ${platform}`
+    );
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier, platform }),
+      });
+
+      if (!response.ok) {
+        // Log specific error from backend if available
+        const errorData = await response.json().catch(() => ({}));
+        logger.error(
+          `[influencerService] Failed requestRiskReport call to ${url}: Status ${response.status}`,
+          { errorData }
+        );
+        return false;
+      }
+      // Assume 200 or 202 indicates successful submission
+      logger.info(
+        `[influencerService] Successfully submitted risk report request for ${identifier}`
+      );
+      return true;
+    } catch (error) {
+      logger.error(
+        `[influencerService] Network error calling ${url} for requestRiskReport:`,
+        error
+      );
+      return false; // Return false on network error
     }
   },
 };
