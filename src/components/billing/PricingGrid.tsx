@@ -138,7 +138,7 @@ const renderFeatureValue = (value: string | boolean | number | null | undefined)
 export const PricingGrid: React.FC = () => {
   return (
     <TooltipProvider>
-      <div className="w-full max-w-7xl mx-auto py-8">
+      <div className="w-full max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8 text-center">
           <h2 className="text-3xl font-bold font-heading text-primary mb-2">Choose your plan</h2>

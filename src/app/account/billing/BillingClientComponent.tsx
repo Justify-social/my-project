@@ -156,9 +156,8 @@ export default function BillingClientComponent() {
             Securely manage your subscription and payment details via Stripe.
           </p>
         </TabsContent>
-        {/* Plans & Pricing Tab Content */}
-        <TabsContent value="plans">
-          {/* PricingGrid is rendered directly */}
+        {/* Plans & Pricing Tab Content - Add padding */}
+        <TabsContent value="plans" className="p-6">
           <PricingGrid />
         </TabsContent>
         {/* FAQ Tab Content */}
