@@ -10,6 +10,17 @@ module.exports = {
   poweredByHeader: false,
   distDir: '.next',
 
+  // Add redirects function
+  async redirects() {
+    return [
+      {
+        source: '/billing',
+        destination: '/account/billing',
+        permanent: true, // Use true for permanent redirects (308)
+      },
+    ];
+  },
+
   // Images config
   images: {
     domains: [],

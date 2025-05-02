@@ -131,7 +131,6 @@ export interface InsightIQProfile {
     state?: string | null;
     country?: string | null;
   } | null;
-  follower_count?: number | null; // Added from /search response
   // NOTE: Audience demographics might come from a separate endpoint like /v1/audience
   is_official_artist?: boolean | null;
 }

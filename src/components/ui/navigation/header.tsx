@@ -96,7 +96,7 @@ const Header: React.FC<HeaderProps> = ({
           {/* Desktop Icons */}
           <div className="hidden md:flex items-center space-x-4 font-body">
             {/* Credits */}
-            <Link href="/billing">
+            <Link href="/account/billing">
               <div className="flex items-center space-x-1 cursor-pointer font-body">
                 {hasCoinsIcon ? (
                   <Icon
@@ -114,9 +114,9 @@ const Header: React.FC<HeaderProps> = ({
                   </div>
                 )}
                 {/* Use text-foreground for credit count */}
-                <span className="text-foreground font-medium text-sm font-body">
+                {/* <span className="text-foreground font-medium text-sm font-body">
                   {remainingCredits}
-                </span>
+                </span> */}
               </div>
             </Link>
 

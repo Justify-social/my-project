@@ -1,7 +1,7 @@
 // src/services/influencer/index.ts
 
 // Import types and logger
-import { InfluencerSummary, InfluencerProfileData } from '@/types/influencer';
+import { InfluencerSummary, InfluencerProfileData, AudienceDemographics } from '@/types/influencer';
 import { PlatformEnum } from '@/types/enums';
 import { logger } from '@/utils/logger';
 import { Platform as PlatformBackend, PrismaClient } from '@prisma/client';
@@ -136,6 +136,10 @@ function findPlatformEnumByValue(value: string | null): PlatformEnum | null {
   }
   return null; // Not found
 }
+
+// --- Define Mock Profile Data ---
+// const mockProfileData: InfluencerProfileData = { ... };
+// --- End Mock Profile Data ---
 
 // --- Real API Service Implementation ---
 
@@ -516,116 +520,74 @@ const apiService: IInfluencerService = {
     platform: string
   ): Promise<InfluencerProfileData | null> {
     logger.info(
-      `[influencerService] Processing profile request for handle: ${handle}, platform string: ${platform}`
+      `[influencerService] Fetching & Mapping profile for handle: ${handle}, platform: ${platform}`
     );
 
-    // Convert platform string to enum using the helper
-    const platformEnum = findPlatformEnumByValue(platform); // Use helper
-    if (!platformEnum) {
-      logger.error(`[influencerService] Invalid platform string received: ${platform}`);
-      throw new Error(`Invalid platform specified: ${platform}`); // Throw error for API route to catch
-    }
-
-    // Get the reliable platform UUID using the enum
-    const reliablePlatformUuid = getInsightIQWorkPlatformId(platformEnum);
-    if (!reliablePlatformUuid) {
-      logger.error(`[influencerService] Could not map platform enum ${platformEnum} to UUID.`);
-      throw new Error(`Internal configuration error for platform: ${platformEnum}`);
-    }
-
-    logger.info(
-      `[influencerService] Mapped platform ${platformEnum} to reliable UUID: ${reliablePlatformUuid}`
-    );
-
+    // --- Original Production/Staging Logic ---
     try {
-      // Call the InsightIQ service function with handle and RELIABLE UUID
-      const detailedProfile: InsightIQProfileWithAnalytics | null = await fetchDetailedProfile(
-        handle,
-        reliablePlatformUuid
-      );
-
-      if (!detailedProfile) {
-        logger.warn(
-          `[influencerService] fetchDetailedProfile returned null for handle: ${handle}.`
+      const platformEnum = findPlatformEnumByValue(platform);
+      if (!platformEnum) {
+        logger.error(`[getAndMapProfileByHandleAndPlatform] Invalid platform string: ${platform}`);
+        return null;
+      }
+      const platformId = getInsightIQWorkPlatformId(platformEnum);
+      if (!platformId) {
+        logger.error(
+          `[getAndMapProfileByHandleAndPlatform] Could not map platform enum ${platformEnum} to InsightIQ ID`
         );
         return null;
       }
 
-      // --- Calculate Audience Quality Indicator --- //
-      let calculatedIndicator: 'High' | 'Medium' | 'Low' | null = null;
-      const credibilityScore = detailedProfile.audience?.credibility_score;
-      logger.debug(
-        `[influencerService] Extracted credibility score for ${handle}: ${credibilityScore}`
-      );
+      // Always attempt to fetch from the configured endpoint
+      const detailedProfile = await fetchDetailedProfile(handle, platformId);
 
-      if (typeof credibilityScore === 'number' && credibilityScore !== null) {
-        if (credibilityScore >= 0.8) {
-          calculatedIndicator = 'High';
-        } else if (credibilityScore >= 0.5) {
-          calculatedIndicator = 'Medium';
-        } else {
-          calculatedIndicator = 'Low';
-        }
-        logger.info(
-          `[influencerService] Calculated Audience Quality for ${handle}: ${calculatedIndicator} (Score: ${credibilityScore})`
-        );
-      } else {
+      if (!detailedProfile) {
         logger.warn(
-          `[influencerService] Credibility score not found or invalid for ${handle}. Indicator remains null.`
+          `[getAndMapProfileByHandleAndPlatform] Profile not found via fetchDetailedProfile for ${handle} on ${platformId}`
         );
+        return null;
       }
-      // --- End Calculate Indicator ---
 
-      // Map the fetched profile data
-      const identifierForMapping = detailedProfile.external_id ?? handle; // Prefer external_id
-      const profileData = mapInsightIQProfileToInfluencerProfileData(
+      const baseProfile = detailedProfile;
+      const identifierForMapping = baseProfile.external_id ?? handle;
+      const mappedData = mapInsightIQProfileToInfluencerProfileData(
         detailedProfile,
         identifierForMapping
       );
 
-      if (!profileData) {
+      if (!mappedData) {
         logger.error(
-          `[influencerService] Failed to map detailedProfile to InfluencerProfileData for handle: ${handle}`
+          `[getAndMapProfileByHandleAndPlatform] Failed to map detailed profile for ${handle}`
         );
         return null;
       }
 
-      // --- Save to Database (including indicator) --- //
-      try {
-        const idForDb = identifierForMapping;
-        const platformSpecificIdForDb = profileData.platformSpecificId;
+      const uniqueId = getProfileUniqueId(baseProfile);
 
-        if (idForDb && platformSpecificIdForDb) {
-          await this.saveProfileIdToDatabase({
-            id: idForDb,
-            handle: profileData.handle,
-            platformSpecificId: platformSpecificIdForDb,
-            name: profileData.name,
-            avatarUrl: profileData.avatarUrl,
-            platforms: profileData.platforms,
-            audienceQualityIndicator: calculatedIndicator,
-          });
-        } else {
-          logger.warn(
-            `[influencerService] Skipping DB save for ${handle} due to missing idForDb or platformSpecificIdForDb after mapping.`
-          );
-        }
-      } catch (dbError) {
+      const finalProfileData: InfluencerProfileData = {
+        ...mappedData,
+        id: uniqueId,
+      };
+
+      this.saveProfileIdToDatabase(finalProfileData).catch(dbError => {
         logger.error(
-          `[influencerService] Failed to save profile data to DB for ${handle}:`,
+          `[getAndMapProfileByHandleAndPlatform] Background DB save failed for ${uniqueId}:`,
           dbError
         );
-      }
-      // --- End Save to Database ---
+      });
 
-      return profileData;
+      logger.info(
+        `[influencerService] Successfully fetched and mapped profile for ${handle} (from configured endpoint)`
+      );
+      return finalProfileData;
     } catch (error) {
       logger.error(
-        `[influencerService] Error in getAndMapProfileByHandleAndPlatform for ${handle}:`,
+        `[influencerService] Error in getAndMapProfileByHandleAndPlatform (from configured endpoint) for handle ${handle}:`,
         error
       );
-      throw error; // Re-throw for the API route
+      return null;
     }
+    // --- End Original Logic ---
   },
 
   // Deprecated implementation

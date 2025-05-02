@@ -85,6 +85,79 @@ interface CreatorProfileAnalyticsResponse {
   profile: InsightIQProfileWithAnalytics;
 }
 
+// --- Define Mock InsightIQ Profile Data (for Sandbox fallback) ---
+// Corrected structure based on cleaned InsightIQProfile type
+const mockInsightIQProfile = {
+  // Fields from InsightIQProfile (Base)
+  id: 'mock-insightiq-id-789',
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+  user: { id: 'mock-user-uuid', name: 'Mock User' },
+  account: { id: 'mock-account-uuid', platform_username: 'sandbox_dummy_user' },
+  work_platform: {
+    id: '9bb8913b-ddd9-430b-a66a-d74d846e6c66',
+    name: 'Instagram',
+    logo_url: 'https://cdn.insightiq.ai/platforms_logo/logos/logo_instagram.png',
+  },
+  platform_username: 'sandbox_dummy_user',
+  full_name: 'Sandbox Dummy User',
+  first_name: 'Sandbox',
+  last_name: 'Dummy',
+  nick_name: null,
+  url: 'https://www.instagram.com/sandbox_dummy_user',
+  introduction: 'This is mock data returned because the Sandbox /analytics endpoint failed.',
+  image_url: 'https://via.placeholder.com/150/808080/FFFFFF?text=Sandbox+Dummy',
+  date_of_birth: null,
+  external_id: 'mock-platform-id-sandbox',
+  platform_account_type: 'CREATOR',
+  category: 'Mock Data',
+  website: null,
+  // Use nested reputation structure
+  reputation: {
+    follower_count: 123456,
+    // Add other optional reputation fields as null if needed
+    following_count: null,
+    subscriber_count: null,
+    // etc.
+  },
+  emails: [{ email_id: 'mock@sandbox.invalid', type: 'OTHER' }],
+  phone_numbers: null,
+  addresses: null,
+  gender: null,
+  country: null,
+  platform_profile_name: 'Sandbox Dummy User',
+  platform_profile_id: 'mock-platform-id-sandbox',
+  platform_profile_published_at: null,
+  is_verified: false,
+  is_business: false,
+  engagement_rate: 0.01,
+  creator_location: null,
+  // follower_count: 123456, // Removed top-level duplicate
+  is_official_artist: false,
+
+  // Fields specific to InsightIQProfileWithAnalytics extension (should now be valid)
+  average_likes: 1234,
+  average_comments: 56,
+  average_views: null,
+  average_reels_views: null,
+  content_count: 100,
+  sponsored_posts_performance: null,
+  reputation_history: null,
+  location: null,
+  top_hashtags: null,
+  top_mentions: null,
+  top_interests: null,
+  brand_affinity: null,
+  top_contents: null,
+  recent_contents: null,
+  posts_hidden_likes_percentage_value: null,
+  sponsored_contents: null,
+  lookalikes: null,
+  contact_details: null,
+  audience: null,
+} as InsightIQProfileWithAnalytics;
+// --- End Mock Data ---
+
 // --- TODO: WEBHOOK DEPENDENCY NOTE ---
 // The data fetched via direct API calls (e.g., getInsightIQProfileById)
 // represents a snapshot at the time of the call. InsightIQ uses webhooks
@@ -592,7 +665,6 @@ export async function fetchDetailedProfile(
   handle: string,
   platformId: string // Accept the potentially unreliable platformId initially
 ): Promise<InsightIQProfileWithAnalytics | null> {
-  // Return the extended profile type
   logger.info(
     `[InsightIQService] Fetching detailed profile for handle: ${handle}, initial platformId: ${platformId}`
   );
@@ -653,57 +725,35 @@ export async function fetchDetailedProfile(
   logger.info(
     `[InsightIQService] Attempting fetch via POST /analytics using handle '${handle}' and platformId '${platformIdToUse}'`
   );
-  const profileFromAnalytics = await callAnalyticsEndpoint(handle, platformIdToUse);
+  const profileData = await callAnalyticsEndpoint(handle, platformIdToUse);
 
-  if (profileFromAnalytics) {
-    // Validate handle match if needed
-    if (profileFromAnalytics.platform_username?.toLowerCase() !== handle.toLowerCase()) {
-      logger.error(
-        `CRITICAL MISMATCH: Requested handle ${handle} but /analytics returned ${profileFromAnalytics.platform_username}`
-      );
-      // If mismatch occurs even with potentially corrected platformId, something is wrong upstream or with API
-      return null;
-    }
-    logger.info(`[InsightIQService] Successfully fetched via /analytics for handle ${handle}`);
-    return profileFromAnalytics;
+  if (!profileData) {
+    logger.warn(`[InsightIQService] callAnalyticsEndpoint returned null for ${handle}`);
+    return null;
   }
 
-  // 4. Fallback: If analytics failed, AND we have a reliable externalId, try GET /profiles
-  logger.warn(`[InsightIQService] POST /analytics failed for handle ${handle}.`);
-  if (reliableExternalId) {
-    logger.warn(
-      `[InsightIQService] Falling back to GET /profiles/${reliableExternalId} (may lack audience data).`
-    );
-    try {
-      const profile = await getInsightIQProfileById(reliableExternalId);
-      if (profile) {
-        // Check handle match here too for safety
-        if (profile.platform_username?.toLowerCase() !== handle.toLowerCase()) {
-          logger.error(
-            `CRITICAL MISMATCH: GET /profiles/${reliableExternalId} returned handle ${profile.platform_username} instead of requested ${handle}`
-          );
-          return null;
-        }
-        logger.info(
-          `[InsightIQService] Successfully fetched via fallback GET /profiles/${reliableExternalId}`
-        );
-        return profile as InsightIQProfileWithAnalytics; // Cast, accepting audience might be missing
-      } else {
-        logger.error(`[InsightIQService] Fallback GET /profiles/${reliableExternalId} failed.`);
-        return null;
-      }
-    } catch (error) {
-      logger.error(
-        `[InsightIQService] Error during fallback GET /profiles/${reliableExternalId}:`,
-        error
-      );
+  // --- MODIFIED MISMATCH CHECK ---
+  const returnedHandle = profileData.platform_username?.toLowerCase();
+  const requestedHandleLower = handle.toLowerCase();
+
+  if (returnedHandle && returnedHandle !== requestedHandleLower) {
+    const isSandbox = serverConfig.insightiq.baseUrl?.includes('sandbox');
+    const mismatchMessage = `CRITICAL MISMATCH: Requested handle ${requestedHandleLower} but /analytics returned ${returnedHandle}`;
+
+    if (isSandbox) {
+      // In Sandbox, log warning but proceed with the returned data
+      logger.warn(`[Sandbox Mode] ${mismatchMessage}. Proceeding with received data.`);
+      // Fall through to return profileData
+    } else {
+      // In Staging/Prod, log error and return null as it's unexpected
+      logger.error(`[Non-Sandbox Mode] ${mismatchMessage}. Returning null.`);
       return null;
     }
   }
+  // --- END MODIFIED MISMATCH CHECK ---
 
-  // 5. If all methods failed:
-  logger.error(`[InsightIQService] All fetch methods failed for handle '${handle}'.`);
-  return null;
+  // If no mismatch, or if mismatch ignored in Sandbox, return the fetched data
+  return profileData;
 }
 
 // Helper function to call the /analytics endpoint
@@ -714,32 +764,55 @@ async function callAnalyticsEndpoint(
   logger.info(
     `[InsightIQService] Calling POST /analytics using handle '${handle}' and platformId '${platformId}'`
   );
-  const endpoint = '/v1/social/creators/profiles/analytics';
-  const requestBody = {
-    identifier: handle,
-    work_platform_id: platformId,
-  };
+  const endpoint = '/v1/analytics';
   try {
+    const requestBody = {
+      query: handle,
+      work_platform_id: platformId,
+      data_points: ['PROFILE', 'AUDIENCE'], // Request necessary data points
+    };
+
     const response = await makeInsightIQRequest<CreatorProfileAnalyticsResponse>(endpoint, {
       method: 'POST',
       body: JSON.stringify(requestBody),
     });
-    if (response?.profile) {
+
+    if (response && response.profile) {
       logger.info(
         `[InsightIQService] Successfully fetched profile via POST /analytics for handle: ${handle}`
       );
-      // Optional: Add handle validation here if needed
+      // Return the profile part of the response
       return response.profile;
     } else {
-      logger.warn(`[InsightIQService] POST /analytics for handle ${handle} returned null profile.`);
+      logger.warn(
+        `[InsightIQService] POST /analytics response missing 'profile' data for handle: ${handle}`,
+        { response }
+      );
       return null;
     }
   } catch (error: any) {
-    logger.error(
-      `[InsightIQService] Error fetching profile via POST /analytics for handle ${handle}:`,
-      error
-    );
-    return null;
+    const isSandbox = serverConfig.insightiq.baseUrl?.includes('sandbox');
+    const isForbiddenError = error.message?.includes('(403)');
+
+    if (isSandbox && isForbiddenError) {
+      // Special case: 403 in Sandbox - return mock data
+      logger.warn(
+        `[Sandbox Mode] POST /analytics failed with 403 for handle: ${handle}. Returning mock profile data.`
+      );
+      // Return a slightly customized mock
+      return {
+        ...mockInsightIQProfile,
+        platform_username: handle, // Use requested handle
+        full_name: `${handle.charAt(0).toUpperCase() + handle.slice(1)} (Sandbox Mock)`, // Customize name
+      };
+    } else if (error.message?.includes('(404)')) {
+      // Handle standard 404
+      logger.warn(`[InsightIQService] POST /analytics returned 404 for handle: ${handle}`);
+    } else {
+      // Handle other errors
+      logger.error(`[InsightIQService] Error calling POST /analytics for handle ${handle}:`, error);
+    }
+    return null; // Return null for 404 or other errors (unless it was 403 in sandbox)
   }
 }
 

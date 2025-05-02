@@ -4,7 +4,7 @@ import { InsightIQProfile, InsightIQSearchProfile } from '@/types/insightiq';
 import { InfluencerProfileData, InfluencerSummary } from '@/types/influencer';
 import { PlatformEnum } from '@/types/enums';
 import { logger } from '@/utils/logger';
-import { calculateJustifyScoreV1 } from '@/lib/scoringService'; // Assuming score is calculated here
+import { calculateJustifyScoreV1 } from '@/lib/scoringService'; // Ensure V1 is imported
 import { getInsightIQWorkPlatformId } from '@/lib/insightiqUtils';
 import { Platform as PlatformBackend } from '@prisma/client';
 import { getProfileUniqueId } from '@/lib/insightiqService';
@@ -72,7 +72,7 @@ const mapPlatformsToFrontend = (backendPlatforms: PlatformBackend[]): PlatformEn
 /**
  * Maps an InsightIQProfile object (full profile data) to the frontend InfluencerProfileData structure.
  * Handles mapping fields available in the full profile.
- * @param profile - The full profile data received from InsightIQ (e.g., via GET /v1/profiles/{id}).
+ * @param profile - The full profile data received from InsightIQ (should include reputation).
  * @param uniqueId - The identifier used for the request (external_id or composite key), used as fallback and ID.
  * @returns InfluencerProfileData object.
  */
@@ -91,8 +91,8 @@ export const mapInsightIQProfileToInfluencerProfileData = (
     handle: handle,
     avatarUrl: profile.image_url ?? null,
     platforms: platformEnum ? [platformEnum] : [],
-    followersCount: profile.follower_count ?? profile.reputation?.follower_count ?? null,
-    justifyScore: calculateJustifyScore(profile),
+    followersCount: profile.reputation?.follower_count ?? null,
+    justifyScore: calculateJustifyScoreV1(profile),
     isVerified: profile.is_verified ?? false,
     isBusinessAccount: profile.is_business ?? profile.platform_account_type === 'BUSINESS',
     primaryAudienceLocation: profile.country ?? profile.creator_location?.country ?? null,
@@ -132,17 +132,13 @@ export const mapInsightIQProfileToInfluencerProfileData = (
 };
 
 /**
- * Maps an InsightIQProfile object (potentially from a search result) to the frontend InfluencerSummary structure.
- * Handles potential missing fields in search results.
- * @param profile - The profile data received from InsightIQ search.
- * @returns InfluencerSummary object (omitting id) plus platformEnum, or null platformEnum if mapping fails.
+ * Maps raw InsightIQ search profile data to our InfluencerSummary type.
+ * Handles potential null values and extracts key information.
  */
 export const mapInsightIQProfileToInfluencerSummary = (
   profile: InsightIQSearchProfile
 ): Omit<InfluencerSummary, 'id' | 'platformEnum'> & { platformEnum: PlatformEnum | null } => {
-  // Platform enum mapping helper
   const platformEnum = mapInsightIQPlatformToEnum(profile.work_platform?.name);
-  // Derive handle
   const handle =
     profile.platform_username ?? (profile.url ? profile.url.split('/').pop() : null) ?? null;
 
@@ -178,21 +174,22 @@ export const mapInsightIQProfileToInfluencerSummary = (
     handle: handle,
     avatarUrl: profile.image_url ?? null,
     platforms: [platformEnum], // Keep original platform array for display
+    // Access follower_count directly from InsightIQSearchProfile
     followersCount: profile.follower_count ?? null,
-    justifyScore: calculateJustifyScore(profile),
+    justifyScore: calculateJustifyScoreV1(profile), // Pass profile data to scoring function (which now handles this type)
     isVerified: profile.is_verified ?? false,
     isBusinessAccount: profile.platform_account_type === 'BUSINESS',
     primaryAudienceLocation: profile.creator_location?.country ?? null,
-    primaryAudienceAgeRange: null,
-    primaryAudienceGender: null,
+    primaryAudienceAgeRange: null, // Needs Audience API data
+    primaryAudienceGender: null, // Needs Audience API data
     engagementRate: profile.engagement_rate ?? null,
-    audienceQualityIndicator: null, // Keep as null for now
-    insightiqUserId: null,
-    insightiqAccountId: null,
+    audienceQualityIndicator: null, // Needs Audience API data or calculation
+    insightiqUserId: null, // Not available in search results
+    insightiqAccountId: null, // Not available in search results
     workPlatformId: profile.work_platform?.id ?? null,
-    platformProfileName: profile.full_name ?? handle,
+    platformProfileName: profile.full_name ?? handle, // Use full_name or handle
     profileId: profile.external_id ?? null,
-    platformSpecificId: null,
+    platformSpecificId: null, // May need enrichment later
     platformEnum: platformEnum, // Add the mapped enum
   };
 
@@ -270,14 +267,4 @@ export const mapPrismaInfluencerToSummary = (
   };
 
   return summary;
-};
-
-// Helper to calculate score based on available data (Search or Full Profile)
-// Might need refinement if full profile offers better metrics for scoring.
-const calculateJustifyScore = (profile: InsightIQSearchProfile | InsightIQProfile): number => {
-  const followerScore = Math.min(profile.follower_count ?? 0, 1000000000) / 10000000;
-  const engagementScore = (profile.engagement_rate ?? 0) * 1000;
-  const verifiedBonus = profile.is_verified ? 10 : 0;
-  // Simple score based on available data, refine later
-  return Math.min(Math.round(followerScore + engagementScore + verifiedBonus), 100) || 50;
 };

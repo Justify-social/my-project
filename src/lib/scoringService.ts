@@ -1,18 +1,23 @@
-import { InsightIQProfile } from '@/types/insightiq'; // Import the correct type
+import { InsightIQProfile, InsightIQSearchProfile } from '@/types/insightiq'; // Import BOTH types
 import { logger } from '@/utils/logger';
 
 /**
  * Calculates the Justify Score (MVP V1 - Revised for Live InsightIQ Data) for an influencer.
  * This is a simple initial version based on readily available LIVE profile data.
  *
- * @param profile The InsightIQProfile data fetched live.
+ * @param profile The InsightIQProfile or InsightIQSearchProfile data.
  * @returns A score between 0 and 100, or null if insufficient data.
  */
 export function calculateJustifyScoreV1(
-  profile: Partial<InsightIQProfile> // Accept partial profile data
+  // Accept a partial union of both types
+  profile: Partial<InsightIQProfile | InsightIQSearchProfile>
 ): number | null {
   // Use username or full name for logging if ID is missing
-  const logIdentifier = profile.id ?? profile.platform_username ?? profile.full_name ?? 'unknown';
+  const logIdentifier =
+    ('id' in profile ? profile.id : undefined) ??
+    profile.platform_username ??
+    profile.full_name ??
+    'unknown';
 
   // Basic check: require some identifier for logging
   if (logIdentifier === 'unknown') {
@@ -24,14 +29,17 @@ export function calculateJustifyScoreV1(
   const MAX_SCORE = 100;
   let factorsUsed = 0;
 
-  // Factor 1: Verification (Weight: 50 points)
+  // Factor 1: Verification (Common field)
   if (profile.is_verified !== undefined && profile.is_verified !== null) {
     score += profile.is_verified ? 50 : 0;
     factorsUsed++;
   }
 
-  // Factor 2: Follower Count (Logarithmic Scale - Weight: 50 points)
-  const followers = profile.reputation?.follower_count;
+  // Factor 2: Follower Count (Check both possible locations)
+  const followers =
+    ('follower_count' in profile ? profile.follower_count : undefined) ?? // Check top-level first
+    ('reputation' in profile ? profile.reputation?.follower_count : undefined); // Fallback to nested
+
   if (typeof followers === 'number' && followers > 0) {
     // Simple logarithmic scaling (adjust thresholds/points as needed)
     let followerScore = 0;
