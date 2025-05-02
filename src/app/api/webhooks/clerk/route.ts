@@ -94,20 +94,25 @@ export async function POST(request: Request) {
   // --- Handle Specific Events ---
   try {
     switch (eventType) {
-      // --- CLERK-BE-4: User Created ---
+      // --- CLERK-BE-4: Use Upsert for User Created ---
       case 'user.created':
         const createdData = evt.data;
         logger.info('Handling user.created', { clerkId: createdData.id });
-        await prisma.user.create({
-          data: {
-            clerkId: createdData.id, // Map Clerk's ID to your clerkId field
-            email: createdData.email_addresses[0]?.email_address ?? 'missing_email@example.com', // Handle potential missing email
-            name: `${createdData.first_name ?? ''} ${createdData.last_name ?? ''}`.trim() || null,
-            // Map other fields as needed (e.g., imageUrl: createdData.image_url)
-            // Ensure your User model has these fields or adjust mapping
-          },
+
+        // Prepare user data for upsert
+        const userDataForCreate = {
+          clerkId: createdData.id,
+          email: createdData.email_addresses[0]?.email_address ?? 'missing_email@example.com',
+          name: `${createdData.first_name ?? ''} ${createdData.last_name ?? ''}`.trim() || null,
+          // Map other fields from createdData if needed
+        };
+
+        await prisma.user.upsert({
+          where: { clerkId: createdData.id }, // Find user by Clerk ID
+          update: userDataForCreate, // Update if exists (handles potential race conditions/retries)
+          create: userDataForCreate, // Create if not exists
         });
-        logger.info(`User created successfully in DB for Clerk ID: ${createdData.id}`);
+        logger.info(`User upserted successfully in DB for Clerk ID: ${createdData.id}`);
         break;
 
       // --- CLERK-BE-5: User Updated ---
@@ -119,7 +124,6 @@ export async function POST(request: Request) {
           data: {
             email: updatedData.email_addresses[0]?.email_address ?? undefined,
             name: `${updatedData.first_name ?? ''} ${updatedData.last_name ?? ''}`.trim() || null,
-            // Update other fields as needed
           },
         });
         logger.info(`User updated successfully in DB for Clerk ID: ${updatedData.id}`);

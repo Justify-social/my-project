@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { prisma } from '@/lib/prisma'; // Import Prisma client
+import { logger } from '@/utils/logger';
 
 // Initialize Stripe with explicit API version required by installed SDK types
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -18,23 +19,58 @@ async function getOrCreateStripeCustomerId(justifyUserId: string): Promise<strin
     });
 
     if (!user) {
-      console.error(`BE-1.5 Error: User not found for Clerk ID: ${justifyUserId}`);
+      logger.error('User not found in DB', { clerkId: justifyUserId });
       return undefined;
     }
 
     // 2. Return existing Stripe Customer ID if found
     // Check explicitly for null/undefined if the field is optional
     if (user.stripeCustomerId) {
-      console.log(
-        `BE-1.5: Found existing Stripe Customer ID for user ${justifyUserId}: ${user.stripeCustomerId}`
-      );
-      return user.stripeCustomerId;
+      try {
+        logger.info('Found existing Stripe Customer ID, verifying with Stripe...', {
+          clerkId: justifyUserId,
+          stripeCustomerId: user.stripeCustomerId,
+        });
+        const existingCustomer = await stripe.customers.retrieve(user.stripeCustomerId);
+        // Check if customer exists and is not deleted
+        if (existingCustomer && !existingCustomer.deleted) {
+          logger.info('Existing Stripe Customer verified.', {
+            clerkId: justifyUserId,
+            stripeCustomerId: user.stripeCustomerId,
+          });
+          return user.stripeCustomerId;
+        } else {
+          logger.warn(
+            'Stripe Customer ID found in DB but customer is deleted or invalid in Stripe. Will create a new one.',
+            { clerkId: justifyUserId, stripeCustomerId: user.stripeCustomerId }
+          );
+          // Fall through to create a new customer
+        }
+      } catch (error: any) {
+        // Specifically handle "resource_missing" which means customer doesn't exist in Stripe
+        if (error.code === 'resource_missing') {
+          logger.warn(
+            'Stripe Customer ID found in DB but does not exist in Stripe. Will create a new one.',
+            { clerkId: justifyUserId, stripeCustomerId: user.stripeCustomerId }
+          );
+          // Fall through to create a new customer
+        } else {
+          // Log other errors during verification but still attempt to create new customer as fallback
+          logger.error(
+            'Error verifying existing Stripe Customer ID, attempting to create new one.',
+            {
+              clerkId: justifyUserId,
+              stripeCustomerId: user.stripeCustomerId,
+              error: error.message,
+            }
+          );
+          // Fall through might be risky depending on error, consider specific handling
+        }
+      }
     }
 
-    // 3. Create a new Stripe Customer if none exists
-    console.log(
-      `BE-1.5: No Stripe Customer ID found for user ${justifyUserId}. Creating new customer...`
-    );
+    // 3. Create a new Stripe Customer if none exists OR if existing one was invalid/deleted
+    logger.info('Creating new Stripe Customer...', { clerkId: justifyUserId });
     const customerParams: Stripe.CustomerCreateParams = {
       email: user.email ?? undefined,
       name: user.name ?? undefined,
@@ -45,21 +81,27 @@ async function getOrCreateStripeCustomerId(justifyUserId: string): Promise<strin
       },
     };
     const customer = await stripe.customers.create(customerParams);
-    console.log(`BE-1.5: Created Stripe Customer ${customer.id} for user ${justifyUserId}`);
+    logger.info('Created Stripe Customer', {
+      clerkId: justifyUserId,
+      stripeCustomerId: customer.id,
+    });
 
     // 4. Update your user record with the new Stripe Customer ID
     await prisma.user.update({
       where: { id: user.id }, // Use the internal DB ID here
       data: { stripeCustomerId: customer.id },
     });
-    console.log(`BE-1.5: Updated user ${justifyUserId} record with Stripe Customer ID.`);
+    logger.info('Updated user record with new Stripe Customer ID.', {
+      clerkId: justifyUserId,
+      stripeCustomerId: customer.id,
+    });
 
     return customer.id;
   } catch (error: any) {
-    console.error(
-      `BE-1.5 Error getting or creating Stripe customer for Clerk ID ${justifyUserId}:`,
-      error
-    );
+    logger.error('Error in getOrCreateStripeCustomerId', {
+      clerkId: justifyUserId,
+      error: error.message,
+    });
     return undefined;
   }
 }
