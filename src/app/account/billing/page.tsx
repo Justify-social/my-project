@@ -6,8 +6,8 @@ import BillingClientComponent from './BillingClientComponent';
 
 export default function BillingPage() {
   return (
-    <div>
-      <h1>Billing Management</h1>
+    <div className="container mx-auto px-4 py-6 md:py-10">
+      <h1 className="text-2xl md:text-3xl font-bold text-primary mb-6">Billing Management</h1>
       <BillingClientComponent />
     </div>
   );

@@ -4,17 +4,18 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import PricingInfoSection from '@/components/billing/PricingInfoSection';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import PricingGrid from '@/components/billing/PricingGrid';
+import FaqSection from '@/components/billing/FaqSection';
 import { useUser } from '@clerk/nextjs';
 import { loadStripe } from '@stripe/stripe-js'; // Still needed for redirect
+import { Separator } from '@/components/ui/separator';
 
 // Load Stripe outside component render
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 export default function BillingClientComponent() {
   const { user, isLoaded: isUserLoaded } = useUser();
-  const [showPricing, setShowPricing] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -39,10 +40,6 @@ export default function BillingClientComponent() {
     }
   }, [searchParams]);
   // --- END FE-Return ---
-
-  const handleTogglePricing = () => {
-    setShowPricing(prev => !prev);
-  };
 
   // --- FE-Redirect: Handle Button Click to Start Checkout ---
   const handleManageBillingClick = async () => {
@@ -119,37 +116,62 @@ export default function BillingClientComponent() {
         </div>
       )}
 
-      {/* Manage Billing Button */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Billing Portal</CardTitle>
-          {/* Optional: Display current plan/status here fetched from DB */}
-        </CardHeader>
-        <CardContent>
-          {/* UI-1 / FE-Redirect Button */}
+      {/* Main Content with Tabs */}
+      <Tabs defaultValue="faq" className="w-full">
+        <TabsList className="grid w-full grid-cols-3 gap-2 h-auto bg-transparent p-0">
+          {/* Reordered Tabs */}
+          <TabsTrigger
+            value="faq"
+            className="w-full justify-start data-[state=active]:bg-muted data-[state=active]:shadow-sm data-[state=active]:border-accent data-[state=active]:border-b-2 rounded-none text-secondary hover:text-primary transition-colors duration-150 px-4 py-2 text-sm font-medium"
+          >
+            FAQ
+          </TabsTrigger>
+          <TabsTrigger
+            value="plans"
+            className="w-full justify-start data-[state=active]:bg-muted data-[state=active]:shadow-sm data-[state=active]:border-accent data-[state=active]:border-b-2 rounded-none text-secondary hover:text-primary transition-colors duration-150 px-4 py-2 text-sm font-medium"
+          >
+            Plans & Pricing
+          </TabsTrigger>
+          <TabsTrigger
+            value="billing"
+            className="w-full justify-start data-[state=active]:bg-muted data-[state=active]:shadow-sm data-[state=active]:border-accent data-[state=active]:border-b-2 rounded-none text-secondary hover:text-primary transition-colors duration-150 px-4 py-2 text-sm font-medium"
+          >
+            Billing Portal
+          </TabsTrigger>
+        </TabsList>
+        <Separator className="mb-6" /> {/* Reduced margin */}
+        {/* CORRECTED Tab Contents Structure */}
+        {/* Billing Portal Tab Content */}
+        <TabsContent value="billing" className="p-6">
+          <h2 className="text-3xl font-bold font-heading text-primary mb-2 text-center sm:text-left">
+            Manage Billing
+          </h2>
+          <p className="text-secondary mb-4 text-center sm:text-left">
+            Manage your current subscription and payment methods.
+          </p>
           <Button onClick={handleManageBillingClick} disabled={isRedirecting || !isUserLoaded}>
             {isRedirecting ? 'Redirecting...' : 'Manage Billing / Payment Methods'}
           </Button>
           <p className="text-sm text-muted-foreground mt-2">
             Securely manage your subscription and payment details via Stripe.
           </p>
-        </CardContent>
-      </Card>
-
-      <Separator />
-
-      {/* Pricing Section Card (Optional - can be kept or removed) */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Plans & Pricing</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Button variant="outline" onClick={handleTogglePricing}>
-            {showPricing ? 'Hide Pricing Plans' : 'View Pricing Plans'}
-          </Button>
-          {showPricing && <PricingInfoSection />}
-        </CardContent>
-      </Card>
+        </TabsContent>
+        {/* Plans & Pricing Tab Content */}
+        <TabsContent value="plans">
+          {/* PricingGrid is rendered directly */}
+          <PricingGrid />
+        </TabsContent>
+        {/* FAQ Tab Content */}
+        <TabsContent value="faq" className="p-6">
+          <h2 className="text-3xl font-bold font-heading text-primary mb-2 text-center sm:text-left">
+            Frequently Asked Questions
+          </h2>
+          <p className="text-secondary mb-4 text-center sm:text-left">
+            Find answers to common questions about billing, plans, and features.
+          </p>
+          <FaqSection />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
