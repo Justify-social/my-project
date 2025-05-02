@@ -112,70 +112,67 @@ export async function POST(request: Request) {
       case 'checkout.session.completed':
         const session = event.data.object as Stripe.Checkout.Session;
         console.log(`Processing checkout.session.completed: ${session.id}`);
-        // Extract user ID (Prefer client_reference_id if set during session creation, fallback to metadata)
+
+        // Prefer client_reference_id if you set it during session creation, otherwise use metadata
         const userId = session.client_reference_id || session.metadata?.justifyUserId || null;
         const stripeCustomerId =
           typeof session.customer === 'string' ? session.customer : session.customer?.id;
 
         if (!userId) {
-          throw new Error(
-            'User identifier (client_reference_id or metadata.justifyUserId) missing in checkout.session.completed'
-          );
+          throw new Error('User identifier missing in checkout.session.completed');
         }
+        console.log(
+          `Checkout completed for user: ${userId}, Stripe Customer: ${stripeCustomerId}, Mode: ${session.mode}`
+        );
 
-        // Use metadata or line items to determine what was purchased/setup
-        console.log(`  Mode: ${session.mode}, Customer: ${stripeCustomerId}, UserID: ${userId}`);
-
-        // Example DB Update Logic (adjust based on mode/metadata)
+        // --- DB Update Logic ---
         if (session.mode === 'setup' && session.setup_intent) {
-          const setupIntentId =
-            typeof session.setup_intent === 'string'
-              ? session.setup_intent
-              : session.setup_intent.id;
-          // Retrieve SetupIntent if more details needed (like payment method ID)
-          // const setupIntent = await stripe.setupIntents.retrieve(setupIntentId);
-          // const paymentMethodId = setupIntent.payment_method;
+          // If using setup mode, maybe store the setup intent ID or payment method ID
+          const setupIntent = await stripe.setupIntents.retrieve(session.setup_intent as string, {
+            expand: ['payment_method'],
+          });
+          const paymentMethodId = setupIntent.payment_method as Stripe.PaymentMethod | null;
+
           await prisma.user.update({
-            where: { id: userId },
+            where: { clerkId: userId }, // Assuming you query users by Clerk ID
             data: {
-              /* Mark setup complete, potentially store default PM ID */
+              stripeCustomerId: stripeCustomerId, // Ensure customer ID is stored
+              // Optionally store default payment method details (ID, last4, brand)
+              // stripePaymentMethodId: paymentMethodId?.id,
+              // stripeCardLast4: paymentMethodId?.card?.last4,
+              // stripeCardBrand: paymentMethodId?.card?.brand,
             },
           });
-          console.log(
-            `ACTION (BE-5): Updated user ${userId} after successful payment method setup via Checkout Session ${session.id}.`
-          );
+          console.log(`ACTION (BE-5): Updated user ${userId} payment method setup info.`);
         } else if (session.mode === 'subscription' && session.subscription) {
-          const subscriptionId =
-            typeof session.subscription === 'string'
-              ? session.subscription
-              : session.subscription.id;
-          // Retrieve subscription for details like plan ID, period end
-          // const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-          // const planId = subscription.items.data[0]?.price.id;
-          // const currentPeriodEnd = new Date(subscription.current_period_end * 1000);
+          // If using subscription mode, store subscription details
+          const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
           await prisma.user.update({
-            where: { id: userId },
+            where: { clerkId: userId },
             data: {
-              // stripeSubscriptionId: subscriptionId,
-              // stripePriceId: planId,
-              // stripeCurrentPeriodEnd: currentPeriodEnd,
-              // subscriptionStatus: 'ACTIVE'
+              stripeCustomerId: stripeCustomerId,
+              stripeSubscriptionId: subscription.id,
+              stripePriceId: subscription.items.data[0]?.price.id,
+              stripeCurrentPeriodEnd: new Date(subscription.current_period_end * 1000),
+              // Add a field to your User model for subscription status if needed
+              // subscriptionStatus: subscription.status,
             },
           });
-          console.log(
-            `ACTION (BE-5): Updated user ${userId} subscription after successful Checkout Session ${session.id}.`
+          console.log(`ACTION (BE-5): Updated user ${userId} subscription data.`);
+        } else if (session.mode === 'payment' && session.payment_intent) {
+          // If using one-time payment mode, update based on the payment
+          // You might store payment intent ID or update an order status
+          const paymentIntent = await stripe.paymentIntents.retrieve(
+            session.payment_intent as string
           );
-        } else if (session.mode === 'payment') {
-          // Handle successful one-time payment
           await prisma.user.update({
-            where: { id: userId },
+            where: { clerkId: userId },
             data: {
-              /* Grant credits, update order status, etc. */
+              stripeCustomerId: stripeCustomerId,
+              /* Grant credits, update order status based on paymentIntent details, etc. */
             },
           });
-          console.log(
-            `ACTION (BE-5): Processed one-time payment for user ${userId} via Checkout Session ${session.id}.`
-          );
+          console.log(`ACTION (BE-5): Processed one-time payment for user ${userId}.`);
         }
         break;
       // --- END BE-5-Checkout ---
