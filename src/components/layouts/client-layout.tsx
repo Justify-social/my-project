@@ -139,7 +139,7 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
     },
     { id: 'mmm', href: '/mmm', label: 'MMM', icon: 'appMmm' },
     { id: 'help', href: '/help', label: 'Help', icon: 'appHelp' },
-    { id: 'billing', href: '/billing', label: 'Billing', icon: 'appBilling' },
+    { id: 'billing', href: '/account/billing', label: 'Billing', icon: 'appBilling' },
   ];
 
   const settingsItemDef: SidebarItemDef = {

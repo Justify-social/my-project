@@ -1,3 +1,0 @@
-# Docs Configuration
-
-Documentation files

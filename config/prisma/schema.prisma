@@ -229,12 +229,7 @@ model User {
   ownedTeamMembers    TeamMember[]               @relation("TeamOwner")
 
   // --- DB-1: Stripe Integration Fields ---
-  stripeCustomerId String? @unique @map("stripe_customer_id") // Store Stripe Customer ID (for BE-1.5)
-  // Add other user-level billing fields if needed (e.g., subscription status, plan ID)
-  // Example:
-  // stripeSubscriptionId String? @unique @map("stripe_subscription_id")
-  // stripePriceId      String? @map("stripe_price_id")
-  // stripeCurrentPeriodEnd DateTime? @map("stripe_current_period_end")
+  stripeCustomerId String? @unique @map("stripe_customer_id")
   // --- END DB-1 ---
 }
 
@@ -420,3 +415,16 @@ model InsightIQAccountLink { // Renamed from PhylloAccountLink
   @@index([insightiqUserId]) // Updated index field name
   @@index([status]) // Useful for finding active links
 }
+
+// --- DB-2: Add StripeEvent model for Idempotency --- 
+model StripeEvent {
+  id            String    @id @unique // Use Stripe Event ID (evt_...) directly for idempotency
+  type          String    // Event type (e.g., payment_intent.succeeded)
+  status        String    // Processing status ("pending", "processed", "failed")
+  error         Json?     // Store any processing error details
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("stripe_events") // Optional: specify table name
+}
+// --- END DB-2 ---

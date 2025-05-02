@@ -1,3 +1,0 @@
-# Eslint Configuration
-
-ESLint configuration
