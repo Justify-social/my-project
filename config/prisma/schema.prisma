@@ -228,6 +228,11 @@ model User {
   memberOfTeams       TeamMember[]               @relation("TeamMember")
   ownedTeamMembers    TeamMember[]               @relation("TeamOwner")
 
+  // Fields for email status tracking
+  isEmailDeliverable    Boolean   @default(true)
+  emailMarketingConsent Boolean   @default(true)
+  emailStatusLastUpdated DateTime? @updatedAt // Using @updatedAt here for simplicity, or can be managed explicitly
+
   // --- DB-1: Stripe Integration Fields ---
   stripeCustomerId String? @unique @map("stripe_customer_id")
   // --- END DB-1 ---

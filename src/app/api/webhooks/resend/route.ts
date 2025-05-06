@@ -1,0 +1,151 @@
+import { headers } from 'next/headers';
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { logger } from '@/utils/logger';
+import { Resend } from 'resend'; // Import Resend SDK
+import { Webhook } from 'svix'; // Import Svix Webhook class
+
+const RESEND_WEBHOOK_SECRET = process.env.RESEND_WEBHOOK_SECRET;
+// No need to instantiate Resend client here unless the SDK's Webhook class is static
+// or you use a global instance for other purposes.
+// For webhook verification, usually you use a method from the imported Resend object/class directly.
+
+export async function POST(request: Request) {
+  logger.info('[Webhook Resend] Received request');
+
+  if (!RESEND_WEBHOOK_SECRET) {
+    logger.error('[Webhook Resend] Webhook secret is not configured.');
+    // Return 500 but don't reveal internal config issues
+    return NextResponse.json({ error: 'Webhook configuration error.' }, { status: 500 });
+  }
+
+  // --- 1. Signature Verification using Svix ---
+  const headerPayload = headers();
+  const svix_id = headerPayload.get('svix-id');
+  const svix_timestamp = headerPayload.get('svix-timestamp');
+  const svix_signature = headerPayload.get('svix-signature');
+
+  if (!svix_id || !svix_timestamp || !svix_signature) {
+    logger.warn('[Webhook Resend] Missing Svix headers for verification.');
+    return NextResponse.json({ error: 'Missing signature headers.' }, { status: 400 });
+  }
+
+  const wh = new Webhook(RESEND_WEBHOOK_SECRET);
+  const rawBody = await request.text();
+  let event: Record<string, any>; // Use a generic record type initially
+
+  try {
+    // Verify the webhook signature
+    event = wh.verify(rawBody, {
+      'svix-id': svix_id,
+      'svix-timestamp': svix_timestamp,
+      'svix-signature': svix_signature,
+    }) as Record<string, any>; // Assert type after verification
+
+    logger.info('[Webhook Resend] Signature verified successfully.');
+  } catch (err: any) {
+    logger.error('[Webhook Resend] Error during signature verification:', err.message);
+    // Ensure specific error message for invalid signature
+    return NextResponse.json(
+      { error: `Webhook signature verification failed: ${err.message}` },
+      { status: 400 }
+    );
+  }
+  // --- End Signature Verification ---
+
+  try {
+    // Event payload is already verified and available in the 'event' variable
+    const eventType = event.type;
+    const eventData = event.data;
+
+    logger.info(`[Webhook Resend] Processing event type: ${eventType}`, {
+      eventId: eventData?.email_id || event.id,
+    });
+
+    // --- 2. Handle Specific Event Types ---
+    switch (eventType) {
+      case 'email.sent':
+        logger.info(`Email Sent: ID ${eventData?.email_id} to ${eventData?.to}`);
+        // Optional: Update internal status if needed
+        break;
+
+      case 'email.delivered':
+        logger.info(`Email Delivered: ID ${eventData?.email_id} to ${eventData?.to}`);
+        // Optional: Mark email as confirmed delivered
+        break;
+
+      case 'email.delivery_delayed':
+        logger.warn(`Email Delivery Delayed: ID ${eventData?.email_id} to ${eventData?.to}`);
+        // Optional: Monitor or notify internally
+        break;
+
+      case 'email.bounced':
+        logger.warn(`Email Bounced: ID ${eventData?.email_id} to ${eventData?.to}`, {
+          bounceReason: eventData?.reason,
+          bounceType: eventData?.type,
+        });
+        if (eventData?.email) {
+          try {
+            await prisma.user.updateMany({
+              where: { email: eventData.email },
+              data: { isEmailDeliverable: false },
+            });
+            logger.info(`Marked email ${eventData.email} as undeliverable due to bounce.`);
+          } catch (dbError) {
+            logger.error(
+              `[Webhook Resend] DB error updating user for bounce: ${eventData.email}`,
+              dbError
+            );
+          }
+        } else {
+          logger.warn('[Webhook Resend] Bounce event missing email address.');
+        }
+        break;
+
+      case 'email.complained':
+        logger.warn(`Email Complaint (Spam): ID ${eventData?.email_id} from ${eventData?.to}`);
+        if (eventData?.email) {
+          try {
+            await prisma.user.updateMany({
+              where: { email: eventData.email },
+              data: {
+                emailMarketingConsent: false,
+                isEmailDeliverable: false,
+              },
+            });
+            logger.info(`Marked email ${eventData.email} as unsubscribed due to complaint.`);
+          } catch (dbError) {
+            logger.error(
+              `[Webhook Resend] DB error updating user for complaint: ${eventData.email}`,
+              dbError
+            );
+          }
+        } else {
+          logger.warn('[Webhook Resend] Complaint event missing email address.');
+        }
+        break;
+
+      case 'email.opened':
+        logger.info(`Email Opened: ID ${eventData?.email_id} by ${eventData?.to}`);
+        // Optional: Track opens for analytics
+        break;
+
+      case 'email.clicked':
+        logger.info(
+          `Email Clicked: ID ${eventData?.email_id} by ${eventData?.to}, URL: ${eventData?.url}`
+        );
+        // Optional: Track clicks for analytics
+        break;
+
+      default:
+        logger.info(`Unhandled Resend event type: ${eventType}`);
+    }
+
+    // --- 3. Acknowledge Receipt ---
+    return NextResponse.json({ received: true });
+  } catch (error: any) {
+    logger.error('[Webhook Resend] Error processing webhook payload (after verification):', error);
+    // Return 500 but don't leak error details
+    return NextResponse.json({ error: 'Webhook processing error' }, { status: 500 });
+  }
+}

@@ -4,6 +4,7 @@ import { Webhook } from 'svix';
 import { WebhookEvent, UserJSON } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma'; // Import your Prisma client
 import { logger } from '@/utils/logger'; // Assuming logger exists
+import { sendWelcomeEmail } from '@/lib/email';
 
 /**
  * Clerk Webhook Handler
@@ -100,19 +101,40 @@ export async function POST(request: Request) {
         logger.info('Handling user.created', { clerkId: createdData.id });
 
         // Prepare user data for upsert
+        const userEmail =
+          createdData.email_addresses[0]?.email_address ?? 'missing_email@example.com';
+        const userName =
+          `${createdData.first_name ?? ''} ${createdData.last_name ?? ''}`.trim() || null;
+
         const userDataForCreate = {
           clerkId: createdData.id,
-          email: createdData.email_addresses[0]?.email_address ?? 'missing_email@example.com',
-          name: `${createdData.first_name ?? ''} ${createdData.last_name ?? ''}`.trim() || null,
+          email: userEmail,
+          name: userName,
           // Map other fields from createdData if needed
         };
 
         await prisma.user.upsert({
-          where: { clerkId: createdData.id }, // Find user by Clerk ID
-          update: userDataForCreate, // Update if exists (handles potential race conditions/retries)
-          create: userDataForCreate, // Create if not exists
+          where: { clerkId: createdData.id },
+          update: userDataForCreate,
+          create: userDataForCreate,
         });
         logger.info(`User upserted successfully in DB for Clerk ID: ${createdData.id}`);
+
+        // --- SEND WELCOME EMAIL ---
+        try {
+          // Don't block webhook response for email sending result
+          sendWelcomeEmail({ email: userEmail, name: userName }).then(success => {
+            if (!success) {
+              logger.error(
+                `Failed to send welcome email to ${userEmail} for Clerk ID: ${createdData.id}`
+              );
+            }
+          });
+        } catch (emailError) {
+          // Catch sync errors if sendWelcomeEmail itself throws somehow
+          logger.error(`Error initiating welcome email for ${userEmail}:`, emailError);
+        }
+        // --- END SEND WELCOME EMAIL ---
         break;
 
       // --- CLERK-BE-5: User Updated ---
