@@ -63,7 +63,11 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
 
   return (
     <Card
-      className={cn('flex flex-col overflow-hidden relative', className)}
+      className={cn(
+        'flex flex-col overflow-hidden relative',
+        isSelected ? 'border-2 border-sky-500 dark:border-sky-400' : 'border', // Apply conditional border
+        className
+      )}
       data-testid="influencer-card"
     >
       {/* Selection Checkbox Area - Positioned relative to card */}

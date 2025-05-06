@@ -32,6 +32,25 @@ import {
   SheetDescription,
 } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // Define the shape of filters state - Aligned with current BE capabilities
 export interface FiltersState {
@@ -46,6 +65,15 @@ export interface FiltersState {
   // Add Audience Quality
   audienceQuality?: 'High' | 'Medium' | 'Low';
 }
+
+// Define CampaignType reused from profile page
+type CampaignType = {
+  id: string;
+  name: string;
+  status: string;
+  startDate?: string | null;
+  endDate?: string | null;
+};
 
 function MarketplacePage() {
   const router = useRouter();
@@ -75,6 +103,14 @@ function MarketplacePage() {
   const [searchTerm, setSearchTerm] = useState<string>('');
   // Add state for the search term that triggers the API call
   const [appliedSearchTerm, setAppliedSearchTerm] = useState<string>('');
+
+  // --- State for Bulk Add Dialog (Task 2.1 - Bulk) ---
+  const [isBulkAddDialogOpen, setIsBulkAddDialogOpen] = useState(false);
+  const [bulkCampaignsList, setBulkCampaignsList] = useState<CampaignType[]>([]);
+  const [bulkSelectedCampaignId, setBulkSelectedCampaignId] = useState<string | null>(null);
+  const [isFetchingBulkCampaigns, setIsFetchingBulkCampaigns] = useState(false);
+  const [isBulkAddingToCampaign, setIsBulkAddingToCampaign] = useState(false);
+  // --- End State for Bulk Add Dialog ---
 
   // --- Data Fetching ---
   const fetchData = useCallback(
@@ -203,10 +239,159 @@ function MarketplacePage() {
     setIsFiltersSheetOpen(false);
   }, []);
 
-  // REMOVE handleAddToCampaign callback
-  // const handleAddToCampaign = useCallback(() => {
-  //   // ... removed logic ...
-  // }, [wizard, selectedIds, router, isWizardJourney]);
+  // --- Logic for Bulk Add Dialog (Task 2.3) ---
+  const fetchBulkCampaignsForDropdown = useCallback(async () => {
+    // Only fetch if dialog is open
+    if (!isBulkAddDialogOpen) return;
+    // Simple check: If list already has items, don't refetch. User can close/reopen to refresh.
+    if (bulkCampaignsList.length > 0) return;
+
+    logger.info('[MarketplacePage] Fetching campaigns for Bulk Add dialog...');
+    setIsFetchingBulkCampaigns(true);
+    try {
+      const response = await fetch('/api/campaigns/selectable-list'); // Use the same endpoint
+      const data = await response.json();
+      if (response.ok && data.success) {
+        setBulkCampaignsList(data.data || []);
+        if (data.data.length === 0) {
+          toast('No draft or active campaigns available.');
+        }
+      } else {
+        logger.error(
+          '[MarketplacePage] Failed to fetch selectable campaigns for bulk add:',
+          data.error
+        );
+        toast.error(data.error || 'Failed to load campaigns.');
+        setBulkCampaignsList([]);
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Network or fetch error';
+      logger.error('[MarketplacePage] Error fetching campaigns for bulk add:', err);
+      toast.error(`Failed to load campaigns: ${message}`);
+      setBulkCampaignsList([]);
+    } finally {
+      setIsFetchingBulkCampaigns(false);
+    }
+  }, [isBulkAddDialogOpen, bulkCampaignsList.length]); // Dependency includes length to re-evaluate if list is empty
+
+  // Effect to fetch campaigns when the bulk add dialog opens
+  useEffect(() => {
+    if (isBulkAddDialogOpen) {
+      fetchBulkCampaignsForDropdown();
+    }
+  }, [isBulkAddDialogOpen, fetchBulkCampaignsForDropdown]);
+
+  // --- handleBulkAddToCampaignSubmit function (Task 2.3) - Updated Error Handling ---
+  const handleBulkAddToCampaignSubmit = async () => {
+    if (!bulkSelectedCampaignId || selectedIds.length === 0) {
+      toast.error('Please select a campaign and at least one influencer.');
+      return;
+    }
+
+    setIsBulkAddingToCampaign(true);
+    const loadingToastId = toast.loading(`Adding ${selectedIds.length} influencers...`);
+
+    // Prepare payload by mapping selected IDs to required data
+    const influencerPayload: Array<{ handle: string; platform: PlatformEnum }> = [];
+    const skippedInfluencers: { handle: string | null; reason: string }[] = [];
+
+    for (const id of selectedIds) {
+      const influencer = influencers.find(inf => inf.id === id);
+      if (!influencer) {
+        logger.warn(
+          `[MarketplacePage] BulkAdd: Could not find influencer data for selected ID: ${id}`
+        );
+        skippedInfluencers.push({ handle: `ID ${id}`, reason: 'Data not found' });
+        continue;
+      }
+
+      let platformToSubmit: PlatformEnum;
+      if (appliedFilters.platforms && appliedFilters.platforms.length === 1) {
+        platformToSubmit = appliedFilters.platforms[0];
+      } else if (influencer.platforms && influencer.platforms.length > 0) {
+        platformToSubmit = influencer.platforms[0];
+        if (
+          influencer.platforms.length > 1 &&
+          !(appliedFilters.platforms && appliedFilters.platforms.length === 1)
+        ) {
+          logger.info(
+            `[MarketplacePage] BulkAdd: Multiple platforms for ${influencer.handle}, using first: ${platformToSubmit}`
+          );
+        }
+      } else {
+        logger.error(
+          `[MarketplacePage] BulkAdd: Cannot determine platform for influencer: ${influencer.handle} (ID: ${id})`
+        );
+        skippedInfluencers.push({ handle: influencer.handle, reason: 'Missing platform' });
+        continue;
+      }
+
+      influencerPayload.push({
+        handle: influencer.handle || 'Unknown Handle',
+        platform: platformToSubmit,
+      });
+    }
+
+    // Check if any influencers were skipped and inform user
+    if (skippedInfluencers.length > 0) {
+      const skippedHandles = skippedInfluencers.map(s => s.handle || 'Unknown').join(', ');
+      toast.error(
+        `Could not process: ${skippedHandles}. Reason(s): ${[...new Set(skippedInfluencers.map(s => s.reason))].join(', ')}`,
+        {
+          duration: 6000, // Longer duration for error message
+        }
+      );
+      // Continue if some influencers are still valid
+      if (influencerPayload.length === 0) {
+        toast.dismiss(loadingToastId); // Dismiss loading if nothing to send
+        setIsBulkAddingToCampaign(false);
+        return; // Stop if no valid influencers left
+      }
+    }
+
+    const payload = { influencers: influencerPayload };
+
+    try {
+      const response = await fetch(
+        `/api/campaigns/${bulkSelectedCampaignId}/influencers/bulk-add`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        toast.success(result.message || 'Bulk add operation completed.', { id: loadingToastId });
+        setIsBulkAddDialogOpen(false); // Close dialog
+        setSelectedIds([]); // Clear selection on success
+        setBulkSelectedCampaignId(null); // Reset campaign selection
+      } else {
+        logger.error('[MarketplacePage] Failed to bulk add influencers:', result);
+        toast.error(result.error || result.message || 'Failed to bulk add influencers.', {
+          id: loadingToastId,
+        });
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Network or submission error';
+      logger.error('[MarketplacePage] Error submitting bulk add:', err);
+      toast.error(`Error: ${message}`, { id: loadingToastId });
+    } finally {
+      setIsBulkAddingToCampaign(false);
+    }
+  };
+  // --- End handleBulkAddToCampaignSubmit ---
+
+  // --- Effects ---
+  useEffect(() => {
+    fetchData(currentPage, appliedFilters, appliedSearchTerm);
+  }, [currentPage, appliedFilters, appliedSearchTerm, fetchData]);
+
+  // --- End Logic for Bulk Add Dialog is implicitly covered by the functions above/below ---
 
   const totalPages = Math.ceil(totalInfluencers / limit);
 
@@ -244,8 +429,93 @@ function MarketplacePage() {
             </SheetContent>
           </Sheet>
 
-          {/* REMOVE Add to Campaign Button */}
-          {/* {isWizardJourney && ( ... )} */}
+          {/* Bulk Add to Campaign Button and Dialog - NEW FOR TASK 2.2 */}
+          {selectedIds.length > 0 && (
+            <AlertDialog open={isBulkAddDialogOpen} onOpenChange={setIsBulkAddDialogOpen}>
+              <AlertDialogTrigger asChild>
+                <Button
+                  size="sm"
+                  className="bg-accent hover:bg-accent/90 text-white" // Applied requested styling
+                  onClick={() => {
+                    setBulkSelectedCampaignId(null); // Reset selection
+                    // fetchBulkCampaignsForDropdown(); // Will be called by useEffect
+                    setIsBulkAddDialogOpen(true);
+                  }}
+                  disabled={isLoading} // Disable if page is loading
+                >
+                  Add {selectedIds.length} to Campaign
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    Add {selectedIds.length} Influencers to Campaign
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Select a campaign to add the selected influencers to.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+
+                <div className="py-2">
+                  <label
+                    htmlFor="bulk-campaign-select"
+                    className="block text-sm font-medium text-gray-900 mb-1"
+                  >
+                    Campaign
+                  </label>
+                  {isFetchingBulkCampaigns ? (
+                    <Skeleton className="h-10 w-full rounded-md" />
+                  ) : bulkCampaignsList.length === 0 ? (
+                    <p className="text-sm text-gray-500 py-2">
+                      {isFetchingBulkCampaigns ? '' : 'No draft or active campaigns found.'}{' '}
+                      {/* Avoid double message during fetch */}
+                    </p>
+                  ) : (
+                    <Select
+                      onValueChange={setBulkSelectedCampaignId}
+                      value={bulkSelectedCampaignId || ''}
+                      disabled={isFetchingBulkCampaigns}
+                    >
+                      <SelectTrigger id="bulk-campaign-select" className="w-full">
+                        <SelectValue placeholder="Select a campaign..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {bulkCampaignsList.map(campaign => (
+                          <SelectItem key={campaign.id} value={campaign.id}>
+                            {campaign.name}{' '}
+                            <span className="text-xs opacity-70 ml-2">({campaign.status})</span>
+                            {campaign.startDate && campaign.endDate && (
+                              <span className="text-xs opacity-50 ml-2">
+                                {new Date(campaign.startDate).toLocaleDateString()} -{' '}
+                                {new Date(campaign.endDate).toLocaleDateString()}
+                              </span>
+                            )}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+
+                <AlertDialogFooter>
+                  <AlertDialogCancel
+                    onClick={() => setIsBulkAddDialogOpen(false)}
+                    disabled={isBulkAddingToCampaign}
+                  >
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleBulkAddToCampaignSubmit} // Wire up the handler here
+                    disabled={
+                      isBulkAddingToCampaign || isFetchingBulkCampaigns || !bulkSelectedCampaignId
+                    }
+                  >
+                    {isBulkAddingToCampaign ? 'Adding...' : 'Add Influencers'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
         </div>
       </div>
 

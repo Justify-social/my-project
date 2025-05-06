@@ -42,7 +42,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { toast } from 'sonner';
+import { toast } from 'react-hot-toast';
 
 // Helper function to get enum key from value (case-insensitive)
 function getPlatformEnumFromString(value: string | null): PlatformEnum | null {
@@ -145,27 +145,27 @@ export default function InfluencerProfilePage() {
     logger.info('[ProfilePage] Fetching campaigns for Add to Campaign dialog...');
     setIsFetchingCampaigns(true);
     try {
-      const response = await fetch('/api/campaigns/selectable-list'); // API from Task 1.1
+      const response = await fetch('/api/campaigns/selectable-list');
       const data = await response.json();
       if (response.ok && data.success) {
         setCampaignsList(data.data || []);
         if (data.data.length === 0) {
-          toast.info('No draft or active campaigns available to add this influencer to.');
+          toast('No draft or active campaigns available to add this influencer to.');
         }
       } else {
         logger.error('[ProfilePage] Failed to fetch selectable campaigns:', data.error);
         toast.error(data.error || 'Failed to load campaigns for dropdown.');
-        setCampaignsList([]); // Clear list on error
+        setCampaignsList([]);
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Network or fetch error';
       logger.error('[ProfilePage] Error fetching selectable campaigns:', err);
       toast.error(`Failed to load campaigns: ${message}`);
-      setCampaignsList([]); // Clear list on error
+      setCampaignsList([]);
     } finally {
       setIsFetchingCampaigns(false);
     }
-  }, [isAddCampaignDialogOpen]); // Add campaignsList to dependency array if we implement conditional refetching
+  }, [isAddCampaignDialogOpen]);
 
   // Effect to fetch campaigns when the dialog opens
   useEffect(() => {
@@ -208,21 +208,10 @@ export default function InfluencerProfilePage() {
       }
     }
 
-    // Use influencer.profileId as the marketplaceInfluencerId, assuming it's the unique stable ID.
-    // The plan also mentioned influencer.id, ensure profileId is the correct one from InfluencerProfileData.
-    const marketplaceInfluencerIdToSubmit = influencer.profileId;
-    if (!marketplaceInfluencerIdToSubmit) {
-      toast.error('Marketplace Influencer ID is missing.');
-      logger.error(
-        '[ProfilePage] AddToCampaign: Missing influencer.profileId for marketplaceInfluencerId.'
-      );
-      return;
-    }
-
+    // Payload now only needs handle and platform
     const payload = {
       handle: influencer.handle,
-      platform: platformToSubmit, // This should be the string enum value, e.g., "INSTAGRAM"
-      marketplaceInfluencerId: marketplaceInfluencerIdToSubmit,
+      platform: platformToSubmit,
     };
 
     logger.info('[ProfilePage] Submitting Add to Campaign:', {
@@ -230,7 +219,7 @@ export default function InfluencerProfilePage() {
       payload,
     });
     setIsAddingToCampaign(true);
-    const addingToastId = toast.loading('Adding influencer to campaign...');
+    const addCampaignToastId = toast('Adding influencer to campaign...');
 
     try {
       const response = await fetch(`/api/campaigns/${selectedCampaignId}/influencers`, {
@@ -245,7 +234,7 @@ export default function InfluencerProfilePage() {
 
       if (response.ok && result.success) {
         toast.success(result.message || 'Influencer added to campaign successfully!', {
-          id: addingToastId,
+          id: addCampaignToastId,
         });
         setIsAddCampaignDialogOpen(false); // Close dialog on success
         // Optionally reset selections, though dialog closing might be enough
@@ -254,13 +243,13 @@ export default function InfluencerProfilePage() {
       } else {
         logger.error('[ProfilePage] Failed to add influencer to campaign:', result);
         toast.error(result.error || result.message || 'Failed to add influencer.', {
-          id: addingToastId,
+          id: addCampaignToastId,
         });
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Network or submission error';
       logger.error('[ProfilePage] Error submitting Add to Campaign:', err);
-      toast.error(`Error: ${message}`, { id: addingToastId });
+      toast.error(`Error: ${message}`, { id: addCampaignToastId });
     } finally {
       setIsAddingToCampaign(false);
     }
@@ -357,7 +346,7 @@ export default function InfluencerProfilePage() {
     const sampleReportUrl = '/Jonathan+Mark+Doe.pdf'; // Relative path in /public
 
     // Directly simulate the async process and show PDF
-    const generatingToastId = toast.loading('Generating sample report...');
+    const generatingToastId = toast('Generating sample report...');
 
     try {
       // Simulate delay for Sandbox/testing

@@ -57,13 +57,13 @@ model Influencer {
   id             String         @id
   platform       Platform
   handle         String
-  platformId     String?
   campaignId     String
   createdAt      DateTime       @default(now())
   updatedAt      DateTime
   CampaignWizard CampaignWizard @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@index([campaignId])
+  @@unique([campaignId, handle, platform])
 }
 
 model WizardHistory {
