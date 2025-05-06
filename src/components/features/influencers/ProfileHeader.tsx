@@ -139,15 +139,31 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         {/* Right Section: Score, Verification, Quality */}
         <div className="w-full md:w-auto space-y-3 md:text-right pt-2 md:pt-0 flex flex-col items-end">
           {/* Justify Score - Enhanced Display inside its own container */}
-          <div className="flex flex-col items-center justify-center bg-muted p-3 rounded-lg min-w-[100px]">
-            <span className="text-xs text-muted-foreground mb-1">Justify Score</span>
-            <div className="flex items-center justify-center gap-2">
-              <Icon iconId="appJustify" className="h-5 w-5 text-primary" /> {/* App Icon */}
-              <span className="text-2xl font-bold text-primary">
-                {typeof justifyScore === 'number' ? justifyScore.toFixed(1) : 'N/A'}
-              </span>
-            </div>
-          </div>
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex flex-col items-center justify-center bg-muted p-3 rounded-lg min-w-[100px] cursor-help">
+                  <span className="text-xs text-muted-foreground mb-1">Justify Score</span>
+                  <div className="flex items-center justify-center gap-2">
+                    <Icon iconId="appJustify" className="h-5 w-5 text-primary" /> {/* App Icon */}
+                    <span className="text-2xl font-bold text-primary">
+                      {typeof justifyScore === 'number' ? justifyScore.toFixed(1) : 'N/A'}
+                    </span>
+                  </div>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs text-left">
+                <p className="text-sm">
+                  <strong>Justify Score (V2):</strong> Calculated based on audience credibility,
+                  account verification, engagement quality, and follower data.
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  This score provides a comprehensive view of an influencer's overall quality and
+                  potential.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
 
           {/* Verification Badge */}
           {isVerified && (

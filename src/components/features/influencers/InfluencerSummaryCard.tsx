@@ -160,16 +160,22 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
             data-testid="justify-score"
           >
             {influencer.justifyScore ?? 'N/A'}
-            <TooltipProvider>
+            <TooltipProvider delayDuration={300}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  {/* Use iconId prop - Use Justify App Icon */}
                   <span className="inline-block ml-1 cursor-help">
                     <Icon iconId="appJustify" className="h-3 w-3 text-gray-400" size="xs" />
                   </span>
                 </TooltipTrigger>
-                <TooltipContent>
-                  <p>Score based on relevance, engagement, safety, and consistency.</p>
+                <TooltipContent className="max-w-xs text-left">
+                  <p className="text-sm">
+                    <strong>Justify Score (Discovery):</strong> Based on verification, followers,
+                    and engagement rate.
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    View full profile for a more comprehensive Justify Score including audience
+                    credibility.
+                  </p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

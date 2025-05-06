@@ -4,7 +4,7 @@ import { InsightIQProfile, InsightIQSearchProfile } from '@/types/insightiq';
 import { InfluencerProfileData, InfluencerSummary } from '@/types/influencer';
 import { PlatformEnum } from '@/types/enums';
 import { logger } from '@/utils/logger';
-import { calculateJustifyScoreV1 } from '@/lib/scoringService'; // Ensure V1 is imported
+import { calculateDiscoveryScore, calculateFullJustifyScore } from '@/lib/scoringService';
 import { getInsightIQWorkPlatformId } from '@/lib/insightiqUtils';
 import { Platform as PlatformBackend } from '@prisma/client';
 import { getProfileUniqueId } from '@/lib/insightiqService';
@@ -85,6 +85,12 @@ export const mapInsightIQProfileToInfluencerProfileData = (
   const name = profile.full_name ?? handle ?? uniqueId ?? 'Unknown Name';
   const platformEnum = mapInsightIQPlatformToEnum(profile.work_platform?.name);
 
+  logger.debug('[mapInsightIQProfileToInfluencerProfileData] Raw InsightIQ Profile:', profile);
+  const calculatedScore = calculateFullJustifyScore(profile);
+  logger.debug(
+    `[mapInsightIQProfileToInfluencerProfileData] Calculated Score for ${uniqueId}: ${calculatedScore}`
+  );
+
   const profileData: InfluencerProfileData = {
     id: uniqueId,
     name: name,
@@ -92,7 +98,7 @@ export const mapInsightIQProfileToInfluencerProfileData = (
     avatarUrl: profile.image_url ?? null,
     platforms: platformEnum ? [platformEnum] : [],
     followersCount: profile.reputation?.follower_count ?? null,
-    justifyScore: calculateJustifyScoreV1(profile),
+    justifyScore: calculatedScore,
     isVerified: profile.is_verified ?? false,
     isBusinessAccount: profile.is_business ?? profile.platform_account_type === 'BUSINESS',
     primaryAudienceLocation: profile.country ?? profile.creator_location?.country ?? null,
@@ -167,16 +173,19 @@ export const mapInsightIQProfileToInfluencerSummary = (
     };
   }
 
-  // Map fields based on available data from /search response
-  // Adjust the type of summary to match the return type
+  logger.debug('[mapInsightIQProfileToInfluencerSummary] Raw InsightIQ Search Profile:', profile);
+  const calculatedSummaryScore = calculateDiscoveryScore(profile);
+  logger.debug(
+    `[mapInsightIQProfileToInfluencerSummary] Calculated Score for ${profile.platform_username}: ${calculatedSummaryScore}`
+  );
+
   const summary: Omit<InfluencerSummary, 'id' | 'platformEnum'> & { platformEnum: PlatformEnum } = {
     name: profile.full_name ?? handle ?? 'Unknown Name',
     handle: handle,
     avatarUrl: profile.image_url ?? null,
     platforms: [platformEnum], // Keep original platform array for display
-    // Access follower_count directly from InsightIQSearchProfile
     followersCount: profile.follower_count ?? null,
-    justifyScore: calculateJustifyScoreV1(profile), // Pass profile data to scoring function (which now handles this type)
+    justifyScore: calculatedSummaryScore,
     isVerified: profile.is_verified ?? false,
     isBusinessAccount: profile.platform_account_type === 'BUSINESS',
     primaryAudienceLocation: profile.creator_location?.country ?? null,

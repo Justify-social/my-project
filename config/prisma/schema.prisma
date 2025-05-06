@@ -370,13 +370,13 @@ model MarketplaceInfluencer {
   avatarUrl                 String?
   platforms                 Platform[]
   followersCount            Int?
-  justifyScore              Float?
+  justifyScore              Float?    // Persisted Full Justify Score (V2)
   isInsightIQVerified       Boolean?  // Renamed from isPhylloVerified
   primaryAudienceLocation String?
   primaryAudienceAgeRange String?
   primaryAudienceGender     String?
   engagementRate            Float?
-  audienceQualityIndicator  String?
+  audienceQualityIndicator  String?   // Persisted High/Medium/Low indicator
   bio                       String?
   contactEmail              String?
   insightiqUserId           String?   @unique // Renamed from phylloUserId, Link to InsightIQ User concept
@@ -387,6 +387,10 @@ model MarketplaceInfluencer {
   insightiqDataLastRefreshedAt DateTime? // Renamed from phylloDataLastRefreshedAt
   searchIdentifier          String?   @unique // Unique identifier derived from /search API (external_id or composite key)
   platformSpecificId        String?   // Actual platform_profile_id from InsightIQ detail view (SSOT)
+
+  // Justify Score & Audience Quality
+  justifyScore              Float?    // Persisted Full Justify Score (V2)
+  audienceQualityIndicator  String?   // Persisted High/Medium/Low indicator
 
   insightiqAccountLinks     InsightIQAccountLink[] // Renamed relation
 

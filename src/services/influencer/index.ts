@@ -4,7 +4,7 @@
 import { InfluencerSummary, InfluencerProfileData, AudienceDemographics } from '@/types/influencer';
 import { PlatformEnum } from '@/types/enums';
 import { logger } from '@/utils/logger';
-import { Platform as PlatformBackend, PrismaClient } from '@prisma/client';
+import { Platform as PlatformBackend, Prisma, PrismaClient } from '@prisma/client';
 // TODO: Add InsightIQ enrichment if needed for summaries
 // Import needed service and mapping functions
 import {
@@ -25,6 +25,7 @@ import {
   mapPrismaInfluencerToSummary,
 } from '@/lib/data-mapping/influencer';
 import { getInsightIQWorkPlatformId } from '@/lib/insightiqUtils';
+import { calculateDiscoveryScore, calculateFullJustifyScore } from '@/lib/scoringService';
 
 const prisma = new PrismaClient();
 
@@ -52,6 +53,37 @@ interface InsightIQProfileFilters {
   // NOTE: InsightIQ search doesn't directly filter by audience quality.
   // This filtering will happen on our backend using stored/calculated data.
 }
+
+/**
+ * Maps an InsightIQ platform name string to our PlatformEnum.
+ * Logs a warning for unmapped platforms.
+ * @param platformName - The platform name string from InsightIQ.
+ * @returns The corresponding PlatformEnum or null if unmapped.
+ */
+const mapInsightIQPlatformToEnum = (
+  platformName: string | null | undefined
+): PlatformEnum | null => {
+  if (!platformName) return null;
+  const lowerPlatformName = platformName.toLowerCase();
+  switch (lowerPlatformName) {
+    case 'instagram':
+      return PlatformEnum.Instagram;
+    case 'youtube':
+      return PlatformEnum.YouTube;
+    case 'tiktok':
+      return PlatformEnum.TikTok;
+    case 'x':
+    case 'twitter':
+      return PlatformEnum.Twitter;
+    case 'facebook':
+      return PlatformEnum.Facebook;
+    case 'twitch':
+      return PlatformEnum.Twitch;
+    default:
+      logger.warn(`[mapInsightIQPlatformToEnum] Unmapped platform: ${platformName}`);
+      return null;
+  }
+};
 
 /**
  * Defines the interface for the influencer service.
@@ -105,19 +137,21 @@ export interface IInfluencerService {
   /** @deprecated Use getAndMapProfileByHandleAndPlatform */
   getAndMapProfileByHandle(handle: string): Promise<InfluencerProfileData | null>;
 
-  // Add interfaces for persistence methods
-  saveProfileIdToDatabase(
-    profileData: Pick<
-      InfluencerProfileData,
-      'id' | 'handle' | 'platformSpecificId' | 'name' | 'avatarUrl' | 'platforms'
-    > & { audienceQualityIndicator?: string | null }
+  // Update interface to expect the full profile for saving score/quality
+  saveAnalysedProfileData(
+    profile: InsightIQProfileWithAnalytics // Expect the full data object
   ): Promise<void>;
 
-  getStoredDataFromDatabase(
-    uniqueIds: string[] // Lookup by unique ID (external_id or composite)
-  ): Promise<
-    Record<string, { platformSpecificId: string | null; audienceQualityIndicator: string | null }>
-  >; // Map unique ID -> stored data
+  getStoredDataFromDatabase(uniqueIds: string[]): Promise<
+    Record<
+      string,
+      {
+        platformSpecificId: string | null;
+        audienceQualityIndicator: string | null;
+        justifyScore: number | null; // Add score here
+      }
+    >
+  >;
 
   // Add definition for the new risk report request method
   requestRiskReport(identifier: string, platform: string): Promise<boolean>;
@@ -404,24 +438,55 @@ const apiService: IInfluencerService = {
       // --- Apply Backend Filtering (Audience Quality & Score) ---
       let filteredSummaries = summaries;
 
-      /* // Temporarily comment out backend filtering
-      // Apply Audience Quality Filter
-      if (filters.audienceQuality) {
-        const qualityFilter = filters.audienceQuality;
-        logger.info(`[getProcessedInfluencerList] Applying backend filter for Audience Quality: ${qualityFilter}`);
-        filteredSummaries = filteredSummaries.filter(summary => {
-          const indicator = summary.audienceQualityIndicator;
-          if (!indicator) return false;
-          if (qualityFilter === 'High') return indicator === 'High';
-          if (qualityFilter === 'Medium') return indicator === 'Medium' || indicator === 'High';
-          return true;
+      // --- Filter by Score (using calculated Discovery Score for now) ---
+      if (filters.minScore !== undefined || filters.maxScore !== undefined) {
+        logger.info(`[getProcessedInfluencerList] Applying backend filter for Justify Score`, {
+          min: filters.minScore,
+          max: filters.maxScore,
         });
-        logger.info(`[getProcessedInfluencerList] ${filteredSummaries.length} summaries remain after Audience Quality filter.`);
+        filteredSummaries = filteredSummaries.filter(summary => {
+          const score = summary.justifyScore; // Using the discovery score calculated earlier
+          if (score === null) return false; // Exclude if no score could be calculated
+          const minOk = filters.minScore === undefined || score >= filters.minScore;
+          const maxOk = filters.maxScore === undefined || score <= filters.maxScore;
+          return minOk && maxOk;
+        });
+        logger.info(
+          `[getProcessedInfluencerList] ${filteredSummaries.length} summaries remain after Score filter.`
+        );
       }
-      */ // End temporary comment out
-      // --------------------------------------------------
+      // --- End Score Filter ---
 
-      // Apply pagination to the *final filtered* list
+      // --- Enrich with Persisted V2 Data ---
+      const idsToEnrich = filteredSummaries.map(s => s.id).filter(Boolean);
+      if (idsToEnrich.length > 0) {
+        logger.debug(
+          `[getProcessedInfluencerList] Fetching stored V2 data for ${idsToEnrich.length} influencers.`
+        );
+        const storedDataMap = await this.getStoredDataFromDatabase(idsToEnrich);
+        filteredSummaries = filteredSummaries.map(summary => {
+          const storedData = summary.id ? storedDataMap[summary.id] : null;
+          if (storedData) {
+            // Overwrite with persisted data if available
+            const updatedSummary = { ...summary };
+            if (storedData.justifyScore !== null) {
+              updatedSummary.justifyScore = storedData.justifyScore;
+            }
+            if (storedData.audienceQualityIndicator !== null) {
+              updatedSummary.audienceQualityIndicator = storedData.audienceQualityIndicator as
+                | 'High'
+                | 'Medium'
+                | 'Low';
+            }
+            return updatedSummary;
+          }
+          return summary;
+        });
+        logger.debug(`[getProcessedInfluencerList] Enrichment complete.`);
+      }
+      // --- End Enrichment ---
+
+      // Apply pagination to the *final enriched and filtered* list
       const paginatedSummaries = filteredSummaries.slice(offset, offset + pagination.limit);
 
       logger.info(
@@ -551,11 +616,20 @@ const apiService: IInfluencerService = {
         return null;
       }
 
-      const baseProfile = detailedProfile;
-      const identifierForMapping = baseProfile.external_id ?? handle;
+      // Call saveAnalysedProfileData in the background (don't await)
+      // Pass the RAW detailedProfile fetched from InsightIQ
+      this.saveAnalysedProfileData(detailedProfile).catch(dbError => {
+        logger.error(
+          `[getAndMapProfileByHandleAndPlatform] Background DB save failed for handle ${handle}:`,
+          dbError
+        );
+      });
+
+      // Now, map the detailed profile to the frontend type FOR THE RESPONSE
+      const uniqueIdForMapping = getProfileUniqueId(detailedProfile);
       const mappedData = mapInsightIQProfileToInfluencerProfileData(
         detailedProfile,
-        identifierForMapping
+        uniqueIdForMapping // Pass the calculated unique ID
       );
 
       if (!mappedData) {
@@ -565,24 +639,8 @@ const apiService: IInfluencerService = {
         return null;
       }
 
-      const uniqueId = getProfileUniqueId(baseProfile);
-
-      const finalProfileData: InfluencerProfileData = {
-        ...mappedData,
-        id: uniqueId,
-      };
-
-      this.saveProfileIdToDatabase(finalProfileData).catch(dbError => {
-        logger.error(
-          `[getAndMapProfileByHandleAndPlatform] Background DB save failed for ${uniqueId}:`,
-          dbError
-        );
-      });
-
-      logger.info(
-        `[influencerService] Successfully fetched and mapped profile for ${handle} (from configured endpoint)`
-      );
-      return finalProfileData;
+      logger.info(`[influencerService] Successfully fetched and mapped profile for ${handle}`);
+      return mappedData; // Return the data mapped for the frontend
     } catch (error) {
       logger.error(
         `[influencerService] Error in getAndMapProfileByHandleAndPlatform (from configured endpoint) for handle ${handle}:`,
@@ -603,76 +661,133 @@ const apiService: IInfluencerService = {
     return null;
   },
 
-  async saveProfileIdToDatabase(
-    profileData: Pick<
-      InfluencerProfileData,
-      'id' | 'handle' | 'platformSpecificId' | 'name' | 'avatarUrl' | 'platforms'
-    > & { audienceQualityIndicator?: string | null }
+  // Renamed and refactored function
+  async saveAnalysedProfileData(
+    profile: InsightIQProfileWithAnalytics // Use the correct rich type
   ): Promise<void> {
-    const { id, handle, platformSpecificId, name, avatarUrl, platforms, audienceQualityIndicator } =
-      profileData;
-
-    if (!platformSpecificId || !id) {
+    // Calculate unique ID (composite key) from the profile data itself
+    const uniqueId = getProfileUniqueId(profile);
+    if (!uniqueId) {
       logger.warn(
-        `[influencerService] Cannot save to DB: platformSpecificId or unique identifier (id) is missing`,
-        { handle, id, platformSpecificId }
+        `[influencerService saveAnalysed] Cannot save to DB: failed to get unique identifier`,
+        { profile }
       );
       return;
     }
 
+    // --- Calculate Full Score and Quality Indicator ---
+    const fullScore = calculateFullJustifyScore(profile); // Pass the full profile
+
+    let qualityIndicator: string | null = null;
+    const credibilityScore = profile.audience?.credibility_score;
+    if (typeof credibilityScore === 'number') {
+      if (credibilityScore >= 0.8) qualityIndicator = 'High';
+      else if (credibilityScore >= 0.5) qualityIndicator = 'Medium';
+      else qualityIndicator = 'Low';
+    } else {
+      logger.warn(
+        `[influencerService saveAnalysed] Missing audience.credibility_score for ${uniqueId}, cannot calculate quality indicator.`
+      );
+    }
+    // --- End Calculation ---
+
     logger.info(
-      `[influencerService] Attempting to upsert DB record using uniqueId ${id} with platformSpecificId ${platformSpecificId} and quality: ${audienceQualityIndicator}`
+      `[influencerService saveAnalysed] Attempting to upsert DB record for uniqueId ${uniqueId}`,
+      {
+        platformSpecificId: profile.platform_profile_id,
+        calculatedScore: fullScore,
+        calculatedQuality: qualityIndicator,
+      }
     );
 
     try {
+      // Use the helper function defined at the top level
+      const platformEnum = mapInsightIQPlatformToEnum(profile.work_platform?.name);
+      const backendPlatforms = platformEnum ? [platformEnum as PlatformBackend] : [];
+
       await prisma.marketplaceInfluencer.upsert({
         where: {
-          searchIdentifier: id,
+          searchIdentifier: uniqueId, // Use the composite ID
         },
         update: {
-          platformSpecificId: platformSpecificId,
-          name: name ?? handle ?? id,
-          handle: handle ?? '',
-          avatarUrl: avatarUrl,
-          platforms: platforms?.map(p => p as PlatformBackend) ?? [],
-          audienceQualityIndicator: audienceQualityIndicator,
+          // Map fields carefully from InsightIQProfileWithAnalytics
+          platformSpecificId: profile.platform_profile_id ?? profile.external_id ?? null,
+          name: profile.full_name ?? profile.platform_username ?? uniqueId,
+          handle: profile.platform_username ?? uniqueId.substring(0, 50), // Ensure handle exists
+          avatarUrl: profile.image_url,
+          platforms: backendPlatforms,
+          justifyScore: fullScore, // Store calculated score
+          audienceQualityIndicator: qualityIndicator, // Store calculated indicator
+          isInsightIQVerified: profile.is_verified, // Use is_verified
+          followersCount: profile.reputation?.follower_count,
+          engagementRate: profile.engagement_rate,
+          primaryAudienceLocation: profile.country ?? profile.creator_location?.country, // Combine sources
+          primaryAudienceAgeRange: profile.audience?.gender_age_distribution ? 'See Details' : null, // Indicate data exists
+          primaryAudienceGender: profile.audience?.gender_age_distribution ? 'See Details' : null, // Indicate data exists
           updatedAt: new Date(),
         },
         create: {
-          searchIdentifier: id,
-          platformSpecificId: platformSpecificId,
-          handle: handle ?? id.substring(0, 50),
-          name: name ?? handle ?? id,
-          avatarUrl: avatarUrl,
-          platforms: platforms?.map(p => p as PlatformBackend) ?? [],
-          audienceQualityIndicator: audienceQualityIndicator,
+          searchIdentifier: uniqueId,
+          platformSpecificId: profile.platform_profile_id ?? profile.external_id ?? null,
+          handle: profile.platform_username ?? uniqueId.substring(0, 50),
+          name: profile.full_name ?? profile.platform_username ?? uniqueId,
+          avatarUrl: profile.image_url,
+          platforms: backendPlatforms,
+          justifyScore: fullScore,
+          audienceQualityIndicator: qualityIndicator,
+          isInsightIQVerified: profile.is_verified,
+          followersCount: profile.reputation?.follower_count,
+          engagementRate: profile.engagement_rate,
+          primaryAudienceLocation: profile.country ?? profile.creator_location?.country,
+          primaryAudienceAgeRange: profile.audience?.gender_age_distribution ? 'See Details' : null,
+          primaryAudienceGender: profile.audience?.gender_age_distribution ? 'See Details' : null,
+          audienceDemographics: profile.audience ? (profile.audience as any) : Prisma.JsonNull, // Store raw audience data if exists
           createdAt: new Date(),
           updatedAt: new Date(),
         },
       });
-      logger.info(`[influencerService] Successfully upserted DB record for uniqueId ${id}`);
+      logger.info(
+        `[influencerService saveAnalysed] Successfully upserted DB record for uniqueId ${uniqueId}`
+      );
     } catch (error) {
-      logger.error(`[influencerService] Error upserting DB record for uniqueId ${id}:`, error);
+      logger.error(
+        `[influencerService saveAnalysed] Error upserting DB record for uniqueId ${uniqueId}:`,
+        error
+      );
     }
   },
 
-  async getStoredDataFromDatabase(
-    uniqueIds: string[]
-  ): Promise<
-    Record<string, { platformSpecificId: string | null; audienceQualityIndicator: string | null }>
+  // Update getStoredDataFromDatabase to return the score as well
+  async getStoredDataFromDatabase(uniqueIds: string[]): Promise<
+    Record<
+      string,
+      {
+        platformSpecificId: string | null;
+        audienceQualityIndicator: string | null;
+        justifyScore: number | null; // Added score
+      }
+    >
   > {
     logger.info(
-      `[influencerService] Fetching stored data (platformSpecificId, audienceQualityIndicator) for ${uniqueIds.length} searchIdentifiers`
+      `[influencerService] Fetching stored data (platformSpecificId, audienceQualityIndicator, justifyScore) for ${uniqueIds.length} searchIdentifiers`
     );
     if (uniqueIds.length === 0) return {};
 
-    // Define the expected structure for the return map
     const initialMap: Record<
       string,
-      { platformSpecificId: string | null; audienceQualityIndicator: string | null }
+      {
+        platformSpecificId: string | null;
+        audienceQualityIndicator: string | null;
+        justifyScore: number | null;
+      }
     > = {};
     uniqueIds.forEach(
-      uid => (initialMap[uid] = { platformSpecificId: null, audienceQualityIndicator: null })
+      uid =>
+        (initialMap[uid] = {
+          platformSpecificId: null,
+          audienceQualityIndicator: null,
+          justifyScore: null,
+        })
     );
 
     try {
@@ -680,26 +795,26 @@ const apiService: IInfluencerService = {
         where: {
           searchIdentifier: { in: uniqueIds },
         },
-        // Select both fields
         select: {
           searchIdentifier: true,
           platformSpecificId: true,
-          audienceQualityIndicator: true, // Add this field
+          audienceQualityIndicator: true,
+          justifyScore: true, // Select the score
         },
       });
 
-      // Populate the map with fetched data
       influencers.forEach(inf => {
         if (inf.searchIdentifier) {
           initialMap[inf.searchIdentifier] = {
             platformSpecificId: inf.platformSpecificId ?? null,
-            audienceQualityIndicator: inf.audienceQualityIndicator ?? null, // Add this field
+            audienceQualityIndicator: inf.audienceQualityIndicator ?? null,
+            justifyScore: inf.justifyScore ?? null, // Add the score
           };
         }
       });
 
       const foundCount = Object.values(initialMap).filter(
-        d => d.platformSpecificId || d.audienceQualityIndicator
+        d => d.platformSpecificId || d.audienceQualityIndicator || d.justifyScore !== null
       ).length;
       logger.debug(
         `[influencerService] Found stored data for ${foundCount} out of ${uniqueIds.length} identifiers.`
@@ -707,7 +822,7 @@ const apiService: IInfluencerService = {
       return initialMap;
     } catch (error) {
       logger.error(`[influencerService] Failed to fetch stored data:`, error);
-      return initialMap; // Return the initial map (all nulls) on error
+      return initialMap;
     }
   },
 
