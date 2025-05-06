@@ -995,6 +995,17 @@ export async function verifyCintExchangeApiServerSide(): Promise<ApiVerification
       audience: audience,
     };
 
+    // +++ START NEW LOGGING +++
+    logger.info(
+      `[Server Verify] Cint - DEBUG: Using Client ID (start): ${clientId?.substring(0, 4)}`
+    );
+    logger.info(`[Server Verify] Cint - DEBUG: Client Secret length: ${clientSecret?.length}`);
+    const requestBodyString = JSON.stringify(requestBody);
+    logger.info(
+      `[Server Verify] Cint - DEBUG: Stringified Request Body: ${requestBodyString.replace(clientSecret, 'REDACTED')}`
+    );
+    // +++ END NEW LOGGING +++
+
     logger.info(
       `[Server Verify] Cint - Request Body: ${JSON.stringify(requestBody, (key, value) => (key === 'client_secret' ? 'REDACTED' : value))}`
     );
@@ -1003,7 +1014,6 @@ export async function verifyCintExchangeApiServerSide(): Promise<ApiVerification
     const headers = {
       'Content-Type': 'application/json',
       'Cint-API-Version': '2025-02-17',
-      ...(accountId && { 'X-Account-ID': accountId }),
     };
 
     logger.info(`[Server Verify] Cint - Request Headers: ${JSON.stringify(headers)}`);
@@ -1113,8 +1123,6 @@ export async function verifyCintExchangeApiServerSide(): Promise<ApiVerification
       headers: {
         Authorization: authToken,
         'Content-Type': 'application/json',
-        // Add the X-Account-ID header if accountId is available
-        ...(accountId && { 'X-Account-ID': accountId }),
       },
     });
 
