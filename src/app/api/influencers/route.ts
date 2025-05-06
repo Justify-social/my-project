@@ -4,8 +4,8 @@ import { PrismaClient, Platform, Prisma, MarketplaceInfluencer } from '@prisma/c
 import { logger } from '@/lib/logger';
 import { InfluencerSummary } from '@/types/influencer'; // Use our frontend type
 import { calculatePagination } from '@/lib/paginationUtils';
-// Re-import scoring service
-import { calculateJustifyScoreV1 } from '@/lib/scoringService';
+// Remove unused import
+// import { calculateJustifyScoreV1 } from '@/lib/scoringService';
 import { PlatformEnum } from '@/types/enums';
 // Use named export for the new function
 // Import the Profile type directly from its definition file

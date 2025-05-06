@@ -12,8 +12,9 @@ const addInfluencerSchema = z.object({
   // marketplaceInfluencerId: z.string().min(1, { message: 'Marketplace Influencer ID is required' }), // REMOVED
 });
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
-  const campaignId = params.id;
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params; // Await the params Promise
+  const campaignId = resolvedParams.id;
 
   if (!campaignId) {
     return NextResponse.json({ success: false, error: 'Campaign ID is missing' }, { status: 400 });

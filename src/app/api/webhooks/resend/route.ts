@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   }
 
   // --- 1. Signature Verification using Svix ---
-  const headerPayload = headers();
+  const headerPayload = await headers();
   const svix_id = headerPayload.get('svix-id');
   const svix_timestamp = headerPayload.get('svix-timestamp');
   const svix_signature = headerPayload.get('svix-signature');

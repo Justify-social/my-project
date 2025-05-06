@@ -388,10 +388,6 @@ model MarketplaceInfluencer {
   searchIdentifier          String?   @unique // Unique identifier derived from /search API (external_id or composite key)
   platformSpecificId        String?   // Actual platform_profile_id from InsightIQ detail view (SSOT)
 
-  // Justify Score & Audience Quality
-  justifyScore              Float?    // Persisted Full Justify Score (V2)
-  audienceQualityIndicator  String?   // Persisted High/Medium/Low indicator
-
   insightiqAccountLinks     InsightIQAccountLink[] // Renamed relation
 
   @@index([justifyScore])

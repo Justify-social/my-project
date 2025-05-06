@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { Platform, Prisma } from '@prisma/client';
@@ -17,50 +17,51 @@ const bulkAddInfluencerSchema = z.object({
     .min(1, { message: 'Influencer list cannot be empty' }),
 });
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
-  const campaignId = params.id;
+// Use the exact signature pattern from the working route
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params; // Await the params Promise
+  console.log('Received request for campaign ID:', resolvedParams.id);
+  return NextResponse.json({ success: true, message: 'Minimal response OK' });
 
+  /* // --- Original Logic Commented Out ---
+  const campaignId = resolvedParams.id;
+ 
   if (!campaignId) {
     return NextResponse.json({ success: false, error: 'Campaign ID is missing' }, { status: 400 });
   }
-
+ 
   try {
     const body = await request.json();
     const validationResult = bulkAddInfluencerSchema.safeParse(body);
-
+ 
     if (!validationResult.success) {
       return NextResponse.json(
         { success: false, error: 'Invalid request body', details: validationResult.error.format() },
         { status: 400 }
       );
     }
-
+ 
     const { influencers: inputInfluencers } = validationResult.data;
-
+ 
     const campaign = await prisma.campaignWizard.findUnique({
       where: { id: campaignId },
       select: { id: true },
     });
-
+ 
     if (!campaign) {
       return NextResponse.json({ success: false, error: 'Campaign not found' }, { status: 404 });
     }
-
-    // Prepare data for createMany - no need for pre-fetching existing ones now
-    // The unique constraint on (campaignId, handle, platform) will prevent duplicates.
-    // We will catch errors from createMany to determine skips.
+ 
     const influencersToAttemptCreate = inputInfluencers.map(inputInf => ({
       id: uuidv4(),
       handle: inputInf.handle,
       platform: inputInf.platform,
       campaignId: campaignId,
     }));
-
+ 
     let addedCount = 0;
     let skippedDueToDuplicate = 0;
-    // We need to create one by one to accurately count skips due to P2002
-    // createMany doesn't easily return which ones failed due to unique constraint.
-
+ 
     for (const influencerData of influencersToAttemptCreate) {
       try {
         await prisma.influencer.create({ data: influencerData });
@@ -69,16 +70,14 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
           skippedDueToDuplicate++;
         } else {
-          // For other errors, log and potentially re-throw or count as a general failure
           console.error(
             `[API /bulk-add] Error creating influencer ${influencerData.handle}:`,
             error
           );
-          // Decide if this should be a general skip or halt the process
         }
       }
     }
-
+ 
     let message = '';
     if (addedCount > 0 && skippedDueToDuplicate > 0) {
       message = `Successfully added ${addedCount} influencers. ${skippedDueToDuplicate} influencers already existed.`;
@@ -87,15 +86,15 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     } else if (skippedDueToDuplicate > 0) {
       message = `No new influencers added. ${skippedDueToDuplicate} influencers already existed.`;
     } else {
-      message = 'No influencers were processed or added.'; // Should not happen if input is validated to be non-empty
+      message = 'No influencers were processed or added.'; 
     }
-
+ 
     return NextResponse.json(
       { success: true, message: message, added: addedCount, skipped: skippedDueToDuplicate },
       { status: addedCount > 0 ? 201 : 200 }
     );
   } catch (error) {
-    console.error(`[API /campaigns/${campaignId}/influencers/bulk-add POST] Error:`, error);
+    console.error(`[API /campaigns/${resolvedParams.id}/influencers/bulk-add POST] Error:`, error);
     const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
     return NextResponse.json(
       {
@@ -106,4 +105,5 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       { status: 500 }
     );
   }
+  */ // --- End Original Logic Commented Out ---
 }

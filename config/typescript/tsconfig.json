@@ -28,6 +28,13 @@
     "baseUrl": "./",
     "types": ["jest", "node", "@testing-library/jest-dom"]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/types/**/*.d.ts"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "src/types/**/*.d.ts",
+    "src/app/api/campaigns/[id]/influencers/bulk-add/route.ts.backup"
+  ],
   "exclude": ["node_modules", "scripts/ui/preview_backups"]
 }
