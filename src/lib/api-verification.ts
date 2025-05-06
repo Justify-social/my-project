@@ -19,6 +19,8 @@ import {
   getInsightIQProfileById,
   getInsightIQAudience,
 } from '@/lib/insightiqService';
+import { Resend } from 'resend';
+import { UTApi } from 'uploadthing/server';
 
 // Import types from the new shared file
 import type { ApiVerificationResult, ApiErrorInfo } from './api-verification-types';
@@ -1204,13 +1206,6 @@ export async function verifyCintExchangeApiServerSide(): Promise<ApiVerification
       `[Server Verify] ${apiName} verification failed with network/fetch error on resource call:`,
       errorMessage
     );
-    if (fetchError instanceof Error) {
-      logger.error('[Server Verify] Cint Resource Fetch Error Details:', {
-        name: fetchError.name,
-        message: fetchError.message,
-        cause: (fetchError as any).cause,
-      });
-    }
     return {
       success: false,
       apiName,
@@ -1228,24 +1223,24 @@ export async function verifyCintExchangeApiServerSide(): Promise<ApiVerification
 
 /**
  * SERVER-SIDE Verify the Uploadthing API
- * Attempts a simple authenticated call using the API secret.
+ * Attempts a simple authenticated call (listFiles with limit 0) using the API token.
  */
 export async function verifyUploadthingApiServerSide(): Promise<ApiVerificationResult> {
   const apiName = 'Uploadthing API';
-  const baseUrl = 'https://uploadthing.com/api';
-  const testEndpoint = `${baseUrl}/whoami`; // Placeholder - find a real simple endpoint
+  // Endpoint is conceptual now, as we use the SDK method
+  const endpoint = 'utapi.listFiles({ limit: 0 })';
 
-  const token = serverConfig.uploadthing.token; // Use the token from config
+  const token = process.env.UPLOADTHING_TOKEN; // Directly access env var
 
   if (!token) {
     return {
       success: false,
       apiName,
-      endpoint: testEndpoint,
+      endpoint,
       error: {
         type: ApiErrorType.AUTHENTICATION_ERROR,
-        message: 'Missing Uploadthing API token in server configuration.',
-        details: 'Check server-config.ts and ensure UPLOADTHING_TOKEN is set.',
+        message: 'Missing Uploadthing API token (UPLOADTHING_TOKEN) in environment variables.',
+        details: 'Please set UPLOADTHING_TOKEN in your .env file.',
         isRetryable: false,
       },
     };
@@ -1253,95 +1248,64 @@ export async function verifyUploadthingApiServerSide(): Promise<ApiVerificationR
 
   const startTime = Date.now();
   try {
-    console.info(`[Server Verify] Testing ${apiName} endpoint: ${testEndpoint}`);
+    logger.info(`[Server Verify] Testing ${apiName} using listFiles`);
 
-    // Revert to standard Bearer token authorization while investigating token value/docs
-    const headers = {
-      Authorization: `Bearer ${token}`, // Revert to Bearer token
-      'Content-Type': 'application/json',
+    // Instantiate UTApi - it should read token from env
+    const utapi = new UTApi();
+
+    // Perform a minimal read operation
+    const listResult = await utapi.listFiles({ limit: 0 });
+    const latency = Date.now() - startTime;
+
+    // If listFiles succeeds without throwing, the token is valid
+    logger.info(`[Server Verify] ${apiName} verification successful`, { latency });
+    return {
+      success: true,
+      apiName,
+      endpoint,
+      latency,
+      data: {
+        status: 'Authenticated & Connected',
+        // listResult might contain info like total count if needed, but status is enough
+      },
     };
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-    // Using POST for /whoami as per potential Uploadthing patterns
-    const response = await fetch(testEndpoint, {
-      method: 'POST', // Often POST even for status checks in Uploadthing
-      signal: controller.signal,
-      headers: headers,
-      body: JSON.stringify({}), // Send empty body for POST
-    });
-
-    clearTimeout(timeoutId);
+  } catch (error: unknown) {
     const latency = Date.now() - startTime;
-    const responseData = await response.json().catch(() => ({}));
-
-    if (response.ok) {
-      console.info(`[Server Verify] ${apiName} verification successful`, {
-        latency,
-        statusCode: response.status,
-      });
-      return {
-        success: true,
-        apiName,
-        endpoint: testEndpoint,
-        latency,
-        data: {
-          status: response.statusText,
-          // Add relevant fields like account ID if present in responseData
-          responseData: responseData,
-        },
-      };
-    } else {
-      // Handle errors
-      let errorType = ApiErrorType.UNKNOWN_ERROR;
-      if (response.status === 401 || response.status === 403) {
-        errorType = ApiErrorType.AUTHENTICATION_ERROR;
-      } // Add other relevant codes
-      else if (response.status >= 500) {
-        errorType = ApiErrorType.SERVER_ERROR;
-      }
-      const isRetryable = [ApiErrorType.SERVER_ERROR].includes(errorType);
-      console.error(`[Server Verify] ${apiName} verification failed with HTTP ${response.status}`);
-      return {
-        success: false,
-        apiName,
-        endpoint: testEndpoint,
-        latency,
-        error: {
-          type: errorType,
-          message: `API returned error status: ${response.status} ${response.statusText}`,
-          details: responseData,
-          isRetryable,
-        },
-      };
-    }
-  } catch (fetchError) {
-    // ... (Standard Fetch/Timeout Error Handling) ...
-    const latency = Date.now() - startTime;
-    let errorType = ApiErrorType.NETWORK_ERROR;
-    let errorMessage = fetchError instanceof Error ? fetchError.message : 'Unknown network error';
+    let errorType = ApiErrorType.UNKNOWN_ERROR;
+    let message = 'An unknown error occurred while verifying Uploadthing.';
+    let details: unknown = error;
     let isRetryable = true;
 
-    if (fetchError instanceof Error && fetchError.name === 'AbortError') {
-      errorType = ApiErrorType.TIMEOUT_ERROR;
-      errorMessage = 'API request timed out after 10000ms';
-      isRetryable = true;
+    // Basic error mapping for potential UTApi errors
+    if (error instanceof Error) {
+      message = error.message;
+      // Check for common error patterns (adjust based on actual errors seen)
+      if (message.includes('Unauthorized') || message.includes('401')) {
+        errorType = ApiErrorType.AUTHENTICATION_ERROR;
+        isRetryable = false;
+      } else if (message.includes('fetch') || message.includes('Network')) {
+        errorType = ApiErrorType.NETWORK_ERROR;
+      } else if (message.includes('timeout')) {
+        errorType = ApiErrorType.TIMEOUT_ERROR;
+      } else if (message.includes('rate limit')) {
+        errorType = ApiErrorType.RATE_LIMIT_ERROR;
+      } // Add specific UploadThing error types if known (e.g., from error.name or error.code)
+
+      details = { errorMessage: message, stack: error.stack, name: error.name };
     }
-    console.error(
-      `[Server Verify] ${apiName} verification failed with network/fetch error:`,
-      errorMessage
-    );
+
+    logger.error(`[Server Verify] ${apiName} verification failed:`, message);
+
     return {
       success: false,
       apiName,
-      endpoint: testEndpoint,
+      endpoint,
       latency: latency > 0 ? latency : undefined,
       error: {
         type: errorType,
-        message: errorMessage,
-        details: fetchError,
-        isRetryable,
+        message: message,
+        details: details,
+        isRetryable: isRetryable,
       },
     };
   }
@@ -1585,25 +1549,23 @@ export async function verifyMuxApiServerSide(): Promise<ApiVerificationResult> {
 }
 
 /**
- * SERVER-SIDE Verify the SendGrid API
- * Attempts to retrieve account details using the API Key.
+ * SERVER-SIDE Verify the Resend API
+ * Attempts to list sending domains to confirm API key validity.
  */
-export async function verifySendGridApiServerSide(): Promise<ApiVerificationResult> {
-  const apiName = 'SendGrid API';
-  const baseUrl = 'https://api.sendgrid.com';
-  const testEndpoint = `${baseUrl}/v3/user/account`;
-
-  const apiKey = serverConfig.sendgrid.apiKey;
+export async function verifyResendApi(): Promise<ApiVerificationResult> {
+  const apiName = 'Resend API';
+  const endpoint = 'resend.domains.list()'; // Conceptual endpoint for logging
+  const apiKey = process.env.RESEND_SECRET;
 
   if (!apiKey) {
     return {
       success: false,
       apiName,
-      endpoint: testEndpoint,
+      endpoint,
       error: {
         type: ApiErrorType.AUTHENTICATION_ERROR,
-        message: 'Missing SendGrid API Key in server configuration.',
-        details: 'Check server-config.ts and ensure SENDGRID_API_KEY is set.',
+        message: 'Missing Resend API Key (RESEND_SECRET) in environment variables.',
+        details: 'Please set RESEND_SECRET in your .env file.',
         isRetryable: false,
       },
     };
@@ -1611,122 +1573,62 @@ export async function verifySendGridApiServerSide(): Promise<ApiVerificationResu
 
   const startTime = Date.now();
   try {
-    logger.info(`[Server Verify] Testing ${apiName} endpoint: ${testEndpoint}`);
-
-    const headers = {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    };
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-    const response = await fetch(testEndpoint, {
-      method: 'GET',
-      signal: controller.signal,
-      headers: headers,
-    });
-
-    clearTimeout(timeoutId);
+    logger.info(`[Server Verify] Testing ${apiName}`);
+    const resend = new Resend(apiKey);
+    const { data: domainsResponseData, error: resendError } = await resend.domains.list();
     const latency = Date.now() - startTime;
-    const responseData = await response.json().catch(() => ({}));
 
-    if (response.ok) {
-      const accountEmail = responseData.email;
-      logger.info(`[Server Verify] ${apiName} verification successful`, {
-        latency,
-        statusCode: response.status,
-        accountEmail: accountEmail,
-      });
-
-      // Prepare data, add warning if email is missing
-      const dataPayload: {
-        status: string;
-        accountEmail?: string;
-        accountUsername?: string;
-        warning?: string;
-      } = {
-        status: response.statusText,
-        accountEmail: responseData.email,
-        accountUsername: responseData.username,
-      };
-      if (!accountEmail) {
-        const warningMessage = `Successful response (HTTP ${response.status}) but missing expected 'email' field.`;
-        logger.warn(`[Server Verify] ${apiName}: ${warningMessage}`, responseData);
-        dataPayload.warning = warningMessage; // Include warning in data for UI
-      }
-
-      return {
-        success: true,
-        apiName,
-        endpoint: testEndpoint,
-        latency,
-        data: dataPayload,
-        // Ensure no error object is sent on success
-        error: undefined,
-      };
-    } else {
-      let errorType = ApiErrorType.UNKNOWN_ERROR;
-      if (response.status === 401 || response.status === 403) {
-        errorType = ApiErrorType.AUTHENTICATION_ERROR;
-      } else if (response.status === 404) {
-        errorType = ApiErrorType.NOT_FOUND_ERROR;
-      } else if (response.status === 429) {
-        errorType = ApiErrorType.RATE_LIMIT_ERROR;
-      } else if (response.status >= 500) {
-        errorType = ApiErrorType.SERVER_ERROR;
-      } else if (response.status >= 400) {
-        errorType = ApiErrorType.VALIDATION_ERROR;
-      }
-
-      const isRetryable = [
-        ApiErrorType.SERVER_ERROR,
-        ApiErrorType.RATE_LIMIT_ERROR,
-        ApiErrorType.TIMEOUT_ERROR,
-        ApiErrorType.NETWORK_ERROR,
-      ].includes(errorType);
-
-      logger.error(
-        `[Server Verify] ${apiName} verification failed with HTTP ${response.status} or invalid data`
-      );
+    if (resendError) {
+      logger.error(`[Server Verify] ${apiName} verification failed: Resend API error`, resendError);
+      const isValidationError = resendError.name === 'validation_error';
       return {
         success: false,
         apiName,
-        endpoint: testEndpoint,
+        endpoint,
         latency,
         error: {
-          type: errorType,
-          message: `API returned error status: ${response.status} ${response.statusText}`,
-          details: responseData,
-          isRetryable,
+          type: isValidationError ? ApiErrorType.VALIDATION_ERROR : ApiErrorType.SERVER_ERROR,
+          message: `Resend API returned an error: ${resendError.message}`,
+          details: resendError,
+          isRetryable: !isValidationError,
         },
       };
     }
-  } catch (fetchError) {
-    const latency = Date.now() - startTime;
-    let errorType = ApiErrorType.NETWORK_ERROR;
-    let errorMessage = fetchError instanceof Error ? fetchError.message : 'Unknown network error';
-    let isRetryable = true;
 
-    if (fetchError instanceof Error && fetchError.name === 'AbortError') {
-      errorType = ApiErrorType.TIMEOUT_ERROR;
-      errorMessage = 'API request timed out after 10000ms';
-      isRetryable = true;
-    }
-    logger.error(
-      `[Server Verify] ${apiName} verification failed with network/fetch error:`,
-      errorMessage
-    );
+    // If there was no error, domainsResponseData contains the object { data: Domain[] }
+    // or it could be null if the API behaves unexpectedly without an error object.
+    const domainList = domainsResponseData?.data || [];
+
+    logger.info(`[Server Verify] ${apiName} verification successful`, {
+      latency,
+      domainCount: domainList.length,
+    });
+    return {
+      success: true,
+      apiName,
+      endpoint,
+      latency,
+      data: {
+        status: 'Authenticated & Connected',
+        verifiedDomains: domainList.map(d => d.name),
+        domainCount: domainList.length,
+      },
+    };
+  } catch (error: unknown) {
+    const latency = Date.now() - startTime;
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown Resend verification error';
+    logger.error(`[Server Verify] ${apiName} verification failed:`, errorMessage, error);
     return {
       success: false,
       apiName,
-      endpoint: testEndpoint,
+      endpoint,
       latency: latency > 0 ? latency : undefined,
       error: {
-        type: errorType,
+        type: ApiErrorType.UNKNOWN_ERROR, // Use a valid ApiErrorType member
         message: errorMessage,
-        details: fetchError,
-        isRetryable,
+        details: error,
+        isRetryable: true,
       },
     };
   }
@@ -1743,5 +1645,5 @@ export default {
   verifyGiphyApi,
   verifyAlgoliaApiServerSide,
   verifyMuxApiServerSide,
-  verifySendGridApiServerSide,
+  verifyResendApi,
 };

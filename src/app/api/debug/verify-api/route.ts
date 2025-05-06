@@ -19,7 +19,7 @@ import {
   verifyGiphyApi,
   verifyAlgoliaApiServerSide,
   verifyMuxApiServerSide,
-  verifySendGridApiServerSide,
+  verifyResendApi,
 } from '@/lib/api-verification';
 
 // Import shared TYPES/ENUMS from the client-safe file
@@ -31,19 +31,19 @@ const ApiNameSchema = z.object({
   apiName: z.string().min(1).optional(),
 });
 
-// List of all verification functions to run for 'Test All'
+// List of all verification functions to run for 'Test All' - Alphabetized
 const ALL_API_VERIFIERS = [
-  { name: 'insightiq', func: verifyInsightIQApi }, // Updated name and function
-  { name: 'stripe', func: verifyStripeApiServerSide },
-  { name: 'cint', func: verifyCintExchangeApiServerSide },
-  { name: 'uploadthing', func: verifyUploadthingApiServerSide },
-  { name: 'database', func: verifyDatabaseConnectionServerSide },
-  { name: 'geolocation', func: verifyGeolocationApi },
-  { name: 'exchange', func: verifyExchangeRatesApi },
-  { name: 'giphy', func: verifyGiphyApi },
-  { name: 'algolia', func: verifyAlgoliaApiServerSide },
-  { name: 'mux', func: verifyMuxApiServerSide },
-  { name: 'sendgrid', func: verifySendGridApiServerSide },
+  { name: 'algolia', func: verifyAlgoliaApiServerSide, category: 'Search' },
+  { name: 'cint', func: verifyCintExchangeApiServerSide, category: 'Surveys' },
+  { name: 'database', func: verifyDatabaseConnectionServerSide, category: 'Infrastructure' },
+  { name: 'exchange', func: verifyExchangeRatesApi, category: 'Utilities' },
+  { name: 'geolocation', func: verifyGeolocationApi, category: 'Utilities' },
+  { name: 'giphy', func: verifyGiphyApi, category: 'Utilities' },
+  { name: 'insightiq', func: verifyInsightIQApi, category: 'Core Platform' },
+  { name: 'mux', func: verifyMuxApiServerSide, category: 'Video' },
+  { name: 'resend', func: verifyResendApi, category: 'Email' },
+  { name: 'stripe', func: verifyStripeApiServerSide, category: 'Payments' },
+  { name: 'uploadthing', func: verifyUploadthingApiServerSide, category: 'File Storage' },
 ];
 
 export async function POST(request: NextRequest) {

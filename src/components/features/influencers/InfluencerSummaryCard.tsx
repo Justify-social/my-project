@@ -169,12 +169,12 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs text-left">
                   <p className="text-sm">
-                    <strong>Justify Score (Discovery):</strong> Based on verification, followers,
-                    and engagement rate.
+                    <strong>Justify Score (V2):</strong> Calculated based on audience credibility,
+                    account verification, engagement quality, and follower data.
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    View full profile for a more comprehensive Justify Score including audience
-                    credibility.
+                    This score provides a comprehensive view of an influencer's overall quality and
+                    potential.
                   </p>
                 </TooltipContent>
               </Tooltip>
