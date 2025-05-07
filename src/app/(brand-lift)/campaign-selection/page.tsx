@@ -3,30 +3,26 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import CampaignSelector from '@/components/features/brand-lift/CampaignSelector';
-// import { ConditionalLayout } from '@/components/ConditionalLayout'; // Assuming this is your layout component
+import ConditionalLayout from '@/components/layouts/conditional-layout';
+import logger from '@/lib/logger';
 
 const CampaignSelectionPage: React.FC = () => {
   const router = useRouter();
 
-  const handleCampaignSelection = (campaignId: string | number) => {
-    if (campaignId) {
-      router.push(`/brand-lift/campaign-review-setup/${campaignId}`);
+  const handleCampaignSelected = (campaignId: number | null) => {
+    if (typeof campaignId === 'number' && !isNaN(campaignId)) {
+      logger.info(`Campaign selected, navigating to review/setup for campaign ID: ${campaignId}`);
+      router.push(`/campaign-review-setup/${campaignId}`);
+    } else {
+      logger.error('Invalid or no campaign ID received from selector:', { receivedCampaignId: campaignId });
     }
   };
 
-  // Placeholder for ConditionalLayout or any other page layout structure
-  const LayoutWrapper = ({ children }: { children: React.ReactNode }) => (
-    // <ConditionalLayout title="Brand Lift - Campaign Selection" description="Select a campaign to start your Brand Lift study.">
-    //   {children}
-    // </ConditionalLayout>
-    // For now, a simple div wrapper:
-    <div className="container mx-auto py-8">{children}</div>
-  );
-
   return (
-    <LayoutWrapper>
-      <CampaignSelector onCampaignSelected={handleCampaignSelection} />
-    </LayoutWrapper>
+    <ConditionalLayout>
+      <h1 className="text-2xl font-bold mb-6">Brand Lift Setup: Select Campaign</h1>
+      <CampaignSelector onCampaignSelected={handleCampaignSelected} />
+    </ConditionalLayout>
   );
 };
 

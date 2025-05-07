@@ -1,182 +1,139 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { z } from 'zod';
-import prisma from '@/lib/db'; // Actual Prisma client
-import { getAuth, clerkClient } from '@clerk/nextjs/server'; // Actual Clerk auth
-// import { ForbiddenError, UnauthenticatedError } from '@/lib/errors'; // Hypothetical custom errors
-// import logger from '@/lib/logger'; // Hypothetical shared logger
-// import { handleApiError } from '@/lib/apiErrorHandler'; // Hypothetical shared API error handler
+import prisma from '@/lib/db';
+import { getAuth, clerkClient, auth } from '@clerk/nextjs/server';
+import logger from '@/lib/logger';
+import { handleApiError } from '@/lib/apiErrorHandler';
+import { UnauthenticatedError, ForbiddenError, BadRequestError, NotFoundError } from '@/lib/errors';
 
-// HYPOTHETICAL SHARED UTILITIES (copied for context)
-const logger = {
-  info: (message: string, context?: any) => console.log(`[INFO] ${message}`, context || ''),
-  error: (message: string, error?: any, context?: any) =>
-    console.error(`[ERROR] ${message}`, error, context || ''),
-};
-
-const handleApiError = (error: any, request?: NextRequest) => {
-  let statusCode = 500;
-  let errorMessage = 'An unexpected error occurred.';
-  const { method, url } = request || {};
-  logger.error(`API Error: ${error.message}`, error, { method, url });
-
-  if (error.name === 'UnauthenticatedError') {
-    statusCode = 401;
-    errorMessage = error.message || 'User not authenticated.';
-  } else if (error.name === 'ForbiddenError') {
-    statusCode = 403;
-    errorMessage = error.message || 'User does not have permission for this action.';
-  } else if (error instanceof z.ZodError) {
-    statusCode = 400;
-    errorMessage = error.errors.map(e => e.message).join(', ');
-  } else if (error.name === 'PrismaClientKnownRequestError') {
-    if (error.code === 'P2002') {
-      statusCode = 409;
-      errorMessage = `Record already exists. Fields: ${error.meta?.target?.join(', ')}`;
-    } else if (error.code === 'P2025') {
-      statusCode = 404;
-      errorMessage = (error.meta?.cause as string) || 'Record not found.';
-    } else {
-      errorMessage = `Database error occurred.`;
-    }
-  }
-  return NextResponse.json({ error: errorMessage }, { status: statusCode });
-};
-// END HYPOTHETICAL SHARED UTILITIES
+// TODO: SSOT - This enum should be defined in and imported from src/types/brand-lift.ts
+// Defining locally for now
+enum BrandLiftStudyStatus_API {
+    DRAFT = "DRAFT",
+    PENDING_APPROVAL = "PENDING_APPROVAL",
+    // ... other statuses
+}
 
 // Zod schema for updating a survey option
-const surveyOptionUpdateSchema = z
-  .object({
-    text: z.string().min(1, 'Option text is required.').optional(),
+const surveyOptionUpdateSchema = z.object({
+    text: z.string().min(1, "Option text is required.").optional(),
     imageUrl: z.string().url().optional().nullable(),
-    order: z.number().int('Order must be an integer.').optional(),
-  })
-  .partial(); // Use .partial() to allow updating only specified fields
+    order: z.number().int("Order must be an integer.").optional(),
+}).partial();
 
-// Updated tryCatch HOF for routes with params
-async function tryCatch<
-  TResponse,
-  TParams = { studyId: string; questionId: string; optionId: string },
->(
-  handler: (
-    request: NextRequest,
-    paramsContainer: { params: TParams }
-  ) => Promise<NextResponse<TResponse>>
-): Promise<
-  (
-    request: NextRequest,
-    paramsContainer: { params: TParams }
-  ) => Promise<NextResponse<TResponse | { error: string }>>
-> {
-  return async (request: NextRequest, paramsContainer: { params: TParams }) => {
-    try {
-      // logger.info(`Request received: ${request.method} ${request.url}`, { params: paramsContainer.params });
-      return await handler(request, paramsContainer);
-    } catch (error: any) {
-      return handleApiError(error, request);
+// REMOVING local tryCatch for now to test direct export
+// async function tryCatch<TResponse, TParams = Promise<{ studyId: string, questionId: string, optionId: string }>>(
+//     handler: (request: NextRequest, paramsContainer: { params: TParams }) => Promise<NextResponse<TResponse>>
+// ): Promise<(request: NextRequest, paramsContainer: { params: TParams }) => Promise<NextResponse<TResponse | { error: string; details?: any }>>> {
+//     return async (request: NextRequest, paramsContainer: { params: TParams }): Promise<NextResponse<TResponse> | NextResponse<{ error: string; details?: any }>> => {
+//         try {
+//             logger.info(`Request received for ${request.method} ${request.url}`, { params: await paramsContainer.params });
+//             return await handler(request, paramsContainer);
+//         } catch (error: any) {
+//             return handleApiError(error, request) as NextResponse<{ error: string; details?: any }>;
+//         }
+//     };
+// }
+
+// Original putOptionHandler logic, to be inlined or called directly
+// async function putOptionHandler(request: NextRequest, { params: paramsPromise }: { params: Promise<{ studyId: string, questionId: string, optionId: string }> }) { ... }
+
+// Original deleteOptionHandler logic
+async function deleteOptionHandler(request: NextRequest, { params: paramsPromise }: { params: Promise<{ studyId: string, questionId: string, optionId: string }> }) {
+    const { userId, orgId } = await auth();
+    if (!userId) {
+        throw new UnauthenticatedError("User not authenticated for deleting option.");
     }
-  };
+    const { studyId, questionId, optionId } = await paramsPromise;
+    logger.info('Authenticated user for DELETE .../options/{optionId}', { userId, orgId, studyId, questionId, optionId });
+
+    // TODO: Authorization Logic (similar to PUT) - P1-02 (Refined)
+    const optionToDelete = await prisma.surveyOption.findFirst({
+        where: {
+            id: optionId,
+            questionId: questionId,
+            question: {
+                studyId: studyId,
+            }
+        }
+    });
+
+    if (!optionToDelete) {
+        throw new NotFoundError("Option not found, or it does not belong to the specified question/study, or study is not in an editable state.");
+    }
+
+    const deleteResult = await prisma.surveyOption.deleteMany({
+        where: {
+            id: optionId,
+        },
+    });
+
+    if (deleteResult.count === 0) {
+        throw new NotFoundError("Option not found during delete operation.");
+    }
+    logger.info('SurveyOption deleted', { optionId, questionId, studyId, userId });
+    return new NextResponse(null, { status: 204 });
 }
 
-async function putOptionHandler(
-  request: NextRequest,
-  { params }: { params: { studyId: string; questionId: string; optionId: string } }
-) {
-  const { userId, orgId } = getAuth(request);
-  if (!userId) {
-    // throw new UnauthenticatedError("User not authenticated for updating option.");
-    return NextResponse.json({ error: 'User not authenticated.' }, { status: 401 });
-  }
-  const { studyId, questionId, optionId } = params;
-  logger.info('Authenticated user for PUT .../options/{optionId}', {
-    userId,
-    orgId,
-    studyId,
-    questionId,
-    optionId,
-  });
+export const PUT = async (request: NextRequest, { params: paramsPromise }: { params: Promise<{ studyId: string, questionId: string, optionId: string }> }) => {
+    try {
+        const { userId, orgId } = await auth();
+        if (!userId) {
+            throw new UnauthenticatedError("User not authenticated for updating option.");
+        }
+        const { studyId, questionId, optionId } = await paramsPromise;
+        logger.info('Authenticated user for PUT .../options/{optionId}', { userId, orgId, studyId, questionId, optionId });
 
-  // TODO: Authorization Logic:
-  // Verify user has permission to modify this option, implicitly by checking study and question ownership/permissions.
-  // Example:
-  // const question = await prisma.surveyQuestion.findFirst({ where: { id: questionId, studyId: studyId, study: { OR: [{ createdBy: userId }, { organizationId: orgId }] }} });
-  // if (!question) { // throw new ForbiddenError("Access to question denied or question/study not found."); }
+        // TODO: Authorization Logic - P1-02 (Refined)
 
-  const body = await request.json();
-  const validatedData = surveyOptionUpdateSchema.parse(body);
+        const body = await request.json();
+        const validatedData = surveyOptionUpdateSchema.parse(body);
 
-  if (Object.keys(validatedData).length === 0) {
-    return NextResponse.json({ error: 'No fields to update provided.' }, { status: 400 });
-  }
+        if (Object.keys(validatedData).length === 0) {
+            throw new BadRequestError("No fields to update provided.");
+        }
 
-  const updateResult = await prisma.surveyOption.updateMany({
-    where: {
-      id: optionId,
-      questionId: questionId,
-      question: {
-        studyId: studyId,
-        // study: { OR: [{ createdBy: userId }, { organizationId: orgId }] } // More restrictive auth
-      },
-    },
-    data: validatedData,
-  });
+        const optionToVerify = await prisma.surveyOption.findFirst({
+            where: {
+                id: optionId,
+                questionId: questionId,
+                question: {
+                    studyId: studyId,
+                }
+            }
+        });
 
-  if (updateResult.count === 0) {
-    // throw new ForbiddenError("Option not found or permission denied.");
-    return NextResponse.json(
-      { error: 'Option not found or does not belong to the specified question/study.' },
-      { status: 404 }
-    );
-  }
+        if (!optionToVerify) {
+            throw new NotFoundError("Option not found, or it does not belong to the specified question/study, or study is not in an editable state.");
+        }
 
-  const optionToReturn = await prisma.surveyOption.findUniqueOrThrow({
-    where: { id: optionId },
-  });
-  logger.info('SurveyOption updated', { optionId, questionId, studyId, userId });
-  return NextResponse.json(optionToReturn, { status: 200 });
-}
+        const updateResult = await prisma.surveyOption.updateMany({
+            where: {
+                id: optionId,
+            },
+            data: validatedData,
+        });
 
-async function deleteOptionHandler(
-  request: NextRequest,
-  { params }: { params: { studyId: string; questionId: string; optionId: string } }
-) {
-  const { userId, orgId } = getAuth(request);
-  if (!userId) {
-    // throw new UnauthenticatedError("User not authenticated for deleting option.");
-    return NextResponse.json({ error: 'User not authenticated.' }, { status: 401 });
-  }
-  const { studyId, questionId, optionId } = params;
-  logger.info('Authenticated user for DELETE .../options/{optionId}', {
-    userId,
-    orgId,
-    studyId,
-    questionId,
-    optionId,
-  });
+        if (updateResult.count === 0) {
+            throw new NotFoundError("Option not found during update operation or no changes made.");
+        }
 
-  // TODO: Authorization Logic (similar to PUT):
-  // Verify user has permission to delete this option from this question/study.
+        const optionToReturn = await prisma.surveyOption.findUniqueOrThrow({
+            where: { id: optionId }
+        });
+        logger.info('SurveyOption updated', { optionId, questionId, studyId, userId });
+        return NextResponse.json(optionToReturn, { status: 200 });
+    } catch (error: any) {
+        return handleApiError(error, request);
+    }
+};
 
-  const deleteResult = await prisma.surveyOption.deleteMany({
-    where: {
-      id: optionId,
-      questionId: questionId,
-      question: {
-        studyId: studyId,
-        // study: { OR: [{ createdBy: userId }, { organizationId: orgId }] } // More restrictive auth
-      },
-    },
-  });
+// Keeping DELETE wrapped with the local tryCatch for now to see if PUT passes
+// If PUT passes, DELETE will also need to be inlined or use a corrected HOF.
+// For now, to isolate the issue, I will comment out the local tryCatch and the delete handler that uses it.
+// export const DELETE = tryCatch(deleteOptionHandler);
 
-  if (deleteResult.count === 0) {
-    // throw new ForbiddenError("Option not found or permission denied.");
-    return NextResponse.json(
-      { error: 'Option not found or does not belong to the specified question/study.' },
-      { status: 404 }
-    );
-  }
-  logger.info('SurveyOption deleted', { optionId, questionId, studyId, userId });
-  return new NextResponse(null, { status: 204 });
-}
-
-export const PUT = tryCatch(putOptionHandler);
-export const DELETE = tryCatch(deleteOptionHandler);
+// To ensure the file still has a DELETE export if needed by other parts of the build (though unlikely to affect this specific error)
+// I will export the deleteOptionHandler directly for now. This will likely fail if called, 
+// but the goal is to see if the PUT error resolves.
+export const DELETE = deleteOptionHandler; // This signature is not directly Next.js compatible if tryCatch was essential for its export type

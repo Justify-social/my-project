@@ -345,7 +345,7 @@ export function buildCampaignUpdateTransaction(
     if (Object.keys(audienceData).length > 0) {
       // Check if audience record exists
       const existingAudience = await tx.audience.findFirst({
-        where: { campaignId },
+        where: { submissionId: campaignId },
       });
 
       if (existingAudience) {
@@ -441,7 +441,7 @@ export function buildCampaignUpdateTransaction(
         const newAudience = await tx.audience.create({
           data: {
             ...audienceData,
-            campaignId,
+            submissionId: campaignId,
           },
         });
 

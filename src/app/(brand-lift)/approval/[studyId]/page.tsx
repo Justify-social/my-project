@@ -2,47 +2,40 @@
 
 import React from 'react';
 import { useParams } from 'next/navigation';
+import ConditionalLayout from '@/components/layouts/conditional-layout';
 import ApprovalWorkflow from '@/components/features/brand-lift/ApprovalWorkflow';
-// import { ConditionalLayout } from '@/components/ConditionalLayout'; // Assuming this is your layout component
-// import { useAuth } from '@clerk/nextjs'; // For getting currentUserId on client component page
+import logger from '@/lib/logger';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Icon } from '@/components/ui/icon';
 
 const ApprovalPage: React.FC = () => {
-  const params = useParams();
-  const studyId = params?.studyId as string | undefined;
-  // const { userId: currentUserId } = useAuth(); // Get actual current user ID via Clerk
-  const currentUserId = 'user_mock_id_123'; // TODO: Replace with actual Clerk user ID
+    const params = useParams();
+    const studyIdParam = params?.studyId;
+    const studyId = typeof studyIdParam === 'string' ? studyIdParam : null;
 
-  // Placeholder for ConditionalLayout or any other page layout structure
-  const LayoutWrapper = ({ children }: { children: React.ReactNode }) => (
-    // <ConditionalLayout title={`Brand Lift - Approval for Study ${studyId || ''}`} description="Review comments and approve the survey.">
-    //   {children}
-    // </ConditionalLayout>
-    <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8">{children}</div>
-  );
+    if (!studyId) {
+        logger.error('Invalid study ID for approval page', { param: studyIdParam });
+        return (
+            <ConditionalLayout>
+                <div className="container mx-auto p-4 text-center">
+                    <Alert variant="destructive">
+                        <Icon iconId="faTriangleExclamationLight" className="h-4 w-4" />
+                        <AlertTitle>Error: Missing Study ID</AlertTitle>
+                        <AlertDescription>The Study ID is missing from the URL. Cannot display approval workflow.</AlertDescription>
+                    </Alert>
+                </div>
+            </ConditionalLayout>
+        );
+    }
 
-  if (!studyId) {
     return (
-      <LayoutWrapper>
-        <p className="text-red-500 text-center">
-          Study ID is missing. Cannot load approval workflow.
-        </p>
-      </LayoutWrapper>
+        <ConditionalLayout>
+            <div className="container mx-auto p-4 md:p-6">
+                <h1 className="text-2xl font-bold mb-6">Survey Approval Workflow</h1>
+                <ApprovalWorkflow studyId={studyId} />
+            </div>
+        </ConditionalLayout>
     );
-  }
-  if (!currentUserId) {
-    // This case might be handled by Clerk middleware redirecting to sign-in
-    return (
-      <LayoutWrapper>
-        <p className="text-red-500 text-center">User not authenticated. Please sign in.</p>
-      </LayoutWrapper>
-    );
-  }
-
-  return (
-    <LayoutWrapper>
-      <ApprovalWorkflow studyId={studyId} currentUserId={currentUserId} />
-    </LayoutWrapper>
-  );
 };
 
 export default ApprovalPage;

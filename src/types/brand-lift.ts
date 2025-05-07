@@ -1,37 +1,15 @@
-export enum BrandLiftStudyStatus {
-  DRAFT = 'DRAFT',
-  PENDING_APPROVAL = 'PENDING_APPROVAL',
-  APPROVED = 'APPROVED',
-  COLLECTING = 'COLLECTING', // Data collection in progress via Cint
-  COMPLETED = 'COMPLETED', // Data collection finished, report may be pending or generated
-  ARCHIVED = 'ARCHIVED',
-}
-
-export enum SurveyQuestionType {
-  SINGLE_CHOICE = 'SINGLE_CHOICE',
-  MULTIPLE_CHOICE = 'MULTIPLE_CHOICE',
-  // TEXT_INPUT = "TEXT_INPUT", // Future consideration
-  // NPS = "NPS", // Future consideration
-}
-
-export enum SurveyApprovalCommentStatus {
-  OPEN = 'OPEN',
-  RESOLVED = 'RESOLVED',
-  // NEED_ACTION = "NEED_ACTION", // Could be a derived state or separate field if needed
-}
-
-export enum SurveyOverallApprovalStatus {
-  PENDING_REVIEW = 'PENDING_REVIEW',
-  CHANGES_REQUESTED = 'CHANGES_REQUESTED',
-  APPROVED = 'APPROVED', // Approved by internal team
-  SIGNED_OFF = 'SIGNED_OFF', // Final sign-off, ready for data collection launch
-}
+import {
+  BrandLiftStudyStatus,
+  SurveyQuestionType,
+  SurveyApprovalCommentStatus,
+  SurveyOverallApprovalStatus
+} from '@prisma/client'; // Import enums from Prisma client
 
 export interface BrandLiftStudyData {
   id: string; // ULID
   name: string;
   campaignId: string; // Corresponds to CampaignWizardSubmission id
-  status: BrandLiftStudyStatus;
+  status: BrandLiftStudyStatus; // Now uses Prisma enum
   funnelStage: string; // e.g., "Top Funnel", "Mid Funnel", "Bottom Funnel"
   primaryKpi: string; // e.g., "Brand Awareness", "Ad Recall"
   secondaryKpis?: string[];
@@ -40,30 +18,39 @@ export interface BrandLiftStudyData {
   cintProjectId?: string | null; // ID from Cint API after project creation
   cintTargetGroupId?: string | null; // ID from Cint API after target group creation
   // Potentially: targetAudienceCriteria?: any; // To store criteria sent to Cint
+  campaign?: {
+    campaignName?: string | null;
+    primaryCreativeUrl?: string | null;
+    primaryCreativeType?: string | null;
+  };
+  questions?: SurveyQuestionData[]; // Optional on base study, loaded separately
+  approvalStatus?: SurveyApprovalStatusData | null; // Optional, loaded separately
 }
 
 export interface SurveyQuestionData {
   id: string; // ULID
+  tempId?: string; // For frontend state management before saving
   studyId: string; // Foreign key to BrandLiftStudyData
   text: string;
-  questionType: SurveyQuestionType;
+  questionType: SurveyQuestionType; // Now uses Prisma enum
   order: number;
-  isRandomized?: boolean; // Option randomization for MCQs
-  isMandatory?: boolean;
+  isRandomized?: boolean | null; // Option randomization for MCQs
+  isMandatory?: boolean | null;
   kpiAssociation?: string | null; // Link to specific KPI string
-  options?: SurveyOptionData[]; // Populated for SINGLE_CHOICE, MULTIPLE_CHOICE
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date; // Optional as it's set by DB
+  updatedAt?: Date; // Optional as it's set by DB
+  options: SurveyOptionData[];
 }
 
 export interface SurveyOptionData {
   id: string; // ULID
-  questionId: string; // Foreign key to SurveyQuestionData
+  tempId?: string; // For frontend state management before saving
+  questionId?: string; // Will be present if option belongs to an existing question
   text: string;
   imageUrl?: string | null;
   order: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date; // Optional
+  updatedAt?: Date; // Optional
 }
 
 export interface SurveyResponseData {
@@ -76,11 +63,12 @@ export interface SurveyResponseData {
     // Array to handle multi-select and store answers for each question responded to
     questionId: string;
     optionIds?: string[]; // For MULTIPLE_CHOICE, SINGLE_CHOICE (will have one item)
-    // textAnswer?: string; // For TEXT_INPUT type (future)
+    textAnswer?: string | null; // For potential open-ended in future
   }>;
   demographics?: Record<string, any> | null; // JSON object for demographic data from Cint (e.g., age, gender, location)
-  respondedAt: Date; // Timestamp of when the response was submitted/recorded
-  // completionTimeSeconds?: number; // Optional: Time taken to complete the survey
+  respondedAt?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface BrandLiftReportData {
@@ -113,29 +101,37 @@ export interface BrandLiftReportData {
   } | null;
   recommendations?: string[];
   status: 'PENDING' | 'GENERATED' | 'ERROR';
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface SurveyApprovalCommentData {
   id: string; // ULID
-  // Link to overall approval status or directly to study if comments are general
-  approvalStatusId?: string | null; // FK to SurveyApprovalStatusData (if comments are tied to an approval instance)
-  studyId: string; // FK to BrandLiftStudyData (if comments can be general to the study)
-  questionId?: string | null; // Optional: Foreign key to SurveyQuestionData if comment is on a specific question
-  authorId: string; // Clerk User ID of the commenter
+  approvalStatusId: string; // Link to SurveyApprovalStatus
+  questionId?: string | null;
+  authorId: string; // Clerk User ID
+  authorName?: string; // For display, if fetched
+  authorAvatarUrl?: string; // For display
   text: string;
-  status: SurveyApprovalCommentStatus;
+  status: SurveyApprovalCommentStatus; // Now uses Prisma enum
   createdAt: Date;
-  updatedAt: Date;
-  // resolutionNote?: string | null;
+  updatedAt?: Date;
+  resolutionNote?: string | null;
 }
 
 export interface SurveyApprovalStatusData {
   id: string; // ULID, typically one per BrandLiftStudy
   studyId: string; // Foreign key to BrandLiftStudyData (unique)
-  status: SurveyOverallApprovalStatus;
+  status: SurveyOverallApprovalStatus; // Now uses Prisma enum
   requestedSignOff: boolean; // True if formal sign-off has been requested
   signedOffBy?: string | null; // Clerk User ID of the final approver
   signedOffAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
+  comments?: SurveyApprovalCommentData[]; // Optional, loaded separately
 }
+
+// Utility type for questions with options during creation if needed
+export type SurveyQuestionWithOptionInput = Omit<SurveyQuestionData, 'id' | 'createdAt' | 'updatedAt' | 'studyId'> & {
+  options: Array<Omit<SurveyOptionData, 'id' | 'createdAt' | 'updatedAt' | 'questionId'>>;
+};

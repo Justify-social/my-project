@@ -41,11 +41,16 @@ export function handleDbErrorImpl(
  * @param operation Optional: The database operation being performed (for logging).
  * @returns A new function that wraps the handler with error handling.
  */
-export function tryCatch<TResponse>(
+export function tryCatch<
+  TResponse,
+  TArgs extends unknown[]
+>(
   handler: (
-    ...args: unknown[]
+    ...args: TArgs
   ) => Promise<NextResponse<TResponse | { success: boolean; error: string; details?: unknown }>>,
   options?: { entityName?: string; operation?: DbOperation }
 ) {
-  return tryCatchImpl(handler, options);
+  return async (...args: TArgs) => {
+    return tryCatchImpl(() => handler(...args), options);
+  };
 }

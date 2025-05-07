@@ -1,70 +1,105 @@
 // src/lib/notificationService.ts
 
-// TODO: Replace with actual Resend SDK import if used, e.g., import { Resend } from 'resend';
+// import { Resend } from 'resend'; // Actual import for Resend
+import { logger } from './logger'; // Assuming shared logger
+
 // const resend = new Resend(process.env.RESEND_API_KEY);
 
+// Placeholder for actual Resend client and email sending logic
+const mockResendClient = {
+  emails: {
+    send: async (payload: {
+      from: string;
+      to: string | string[];
+      subject: string;
+      html: string;
+    }) => {
+      logger.info('Mock Resend: Email send called', { resendPayload: payload });
+      if (!process.env.RESEND_API_KEY) {
+        logger.warn('Mock Resend: RESEND_API_KEY not set. Email not actually sent.', {});
+        return { data: { id: `mock_email_id_${Date.now()}` }, error: null };
+      }
+      if (Array.isArray(payload.to) ? payload.to.includes('test@error.com') : payload.to === 'test@error.com') {
+        logger.error('Mock Resend: Simulated error sending email.', {});
+        return { data: null, error: { message: 'Simulated send failure', name: 'EmailSendError' } };
+      }
+      return { data: { id: `mock_email_id_${Date.now()}` }, error: null };
+    },
+  },
+};
+
+const APP_NAME = 'Justify Platform'; // Or your application's name
+const DEFAULT_FROM_EMAIL = process.env.DEFAULT_FROM_EMAIL || 'noreply@justifyplatform.com';
+const APP_BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
 // TODO: Define more specific types for user and study details needed for emails
-interface UserDetails {
+// Export UserDetails to be used by other modules
+export interface UserDetails {
   email: string;
   name?: string;
+  id?: string; // Optional ID if needed by consuming services
 }
 
-interface StudyDetails {
+export interface StudyDetails {
   id: string;
   name: string;
-  // Add other relevant details like campaign name, link to the approval page
   approvalPageUrl?: string;
 }
 
-interface CommentDetails {
+export interface CommentDetails {
   commentText: string;
   commentAuthorName?: string;
   questionText?: string; // If comment is on a specific question
 }
 
-// Placeholder for actual email sending logic using Resend
-async function sendEmailWithResend(
-  to: string | string[],
-  subject: string,
-  htmlContent: string,
-  fromAddress?: string // e.g., 'BrandLift Platform <notifications@yourdomain.com>'
-) {
-  const from = fromAddress || 'notifications@brandlift.example.com'; // Fallback from address
-  console.log(`==== SENDING EMAIL (MOCK) ====`);
-  console.log(`FROM: ${from}`);
-  console.log(`TO: ${Array.isArray(to) ? to.join(', ') : to}`);
-  console.log(`SUBJECT: ${subject}`);
-  console.log(`HTML BODY:\n${htmlContent}`);
-  console.log(`==== END SENDING EMAIL (MOCK) ====`);
+// Adding ApprovalWorkflowStatus type, assuming it might be used by sendStudyStatusChangeEmail
+// Ideally, this would be imported from a shared types file (e.g., src/types/brand-lift.ts or a status enum file)
+export type ApprovalWorkflowStatus =
+  | 'OPEN'
+  | 'RESOLVED'
+  | 'NEED_ACTION'
+  | 'PENDING_REVIEW'
+  | 'CHANGES_REQUESTED'
+  | 'APPROVED'
+  | 'SIGNED_OFF'
+  | 'DRAFT'
+  | 'COLLECTING'
+  | 'COMPLETED'
+  | 'ARCHIVED'
+  | 'DEFAULT';
 
-  // In a real implementation:
-  /*
+// Simplified conceptual service
+export class NotificationService {
+  private client: typeof mockResendClient; // Replace with `Resend` type in actual implementation
+
+  constructor() {
     if (!process.env.RESEND_API_KEY) {
-      console.warn("RESEND_API_KEY not set. Skipping actual email send.");
-      return { success: false, error: "RESEND_API_KEY not configured." };
+      logger.warn('RESEND_API_KEY is not set. NotificationService will use mock email sending.', {});
     }
+    this.client = mockResendClient; // Use `resend` in actual implementation
+  }
+
+  private async sendEmail(to: string | string[], subject: string, htmlContent: string): Promise<boolean> {
     try {
-      const { data, error } = await resend.emails.send({
-        from: from,
+      const { data, error } = await this.client.emails.send({
+        from: `${APP_NAME} <${DEFAULT_FROM_EMAIL}>`,
         to: to,
         subject: subject,
         html: htmlContent,
       });
-      if (error) {
-        console.error("Resend API Error:", error);
-        return { success: false, error };
-      }
-      console.log("Email sent successfully via Resend:", data);
-      return { success: true, data };
-    } catch (e) {
-      console.error("Exception sending email:", e);
-      return { success: false, error: e };
-    }
-    */
-  return { success: true, messageId: `mock_message_${Date.now()}` }; // Mock success
-}
 
-export class NotificationService {
+      if (error) {
+        logger.error('Failed to send email via Resend', { error, to, subject });
+        return false;
+      }
+      logger.info('Email sent successfully via Resend', { emailId: data?.id, to, subject });
+      return true;
+    } catch (e: any) {
+      logger.error('Exception during email sending', { error: e.message, to, subject, stack: e.stack });
+      return false;
+    }
+  }
+
   // Email for when a survey is first submitted for review
   async sendSurveySubmittedForReviewEmail(
     recipients: UserDetails[], // e.g., designated reviewers, team leads
@@ -78,7 +113,7 @@ export class NotificationService {
       <p>You can access the approval workflow here: <a href="${study.approvalPageUrl || '#'}">Review Study</a></p>
       <p>Thank you!</p>
     `;
-    await sendEmailWithResend(
+    await this.sendEmail(
       recipients.map(r => r.email),
       subject,
       htmlContent
@@ -99,7 +134,7 @@ export class NotificationService {
       <p>Comment: <em>"${comment.commentText}"</em></p>
       <p>View the discussion: <a href="${study.approvalPageUrl || '#'}">View Study Comments</a></p>
     `;
-    await sendEmailWithResend(
+    await this.sendEmail(
       recipients.map(r => r.email),
       subject,
       htmlContent
@@ -118,7 +153,7 @@ export class NotificationService {
       <p>${requester.name || requester.email} has requested your formal approval for the Brand Lift study "<strong>${study.name}</strong>".</p>
       <p>Please review and provide your approval/sign-off here: <a href="${study.approvalPageUrl || '#'}">Approve Study</a></p>
     `;
-    await sendEmailWithResend(
+    await this.sendEmail(
       approvers.map(r => r.email),
       subject,
       htmlContent
@@ -140,9 +175,9 @@ export class NotificationService {
       <p>You can view the study here: <a href="${study.approvalPageUrl || '#'}">View Study</a></p>
       ${newStatus === 'CHANGES_REQUESTED' ? '<p>Please review the comments and make the necessary adjustments.</p>' : ''}
     `;
-    await sendEmailWithResend(studyOwner.email, subject, htmlContent);
+    await this.sendEmail(studyOwner.email, subject, htmlContent);
   }
 }
 
-// Export a singleton instance if preferred, or allow instantiation
-export const notificationService = new NotificationService();
+// Export an instance for easy use elsewhere, or use dependency injection
+// export const notificationService = new NotificationService();

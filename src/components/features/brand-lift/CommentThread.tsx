@@ -1,171 +1,165 @@
-import React from 'react';
+import React, { useState } from 'react';
+import {
+    Avatar,
+    AvatarFallback,
+    AvatarImage,
+} from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import StatusTag from './StatusTag'; // Corrected import path
+import { SurveyApprovalCommentStatus } from '@prisma/client'; // Correct import for the enum
+import { Icon } from '@/components/ui/icon'; // Correct import for Icon component
+import { formatDistanceToNow } from 'date-fns'; // For relative timestamps
+import { SurveyApprovalCommentData } from "@/types/brand-lift";
+import { cn } from "@/lib/utils"; // For conditional styling
 
-// Assuming these are your Shadcn UI primitive components
-// import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-// import { Button } from '@/components/ui/button';
-// import { Input } from '@/components/ui/input'; // Or Textarea
-// import { Badge } from "@/components/ui/badge";
+// Interface matching expected data structure for a comment author
+export interface CommentAuthor {
+    id: string;
+    firstName?: string | null;
+    lastName?: string | null;
+    avatarUrl?: string | null;
+}
 
-// TODO: Replace with actual types from src/types/brand-lift.ts
-interface Comment {
-  id: string;
-  authorId: string;
-  authorName?: string; // Denormalized for display, or fetched via authorId
-  authorAvatarUrl?: string; // Denormalized or fetched
-  text: string;
-  createdAt: Date | string;
-  status?: 'OPEN' | 'RESOLVED'; // Or from SurveyApprovalCommentStatus enum
-  questionId?: string;
+// Interface matching expected data structure for a single comment
+// Matches SurveyApprovalCommentData from types/brand-lift.ts structure closely
+export interface CommentData {
+    id: string;
+    author: {
+        id: string;
+        name?: string | null; // Use combined name if available
+        firstName?: string | null;
+        lastName?: string | null;
+        avatarUrl?: string | null;
+    };
+    text: string;
+    status: SurveyApprovalCommentStatus;
+    createdAt: string | Date; // Allow Date object or string
+    questionId?: string | null;
+    questionLink?: string | null; // Added for linking
+    resolutionNote?: string | null; // Added this field
 }
 
 interface CommentThreadProps {
-  comments: Comment[];
-  currentUserId: string;
-  onAddComment: (text: string, questionId?: string) => Promise<void>;
-  // onResolveComment?: (commentId: string) => Promise<void>; // Future enhancement
-  associatedQuestionId?: string; // If the thread is for a specific question
-  isLoading?: boolean;
+    comments: CommentData[];
+    onAddComment: (text: string, questionId?: string | null) => Promise<void>; // Make async
+    currentUserId: string;
+    isLoading?: boolean; // Loading state for adding comments
+    // Optional: Add props for resolving/updating comment status if handled here
+    // onUpdateCommentStatus?: (commentId: string, newStatus: SurveyApprovalCommentStatus) => Promise<void>;
+    // userHasModeratorRole?: boolean; // To control who can resolve
 }
 
-/**
- * CommentThread Molecule
- * Displays a list of comments and an input field for adding new comments.
- * Built conceptually using Shadcn UI primitives (Card, Avatar, Input, Button).
- */
-export const CommentThread: React.FC<CommentThreadProps> = ({
-  comments,
-  currentUserId,
-  onAddComment,
-  associatedQuestionId,
-  isLoading,
-}) => {
-  const [newComment, setNewComment] = React.useState('');
-
-  const handleAddComment = async () => {
-    if (newComment.trim()) {
-      await onAddComment(newComment.trim(), associatedQuestionId);
-      setNewComment('');
+// Restore local formatDate helper function
+const formatDate = (dateInput: Date | string): string => {
+    try {
+        const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
+        return formatDistanceToNow(date, { addSuffix: true });
+    } catch (e) {
+        return 'Invalid date';
     }
-  };
+};
 
-  // Placeholder for Shadcn component usage
-  const Card = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-    <div className={`border rounded-lg p-4 shadow ${className}`}>{children}</div>
-  );
-  const CardHeader = ({ children }: { children: React.ReactNode }) => (
-    <div className="mb-2 font-semibold">{children}</div>
-  );
-  const CardTitle = ({ children }: { children: React.ReactNode }) => (
-    <h3 className="text-lg">{children}</h3>
-  );
-  const CardContent = ({ children }: { children: React.ReactNode }) => (
-    <div className="text-sm">{children}</div>
-  );
-  const CardFooter = ({ children }: { children: React.ReactNode }) => (
-    <div className="mt-4 pt-2 border-t">{children}</div>
-  );
-  const Avatar = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-    <div
-      className={`w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center ${className}`}
-    >
-      {children}
-    </div>
-  );
-  const AvatarImage = ({ src, alt }: { src: string; alt: string }) => (
-    <img src={src} alt={alt} className="w-full h-full rounded-full object-cover" />
-  );
-  const AvatarFallback = ({ children }: { children: React.ReactNode }) => <span>{children}</span>;
-  const Input = (props: any) => <input {...props} className="border p-2 w-full rounded" />;
-  const Button = (props: any) => (
-    <button
-      {...props}
-      className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300"
-    />
-  );
-  const Badge = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-    <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${className}`}>
-      {children}
-    </span>
-  );
+const CommentThread: React.FC<CommentThreadProps> = ({
+    comments,
+    onAddComment,
+    currentUserId,
+    isLoading = false,
+    // onUpdateCommentStatus,
+    // userHasModeratorRole = false,
+}) => {
+    const [newCommentText, setNewCommentText] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-  return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>
-          Comments {associatedQuestionId ? `for Q#${associatedQuestionId}` : ''}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4 mb-4 max-h-60 overflow-y-auto">
-          {comments.length === 0 && !isLoading && <p className="text-gray-500">No comments yet.</p>}
-          {isLoading && comments.length === 0 && <p>Loading comments...</p>}
-          {comments.map(comment => (
-            <div key={comment.id} className="flex items-start space-x-3">
-              <Avatar className="mt-1">
-                {comment.authorAvatarUrl ? (
-                  <AvatarImage src={comment.authorAvatarUrl} alt={comment.authorName || 'User'} />
-                ) : (
-                  <AvatarFallback>
-                    {comment.authorName ? comment.authorName.substring(0, 1).toUpperCase() : 'U'}
-                  </AvatarFallback>
-                )}
-              </Avatar>
-              <div className="flex-1 bg-gray-50 p-3 rounded-md">
-                <div className="flex items-center justify-between mb-1">
-                  <p className="font-medium text-sm">
-                    {comment.authorName || 'Anonymous'}
-                    {comment.authorId === currentUserId && (
-                      <span className="text-xs text-blue-600 ml-1">(You)</span>
-                    )}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {new Date(comment.createdAt).toLocaleDateString()}{' '}
-                    {new Date(comment.createdAt).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </p>
+    const handleAddSubmit = async () => {
+        if (!newCommentText.trim()) return;
+        setIsSubmitting(true);
+        try {
+            await onAddComment(newCommentText.trim());
+            setNewCommentText(''); // Clear input on success
+        } catch (error) {
+            console.error("Error adding comment:", error);
+            // Optionally show an error message to the user
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <Card className="shadow-none border-none">
+            <CardContent className="p-0 space-y-4">
+                {/* Display existing comments */}
+                <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
+                    {comments.length === 0 && <p className="text-sm text-gray-500">No comments yet.</p>}
+                    {comments.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) // Sort by oldest first
+                        .map((comment) => (
+                            <div key={comment.id} className="flex space-x-3">
+                                <Avatar className="h-8 w-8">
+                                    <AvatarImage src={comment.author.avatarUrl ?? undefined} />
+                                    <AvatarFallback>{comment.author.firstName?.[0] ?? 'U'}{comment.author.lastName?.[0] ?? 'N'}</AvatarFallback>
+                                </Avatar>
+                                <div className="ml-4 flex-1 space-y-1">
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-sm font-medium leading-none">{comment.author.firstName || 'Anonymous'} {comment.author.lastName || 'User'}</p>
+                                        <p className="text-xs text-muted-foreground">{formatDate(comment.createdAt)}</p>
+                                    </div>
+                                    {comment.questionId && (
+                                        <p className="text-xs text-muted-foreground">Linked to: <a href={`/question/${comment.questionId}`} className="underline" target="_blank" rel="noopener noreferrer">Question {comment.questionId.split('-').pop()}</a></p>
+                                    )}
+                                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{comment.text}</p>
+                                    <div className="mt-1 flex items-center space-x-2">
+                                        <StatusTag status={comment.status} type="comment" />
+                                        {/* Resolve Button Placeholder - implement based on permissions */}
+                                        {/* {comment.status === SurveyApprovalCommentStatus.OPEN && onUpdateCommentStatus && (comment.author.id === currentUserId || userHasModeratorRole) && (
+                                        <Button size="xs" variant="outline" onClick={() => onUpdateCommentStatus(comment.id, SurveyApprovalCommentStatus.RESOLVED)}>
+                      Resolve
+                                        </Button>
+                  )} */}
+                                        {comment.status === 'RESOLVED' && comment.resolutionNote && (
+                                            <p className="text-xs text-muted-foreground italic">Note: {comment.resolutionNote}</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                 </div>
-                <p className="text-gray-700 text-sm whitespace-pre-wrap">{comment.text}</p>
-                {comment.status && (
-                  <div className="mt-1.5">
-                    <Badge
-                      className={
-                        comment.status === 'RESOLVED'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-yellow-100 text-yellow-700'
-                      }
-                    >
-                      {comment.status}
-                    </Badge>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="mt-2">
-          <Input // Using a basic input, consider Textarea for multi-line
-            placeholder="Add a comment..."
-            value={newComment}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewComment(e.target.value)}
-            disabled={isLoading}
-          />
-          <Button
-            onClick={handleAddComment}
-            disabled={isLoading || !newComment.trim()}
-            className="mt-2 w-full"
-          >
-            {isLoading ? 'Adding...' : 'Add Comment'}
-          </Button>
-        </div>
-      </CardContent>
-      {/* <CardFooter>
-        <p className="text-xs text-gray-500">{comments.length} comment(s)</p>
-      </CardFooter> */}
-    </Card>
-  );
+
+                <Separator />
+
+                {/* Add new comment section */}
+                <div className="flex items-start space-x-3 pt-2">
+                    {/* Placeholder Avatar for current user - Replace with actual user avatar */}
+                    <Avatar className="h-8 w-8">
+                        <AvatarFallback>You</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 space-y-2">
+                        <Textarea
+                            placeholder="Add a comment..."
+                            value={newCommentText}
+                            onChange={(e) => setNewCommentText(e.target.value)}
+                            rows={3}
+                            className="min-h-[60px]"
+                        />
+                        <div className="flex justify-end">
+                            <Button
+                                onClick={handleAddSubmit}
+                                disabled={!newCommentText.trim() || isSubmitting || isLoading}
+                                size="sm"
+                            >
+                                {isSubmitting || isLoading ? <Icon iconId="faSpinnerLight" className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                Add Comment
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            </CardContent>
+            {/* <CardFooter>
+                Optional footer content
+            </CardFooter> */}
+        </Card>
+    );
 };
 
 export default CommentThread;

@@ -1,232 +1,214 @@
-import { NextResponse, NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import prisma from '@/lib/db';
-import { getAuth, clerkClient } from '@clerk/nextjs/server';
-// import { ForbiddenError, UnauthenticatedError } from '@/lib/errors'; // Hypothetical custom errors
-// import logger from '@/lib/logger'; // Hypothetical shared logger
-// import { handleApiError } from '@/lib/apiErrorHandler'; // Hypothetical shared API error handler
+import { auth } from '@clerk/nextjs/server';
+import { Prisma, BrandLiftStudyStatus, SurveyOverallApprovalStatus, User } from '@prisma/client';
 
-// HYPOTHETICAL SHARED UTILITIES (copied for context)
-const logger = {
-  info: (message: string, context?: any) => console.log(`[INFO] ${message}`, context || ''),
-  error: (message: string, error?: any, context?: any) =>
-    console.error(`[ERROR] ${message}`, error, context || ''),
-};
+import db from '@/lib/db';
+import { logger } from '@/lib/logger';
+import { handleApiError } from '@/lib/apiErrorHandler';
+import { BadRequestError, ForbiddenError, NotFoundError, UnauthenticatedError } from '@/lib/errors';
+import { NotificationService, UserDetails, StudyDetails as EmailStudyDetails } from '@/lib/notificationService';
+import { BASE_URL } from '@/config/constants';
 
-const handleApiError = (error: any, request?: NextRequest) => {
-  let statusCode = 500;
-  let errorMessage = 'An unexpected error occurred.';
-  const { method, url } = request || {};
-  logger.error(`API Error: ${error.message}`, error, { method, url });
-
-  if (error.name === 'UnauthenticatedError') {
-    statusCode = 401;
-    errorMessage = error.message || 'User not authenticated.';
-  } else if (error.name === 'ForbiddenError') {
-    statusCode = 403;
-    errorMessage = error.message || 'User does not have permission for this action.';
-  } else if (error instanceof z.ZodError) {
-    statusCode = 400;
-    errorMessage = error.errors.map(e => e.message).join(', ');
-  } else if (error.name === 'PrismaClientKnownRequestError') {
-    if (error.code === 'P2002') {
-      statusCode = 409;
-      errorMessage = `Record already exists. Fields: ${error.meta?.target?.join(', ')}`;
-    } else if (error.code === 'P2025') {
-      statusCode = 404;
-      errorMessage = (error.meta?.cause as string) || 'Record not found.';
-    } else {
-      errorMessage = `Database error occurred.`;
-    }
-  }
-  return NextResponse.json({ error: errorMessage }, { status: statusCode });
-};
-// END HYPOTHETICAL SHARED UTILITIES
-
-// Enum for Zod, ideally from src/types/brand-lift.ts
-enum SurveyOverallApprovalStatus {
-  PENDING_REVIEW = 'PENDING_REVIEW',
-  CHANGES_REQUESTED = 'CHANGES_REQUESTED',
-  APPROVED = 'APPROVED',
-  SIGNED_OFF = 'SIGNED_OFF',
-}
-
-// Placeholder for actual BrandLiftStudy status enum, ensure it matches your Prisma schema
-enum BrandLiftStudyStatus_API {
-  DRAFT = 'DRAFT',
-  PENDING_APPROVAL = 'PENDING_APPROVAL',
-  APPROVED = 'APPROVED', // This status might be what the main study gets set to
-  COLLECTING = 'COLLECTING',
-  COMPLETED = 'COMPLETED',
-  ARCHIVED = 'ARCHIVED',
-}
-
-const surveyApprovalStatusUpdateSchema = z.object({
+const updateApprovalStatusSchema = z.object({
   status: z.nativeEnum(SurveyOverallApprovalStatus),
-  requestedSignOff: z.boolean().optional(), // Can be set true when moving to PENDING_REVIEW or APPROVED
+  requestedSignOff: z.boolean().optional(),
 });
 
-// Updated tryCatch HOF for routes that use query params
-async function tryCatchForQueryRoutes<TResponse>(
-  handler: (request: NextRequest) => Promise<NextResponse<TResponse>>
-): Promise<(request: NextRequest) => Promise<NextResponse<TResponse | { error: string }>>> {
-  return async (request: NextRequest) => {
-    try {
-      // logger.info(`Request received: ${request.method} ${request.url}`);
-      return await handler(request);
-    } catch (error: any) {
-      return handleApiError(error, request);
+const getApprovalStatusQuerySchema = z.object({
+  studyId: z.string().cuid({ message: 'Valid Study ID is required.' }),
+});
+
+// Type for the enriched study state used in this handler
+type EnrichedStudyState = Prisma.BrandLiftStudyGetPayload<{
+  select: {
+    id: true, name: true, status: true,
+    campaign: { select: { userId: true } },
+    approvalStatus: { select: { id: true, status: true, requestedSignOff: true } }
+  }
+}>;
+
+async function verifyStudyForApprovalInteraction(studyId: string, orgId: string): Promise<EnrichedStudyState> {
+  const study = await db.brandLiftStudy.findFirst({
+    where: { id: studyId, organizationId: orgId },
+    select: {
+      id: true, name: true, status: true,
+      campaign: { select: { userId: true } },
+      approvalStatus: { select: { id: true, status: true, requestedSignOff: true } }
     }
-  };
+  });
+
+  if (!study) throw new NotFoundError('Study not found or not accessible.');
+
+  // Allowed main study statuses for updating/viewing approval status:
+  // If SurveyOverallApprovalStatus is CHANGES_REQUESTED, the main BrandLiftStudy.status would be PENDING_APPROVAL.
+  const allowedInteractionStatuses: BrandLiftStudyStatus[] = [
+    BrandLiftStudyStatus.PENDING_APPROVAL, // Covers initial review and when changes were requested
+    BrandLiftStudyStatus.APPROVED,
+  ];
+
+  const currentMainStudyStatus = study.status as BrandLiftStudyStatus;
+  if (!allowedInteractionStatuses.includes(currentMainStudyStatus)) {
+    throw new ForbiddenError(`Approval operations are not allowed when main study status is ${currentMainStudyStatus}.`);
+  }
+  return study as EnrichedStudyState;
 }
 
-// PUT /api/brand-lift/approval/status?studyId=xxx
-async function putApprovalStatusHandler(request: NextRequest) {
-  const { userId, orgId } = getAuth(request);
-  if (!userId) {
-    // throw new UnauthenticatedError("User not authenticated to update approval status.");
-    return NextResponse.json({ error: 'User not authenticated.' }, { status: 401 }); // Fallback
-  }
+export const GET = async (req: NextRequest) => {
+  try {
+    const { userId, orgId } = await auth();
+    if (!userId || !orgId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { searchParams } = new URL(request.url);
-  const studyId = searchParams.get('studyId');
-  logger.info('Authenticated user for PUT /approval/status', {
-    userId,
-    orgId,
-    studyIdFromQuery: studyId,
-  });
+    const { searchParams } = new URL(req.url);
+    const studyIdQueryParam = searchParams.get('studyId');
+    const parsedQuery = getApprovalStatusQuerySchema.safeParse({ studyId: studyIdQueryParam });
 
-  if (!studyId) {
-    return NextResponse.json(
-      { error: 'Study ID is required to update approval status.' },
-      { status: 400 }
-    );
-  }
-
-  // TODO: Authorization Logic:
-  // 1. Verify studyId exists.
-  // 2. Verify user (userId/orgId) has permission to update approval status for this study
-  //    (e.g., study owner, admin, or specific roles like 'approver', 'signer').
-  // Example:
-  // const study = await prisma.brandLiftStudy.findUnique({ where: { id: studyId } });
-  // if (!study) { return NextResponse.json({ error: "Study not found." }, { status: 404 }); }
-  // const userRoles = (await clerkClient.users.getUser(userId)).publicMetadata.roles as string[] || [];
-  // const canUpdateStatus = study.createdBy === userId || userRoles.includes('admin') || (orgId && study.organizationId === orgId && userRoles.includes('approver'));
-  // if (!canUpdateStatus) { // throw new ForbiddenError("User does not have permission to update approval status for this study."); }
-
-  const body = await request.json();
-  const validatedData = surveyApprovalStatusUpdateSchema.parse(body);
-
-  const updatePayloadForApprovalStatus: any = {
-    status: validatedData.status, // Prisma enum SurveyOverallApprovalStatus
-    updatedAt: new Date(),
-  };
-
-  if (validatedData.requestedSignOff !== undefined) {
-    updatePayloadForApprovalStatus.requestedSignOff = validatedData.requestedSignOff;
-  }
-
-  if (validatedData.status === SurveyOverallApprovalStatus.SIGNED_OFF) {
-    updatePayloadForApprovalStatus.signedOffBy = userId;
-    updatePayloadForApprovalStatus.signedOffAt = new Date();
-  }
-
-  const updatedApprovalStatus = await prisma.surveyApprovalStatus.upsert({
-    where: { studyId: studyId },
-    update: updatePayloadForApprovalStatus,
-    create: {
-      studyId: studyId,
-      status: validatedData.status,
-      requestedSignOff: validatedData.requestedSignOff || false,
-      ...(validatedData.status === SurveyOverallApprovalStatus.SIGNED_OFF && {
-        signedOffBy: userId,
-        signedOffAt: new Date(),
-      }),
-    },
-    include: {
-      study: { select: { name: true, status: true } },
-    },
-  });
-  logger.info('SurveyApprovalStatus upserted for study', {
-    studyId,
-    approvalStatusId: updatedApprovalStatus.id,
-    newStatus: validatedData.status,
-    userId,
-  });
-
-  // Update the main BrandLiftStudy status based on the approval outcome
-  let mainStudyNewStatus: BrandLiftStudyStatus_API | undefined;
-  if (
-    validatedData.status === SurveyOverallApprovalStatus.APPROVED ||
-    validatedData.status === SurveyOverallApprovalStatus.SIGNED_OFF
-  ) {
-    mainStudyNewStatus = BrandLiftStudyStatus_API.APPROVED;
-  } else if (validatedData.status === SurveyOverallApprovalStatus.CHANGES_REQUESTED) {
-    mainStudyNewStatus = BrandLiftStudyStatus_API.PENDING_APPROVAL; // Or back to DRAFT depending on workflow
-  } // Add other mappings if needed
-
-  if (mainStudyNewStatus) {
-    try {
-      await prisma.brandLiftStudy.update({
-        where: { id: studyId },
-        data: { status: mainStudyNewStatus }, // Assumes BrandLiftStudy model has a status field matching BrandLiftStudyStatus_API values
-      });
-      logger.info('Main BrandLiftStudy status updated based on approval', {
-        studyId,
-        newMainStatus: mainStudyNewStatus,
-      });
-    } catch (e) {
-      logger.error('Failed to update main BrandLiftStudy status after approval update', e, {
-        studyId,
-      });
-      // Decide if this should cause the overall request to fail or just be logged
+    if (!parsedQuery.success) {
+      logger.warn('Invalid query params for fetching approval status', { errors: parsedQuery.error.flatten().fieldErrors, orgId });
+      throw parsedQuery.error;
     }
+    const { studyId } = parsedQuery.data;
+
+    await verifyStudyForApprovalInteraction(studyId, orgId); // Verifies access and correct study state
+
+    const approvalStatus = await db.surveyApprovalStatus.findUnique({
+      where: { studyId: studyId },
+    });
+
+    if (!approvalStatus) {
+      // If no explicit record, it implies PENDING_REVIEW if study is in that phase, or can be created on first comment/action.
+      // For GET, returning 404 if not explicitly created is reasonable.
+      throw new NotFoundError('Approval status record not found for this study.');
+    }
+    logger.info('SurveyApprovalStatus fetched successfully', { studyId, orgId });
+    return NextResponse.json(approvalStatus);
+  } catch (error: any) {
+    return handleApiError(error, req);
   }
+};
 
-  // TODO: P3-04 - Integrate NotificationService for email notifications based on status change
-  // try {
-  //     const studyName = updatedApprovalStatus.study?.name || 'N/A';
-  //     const recipientEmails = [/* determine recipients based on study ownership/roles */];
+export const PUT = async (req: NextRequest) => {
+  try {
+    const { userId, orgId } = await auth();
+    if (!userId || !orgId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  //     if (validatedData.status === SurveyOverallApprovalStatus.APPROVED) {
-  //         await NotificationService.sendStudyStatusChangeEmail({
-  //             studyId,
-  //             studyName,
-  //             newStatus: 'APPROVED',
-  //             recipientEmails,
-  //             // customMessage: "The survey has been approved and may require sign-off."
-  //         });
-  //     } else if (validatedData.status === SurveyOverallApprovalStatus.CHANGES_REQUESTED) {
-  //         await NotificationService.sendStudyStatusChangeEmail({
-  //             studyId,
-  //             studyName,
-  //             newStatus: 'CHANGES_REQUESTED',
-  //             recipientEmails,
-  //             // customMessage: "Changes have been requested for the survey."
-  //         });
-  //     } else if (validatedData.status === SurveyOverallApprovalStatus.SIGNED_OFF) {
-  //         await NotificationService.sendStudyStatusChangeEmail({
-  //             studyId,
-  //             studyName,
-  //             newStatus: 'SIGNED_OFF',
-  //             recipientEmails,
-  //             // customMessage: "The survey has been signed off and is ready for data collection."
-  //         });
-  //     }
-  //     if (validatedData.requestedSignOff && validatedData.status === SurveyOverallApprovalStatus.APPROVED) {
-  //          await NotificationService.sendApprovalRequestedEmail({
-  //              studyId,
-  //              studyName,
-  //              // recipientEmails: [/* approver emails */],
-  //              // requestedBy: userId
-  //          });
-  //     }
-  //     logger.info('Approval status change notification sent', { studyId, newStatus: validatedData.status });
-  // } catch (emailError) {
-  //     logger.error('Failed to send approval status change notification', emailError, { studyId });
-  // }
+    const { searchParams } = new URL(req.url);
+    const studyId = searchParams.get('studyId');
+    if (!studyId || !z.string().cuid().safeParse(studyId).success) {
+      throw new BadRequestError('Valid Study ID is required as a query parameter.');
+    }
 
-  return NextResponse.json(updatedApprovalStatus, { status: 200 });
-}
+    // verifyStudyForApprovalInteraction is called, which now uses the corrected allowed statuses
+    const currentStudyState: EnrichedStudyState = await verifyStudyForApprovalInteraction(studyId, orgId);
 
-export const PUT = tryCatchForQueryRoutes(putApprovalStatusHandler);
+    const body = await req.json();
+    const validation = updateApprovalStatusSchema.safeParse(body);
+    if (!validation.success) {
+      logger.warn('Invalid approval status update data', { studyId, errors: validation.error.flatten().fieldErrors, orgId });
+      throw validation.error;
+    }
+
+    const { status: newApprovalStatusEnumValue, requestedSignOff } = validation.data;
+    const oldOverallApprovalStatus = currentStudyState.approvalStatus?.status as SurveyOverallApprovalStatus | undefined;
+    const oldRequestedSignOff = currentStudyState.approvalStatus?.requestedSignOff;
+
+    let newBrandLiftStudyMainStatus: BrandLiftStudyStatus = currentStudyState.status as BrandLiftStudyStatus;
+
+    if (newApprovalStatusEnumValue === SurveyOverallApprovalStatus.APPROVED) {
+      newBrandLiftStudyMainStatus = BrandLiftStudyStatus.APPROVED;
+    } else if (newApprovalStatusEnumValue === SurveyOverallApprovalStatus.CHANGES_REQUESTED) {
+      // When SurveyOverallApprovalStatus is CHANGES_REQUESTED, the main BrandLiftStudy.status goes to PENDING_APPROVAL.
+      newBrandLiftStudyMainStatus = BrandLiftStudyStatus.PENDING_APPROVAL;
+    } else if (newApprovalStatusEnumValue === SurveyOverallApprovalStatus.SIGNED_OFF) {
+      if (currentStudyState.approvalStatus?.status !== SurveyOverallApprovalStatus.APPROVED && !currentStudyState.approvalStatus?.requestedSignOff) {
+        throw new BadRequestError('Study must be in APPROVED status and sign-off must have been requested before it can be SIGNED_OFF.');
+      }
+      newBrandLiftStudyMainStatus = BrandLiftStudyStatus.APPROVED;
+    } else if (newApprovalStatusEnumValue === SurveyOverallApprovalStatus.PENDING_REVIEW) {
+      // This case implies a re-submission or initial submission setting things to PENDING_APPROVAL for the main study.
+      newBrandLiftStudyMainStatus = BrandLiftStudyStatus.PENDING_APPROVAL;
+    }
+
+    const approvalStatusDataToUpdate: Prisma.SurveyApprovalStatusUpdateInput = { status: newApprovalStatusEnumValue };
+    if (typeof requestedSignOff === 'boolean') approvalStatusDataToUpdate.requestedSignOff = requestedSignOff;
+    if (newApprovalStatusEnumValue === SurveyOverallApprovalStatus.SIGNED_OFF) {
+      approvalStatusDataToUpdate.signedOffBy = userId;
+      approvalStatusDataToUpdate.signedOffAt = new Date();
+    }
+
+    const notificationService = new NotificationService();
+
+    const [updatedApprovalStatus, finalStudyDbState] = await db.$transaction(async (tx: Prisma.TransactionClient) => {
+      const upsertedApproval = await tx.surveyApprovalStatus.upsert({
+        where: { studyId: studyId },
+        create: {
+          studyId: studyId,
+          status: newApprovalStatusEnumValue,
+          requestedSignOff: requestedSignOff ?? false,
+          ...(newApprovalStatusEnumValue === SurveyOverallApprovalStatus.SIGNED_OFF && { signedOffBy: userId, signedOffAt: new Date() }),
+        },
+        update: approvalStatusDataToUpdate,
+      });
+
+      let updatedStudyDirectly = { status: currentStudyState.status as BrandLiftStudyStatus };
+      if (currentStudyState.status !== newBrandLiftStudyMainStatus) {
+        const updated = await tx.brandLiftStudy.update({
+          where: { id: studyId },
+          data: { status: newBrandLiftStudyMainStatus },
+          select: { status: true }
+        });
+        updatedStudyDirectly = { status: updated.status as BrandLiftStudyStatus };
+      }
+      return [upsertedApproval, updatedStudyDirectly];
+    });
+
+    const studyOwnerId = currentStudyState.campaign?.userId;
+    let studyOwnerDetails: UserDetails | null = null;
+    if (studyOwnerId) {
+      const owner = await db.user.findUnique({ where: { id: studyOwnerId }, select: { id: true, email: true, name: true } });
+      if (owner) studyOwnerDetails = { email: owner.email, name: owner.name ?? undefined, id: owner.id };
+    }
+
+    const requesterDetailsFull = await db.user.findUnique({ where: { id: userId }, select: { id: true, email: true, name: true } });
+    const requesterDetails: UserDetails | null = requesterDetailsFull ? { id: requesterDetailsFull.id, email: requesterDetailsFull.email, name: requesterDetailsFull.name ?? undefined } : null;
+
+    const studyDetailsForEmail: EmailStudyDetails = { id: studyId, name: currentStudyState.name, approvalPageUrl: `${BASE_URL}/approval/${studyId}` };
+
+    // 1. Sign-off Requested
+    if (requestedSignOff === true && oldRequestedSignOff !== true && newApprovalStatusEnumValue === SurveyOverallApprovalStatus.APPROVED) {
+      const approverEmails = ['manager@example.com']; // Placeholder
+      if (approverEmails.length > 0 && requesterDetails?.email) {
+        try {
+          await notificationService.sendApprovalRequestedEmail(
+            approverEmails.map(email => ({ email })),
+            studyDetailsForEmail,
+            requesterDetails
+          );
+          logger.info('"Approval Requested" notification sent', { studyId });
+        } catch (emailError: any) { logger.error('Failed to send "Approval Requested" email', { studyId, error: emailError.message }); }
+      }
+    }
+
+    // 2. Status Changed (Approved or Changes Requested)
+    if (newApprovalStatusEnumValue !== oldOverallApprovalStatus &&
+      (newApprovalStatusEnumValue === SurveyOverallApprovalStatus.APPROVED || newApprovalStatusEnumValue === SurveyOverallApprovalStatus.CHANGES_REQUESTED)) {
+      if (studyOwnerDetails?.email && requesterDetails?.email) {
+        try {
+          await notificationService.sendStudyStatusChangeEmail(
+            studyOwnerDetails,
+            studyDetailsForEmail,
+            newApprovalStatusEnumValue.replace(/_/g, ' ').toLowerCase(),
+            requesterDetails
+          );
+          logger.info(`"Study Status Change (${newApprovalStatusEnumValue})" notification sent`, { studyId });
+        } catch (emailError: any) { logger.error('Failed to send "Study Status Change" email', { studyId, error: emailError.message }); }
+      }
+    }
+
+    logger.info('Survey approval status and main study status updated', { studyId, newApprovalStatus: updatedApprovalStatus.status, newStudyStatus: finalStudyDbState.status, orgId });
+    return NextResponse.json({ approvalStatus: updatedApprovalStatus, studyStatus: finalStudyDbState.status });
+
+  } catch (error: any) {
+    return handleApiError(error, req);
+  }
+};

@@ -1,166 +1,101 @@
-import { NextResponse, NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
 import { z } from 'zod';
-import prisma from '@/lib/db';
-import { getAuth, clerkClient } from '@clerk/nextjs/server';
+import { prisma } from '@/lib/db';
+import { handleApiError } from '@/lib/apiErrorHandler';
+import { tryCatch } from '@/lib/middleware/api/util-middleware';
+import { withValidation } from '@/lib/middleware/api/util-middleware';
+import { SubmissionStatus } from '@prisma/client';
 
-// HYPOTHETICAL SHARED UTILITIES (copied from previous step for context)
-const logger = {
-  info: (message: string, context?: any) => console.log(`[INFO] ${message}`, context || ''),
-  error: (message: string, error?: any, context?: any) =>
-    console.error(`[ERROR] ${message}`, error, context || ''),
-};
+import { logger } from '@/lib/logger';
+import { UnauthenticatedError, ForbiddenError, NotFoundError, BadRequestError, DatabaseError, ZodValidationError } from '@/lib/errors';
 
-const handleApiError = (error: any, request?: NextRequest) => {
-  let statusCode = 500;
-  let errorMessage = 'An unexpected error occurred.';
-  const { method, url } = request || {};
-  logger.error(`API Error: ${error.message}`, error, { method, url });
-
-  if (error.name === 'UnauthenticatedError') {
-    statusCode = 401;
-    errorMessage = error.message || 'User not authenticated.';
-  } else if (error.name === 'ForbiddenError') {
-    statusCode = 403;
-    errorMessage = error.message || 'User does not have permission for this action.';
-  } else if (error instanceof z.ZodError) {
-    statusCode = 400;
-    errorMessage = error.errors.map(e => e.message).join(', ');
-  } else if (error.name === 'PrismaClientKnownRequestError') {
-    if (error.code === 'P2002') {
-      statusCode = 409;
-      errorMessage = `Record already exists. Fields: ${error.meta?.target?.join(', ')}`;
-    } else if (error.code === 'P2025') {
-      statusCode = 404;
-      errorMessage = (error.meta?.cause as string) || 'Record not found.';
-    } else {
-      errorMessage = `Database error occurred.`;
-    }
-  }
-  return NextResponse.json({ error: errorMessage }, { status: statusCode });
-};
-// END HYPOTHETICAL SHARED UTILITIES
-
-// Re-define enums here or ensure they are properly imported from src/types/brand-lift.ts
-enum SurveyQuestionType {
-  SINGLE_CHOICE = 'SINGLE_CHOICE',
-  MULTIPLE_CHOICE = 'MULTIPLE_CHOICE',
-}
-
-// Zod schema for updating a question (options are not updated here directly, but via their own endpoints or as part of full question replacement)
-const surveyQuestionUpdateSchema = z.object({
-  text: z.string().min(1, 'Question text is required.').optional(),
-  questionType: z.nativeEnum(SurveyQuestionType).optional(),
-  order: z.number().int().optional(),
-  isRandomized: z.boolean().optional(),
-  isMandatory: z.boolean().optional(),
-  kpiAssociation: z.string().optional().nullable(),
-  // Options are managed separately or by re-posting the whole question if a full update is desired via the collection POST
+// Schema for updating a SurveyQuestion. Options are handled separately or as part of a full replace if needed.
+const updateQuestionSchema = z.object({
+    text: z.string().min(1).max(500).optional(),
+    questionType: z.enum(['SINGLE_CHOICE', 'MULTIPLE_CHOICE']).optional(), // Adjust as per Prisma enum
+    order: z.number().int().min(0).optional(),
+    isRandomized: z.boolean().optional(),
+    isMandatory: z.boolean().optional(),
+    kpiAssociation: z.string().optional().nullable(),
+    // Note: Updating options here might be complex (add/remove/update existing).
+    // For simplicity, this schema focuses on question-level fields.
+    // Options might be managed by dedicated option endpoints or by replacing all options if that's the pattern.
 });
 
-// Updated tryCatch HOF for routes with params
-async function tryCatch<TResponse, TParams = { studyId: string; questionId: string }>(
-  handler: (
-    request: NextRequest,
-    paramsContainer: { params: TParams }
-  ) => Promise<NextResponse<TResponse>>
-): Promise<
-  (
-    request: NextRequest,
-    paramsContainer: { params: TParams }
-  ) => Promise<NextResponse<TResponse | { error: string }>>
-> {
-  return async (request: NextRequest, paramsContainer: { params: TParams }) => {
-    try {
-      // logger.info(`Request received: ${request.method} ${request.url}`, { params: paramsContainer.params });
-      return await handler(request, paramsContainer);
-    } catch (error: any) {
-      return handleApiError(error, request);
+// Helper to verify study access, question existence, and modifiability status
+async function getAndVerifyQuestion(studyId: string, questionId: string, orgId: string) {
+    const question = await prisma.surveyQuestion.findFirst({
+        where: {
+            id: questionId,
+            studyId: studyId,
+            study: { // Ensures study belongs to the org
+                organizationId: orgId,
+            },
+        },
+        include: {
+            study: { select: { status: true } }, // To check study status for modifiability
+        },
+    });
+
+    if (!question) {
+        throw new NotFoundError('Question not found or not accessible.');
     }
-  };
+
+    // Prevent changes if study is in a non-editable state
+    if (!['DRAFT', 'PENDING_APPROVAL'].includes(question.study.status)) {
+        throw new ForbiddenError(`Questions cannot be modified when study status is ${question.study.status}.`);
+    }
+    return question;
 }
 
-// PUT /api/brand-lift/surveys/[studyId]/questions/[questionId]
-async function putQuestionHandler(
-  request: NextRequest,
-  { params }: { params: { studyId: string; questionId: string } }
-) {
-  const { userId, orgId } = getAuth(request);
-  if (!userId) {
-    // throw new UnauthenticatedError("User not authenticated for updating question.");
-    return NextResponse.json({ error: 'User not authenticated.' }, { status: 401 });
-  }
-  const { studyId, questionId } = params;
-  logger.info('Authenticated user for PUT /surveys/{studyId}/questions/{questionId}', {
-    userId,
-    orgId,
-    studyId,
-    questionId,
-  });
+export async function PUT(req: NextRequest, { params: paramsPromise }: { params: Promise<{ studyId: string, questionId: string }> }) {
+    // Remove withValidation wrapping, handle validation inside
+    return tryCatch(async () => {
+        const { userId, orgId } = await auth();
+        if (!userId || !orgId) throw new UnauthenticatedError('Authentication and organization membership required.');
 
-  // TODO: Authorization Logic:
-  // 1. Verify studyId exists and user has write permissions.
-  // 2. Verify questionId exists within that study and user has permission to modify it.
-  // Example: const study = await prisma.brandLiftStudy.findFirst({ where: { id: studyId, OR: [{ createdBy: userId }, { organizationId: orgId }] } });
-  // if (!study) { // throw new ForbiddenError("Access to study denied or study not found."); }
-  // const question = await prisma.surveyQuestion.findFirst({where: {id: questionId, studyId: study.id }});
-  // if (!question) { // throw new ForbiddenError("Question not found in this study or access denied."); }
+        const { studyId, questionId } = await paramsPromise;
+        if (!studyId || !questionId) throw new ZodValidationError('Study ID and Question ID are required.');
 
-  const body = await request.json();
-  const validatedData = surveyQuestionUpdateSchema.parse(body); // .partial() is applied by default by Zod for .object().optional() etc.
+        await getAndVerifyQuestion(studyId, questionId, orgId); // Verifies access and modifiability
 
-  if (Object.keys(validatedData).length === 0) {
-    return NextResponse.json({ error: 'No fields to update provided.' }, { status: 400 });
-  }
+        const body = await req.json();
+        const parsedBody = updateQuestionSchema.safeParse(body);
+        if (!parsedBody.success) throw new ZodValidationError(parsedBody.error);
 
-  const updatedQuestion = await prisma.surveyQuestion.update({
-    where: { id: questionId, studyId: studyId }, // Composite key check or ensure studyId matches if not part of unique constraint directly
-    data: validatedData,
-    include: { options: true },
-  });
-  logger.info('SurveyQuestion updated', { questionId: updatedQuestion.id, studyId, userId });
-  return NextResponse.json(updatedQuestion, { status: 200 });
+        const updateData = parsedBody.data;
+        if (Object.keys(updateData).length === 0) {
+            return NextResponse.json({ message: 'No update data provided' }, { status: 400 });
+        }
+
+        logger.info('Attempting to update SurveyQuestion', { userId, orgId, studyId, questionId, updateData });
+        const updatedQuestion = await prisma.surveyQuestion.update({
+            where: { id: questionId },
+            data: updateData,
+        });
+        logger.info('SurveyQuestion updated successfully', { userId, orgId, questionId });
+        return NextResponse.json(updatedQuestion);
+
+    }, (error) => handleApiError(error, req)); // Pass req to error handler
 }
 
-// DELETE /api/brand-lift/surveys/[studyId]/questions/[questionId]
-async function deleteQuestionHandler(
-  request: NextRequest,
-  { params }: { params: { studyId: string; questionId: string } }
-) {
-  const { userId, orgId } = getAuth(request);
-  if (!userId) {
-    // throw new UnauthenticatedError("User not authenticated for deleting question.");
-    return NextResponse.json({ error: 'User not authenticated.' }, { status: 401 });
-  }
-  const { studyId, questionId } = params;
-  logger.info('Authenticated user for DELETE /surveys/{studyId}/questions/{questionId}', {
-    userId,
-    orgId,
-    studyId,
-    questionId,
-  });
+export async function DELETE(req: NextRequest, { params: paramsPromise }: { params: Promise<{ studyId: string, questionId: string }> }) {
+    return tryCatch(async () => {
+        const { userId, orgId } = await auth();
+        if (!userId || !orgId) throw new UnauthenticatedError('Authentication and organization membership required.');
 
-  // TODO: Authorization Logic (similar to PUT):
-  // Verify user has permission to delete this question from this study.
+        const { studyId, questionId } = await paramsPromise;
+        if (!studyId || !questionId) throw new ZodValidationError('Study ID and Question ID are required.');
 
-  // Ensure the question belongs to the study before deleting
-  const question = await prisma.surveyQuestion.findFirst({
-    where: { id: questionId, studyId: studyId },
-  });
+        await getAndVerifyQuestion(studyId, questionId, orgId); // Verifies access and modifiability
 
-  if (!question) {
-    // throw new ForbiddenError("Question not found in this study or permission denied.");
-    return NextResponse.json(
-      { error: 'Question not found in this study or permission denied.' },
-      { status: 404 }
-    ); // Or 403 if it exists but no permission
-  }
+        logger.info('Attempting to delete SurveyQuestion', { userId, orgId, studyId, questionId });
+        await prisma.surveyQuestion.delete({
+            where: { id: questionId },
+        });
+        logger.info('SurveyQuestion deleted successfully', { userId, orgId, questionId });
+        return NextResponse.json({ message: 'Question deleted successfully' }, { status: 200 }); // Or 204 No Content
 
-  await prisma.surveyQuestion.delete({
-    where: { id: questionId }, // studyId check was effectively done above
-  });
-  logger.info('SurveyQuestion deleted', { questionId, studyId, userId });
-  return new NextResponse(null, { status: 204 });
+    }, (error) => handleApiError(error, req)); // Pass req to error handler
 }
-
-export const PUT = tryCatch(putQuestionHandler);
-export const DELETE = tryCatch(deleteQuestionHandler);

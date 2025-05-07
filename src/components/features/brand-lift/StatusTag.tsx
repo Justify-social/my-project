@@ -1,111 +1,105 @@
 import React from 'react';
+import { Badge } from '@/components/ui/badge'; // Assuming Badge is the base component
+import {
+  BrandLiftStudyStatus,
+  SurveyApprovalCommentStatus,
+  SurveyOverallApprovalStatus,
+} from '@prisma/client'; // Import enums directly from Prisma
 
-// Assuming this is your Shadcn UI primitive component
-// import { Badge } from "@/components/ui/badge";
-
-// TODO: Replace with actual enum from src/types/brand-lift.ts if different
-// Using a union type here for flexibility, could also be a specific status enum.
-export type StatusTagVariant =
-  | 'OPEN'
-  | 'RESOLVED'
-  | 'NEED_ACTION'
-  | 'PENDING_REVIEW'
-  | 'CHANGES_REQUESTED'
-  | 'APPROVED'
-  | 'SIGNED_OFF'
-  | 'DRAFT'
-  | 'COLLECTING'
-  | 'COMPLETED'
-  | 'ARCHIVED'
-  | 'DEFAULT'; // Default/neutral style
-
-interface StatusTagProps {
-  status: StatusTagVariant | string; // Allow string for flexibility if statuses come from various sources
-  className?: string;
-}
-
-const getStatusColors = (status: StatusTagVariant | string): string => {
-  switch (status.toUpperCase()) {
-    case 'OPEN':
-    case 'PENDING_REVIEW':
-    case 'NEED_ACTION':
-      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
-    case 'RESOLVED':
-    case 'APPROVED':
-    case 'SIGNED_OFF':
-    case 'COMPLETED':
-      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-    case 'CHANGES_REQUESTED':
-    case 'ARCHIVED':
-      return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
-    case 'DRAFT':
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
-    case 'COLLECTING':
-      return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
-    default:
-      return 'bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200';
-  }
+// Define possible statuses this component can handle
+type StatusTagProps = {
+  status: BrandLiftStudyStatus | SurveyApprovalCommentStatus | SurveyOverallApprovalStatus | string; // Allow string for flexibility if needed
+  type: 'study' | 'comment' | 'approval'; // To help determine color/text logic
 };
 
-/**
- * StatusTag Atom/Molecule
- * Displays a status with appropriate coloring using a Badge primitive conceptually.
- */
-export const StatusTag: React.FC<StatusTagProps> = ({ status, className }) => {
-  // Placeholder for Shadcn Badge component usage
-  const Badge = ({
-    children,
-    className: badgeClassName,
-  }: {
-    children: React.ReactNode;
-    className?: string;
-  }) => (
-    <span
-      className={`px-2.5 py-0.5 text-xs font-medium rounded-full inline-flex items-center ${badgeClassName}`}
-    >
-      {children}
-    </span>
-  );
+const StatusTag: React.FC<StatusTagProps> = ({ status, type }) => {
+  let variant: "default" | "secondary" | "destructive" | "outline" | "success" | "warning" | "info" = "secondary";
+  let text = String(status);
 
-  const normalizedStatus = status.toUpperCase().replace(/\s+/g, '_') as StatusTagVariant;
-  // Try to match specific known statuses, otherwise use the input as is for the label
-  const displayStatus =
-    Object.values(SurveyApprovalCommentStatus).includes(normalizedStatus as any) ||
-    Object.values(SurveyOverallApprovalStatus).includes(normalizedStatus as any) ||
-    Object.values(BrandLiftStudyStatus).includes(normalizedStatus as any)
-      ? normalizedStatus
-          .replace(/_/g, ' ')
-          .split(' ')
-          .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-          .join(' ')
-      : status;
+  // Determine variant and text based on status and type
+  switch (status) {
+    // BrandLiftStudy Statuses
+    case BrandLiftStudyStatus.DRAFT:
+      variant = "outline";
+      text = 'Draft';
+      break;
+    case BrandLiftStudyStatus.PENDING_APPROVAL:
+      variant = "warning";
+      text = 'Pending Approval';
+      break;
+    case BrandLiftStudyStatus.APPROVED:
+      variant = "info";
+      text = 'Approved (Design)';
+      break;
+    case BrandLiftStudyStatus.COLLECTING:
+      variant = "default";
+      text = 'Collecting Responses';
+      break;
+    case BrandLiftStudyStatus.COMPLETED:
+      variant = "success";
+      text = 'Completed';
+      break;
+    case BrandLiftStudyStatus.ARCHIVED:
+      variant = "secondary";
+      text = 'Archived';
+      break;
+
+    // SurveyApprovalComment Statuses
+    case SurveyApprovalCommentStatus.OPEN:
+      // Use default variant or specific one like 'destructive' for NEED_ACTION?
+      variant = "warning"; // Or maybe destructive? Depends on desired emphasis
+      text = 'Needs Action'; // Changed text for clarity
+      break;
+    case SurveyApprovalCommentStatus.RESOLVED:
+      variant = "success";
+      text = 'Resolved';
+      break;
+
+    // SurveyOverallApproval Statuses
+    case SurveyOverallApprovalStatus.PENDING_REVIEW:
+      variant = "warning";
+      text = 'Pending Review';
+      break;
+    case SurveyOverallApprovalStatus.CHANGES_REQUESTED:
+      variant = "destructive";
+      text = 'Changes Requested';
+      break;
+    case SurveyOverallApprovalStatus.APPROVED:
+      // Distinguish from study design approval
+      variant = "info";
+      text = 'Approved for Sign-off';
+      break;
+    case SurveyOverallApprovalStatus.SIGNED_OFF:
+      variant = "success";
+      text = 'Signed Off';
+      break;
+
+    default:
+      // Handle any unexpected string statuses gracefully
+      variant = "secondary";
+      text = status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()); // Basic formatting
+      break;
+  }
+
+  // Ensure the Badge component accepts these variants or map them
+  // If Badge variants don't match ('success', 'warning', 'info'), map them here:
+  const badgeVariantMapping = {
+    default: 'default',
+    secondary: 'secondary',
+    destructive: 'destructive',
+    outline: 'outline',
+    success: 'success', // Assuming Badge has a success variant
+    warning: 'warning', // Assuming Badge has a warning variant
+    info: 'info', // Assuming Badge has an info variant
+  };
+
+  const finalVariant = badgeVariantMapping[variant] || 'secondary';
 
   return (
-    <Badge className={`${getStatusColors(normalizedStatus)} ${className || ''}`}>
-      {displayStatus}
+    <Badge variant={finalVariant as any} className="capitalize">
+      {text}
     </Badge>
   );
 };
-
-// Expose enums if they are defined here for Storybook or testing, ideally import from types
-export enum SurveyApprovalCommentStatus {
-  OPEN = 'OPEN',
-  RESOLVED = 'RESOLVED',
-}
-
-export enum SurveyOverallApprovalStatus {
-  PENDING_REVIEW = 'PENDING_REVIEW',
-  CHANGES_REQUESTED = 'CHANGES_REQUESTED',
-  APPROVED = 'APPROVED',
-  SIGNED_OFF = 'SIGNED_OFF',
-}
-export enum BrandLiftStudyStatus {
-  DRAFT = 'DRAFT',
-  PENDING_APPROVAL = 'PENDING_APPROVAL',
-  APPROVED = 'APPROVED',
-  COLLECTING = 'COLLECTING',
-  COMPLETED = 'COMPLETED',
-  ARCHIVED = 'ARCHIVED',
-}
 
 export default StatusTag;

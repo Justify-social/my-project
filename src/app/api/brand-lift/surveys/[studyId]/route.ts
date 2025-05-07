@@ -1,193 +1,185 @@
-import { NextResponse, NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import prisma from '@/lib/db';
-import { getAuth, clerkClient } from '@clerk/nextjs/server';
+import { auth } from '@clerk/nextjs/server';
+import { BrandLiftStudyStatus, Prisma } from '@prisma/client';
+import db from '@/lib/db';
+import { logger } from '@/lib/logger';
+import { handleApiError } from '@/lib/apiErrorHandler';
+import { BadRequestError, ForbiddenError, NotFoundError, UnauthenticatedError } from '@/lib/errors';
+import { NotificationService } from '@/lib/notificationService';
+import { BASE_URL } from '@/config/constants';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { CintApiService } from '@/lib/cint';
 
-// HYPOTHETICAL SHARED UTILITIES (Illustrative - these would be in separate files)
-const logger = {
-  info: (message: string, context?: any) => console.log(`[INFO] ${message}`, context || ''),
-  error: (message: string, error?: any, context?: any) =>
-    console.error(`[ERROR] ${message}`, error, context || ''),
-};
-
-const handleApiError = (error: any, request?: NextRequest) => {
-  // Changed Request to NextRequest
-  // Default error
-  let statusCode = 500;
-  let errorMessage = 'An unexpected error occurred.';
-
-  // Log the error with context
-  const { method, url } = request || {};
-  logger.error(`API Error: ${error.message}`, error, { method, url });
-
-  if (error.name === 'UnauthenticatedError') {
-    // Hypothetical custom error
-    statusCode = 401;
-    errorMessage = error.message || 'User not authenticated.';
-  } else if (error.name === 'ForbiddenError') {
-    // Hypothetical custom error
-    statusCode = 403;
-    errorMessage = error.message || 'User does not have permission for this action.';
-  } else if (error instanceof z.ZodError) {
-    statusCode = 400;
-    errorMessage = error.errors.map(e => e.message).join(', ');
-  } else if (error.name === 'PrismaClientKnownRequestError') {
-    if (error.code === 'P2002') {
-      statusCode = 409; // Conflict
-      errorMessage = `Record already exists. Fields: ${error.meta?.target?.join(', ')}`;
-    } else if (error.code === 'P2025') {
-      statusCode = 404;
-      errorMessage = (error.meta?.cause as string) || 'Record not found.';
-    } else {
-      errorMessage = `Database error occurred.`; // Avoid leaking sensitive error.message
-    }
-  }
-  // ... add more specific error type handling as needed
-
-  return NextResponse.json({ error: errorMessage }, { status: statusCode });
-};
-// END HYPOTHETICAL SHARED UTILITIES
-
-// Helper enum (should ideally be imported from src/types/brand-lift.ts)
-// Duplicating here for self-containment in this snippet, but SSOT should be in types file.
-enum BrandLiftStudyStatus {
-  DRAFT = 'DRAFT',
-  PENDING_APPROVAL = 'PENDING_APPROVAL',
-  APPROVED = 'APPROVED',
-  COLLECTING = 'COLLECTING',
-  COMPLETED = 'COMPLETED',
-  ARCHIVED = 'ARCHIVED',
-}
-
-const brandLiftStudyUpdateSchema = z
-  .object({
-    name: z.string().min(1, { message: 'Study name is required.' }).optional(),
-    // campaignId is typically not updatable once a study is linked. If it is, ensure business logic allows.
-    // campaignId: z.string().min(1, { message: "Campaign ID is required." }).optional(),
-    funnelStage: z.string().min(1, { message: 'Funnel stage is required.' }).optional(),
-    primaryKpi: z.string().min(1, { message: 'Primary KPI is required.' }).optional(),
+const updateStudySchema = z.object({
+    name: z.string().min(1).optional(),
+    funnelStage: z.string().min(1).optional(),
+    primaryKpi: z.string().min(1).optional(),
     secondaryKpis: z.array(z.string()).optional(),
     status: z.nativeEnum(BrandLiftStudyStatus).optional(),
-  })
-  .partial(); // Use .partial() to make all fields optional for PUT/PATCH
+}).partial().refine(data => Object.keys(data).length > 0, { message: 'At least one field for update is required.' });
 
-// Updated tryCatch to use shared error/logging utilities
-async function tryCatch<TResponse, TParams = { studyId: string }>(
-  // paramsContainer is now non-optional for the handler, as this route file implies params will exist
-  handler: (
-    request: NextRequest,
-    paramsContainer: { params: TParams }
-  ) => Promise<NextResponse<TResponse>>
-): Promise<
-  (
-    request: NextRequest,
-    paramsContainer: { params: TParams }
-  ) => Promise<NextResponse<TResponse | { error: string }>>
-> {
-  // The function returned by tryCatch will also expect paramsContainer for dynamic routes
-  return async (request: NextRequest, paramsContainer: { params: TParams }) => {
+const notificationServiceInstance = new NotificationService();
+const cintService = new CintApiService(
+    process.env.CINT_CLIENT_ID || 'mock_client_id',
+    process.env.CINT_CLIENT_SECRET || 'mock_client_secret',
+    process.env.CINT_ACCOUNT_ID || 'mock_account_id',
+    process.env.CINT_S2S_API_KEY || 'mock_s2s_key'
+);
+
+export const GET = async (req: NextRequest, { params: paramsPromise }: { params: Promise<{ studyId: string }> }) => {
     try {
-      // logger.info(`Request received: ${request.method} ${request.url}`, { params: paramsContainer?.params });
-      return await handler(request, paramsContainer);
+        const { userId, orgId } = await auth();
+        if (!userId || !orgId) throw new UnauthenticatedError('Authentication and organization membership required.');
+
+        const { studyId } = await paramsPromise;
+        if (!studyId) throw new BadRequestError('Study ID is required.');
+
+        const study = await db.brandLiftStudy.findFirst({
+            where: { id: studyId, organizationId: orgId },
+            include: {
+                campaign: { select: { campaignName: true } },
+                _count: { select: { questions: true } }
+            }
+        });
+        if (!study) throw new NotFoundError('Study not found');
+        logger.info('Fetched Brand Lift Study details', { studyId, orgId });
+        return NextResponse.json(study);
     } catch (error: any) {
-      return handleApiError(error, request);
+        return handleApiError(error, req);
     }
-  };
-}
+};
 
-async function getStudyHandler(request: NextRequest, { params }: { params: { studyId: string } }) {
-  const { userId, orgId } = getAuth(request);
-  if (!userId) {
-    // throw new UnauthenticatedError("User not authenticated.");
-    return NextResponse.json({ error: 'User not authenticated.' }, { status: 401 });
-  }
-  const { studyId } = params;
-  logger.info('Authenticated user for GET /surveys/{studyId}', { userId, orgId, studyId });
+export const PUT = async (req: NextRequest, { params: paramsPromise }: { params: Promise<{ studyId: string }> }) => {
+    try {
+        const { userId, orgId } = await auth();
+        if (!userId || !orgId) throw new UnauthenticatedError('Authentication and organization membership required.');
 
-  // TODO: Authorization Logic for fetching a specific study
-  // Example: Check if the user is the creator or part of the organization associated with the study.
-  // const studyForAuth = await prisma.brandLiftStudy.findUnique({ where: { id: studyId }, select: { createdBy: true, organizationId: true } });
-  // if (!studyForAuth) { return NextResponse.json({ error: "Study not found" }, { status: 404 }); }
-  // const canAccess = (studyForAuth.createdBy === userId) || (orgId && studyForAuth.organizationId === orgId && /* check user role in org */ true);
-  // if (!canAccess) {
-  //    // throw new ForbiddenError("User does not have permission to access this study.");
-  //    return NextResponse.json({ error: "User does not have permission." }, { status: 403 });
-  // }
+        const { studyId } = await paramsPromise;
+        if (!studyId) throw new BadRequestError('Study ID is required.');
 
-  const study = await prisma.brandLiftStudy.findUnique({
-    where: { id: studyId },
-    // include: { questions: true } // Optionally include related data
-  });
+        const body = await req.json();
+        const validation = updateStudySchema.safeParse(body);
+        if (!validation.success) {
+            logger.warn('Invalid study update data', { studyId, errors: validation.error.flatten().fieldErrors, orgId });
+            throw validation.error;
+        }
 
-  if (!study) {
-    return NextResponse.json({ error: 'Study not found' }, { status: 404 });
-  }
-  return NextResponse.json(study, { status: 200 });
-}
+        const updateData = validation.data;
 
-async function putStudyHandler(request: NextRequest, { params }: { params: { studyId: string } }) {
-  const { userId, orgId } = getAuth(request);
-  if (!userId) {
-    // throw new UnauthenticatedError("User not authenticated.");
-    return NextResponse.json({ error: 'User not authenticated.' }, { status: 401 });
-  }
-  const { studyId } = params;
-  logger.info('Authenticated user for PUT /surveys/{studyId}', { userId, orgId, studyId });
+        const existingStudy = await db.brandLiftStudy.findFirst({
+            where: { id: studyId, organizationId: orgId },
+            select: { id: true, status: true, name: true, campaign: { select: { userId: true, campaignName: true } } }
+        });
+        if (!existingStudy) throw new NotFoundError('Study not found or not accessible');
 
-  // TODO: Authorization Logic for updating a specific study
-  // Example: Similar to GET, check ownership or specific update permissions.
-  // const studyForAuth = await prisma.brandLiftStudy.findUnique({ where: { id: studyId }, select: { createdBy: true, organizationId: true } });
-  // if (!studyForAuth) { return NextResponse.json({ error: "Study not found" }, { status: 404 }); }
-  // const canUpdate = (studyForAuth.createdBy === userId) || (orgId && studyForAuth.organizationId === orgId && /* check user role for update rights */ true);
-  // if (!canUpdate) {
-  //    // throw new ForbiddenError("User does not have permission to update this study.");
-  //    return NextResponse.json({ error: "User does not have permission." }, { status: 403 });
-  // }
-  // Also, consider if study status prevents updates (e.g., if 'COLLECTING' or 'COMPLETED').
+        const currentStatus = existingStudy.status as BrandLiftStudyStatus;
+        if (updateData.status &&
+            (currentStatus === BrandLiftStudyStatus.COLLECTING ||
+                currentStatus === BrandLiftStudyStatus.COMPLETED ||
+                currentStatus === BrandLiftStudyStatus.ARCHIVED) &&
+            currentStatus !== updateData.status &&
+            updateData.status !== BrandLiftStudyStatus.ARCHIVED
+        ) {
+            throw new ForbiddenError(`Study status ${currentStatus} cannot be changed to ${updateData.status} via this endpoint unless archiving.`);
+        }
 
-  const body = await request.json();
-  const validatedData = brandLiftStudyUpdateSchema.parse(body);
+        let finalUpdatedStudy;
 
-  if (Object.keys(validatedData).length === 0) {
-    return NextResponse.json({ error: 'No fields to update provided.' }, { status: 400 });
-  }
+        if (updateData.status === BrandLiftStudyStatus.COLLECTING && existingStudy.status !== BrandLiftStudyStatus.COLLECTING) {
+            logger.info(`Attempting to launch study ${studyId} on Cint...`, { orgId });
+            try {
+                const fullStudyForCint = await db.brandLiftStudy.findUnique({
+                    where: { id: studyId },
+                    include: { campaign: true }
+                });
+                if (!fullStudyForCint) throw new NotFoundError('Full study details not found for Cint launch.');
 
-  // If campaignId is part of validatedData and needs to be Int, handle conversion
-  // However, campaignId is usually not updatable for an existing study.
-  // const updatePayload: any = { ...validatedData };
-  // if (validatedData.campaignId) {
-  //   updatePayload.campaignId = parseInt(validatedData.campaignId, 10);
-  // }
+                const CINT_PROJECT_MANAGER_ID = process.env.CINT_PROJECT_MANAGER_ID || 'pm_default_mock';
+                const CINT_BUSINESS_UNIT_ID = process.env.CINT_BUSINESS_UNIT_ID || 'bu_default_mock';
 
-  const updatedStudy = await prisma.brandLiftStudy.update({
-    where: { id: studyId /*, createdBy: userId */ }, // Example: Ensure user can only update their own studies
-    data: validatedData,
-  });
-  logger.info('BrandLiftStudy updated', {
-    studyId: updatedStudy.id,
-    userId,
-    status: validatedData.status,
-  });
+                const cintProject = await cintService.createCintProject(fullStudyForCint.name, CINT_PROJECT_MANAGER_ID);
+                logger.info('Cint Project created', { studyId, cintProjectId: cintProject.id });
 
-  // TODO: P3-04 - Integrate NotificationService for email notifications
-  // if (validatedData.status === BrandLiftStudyStatus.PENDING_APPROVAL) {
-  //    try {
-  //        await NotificationService.sendSurveySubmittedForReviewEmail({
-  //            studyId: updatedStudy.id,
-  //            studyName: updatedStudy.name,
-  //            // recipientEmails: [/* array of reviewer emails */],
-  //            // submittedBy: userId
-  //        });
-  //        logger.info('PENDING_APPROVAL notification sent for study', { studyId: updatedStudy.id });
-  //    } catch (emailError) {
-  //        logger.error('Failed to send PENDING_APPROVAL notification', emailError, { studyId: updatedStudy.id });
-  //    }
-  // }
+                const surveyLiveUrl = `${BASE_URL}/survey/${studyId}?rid=[%RID%]`;
 
-  return NextResponse.json(updatedStudy, { status: 200 });
-}
+                const cintTargetGroup = await cintService.createCintTargetGroup(
+                    cintProject.id,
+                    fullStudyForCint as any,
+                    surveyLiveUrl,
+                    CINT_PROJECT_MANAGER_ID,
+                    CINT_BUSINESS_UNIT_ID
+                );
+                logger.info('Cint Target Group created', { studyId, cintTargetGroupId: cintTargetGroup.id });
 
-export const GET = tryCatch(getStudyHandler);
-export const PUT = tryCatch(putStudyHandler);
+                const endFieldingAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
+                await cintService.launchCintTargetGroup(cintProject.id, cintTargetGroup.id, endFieldingAt);
+                logger.info('Cint Target Group launched', { studyId, cintTargetGroupId: cintTargetGroup.id });
+
+                const dataToUpdate: Prisma.BrandLiftStudyUpdateInput = {
+                    status: BrandLiftStudyStatus.COLLECTING,
+                    cintProjectId: cintProject.id,
+                    cintTargetGroupId: cintTargetGroup.id,
+                };
+                if (updateData.name) dataToUpdate.name = updateData.name;
+                if (updateData.funnelStage) dataToUpdate.funnelStage = updateData.funnelStage;
+                if (updateData.primaryKpi) dataToUpdate.primaryKpi = updateData.primaryKpi;
+                if (updateData.secondaryKpis) dataToUpdate.secondaryKpis = updateData.secondaryKpis;
+
+                finalUpdatedStudy = await db.brandLiftStudy.update({
+                    where: { id: studyId },
+                    data: dataToUpdate,
+                    select: { id: true, name: true, status: true, campaign: { select: { userId: true, campaignName: true } } }
+                });
+
+            } catch (cintLaunchError: any) {
+                logger.error('Cint launch failed', { studyId, error: cintLaunchError.message });
+                throw new Error(`Cint launch failed: ${cintLaunchError.message}. Study status not changed to COLLECTING.`);
+            }
+        } else {
+            finalUpdatedStudy = await db.brandLiftStudy.update({
+                where: { id: studyId },
+                data: updateData,
+                select: { id: true, name: true, status: true, campaign: { select: { userId: true, campaignName: true } } }
+            });
+        }
+
+        if (updateData.status === BrandLiftStudyStatus.PENDING_APPROVAL && existingStudy.status !== BrandLiftStudyStatus.PENDING_APPROVAL) {
+            try {
+                const studyCreatorCampaignUserId = finalUpdatedStudy.campaign?.userId;
+                let submitterDetails: { email: string; name?: string | null } | null = null;
+                if (studyCreatorCampaignUserId) {
+                    submitterDetails = await db.user.findUnique({ where: { id: studyCreatorCampaignUserId }, select: { email: true, name: true } });
+                } else {
+                    submitterDetails = await db.user.findUnique({ where: { id: userId }, select: { email: true, name: true } });
+                }
+
+                const designatedReviewerEmails = ['team-review@example.com'];
+
+                if (submitterDetails?.email && designatedReviewerEmails.length > 0) {
+                    const approvalPageUrl = `${BASE_URL}/approval/${finalUpdatedStudy.id}`;
+                    await notificationServiceInstance.sendSurveySubmittedForReviewEmail(
+                        designatedReviewerEmails.map(email => ({ email })),
+                        { id: finalUpdatedStudy.id, name: finalUpdatedStudy.name, approvalPageUrl },
+                        { email: submitterDetails.email, name: submitterDetails.name ?? undefined }
+                    );
+                    logger.info('"Study Submitted for Review" notification sent', { studyId });
+                } else {
+                    logger.warn('Could not send "Study Submitted for Review" notification due to missing submitter/reviewer details', { studyId, submitterDetailsProvided: !!submitterDetails, designatedReviewerEmails });
+                }
+            } catch (emailError: any) {
+                logger.error('Failed to send "Study Submitted for Review" email', { studyId, error: emailError.message });
+            }
+        }
+
+        logger.info('Brand Lift Study updated successfully', { studyId, orgId, newStatus: finalUpdatedStudy.status });
+        return NextResponse.json(finalUpdatedStudy);
+    } catch (error: any) {
+        if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
+            throw new NotFoundError('Study not found for update.');
+        }
+        return handleApiError(error, req);
+    }
+};
 
 // DELETE handler can be added here if needed later, following similar structure.

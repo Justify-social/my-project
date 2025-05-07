@@ -6,12 +6,13 @@ import {
   // Position, // Unused
   // KPI, // Unused
   // Currency, // Unused
-  // SubmissionStatus, // Unused
+  SubmissionStatus,
   // CreativeAssetType, // Unused
   // Feature, // Unused
   Status,
+  CampaignWizardSubmission,
 } from '@prisma/client';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/db';
 import { dbLogger, DbOperation } from '@/lib/data-mapping/db-logger';
 import { v4 as uuidv4 } from 'uuid';
 // import { withValidation, tryCatch } from '@/lib/middleware/api'; // tryCatch unused, withValidation used later
@@ -30,6 +31,12 @@ import {
 } from '@/components/features/campaigns/types';
 // import { formatCampaignDataForResponse } from '@/utils/api-response-formatter'; // Unused
 // import { handleDbError, validateRequest } from '@/lib/middleware/api'; // Unused
+import { getAuth, clerkClient } from '@clerk/nextjs/server';
+import logger from '@/lib/logger'; // Import shared logger
+import { handleApiError } from '@/lib/apiErrorHandler'; // Import shared error handler
+import { BadRequestError, ForbiddenError, UnauthenticatedError, NotFoundError } from '@/lib/errors'; // Import custom errors
+import { auth } from '@clerk/nextjs/server'; // Assuming Clerk setup
+import { tryCatch } from '@/lib/middleware/api/util-middleware'; // Corrected path and function name
 
 // Define interface for influencer data from request body (used in POST)
 interface ApiInfluencer {
@@ -323,291 +330,297 @@ const CampaignPostApiSchema = z
     }
   );
 
-// GET handler - List campaigns
-export async function GET(_request: NextRequest) {
-  // --- Add runtime logging for DATABASE_URL ---
-  // console.log("[/api/campaigns GET] Runtime DATABASE_URL:", process.env.DATABASE_URL); // Keep commented out for now
-  // -------------------------------------------
+// Schema for validating expected query parameters for this specific endpoint usage
+const queryParamsSchema = z.object({
+  // user_accessible is conceptually required for security, default to true if not specified for this context
+  user_accessible: z.string().optional().refine(val => val === undefined || val === 'true', { message: "user_accessible must be 'true' or omitted for this context" }).default('true'),
+  // status=completed is required for the campaign selection UI in Brand Lift
+  status: z.string().optional().refine(val => val === undefined || val === 'completed', { message: "status must be 'completed' or omitted for this context" }).default('completed'),
+});
+
+// Schema for query params for listing campaigns, specifically for Brand Lift use case
+const listCampaignsQuerySchema = z.object({
+  status: z.nativeEnum(SubmissionStatus).optional().refine(val => val === SubmissionStatus.submitted || val === undefined, {
+    message: "Status must be 'submitted' (mapped from COMPLETED concept) or omitted."
+    // Defaulting to submitted as the likely equivalent of a completed campaign wizard
+  }).default(SubmissionStatus.submitted),
+  // Removed user_accessible as orgId check handles this
+});
+
+// Define the type for the selected campaign data
+type SelectedCampaignData = Pick<CampaignWizardSubmission, 'id' | 'campaignName' | 'createdAt' | 'submissionStatus'>;
+
+export const GET = async (req: NextRequest) => {
   try {
-    // --- Low-level diagnostic: Check if table exists via raw SQL (REMOVED) ---
-    // console.log("[/api/campaigns GET] Running raw query to check for CampaignWizard table...");
-    // const tableExistsResult = await prisma.$queryRawUnsafe(
-    //   `SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'CampaignWizard');`
-    // );
-    // console.log("[/api/campaigns GET] Raw query result:", tableExistsResult);
-    // // @ts-expect-error - Prisma types for raw queries can be complex
-    // const tableExists = tableExistsResult?.[0]?.exists;
-    // console.log("[/api/campaigns GET] Does 'CampaignWizard' table exist according to DB?", tableExists);
-    // --- End diagnostic ---
+    const { userId, orgId } = await auth();
 
-    // --- Original code (Restored) ---
-    const campaigns = await prisma.campaignWizard.findMany({
+    if (!userId || !orgId) {
+      // Throw consistent error
+      throw new UnauthenticatedError('Authentication and organization membership required.');
+    }
+
+    const searchParams = req.nextUrl.searchParams;
+    const parsedParams = listCampaignsQuerySchema.safeParse({
+      status: searchParams.get('status')?.toLowerCase() === 'completed' ? SubmissionStatus.submitted : searchParams.get('status') ?? undefined,
+    });
+
+    if (!parsedParams.success) {
+      throw parsedParams.error; // ZodError handled by handleApiError
+    }
+
+    const { status: validatedStatus } = parsedParams.data;
+
+    const whereClause: Prisma.CampaignWizardSubmissionWhereInput = {
+      userId: userId,
+      submissionStatus: validatedStatus,
+    };
+
+    logger.info('Fetching completed campaigns (submissions) for Brand Lift', { userId, whereClause });
+
+    const campaigns: SelectedCampaignData[] = await prisma.campaignWizardSubmission.findMany({
+      where: whereClause,
+      select: {
+        id: true,
+        campaignName: true,
+        createdAt: true,
+        submissionStatus: true,
+      },
       orderBy: {
-        updatedAt: 'desc',
+        createdAt: 'desc',
       },
-      take: 100,
     });
-    console.log('Raw campaigns from DB:', JSON.stringify(campaigns, null, 2));
-    const { EnumTransformers } = await import('@/utils/enum-transformers');
-    const transformedCampaigns = campaigns.map(campaign => {
-      const transformed = EnumTransformers.transformObjectFromBackend(campaign);
-      return {
-        ...transformed,
-        startDate: campaign.startDate instanceof Date ? campaign.startDate.toISOString() : null,
-        endDate: campaign.endDate instanceof Date ? campaign.endDate.toISOString() : null,
-        createdAt: campaign.createdAt instanceof Date ? campaign.createdAt.toISOString() : null,
-        updatedAt: campaign.updatedAt instanceof Date ? campaign.updatedAt.toISOString() : null,
-      };
-    });
-    return NextResponse.json({
-      success: true,
-      data: transformedCampaigns,
-    });
-    // --- End original code ---
 
-    // --- Placeholder response (Removed) ---
-    // if (!tableExists) {
-    //   throw new Error("Diagnostic check failed: 'CampaignWizard' table not found in information_schema.");
-    // }
-    // return NextResponse.json({ success: true, data: [], message: "Diagnostic OK - Table exists." });
-  } catch (error) {
-    console.error('Error fetching campaigns:', error); // Restored original error message context
-    dbLogger.error(
-      DbOperation.FETCH,
-      'Error fetching campaigns',
-      {},
-      error instanceof Error ? error : new Error(String(error))
-    );
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to fetch campaigns',
-        details: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 }
-    );
+    const responseData = campaigns.map((c: SelectedCampaignData) => ({
+      ...c,
+      status: c.submissionStatus === SubmissionStatus.submitted ? 'COMPLETED' : 'DRAFT'
+    }));
+
+    logger.info(`Successfully fetched ${campaigns.length} campaigns for Brand Lift`, { userId, count: campaigns.length });
+    return NextResponse.json(responseData);
+
+  } catch (error: any) {
+    logger.error('Error fetching campaigns', { error: error.message });
+    return handleApiError(error, req);
   }
-}
+};
 
-// POST handler - Create campaign
-export const POST = withValidation(
-  CampaignPostApiSchema, // Use the original, refined schema
-  async (data: z.infer<typeof CampaignPostApiSchema>, _request: NextRequest) => {
-    try {
-      // Remove manual refinement checks
+// Logic for postCampaignsHandler will be inlined into POST export
+// const postCampaignsHandler = async (request: NextRequest, data: z.infer<typeof CampaignPostApiSchema>) => { ... };
 
-      // Log the raw request data (now validated against the stricter schema)
-      console.log('Raw request data:', JSON.stringify(data, null, 2));
+// Inlining POST handler with validation and error handling
+export const POST = async (request: NextRequest) => {
+  try {
+    // --- Start: Inlined withValidation logic ---
+    if (!request.body) {
+      return NextResponse.json({ success: false, error: 'Request body is required' }, { status: 400 });
+    }
+    const clone = request.clone();
+    const body = await clone.json();
+    const validationResult = CampaignPostApiSchema.safeParse(body);
 
-      // Import the EnumTransformers utility
-      const { EnumTransformers } = await import('@/utils/enum-transformers');
-
-      // Transform any enum values from frontend to backend format
-      // Note: This will handle Currency, Platform, Position, KPI and Feature enums
-      const transformedData = EnumTransformers.transformObjectToBackend(data);
-      console.log('Transformed data for API:', JSON.stringify(transformedData, null, 2));
-
-      // Extract budget data directly from the validated object
-      const budgetData = transformedData.budget || { total: 0, currency: 'USD', socialMedia: 0 }; // Use default if null/undefined
-      console.log('Budget data:', JSON.stringify(budgetData, null, 2));
-
-      // Contact data is now validated correctly, handle nulls properly
-      const primaryContactJson = transformedData.primaryContact
-        ? JSON.stringify(transformedData.primaryContact)
-        : Prisma.JsonNull;
-      const secondaryContactJson = transformedData.secondaryContact // Already processed by preprocess
-        ? JSON.stringify(transformedData.secondaryContact)
-        : Prisma.JsonNull;
-
-      console.log('Primary contact:', primaryContactJson);
-      console.log('Secondary contact:', secondaryContactJson);
-
-      // Prepare DB creation data - converting date strings to Date objects
-      const dbData = {
-        id: uuidv4(),
-        name: transformedData.name,
-        businessGoal: transformedData.businessGoal || '',
-        brand: transformedData.brand || '',
-        website: transformedData.website || null,
-        // Convert validated date strings to Date objects for Prisma
-        startDate: transformedData.startDate ? new Date(transformedData.startDate) : new Date(),
-        endDate: transformedData.endDate ? new Date(transformedData.endDate) : new Date(),
-        timeZone: transformedData.timeZone || 'UTC',
-        // Pass objects/arrays directly for Json/Json[] fields
-        primaryContact: transformedData.primaryContact || Prisma.JsonNull,
-        secondaryContact: transformedData.secondaryContact || Prisma.JsonNull,
-        additionalContacts: transformedData.additionalContacts || [],
-        budget: transformedData.budget || Prisma.JsonNull,
-        primaryKPI: transformedData.primaryKPI,
-        secondaryKPIs: transformedData.secondaryKPIs || [], // Prisma expects Enum[]
-        features: transformedData.features || [], // Prisma expects Enum[]
-        messaging: transformedData.messaging || Prisma.JsonNull,
-        expectedOutcomes: transformedData.expectedOutcomes || Prisma.JsonNull,
-        demographics: transformedData.demographics || Prisma.JsonNull,
-        locations: transformedData.locations || [], // Pass array directly
-        targeting: transformedData.targeting || Prisma.JsonNull,
-        competitors: transformedData.competitors || [], // Prisma expects String[]
-        assets: transformedData.assets || [], // Pass array directly
-        status: Status.DRAFT,
-        step1Complete: true,
-        step2Complete: false,
-        step3Complete: false,
-        step4Complete: false,
-        isComplete: false,
-        currentStep: 1,
-        updatedAt: new Date(),
-        // userId: ???
-      };
-
-      console.log('Database creation data (Corrected Types):', JSON.stringify(dbData, null, 2));
-
-      try {
-        // Create campaign and handle influencers in the same transaction
-        const campaign = await prisma.$transaction(async tx => {
-          // First create the campaign
-          const newCampaign = await tx.campaignWizard.create({
-            data: dbData as Prisma.CampaignWizardCreateInput, // Use specific Prisma type
-          });
-
-          // If there are influencers in the request, create them
-          // Use transformedData.Influencer (capital I)
-          if (
-            transformedData.Influencer &&
-            Array.isArray(transformedData.Influencer) &&
-            transformedData.Influencer.length > 0
-          ) {
-            // Filter out any incomplete influencer data
-            const validInfluencers = transformedData.Influencer.filter(
-              (inf: ApiInfluencer): inf is NonNullable<typeof inf> =>
-                !!inf &&
-                typeof inf === 'object' &&
-                typeof inf.platform === 'string' &&
-                !!inf.platform &&
-                typeof inf.handle === 'string' &&
-                !!inf.handle
-            );
-
-            console.log('Creating influencers:', JSON.stringify(validInfluencers, null, 2));
-
-            // Create all influencers connected to this campaign
-            for (const influencer of validInfluencers) {
-              await tx.influencer.create({
-                data: {
-                  id: influencer.id || uuidv4(),
-                  // Cast string platform to Platform enum type
-                  platform: influencer.platform as Platform,
-                  handle: influencer.handle,
-                  // We don't have platformId in our schema, so don't try to use it
-                  campaignId: newCampaign.id,
-                  updatedAt: new Date(),
-                },
-              });
-            }
-          }
-
-          return newCampaign;
-        });
-
-        dbLogger.info(DbOperation.CREATE, 'Campaign created successfully', {
-          campaignId: campaign.id,
-        });
-
-        // Fetch the complete campaign with influencers for the response
-        const campaignWithInfluencers = await prisma.campaignWizard.findUnique({
-          where: { id: campaign.id },
-          include: {
-            Influencer: true,
-          },
-        });
-
-        // Transform campaign data back to frontend format before returning
-        const transformedCampaign =
-          EnumTransformers.transformObjectFromBackend(campaignWithInfluencers);
-
-        return NextResponse.json({
-          success: true,
-          data: transformedCampaign,
-          message: 'Campaign created successfully',
-        });
-      } catch (dbError) {
-        console.error('Database error during campaign creation:', dbError);
-
-        // Check for specific Prisma errors
-        if (dbError instanceof Prisma.PrismaClientKnownRequestError) {
-          console.error(`Prisma error code: ${dbError.code}`);
-          console.error(`Prisma error message: ${dbError.message}`);
-
-          if (dbError.meta) {
-            console.error(`Prisma error meta: ${JSON.stringify(dbError.meta, null, 2)}`);
-          }
-        }
-
-        return NextResponse.json(
-          {
-            success: false,
-            error: 'Database error during campaign creation',
-            details: dbError instanceof Error ? dbError.message : String(dbError),
-            code:
-              dbError instanceof Prisma.PrismaClientKnownRequestError ? dbError.code : undefined,
-            meta:
-              dbError instanceof Prisma.PrismaClientKnownRequestError ? dbError.meta : undefined,
-          },
-          { status: 500 }
-        );
-      }
-    } catch (error) {
-      console.error('Campaign creation error:', error);
-
-      // Provide detailed error information for debugging
+    if (!validationResult.success) {
+      logger.warn('Campaign POST: Validation failed', { errors: validationResult.error.format() });
       return NextResponse.json(
-        {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          details: error,
-        },
-        { status: 500 }
+        { success: false, error: 'Validation failed', details: validationResult.error.format() },
+        { status: 400 }
       );
     }
-  },
-  {
-    entityName: 'Campaign',
-    logValidationErrors: true,
-    logRequestBody: true,
-  }
-);
+    const data = validationResult.data; // This is the validated data
+    // --- End: Inlined withValidation logic ---
 
-// PATCH handler - Update campaign
-export const PATCH = withValidation(
-  campaignUpdateSchema,
-  async (data: z.infer<typeof campaignUpdateSchema>, _request: NextRequest) => {
+    // --- Start: Original postCampaignsHandler logic ---
+    const { userId, orgId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Authentication required for POST' }, { status: 401 });
+    }
+    if (!orgId) {
+      throw new ForbiddenError('Organization membership required to create campaigns.');
+    }
+
+    logger.info('Campaign POST: Creating campaign', { userId, orgId, campaignName: data.name });
+
+    // Import the EnumTransformers utility
+    const { EnumTransformers } = await import('@/utils/enum-transformers');
+    const transformedData = EnumTransformers.transformObjectToBackend(data);
+    const budgetData = transformedData.budget || { total: 0, currency: 'USD', socialMedia: 0 };
+    const primaryContactJson = transformedData.primaryContact ? JSON.stringify(transformedData.primaryContact) : Prisma.JsonNull;
+    const secondaryContactJson = transformedData.secondaryContact ? JSON.stringify(transformedData.secondaryContact) : Prisma.JsonNull;
+
+    const dbData = {
+      id: uuidv4(),
+      name: transformedData.name,
+      businessGoal: transformedData.businessGoal || '',
+      brand: transformedData.brand || '',
+      website: transformedData.website || null,
+      startDate: transformedData.startDate ? new Date(transformedData.startDate) : new Date(),
+      endDate: transformedData.endDate ? new Date(transformedData.endDate) : new Date(),
+      timeZone: transformedData.timeZone || 'UTC',
+      primaryContact: transformedData.primaryContact || Prisma.JsonNull,
+      secondaryContact: transformedData.secondaryContact || Prisma.JsonNull,
+      additionalContacts: transformedData.additionalContacts || [],
+      budget: transformedData.budget || Prisma.JsonNull,
+      primaryKPI: transformedData.primaryKPI,
+      secondaryKPIs: transformedData.secondaryKPIs || [],
+      features: transformedData.features || [],
+      messaging: transformedData.messaging || Prisma.JsonNull,
+      expectedOutcomes: transformedData.expectedOutcomes || Prisma.JsonNull,
+      demographics: transformedData.demographics || Prisma.JsonNull,
+      locations: transformedData.locations || [],
+      targeting: transformedData.targeting || Prisma.JsonNull,
+      competitors: transformedData.competitors || [],
+      assets: transformedData.assets || [],
+      status: Status.DRAFT,
+      step1Complete: true,
+      step2Complete: false,
+      step3Complete: false,
+      step4Complete: false,
+      isComplete: false,
+      currentStep: 1,
+      updatedAt: new Date(),
+      userId: userId, // Assign the authenticated user ID
+      organizationId: orgId // Assign the organization ID
+    };
+
+    const campaign = await prisma.$transaction(async tx => {
+      const newCampaign = await tx.campaignWizard.create({
+        data: dbData as Prisma.CampaignWizardCreateInput,
+      });
+
+      if (
+        transformedData.Influencer &&
+        Array.isArray(transformedData.Influencer) &&
+        transformedData.Influencer.length > 0
+      ) {
+        const validInfluencers = transformedData.Influencer.filter(
+          (inf: ApiInfluencer): inf is NonNullable<typeof inf> =>
+            !!inf &&
+            typeof inf === 'object' &&
+            typeof inf.platform === 'string' &&
+            !!inf.platform &&
+            typeof inf.handle === 'string' &&
+            !!inf.handle
+        );
+
+        for (const influencer of validInfluencers) {
+          await tx.influencer.create({
+            data: {
+              id: influencer.id || uuidv4(),
+              platform: influencer.platform as Platform,
+              handle: influencer.handle,
+              campaignId: newCampaign.id,
+              updatedAt: new Date(),
+            },
+          });
+        }
+      }
+      return newCampaign;
+    });
+
+    dbLogger.info(DbOperation.CREATE, 'Campaign created successfully', { campaignId: campaign.id });
+
+    const campaignWithInfluencers = await prisma.campaignWizard.findUnique({
+      where: { id: campaign.id },
+      include: { Influencer: true },
+    });
+
+    const transformedCampaign = EnumTransformers.transformObjectFromBackend(campaignWithInfluencers);
+
+    return NextResponse.json({
+      success: true,
+      data: transformedCampaign,
+      message: 'Campaign created successfully'
+    });
+    // --- End: Original postCampaignsHandler logic ---
+
+  } catch (error: any) {
+    // --- Start: Inlined tryCatch logic ---
+    logger.error('Campaign POST: Error occurred', { error: error.message, stack: error.stack });
+    // Using handleApiError directly, passing the original request
+    return handleApiError(error, request);
+    // --- End: Inlined tryCatch logic ---
+  }
+};
+
+// Commenting out original HOF export for POST
+// export const POST = tryCatch(
+//   withValidation(CampaignPostApiSchema, postCampaignsHandler, {
+//     entityName: 'Campaign',
+//     logValidationErrors: true,
+//     logRequestBody: true,
+//   })
+// );
+
+// Logic for patchCampaignHandler will be inlined into PATCH export
+// const patchCampaignHandler = async (request: NextRequest, data: z.infer<typeof campaignUpdateSchema>) => { ... };
+
+// Inlining PATCH handler with validation and error handling
+export const PATCH = async (request: NextRequest) => {
+  try {
+    // --- Start: Inlined withValidation logic ---
+    if (!request.body) {
+      return NextResponse.json({ success: false, error: 'Request body is required' }, { status: 400 });
+    }
+    const clone = request.clone();
+    const body = await clone.json();
+    const validationResult = campaignUpdateSchema.safeParse(body);
+
+    if (!validationResult.success) {
+      logger.warn('Campaign PATCH: Validation failed', { errors: validationResult.error.format() });
+      return NextResponse.json(
+        { success: false, error: 'Validation failed', details: validationResult.error.format() },
+        { status: 400 }
+      );
+    }
+    const data = validationResult.data; // This is the validated data (includes id)
+    // --- End: Inlined withValidation logic ---
+
+    // --- Start: Original patchCampaignHandler logic ---
+    const { userId, orgId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Authentication required for PATCH' }, { status: 401 });
+    }
+    if (!orgId) {
+      throw new ForbiddenError('Organization membership required to update campaigns.');
+    }
+
     const { id, ...updateData } = data;
+    // TODO: Check if updateData is empty after extracting id?
+
+    logger.info('Campaign PATCH: Updating campaign', { userId, orgId, campaignId: id });
+
+    // Authorization: Check if user/org has permission to update this campaignId
+    const existingCampaign = await prisma.campaignWizard.findFirst({ where: { id, userId } }); // Check if campaign exists and belongs to user
+    if (!existingCampaign) throw new NotFoundError('Campaign not found or not accessible for update.');
 
     const campaign = await prisma.campaignWizard.update({
       where: { id },
       data: {
+        // Map fields from campaignUpdateSchema to CampaignWizard model
         name: updateData.campaignName,
         businessGoal: updateData.description,
         startDate: updateData.startDate ? new Date(updateData.startDate) : undefined,
         endDate: updateData.endDate ? new Date(updateData.endDate) : undefined,
-        // Other fields need to be updated here
+        currentStep: updateData.step,
+        updatedAt: new Date(), // Always update timestamp
+        // Add other potential fields from campaignUpdateSchema if needed
       },
     });
 
-    // Update wizard history record
+    // TODO: Consider if WizardHistory update is still needed/correct here
     try {
       await prisma.wizardHistory.create({
         data: {
           id: uuidv4(),
           wizardId: campaign.id,
-          step: updateData.step ?? 1,
+          step: updateData.step ?? existingCampaign.currentStep ?? 1,
           timestamp: new Date(),
           action: 'UPDATE',
-          changes: {},
-          performedBy: 'system',
+          changes: { /* Diffing logic would go here */ },
+          performedBy: userId,
         },
       });
     } catch (error) {
-      console.error('Error creating wizard history:', error);
+      logger.error('Error creating wizard history during campaign update:', { campaignId: id, error });
       // Continue with campaign update even if history creation fails
     }
 
@@ -616,6 +629,21 @@ export const PATCH = withValidation(
       data: campaign,
       message: 'Campaign updated successfully',
     });
-  },
-  { entityName: 'Campaign', logValidationErrors: true }
-);
+    // --- End: Original patchCampaignHandler logic ---
+
+  } catch (error: any) {
+    // --- Start: Inlined tryCatch logic ---
+    logger.error('Campaign PATCH: Error occurred', { error: error.message, stack: error.stack });
+    // Using handleApiError directly, passing the original request
+    return handleApiError(error, request);
+    // --- End: Inlined tryCatch logic ---
+  }
+};
+
+// Commenting out original HOF export for PATCH
+// export const PATCH = tryCatch(
+//   withValidation(campaignUpdateSchema, patchCampaignHandler, {
+//     entityName: 'Campaign',
+//     logValidationErrors: true,
+//   })
+// );

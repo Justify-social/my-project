@@ -2,36 +2,35 @@
 
 import React from 'react';
 import { useParams } from 'next/navigation';
+import ConditionalLayout from '@/components/layouts/conditional-layout';
 import CampaignReviewStudySetup from '@/components/features/brand-lift/CampaignReviewStudySetup';
-// import { ConditionalLayout } from '@/components/ConditionalLayout'; // Assuming this is your layout component
+import { Skeleton } from '@/components/ui/skeleton'; // For loading state
+import logger from '@/lib/logger';
 
 const CampaignReviewSetupPage: React.FC = () => {
   const params = useParams();
-  const campaignId = params?.campaignId as string | undefined;
+  // params can be null or { campaignId: string | string[] } initially
+  const campaignIdParam = params?.campaignId;
+  const campaignId = typeof campaignIdParam === 'string' ? parseInt(campaignIdParam, 10) : null;
 
-  // Placeholder for ConditionalLayout or any other page layout structure
-  const LayoutWrapper = ({ children }: { children: React.ReactNode }) => (
-    // <ConditionalLayout title="Brand Lift - Review & Setup" description="Review campaign details and set up your new Brand Lift study.">
-    //   {children}
-    // </ConditionalLayout>
-    // For now, a simple div wrapper:
-    <div className="container mx-auto py-8">{children}</div>
-  );
-
-  if (!campaignId) {
-    // This case should ideally be handled by Next.js routing if the param is missing/invalid,
-    // or redirect if necessary.
+  // Basic validation for campaignId
+  if (campaignId === null || isNaN(campaignId)) {
+    logger.error('Invalid campaign ID in route parameter', { param: campaignIdParam });
+    // Render an error state or redirect
     return (
-      <LayoutWrapper>
-        <p className="text-red-500 text-center">Campaign ID is missing. Cannot load setup page.</p>
-      </LayoutWrapper>
+      <ConditionalLayout>
+        <h1 className="text-2xl font-bold mb-6 text-destructive">Error</h1>
+        <div className="text-red-600">Invalid Campaign ID provided in the URL. Please go back and select a valid campaign.</div>
+      </ConditionalLayout>
     );
   }
 
   return (
-    <LayoutWrapper>
+    <ConditionalLayout>
+      {/* Pass validated numeric campaignId to the main component */}
+      {/* Add a Suspense boundary or loading check if CampaignReviewStudySetup fetches data internally */}
       <CampaignReviewStudySetup campaignId={campaignId} />
-    </LayoutWrapper>
+    </ConditionalLayout>
   );
 };
 

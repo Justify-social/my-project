@@ -24,5 +24,5 @@ yarn-error.log*
 # Ignore locked icon registry files
 public/static/*-icon-registry.json
 
-# Ignore files for Prettier formatting
-src/app/api/campaigns/route.ts 
+# Ignore files for Prettier formatting (temporary, to be removed once fixed)
+# src/app/api/campaigns/route.ts 

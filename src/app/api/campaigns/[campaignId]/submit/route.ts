@@ -5,11 +5,11 @@
 // Define type for route context parameters
 /* // Interface removed due to build errors with handlers
 interface RouteContext {
-  params: { id: string };
+  params: { campaignId: string };
 }
 */
 
 // POST, GET, DELETE handlers previously here were removed due to build errors.
 // See TODO at the top of the file.
 
-export {};
+export { };

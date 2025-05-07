@@ -189,13 +189,12 @@ const campaignUpdateSchema = z.object({
   influencers: z.array(z.any()).optional(),
 });
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ campaignId: string }> }) {
   // Rely solely on the inner try...catch for robust error handling
   try {
-    console.log('[API GET /api/campaigns/[id]] Handler started'); // Log start
+    console.log('[API GET /api/campaigns/[campaignId]] Handler started'); // Log start
     // Get campaign ID from params - properly awaiting
-    const { id } = await params;
-    const campaignId = id;
+    const { campaignId } = await params;
 
     // Check if the ID is a UUID (string format) or a numeric ID
     const _isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
@@ -204,7 +203,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     // Connect to database
     await connectToDatabase();
-    console.log('[API GET /api/campaigns/[id]] Database connected'); // Log DB connection
+    console.log('[API GET /api/campaigns/[campaignId]] Database connected'); // Log DB connection
 
     let campaign = null;
     let isSubmittedCampaign = false;
@@ -213,7 +212,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     if (_isUuid) {
       console.log('Using UUID format for campaign ID:', campaignId);
       // Look for draft in CampaignWizard table with string ID
-      console.log('[API GET /api/campaigns/[id]] Querying CampaignWizard...'); // Log before query
+      console.log('[API GET /api/campaigns/[campaignId]] Querying CampaignWizard...'); // Log before query
       try {
         campaign = await prisma.campaignWizard.findUnique({
           where: { id: campaignId },
@@ -221,13 +220,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             Influencer: true, // Include the Influencer relation
           },
         });
-        console.log('[API GET /api/campaigns/[id]] Prisma query successful.'); // Log success
+        console.log('[API GET /api/campaigns/[campaignId]] Prisma query successful.'); // Log success
       } catch (prismaError) {
-        console.error('[API GET /api/campaigns/[id]] Prisma query failed:', prismaError);
+        console.error('[API GET /api/campaigns/[campaignId]] Prisma query failed:', prismaError);
         throw prismaError; // Re-throw to be caught by the outer handler
       }
       console.log(
-        '[API GET /api/campaigns/[id]] CampaignWizard query complete.',
+        '[API GET /api/campaigns/[campaignId]] CampaignWizard query complete.',
         campaign ? 'Found.' : 'Not found.'
       ); // Log after query
     } else {
@@ -238,7 +237,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       }
       console.log('Using numeric format for campaign ID:', numericId);
       // Look for submitted campaign in CampaignWizardSubmission table with numeric ID
-      console.log('[API GET /api/campaigns/[id]] Querying CampaignWizardSubmission...'); // Log before query
+      console.log('[API GET /api/campaigns/[campaignId]] Querying CampaignWizardSubmission...'); // Log before query
       campaign = await prisma.campaignWizardSubmission.findUnique({
         where: { id: numericId },
         include: {
@@ -250,7 +249,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         },
       });
       console.log(
-        '[API GET /api/campaigns/[id]] CampaignWizardSubmission query complete.',
+        '[API GET /api/campaigns/[campaignId]] CampaignWizardSubmission query complete.',
         campaign ? 'Found.' : 'Not found.'
       ); // Log after query
       isSubmittedCampaign = true;
@@ -269,7 +268,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     // Log the raw campaign data fetched from DB *before* transformation
     console.log(
-      '[API GET /api/campaigns/[id]] Raw campaign data from DB:',
+      '[API GET /api/campaigns/[campaignId]] Raw campaign data from DB:',
       JSON.stringify(campaign, null, 2)
     );
 
@@ -282,16 +281,16 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     // Normalize the campaign data to match frontend schema expectations
     console.log(
-      '[API GET /api/campaigns/[id]] Normalizing data for frontend schema compatibility...'
+      '[API GET /api/campaigns/[campaignId]] Normalizing data for frontend schema compatibility...'
     );
     const normalizedCampaign = {
       ...campaign,
       // Transform locations if it's an array of strings to array of objects
       locations:
         'locations' in campaign &&
-        Array.isArray(campaign.locations) &&
-        campaign.locations.length > 0 &&
-        typeof campaign.locations[0] === 'string'
+          Array.isArray(campaign.locations) &&
+          campaign.locations.length > 0 &&
+          typeof campaign.locations[0] === 'string'
           ? campaign.locations.map(loc => ({ city: loc }))
           : 'locations' in campaign
             ? campaign.locations
@@ -300,38 +299,38 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       budget:
         'budget' in campaign && campaign.budget && typeof campaign.budget === 'object'
           ? {
-              currency: 'currency' in campaign.budget ? campaign.budget.currency : 'GBP',
-              total: 'total' in campaign.budget ? campaign.budget.total : 0,
-              socialMedia: 'socialMedia' in campaign.budget ? campaign.budget.socialMedia : 0,
-            }
+            currency: 'currency' in campaign.budget ? campaign.budget.currency : 'GBP',
+            total: 'total' in campaign.budget ? campaign.budget.total : 0,
+            socialMedia: 'socialMedia' in campaign.budget ? campaign.budget.socialMedia : 0,
+          }
           : { currency: 'GBP', total: 0, socialMedia: 0 },
       // Normalize contacts if they exist
       primaryContact:
         'primaryContact' in campaign &&
-        campaign.primaryContact &&
-        typeof campaign.primaryContact === 'object'
+          campaign.primaryContact &&
+          typeof campaign.primaryContact === 'object'
           ? {
-              firstName:
-                'firstName' in campaign.primaryContact ? campaign.primaryContact.firstName : '',
-              surname: 'surname' in campaign.primaryContact ? campaign.primaryContact.surname : '',
-              email: 'email' in campaign.primaryContact ? campaign.primaryContact.email : '',
-              position:
-                'position' in campaign.primaryContact ? campaign.primaryContact.position : '',
-            }
+            firstName:
+              'firstName' in campaign.primaryContact ? campaign.primaryContact.firstName : '',
+            surname: 'surname' in campaign.primaryContact ? campaign.primaryContact.surname : '',
+            email: 'email' in campaign.primaryContact ? campaign.primaryContact.email : '',
+            position:
+              'position' in campaign.primaryContact ? campaign.primaryContact.position : '',
+          }
           : null,
       secondaryContact:
         'secondaryContact' in campaign &&
-        campaign.secondaryContact &&
-        typeof campaign.secondaryContact === 'object'
+          campaign.secondaryContact &&
+          typeof campaign.secondaryContact === 'object'
           ? {
-              firstName:
-                'firstName' in campaign.secondaryContact ? campaign.secondaryContact.firstName : '',
-              surname:
-                'surname' in campaign.secondaryContact ? campaign.secondaryContact.surname : '',
-              email: 'email' in campaign.secondaryContact ? campaign.secondaryContact.email : '',
-              position:
-                'position' in campaign.secondaryContact ? campaign.secondaryContact.position : '',
-            }
+            firstName:
+              'firstName' in campaign.secondaryContact ? campaign.secondaryContact.firstName : '',
+            surname:
+              'surname' in campaign.secondaryContact ? campaign.secondaryContact.surname : '',
+            email: 'email' in campaign.secondaryContact ? campaign.secondaryContact.email : '',
+            position:
+              'position' in campaign.secondaryContact ? campaign.secondaryContact.position : '',
+          }
           : null,
       // Ensure additionalContacts is always an array
       additionalContacts:
@@ -342,49 +341,49 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       assets:
         'assets' in campaign && Array.isArray(campaign.assets)
           ? campaign.assets.map(asset => {
-              if (asset && typeof asset === 'object') {
-                return {
-                  id: 'id' in asset ? asset.id : '',
-                  name: 'name' in asset ? asset.name : '',
-                  type: 'type' in asset ? asset.type : 'image',
-                  url: 'url' in asset ? asset.url : '',
-                  fileName: 'fileName' in asset ? asset.fileName : '',
-                  fileSize: 'fileSize' in asset ? asset.fileSize : 0,
-                  description: 'description' in asset ? asset.description : '',
-                  temp: 'temp' in asset ? asset.temp : false,
-                  rationale: 'rationale' in asset ? asset.rationale : '',
-                  budget: 'budget' in asset ? asset.budget : undefined,
-                  associatedInfluencerIds:
-                    'associatedInfluencerIds' in asset &&
-                    Array.isArray(asset.associatedInfluencerIds)
-                      ? asset.associatedInfluencerIds
-                      : [],
-                };
-              }
+            if (asset && typeof asset === 'object') {
               return {
-                id: '',
-                name: '',
-                type: 'image',
-                url: '',
-                fileName: '',
-                fileSize: 0,
-                description: '',
-                temp: false,
-                rationale: '',
-                budget: undefined,
-                associatedInfluencerIds: [],
+                id: 'id' in asset ? asset.id : '',
+                name: 'name' in asset ? asset.name : '',
+                type: 'type' in asset ? asset.type : 'image',
+                url: 'url' in asset ? asset.url : '',
+                fileName: 'fileName' in asset ? asset.fileName : '',
+                fileSize: 'fileSize' in asset ? asset.fileSize : 0,
+                description: 'description' in asset ? asset.description : '',
+                temp: 'temp' in asset ? asset.temp : false,
+                rationale: 'rationale' in asset ? asset.rationale : '',
+                budget: 'budget' in asset ? asset.budget : undefined,
+                associatedInfluencerIds:
+                  'associatedInfluencerIds' in asset &&
+                    Array.isArray(asset.associatedInfluencerIds)
+                    ? asset.associatedInfluencerIds
+                    : [],
               };
-            })
+            }
+            return {
+              id: '',
+              name: '',
+              type: 'image',
+              url: '',
+              fileName: '',
+              fileSize: 0,
+              description: '',
+              temp: false,
+              rationale: '',
+              budget: undefined,
+              associatedInfluencerIds: [],
+            };
+          })
           : [],
       // Normalize influencers if they exist
       Influencer:
         'Influencer' in campaign && Array.isArray(campaign.Influencer)
           ? campaign.Influencer.map(inf => ({
-              id: 'id' in inf ? inf.id : '',
-              platform: 'platform' in inf ? inf.platform : 'INSTAGRAM',
-              handle: 'handle' in inf ? inf.handle : '',
-              platformId: 'platformId' in inf ? inf.platformId : '',
-            }))
+            id: 'id' in inf ? inf.id : '',
+            platform: 'platform' in inf ? inf.platform : 'INSTAGRAM',
+            handle: 'handle' in inf ? inf.handle : '',
+            platformId: 'platformId' in inf ? inf.platformId : '',
+          }))
           : [],
     };
 
@@ -404,14 +403,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     });
 
     // Return the campaign data
-    console.log('[API GET /api/campaigns/[id]] Preparing final response...'); // Log before final response
+    console.log('[API GET /api/campaigns/[campaignId]] Preparing final response...'); // Log before final response
     return NextResponse.json({
       success: true,
       data: formattedCampaign,
     });
   } catch (internalError) {
     // Catch any errors within the main logic block
-    console.error('[API GET /api/campaigns/[id]] Internal error caught:', internalError);
+    console.error('[API GET /api/campaigns/[campaignId]] Internal error caught:', internalError);
     // Return a generic 500 error response
     return NextResponse.json(
       {
@@ -427,11 +426,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ campaignId: string }> }
 ) {
   // Await params before using it
-  const { id } = await params;
-  const campaignId = id;
+  const { campaignId } = await params;
   console.log(`DELETE request started for campaign ID: ${campaignId}`);
 
   try {
@@ -539,11 +537,10 @@ export async function DELETE(
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ campaignId: string }> }) {
   try {
-    console.log('[API PUT /api/campaigns/[id]] Handler started');
-    const { id } = await params;
-    const campaignId = id;
+    console.log('[API PUT /api/campaigns/[campaignId]] Handler started');
+    const { campaignId } = await params;
 
     // Check if the ID is a UUID (string format) or a numeric ID
     const _isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
@@ -558,7 +555,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const validationResult = campaignUpdateSchema.safeParse(body);
     if (!validationResult.success) {
       console.error(
-        '[API PUT /api/campaigns/[id]] Validation failed:',
+        '[API PUT /api/campaigns/[campaignId]] Validation failed:',
         validationResult.error.format()
       );
       return NextResponse.json(
@@ -576,7 +573,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     if (isNumeric) {
       // Update the campaign in CampaignWizardSubmission table for numeric IDs (submitted campaigns)
       console.log(
-        '[API PUT /api/campaigns/[id]] Updating submitted campaign with numeric ID:',
+        '[API PUT /api/campaigns/[campaignId]] Updating submitted campaign with numeric ID:',
         numericId
       );
       updatedCampaign = await prisma.campaignWizardSubmission.update({
@@ -609,10 +606,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       );
     }
 
-    console.log(`[API PUT /api/campaigns/[id]] Campaign updated: ${campaignId}`);
+    console.log(`[API PUT /api/campaigns/[campaignId]] Campaign updated: ${campaignId}`);
     return NextResponse.json({ success: true, data: updatedCampaign }, { status: 200 });
   } catch (error) {
-    console.error(`[API PUT /api/campaigns/[id]] Error:`, error);
+    console.error(`[API PUT /api/campaigns/[campaignId]] Error:`, error);
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

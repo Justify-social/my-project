@@ -18,13 +18,13 @@ const bulkAddInfluencerSchema = z.object({
 });
 
 // Use the exact signature pattern from the working route
-export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ campaignId: string }> }) {
   const resolvedParams = await params; // Await the params Promise
-  console.log('Received request for campaign ID:', resolvedParams.id);
+  console.log('Received request for campaign ID:', resolvedParams.campaignId);
   return NextResponse.json({ success: true, message: 'Minimal response OK' });
 
   /* // --- Original Logic Commented Out ---
-  const campaignId = resolvedParams.id;
+  const campaignId = resolvedParams.campaignId;
  
   if (!campaignId) {
     return NextResponse.json({ success: false, error: 'Campaign ID is missing' }, { status: 400 });
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       { status: addedCount > 0 ? 201 : 200 }
     );
   } catch (error) {
-    console.error(`[API /campaigns/${resolvedParams.id}/influencers/bulk-add POST] Error:`, error);
+    console.error(`[API /campaigns/${resolvedParams.campaignId}/influencers/bulk-add POST] Error:`, error);
     const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
     return NextResponse.json(
       {

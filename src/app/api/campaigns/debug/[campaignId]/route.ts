@@ -3,7 +3,7 @@
 // Define type for route context parameters
 /* // Interface removed due to build errors with handlers
 interface RouteContext {
-  params: { id: string };
+  params: { campaignId: string };
 }
 */
 
@@ -17,7 +17,7 @@ export async function GET(
   context: RouteContext // Use specific type
 ) {
   // Safely access id
-  const campaignId = context?.params?.id;
+  const campaignId = context?.params?.campaignId;
   console.log(`GET /api/campaigns/debug/${campaignId}`);
 
   // Ensure ID was extracted
@@ -51,4 +51,4 @@ export async function GET(
 }
 */
 
-export {};
+export { };

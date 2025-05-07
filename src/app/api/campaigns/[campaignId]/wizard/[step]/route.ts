@@ -26,13 +26,13 @@ interface ApiInfluencer {
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string; step: string }> }
+  { params }: { params: Promise<{ campaignId: string; step: string }> }
 ) {
   // Apply tryCatch logic internally
   try {
     // Await params resolution at the beginning
     const resolvedParams = await params;
-    const campaignId = resolvedParams.id;
+    const campaignId = resolvedParams.campaignId;
     const step = parseInt(resolvedParams.step, 10);
     const { userId: _userId } = await auth(); // Prefixed userId
     const body = await request.json();
@@ -306,10 +306,10 @@ export async function PATCH(
     let stepForLog = 'unknown';
     try {
       // Use the already awaited params if available, otherwise try awaiting again (carefully)
-      // This assumes params promise itself doesn't error, which might not be safe
+      // This might be null if params promise itself rejected, which might not be safe
       // A more robust approach might involve passing params differently or handling its potential rejection.
       const resolvedParamsForLog = await params; // Re-awaiting might be problematic
-      campaignIdForLog = resolvedParamsForLog.id;
+      campaignIdForLog = resolvedParamsForLog.campaignId;
       stepForLog = resolvedParamsForLog.step;
     } catch (paramError) {
       console.error('Could not resolve params for error logging:', paramError);
@@ -339,11 +339,11 @@ export async function PATCH(
 // --- GET handler (Ensure this export is correct) ---
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string; step: string }> }
+  { params }: { params: Promise<{ campaignId: string; step: string }> }
 ) {
   // Apply tryCatch logic internally
   try {
-    const { id: campaignId, step } = await params;
+    const { campaignId, step } = await params;
     const stepNumber = parseInt(step, 10);
 
     if (!campaignId || isNaN(stepNumber)) {
@@ -379,7 +379,7 @@ export async function GET(
     // Await params before accessing properties
     const resolvedParams = await params;
     console.error(
-      `Unhandled error in GET /api/campaigns/${resolvedParams.id}/wizard/${resolvedParams.step}:`,
+      `Unhandled error in GET /api/campaigns/${resolvedParams.campaignId}/wizard/${resolvedParams.step}:`,
       error
     );
     // Consider using a more specific error handling function if available

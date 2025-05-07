@@ -26,8 +26,8 @@ model CampaignWizard {
   additionalContacts Json?
   budget           Json
   step1Complete    Boolean         @default(false)
-  primaryKPI       KPI?
-  secondaryKPIs    KPI[]
+  primaryKPI        KPI?
+  secondaryKPIs     KPI[]
   messaging        Json?
   expectedOutcomes Json?
   features         Feature[]
@@ -140,14 +140,14 @@ model Audience {
   ageRangeMax        Int
   keywords           String[]
   interests          String[]
-  campaignId         Int
-  age1824            Int                        @default(0)
-  age2534            Int                        @default(0)
-  age3544            Int                        @default(0)
-  age4554            Int                        @default(0)
-  age5564            Int                        @default(0)
-  age65plus          Int                        @default(0)
-  campaign           CampaignWizardSubmission    @relation(fields: [campaignId], references: [id])
+  submissionId       Int                         // Renamed from campaignId
+  age1824            Int                         @default(0)
+  age2534            Int                         @default(0)
+  age3544            Int                         @default(0)
+  age4554            Int                         @default(0)
+  age5564            Int                         @default(0)
+  age65plus          Int                         @default(0)
+  campaign           CampaignWizardSubmission    @relation(fields: [submissionId], references: [id])
   competitors        AudienceCompetitor[]
   gender             AudienceGender[]
   languages          AudienceLanguage[]
@@ -159,7 +159,7 @@ model AudienceLocation {
   id         Int      @id @default(autoincrement())
   country    String
   proportion Float
-  audienceId Int
+  audienceId Int      // Foreign Key
   audience   Audience @relation(fields: [audienceId], references: [id])
 }
 
@@ -167,28 +167,28 @@ model AudienceGender {
   id         Int      @id @default(autoincrement())
   gender     String
   proportion Float
-  audienceId Int
+  audienceId Int      // Foreign Key
   audience   Audience @relation(fields: [audienceId], references: [id])
 }
 
 model AudienceScreeningQuestion {
   id         Int      @id @default(autoincrement())
   question   String
-  audienceId Int
+  audienceId Int      // Foreign Key
   audience   Audience @relation(fields: [audienceId], references: [id])
 }
 
 model AudienceLanguage {
   id         Int      @id @default(autoincrement())
   language   String
-  audienceId Int
+  audienceId Int      // Foreign Key
   audience   Audience @relation(fields: [audienceId], references: [id])
 }
 
 model AudienceCompetitor {
   id         Int      @id @default(autoincrement())
   name       String
-  audienceId Int
+  audienceId Int      // Foreign Key
   audience   Audience @relation(fields: [audienceId], references: [id])
 }
 
@@ -468,24 +468,26 @@ enum SurveyOverallApprovalStatus {
 model BrandLiftStudy {
   id                String                  @id @default(cuid())
   name              String
-  campaignId        Int                     // Corrected to Int to match CampaignWizardSubmission.id
-  campaign          CampaignWizardSubmission @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  submissionId      Int                     // Renamed from campaignId - Relation to CampaignWizardSubmission.id
+  campaign          CampaignWizardSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade) // Relation defined here
   status            BrandLiftStudyStatus    @default(DRAFT)
   funnelStage       String
   primaryKpi        String
-  secondaryKpis     String[]
+  secondaryKpis     String[]                @default([])
   createdAt         DateTime                @default(now())
   updatedAt         DateTime                @updatedAt
   cintProjectId     String?                 @unique
   cintTargetGroupId String?                 @unique
+  organizationId    String                  // To scope studies to an organization, assuming User model has orgId or similar
 
   questions         SurveyQuestion[]
   responses         SurveyResponse[]
   reports           BrandLiftReport[]
-  approvalStatus    SurveyApprovalStatus?   // This is the one-to-one relation field, Prisma handles the foreign key implicitly if not named
-  
-  @@index([campaignId])
+  approvalStatus    SurveyApprovalStatus?   // Relation defined on SurveyApprovalStatus.study
+
+  @@index([submissionId]) // Updated index field
   @@index([status])
+  @@index([organizationId])
 }
 
 model SurveyQuestion {
@@ -521,37 +523,37 @@ model SurveyOption {
 }
 
 model SurveyResponse {
-  id             String   @id @default(cuid())
+  id             String         @id @default(cuid())
   studyId        String
   study          BrandLiftStudy @relation(fields: [studyId], references: [id], onDelete: Cascade)
-  respondentId   String
-  cintResponseId String?  @unique
+  respondentId   String         // External ID from Cint
+  cintResponseId String?        @unique
   isControlGroup Boolean
-  answers        Json     // Example: [{ "questionId": "cuid...", "optionIds": ["cuid..."], "textAnswer": null }]
-  demographics   Json?    // Example: { "age": "18-24", "gender": "Female" }
-  respondedAt    DateTime @default(now())
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  answers        Json           // Store as [{ "questionId": "...", "optionIds": ["..."] }]
+  demographics   Json?          // Store demographic data from Cint
+  respondedAt    DateTime       @default(now())
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
   @@index([studyId])
   @@index([respondentId])
 }
 
 model BrandLiftReport {
-  id              String   @id @default(cuid())
-  studyId         String   @unique
-  study           BrandLiftStudy @relation(fields: [studyId], references: [id], onDelete: Cascade)
-  generatedAt     DateTime @default(now())
-  metrics         Json?    // As defined in BrandLiftReportData in src/types/brand-lift.ts
-  recommendations String[]
-  status          String   @default("PENDING") // PENDING, GENERATED, ERROR
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id              String          @id @default(cuid())
+  studyId         String          @unique
+  study           BrandLiftStudy  @relation(fields: [studyId], references: [id], onDelete: Cascade)
+  generatedAt     DateTime        @default(now())
+  metrics         Json?
+  recommendations String[]        @default([])
+  status          String          @default("PENDING") // PENDING, GENERATED, ERROR
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 }
 
 model SurveyApprovalStatus {
   id                 String                      @id @default(cuid())
-  studyId            String                      @unique // Foreign key for one-to-one with BrandLiftStudy
+  studyId            String                      @unique
   study              BrandLiftStudy              @relation(fields: [studyId], references: [id], onDelete: Cascade)
   status             SurveyOverallApprovalStatus @default(PENDING_REVIEW)
   requestedSignOff   Boolean                     @default(false)
@@ -560,20 +562,21 @@ model SurveyApprovalStatus {
   createdAt          DateTime                    @default(now())
   updatedAt          DateTime                    @updatedAt
 
-  comments           SurveyApprovalComment[]     // All comments related to this approval status
+  comments           SurveyApprovalComment[]
 }
 
 model SurveyApprovalComment {
   id               String                      @id @default(cuid())
-  approvalStatusId String                      // Foreign key to SurveyApprovalStatus
+  approvalStatusId String
   approvalStatus   SurveyApprovalStatus        @relation(fields: [approvalStatusId], references: [id], onDelete: Cascade)
-  questionId       String?                     // Optional: if comment is on a specific question
+  questionId       String?
   question         SurveyQuestion?             @relation(fields: [questionId], references: [id], onDelete: Cascade, map: "SurveyApprovalComment_questionId_fkey")
-  authorId         String                      // Clerk User ID (maps to User.clerkId if a direct relation is set up, otherwise just a string)
+  authorId         String                      // Clerk User ID
   text             String
   status           SurveyApprovalCommentStatus @default(OPEN)
   createdAt        DateTime                    @default(now())
   updatedAt        DateTime                    @updatedAt
+  resolutionNote   String?
 
   @@index([approvalStatusId])
   @@index([questionId])
