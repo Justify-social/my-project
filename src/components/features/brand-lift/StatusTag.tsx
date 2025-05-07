@@ -13,70 +13,77 @@ type StatusTagProps = {
 };
 
 const StatusTag: React.FC<StatusTagProps> = ({ status, type }) => {
-  let variant: "default" | "secondary" | "destructive" | "outline" | "success" | "warning" | "info" = "secondary";
+  let variant:
+    | 'default'
+    | 'secondary'
+    | 'destructive'
+    | 'outline'
+    | 'success'
+    | 'warning'
+    | 'info' = 'secondary';
   let text = String(status);
 
   // Determine variant and text based on status and type
   switch (status) {
     // BrandLiftStudy Statuses
     case BrandLiftStudyStatus.DRAFT:
-      variant = "outline";
+      variant = 'outline';
       text = 'Draft';
       break;
     case BrandLiftStudyStatus.PENDING_APPROVAL:
-      variant = "warning";
+      variant = 'warning';
       text = 'Pending Approval';
       break;
     case BrandLiftStudyStatus.APPROVED:
-      variant = "info";
+      variant = 'info';
       text = 'Approved (Design)';
       break;
     case BrandLiftStudyStatus.COLLECTING:
-      variant = "default";
+      variant = 'default';
       text = 'Collecting Responses';
       break;
     case BrandLiftStudyStatus.COMPLETED:
-      variant = "success";
+      variant = 'success';
       text = 'Completed';
       break;
     case BrandLiftStudyStatus.ARCHIVED:
-      variant = "secondary";
+      variant = 'secondary';
       text = 'Archived';
       break;
 
     // SurveyApprovalComment Statuses
     case SurveyApprovalCommentStatus.OPEN:
       // Use default variant or specific one like 'destructive' for NEED_ACTION?
-      variant = "warning"; // Or maybe destructive? Depends on desired emphasis
+      variant = 'warning'; // Or maybe destructive? Depends on desired emphasis
       text = 'Needs Action'; // Changed text for clarity
       break;
     case SurveyApprovalCommentStatus.RESOLVED:
-      variant = "success";
+      variant = 'success';
       text = 'Resolved';
       break;
 
     // SurveyOverallApproval Statuses
     case SurveyOverallApprovalStatus.PENDING_REVIEW:
-      variant = "warning";
+      variant = 'warning';
       text = 'Pending Review';
       break;
     case SurveyOverallApprovalStatus.CHANGES_REQUESTED:
-      variant = "destructive";
+      variant = 'destructive';
       text = 'Changes Requested';
       break;
     case SurveyOverallApprovalStatus.APPROVED:
       // Distinguish from study design approval
-      variant = "info";
+      variant = 'info';
       text = 'Approved for Sign-off';
       break;
     case SurveyOverallApprovalStatus.SIGNED_OFF:
-      variant = "success";
+      variant = 'success';
       text = 'Signed Off';
       break;
 
     default:
       // Handle any unexpected string statuses gracefully
-      variant = "secondary";
+      variant = 'secondary';
       text = status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()); // Basic formatting
       break;
   }

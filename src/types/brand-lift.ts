@@ -2,7 +2,7 @@ import {
   BrandLiftStudyStatus,
   SurveyQuestionType,
   SurveyApprovalCommentStatus,
-  SurveyOverallApprovalStatus
+  SurveyOverallApprovalStatus,
 } from '@prisma/client'; // Import enums from Prisma client
 
 export interface BrandLiftStudyData {
@@ -132,6 +132,9 @@ export interface SurveyApprovalStatusData {
 }
 
 // Utility type for questions with options during creation if needed
-export type SurveyQuestionWithOptionInput = Omit<SurveyQuestionData, 'id' | 'createdAt' | 'updatedAt' | 'studyId'> & {
+export type SurveyQuestionWithOptionInput = Omit<
+  SurveyQuestionData,
+  'id' | 'createdAt' | 'updatedAt' | 'studyId'
+> & {
   options: Array<Omit<SurveyOptionData, 'id' | 'createdAt' | 'updatedAt' | 'questionId'>>;
 };

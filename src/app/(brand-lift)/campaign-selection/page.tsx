@@ -14,7 +14,9 @@ const CampaignSelectionPage: React.FC = () => {
       logger.info(`Campaign selected, navigating to review/setup for campaign ID: ${campaignId}`);
       router.push(`/campaign-review-setup/${campaignId}`);
     } else {
-      logger.error('Invalid or no campaign ID received from selector:', { receivedCampaignId: campaignId });
+      logger.error('Invalid or no campaign ID received from selector:', {
+        receivedCampaignId: campaignId,
+      });
     }
   };
 

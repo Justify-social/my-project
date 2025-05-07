@@ -32,7 +32,7 @@ const mockMuxApiClient = {
         // ... other mock data
       };
     }
-    return { message: "Mock Mux POST success" };
+    return { message: 'Mock Mux POST success' };
   },
   get: async (url: string, headers?: any): Promise<any> => {
     logger.info(`[MOCK MUX API] GET ${url}`);
@@ -45,7 +45,7 @@ const mockMuxApiClient = {
         // ... other mock data
       };
     }
-    return { message: "Mock Mux GET success" };
+    return { message: 'Mock Mux GET success' };
   },
 };
 
@@ -53,10 +53,10 @@ const mockMuxApiClient = {
 const realMuxApiClient = {
   // TODO: Implement actual Mux API calls
   post: async (url: string, data: any, headers?: any): Promise<any> => {
-    throw new Error("Real Mux API client not implemented");
+    throw new Error('Real Mux API client not implemented');
   },
   get: async (url: string, headers?: any): Promise<any> => {
-    throw new Error("Real Mux API client not implemented");
+    throw new Error('Real Mux API client not implemented');
   },
 };
 
@@ -72,32 +72,39 @@ export class MuxService {
     this.accessTokenSecret = process.env.MUX_ACCESS_TOKEN_SECRET || 'mock_mux_token_secret';
 
     if (!MUX_API_MOCK_ENABLED && (!this.accessTokenId || !this.accessTokenSecret)) {
-      logger.warn("Mux Access Token ID or Secret not fully configured for live mode.");
+      logger.warn('Mux Access Token ID or Secret not fully configured for live mode.');
     }
   }
 
   private getAuthHeaders(): Record<string, string> {
-    const basicAuth = Buffer.from(`${this.accessTokenId}:${this.accessTokenSecret}`).toString('base64');
+    const basicAuth = Buffer.from(`${this.accessTokenId}:${this.accessTokenSecret}`).toString(
+      'base64'
+    );
     return {
-      'Authorization': `Basic ${basicAuth}`,
+      Authorization: `Basic ${basicAuth}`,
       'Content-Type': 'application/json',
     };
   }
 
   private async makeMuxApiRequest(method: 'get' | 'post', path: string, data?: any): Promise<any> {
     if (MUX_API_MOCK_ENABLED) {
-      return method === 'get' ? muxApiClient.get(`${MUX_API_BASE_URL}${path}`) : muxApiClient.post(`${MUX_API_BASE_URL}${path}`, data);
+      return method === 'get'
+        ? muxApiClient.get(`${MUX_API_BASE_URL}${path}`)
+        : muxApiClient.post(`${MUX_API_BASE_URL}${path}`, data);
     }
 
     const headers = this.getAuthHeaders();
     // TODO: Implement actual API call using Mux Node SDK or fetch/axios
     try {
-      const response = method === 'get'
-        ? await muxApiClient.get(`${MUX_API_BASE_URL}${path}`, headers)
-        : await muxApiClient.post(`${MUX_API_BASE_URL}${path}`, data, headers);
+      const response =
+        method === 'get'
+          ? await muxApiClient.get(`${MUX_API_BASE_URL}${path}`, headers)
+          : await muxApiClient.post(`${MUX_API_BASE_URL}${path}`, data, headers);
       return response;
     } catch (error: any) {
-      logger.error(`Mux API request failed: ${method.toUpperCase()} ${path}`, { error: error.message });
+      logger.error(`Mux API request failed: ${method.toUpperCase()} ${path}`, {
+        error: error.message,
+      });
       // TODO: Implement specific Mux error handling
       throw error;
     }
@@ -131,10 +138,16 @@ export class MuxService {
     return this.makeMuxApiRequest('get', path);
   }
 
-  getPlaybackUrl(playbackId: string, type: 'public' | 'signed' = 'public', options?: { token?: string }): string {
+  getPlaybackUrl(
+    playbackId: string,
+    type: 'public' | 'signed' = 'public',
+    options?: { token?: string }
+  ): string {
     if (type === 'signed' && !options?.token) {
       // In a real scenario, you'd generate a signed URL token here
-      logger.warn("Attempting to get signed Mux URL without a token. This will likely fail in live mode.");
+      logger.warn(
+        'Attempting to get signed Mux URL without a token. This will likely fail in live mode.'
+      );
     }
     const baseUrl = `https://stream.mux.com/${playbackId}.m3u8`;
     return options?.token ? `${baseUrl}?token=${options.token}` : baseUrl;

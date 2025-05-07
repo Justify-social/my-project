@@ -20,7 +20,9 @@ const CampaignReviewSetupPage: React.FC = () => {
     return (
       <ConditionalLayout>
         <h1 className="text-2xl font-bold mb-6 text-destructive">Error</h1>
-        <div className="text-red-600">Invalid Campaign ID provided in the URL. Please go back and select a valid campaign.</div>
+        <div className="text-red-600">
+          Invalid Campaign ID provided in the URL. Please go back and select a valid campaign.
+        </div>
       </ConditionalLayout>
     );
   }

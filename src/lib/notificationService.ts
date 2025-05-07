@@ -19,7 +19,11 @@ const mockResendClient = {
         logger.warn('Mock Resend: RESEND_API_KEY not set. Email not actually sent.', {});
         return { data: { id: `mock_email_id_${Date.now()}` }, error: null };
       }
-      if (Array.isArray(payload.to) ? payload.to.includes('test@error.com') : payload.to === 'test@error.com') {
+      if (
+        Array.isArray(payload.to)
+          ? payload.to.includes('test@error.com')
+          : payload.to === 'test@error.com'
+      ) {
         logger.error('Mock Resend: Simulated error sending email.', {});
         return { data: null, error: { message: 'Simulated send failure', name: 'EmailSendError' } };
       }
@@ -74,12 +78,19 @@ export class NotificationService {
 
   constructor() {
     if (!process.env.RESEND_API_KEY) {
-      logger.warn('RESEND_API_KEY is not set. NotificationService will use mock email sending.', {});
+      logger.warn(
+        'RESEND_API_KEY is not set. NotificationService will use mock email sending.',
+        {}
+      );
     }
     this.client = mockResendClient; // Use `resend` in actual implementation
   }
 
-  private async sendEmail(to: string | string[], subject: string, htmlContent: string): Promise<boolean> {
+  private async sendEmail(
+    to: string | string[],
+    subject: string,
+    htmlContent: string
+  ): Promise<boolean> {
     try {
       const { data, error } = await this.client.emails.send({
         from: `${APP_NAME} <${DEFAULT_FROM_EMAIL}>`,
@@ -95,7 +106,12 @@ export class NotificationService {
       logger.info('Email sent successfully via Resend', { emailId: data?.id, to, subject });
       return true;
     } catch (e: any) {
-      logger.error('Exception during email sending', { error: e.message, to, subject, stack: e.stack });
+      logger.error('Exception during email sending', {
+        error: e.message,
+        to,
+        subject,
+        stack: e.stack,
+      });
       return false;
     }
   }
@@ -127,7 +143,7 @@ export class NotificationService {
     comment: CommentDetails
   ) {
     const subject = `New Comment on Brand Lift Study: "${study.name}"`;
-    let commentContext = comment.questionText ? ` on question: "${comment.questionText}"` : '';
+    const commentContext = comment.questionText ? ` on question: "${comment.questionText}"` : '';
     const htmlContent = `
       <p>Hi there,</p>
       <p>A new comment has been added by ${comment.commentAuthorName || 'A user'} to the Brand Lift study "<strong>${study.name}</strong>"${commentContext}.</p>

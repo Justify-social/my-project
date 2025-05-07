@@ -9,8 +9,8 @@ import { UnauthenticatedError, ForbiddenError, BadRequestError, NotFoundError } 
 // TODO: SSOT - Enums should be defined in and imported from src/types/brand-lift.ts
 // Defining locally for now
 enum BrandLiftStudyStatus_API {
-  DRAFT = "DRAFT",
-  PENDING_APPROVAL = "PENDING_APPROVAL",
+  DRAFT = 'DRAFT',
+  PENDING_APPROVAL = 'PENDING_APPROVAL',
   // ... other statuses
 }
 
@@ -30,7 +30,7 @@ const surveyOptionCreateSchema = z.object({
 //       logger.info(`Request received for ${request.method} ${request.url}`, { params: await paramsContainer.params });
 //       return await handler(request, paramsContainer);
 //     } catch (error: any) {
-//       return handleApiError(error, request) as NextResponse<{ error: string; details?: any }>; 
+//       return handleApiError(error, request) as NextResponse<{ error: string; details?: any }>;
 //     }
 //   };
 // }
@@ -38,14 +38,22 @@ const surveyOptionCreateSchema = z.object({
 // Logic from postOptionHandler will be inlined below
 // async function postOptionHandler(request: NextRequest, { params: paramsPromise }: { params: Promise<{ studyId: string, questionId: string }> }) { ... }
 
-export const POST = async (request: NextRequest, { params: paramsPromise }: { params: Promise<{ studyId: string, questionId: string }> }) => {
+export const POST = async (
+  request: NextRequest,
+  { params: paramsPromise }: { params: Promise<{ studyId: string; questionId: string }> }
+) => {
   try {
     const { userId, orgId } = await auth();
     if (!userId || !orgId) {
-      throw new UnauthenticatedError("User not authenticated or not part of an organization.");
+      throw new UnauthenticatedError('User not authenticated or not part of an organization.');
     }
     const { studyId, questionId } = await paramsPromise;
-    logger.info('Authenticated user for POST .../questions/{questionId}/options', { userId, orgId, studyId, questionId });
+    logger.info('Authenticated user for POST .../questions/{questionId}/options', {
+      userId,
+      orgId,
+      studyId,
+      questionId,
+    });
 
     // TODO: Authorization Logic - P1-02 (Refined)
     const question = await prisma.surveyQuestion.findUnique({

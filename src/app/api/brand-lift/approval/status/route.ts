@@ -7,7 +7,11 @@ import db from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { handleApiError } from '@/lib/apiErrorHandler';
 import { BadRequestError, ForbiddenError, NotFoundError, UnauthenticatedError } from '@/lib/errors';
-import { NotificationService, UserDetails, StudyDetails as EmailStudyDetails } from '@/lib/notificationService';
+import {
+  NotificationService,
+  UserDetails,
+  StudyDetails as EmailStudyDetails,
+} from '@/lib/notificationService';
 import { BASE_URL } from '@/config/constants';
 
 const updateApprovalStatusSchema = z.object({
@@ -22,20 +26,27 @@ const getApprovalStatusQuerySchema = z.object({
 // Type for the enriched study state used in this handler
 type EnrichedStudyState = Prisma.BrandLiftStudyGetPayload<{
   select: {
-    id: true, name: true, status: true,
-    campaign: { select: { userId: true } },
-    approvalStatus: { select: { id: true, status: true, requestedSignOff: true } }
-  }
+    id: true;
+    name: true;
+    status: true;
+    campaign: { select: { userId: true } };
+    approvalStatus: { select: { id: true; status: true; requestedSignOff: true } };
+  };
 }>;
 
-async function verifyStudyForApprovalInteraction(studyId: string, orgId: string): Promise<EnrichedStudyState> {
+async function verifyStudyForApprovalInteraction(
+  studyId: string,
+  orgId: string
+): Promise<EnrichedStudyState> {
   const study = await db.brandLiftStudy.findFirst({
     where: { id: studyId, organizationId: orgId },
     select: {
-      id: true, name: true, status: true,
+      id: true,
+      name: true,
+      status: true,
       campaign: { select: { userId: true } },
-      approvalStatus: { select: { id: true, status: true, requestedSignOff: true } }
-    }
+      approvalStatus: { select: { id: true, status: true, requestedSignOff: true } },
+    },
   });
 
   if (!study) throw new NotFoundError('Study not found or not accessible.');
@@ -49,7 +60,9 @@ async function verifyStudyForApprovalInteraction(studyId: string, orgId: string)
 
   const currentMainStudyStatus = study.status as BrandLiftStudyStatus;
   if (!allowedInteractionStatuses.includes(currentMainStudyStatus)) {
-    throw new ForbiddenError(`Approval operations are not allowed when main study status is ${currentMainStudyStatus}.`);
+    throw new ForbiddenError(
+      `Approval operations are not allowed when main study status is ${currentMainStudyStatus}.`
+    );
   }
   return study as EnrichedStudyState;
 }
@@ -64,7 +77,10 @@ export const GET = async (req: NextRequest) => {
     const parsedQuery = getApprovalStatusQuerySchema.safeParse({ studyId: studyIdQueryParam });
 
     if (!parsedQuery.success) {
-      logger.warn('Invalid query params for fetching approval status', { errors: parsedQuery.error.flatten().fieldErrors, orgId });
+      logger.warn('Invalid query params for fetching approval status', {
+        errors: parsedQuery.error.flatten().fieldErrors,
+        orgId,
+      });
       throw parsedQuery.error;
     }
     const { studyId } = parsedQuery.data;
@@ -99,20 +115,30 @@ export const PUT = async (req: NextRequest) => {
     }
 
     // verifyStudyForApprovalInteraction is called, which now uses the corrected allowed statuses
-    const currentStudyState: EnrichedStudyState = await verifyStudyForApprovalInteraction(studyId, orgId);
+    const currentStudyState: EnrichedStudyState = await verifyStudyForApprovalInteraction(
+      studyId,
+      orgId
+    );
 
     const body = await req.json();
     const validation = updateApprovalStatusSchema.safeParse(body);
     if (!validation.success) {
-      logger.warn('Invalid approval status update data', { studyId, errors: validation.error.flatten().fieldErrors, orgId });
+      logger.warn('Invalid approval status update data', {
+        studyId,
+        errors: validation.error.flatten().fieldErrors,
+        orgId,
+      });
       throw validation.error;
     }
 
     const { status: newApprovalStatusEnumValue, requestedSignOff } = validation.data;
-    const oldOverallApprovalStatus = currentStudyState.approvalStatus?.status as SurveyOverallApprovalStatus | undefined;
+    const oldOverallApprovalStatus = currentStudyState.approvalStatus?.status as
+      | SurveyOverallApprovalStatus
+      | undefined;
     const oldRequestedSignOff = currentStudyState.approvalStatus?.requestedSignOff;
 
-    let newBrandLiftStudyMainStatus: BrandLiftStudyStatus = currentStudyState.status as BrandLiftStudyStatus;
+    let newBrandLiftStudyMainStatus: BrandLiftStudyStatus =
+      currentStudyState.status as BrandLiftStudyStatus;
 
     if (newApprovalStatusEnumValue === SurveyOverallApprovalStatus.APPROVED) {
       newBrandLiftStudyMainStatus = BrandLiftStudyStatus.APPROVED;
@@ -120,8 +146,13 @@ export const PUT = async (req: NextRequest) => {
       // When SurveyOverallApprovalStatus is CHANGES_REQUESTED, the main BrandLiftStudy.status goes to PENDING_APPROVAL.
       newBrandLiftStudyMainStatus = BrandLiftStudyStatus.PENDING_APPROVAL;
     } else if (newApprovalStatusEnumValue === SurveyOverallApprovalStatus.SIGNED_OFF) {
-      if (currentStudyState.approvalStatus?.status !== SurveyOverallApprovalStatus.APPROVED && !currentStudyState.approvalStatus?.requestedSignOff) {
-        throw new BadRequestError('Study must be in APPROVED status and sign-off must have been requested before it can be SIGNED_OFF.');
+      if (
+        currentStudyState.approvalStatus?.status !== SurveyOverallApprovalStatus.APPROVED &&
+        !currentStudyState.approvalStatus?.requestedSignOff
+      ) {
+        throw new BadRequestError(
+          'Study must be in APPROVED status and sign-off must have been requested before it can be SIGNED_OFF.'
+        );
       }
       newBrandLiftStudyMainStatus = BrandLiftStudyStatus.APPROVED;
     } else if (newApprovalStatusEnumValue === SurveyOverallApprovalStatus.PENDING_REVIEW) {
@@ -129,8 +160,11 @@ export const PUT = async (req: NextRequest) => {
       newBrandLiftStudyMainStatus = BrandLiftStudyStatus.PENDING_APPROVAL;
     }
 
-    const approvalStatusDataToUpdate: Prisma.SurveyApprovalStatusUpdateInput = { status: newApprovalStatusEnumValue };
-    if (typeof requestedSignOff === 'boolean') approvalStatusDataToUpdate.requestedSignOff = requestedSignOff;
+    const approvalStatusDataToUpdate: Prisma.SurveyApprovalStatusUpdateInput = {
+      status: newApprovalStatusEnumValue,
+    };
+    if (typeof requestedSignOff === 'boolean')
+      approvalStatusDataToUpdate.requestedSignOff = requestedSignOff;
     if (newApprovalStatusEnumValue === SurveyOverallApprovalStatus.SIGNED_OFF) {
       approvalStatusDataToUpdate.signedOffBy = userId;
       approvalStatusDataToUpdate.signedOffAt = new Date();
@@ -138,44 +172,70 @@ export const PUT = async (req: NextRequest) => {
 
     const notificationService = new NotificationService();
 
-    const [updatedApprovalStatus, finalStudyDbState] = await db.$transaction(async (tx: Prisma.TransactionClient) => {
-      const upsertedApproval = await tx.surveyApprovalStatus.upsert({
-        where: { studyId: studyId },
-        create: {
-          studyId: studyId,
-          status: newApprovalStatusEnumValue,
-          requestedSignOff: requestedSignOff ?? false,
-          ...(newApprovalStatusEnumValue === SurveyOverallApprovalStatus.SIGNED_OFF && { signedOffBy: userId, signedOffAt: new Date() }),
-        },
-        update: approvalStatusDataToUpdate,
-      });
-
-      let updatedStudyDirectly = { status: currentStudyState.status as BrandLiftStudyStatus };
-      if (currentStudyState.status !== newBrandLiftStudyMainStatus) {
-        const updated = await tx.brandLiftStudy.update({
-          where: { id: studyId },
-          data: { status: newBrandLiftStudyMainStatus },
-          select: { status: true }
+    const [updatedApprovalStatus, finalStudyDbState] = await db.$transaction(
+      async (tx: Prisma.TransactionClient) => {
+        const upsertedApproval = await tx.surveyApprovalStatus.upsert({
+          where: { studyId: studyId },
+          create: {
+            studyId: studyId,
+            status: newApprovalStatusEnumValue,
+            requestedSignOff: requestedSignOff ?? false,
+            ...(newApprovalStatusEnumValue === SurveyOverallApprovalStatus.SIGNED_OFF && {
+              signedOffBy: userId,
+              signedOffAt: new Date(),
+            }),
+          },
+          update: approvalStatusDataToUpdate,
         });
-        updatedStudyDirectly = { status: updated.status as BrandLiftStudyStatus };
+
+        let updatedStudyDirectly = { status: currentStudyState.status as BrandLiftStudyStatus };
+        if (currentStudyState.status !== newBrandLiftStudyMainStatus) {
+          const updated = await tx.brandLiftStudy.update({
+            where: { id: studyId },
+            data: { status: newBrandLiftStudyMainStatus },
+            select: { status: true },
+          });
+          updatedStudyDirectly = { status: updated.status as BrandLiftStudyStatus };
+        }
+        return [upsertedApproval, updatedStudyDirectly];
       }
-      return [upsertedApproval, updatedStudyDirectly];
-    });
+    );
 
     const studyOwnerId = currentStudyState.campaign?.userId;
     let studyOwnerDetails: UserDetails | null = null;
     if (studyOwnerId) {
-      const owner = await db.user.findUnique({ where: { id: studyOwnerId }, select: { id: true, email: true, name: true } });
-      if (owner) studyOwnerDetails = { email: owner.email, name: owner.name ?? undefined, id: owner.id };
+      const owner = await db.user.findUnique({
+        where: { id: studyOwnerId },
+        select: { id: true, email: true, name: true },
+      });
+      if (owner)
+        studyOwnerDetails = { email: owner.email, name: owner.name ?? undefined, id: owner.id };
     }
 
-    const requesterDetailsFull = await db.user.findUnique({ where: { id: userId }, select: { id: true, email: true, name: true } });
-    const requesterDetails: UserDetails | null = requesterDetailsFull ? { id: requesterDetailsFull.id, email: requesterDetailsFull.email, name: requesterDetailsFull.name ?? undefined } : null;
+    const requesterDetailsFull = await db.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, name: true },
+    });
+    const requesterDetails: UserDetails | null = requesterDetailsFull
+      ? {
+          id: requesterDetailsFull.id,
+          email: requesterDetailsFull.email,
+          name: requesterDetailsFull.name ?? undefined,
+        }
+      : null;
 
-    const studyDetailsForEmail: EmailStudyDetails = { id: studyId, name: currentStudyState.name, approvalPageUrl: `${BASE_URL}/approval/${studyId}` };
+    const studyDetailsForEmail: EmailStudyDetails = {
+      id: studyId,
+      name: currentStudyState.name,
+      approvalPageUrl: `${BASE_URL}/approval/${studyId}`,
+    };
 
     // 1. Sign-off Requested
-    if (requestedSignOff === true && oldRequestedSignOff !== true && newApprovalStatusEnumValue === SurveyOverallApprovalStatus.APPROVED) {
+    if (
+      requestedSignOff === true &&
+      oldRequestedSignOff !== true &&
+      newApprovalStatusEnumValue === SurveyOverallApprovalStatus.APPROVED
+    ) {
       const approverEmails = ['manager@example.com']; // Placeholder
       if (approverEmails.length > 0 && requesterDetails?.email) {
         try {
@@ -185,13 +245,21 @@ export const PUT = async (req: NextRequest) => {
             requesterDetails
           );
           logger.info('"Approval Requested" notification sent', { studyId });
-        } catch (emailError: any) { logger.error('Failed to send "Approval Requested" email', { studyId, error: emailError.message }); }
+        } catch (emailError: any) {
+          logger.error('Failed to send "Approval Requested" email', {
+            studyId,
+            error: emailError.message,
+          });
+        }
       }
     }
 
     // 2. Status Changed (Approved or Changes Requested)
-    if (newApprovalStatusEnumValue !== oldOverallApprovalStatus &&
-      (newApprovalStatusEnumValue === SurveyOverallApprovalStatus.APPROVED || newApprovalStatusEnumValue === SurveyOverallApprovalStatus.CHANGES_REQUESTED)) {
+    if (
+      newApprovalStatusEnumValue !== oldOverallApprovalStatus &&
+      (newApprovalStatusEnumValue === SurveyOverallApprovalStatus.APPROVED ||
+        newApprovalStatusEnumValue === SurveyOverallApprovalStatus.CHANGES_REQUESTED)
+    ) {
       if (studyOwnerDetails?.email && requesterDetails?.email) {
         try {
           await notificationService.sendStudyStatusChangeEmail(
@@ -200,14 +268,28 @@ export const PUT = async (req: NextRequest) => {
             newApprovalStatusEnumValue.replace(/_/g, ' ').toLowerCase(),
             requesterDetails
           );
-          logger.info(`"Study Status Change (${newApprovalStatusEnumValue})" notification sent`, { studyId });
-        } catch (emailError: any) { logger.error('Failed to send "Study Status Change" email', { studyId, error: emailError.message }); }
+          logger.info(`"Study Status Change (${newApprovalStatusEnumValue})" notification sent`, {
+            studyId,
+          });
+        } catch (emailError: any) {
+          logger.error('Failed to send "Study Status Change" email', {
+            studyId,
+            error: emailError.message,
+          });
+        }
       }
     }
 
-    logger.info('Survey approval status and main study status updated', { studyId, newApprovalStatus: updatedApprovalStatus.status, newStudyStatus: finalStudyDbState.status, orgId });
-    return NextResponse.json({ approvalStatus: updatedApprovalStatus, studyStatus: finalStudyDbState.status });
-
+    logger.info('Survey approval status and main study status updated', {
+      studyId,
+      newApprovalStatus: updatedApprovalStatus.status,
+      newStudyStatus: finalStudyDbState.status,
+      orgId,
+    });
+    return NextResponse.json({
+      approvalStatus: updatedApprovalStatus,
+      studyStatus: finalStudyDbState.status,
+    });
   } catch (error: any) {
     return handleApiError(error, req);
   }

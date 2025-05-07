@@ -361,7 +361,7 @@ const apiService: IInfluencerService = {
       const platformResults = await Promise.all(platformPromises);
 
       // Process results, aggregate, and deduplicate
-      let combinedInfluencerData: InsightIQSearchProfile[] = [];
+      const combinedInfluencerData: InsightIQSearchProfile[] = [];
       let combinedTotal = 0;
       const handledHandles = new Set<string>(); // Simple deduplication by handle
 

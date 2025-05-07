@@ -18,7 +18,10 @@ const bulkAddInfluencerSchema = z.object({
 });
 
 // Use the exact signature pattern from the working route
-export async function POST(request: NextRequest, { params }: { params: Promise<{ campaignId: string }> }) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ campaignId: string }> }
+) {
   const resolvedParams = await params; // Await the params Promise
   console.log('Received request for campaign ID:', resolvedParams.campaignId);
   return NextResponse.json({ success: true, message: 'Minimal response OK' });

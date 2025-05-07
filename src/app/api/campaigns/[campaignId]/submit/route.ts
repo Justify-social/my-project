@@ -12,4 +12,4 @@ interface RouteContext {
 // POST, GET, DELETE handlers previously here were removed due to build errors.
 // See TODO at the top of the file.
 
-export { };
+export {};

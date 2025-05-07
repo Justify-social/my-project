@@ -189,7 +189,10 @@ const campaignUpdateSchema = z.object({
   influencers: z.array(z.any()).optional(),
 });
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ campaignId: string }> }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ campaignId: string }> }
+) {
   // Rely solely on the inner try...catch for robust error handling
   try {
     console.log('[API GET /api/campaigns/[campaignId]] Handler started'); // Log start
@@ -288,9 +291,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       // Transform locations if it's an array of strings to array of objects
       locations:
         'locations' in campaign &&
-          Array.isArray(campaign.locations) &&
-          campaign.locations.length > 0 &&
-          typeof campaign.locations[0] === 'string'
+        Array.isArray(campaign.locations) &&
+        campaign.locations.length > 0 &&
+        typeof campaign.locations[0] === 'string'
           ? campaign.locations.map(loc => ({ city: loc }))
           : 'locations' in campaign
             ? campaign.locations
@@ -299,38 +302,38 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       budget:
         'budget' in campaign && campaign.budget && typeof campaign.budget === 'object'
           ? {
-            currency: 'currency' in campaign.budget ? campaign.budget.currency : 'GBP',
-            total: 'total' in campaign.budget ? campaign.budget.total : 0,
-            socialMedia: 'socialMedia' in campaign.budget ? campaign.budget.socialMedia : 0,
-          }
+              currency: 'currency' in campaign.budget ? campaign.budget.currency : 'GBP',
+              total: 'total' in campaign.budget ? campaign.budget.total : 0,
+              socialMedia: 'socialMedia' in campaign.budget ? campaign.budget.socialMedia : 0,
+            }
           : { currency: 'GBP', total: 0, socialMedia: 0 },
       // Normalize contacts if they exist
       primaryContact:
         'primaryContact' in campaign &&
-          campaign.primaryContact &&
-          typeof campaign.primaryContact === 'object'
+        campaign.primaryContact &&
+        typeof campaign.primaryContact === 'object'
           ? {
-            firstName:
-              'firstName' in campaign.primaryContact ? campaign.primaryContact.firstName : '',
-            surname: 'surname' in campaign.primaryContact ? campaign.primaryContact.surname : '',
-            email: 'email' in campaign.primaryContact ? campaign.primaryContact.email : '',
-            position:
-              'position' in campaign.primaryContact ? campaign.primaryContact.position : '',
-          }
+              firstName:
+                'firstName' in campaign.primaryContact ? campaign.primaryContact.firstName : '',
+              surname: 'surname' in campaign.primaryContact ? campaign.primaryContact.surname : '',
+              email: 'email' in campaign.primaryContact ? campaign.primaryContact.email : '',
+              position:
+                'position' in campaign.primaryContact ? campaign.primaryContact.position : '',
+            }
           : null,
       secondaryContact:
         'secondaryContact' in campaign &&
-          campaign.secondaryContact &&
-          typeof campaign.secondaryContact === 'object'
+        campaign.secondaryContact &&
+        typeof campaign.secondaryContact === 'object'
           ? {
-            firstName:
-              'firstName' in campaign.secondaryContact ? campaign.secondaryContact.firstName : '',
-            surname:
-              'surname' in campaign.secondaryContact ? campaign.secondaryContact.surname : '',
-            email: 'email' in campaign.secondaryContact ? campaign.secondaryContact.email : '',
-            position:
-              'position' in campaign.secondaryContact ? campaign.secondaryContact.position : '',
-          }
+              firstName:
+                'firstName' in campaign.secondaryContact ? campaign.secondaryContact.firstName : '',
+              surname:
+                'surname' in campaign.secondaryContact ? campaign.secondaryContact.surname : '',
+              email: 'email' in campaign.secondaryContact ? campaign.secondaryContact.email : '',
+              position:
+                'position' in campaign.secondaryContact ? campaign.secondaryContact.position : '',
+            }
           : null,
       // Ensure additionalContacts is always an array
       additionalContacts:
@@ -341,49 +344,49 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       assets:
         'assets' in campaign && Array.isArray(campaign.assets)
           ? campaign.assets.map(asset => {
-            if (asset && typeof asset === 'object') {
-              return {
-                id: 'id' in asset ? asset.id : '',
-                name: 'name' in asset ? asset.name : '',
-                type: 'type' in asset ? asset.type : 'image',
-                url: 'url' in asset ? asset.url : '',
-                fileName: 'fileName' in asset ? asset.fileName : '',
-                fileSize: 'fileSize' in asset ? asset.fileSize : 0,
-                description: 'description' in asset ? asset.description : '',
-                temp: 'temp' in asset ? asset.temp : false,
-                rationale: 'rationale' in asset ? asset.rationale : '',
-                budget: 'budget' in asset ? asset.budget : undefined,
-                associatedInfluencerIds:
-                  'associatedInfluencerIds' in asset &&
+              if (asset && typeof asset === 'object') {
+                return {
+                  id: 'id' in asset ? asset.id : '',
+                  name: 'name' in asset ? asset.name : '',
+                  type: 'type' in asset ? asset.type : 'image',
+                  url: 'url' in asset ? asset.url : '',
+                  fileName: 'fileName' in asset ? asset.fileName : '',
+                  fileSize: 'fileSize' in asset ? asset.fileSize : 0,
+                  description: 'description' in asset ? asset.description : '',
+                  temp: 'temp' in asset ? asset.temp : false,
+                  rationale: 'rationale' in asset ? asset.rationale : '',
+                  budget: 'budget' in asset ? asset.budget : undefined,
+                  associatedInfluencerIds:
+                    'associatedInfluencerIds' in asset &&
                     Array.isArray(asset.associatedInfluencerIds)
-                    ? asset.associatedInfluencerIds
-                    : [],
+                      ? asset.associatedInfluencerIds
+                      : [],
+                };
+              }
+              return {
+                id: '',
+                name: '',
+                type: 'image',
+                url: '',
+                fileName: '',
+                fileSize: 0,
+                description: '',
+                temp: false,
+                rationale: '',
+                budget: undefined,
+                associatedInfluencerIds: [],
               };
-            }
-            return {
-              id: '',
-              name: '',
-              type: 'image',
-              url: '',
-              fileName: '',
-              fileSize: 0,
-              description: '',
-              temp: false,
-              rationale: '',
-              budget: undefined,
-              associatedInfluencerIds: [],
-            };
-          })
+            })
           : [],
       // Normalize influencers if they exist
       Influencer:
         'Influencer' in campaign && Array.isArray(campaign.Influencer)
           ? campaign.Influencer.map(inf => ({
-            id: 'id' in inf ? inf.id : '',
-            platform: 'platform' in inf ? inf.platform : 'INSTAGRAM',
-            handle: 'handle' in inf ? inf.handle : '',
-            platformId: 'platformId' in inf ? inf.platformId : '',
-          }))
+              id: 'id' in inf ? inf.id : '',
+              platform: 'platform' in inf ? inf.platform : 'INSTAGRAM',
+              handle: 'handle' in inf ? inf.handle : '',
+              platformId: 'platformId' in inf ? inf.platformId : '',
+            }))
           : [],
     };
 
@@ -537,7 +540,10 @@ export async function DELETE(
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: Promise<{ campaignId: string }> }) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ campaignId: string }> }
+) {
   try {
     console.log('[API PUT /api/campaigns/[campaignId]] Handler started');
     const { campaignId } = await params;

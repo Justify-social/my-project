@@ -333,22 +333,41 @@ const CampaignPostApiSchema = z
 // Schema for validating expected query parameters for this specific endpoint usage
 const queryParamsSchema = z.object({
   // user_accessible is conceptually required for security, default to true if not specified for this context
-  user_accessible: z.string().optional().refine(val => val === undefined || val === 'true', { message: "user_accessible must be 'true' or omitted for this context" }).default('true'),
+  user_accessible: z
+    .string()
+    .optional()
+    .refine(val => val === undefined || val === 'true', {
+      message: "user_accessible must be 'true' or omitted for this context",
+    })
+    .default('true'),
   // status=completed is required for the campaign selection UI in Brand Lift
-  status: z.string().optional().refine(val => val === undefined || val === 'completed', { message: "status must be 'completed' or omitted for this context" }).default('completed'),
+  status: z
+    .string()
+    .optional()
+    .refine(val => val === undefined || val === 'completed', {
+      message: "status must be 'completed' or omitted for this context",
+    })
+    .default('completed'),
 });
 
 // Schema for query params for listing campaigns, specifically for Brand Lift use case
 const listCampaignsQuerySchema = z.object({
-  status: z.nativeEnum(SubmissionStatus).optional().refine(val => val === SubmissionStatus.submitted || val === undefined, {
-    message: "Status must be 'submitted' (mapped from COMPLETED concept) or omitted."
-    // Defaulting to submitted as the likely equivalent of a completed campaign wizard
-  }).default(SubmissionStatus.submitted),
+  status: z
+    .nativeEnum(SubmissionStatus)
+    .optional()
+    .refine(val => val === SubmissionStatus.submitted || val === undefined, {
+      message: "Status must be 'submitted' (mapped from COMPLETED concept) or omitted.",
+      // Defaulting to submitted as the likely equivalent of a completed campaign wizard
+    })
+    .default(SubmissionStatus.submitted),
   // Removed user_accessible as orgId check handles this
 });
 
 // Define the type for the selected campaign data
-type SelectedCampaignData = Pick<CampaignWizardSubmission, 'id' | 'campaignName' | 'createdAt' | 'submissionStatus'>;
+type SelectedCampaignData = Pick<
+  CampaignWizardSubmission,
+  'id' | 'campaignName' | 'createdAt' | 'submissionStatus'
+>;
 
 export const GET = async (req: NextRequest) => {
   try {
@@ -361,7 +380,10 @@ export const GET = async (req: NextRequest) => {
 
     const searchParams = req.nextUrl.searchParams;
     const parsedParams = listCampaignsQuerySchema.safeParse({
-      status: searchParams.get('status')?.toLowerCase() === 'completed' ? SubmissionStatus.submitted : searchParams.get('status') ?? undefined,
+      status:
+        searchParams.get('status')?.toLowerCase() === 'completed'
+          ? SubmissionStatus.submitted
+          : (searchParams.get('status') ?? undefined),
     });
 
     if (!parsedParams.success) {
@@ -375,7 +397,10 @@ export const GET = async (req: NextRequest) => {
       submissionStatus: validatedStatus,
     };
 
-    logger.info('Fetching completed campaigns (submissions) for Brand Lift', { userId, whereClause });
+    logger.info('Fetching completed campaigns (submissions) for Brand Lift', {
+      userId,
+      whereClause,
+    });
 
     const campaigns: SelectedCampaignData[] = await prisma.campaignWizardSubmission.findMany({
       where: whereClause,
@@ -392,12 +417,14 @@ export const GET = async (req: NextRequest) => {
 
     const responseData = campaigns.map((c: SelectedCampaignData) => ({
       ...c,
-      status: c.submissionStatus === SubmissionStatus.submitted ? 'COMPLETED' : 'DRAFT'
+      status: c.submissionStatus === SubmissionStatus.submitted ? 'COMPLETED' : 'DRAFT',
     }));
 
-    logger.info(`Successfully fetched ${campaigns.length} campaigns for Brand Lift`, { userId, count: campaigns.length });
+    logger.info(`Successfully fetched ${campaigns.length} campaigns for Brand Lift`, {
+      userId,
+      count: campaigns.length,
+    });
     return NextResponse.json(responseData);
-
   } catch (error: any) {
     logger.error('Error fetching campaigns', { error: error.message });
     return handleApiError(error, req);
@@ -412,7 +439,10 @@ export const POST = async (request: NextRequest) => {
   try {
     // --- Start: Inlined withValidation logic ---
     if (!request.body) {
-      return NextResponse.json({ success: false, error: 'Request body is required' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: 'Request body is required' },
+        { status: 400 }
+      );
     }
     const clone = request.clone();
     const body = await clone.json();
@@ -443,8 +473,12 @@ export const POST = async (request: NextRequest) => {
     const { EnumTransformers } = await import('@/utils/enum-transformers');
     const transformedData = EnumTransformers.transformObjectToBackend(data);
     const budgetData = transformedData.budget || { total: 0, currency: 'USD', socialMedia: 0 };
-    const primaryContactJson = transformedData.primaryContact ? JSON.stringify(transformedData.primaryContact) : Prisma.JsonNull;
-    const secondaryContactJson = transformedData.secondaryContact ? JSON.stringify(transformedData.secondaryContact) : Prisma.JsonNull;
+    const primaryContactJson = transformedData.primaryContact
+      ? JSON.stringify(transformedData.primaryContact)
+      : Prisma.JsonNull;
+    const secondaryContactJson = transformedData.secondaryContact
+      ? JSON.stringify(transformedData.secondaryContact)
+      : Prisma.JsonNull;
 
     const dbData = {
       id: uuidv4(),
@@ -478,7 +512,7 @@ export const POST = async (request: NextRequest) => {
       currentStep: 1,
       updatedAt: new Date(),
       userId: userId, // Assign the authenticated user ID
-      organizationId: orgId // Assign the organization ID
+      organizationId: orgId, // Assign the organization ID
     };
 
     const campaign = await prisma.$transaction(async tx => {
@@ -523,15 +557,15 @@ export const POST = async (request: NextRequest) => {
       include: { Influencer: true },
     });
 
-    const transformedCampaign = EnumTransformers.transformObjectFromBackend(campaignWithInfluencers);
+    const transformedCampaign =
+      EnumTransformers.transformObjectFromBackend(campaignWithInfluencers);
 
     return NextResponse.json({
       success: true,
       data: transformedCampaign,
-      message: 'Campaign created successfully'
+      message: 'Campaign created successfully',
     });
     // --- End: Original postCampaignsHandler logic ---
-
   } catch (error: any) {
     // --- Start: Inlined tryCatch logic ---
     logger.error('Campaign POST: Error occurred', { error: error.message, stack: error.stack });
@@ -558,7 +592,10 @@ export const PATCH = async (request: NextRequest) => {
   try {
     // --- Start: Inlined withValidation logic ---
     if (!request.body) {
-      return NextResponse.json({ success: false, error: 'Request body is required' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: 'Request body is required' },
+        { status: 400 }
+      );
     }
     const clone = request.clone();
     const body = await clone.json();
@@ -590,7 +627,8 @@ export const PATCH = async (request: NextRequest) => {
 
     // Authorization: Check if user/org has permission to update this campaignId
     const existingCampaign = await prisma.campaignWizard.findFirst({ where: { id, userId } }); // Check if campaign exists and belongs to user
-    if (!existingCampaign) throw new NotFoundError('Campaign not found or not accessible for update.');
+    if (!existingCampaign)
+      throw new NotFoundError('Campaign not found or not accessible for update.');
 
     const campaign = await prisma.campaignWizard.update({
       where: { id },
@@ -615,12 +653,17 @@ export const PATCH = async (request: NextRequest) => {
           step: updateData.step ?? existingCampaign.currentStep ?? 1,
           timestamp: new Date(),
           action: 'UPDATE',
-          changes: { /* Diffing logic would go here */ },
+          changes: {
+            /* Diffing logic would go here */
+          },
           performedBy: userId,
         },
       });
     } catch (error) {
-      logger.error('Error creating wizard history during campaign update:', { campaignId: id, error });
+      logger.error('Error creating wizard history during campaign update:', {
+        campaignId: id,
+        error,
+      });
       // Continue with campaign update even if history creation fails
     }
 
@@ -630,7 +673,6 @@ export const PATCH = async (request: NextRequest) => {
       message: 'Campaign updated successfully',
     });
     // --- End: Original patchCampaignHandler logic ---
-
   } catch (error: any) {
     // --- Start: Inlined tryCatch logic ---
     logger.error('Campaign PATCH: Error occurred', { error: error.message, stack: error.stack });

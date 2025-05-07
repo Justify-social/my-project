@@ -174,17 +174,17 @@ export default function CampaignDetail() {
           },
           secondaryContact: data.secondaryContact
             ? {
-              name: `${data.secondaryContact.firstName || ''} ${data.secondaryContact.surname || ''}`.trim(),
-              email: data.secondaryContact?.email || 'N/A',
-              position: data.secondaryContact?.position || 'N/A',
-            }
+                name: `${data.secondaryContact.firstName || ''} ${data.secondaryContact.surname || ''}`.trim(),
+                email: data.secondaryContact?.email || 'N/A',
+                position: data.secondaryContact?.position || 'N/A',
+              }
             : undefined,
           influencers:
             data.Influencer && Array.isArray(data.Influencer)
               ? data.Influencer.map((inf: ApiInfluencer) => ({
-                handle: inf.handle || 'N/A',
-                platform: inf.platform || 'N/A',
-              }))
+                  handle: inf.handle || 'N/A',
+                  platform: inf.platform || 'N/A',
+                }))
               : [],
           primaryKPI: data.primaryKPI || 'Not Set',
           secondaryKPIs:
@@ -231,51 +231,51 @@ export default function CampaignDetail() {
             requirements:
               data.requirements && Array.isArray(data.requirements)
                 ? data.requirements.map((req: ApiRequirement) => ({
-                  text: req?.requirement || 'N/A',
-                  mandatory: false,
-                }))
+                    text: req?.requirement || 'N/A',
+                    mandatory: false,
+                  }))
                 : [],
             uploaded:
               data.assets && Array.isArray(data.assets)
                 ? data.assets.map((asset: ApiAsset) => ({
-                  name: asset?.name || 'Unnamed Asset',
-                  url: asset?.url || '#',
-                }))
+                    name: asset?.name || 'Unnamed Asset',
+                    url: asset?.url || '#',
+                  }))
                 : [],
             notes: data.notes || 'Not Set',
           },
           contacts: [
             ...(data.primaryContact
               ? [
-                {
-                  name:
-                    `${data.primaryContact.firstName || ''} ${data.primaryContact.surname || ''}`.trim() ||
-                    'N/A',
-                  email: data.primaryContact.email || 'N/A',
-                  position: data.primaryContact.position || 'N/A',
-                  phone: undefined,
-                },
-              ]
+                  {
+                    name:
+                      `${data.primaryContact.firstName || ''} ${data.primaryContact.surname || ''}`.trim() ||
+                      'N/A',
+                    email: data.primaryContact.email || 'N/A',
+                    position: data.primaryContact.position || 'N/A',
+                    phone: undefined,
+                  },
+                ]
               : []),
             ...(data.secondaryContact
               ? [
-                {
-                  name:
-                    `${data.secondaryContact.firstName || ''} ${data.secondaryContact.surname || ''}`.trim() ||
-                    'N/A',
-                  email: data.secondaryContact.email || 'N/A',
-                  position: data.secondaryContact.position || 'N/A',
-                  phone: undefined,
-                },
-              ]
+                  {
+                    name:
+                      `${data.secondaryContact.firstName || ''} ${data.secondaryContact.surname || ''}`.trim() ||
+                      'N/A',
+                    email: data.secondaryContact.email || 'N/A',
+                    position: data.secondaryContact.position || 'N/A',
+                    phone: undefined,
+                  },
+                ]
               : []),
             ...(data.additionalContacts && Array.isArray(data.additionalContacts)
               ? data.additionalContacts.map((contact: ApiContact) => ({
-                name: `${contact.firstName || ''} ${contact.surname || ''}`.trim() || 'N/A',
-                email: contact.email || 'N/A',
-                position: contact.position || 'N/A',
-                phone: undefined,
-              }))
+                  name: `${contact.firstName || ''} ${contact.surname || ''}`.trim() || 'N/A',
+                  email: contact.email || 'N/A',
+                  position: contact.position || 'N/A',
+                  phone: undefined,
+                }))
               : []),
           ],
         };

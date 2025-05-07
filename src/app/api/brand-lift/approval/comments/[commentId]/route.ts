@@ -6,7 +6,14 @@ import { Prisma, SurveyApprovalCommentStatus, BrandLiftStudyStatus } from '@pris
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { handleApiError } from '@/lib/apiErrorHandler';
-import { BadRequestError, ForbiddenError, NotFoundError, UnauthenticatedError, DatabaseError, ZodValidationError } from '@/lib/errors';
+import {
+  BadRequestError,
+  ForbiddenError,
+  NotFoundError,
+  UnauthenticatedError,
+  DatabaseError,
+  ZodValidationError,
+} from '@/lib/errors';
 
 // Zod schema for updating a SurveyApprovalComment's status
 const updateCommentStatusSchema = z.object({
@@ -21,21 +28,30 @@ async function verifyCommentAccess(commentId: string, orgId: string, userId: str
       approvalStatus: {
         include: {
           study: {
-            select: { id: true, status: true, organizationId: true }
-          }
-        }
-      }
-    }
+            select: { id: true, status: true, organizationId: true },
+          },
+        },
+      },
+    },
   });
 
   if (!comment) throw new NotFoundError('Comment not found.');
   if (comment.approvalStatus?.study?.organizationId !== orgId) {
-    throw new ForbiddenError('Access denied to this comment\'s study.');
+    throw new ForbiddenError("Access denied to this comment's study.");
   }
 
   const currentStudyStatus = comment.approvalStatus?.study?.status as BrandLiftStudyStatus;
-  if (!([BrandLiftStudyStatus.PENDING_APPROVAL, BrandLiftStudyStatus.APPROVED] as BrandLiftStudyStatus[]).includes(currentStudyStatus)) {
-    throw new ForbiddenError(`Comment status cannot be updated when study status is ${currentStudyStatus}.`);
+  if (
+    !(
+      [
+        BrandLiftStudyStatus.PENDING_APPROVAL,
+        BrandLiftStudyStatus.APPROVED,
+      ] as BrandLiftStudyStatus[]
+    ).includes(currentStudyStatus)
+  ) {
+    throw new ForbiddenError(
+      `Comment status cannot be updated when study status is ${currentStudyStatus}.`
+    );
   }
 
   return comment;
@@ -55,7 +71,11 @@ export async function PUT(req: NextRequest, context: any) {
     const body = await req.json();
     const validation = updateCommentStatusSchema.safeParse(body);
     if (!validation.success) {
-      logger.warn('Invalid comment status update data', { commentId, errors: validation.error.flatten().fieldErrors, orgId });
+      logger.warn('Invalid comment status update data', {
+        commentId,
+        errors: validation.error.flatten().fieldErrors,
+        orgId,
+      });
       throw new ZodValidationError(validation.error.flatten().fieldErrors);
     }
 
@@ -68,7 +88,6 @@ export async function PUT(req: NextRequest, context: any) {
 
     logger.info('Survey approval comment status updated', { commentId, newStatus: status, orgId });
     return NextResponse.json(updatedComment);
-
   } catch (error: any) {
     return handleApiError(error, req);
   }

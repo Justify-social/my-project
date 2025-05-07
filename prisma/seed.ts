@@ -17,10 +17,10 @@ async function main() {
 
   // Create Primary Contacts first
   const contact1 = await prisma.primaryContact.create({
-    data: { firstName: 'Seed', surname: 'User1', email: 'seed1@example.com', position: 'Manager' }
+    data: { firstName: 'Seed', surname: 'User1', email: 'seed1@example.com', position: 'Manager' },
   });
   const contact2 = await prisma.primaryContact.create({
-    data: { firstName: 'Seed', surname: 'User2', email: 'seed2@example.com', position: 'Director' }
+    data: { firstName: 'Seed', surname: 'User2', email: 'seed2@example.com', position: 'Director' },
   });
 
   // --- Create Sample CampaignWizardSubmissions ---
@@ -56,9 +56,10 @@ async function main() {
       secondaryKPIs: ['AD_RECALL'],
       features: ['BRAND_LIFT'],
       submissionStatus: 'submitted', // Use actual enum value
-      primaryContact: { // Connect to created contact
-        connect: { id: contact1.id }
-      }
+      primaryContact: {
+        // Connect to created contact
+        connect: { id: contact1.id },
+      },
       // Add relations if needed, e.g., primaryContactId or userId
     },
   });
@@ -94,9 +95,10 @@ async function main() {
       secondaryKPIs: ['CONSIDERATION'],
       features: ['BRAND_LIFT', 'CREATIVE_ASSET_TESTING'],
       submissionStatus: 'submitted', // Use actual enum value
-      primaryContact: { // Connect to created contact
-        connect: { id: contact2.id }
-      }
+      primaryContact: {
+        // Connect to created contact
+        connect: { id: contact2.id },
+      },
       // Add relations if needed
     },
   });
@@ -118,11 +120,11 @@ async function main() {
 }
 
 main()
-  .catch(async (e) => {
+  .catch(async e => {
     console.error(e);
     await prisma.$disconnect();
     process.exit(1);
   })
   .finally(async () => {
     await prisma.$disconnect();
-  }); 
+  });

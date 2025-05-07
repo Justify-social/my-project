@@ -51,10 +51,11 @@ You are a creative assistant specializing in sourcing culturally sensitive and r
  * @returns The formatted prompt string.
  */
 export function createQuestionGenerationPrompt(study: Partial<BrandLiftStudyData>): string {
-    const campaignNameForPrompt = (study.campaign as any)?.campaignName || 'the campaign\'s associated marketing efforts';
-    const brandName = (study.campaign as any)?.campaignName?.split(' ')[0] || 'the brand';
+  const campaignNameForPrompt =
+    (study.campaign as any)?.campaignName || "the campaign's associated marketing efforts";
+  const brandName = (study.campaign as any)?.campaignName?.split(' ')[0] || 'the brand';
 
-    const context = `
+  const context = `
 Campaign Context: ${campaignNameForPrompt}
 Study Name: ${study.name ?? 'N/A'}
 Funnel Stage Focus: ${study.funnelStage ?? 'N/A'}
@@ -62,9 +63,9 @@ Primary KPI: ${study.primaryKpi ?? 'N/A'}
 Secondary KPIs: ${study.secondaryKpis?.join(', ') || 'None'}
 `;
 
-    const userPrompt = `
+  const userPrompt = `
 Please generate approximately 5-7 survey questions in YAML format based on the following study and campaign context. The primary brand for this study is \"${brandName}\". Focus questions on measuring the specified KPIs, particularly the primary KPI: ${study.primaryKpi ?? 'N/A'}. Remember to include image/GIF descriptions for each answer option.\n\n**Study & Campaign Context:**\n${context}\n`;
-    return userPrompt;
+  return userPrompt;
 }
 
 /**
@@ -75,15 +76,15 @@ Please generate approximately 5-7 survey questions in YAML format based on the f
  * @returns The formatted prompt string.
  */
 export function createVisualSuggestionPrompt(questionText: string, options: string[]): string {
-    const optionsList = options.map((opt, i) => `  ${i + 1}. ${opt}`).join('\n');
-    const userPrompt = `
+  const optionsList = options.map((opt, i) => `  ${i + 1}. ${opt}`).join('\n');
+  const userPrompt = `
 For the following survey question and options, provide brief, culturally sensitive image/GIF descriptions for each option:\n\n**Question:** ${questionText}\n\n**Options:**\n${optionsList}\n\n**Output Format:**\nReturn a list of descriptions corresponding to the options.\nExample:\n1. Description for option 1\n2. Description for option 2\n...\n`;
-    return userPrompt;
+  return userPrompt;
 }
 
 // --- Export Configuration ---
 export const AiConfig = {
-    model: AI_MODEL,
-    questionGenSystemPrompt: QUESTION_GENERATION_SYSTEM_PROMPT,
-    visualSystemPrompt: VISUAL_SUGGESTION_SYSTEM_PROMPT,
+  model: AI_MODEL,
+  questionGenSystemPrompt: QUESTION_GENERATION_SYSTEM_PROMPT,
+  visualSystemPrompt: VISUAL_SUGGESTION_SYSTEM_PROMPT,
 };
