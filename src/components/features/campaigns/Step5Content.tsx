@@ -6,7 +6,11 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWizard } from '@/components/features/campaigns/WizardContext';
-import { DraftCampaignData, SubmissionPayloadData } from '@/components/features/campaigns/types';
+import {
+  DraftCampaignData,
+  SubmissionPayloadData,
+  StatusEnum,
+} from '@/components/features/campaigns/types';
 import { toast } from 'react-hot-toast';
 import { WizardSkeleton } from '@/components/ui/loading-skeleton';
 import { Icon } from '@/components/ui/icon/icon';
@@ -295,142 +299,6 @@ function Step5Content() {
     defaultValues: { confirm: false },
   });
 
-  // --- Data Transformation & Validation for Submission (REWRITTEN) ---
-  const prepareSubmissionPayload = useCallback((): SubmissionPayloadData | null => {
-    const draft = wizard.wizardState;
-    if (!draft) {
-      toast.error('Cannot prepare submission, draft data is missing.');
-      return null;
-    }
-
-    // Construct the payload object step-by-step, ensuring fields match SubmissionPayloadSchema
-    // Use nullish coalescing (??) for defaults where appropriate, and safe access
-    const payload: Partial<SubmissionPayloadData> = {
-      // Core Info
-      campaignName: draft.name || 'Untitled Campaign',
-      businessGoal: draft.businessGoal ?? '',
-      description: draft.businessGoal ?? '',
-      startDate: draft.startDate
-        ? typeof draft.startDate === 'string'
-          ? draft.startDate
-          : (draft.startDate as Date).toISOString()
-        : undefined,
-      endDate: draft.endDate
-        ? typeof draft.endDate === 'string'
-          ? draft.endDate
-          : (draft.endDate as Date).toISOString()
-        : undefined,
-      timeZone: draft.timeZone ?? 'UTC',
-      currency: draft.budget?.currency,
-      totalBudget: draft.budget?.total,
-      socialMediaBudget: draft.budget?.socialMedia,
-      platform: draft.Influencer?.[0]?.platform, // Use capitalized Influencer
-      influencerHandle: draft.Influencer?.[0]?.handle, // Use capitalized Influencer
-
-      // Contacts (Assuming structure is correct)
-      primaryContact: draft.primaryContact
-        ? {
-            firstName: draft.primaryContact.firstName,
-            surname: draft.primaryContact.surname,
-            email: draft.primaryContact.email,
-            position: draft.primaryContact.position,
-          }
-        : undefined,
-      secondaryContact: draft.secondaryContact
-        ? {
-            firstName: draft.secondaryContact.firstName,
-            surname: draft.secondaryContact.surname,
-            email: draft.secondaryContact.email,
-            position: draft.secondaryContact.position,
-          }
-        : undefined,
-
-      // Objectives (Assuming structure is correct)
-      primaryKPI: draft.primaryKPI ?? undefined,
-      secondaryKPIs: draft.secondaryKPIs ?? [],
-      features: draft.features ?? [],
-      mainMessage: draft.messaging?.mainMessage ?? '',
-      hashtags: Array.isArray(draft.messaging?.hashtags)
-        ? draft.messaging?.hashtags.join(', ')
-        : draft.messaging?.hashtags || '',
-      keyBenefits: Array.isArray(draft.messaging?.keyBenefits)
-        ? draft.messaging?.keyBenefits.join(', ')
-        : typeof draft.messaging?.keyBenefits === 'string'
-          ? draft.messaging?.keyBenefits
-          : '',
-      expectedAchievements: draft.expectedOutcomes?.purchaseIntent ?? '',
-      memorability: draft.expectedOutcomes?.memorability ?? '',
-      purchaseIntent: draft.expectedOutcomes?.purchaseIntent ?? '',
-      brandPerception: draft.expectedOutcomes?.brandPerception ?? '',
-
-      // Audience (Assuming structure is correct for now)
-      audience: {
-        ageRangeMin: 18,
-        ageRangeMax: 65,
-        keywords: draft.targeting?.keywords ?? [],
-        interests: draft.targeting?.interests ?? [],
-        age1824: 0,
-        age2534: 0,
-        age3544: 0,
-        age4554: 0,
-        age5564: 0,
-        age65plus: 0,
-        competitors: draft.competitors?.map(name => ({ name })) ?? [],
-        gender: draft.demographics?.genders?.map(g => ({ gender: g, proportion: 0 })) ?? [],
-        languages: draft.demographics?.languages?.map(lang => ({ language: lang })) ?? [],
-        geographicSpread:
-          draft.locations?.map(loc => ({
-            country: loc.country ?? '',
-            proportion: 0,
-          })) ?? [],
-        screeningQuestions: [],
-      },
-
-      // Creatives - Align with FRONTEND schema (SubmissionPayloadSchema in types.ts)
-      creativeAssets:
-        draft.assets?.map(asset => ({
-          name: asset.name ?? asset.fileName ?? 'Untitled Asset', // Explicitly add name
-          description: asset.description ?? '',
-          url: asset.url ?? '',
-          type: asset.type === 'video' ? 'video' : 'image', // Use lowercase type
-        })) ?? [],
-      creativeRequirements:
-        draft.requirements?.map(req => ({
-          description: req.description ?? '',
-          mandatory: req.mandatory ?? false,
-        })) ?? [],
-
-      submissionStatus: 'submitted',
-    };
-
-    // --- TEMPORARILY BYPASSING FRONTEND VALIDATION ---
-    // const result = SubmissionPayloadSchema.safeParse(payload);
-    // if (!result.success) {
-    //     console.error("Submission Payload Validation Error:", result.error.errors);
-    //     const errorMessages = result.error.errors.map(e => {
-    //         const field = e.path.join('.');
-    //         if (e.code === z.ZodIssueCode.invalid_type && e.path.length > 0) {
-    //             return `${field}: Invalid type provided (expected ${e.expected}, received ${e.received})`;
-    //         }
-    //         if (e.message && field) {
-    //             return `${field}: ${e.message}`;
-    //         }
-    //         return e.message; // Fallback to default message
-    //     }).filter(Boolean).join('; \n');
-    //     const finalMessage = `Submission data is invalid. Please review the following: \n${errorMessages}`;
-    //     toast.error(finalMessage, { duration: 8000 });
-    //     setSubmitError("Validation failed. Check highlighted fields or previous steps.");
-    //     return null; // Indicate failure
-    // }
-    // console.log("Submission Payload Validated Successfully:", result.data);
-    // return result.data; // Return the validated data
-    // --- END TEMPORARY BYPASS ---
-
-    console.log('Submission Payload (Frontend Validation Bypassed):', payload);
-    // Directly return the constructed payload without frontend validation
-    return payload as SubmissionPayloadData; // Cast as SubmissionPayloadData for type consistency downstream
-  }, [wizard.wizardState]);
-
   // Submit Handler (Uses validated payload)
   const onSubmit: SubmitHandler<ConfirmationFormData> = async formData => {
     if (!formData.confirm) {
@@ -440,79 +308,45 @@ function Step5Content() {
     setIsSubmitting(true);
     setSubmitError(null);
 
-    const finalPayload = prepareSubmissionPayload();
+    // --- REVISED LOGIC ---
+    // Instead of preparing a full submission payload for POST,
+    // we prepare a smaller payload for PATCH via saveProgress.
+    const payload: Partial<DraftCampaignData> = {
+      currentStep: 5,
+      status: StatusEnum.Values.IN_REVIEW, // Set desired final status (e.g., IN_REVIEW)
+      isComplete: true, // Mark the campaign as complete
+      // We don't need to resend all previous step data,
+      // the PATCH endpoint for step 5 should only handle status/completion update.
+    };
 
-    if (!finalPayload) {
-      setIsSubmitting(false);
-      // Validation errors already shown by prepareSubmissionPayload
-      return;
-    }
-
-    // Create a separate payload for the backend, transforming as needed
-    const payloadForBackend = JSON.parse(JSON.stringify(finalPayload)); // Deep copy
-
-    // Rename campaignName to name for backend
-    payloadForBackend.name = payloadForBackend.campaignName;
-    delete payloadForBackend.campaignName;
-
-    // Map creative assets separately for backend format
-    payloadForBackend.creativeAssets = payloadForBackend.creativeAssets?.map((asset: unknown) => {
-      // Changed any to unknown
-      const description =
-        typeof asset === 'object' && asset !== null && 'description' in asset
-          ? asset.description
-          : '';
-      const url = typeof asset === 'object' && asset !== null && 'url' in asset ? asset.url : '';
-      const type =
-        typeof asset === 'object' && asset !== null && 'type' in asset ? asset.type : 'image';
-
-      return {
-        description: String(description),
-        url: String(url),
-        type: String(type)?.toUpperCase() === 'VIDEO' ? 'VIDEO' : 'IMAGE',
-      };
-    });
-
-    console.log('Submitting transformed payload to /api/campaigns:', payloadForBackend);
+    console.log('[Step 5] Payload prepared for final submission (PATCH):', payload);
 
     try {
-      const response = await fetch('/api/campaigns', {
-        // POST to create submission
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payloadForBackend), // Send transformed payload
-      });
-      const result = await response.json(); // Try to parse JSON regardless of status
+      const saveSuccess = await wizard.saveProgress(payload); // Use saveProgress for PATCH
 
-      if (!response.ok) {
-        // Use error from JSON response if available, otherwise status text
-        throw new Error(
-          result?.error || result?.message || `API Error: ${response.status} ${response.statusText}`
+      if (saveSuccess) {
+        toast.success('Campaign submitted successfully!');
+        console.log(
+          '[Step5Content] Submission save successful. Attempting to navigate to submission page...'
         );
-      }
-
-      toast.success('Campaign submitted successfully!');
-      // TODO: Implement clearWizardState in context if needed
-      // wizard.clearWizardState();
-      // --- Ensure correct navigation target ---
-      console.log(
-        '[Step5Content] Submission successful. Attempting to navigate to submission page...'
-      );
-      if (wizard.campaignId) {
-        router.push(`/campaigns/wizard/submission?id=${wizard.campaignId}`); // Correct destination
-        console.log('[Step5Content] Navigation to /campaigns/wizard/submission initiated.');
+        if (wizard.campaignId) {
+          // Navigate to a confirmation/summary page (adjust URL if needed)
+          router.push(`/campaigns/wizard/submission?id=${wizard.campaignId}`);
+          console.log('[Step5Content] Navigation to /campaigns/wizard/submission initiated.');
+        } else {
+          console.error(
+            'Navigation to submission page failed: Campaign ID missing after successful submission.'
+          );
+          toast.error('Could not display submission confirmation (missing ID).');
+          router.push('/dashboard?submission=success'); // Fallback
+        }
       } else {
-        console.error(
-          'Navigation to submission page failed: Campaign ID missing after successful submission.'
-        );
-        toast.error('Could not display submission confirmation (missing ID).');
-        // Fallback to dashboard if ID is somehow missing
-        router.push('/dashboard?submission=success');
+        // saveProgress already shows specific errors via toast
+        setSubmitError('Failed to submit campaign. Please try again.');
       }
     } catch (err: unknown) {
-      // Changed any to unknown
       console.error('Submission Error:', err);
-      const message = err instanceof Error ? err.message : 'Failed to submit campaign.'; // Added instanceof check
+      const message = err instanceof Error ? err.message : 'Failed to submit campaign.';
       setSubmitError(message);
       toast.error(message);
     } finally {

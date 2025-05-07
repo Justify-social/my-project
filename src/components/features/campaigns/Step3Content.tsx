@@ -130,14 +130,22 @@ function Step3Content() {
       targeting: data.targeting,
       competitors: data.competitors,
       step3Complete: true,
-      currentStep: 4,
+      currentStep: 3,
     };
-    wizard.updateWizardState(payload);
-    const saved = await wizard.saveProgress(payload);
+    // wizard.updateWizardState(payload); // Commented out immediate state update
+
+    // Log the payload being sent when clicking Next
+    console.log(
+      '[Step 3] Payload prepared for onSubmitAndNavigate, sending to saveProgress:',
+      payload
+    );
+
+    const saved = await wizard.saveProgress(payload); // Save Step 3 data first
     if (saved) {
+      // Only navigate AFTER successful save
       form.reset(data, { keepValues: true, keepDirty: false });
       if (wizard.campaignId) {
-        router.push(`/campaigns/wizard/step-4?id=${wizard.campaignId}`);
+        router.push(`/campaigns/wizard/step-4?id=${wizard.campaignId}`); // Navigate to Step 4
       } else {
         toast.error('Could not navigate: campaign ID not found.');
       }
@@ -156,7 +164,7 @@ function Step3Content() {
       return false;
     }
     const data = form.getValues();
-    console.log('[Step 3] Form data is valid for manual save.');
+    console.log('[Step 3] Form data is valid for manual save.', data);
 
     // Prepare payload, keeping currentStep as 3
     const payload: Partial<DraftCampaignData> = {
@@ -168,7 +176,7 @@ function Step3Content() {
       currentStep: 3,
     };
 
-    console.log('[Step 3] Payload prepared for manual save:', payload);
+    console.log('[Step 3] Payload prepared for manual save, sending to saveProgress:', payload);
 
     try {
       // Only call saveProgress, do not update local state or navigate

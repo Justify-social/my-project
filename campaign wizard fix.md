@@ -136,3 +136,45 @@ src/
 ```
 
 ---
+
+## 5. Resolution Attempt for P2025 Error (Connecting User to CampaignWizard)
+
+**Refined Understanding of P2025 Error:**
+
+The `PrismaClientKnownRequestError (P2025): No 'User' record(s) found for a nested connect on 'CampaignWizardToUser'` was occurring despite attempts to connect via `clerkId`. The root cause was identified as a mismatch between how the relationship was being established in the API and how the Prisma schema defines the foreign key relationship.
+
+- **Schema Definition (`config/prisma/schema.prisma`):**
+
+  - `CampaignWizard.userId` is a foreign key referencing `User.id` (a UUID).
+  - `User.clerkId` is a separate unique field storing the Clerk user ID.
+
+- **Previous API Logic Issue:** The API was using a nested write (`user: { connect: { clerkId: clerkAuthId } }`) when creating a `CampaignWizard`. While this aimed to link to the correct user, it wasn't the most direct way to ensure the `CampaignWizard.userId` (UUID) field was correctly populated with the `User.id` (UUID).
+
+**Implemented Solution in API (`src/app/api/campaigns/route.ts`):**
+
+To resolve this, the `POST` handler in `src/app/api/campaigns/route.ts` was modified to:
+
+1.  Retrieve the `clerkUserId` from `auth()`.
+2.  **Explicitly query the `User` table** to find the corresponding user record using this `clerkUserId`:
+    ```typescript
+    const userRecord = await prisma.user.findUnique({
+      where: { clerkId: clerkUserId },
+      select: { id: true }, // Select the internal UUID
+    });
+    ```
+3.  If `userRecord` is not found (i.e., no user in the DB has a `clerkId` matching the one from auth), throw a `NotFoundError`.
+4.  Extract the `User.id` (the UUID) from `userRecord` (e.g., into an `internalUserId` variable).
+5.  **Directly assign this `internalUserId` (UUID) to the `userId` field** when preparing the data for `prisma.campaignWizard.create()`:
+    ```typescript
+    const dbData = {
+      // ... other campaign fields
+      userId: internalUserId, // Assign the User's UUID directly
+    };
+    ```
+6.  The nested `connect` logic (`user: { connect: { ... } }`) was removed from the `CampaignWizard` creation data.
+
+**Critical Prerequisite for this Fix:**
+
+- For the `prisma.user.findUnique({ where: { clerkId: clerkUserId }})` lookup to succeed, the `clerkUserId` obtained from the authenticated session **must exactly match** the `clerkId` value stored in the `User` table for the intended user. If these IDs are different (as was observed in previous debugging steps, e.g., API showing `user_2wmall0BGwTAXMGXvqKLPWrJf3I` while DB had `user_2wma1mjMbkD65q5R...`), this lookup will fail, and the campaign creation will be blocked with a "User record not found" error. This ID discrepancy must be resolved at its source (e.g., by ensuring the correct Clerk ID is synced to the database for the user).
+
+---

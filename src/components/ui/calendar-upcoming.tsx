@@ -23,6 +23,8 @@ import {
   endOfDay,
   addMonths,
   subMonths,
+  isSameMonth,
+  isSameYear,
 } from 'date-fns';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import Image from 'next/image';
@@ -209,13 +211,19 @@ export function CalendarUpcoming({
                     className="text-xs max-w-[300px] z-50 bg-background text-foreground border shadow-md rounded-md p-3"
                   >
                     <p className="font-semibold mb-1 text-primary">{event.title}</p>
-                    {/* Format date range (Date only) */}
-                    <p className="text-muted-foreground text-xs mb-2">
-                      {format(eventStart, 'MMM d, yyyy')}
-                      {event.end &&
-                        !isSameDay(eventStart, eventEnd) &&
-                        ` - ${format(eventEnd, 'MMM d, yyyy')}`}
-                    </p>
+                    {/* Updated date display for clarity and format */}
+                    <div className="text-muted-foreground text-xs mb-2">
+                      <span className="font-medium">Campaign Duration: </span>
+                      {
+                        isSameDay(eventStart, eventEnd)
+                          ? format(eventStart, 'MMM d, yyyy') // e.g., May 7, 2025
+                          : isSameMonth(eventStart, eventEnd) && isSameYear(eventStart, eventEnd)
+                            ? `${format(eventStart, 'MMM d')} - ${format(eventEnd, 'd, yyyy')}` // e.g., May 7 - 14, 2025
+                            : isSameYear(eventStart, eventEnd)
+                              ? `${format(eventStart, 'MMM d')} - ${format(eventEnd, 'MMM d, yyyy')}` // e.g., May 7 - Jun 14, 2025
+                              : `${format(eventStart, 'MMM d, yyyy')} - ${format(eventEnd, 'MMM d, yyyy')}` // e.g., Dec 7, 2024 - Jan 5, 2025
+                      }
+                    </div>
                     {/* Grid Container for Details */}
                     <div className="grid grid-cols-[auto_1fr] gap-x-1.5 gap-y-1.5">
                       {' '}

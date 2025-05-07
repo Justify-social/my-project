@@ -13,7 +13,7 @@
 'use client';
 
 import React from 'react';
-import { format } from 'date-fns';
+import { format, isSameDay, isSameMonth, isSameYear } from 'date-fns';
 import Link from 'next/link'; // Import Link from Next.js
 import { cn } from '@/lib/utils';
 import {
@@ -24,7 +24,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Icon } from '@/components/ui/icon/icon'; // Assuming Icon component is available
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'; // Import Tooltip components
@@ -51,24 +50,28 @@ export interface UpcomingCampaignsTableProps {
   onRowClick?: (campaignId: string | number) => void;
 }
 
-// Helper function to determine Badge variant based on status
-const getStatusVariant = (status?: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
-  switch (status?.toLowerCase()) {
-    case 'live':
+// Added getStatusInfo function (logic copied from campaigns/page.tsx)
+// TODO: Consider moving this to a shared util file
+const getStatusInfo = (status: string | null | undefined) => {
+  const normalizedStatus = (status || '').toLowerCase();
+  switch (normalizedStatus) {
+    case 'approved':
+      return { class: 'bg-green-100 text-green-800', text: 'Approved' };
     case 'active':
-    case 'completed':
-      return 'default'; // Use primary color for active/complete
-    case 'scheduled':
-    case 'confirmed':
-      return 'secondary'; // Use secondary for scheduled
+      return { class: 'bg-green-100 text-green-800', text: 'Active' };
+    case 'in_review':
+      return { class: 'bg-yellow-100 text-yellow-800', text: 'In Review' };
     case 'draft':
-    case 'planning':
-      return 'outline'; // Use outline for planning/drafts
-    case 'paused':
-    case 'error':
-      return 'destructive'; // Use destructive for paused/errors
+      return { class: 'bg-gray-100 text-gray-800', text: 'Draft' };
+    case 'completed':
+      return { class: 'bg-blue-100 text-blue-800', text: 'Completed' };
+    case 'paused': // Assuming style for paused
+      return { class: 'bg-red-100 text-red-800', text: 'Paused' };
     default:
-      return 'outline';
+      const defaultText = status
+        ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
+        : 'Unknown';
+      return { class: 'bg-gray-100 text-gray-800', text: defaultText };
   }
 };
 
@@ -93,13 +96,44 @@ export function UpcomingCampaignsTable({
     });
   };
 
-  // Helper to format dates
+  // Helper to format single dates (remains for tooltip or single date display)
   const formatDate = (date?: Date) => {
     if (!date) return '-';
     try {
       return format(date, 'MMM dd, yyyy');
     } catch {
       return 'Invalid Date';
+    }
+  };
+
+  // New helper to format campaign duration
+  const formatCampaignDuration = (startDate?: Date, endDate?: Date): string => {
+    if (!startDate) return '-';
+
+    const startFormatted = format(startDate, 'MMM d');
+    const startYearFormatted = format(startDate, 'yyyy');
+    const startFullFormatted = format(startDate, 'MMM d, yyyy');
+
+    if (!endDate || isSameDay(startDate, endDate)) {
+      return startFullFormatted;
+    }
+
+    const endFormatted = format(endDate, 'd');
+    const endMonthFormatted = format(endDate, 'MMM d');
+    const endYearFormatted = format(endDate, 'yyyy');
+    const endFullFormatted = format(endDate, 'MMM d, yyyy');
+
+    if (isSameYear(startDate, endDate)) {
+      if (isSameMonth(startDate, endDate)) {
+        // Same month and year: May 7 - 14, 2025
+        return `${startFormatted} - ${endFormatted}, ${startYearFormatted}`;
+      } else {
+        // Different months, same year: May 7 - Jun 14, 2025
+        return `${startFormatted} - ${endMonthFormatted}, ${startYearFormatted}`;
+      }
+    } else {
+      // Different years: Dec 28, 2024 - Jan 5, 2025
+      return `${startFullFormatted} - ${endFullFormatted}`;
     }
   };
 
@@ -115,7 +149,7 @@ export function UpcomingCampaignsTable({
   };
 
   // Determine the number of columns for the empty state cell
-  const columnCount = 7; // Campaign, Platform, Influencer, Budget, Start Date, End Date, Status
+  const columnCount = 5; // Campaign, Status, Influencer, Budget, Date (Platform removed, Dates combined)
 
   return (
     <TooltipProvider>
@@ -124,12 +158,10 @@ export function UpcomingCampaignsTable({
           <TableHeader>
             <TableRow>
               <TableHead>Campaign</TableHead>
-              <TableHead>Platform</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead>Influencer</TableHead>
               <TableHead className="text-right">Budget</TableHead>
-              <TableHead>Start Date</TableHead>
-              <TableHead>End Date</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead>Campaign Duration</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -144,93 +176,96 @@ export function UpcomingCampaignsTable({
                 </TableCell>
               </TableRow>
             ) : (
-              campaigns.map(campaign => (
-                <TableRow
-                  key={campaign.id}
-                  className={
-                    onRowClick && !campaign.title
-                      ? 'cursor-pointer hover:bg-muted/50'
-                      : 'hover:bg-muted/50'
-                  }
-                >
-                  <TableCell className="font-medium">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Link
-                          href={`/campaigns/${campaign.id}`}
-                          className="hover:underline text-accent"
-                        >
-                          {campaign.title}
-                        </Link>
-                      </TooltipTrigger>
-                      <TooltipContent className="w-64 p-3 text-sm">
-                        <div className="space-y-1.5">
-                          <p className="font-semibold text-base mb-1">{campaign.title}</p>
-                          <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1">
-                            <span className="font-medium text-muted-foreground">Platform:</span>
-                            <span>{campaign.platform || 'N/A'}</span>
-                            <span className="font-medium text-muted-foreground">Status:</span>
-                            <span>{campaign.status || 'N/A'}</span>
-                            <span className="font-medium text-muted-foreground">Start:</span>
-                            <span>{formatDate(campaign.startDate)}</span>
-                            <span className="font-medium text-muted-foreground">End:</span>
-                            <span>{campaign.endDate ? formatDate(campaign.endDate) : 'N/A'}</span>
-                            <span className="font-medium text-muted-foreground">Budget:</span>
-                            <span>{formatCurrency(campaign.budget)}</span>
-                            <span className="font-medium text-muted-foreground">Influencer:</span>
-                            <span>{campaign.influencer?.name || 'N/A'}</span>
-                          </div>
-                        </div>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TableCell>
-                  <TableCell>
-                    {campaign.platform ? (
-                      <span className="flex items-center">
-                        {platformIconMap[campaign.platform.toLowerCase()] && (
+              campaigns.map(campaign => {
+                const statusInfo = getStatusInfo(campaign.status);
+                return (
+                  <TableRow
+                    key={campaign.id}
+                    className={
+                      onRowClick && !campaign.title
+                        ? 'cursor-pointer hover:bg-muted/50'
+                        : 'hover:bg-muted/50'
+                    }
+                  >
+                    <TableCell className="font-medium">
+                      <div className="flex items-center space-x-2">
+                        {campaign.platform && platformIconMap[campaign.platform.toLowerCase()] && (
                           <Icon
                             iconId={platformIconMap[campaign.platform.toLowerCase()]}
-                            className="mr-1.5 h-4 w-4 text-muted-foreground"
+                            className="h-4 w-4 text-muted-foreground flex-shrink-0"
                           />
                         )}
-                        <span className="text-sm">{campaign.platform}</span>
-                      </span>
-                    ) : (
-                      '-'
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {campaign.influencer ? (
-                      <div className="flex items-center space-x-2">
-                        <Avatar className="h-6 w-6">
-                          <AvatarImage
-                            src={campaign.influencer.image}
-                            alt={campaign.influencer.name}
-                          />
-                          <AvatarFallback className="text-xs">
-                            {campaign.influencer.name.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span>{campaign.influencer.name}</span>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Link
+                              href={`/campaigns/${campaign.id}`}
+                              className="hover:underline text-accent"
+                            >
+                              {campaign.title}
+                            </Link>
+                          </TooltipTrigger>
+                          <TooltipContent className="w-64 p-3 text-sm">
+                            <div className="space-y-1.5">
+                              <p className="font-semibold text-base mb-1">{campaign.title}</p>
+                              <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1">
+                                <span className="font-medium text-muted-foreground">Platform:</span>
+                                <span>{campaign.platform || 'N/A'}</span>
+                                <span className="font-medium text-muted-foreground">Status:</span>
+                                <span>{statusInfo.text || 'N/A'}</span>
+                                <span className="font-medium text-muted-foreground">Duration:</span>
+                                <span>
+                                  {formatCampaignDuration(campaign.startDate, campaign.endDate)}
+                                </span>
+                                <span className="font-medium text-muted-foreground">Budget:</span>
+                                <span>{formatCurrency(campaign.budget)}</span>
+                                <span className="font-medium text-muted-foreground">
+                                  Influencer:
+                                </span>
+                                <span>{campaign.influencer?.name || 'N/A'}</span>
+                              </div>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
                       </div>
-                    ) : (
-                      '-'
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right">{formatCurrency(campaign.budget)}</TableCell>
-                  <TableCell>{formatDate(campaign.startDate)}</TableCell>
-                  <TableCell>{formatDate(campaign.endDate)}</TableCell>
-                  <TableCell>
-                    {campaign.status ? (
-                      <Badge variant={getStatusVariant(campaign.status)} className="text-xs">
-                        {campaign.status}
-                      </Badge>
-                    ) : (
-                      '-'
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))
+                    </TableCell>
+                    <TableCell>
+                      {' '}
+                      {/* Status cell - Use getStatusInfo */}
+                      {campaign.status ? (
+                        <span
+                          className={`px-2 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${statusInfo.class}`}
+                        >
+                          {statusInfo.text}
+                        </span>
+                      ) : (
+                        '-'
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {campaign.influencer ? (
+                        <div className="flex items-center space-x-2">
+                          <Avatar className="h-6 w-6">
+                            <AvatarImage
+                              src={campaign.influencer.image}
+                              alt={campaign.influencer.name}
+                            />
+                            <AvatarFallback className="text-xs">
+                              {campaign.influencer.name.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span>{campaign.influencer.name}</span>
+                        </div>
+                      ) : (
+                        '-'
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">{formatCurrency(campaign.budget)}</TableCell>
+                    <TableCell>
+                      {formatCampaignDuration(campaign.startDate, campaign.endDate)}
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>

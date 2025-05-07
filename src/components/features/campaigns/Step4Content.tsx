@@ -134,48 +134,39 @@ function Step4Content() {
   };
   // Combined Save & Next handler
   const onSubmitAndNavigate = async () => {
+    const isValid = await form.trigger();
+    if (!isValid) {
+      toast.error('Please fix the errors before proceeding.');
+      return;
+    }
     const data = form.getValues();
     const payload: Partial<DraftCampaignData> = {
       assets: data.assets,
-      // Remove deprecated fields
-      // guidelines: data.guidelines,
-      // requirements: data.requirements,
-      // notes: data.notes,
-      step4Complete: true, // Mark step 4 as complete
-      currentStep: 5,
+      guidelines: data.guidelines,
+      requirements: data.requirements,
+      notes: data.notes,
+      step4Complete: true,
+      currentStep: 4,
     };
-    // Update the centralized wizard state (SSOT)
-    wizard.updateWizardState(payload);
-    try {
-      // Attempt to save progress, but don't block navigation if it fails
-      const saved = await wizard.saveProgress(payload);
-      if (saved) {
-        form.reset(data, { keepValues: true, keepDirty: false });
-        console.log('Progress saved successfully, navigating to Step 5.');
-      } else {
-        console.error(
-          'Failed to save progress, but proceeding with navigation to maintain user flow.'
-        );
-        toast('Progress not saved, but proceeding to next step. Changes may not persist.', {
-          icon: '⚠️',
-        });
-      }
-      // Navigate to Step 5 regardless of save success, as state is updated locally in WizardContext
+    // wizard.updateWizardState(payload); // Commented out immediate state update
+
+    // Log the payload being sent when clicking Next
+    console.log(
+      '[Step 4] Payload prepared for onSubmitAndNavigate, sending to saveProgress:',
+      payload
+    );
+
+    const saved = await wizard.saveProgress(payload); // Save Step 4 data first
+    if (saved) {
+      // Only navigate AFTER successful save
+      form.reset(data, { keepValues: true, keepDirty: false });
       if (wizard.campaignId) {
-        router.push(`/campaigns/wizard/step-5?id=${wizard.campaignId}`);
-      } else {
-        console.error('Navigation failed: Campaign ID not found.');
-        toast.error('Could not navigate: campaign ID not found.');
-      }
-    } catch (error) {
-      console.error('Error during save and navigation:', error);
-      toast.error('An error occurred while saving progress.');
-      // Fallback navigation in case of error, ensuring user can proceed
-      if (wizard.campaignId) {
-        router.push(`/campaigns/wizard/step-5?id=${wizard.campaignId}`);
+        router.push(`/campaigns/wizard/step-5?id=${wizard.campaignId}`); // Navigate to Step 5
       } else {
         toast.error('Could not navigate: campaign ID not found.');
       }
+    } else {
+      toast.error('Failed to save progress before navigating.');
     }
   };
 
@@ -225,9 +216,17 @@ function Step4Content() {
   };
 
   // Render Logic
+  // Removed internal loading check
+  /*
   if (wizard.isLoading && !wizard.wizardState && wizard.campaignId) {
-    // Revert to using LoadingSkeleton
     return <LoadingSkeleton />;
+  }
+  */
+
+  // Add null check for wizardState
+  if (!wizard.wizardState) {
+    console.warn('[Step4Content] Wizard state is null during render.');
+    return null; // Or a basic placeholder
   }
 
   return (

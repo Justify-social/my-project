@@ -352,14 +352,7 @@ const queryParamsSchema = z.object({
 
 // Schema for query params for listing campaigns, specifically for Brand Lift use case
 const listCampaignsQuerySchema = z.object({
-  status: z
-    .nativeEnum(SubmissionStatus)
-    .optional()
-    // .refine(val => val === SubmissionStatus.submitted || val === undefined, {
-    //   message: "Status must be 'submitted' (mapped from COMPLETED concept) or omitted.",
-    //   // Defaulting to submitted as the likely equivalent of a completed campaign wizard
-    // })
-    .default(SubmissionStatus.submitted),
+  status: z.nativeEnum(SubmissionStatus).optional(),
   // Removed user_accessible as orgId check handles this
 });
 
@@ -379,25 +372,53 @@ export const GET = async (req: NextRequest) => {
     }
 
     const searchParams = req.nextUrl.searchParams;
-    const parsedParams = listCampaignsQuerySchema.safeParse({
-      status:
-        searchParams.get('status')?.toLowerCase() === 'completed'
-          ? SubmissionStatus.submitted
-          : (searchParams.get('status') ?? undefined),
-    });
+    const statusParam = searchParams.get('status'); // This will be null if no param is sent
+
+    // Prepare the object for Zod parsing.
+    // If statusParam is null, objectToParse will be {}, and .optional() in Zod will handle it.
+    // If statusParam is a string, it will be included for validation against the enum.
+    const objectToParse: { status?: string } = {}; // Zod will validate if this string is part of the enum
+
+    if (statusParam !== null) {
+      // Only if status query param is present
+      if (statusParam.toLowerCase() === 'completed') {
+        // Assuming SubmissionStatus.submitted is the string value like 'submitted'
+        objectToParse.status = SubmissionStatus.submitted;
+      } else {
+        // For any other status string, pass it as is.
+        // z.nativeEnum(SubmissionStatus) will validate if it's a correct enum string e.g. "draft".
+        // If statusParam is "foo", Zod will correctly reject it.
+        objectToParse.status = statusParam;
+      }
+    }
+    // If statusParam is null, objectToParse remains {}.
+    // safeParse({}) on a schema with an optional status field will result in data.status being undefined.
+
+    const parsedParams = listCampaignsQuerySchema.safeParse(objectToParse);
 
     if (!parsedParams.success) {
-      throw parsedParams.error; // ZodError handled by handleApiError
+      // Log the actual Zod error for better debugging
+      logger.warn('API Zod Validation Error', {
+        errors: parsedParams.error.format(), // Use .format() for readable errors
+        method: req.method,
+        url: req.url,
+        statusCode: 400, // Keep for logging, handleApiError will set response status
+      });
+      // Throw the Zod error directly. handleApiError will format it for the response.
+      throw parsedParams.error;
     }
 
-    const { status: validatedStatus } = parsedParams.data;
+    const { status: validatedStatus } = parsedParams.data; // validatedStatus will be undefined if no statusParam was provided
 
     const whereClause: Prisma.CampaignWizardSubmissionWhereInput = {
-      userId: userId,
-      submissionStatus: validatedStatus,
+      userId: userId, // Assuming userId should always be part of the clause for security/data scoping
     };
 
-    logger.info('Fetching completed campaigns (submissions) for Brand Lift', {
+    if (validatedStatus) {
+      whereClause.submissionStatus = validatedStatus;
+    }
+
+    logger.info('Fetching campaigns for Brand Lift', {
       userId,
       whereClause,
     });
@@ -456,22 +477,41 @@ export const POST = async (request: NextRequest) => {
       );
     }
     const data = validationResult.data; // This is the validated data
+    logger.info('Campaign POST: Validated request body', { data });
     // --- End: Inlined withValidation logic ---
 
     // --- Start: Original postCampaignsHandler logic ---
-    const { userId, orgId } = await auth();
-    if (!userId) {
+    const { userId: clerkUserId, orgId } = await auth(); // Renamed to clerkUserId for clarity
+    logger.info('Campaign POST: Auth details', { clerkUserId, orgId });
+
+    if (!clerkUserId) {
       return NextResponse.json({ error: 'Authentication required for POST' }, { status: 401 });
     }
-    if (!orgId) {
-      throw new ForbiddenError('Organization membership required to create campaigns.');
-    }
 
-    logger.info('Campaign POST: Creating campaign', { userId, orgId, campaignName: data.name });
+    // Fetch the internal User record using the clerkUserId
+    const userRecord = await prisma.user.findUnique({
+      where: { clerkId: clerkUserId },
+      select: { id: true }, // We only need the internal UUID (id)
+    });
+
+    if (!userRecord) {
+      logger.error('Campaign POST: No User record found for clerkUserId', { clerkUserId });
+      throw new NotFoundError('User record not found. Cannot create campaign.');
+    }
+    const internalUserId = userRecord.id; // This is the UUID
+    logger.info('Campaign POST: Found internal User ID', { internalUserId, clerkUserId });
+
+    logger.info('Campaign POST: Creating campaign', {
+      internalUserId,
+      orgId,
+      campaignName: data.name,
+    });
 
     // Import the EnumTransformers utility
     const { EnumTransformers } = await import('@/utils/enum-transformers');
     const transformedData = EnumTransformers.transformObjectToBackend(data);
+    logger.info('Campaign POST: Transformed data for backend', { transformedData });
+
     const budgetData = transformedData.budget || { total: 0, currency: 'USD', socialMedia: 0 };
     const primaryContactJson = transformedData.primaryContact
       ? JSON.stringify(transformedData.primaryContact)
@@ -511,8 +551,9 @@ export const POST = async (request: NextRequest) => {
       isComplete: false,
       currentStep: 1,
       updatedAt: new Date(),
-      user: userId ? { connect: { id: userId } } : undefined,
+      userId: internalUserId, // NEW WAY: Directly set the foreign key
     };
+    logger.info('Campaign POST: Data prepared for DB create', { dbData });
 
     const campaign = await prisma.$transaction(async tx => {
       const newCampaign = await tx.campaignWizard.create({
@@ -608,21 +649,21 @@ export const PATCH = async (request: NextRequest) => {
       );
     }
     const data = validationResult.data; // This is the validated data (includes id)
+    logger.info('Campaign PATCH: Validated request body', { data });
     // --- End: Inlined withValidation logic ---
 
     // --- Start: Original patchCampaignHandler logic ---
     const { userId, orgId } = await auth();
+    logger.info('Campaign PATCH: Auth details', { userId, orgId });
+
     if (!userId) {
       return NextResponse.json({ error: 'Authentication required for PATCH' }, { status: 401 });
-    }
-    if (!orgId) {
-      throw new ForbiddenError('Organization membership required to update campaigns.');
     }
 
     const { id, ...updateData } = data;
     // TODO: Check if updateData is empty after extracting id?
 
-    logger.info('Campaign PATCH: Updating campaign', { userId, orgId, campaignId: id });
+    logger.info('Campaign PATCH: Updating campaign', { userId, orgId, campaignId: id, updateData });
 
     // Authorization: Check if user/org has permission to update this campaignId
     const existingCampaign = await prisma.campaignWizard.findFirst({ where: { id, userId } }); // Check if campaign exists and belongs to user

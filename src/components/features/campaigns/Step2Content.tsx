@@ -233,8 +233,20 @@ function Step2Content() {
   // Removed unused onSubmit function
 
   // --- Render Logic ---
+  // Removed internal loading check
+  /* 
   if (wizard.isLoading && !wizard.wizardState && wizard.campaignId) {
     return <LoadingSkeleton />;
+  }
+  */
+
+  // Handle case where wizardState might still be null briefly after loading
+  // or if campaignId was invalid - though WizardProvider might handle this upstream.
+  // A simple check here prevents errors accessing wizardState properties.
+  if (!wizard.wizardState) {
+    // Optionally return a minimal skeleton or null, or rely on parent handling
+    console.warn('[Step2Content] Wizard state is null during render.');
+    return null; // Or return a basic placeholder
   }
 
   // Watch necessary values for conditional rendering
@@ -267,22 +279,26 @@ function Step2Content() {
     const payload: Partial<DraftCampaignData> = {
       primaryKPI: data.primaryKPI,
       secondaryKPIs: data.secondaryKPIs,
-      messaging: {
-        mainMessage: data.messaging?.mainMessage,
-        hashtags: data.messaging?.hashtags ?? [],
-        keyBenefits: data.messaging?.keyBenefits,
-      },
+      messaging: data.messaging,
       expectedOutcomes: data.expectedOutcomes,
       features: data.features,
       step2Complete: true,
-      currentStep: 3,
+      currentStep: 2,
     };
-    wizard.updateWizardState(payload);
-    const saved = await wizard.saveProgress(payload);
+    // wizard.updateWizardState(payload); // Commented out immediate state update
+
+    // Log the payload being sent when clicking Next
+    console.log(
+      '[Step 2] Payload prepared for onSubmitAndNavigate, sending to saveProgress:',
+      payload
+    );
+
+    const saved = await wizard.saveProgress(payload); // Save Step 2 data first
     if (saved) {
+      // Only navigate AFTER successful save
       form.reset(data, { keepValues: true, keepDirty: false });
       if (wizard.campaignId) {
-        router.push(`/campaigns/wizard/step-3?id=${wizard.campaignId}`);
+        router.push(`/campaigns/wizard/step-3?id=${wizard.campaignId}`); // Navigate to Step 3
       } else {
         toast.error('Could not navigate: campaign ID not found.');
       }

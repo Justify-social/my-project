@@ -431,6 +431,7 @@ export const SubmissionPayloadSchema = z
   .object({
     // Fields likely directly on CampaignWizardSubmission or Campaign model
     campaignName: z.string(),
+    brand: z.string().min(1, { message: 'Brand name is required for submission' }),
     businessGoal: z.string(),
     description: z.string(), // Matches businessGoal from draft?
     startDate: z.string(), // Expecting ISO date string? Needs backend verification.

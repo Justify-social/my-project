@@ -31,23 +31,42 @@ export type CampaignForList = Prisma.CampaignWizardGetPayload<{
  * Fetches all campaigns for a specific user.
  * TODO: Add filtering parameters (status, search, objective, dates) and pagination.
  */
-export async function getAllCampaignsForUser(userId: string): Promise<CampaignForList[]> {
-  logger.info(`Fetching all campaigns for user ${userId} from CampaignWizard`);
+export async function getAllCampaignsForUser(clerkUserId: string): Promise<CampaignForList[]> {
+  logger.info(`[getAllCampaignsForUser] Fetching for clerkUserId: ${clerkUserId}`);
   try {
+    // Fetch the internal User record using the clerkUserId
+    const userRecord = await prisma.user.findUnique({
+      where: { clerkId: clerkUserId },
+      select: { id: true }, // We only need the internal UUID (id)
+    });
+
+    if (!userRecord) {
+      logger.error('[getAllCampaignsForUser] No User record found for clerkUserId', {
+        clerkUserId,
+      });
+      return []; // Return empty if user not found in DB
+    }
+    const internalUserId = userRecord.id; // This is the UUID
+    logger.info('[getAllCampaignsForUser] Found internal User ID', { internalUserId, clerkUserId });
+
     const campaigns = await prisma.campaignWizard.findMany({
       where: {
-        userId: userId,
+        userId: internalUserId, // Use the internal UUID for the query
       },
       select: campaignWizardSelectForList,
       orderBy: {
         createdAt: 'desc',
       },
     });
+    logger.info(
+      `[getAllCampaignsForUser] Found ${campaigns.length} campaigns from DB query for internalUserId ${internalUserId}`
+    );
     return campaigns;
   } catch (error) {
-    logger.error(`Error fetching campaigns for user ${userId}:`, { error });
-    // It's often better to throw the error here to be handled by the API route
-    // rather than returning an empty array, so the caller knows something went wrong.
+    logger.error(
+      `[getAllCampaignsForUser] Error fetching campaigns for clerkUserId ${clerkUserId}:`,
+      { error }
+    );
     throw error;
   }
 }

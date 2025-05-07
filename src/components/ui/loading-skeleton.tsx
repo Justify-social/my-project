@@ -184,90 +184,244 @@ export function DashboardSkeleton({ className }: { className?: string }) {
   );
 }
 
+// Helper: Skeleton Card Structure
+const SkeletonCard: React.FC<{ children: React.ReactNode; className?: string }> = ({
+  children,
+  className,
+}) => (
+  <div className={cn('rounded-xl p-4 md:p-6 border border-border bg-card space-y-4', className)}>
+    {children}
+  </div>
+);
+
+// Helper: Skeleton Form Field
+const SkeletonField: React.FC<{ labelWidth?: string; inputHeight?: string }> = ({
+  labelWidth = 'w-32',
+  inputHeight = 'h-10',
+}) => (
+  <div className="space-y-2">
+    <Skeleton className={cn('h-4 rounded', labelWidth)} />
+    <Skeleton className={cn('w-full rounded border border-input', inputHeight, 'bg-transparent')} />
+  </div>
+);
+
+// Step 1: Basic Info, Contacts, Budget, Influencers
+const Step1SkeletonContent = () => (
+  <div className="space-y-6">
+    <SkeletonCard>
+      {' '}
+      {/* Basic Info */}
+      <Skeleton className="h-6 w-1/3 rounded mb-4" />
+      <SkeletonField labelWidth="w-1/4" />
+      <SkeletonField labelWidth="w-1/4" inputHeight="h-16" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <SkeletonField labelWidth="w-1/3" />
+        <SkeletonField labelWidth="w-1/3" />
+      </div>
+      <SkeletonField labelWidth="w-1/3" />
+    </SkeletonCard>
+    <SkeletonCard>
+      {' '}
+      {/* Contacts */}
+      <Skeleton className="h-6 w-1/4 rounded mb-4" />
+      <SkeletonField labelWidth="w-1/3" />
+      <SkeletonField labelWidth="w-1/3" />
+      <SkeletonField labelWidth="w-1/3" />
+    </SkeletonCard>
+    <SkeletonCard>
+      {' '}
+      {/* Budget */}
+      <Skeleton className="h-6 w-1/5 rounded mb-4" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <SkeletonField labelWidth="w-1/2" />
+        <SkeletonField labelWidth="w-1/2" />
+        <SkeletonField labelWidth="w-1/2" />
+      </div>
+    </SkeletonCard>
+    <SkeletonCard>
+      {' '}
+      {/* Influencers */}
+      <Skeleton className="h-6 w-1/4 rounded mb-4" />
+      <SkeletonField labelWidth="w-1/3" />
+      <Skeleton className="h-12 w-full rounded border border-input bg-transparent" />
+    </SkeletonCard>
+  </div>
+);
+
+// Step 2: KPIs, Messaging, Hypotheses, Features
+const Step2SkeletonContent = () => (
+  <div className="space-y-6">
+    <SkeletonCard>
+      {' '}
+      {/* KPIs */}
+      <Skeleton className="h-6 w-1/2 rounded mb-4" />
+      <TableSkeleton rows={5} columns={3} />
+      <Skeleton className="h-20 w-full rounded mt-4 bg-muted/50" /> {/* Summary Boxes */}
+    </SkeletonCard>
+    <SkeletonCard>
+      {' '}
+      {/* Messaging */}
+      <Skeleton className="h-6 w-1/3 rounded mb-4" />
+      <SkeletonField labelWidth="w-1/4" inputHeight="h-16" />
+      <SkeletonField labelWidth="w-1/4" />
+      <SkeletonField labelWidth="w-1/4" />
+    </SkeletonCard>
+    <SkeletonCard>
+      {' '}
+      {/* Hypotheses */}
+      <Skeleton className="h-6 w-2/5 rounded mb-4" />
+      <SkeletonField labelWidth="w-1/3" inputHeight="h-16" />
+      <SkeletonField labelWidth="w-1/3" inputHeight="h-16" />
+      <SkeletonField labelWidth="w-1/3" inputHeight="h-16" />
+    </SkeletonCard>
+    <SkeletonCard>
+      {' '}
+      {/* Features */}
+      <Skeleton className="h-6 w-1/3 rounded mb-4" />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Skeleton className="h-24 rounded border border-input bg-transparent" />
+        <Skeleton className="h-24 rounded border border-input bg-transparent" />
+        <Skeleton className="h-24 rounded border border-input bg-transparent" />
+        <Skeleton className="h-24 rounded border border-input bg-transparent" />
+      </div>
+    </SkeletonCard>
+  </div>
+);
+
+// Step 3: Demographics, Locations, Targeting, Competitors
+const Step3SkeletonContent = () => (
+  <div className="space-y-6">
+    <SkeletonCard>
+      {' '}
+      {/* Demographics */}
+      <Skeleton className="h-6 w-1/3 rounded mb-4" />
+      <Skeleton className="h-16 w-full rounded bg-muted/50 mb-4" /> {/* Age sliders */}
+      <Skeleton className="h-10 w-1/2 rounded bg-muted/50" /> {/* Gender selector */}
+    </SkeletonCard>
+    <SkeletonCard>
+      {' '}
+      {/* Locations */}
+      <Skeleton className="h-6 w-1/4 rounded mb-4" />
+      <SkeletonField labelWidth="w-1/3" />
+    </SkeletonCard>
+    <SkeletonCard>
+      {' '}
+      {/* Targeting */}
+      <Skeleton className="h-6 w-1/3 rounded mb-4" />
+      <SkeletonField labelWidth="w-1/4" />
+      <SkeletonField labelWidth="w-1/4" />
+      <SkeletonField labelWidth="w-1/4" />
+    </SkeletonCard>
+    <SkeletonCard>
+      {' '}
+      {/* Competitors */}
+      <Skeleton className="h-6 w-2/5 rounded mb-4" />
+      <SkeletonField labelWidth="w-1/3" />
+    </SkeletonCard>
+  </div>
+);
+
+// Step 4: Assets
+const Step4SkeletonContent = () => (
+  <div className="space-y-6">
+    <SkeletonCard>
+      {' '}
+      {/* Assets */}
+      <Skeleton className="h-6 w-1/3 rounded mb-2" />
+      <Skeleton className="h-4 w-full rounded mb-4" />
+      {/* File Uploader Area */}
+      <Skeleton className="h-32 w-full rounded border border-dashed border-input mb-4" />
+      {/* Asset Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <Skeleton className="h-48 rounded border border-input bg-transparent" />{' '}
+        {/* Mimic AssetCard */}
+        <Skeleton className="h-48 rounded border border-input bg-transparent" />
+        <Skeleton className="h-48 rounded border" /> {/* Mimic AssetCard */}
+        <Skeleton className="h-48 rounded border" />
+        <Skeleton className="h-48 rounded border" />
+        <Skeleton className="h-48 rounded border" />
+      </div>
+    </SkeletonCard>
+  </div>
+);
+
+// Step 5: Review Accordion + Confirmation
+const Step5SkeletonContent = () => (
+  <div className="space-y-4">
+    {/* Accordion items */}
+    <Skeleton className="h-16 w-full rounded border" />
+    <Skeleton className="h-16 w-full rounded border" />
+    <Skeleton className="h-16 w-full rounded border" />
+    <Skeleton className="h-16 w-full rounded border" />
+    {/* Confirmation Card */}
+    <SkeletonCard className="mt-6">
+      <Skeleton className="h-6 w-1/3 rounded mb-4" />
+      <div className="flex items-start space-x-3">
+        <Skeleton className="h-6 w-6 rounded" />
+        <div className="space-y-2 flex-1">
+          <Skeleton className="h-4 w-1/2 rounded" />
+          <Skeleton className="h-4 w-full rounded" />
+        </div>
+      </div>
+    </SkeletonCard>
+  </div>
+);
+
 /**
  * @component WizardSkeleton
  * @category organism
  * @subcategory loading
  * @description Displays a skeleton loading state for a multi-step wizard.
  */
-export function WizardSkeleton({
-  step = 1,
-  stepContent,
-  className,
-}: {
-  step?: number;
-  stepContent?: React.ReactNode;
-  className?: string;
-}) {
-  // Ensure step is within a reasonable range if needed (e.g., 1 to 5)
+export function WizardSkeleton({ step = 1, className }: { step?: number; className?: string }) {
   const normalizedStep = Math.max(1, Math.min(step, 5));
 
+  // Moved render function definition outside return
+  const renderStepContentSkeleton = () => {
+    switch (normalizedStep) {
+      case 1:
+        return <Step1SkeletonContent />;
+      case 2:
+        return <Step2SkeletonContent />;
+      case 3:
+        return <Step3SkeletonContent />;
+      case 4:
+        return <Step4SkeletonContent />;
+      case 5:
+        return <Step5SkeletonContent />;
+      default: // Should not be reached
+        return (
+          <SkeletonCard>
+            <SkeletonField />
+          </SkeletonCard>
+        );
+    }
+  };
+
   return (
-    <div className={cn('max-w-6xl mx-auto px-6 py-8 space-y-6', className)}>
-      {/* Wizard header */}
-      <div className="flex justify-between items-center">
-        <div className="space-y-2">
+    <div className={cn('max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6', className)}>
+      {/* Header */}
+      <div className="flex justify-between items-center mb-4">
+        <div className="space-y-1">
           <Skeleton className="h-8 w-48 rounded" />
           <Skeleton className="h-4 w-64 rounded" />
         </div>
-        <Skeleton className="h-10 w-24 rounded" />
+        <Skeleton className="h-10 w-24 rounded-md" />
       </div>
 
-      {/* Step indicator - Use Progress component? Or keep simple? Keep simple for now */}
-      <Skeleton
-        className="h-2 w-full rounded-full"
-        style={{ width: `${(normalizedStep / 5) * 100}%`, backgroundColor: 'hsl(var(--muted))' }}
-      >
-        {/* Maybe indicate progress visually? Difficult with skeleton primitive */}
-        {/* <div
-          className="h-2 bg-primary rounded-full"
-          style={{ width: `${(normalizedStep / 5) * 100}%` }}
-        ></div> */}
-      </Skeleton>
+      {/* Progress Bar - Made thinner and less prominent */}
+      <Skeleton className="h-1 w-full rounded-full mb-4 bg-muted/50" />
 
-      {/* Step content or default skeleton */}
-      {stepContent || (
-        <div className="space-y-6">
-          {/* Default form fields */}
-          <div className="rounded-xl p-6 border space-y-5">
-            <div className="flex items-center gap-2">
-              <Skeleton className="w-6 h-6 rounded" />
-              <Skeleton className="h-6 w-40 rounded" />
-            </div>
+      {/* Main Content Area - renders step-specific skeleton */}
+      <div className="min-h-[300px]">{renderStepContentSkeleton()}</div>
 
-            {/* Form fields - vary number based on step */}
-            {Array.from({ length: 3 + normalizedStep }).map((_, i) => (
-              <div key={`field-${i}`} className="space-y-2">
-                <Skeleton className="h-4 w-32 rounded" />
-                <Skeleton className="h-10 w-full rounded border" />
-              </div>
-            ))}
-          </div>
-
-          {/* Optional second block */}
-          {normalizedStep >= 2 && (
-            <div className="rounded-xl p-6 border space-y-5">
-              <div className="flex items-center gap-2">
-                <Skeleton className="w-6 h-6 rounded" />
-                <Skeleton className="h-6 w-48 rounded" />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={`opt-${i}`} className="h-12 rounded border" />
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Bottom navigation */}
-      <div className="sticky bottom-0 bg-background p-4 border-t border flex justify-between items-center">
-        <Skeleton className="h-10 w-24 rounded" />
+      {/* Footer Navigation */}
+      {/* Ensure footer is visually separated and sticky if StepContent uses padding-bottom */}
+      <div className="sticky bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm p-4 border-t border-border flex justify-between items-center z-10 mt-8">
+        <Skeleton className="h-10 w-24 rounded-md" />
         <div className="flex gap-3">
-          <Skeleton className="h-10 w-28 rounded" />
-          <Skeleton className="h-10 w-28 rounded" />
+          <Skeleton className="h-10 w-28 rounded-md" />
+          <Skeleton className="h-10 w-28 rounded-md" />
         </div>
       </div>
     </div>

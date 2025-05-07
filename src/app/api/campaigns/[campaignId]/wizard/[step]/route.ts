@@ -141,26 +141,42 @@ export async function PATCH(
         mappedData.expectedOutcomes = dataToSave.expectedOutcomes ?? Prisma.JsonNull;
     } else if (step === 3) {
       if (dataToSave.demographics !== undefined) {
-        const existingDemographics =
-          typeof mappedData.demographics === 'object' && mappedData.demographics !== null
-            ? mappedData.demographics
-            : {};
-        mappedData.demographics = dataToSave.demographics
-          ? { ...existingDemographics, ...dataToSave.demographics }
-          : Prisma.JsonNull;
+        // Logging received demographics
+        console.log(
+          '[API Step 3] Received demographics:',
+          JSON.stringify(dataToSave.demographics, null, 2)
+        );
+        mappedData.demographics = dataToSave.demographics ?? Prisma.JsonNull;
       }
-      if (dataToSave.locations !== undefined) mappedData.locations = dataToSave.locations ?? [];
+      if (dataToSave.locations !== undefined) {
+        // Logging received locations
+        console.log(
+          '[API Step 3] Received locations:',
+          JSON.stringify(dataToSave.locations, null, 2)
+        );
+        mappedData.locations = dataToSave.locations ?? [];
+      }
       if (dataToSave.targeting !== undefined) {
-        const existingTargeting =
-          typeof mappedData.targeting === 'object' && mappedData.targeting !== null
-            ? mappedData.targeting
-            : {};
-        mappedData.targeting = dataToSave.targeting
-          ? { ...existingTargeting, ...dataToSave.targeting }
-          : Prisma.JsonNull;
+        // Logging received targeting
+        console.log(
+          '[API Step 3] Received targeting:',
+          JSON.stringify(dataToSave.targeting, null, 2)
+        );
+        mappedData.targeting = dataToSave.targeting ?? Prisma.JsonNull;
       }
-      if (dataToSave.competitors !== undefined)
+      if (dataToSave.competitors !== undefined) {
+        // Logging received competitors
+        console.log(
+          '[API Step 3] Received competitors:',
+          JSON.stringify(dataToSave.competitors, null, 2)
+        );
         mappedData.competitors = dataToSave.competitors ?? [];
+      }
+      // Log the mapped data specifically for step 3 before transformation
+      console.log(
+        '[API Step 3] mappedData before transformation:',
+        JSON.stringify(mappedData, null, 2)
+      );
     } else if (step === 4) {
       if (dataToSave.assets !== undefined) mappedData.assets = dataToSave.assets ?? [];
     } else if (step === 5) {

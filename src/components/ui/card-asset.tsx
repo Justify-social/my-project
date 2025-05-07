@@ -206,20 +206,17 @@ export const AssetPreview = ({
 
   return (
     <div
-      className={cn(
-        'relative rounded-t-lg overflow-hidden bg-muted/50 w-full aspect-square',
-        className
-      )}
+      className={cn('relative overflow-hidden bg-muted/50 w-full aspect-square p-3', className)}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       {...props}
     >
-      {/* Image preview */}
+      {/* Image preview - add rounded corners inside padding */}
       {isImage && url && (
         <Image
           src={url}
           alt={fileName ?? 'Asset preview'}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 rounded-md"
           width={300}
           height={300}
           unoptimized
@@ -342,9 +339,9 @@ export function AssetCard({
   return (
     <Card
       className={cn(
-        'group flex flex-col overflow-hidden h-full',
-        'border border-border rounded-lg shadow-sm',
-        'hover:shadow-lg transition-shadow duration-300 ease-in-out',
+        'relative group flex flex-col overflow-hidden h-full',
+        'border border-border rounded-lg shadow-lg',
+        'hover:shadow-xl transition-shadow duration-300 ease-in-out',
         props.onClick && 'cursor-pointer',
         cardClassName
       )}
@@ -358,50 +355,63 @@ export function AssetCard({
         mediaTypeLabel={mediaTypeLabel}
       />
 
-      <CardHeader className="flex-row items-center justify-between gap-2 pb-2 pt-3 px-3">
-        <div className="flex items-center gap-1.5 flex-1 min-w-0">
-          <CardTitle className="text-sm font-medium leading-snug truncate" title={name}>
-            {name || 'Untitled Asset'}
-          </CardTitle>
-        </div>
-        {hasPlatform(platform, defaultPlatform) && (
-          <Badge
-            variant="outline"
-            className="flex-shrink-0 items-center gap-1 px-1.5 py-0.5 border-border"
-          >
-            <Icon iconId={platformIconId} className="h-3 w-3" />
-            <span className="text-xs font-medium text-muted-foreground">{platform}</span>
-          </Badge>
-        )}
-      </CardHeader>
-
-      <CardContent className={cn('px-3 pb-3 flex flex-col flex-grow', className)}>
-        {influencerHandle && (
-          <div className="mt-1 mb-2 flex items-center text-muted-foreground">
-            <Icon iconId="faUserLight" className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />
-            <span className="text-muted-foreground text-xs truncate" title={influencerHandle}>
-              {influencerHandle}
-            </span>
+      {/* Content Area with padding and flex-grow */}
+      <div className={cn('flex flex-col flex-grow', className)}>
+        <div className="p-4">
+          {/* Header section moved inside content padding */}
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+              {/* Optional: Icon before title? If needed 
+            <Icon iconId={mediaTypeIconId} className="h-4 w-4 text-muted-foreground flex-shrink-0" /> 
+            */}
+              <CardTitle className="text-sm font-medium leading-snug truncate" title={name}>
+                {name || 'Untitled Asset'}
+              </CardTitle>
+            </div>
+            {hasPlatform(platform, defaultPlatform) && (
+              <Badge
+                variant="outline"
+                className="flex-shrink-0 items-center gap-1 px-1.5 py-0.5 border-border"
+              >
+                <Icon iconId={platformIconId} className="h-3 w-3" />
+                <span className="text-xs font-medium text-muted-foreground">{platform}</span>
+              </Badge>
+            )}
           </div>
-        )}
 
-        {description && (
-          <div className="mb-2 flex-grow">
-            <span className="text-xs font-medium text-secondary underline">Why this content?</span>
-            <p className="text-sm text-foreground mt-0.5 line-clamp-3">{description}</p>
-          </div>
-        )}
-
-        <div className="mt-auto pt-2 space-y-2 border-t border-divider">
-          {budget !== undefined && budget !== null && (
-            <div className="flex justify-end items-center text-foreground">
-              <span className="text-sm font-medium text-primary">
-                {formatCurrency(budget, currency)}
+          {/* Influencer Handle */}
+          {influencerHandle && (
+            <div className="mb-2 flex items-center text-muted-foreground">
+              <Icon iconId="faUserLight" className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />
+              <span className="text-muted-foreground text-xs truncate" title={influencerHandle}>
+                {influencerHandle}
               </span>
             </div>
           )}
+
+          {/* Description - takes remaining space */}
+          {description && (
+            <div className="mb-2 flex-grow">
+              <span className="text-xs font-medium text-muted-foreground underline">
+                Why this content?
+              </span>
+              <p className="text-sm text-foreground mt-0.5 line-clamp-3">{description}</p>
+            </div>
+          )}
+
+          {/* Spacer to push budget down if no description */}
+          {!description && <div className="flex-grow"></div>}
+
+          {/* Budget - Absolute positioned in bottom-right corner */}
+          {budget !== undefined && budget !== null && (
+            <div className="absolute bottom-3 right-3 z-10">
+              <Badge variant="secondary" className="text-sm font-medium">
+                {formatCurrency(budget, currency)}
+              </Badge>
+            </div>
+          )}
         </div>
-      </CardContent>
+      </div>
     </Card>
   );
 }

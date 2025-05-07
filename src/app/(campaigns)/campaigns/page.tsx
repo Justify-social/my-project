@@ -750,13 +750,12 @@ const ClientCampaignList: React.FC = () => {
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="approved">Approved</SelectItem>
               <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="submitted">Submitted</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="draft">Draft</SelectItem>
               <SelectItem value="in_review">In Review</SelectItem>
               <SelectItem value="paused">Paused</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
             </SelectContent>
           </Select>
 

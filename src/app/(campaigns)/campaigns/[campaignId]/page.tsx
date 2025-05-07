@@ -191,9 +191,7 @@ export default function CampaignDetail() {
             data.secondaryKPIs && Array.isArray(data.secondaryKPIs) ? data.secondaryKPIs : [],
           features: data.features && Array.isArray(data.features) ? data.features : [],
           mainMessage: data.mainMessage || data.messaging?.mainMessage || 'Not Set',
-          hashtags: data.messaging?.hashtags
-            ? data.messaging.hashtags.split(',').filter(Boolean)
-            : [],
+          hashtags: Array.isArray(data.messaging?.hashtags) ? data.messaging.hashtags : [],
           keyBenefits: data.messaging?.keyBenefits || 'Not Set',
           expectedOutcomes: {
             memorability: data.expectedOutcomes?.memorability || 'Not Set',
@@ -309,7 +307,8 @@ export default function CampaignDetail() {
       case 'draft':
         return { variant: 'default', text: 'Draft', className: 'badge-draft' };
       case 'pending':
-        return { variant: 'secondary', text: 'Pending', className: '' };
+      case 'in_review':
+        return { variant: 'secondary', text: 'In Review', className: '' };
       case 'approved':
       case 'active':
         return {

@@ -45,8 +45,8 @@ const CampaignSelector: React.FC<CampaignSelectorProps> = ({ onCampaignSelected 
       setIsLoading(true);
       setError(null);
       try {
-        // Fetch COMPLETED campaigns (API defaults to this filter)
-        const response = await fetch('/api/campaigns?status=completed'); // Explicitly add status for clarity
+        // Fetch campaigns (no specific status filter, API might apply defaults or none)
+        const response = await fetch('/api/campaigns');
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.error || `Failed to fetch campaigns: ${response.statusText}`);
@@ -54,7 +54,7 @@ const CampaignSelector: React.FC<CampaignSelectorProps> = ({ onCampaignSelected 
         const data: Campaign[] = await response.json();
         setCampaigns(data);
         if (data.length === 0) {
-          setError('No completed campaigns found. Please create and complete a campaign first.');
+          setError('No campaigns found. Please create a campaign first.');
         }
       } catch (err: any) {
         logger.error('Error fetching campaigns for Brand Lift Selector:', { error: err.message });

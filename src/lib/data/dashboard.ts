@@ -48,9 +48,22 @@ function mapStatusEnumToString(statusEnum: Status): string {
 type CampaignWithInfluencers = Prisma.CampaignWizardGetPayload<{ include: { Influencer: true } }>;
 
 // Fetch upcoming/ongoing events (campaigns) for the calendar
-export async function getUpcomingEvents(userId: string): Promise<CalendarEvent[]> {
-  console.log(`Fetching upcoming events for user ${userId} from DB (endDate required)...`);
+export async function getUpcomingEvents(clerkUserId: string): Promise<CalendarEvent[]> {
+  logger.info(`[getUpcomingEvents] Fetching for clerkUserId: ${clerkUserId}`);
   try {
+    // Fetch the internal User record using the clerkUserId
+    const userRecord = await prisma.user.findUnique({
+      where: { clerkId: clerkUserId },
+      select: { id: true },
+    });
+
+    if (!userRecord) {
+      logger.error('[getUpcomingEvents] No User record found for clerkUserId', { clerkUserId });
+      return []; // Or throw an error
+    }
+    const internalUserId = userRecord.id; // This is the UUID
+    logger.info('[getUpcomingEvents] Found internal User ID', { internalUserId, clerkUserId });
+
     const now = new Date();
     const startOfNow = startOfDay(now);
     const nextFewMonths = addMonths(now, 3);
@@ -59,9 +72,10 @@ export async function getUpcomingEvents(userId: string): Promise<CalendarEvent[]
     // Query based on required endDate: Must end >= now AND start <= future window end
     const campaignsWithInfluencers = await prisma.campaignWizard.findMany({
       where: {
+        userId: internalUserId, // Use the internal UUID for filtering
         endDate: { gte: startOfNow }, // Campaign must end today or later
         startDate: { lte: endOfNextFewMonths }, // Campaign must start by end of window
-        // TODO: Add user filtering
+        // TODO: Add user filtering (the main user filter is now done by internalUserId)
       },
       include: { Influencer: true },
       orderBy: { startDate: 'asc' },
@@ -147,19 +161,38 @@ type CampaignWithPrimaryInfluencer = Prisma.CampaignWizardGetPayload<{
 }>;
 
 // Fetch upcoming campaigns for the table
-export async function getUpcomingCampaigns(userId: string): Promise<CampaignData[]> {
-  console.log(`Fetching upcoming campaigns for user ${userId} from DB (endDate required)...`);
+export async function getUpcomingCampaigns(clerkUserId: string): Promise<CampaignData[]> {
+  logger.info(`[getUpcomingCampaigns] Fetching for clerkUserId: ${clerkUserId}`);
   try {
-    const nextFewMonths = addMonths(new Date(), 3);
+    // Fetch the internal User record using the clerkUserId
+    const userRecord = await prisma.user.findUnique({
+      where: { clerkId: clerkUserId },
+      select: { id: true },
+    });
+
+    if (!userRecord) {
+      logger.error('[getUpcomingCampaigns] No User record found for clerkUserId', { clerkUserId });
+      return []; // Or throw an error
+    }
+    const internalUserId = userRecord.id; // This is the UUID
+    logger.info('[getUpcomingCampaigns] Found internal User ID', { internalUserId, clerkUserId });
+
+    const now = new Date();
+    const nextFewMonths = addMonths(now, 3);
     const endOfNextFewMonths = endOfDay(nextFewMonths);
+    logger.info(
+      `[getUpcomingCampaigns] Current time (server): ${now.toISOString()}, Querying campaigns starting before or on: ${endOfNextFewMonths.toISOString()}`
+    );
+
+    const whereClause = {
+      userId: internalUserId, // Use the internal UUID for filtering
+      status: { in: [Status.DRAFT, Status.IN_REVIEW, Status.APPROVED, Status.ACTIVE] },
+      startDate: { lte: endOfNextFewMonths }, // Starting within window
+    };
+    logger.info('[getUpcomingCampaigns] Prisma whereClause:', whereClause);
 
     const campaignsWithInfluencers = await prisma.campaignWizard.findMany({
-      where: {
-        userId: userId,
-        status: { in: [Status.DRAFT, Status.APPROVED, Status.ACTIVE] }, // Include DRAFT status
-        startDate: { lte: endOfNextFewMonths }, // Starting within window
-        // TODO: Add user filtering
-      },
+      where: whereClause,
       include: {
         Influencer: {
           select: { handle: true, platform: true },
@@ -169,9 +202,12 @@ export async function getUpcomingCampaigns(userId: string): Promise<CampaignData
       orderBy: { startDate: 'asc' },
       take: 10,
     });
+    logger.info(
+      `[getUpcomingCampaigns] Found ${campaignsWithInfluencers.length} campaigns from DB query.`
+    );
 
     // Use the specific type here
-    return (campaignsWithInfluencers as CampaignWithPrimaryInfluencer[]).map(
+    const mappedCampaigns = (campaignsWithInfluencers as CampaignWithPrimaryInfluencer[]).map(
       (campaign): CampaignData => {
         const primaryInfluencer: { handle: string; platform: PrismaPlatform } | undefined =
           campaign.Influencer?.[0];
@@ -226,8 +262,15 @@ export async function getUpcomingCampaigns(userId: string): Promise<CampaignData
         };
       }
     );
+    logger.info(
+      `[getUpcomingCampaigns] Mapped ${mappedCampaigns.length} campaigns. IDs: ${mappedCampaigns.map(c => c.id).join(', ')}`
+    );
+    return mappedCampaigns;
   } catch (error) {
-    console.error('Error fetching upcoming campaigns:', error);
+    logger.error('[getUpcomingCampaigns] Error fetching upcoming campaigns:', {
+      clerkUserId,
+      error,
+    });
     return [];
   }
 }
