@@ -153,7 +153,7 @@
     "use-debounce": "10.0.0",
     "zod": "^3.24.2",
     "zustand": "^4.5.2",
-    "@prisma/client": "5.8.1"
+    "@prisma/client": "^6.7.0"
   },
   "devDependencies": {
     "@babel/generator": "^7.27.0",
@@ -208,7 +208,7 @@
     "postcss": "^8.4.21",
     "postcss-scss": "^4.0.9",
     "prettier": "^3.5.3",
-    "prisma": "5.8.1",
+    "prisma": "^6.7.0",
     "shadcn": "^2.4.0-canary.17",
     "start-server-and-test": "^2.0.11",
     "ts-node": "^10.9.2",
