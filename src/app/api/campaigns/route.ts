@@ -511,8 +511,7 @@ export const POST = async (request: NextRequest) => {
       isComplete: false,
       currentStep: 1,
       updatedAt: new Date(),
-      userId: userId, // Assign the authenticated user ID
-      organizationId: orgId, // Assign the organization ID
+      user: userId ? { connect: { id: userId } } : undefined,
     };
 
     const campaign = await prisma.$transaction(async tx => {

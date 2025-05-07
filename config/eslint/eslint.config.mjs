@@ -48,6 +48,9 @@ const eslintConfig = [
       'archives/**',
       'src/app/(campaigns)/campaigns/wizard/step-*/**',
       'config/**',
+      'graphiti-env/**',
+      'src/lib/generated/**',
+      'graphiti_src/**',
     ],
     rules: {
       '@typescript-eslint/no-unused-vars': [
