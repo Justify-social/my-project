@@ -33,245 +33,120 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
+import { Prisma } from '@prisma/client'; // Ensure Prisma namespace is imported
 
-// Define raw API structure (based on usage in transformCampaignData)
-interface ApiCampaignData {
-  id: string | number;
-  name?: string | null;
-  status?: string | null;
-  startDate?: string | Date | null | Record<string, never>; // Account for various formats seen
-  endDate?: string | Date | null | Record<string, never>;
-  timeZone?: string | null;
-  budget?:
-    | string
-    | {
-        total?: number | string | null;
-        socialMedia?: number | string | null;
-        currency?: string | null;
-      }
-    | null;
-  primaryContact?:
-    | string
-    | {
-        firstName?: string | null;
-        surname?: string | null;
-        email?: string | null;
-        position?: string | null;
-      }
-    | null;
-  secondaryContact?:
-    | string
-    | {
-        firstName?: string | null;
-        surname?: string | null;
-        email?: string | null;
-        position?: string | null;
-      }
-    | null;
-  Influencer?: { handle?: string | null; platform?: string | null }[] | null;
-  primaryKPI?: string | null;
-  secondaryKPIs?: string[] | null;
-  features?: string[] | null;
-  messaging?: {
-    mainMessage?: string | null;
-    hashtags?: string | null;
-    keyBenefits?: string | null;
-  } | null;
-  mainMessage?: string | null; // Allow top-level mainMessage as fallback
-  expectedOutcomes?: {
-    memorability?: string | null;
-    purchaseIntent?: string | null;
-    brandPerception?: string | null;
-  } | null;
-  demographics?: {
-    gender?: string[] | null;
-    ageRange?: string | string[] | null;
-    interests?: string[] | null;
-  } | null;
-  targeting?: { languages?: { language?: string | null }[] | null } | null;
-  locations?: { location?: string | null }[] | null;
-  competitors?: string[] | null;
-  guidelines?: string | null;
-  requirements?: { requirement?: string | null }[] | null;
-  assets?: { name?: string | null; url?: string | null }[] | null;
-  notes?: string | null;
-  additionalContacts?:
-    | {
-        firstName?: string | null;
-        surname?: string | null;
-        email?: string | null;
-        position?: string | null;
-      }[]
-    | null;
-  createdAt?: string | Date | null;
-  // Add any other potential top-level fields observed
-  [key: string]: unknown; // Allow other fields safely
+// Define expected status values
+type CampaignStatus = 'DRAFT' | 'IN_REVIEW' | 'APPROVED' | 'ACTIVE' | 'COMPLETED' | string;
+type Platform = 'Instagram' | 'YouTube' | 'TikTok' | 'N/A';
+
+// Define the shape of the data coming from /api/list-campaigns
+// Based on campaignWizardSelectForList in src/lib/data/campaigns.ts
+interface ApiListData {
+  id: string;
+  name: string | null;
+  status: string | null; // Prisma Status enum values as strings
+  startDate: Date | string | null; // Allow string dates from DB/JSON
+  endDate: Date | string | null; // Allow string dates from DB/JSON
+  budget: Prisma.JsonValue | null; // Comes as JSON
+  primaryKPI: string | null;
+  primaryContact: Prisma.JsonValue | null; // Comes as JSON
+  createdAt: Date | string | null; // Allow string dates from DB/JSON
+  Influencer: { platform: string | null }[] | null; // Prisma Platform enum values
+  locations: Prisma.JsonValue | null; // Comes as JSON
 }
 
-// Define interfaces for other mapped API data structures (MOVED OUTSIDE FUNCTION)
-interface ApiLocation {
-  location?: string | null;
-}
-
-/* // Removed unused type ApiAudienceLocation
-interface ApiAudienceLocation {
-  location?: string | null;
-}
-*/
-
-/* // Removed unused type ApiAudienceInterest
-interface ApiAudienceInterest {
-  interest?: string | null;
-}
-*/
+// Helper function (can be moved to utils)
+const safelyParseJson = <T,>(jsonValue: Prisma.JsonValue | null, defaultValue: T): T => {
+  // Corrected generic syntax
+  if (typeof jsonValue === 'string') {
+    try {
+      return JSON.parse(jsonValue) as T;
+    } catch (error) {
+      console.error('Error parsing JSON string:', error, jsonValue);
+      return defaultValue;
+    }
+  }
+  // If it's not a string or null, return default value. Avoid parsing non-strings.
+  return defaultValue;
+};
 
 /**
- * Transforms raw campaign data from API to the Campaign interface format
- * Safely handles different data formats and ensures consistent transformation
+ * Transforms raw campaign data from the NEW API (/api/list-campaigns)
+ * based on the CampaignWizard model fields.
  */
-const transformCampaignData = (campaign: ApiCampaignData): Campaign => {
-  // Log the incoming campaign ID for debugging
-  console.log(`Campaign ID from API: ${campaign.id}, type: ${typeof campaign.id}`);
-
-  // Debug date formats
-  console.log(
-    `Raw startDate from API: ${JSON.stringify(campaign.startDate)}, type: ${typeof campaign.startDate}`
-  );
-  console.log(
-    `Raw endDate from API: ${JSON.stringify(campaign.endDate)}, type: ${typeof campaign.endDate}`
-  );
-
-  // Helper to safely parse dates from various formats
-  const safelyParseDate = (
-    dateValue: string | number | Date | null | undefined | Record<string, never>
-  ): string => {
+const transformCampaignData = (campaign: ApiListData): Campaign => {
+  // Safely format dates to ISO strings or empty string
+  const formatDateToString = (dateInput: Date | string | null): string => {
+    if (!dateInput) return '';
     try {
-      // Handle null or undefined
-      if (!dateValue) return '';
+      // Standardize to Date object first
+      const date = new Date(dateInput); // Accepts Date objects, ISO strings, timestamps
 
-      // Handle empty object case: {}
-      if (dateValue && typeof dateValue === 'object' && Object.keys(dateValue).length === 0) {
-        return '';
+      // Check if the resulting Date object is valid
+      if (!isNaN(date.getTime())) {
+        return date.toISOString();
       }
-
-      // Handle null values that might come from the API
-      if (dateValue === null) return '';
-
-      // Handle ISO date strings (which is what the API returns)
-      if (typeof dateValue === 'string' && dateValue.trim() !== '') {
-        // Check if it's a valid date without converting format
-        const date = new Date(dateValue);
-        if (!isNaN(date.getTime())) {
-          // Return the original ISO string as is
-          return dateValue;
-        }
-      }
-      return '';
     } catch (error) {
-      console.error('Error parsing date:', error, dateValue);
-      return '';
+      console.error('Error formatting date:', error, dateInput);
     }
+    return '';
   };
 
-  // Helper to safely parse JSON strings
-  const safelyParseJSON = (jsonValue: unknown, defaultValue: unknown): unknown => {
-    if (typeof jsonValue === 'object' && jsonValue !== null) {
-      return jsonValue;
-    }
-    if (typeof jsonValue === 'string') {
-      try {
-        return JSON.parse(jsonValue);
-      } catch (error) {
-        console.error('Error parsing JSON:', error, jsonValue);
-      }
-    }
-    return defaultValue;
+  // Safely parse budget JSON
+  const budgetData = safelyParseJson<{ total?: number | string | null }>(campaign.budget, {});
+  const totalBudget = Number(budgetData?.total || 0);
+
+  // Safely parse primaryContact JSON
+  const contactData = safelyParseJson<{
+    firstName?: string;
+    surname?: string;
+    email?: string;
+    position?: string;
+  }>(campaign.primaryContact, {});
+  const primaryContact = {
+    firstName: contactData?.firstName || '',
+    surname: contactData?.surname || '',
+    email: contactData?.email || undefined,
+    position: contactData?.position || undefined,
   };
 
-  // Helper to safely get budget total
-  const safelyGetBudgetTotal = (budget: unknown): number => {
-    if (!budget) return 0;
-    try {
-      let parsedBudget: unknown = budget; // Use unknown instead of any
+  // Safely parse locations JSON
+  const locationsArray = safelyParseJson<{ location?: string }[]>(campaign.locations, []);
+  const audienceLocations = locationsArray
+    .map(loc => loc?.location)
+    .filter((loc): loc is string => typeof loc === 'string' && loc.trim() !== '')
+    .map(location => ({ location }));
 
-      // String that needs parsing
-      if (typeof budget === 'string') {
-        parsedBudget = JSON.parse(budget);
-      }
-
-      // Check if it's an object and has the property
-      if (typeof parsedBudget === 'object' && parsedBudget !== null) {
-        // Use type assertion or 'in' operator for property access
-        if ('total' in parsedBudget && parsedBudget.total != null) {
-          return Number(parsedBudget.total);
-        }
-        if ('totalBudget' in parsedBudget && parsedBudget.totalBudget != null) {
-          return Number(parsedBudget.totalBudget);
-        }
-      }
-      return 0;
-    } catch (error) {
-      console.error('Error getting budget total:', error, budget);
-      return 0;
+  // Determine platform from first influencer
+  let platform: Platform = 'N/A';
+  const firstInfluencerPlatform = campaign.Influencer?.[0]?.platform;
+  if (firstInfluencerPlatform) {
+    switch (firstInfluencerPlatform) {
+      case 'INSTAGRAM':
+        platform = 'Instagram';
+        break;
+      case 'YOUTUBE':
+        platform = 'YouTube';
+        break;
+      case 'TIKTOK':
+        platform = 'TikTok';
+        break;
     }
-  };
-
-  // Parse primary contact
-  // Assuming safelyParseJSON returns an object with firstName/surname or a default
-  const primaryContact = safelyParseJSON(campaign.primaryContact, {
-    firstName: '',
-    surname: '',
-  }) as {
-    firstName?: string | null;
-    surname?: string | null;
-    email?: string | null;
-    position?: string | null;
-  }; // Assert type after parsing
-
-  // Map the status properly from the database schema (DRAFT, IN_REVIEW, APPROVED, ACTIVE, COMPLETED)
-  // to the frontend statuses
-  let status;
-  if (campaign.status) {
-    status = campaign.status.toLowerCase();
-  } else {
-    status = 'draft';
   }
-
-  // Ensure influencers is an array before accessing index
-  const influencersArray = Array.isArray(campaign.Influencer) ? campaign.Influencer : [];
 
   return {
     id: campaign.id,
     campaignName: campaign.name || 'Untitled Campaign',
-    submissionStatus: status as
-      | 'draft'
-      | 'submitted'
-      | 'in_review'
-      | 'approved'
-      | 'active'
-      | 'paused'
-      | 'completed',
-    // Use the first influencer's platform or default to Instagram
-    platform: (influencersArray[0]?.platform as 'Instagram' | 'YouTube' | 'TikTok') || 'Instagram',
-    startDate: safelyParseDate(campaign.startDate),
-    endDate: safelyParseDate(campaign.endDate),
-    totalBudget: safelyGetBudgetTotal(campaign.budget),
+    status: (campaign.status || 'DRAFT') as CampaignStatus,
+    platform: platform,
+    startDate: formatDateToString(campaign.startDate),
+    endDate: formatDateToString(campaign.endDate),
+    totalBudget: totalBudget,
     primaryKPI: campaign.primaryKPI || '',
-    primaryContact: {
-      firstName: primaryContact.firstName || '',
-      surname: primaryContact.surname || '',
-      email: primaryContact.email || undefined,
-      position: primaryContact.position || undefined,
-    },
-    createdAt: safelyParseDate(campaign.createdAt),
+    primaryContact: primaryContact,
+    createdAt: formatDateToString(campaign.createdAt),
     audience: {
-      // Filter locations to ensure they match the expected type
-      locations: Array.isArray(campaign.locations)
-        ? campaign.locations
-            .map((loc: ApiLocation) => loc?.location)
-            .filter((loc): loc is string => typeof loc === 'string' && loc.trim() !== '')
-            .map(location => ({ location }))
-        : [],
+      locations: audienceLocations,
     },
   };
 };
@@ -319,20 +194,15 @@ const KPI_OPTIONS: KpiOption[] = [
     title: 'Advocacy',
   },
 ];
+
+// UPDATED Campaign interface to match transformed data
 interface Campaign {
-  id: string | number; // Handle both string and number IDs
+  id: string | number;
   campaignName: string;
-  submissionStatus:
-    | 'draft'
-    | 'in_review'
-    | 'approved'
-    | 'active'
-    | 'submitted'
-    | 'paused'
-    | 'completed';
-  platform: 'Instagram' | 'YouTube' | 'TikTok';
-  startDate: string;
-  endDate: string;
+  status: CampaignStatus; // Use the raw status string (e.g., 'DRAFT', 'ACTIVE')
+  platform: Platform;
+  startDate: string; // ISO string format
+  endDate: string; // ISO string format
   totalBudget: number;
   primaryKPI: string;
   primaryContact: {
@@ -341,14 +211,16 @@ interface Campaign {
     email?: string;
     position?: string;
   };
-  createdAt: string;
+  createdAt: string; // ISO string format
   audience?: {
     locations: {
       location: string;
     }[];
   };
 }
+
 type SortDirection = 'ascending' | 'descending';
+
 const ClientCampaignList: React.FC = () => {
   const { user, isLoaded } = useUser();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -377,51 +249,60 @@ const ClientCampaignList: React.FC = () => {
   const [deleteInProgress, setDeleteInProgress] = useState(false);
   const router = useRouter();
 
-  // Fetch campaigns from API
+  // Fetch campaigns from the NEW API endpoint
   useEffect(() => {
     const fetchCampaigns = async () => {
       setIsLoadingData(true);
+      setError(''); // Clear previous errors
       try {
-        const response = await fetch('/api/campaigns', {
+        const response = await fetch('/api/list-campaigns', {
+          // Use new endpoint
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
+          // TODO: Pass filters as query params for server-side filtering
         });
         if (!response.ok) {
+          let errorDetails = `Failed to load campaigns: ${response.status}`;
+          try {
+            const errorData = await response.json();
+            errorDetails = errorData.error || errorData.message || errorDetails;
+          } catch {
+            /* Ignore JSON parsing error */
+          }
           if (response.status === 401 || response.status === 403) {
             throw new Error('Unauthorized to fetch campaigns.');
           }
-          throw new Error(`Failed to load campaigns: ${response.status}`);
+          throw new Error(errorDetails);
         }
-        const data = await response.json();
-        console.log('API Response:', data);
+        const data = await response.json(); // Assign response.json() to data
+        console.log('API Response from /api/list-campaigns:', data);
+
         if (data.success && Array.isArray(data.data)) {
           console.log('Setting campaigns:', data.data);
           const transformedCampaigns = data.data.map(transformCampaignData);
           console.log('Transformed campaigns:', transformedCampaigns);
           setCampaigns(transformedCampaigns);
-          setError('');
         } else {
+          const errorMsg = data.error || 'Invalid data format received from server.';
           console.log('Invalid data format:', data);
-          const errorDetails = !data.success
-            ? 'API response indicates failure'
-            : !Array.isArray(data.data)
-              ? `Expected data.data to be an array, got ${typeof data.data}`
-              : 'Unknown data format error';
-          throw new Error(`Invalid data format received from server: ${errorDetails}`);
+          throw new Error(errorMsg);
         }
-      } catch (error) {
-        console.error('Error fetching campaigns:', error);
-        setError(error instanceof Error ? error.message : 'Failed to load campaigns');
+      } catch (err) {
+        console.error('Error fetching campaigns:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load campaigns');
+        setCampaigns([]);
       } finally {
         setIsLoadingData(false);
       }
     };
+
     if (isLoaded && user) {
       fetchCampaigns();
     } else if (isLoaded && !user) {
       setIsLoadingData(false);
+      setCampaigns([]);
     }
   }, [isLoaded, user]);
 
@@ -433,54 +314,47 @@ const ClientCampaignList: React.FC = () => {
         endDates: [],
       };
 
-    // Helper function to safely parse dates
-    const safelyFormatDate = (
-      dateValue: string | number | Date | null | undefined | Record<string, never>
+    // Updated helper function to safely parse dates for filters
+    const safelyFormatDateForFilter = (
+      dateValue: string | number | Date | null | undefined // Removed Record<string, never>
     ): string | undefined => {
       if (!dateValue) return undefined;
+      // Explicitly handle only types Date constructor accepts
+      if (
+        typeof dateValue !== 'string' &&
+        typeof dateValue !== 'number' &&
+        !(dateValue instanceof Date)
+      ) {
+        console.warn(
+          'safelyFormatDateForFilter received unexpected type:',
+          typeof dateValue,
+          dateValue
+        );
+        return undefined; // Ignore unexpected types
+      }
       try {
-        // If it's already a Date object
-        if (dateValue instanceof Date) {
-          return dateValue.toISOString().split('T')[0];
-        }
-
-        // Handle string dates
-        if (typeof dateValue === 'string') {
-          // For ISO strings and other standard formats
-          const date = new Date(dateValue);
-          // Check if date is valid
-          if (!isNaN(date.getTime())) {
-            return date.toISOString().split('T')[0];
-          }
-        }
-
-        // Handle cases where the date might be a timestamp
-        if (typeof dateValue === 'number') {
-          const date = new Date(dateValue);
-          if (!isNaN(date.getTime())) {
-            return date.toISOString().split('T')[0];
-          }
+        const date = new Date(dateValue);
+        if (!isNaN(date.getTime())) {
+          return date.toISOString().split('T')[0]; // Use YYYY-MM-DD format for filtering
         }
         return undefined;
       } catch (error) {
-        console.error('Error parsing date:', error, dateValue);
+        console.error('Error parsing date for filter:', error, dateValue);
         return undefined;
       }
     };
+
     const startDatesArray = campaigns
-      .filter(campaign => campaign.startDate)
-      .map(campaign => safelyFormatDate(campaign.startDate))
-      .filter((date): date is string => !!date); // Type guard to ensure we only have strings
+      .map(campaign => safelyFormatDateForFilter(campaign.startDate))
+      .filter((date): date is string => !!date);
 
     const endDatesArray = campaigns
-      .filter(campaign => campaign.endDate)
-      .map(campaign => safelyFormatDate(campaign.endDate))
-      .filter((date): date is string => !!date); // Type guard to ensure we only have strings
+      .map(campaign => safelyFormatDateForFilter(campaign.endDate))
+      .filter((date): date is string => !!date);
 
     const startDatesSet = new Set(startDatesArray);
     const endDatesSet = new Set(endDatesArray);
 
-    // Convert Sets to Arrays and sort
     const startDates = Array.from(startDatesSet).sort();
     const endDates = Array.from(endDatesSet).sort();
     return {
@@ -493,16 +367,11 @@ const ClientCampaignList: React.FC = () => {
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     try {
-      // Parse the ISO date string
       const date = new Date(dateString);
-
-      // Check if date is valid
       if (isNaN(date.getTime())) {
         console.warn(`Invalid date format: ${dateString}`);
         return 'Invalid date';
       }
-
-      // Format the date for display
       return date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
@@ -521,20 +390,21 @@ const ClientCampaignList: React.FC = () => {
       if (!campaign) return false;
       const matchesSearch =
         campaign.campaignName?.toLowerCase()?.includes(search.toLowerCase()) ?? false;
-      const matchesStatus = !statusFilter || campaign.submissionStatus === statusFilter;
+      const matchesStatus = !statusFilter || campaign.status?.toLowerCase() === statusFilter;
 
       // Match primaryKPI with objective filter using KPI_OPTIONS
-      const matchesObjective = !objectiveFilter || campaign.primaryKPI === objectiveFilter;
+      const kpiOption = KPI_OPTIONS.find(kpi => kpi.title === campaign.primaryKPI);
+      const kpiKey = kpiOption ? kpiOption.key : '';
+      const matchesObjective = !objectiveFilter || kpiKey === objectiveFilter;
 
       // Date filters with proper date comparison
+      const campaignStartDate = campaign.startDate ? campaign.startDate.split('T')[0] : '';
+      const campaignEndDate = campaign.endDate ? campaign.endDate.split('T')[0] : '';
       const matchesStartDate =
-        !startDateFilter ||
-        (campaign.startDate &&
-          new Date(campaign.startDate).toISOString().split('T')[0] >= startDateFilter);
+        !startDateFilter || (campaignStartDate && campaignStartDate >= startDateFilter);
       const matchesEndDate =
-        !endDateFilter ||
-        (campaign.endDate &&
-          new Date(campaign.endDate).toISOString().split('T')[0] <= endDateFilter);
+        !endDateFilter || (campaignEndDate && campaignEndDate <= endDateFilter);
+
       return (
         matchesSearch && matchesStatus && matchesObjective && matchesStartDate && matchesEndDate
       );
@@ -550,25 +420,28 @@ const ClientCampaignList: React.FC = () => {
       const aVal = a[sortConfig.key];
       const bVal = b[sortConfig.key];
 
-      // Add null checks
       if (aVal === null || aVal === undefined) return 1;
       if (bVal === null || bVal === undefined) return -1;
 
-      // Sort dates by converting to timestamps
-      if (sortConfig.key === 'startDate' || sortConfig.key === 'endDate') {
+      if (
+        sortConfig.key === 'startDate' ||
+        sortConfig.key === 'endDate' ||
+        sortConfig.key === 'createdAt'
+      ) {
         const aDate = new Date(aVal as string).getTime();
         const bDate = new Date(bVal as string).getTime();
+        if (isNaN(aDate) && isNaN(bDate)) return 0;
+        if (isNaN(aDate)) return 1;
+        if (isNaN(bDate)) return -1;
         return sortConfig.direction === 'ascending' ? aDate - bDate : bDate - aDate;
       }
 
-      // Compare strings
       if (typeof aVal === 'string' && typeof bVal === 'string') {
         return sortConfig.direction === 'ascending'
           ? aVal.localeCompare(bVal)
           : bVal.localeCompare(aVal);
       }
 
-      // Compare numbers
       if (typeof aVal === 'number' && typeof bVal === 'number') {
         return sortConfig.direction === 'ascending' ? aVal - bVal : bVal - aVal;
       }
@@ -599,132 +472,53 @@ const ClientCampaignList: React.FC = () => {
   const refetchCampaigns = async () => {
     try {
       setIsLoadingData(true);
-      const response = await fetch('/api/campaigns', {
+      setError('');
+      const response = await fetch('/api/list-campaigns', {
+        // Use new endpoint
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          // Add cache busting to ensure we get fresh data
           'Cache-Control': 'no-cache',
         },
+        // TODO: Pass filters here as well
       });
       if (!response.ok) {
-        console.error(`Failed to refresh campaigns: ${response.status}`);
+        let errorDetails = `Failed to refresh campaigns: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorDetails = errorData.error || errorData.message || errorDetails;
+        } catch {
+          /* Ignore JSON parsing error */
+        }
+        console.error(errorDetails);
+        setError(errorDetails);
         return;
       }
-      const data = await response.json();
+      const data = await response.json(); // Assign response.json() to data
       if (data.success && Array.isArray(data.data)) {
         console.log('Refreshed campaigns data:', data.data);
-
-        // Transform the raw campaign data to match the Campaign interface
         const transformedCampaigns = data.data.map(transformCampaignData);
         setCampaigns(transformedCampaigns);
+      } else {
+        const errorMsg = data.error || 'Invalid data format on refresh.';
+        console.error('Invalid data format on refresh:', data);
+        setError(errorMsg);
       }
-    } catch (error) {
-      console.error('Error refreshing campaigns:', error);
+    } catch (err) {
+      console.error('Error refreshing campaigns:', err);
+      setError(err instanceof Error ? err.message : 'Failed to refresh campaigns');
     } finally {
       setIsLoadingData(false);
     }
   };
-  const deleteCampaign = async (campaignId: string) => {
-    try {
-      if (!user) {
-        toast.error('You must be logged in to delete a campaign');
-        throw new Error('Not authenticated');
-      }
 
-      // UUID validation - most campaigns appear to have UUID IDs based on the logs
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      const isUuid = uuidRegex.test(campaignId);
-      const isNumeric = !isNaN(Number(campaignId));
-      if (!isUuid && !isNumeric) {
-        console.error(`Invalid ID format (neither UUID nor numeric): ${campaignId}`);
-        throw new Error('Invalid campaign ID format');
-      }
-
-      // Try to refresh the session before making the delete request
-      try {
-        await fetch('/api/auth/refresh', {
-          method: 'GET',
-          credentials: 'include',
-        });
-      } catch (refreshError) {
-        console.warn('Session refresh failed, proceeding with deletion anyway', refreshError);
-      }
-      console.log(
-        `Sending DELETE request for campaign ID: ${campaignId} (${isUuid ? 'UUID format' : 'numeric format'})`
-      );
-      const response = await fetch(`/api/campaigns/${campaignId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          // Ensure we have the latest auth cookie
-          'Cache-Control': 'no-cache',
-        },
-        credentials: 'include',
-      });
-
-      // Handle authentication errors specifically
-      if (response.status === 401) {
-        toast.error('Authentication error. Please try logging in again.');
-        throw new Error('Authentication failed when deleting campaign');
-      }
-      let data;
-      try {
-        data = await response.json();
-      } catch (jsonError) {
-        console.error('Failed to parse JSON response:', jsonError);
-        throw new Error(`Failed to delete campaign: Invalid response from server`);
-      }
-
-      // Handle 404 errors specially - treat as success since the campaign is gone anyway
-      if (response.status === 404) {
-        console.warn('Campaign not found during deletion:', data);
-
-        // Still update the UI to remove the campaign since it's not in the database
-        setCampaigns(prevCampaigns =>
-          prevCampaigns.filter(campaign => campaign.id.toString() !== campaignId)
-        );
-
-        // Show a more user-friendly message
-        toast.success('Campaign removed from list');
-        return {
-          success: true,
-          message: 'Campaign no longer exists',
-        };
-      }
-
-      // Handle other errors
-      if (!response.ok) {
-        console.error('Delete campaign error:', data);
-        throw new Error(
-          data.error || data.message || `Failed to delete campaign: ${response.status}`
-        );
-      }
-
-      // Update local state
-      setCampaigns(prevCampaigns =>
-        prevCampaigns.filter(campaign => campaign.id.toString() !== campaignId)
-      );
-
-      // If the deletion was successful, also trigger a refresh from the server to get the latest data
-      if (data.success) {
-        console.log(`Campaign deleted successfully from ${data.source || 'database'}`);
-        // Refresh the campaigns list after a short delay to ensure the server has processed the deletion
-        setTimeout(() => {
-          refetchCampaigns();
-        }, 1000);
-      }
-      return data;
-    } catch (error) {
-      console.error('Error deleting campaign:', error);
-      throw error;
-    }
+  // RESTORED HANDLER FUNCTIONS:
+  const handleViewCampaign = (campaignId: string) => {
+    router.push(`/campaigns/${campaignId}`);
   };
-  const handleDeleteClick = (campaign: Campaign) => {
-    // Convert ID to string in case it's a number
-    const campaignId = campaign.id.toString();
 
-    // Log the ID to help debugging
+  const handleDeleteClick = (campaign: Campaign) => {
+    const campaignId = campaign.id.toString();
     console.log(`Preparing to delete campaign: ${campaignId}, type: ${typeof campaign.id}`);
     setCampaignToAction({
       id: campaignId,
@@ -732,60 +526,83 @@ const ClientCampaignList: React.FC = () => {
     });
     setShowDeleteModal(true);
   };
-  const confirmDelete = async () => {
-    if (!campaignToAction) return;
-    console.log(`Confirming deletion of campaign: ${campaignToAction.id}`);
-    try {
-      // Don't use toast.promise since we're handling 404s specially
-      setDeleteInProgress(true);
-      try {
-        const result = await deleteCampaign(campaignToAction.id);
-        console.log('Delete campaign result:', result);
-        toast.success('Campaign deleted successfully');
-        setShowDeleteModal(false);
-      } catch (error) {
-        // Error is already logged in deleteCampaign
-        console.log('Delete campaign error details:', error);
-        if (error instanceof Error) {
-          const errorMessage = error.message.toLowerCase();
-          if (errorMessage.includes('not found') || errorMessage.includes('404')) {
-            // If campaign wasn't found, still close the modal and show success
-            console.log('Handling "not found" error as success');
-            toast.success('Campaign removed from list');
-            setShowDeleteModal(false);
-          } else if (
-            errorMessage.includes('invalid') &&
-            (errorMessage.includes('id') ||
-              errorMessage.includes('uuid') ||
-              errorMessage.includes('format'))
-          ) {
-            // Special handling for invalid ID format errors
-            console.log('Invalid ID format error detected');
-            toast.error(
-              'Campaign ID format issue detected. The system will still try to delete the campaign.'
-            );
 
-            // Even with invalid format, still remove it from the UI
-            setCampaigns(prevCampaigns =>
-              prevCampaigns.filter(campaign => campaign.id.toString() !== campaignToAction.id)
-            );
-            setShowDeleteModal(false);
-          } else {
-            // For other errors, show error toast
-            toast.error(errorMessage);
-          }
-        } else {
-          toast.error('Failed to delete campaign - unknown error');
-        }
-      } finally {
-        setDeleteInProgress(false);
+  const deleteCampaign = async (campaignId: string) => {
+    // NOTE: Assumes DELETE /api/campaigns/[campaignId] targets CampaignWizard correctly.
+    // If not, this endpoint needs to be created/updated.
+    try {
+      if (!user) {
+        toast.error('You must be logged in to delete a campaign');
+        throw new Error('Not authenticated');
       }
+      const response = await fetch(`/api/campaigns/${campaignId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      });
+
+      if (response.status === 401) {
+        throw new Error('Authentication failed when deleting campaign');
+      }
+
+      let data = { success: false, message: 'Unknown delete error' };
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        if (!response.ok && response.status !== 404) {
+          // Don't throw if 404, handle below
+          throw new Error(
+            `Failed to delete campaign: Server returned non-JSON response with status ${response.status}`
+          );
+        }
+        // If 404 or OK with no body, proceed
+        data.success = response.ok || response.status === 404;
+        data.message = response.status === 404 ? 'Campaign not found' : 'Campaign deleted';
+      }
+
+      if (response.status === 404) {
+        console.warn('Campaign not found during deletion (404):', campaignId);
+        toast.success('Campaign already removed');
+        // Still update UI and trigger refetch
+      } else if (!response.ok) {
+        console.error('Delete campaign error:', data);
+        throw new Error(data.message || `Failed to delete campaign: ${response.status}`);
+      }
+
+      // Update local state optimistically or after success
+      setCampaigns(prevCampaigns =>
+        prevCampaigns.filter(campaign => campaign.id.toString() !== campaignId)
+      );
+
+      // Trigger refetch to ensure consistency
+      // Use the updated refetchCampaigns which calls the correct list endpoint
+      toast.success('Campaign deleted successfully');
+      setTimeout(() => {
+        refetchCampaigns();
+      }, 500); // Short delay
+
+      return data;
     } catch (error) {
-      console.error('Unhandled error in confirmDelete:', error);
-      toast.error('An unexpected error occurred');
-      setDeleteInProgress(false);
+      console.error('Error in deleteCampaign function:', error);
+      throw error; // Re-throw to be caught by confirmDelete
     }
   };
+
+  const confirmDelete = async () => {
+    if (!campaignToAction) return;
+    setDeleteInProgress(true);
+    try {
+      await deleteCampaign(campaignToAction.id);
+      // Success toast is handled within deleteCampaign now
+      setShowDeleteModal(false);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to delete campaign');
+    } finally {
+      setDeleteInProgress(false);
+      setCampaignToAction(null); // Clear the action target
+    }
+  };
+
   const handleDuplicateClick = (campaign: Campaign) => {
     setCampaignToAction({
       id: campaign.id.toString(),
@@ -794,109 +611,64 @@ const ClientCampaignList: React.FC = () => {
     setDuplicateName(`Copy of ${campaign.campaignName}`);
     setShowDuplicateModal(true);
   };
+
   const duplicateCampaign = async () => {
+    // NOTE: Assumes POST /api/campaigns/[campaignId]/duplicate targets CampaignWizard correctly.
+    // If not, this endpoint needs to be created/updated.
     if (!campaignToAction || !duplicateName.trim()) return;
+    setIsLoadingData(true);
     try {
-      setIsLoadingData(true);
       const response = await fetch(`/api/campaigns/${campaignToAction.id}/duplicate`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({
-          newName: duplicateName.trim(),
-        }),
+        body: JSON.stringify({ newName: duplicateName.trim() }),
       });
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.message || `Failed to duplicate campaign: ${response.status}`);
       }
-
-      // Refresh campaigns list
-      const updatedResponse = await fetch('/api/campaigns', {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      const updatedData = await updatedResponse.json();
-      if (updatedData.success && Array.isArray(updatedData.data)) {
-        // Transform the raw campaign data to match the Campaign interface
-        const transformedCampaigns = updatedData.data.map(transformCampaignData);
-        setCampaigns(transformedCampaigns);
-      }
       toast.success('Campaign duplicated successfully');
       setShowDuplicateModal(false);
+      refetchCampaigns(); // Refresh list with the new duplicate
     } catch (error) {
       console.error('Error duplicating campaign:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to duplicate campaign');
     } finally {
       setIsLoadingData(false);
+      setCampaignToAction(null); // Clear action target
     }
-  };
-  const handleViewCampaign = (campaignId: string) => {
-    router.push(`/campaigns/${campaignId}`);
   };
 
   // Helper to get status color and text
-  const getStatusInfo = (status: string) => {
-    // Normalize status to lowercase for case-insensitive matching
+  // Adjusted to handle potential uppercase enum strings from Prisma Status
+  const getStatusInfo = (status: CampaignStatus | null | undefined) => {
     const normalizedStatus = (status || '').toLowerCase();
     switch (normalizedStatus) {
       case 'approved':
-        return {
-          class: 'bg-green-100 text-green-800',
-          text: 'Approved',
-        };
+        return { class: 'bg-green-100 text-green-800', text: 'Approved' };
       case 'active':
-        return {
-          class: 'bg-green-100 text-green-800',
-          text: 'Active',
-        };
-      case 'submitted':
-        return {
-          class: 'bg-green-100 text-green-800',
-          text: 'Submitted',
-        };
+        return { class: 'bg-green-100 text-green-800', text: 'Active' };
       case 'in_review':
-        return {
-          class: 'bg-yellow-100 text-yellow-800',
-          text: 'In Review',
-        };
+        return { class: 'bg-yellow-100 text-yellow-800', text: 'In Review' };
       case 'draft':
-        return {
-          class: 'bg-gray-100 text-gray-800',
-          text: 'Draft',
-        };
-      case 'paused':
-        return {
-          class: 'bg-orange-100 text-orange-800',
-          text: 'Paused',
-        };
+        return { class: 'bg-gray-100 text-gray-800', text: 'Draft' };
       case 'completed':
-        return {
-          class: 'bg-blue-100 text-blue-800',
-          text: 'Completed',
-        };
+        return { class: 'bg-blue-100 text-blue-800', text: 'Completed' };
       default:
-        return {
-          class: 'bg-gray-100 text-gray-800',
-          text: status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Unknown', // Capitalize if unknown
-        };
+        const defaultText = status
+          ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
+          : 'Unknown';
+        return { class: 'bg-gray-100 text-gray-800', text: defaultText };
     }
   };
 
   // Helper to get the display name for a KPI key
   const getKpiDisplayName = (kpiKey: string): string => {
     if (!kpiKey) return 'N/A';
-
-    // Convert from SNAKE_CASE (API) to camelCase (mapping)
     const camelCaseKey = kpiKey.toLowerCase().replace(/_([a-z])/g, g => g[1].toUpperCase());
-
     const kpiOption = KPI_OPTIONS.find(option => option.key === camelCaseKey);
-    return kpiOption ? kpiOption.title : kpiKey; // Return the original key if not found
+    return kpiOption ? kpiOption.title : kpiKey;
   };
 
   // Render loading state
@@ -1055,7 +827,7 @@ const ClientCampaignList: React.FC = () => {
                   </TableHead>
                   <TableHead
                     className="cursor-pointer text-secondary"
-                    onClick={() => requestSort('submissionStatus')}
+                    onClick={() => requestSort('status')}
                   >
                     Status
                   </TableHead>
@@ -1084,7 +856,7 @@ const ClientCampaignList: React.FC = () => {
               </TableHeader>
               <TableBody>
                 {displayedCampaigns.map(campaign => {
-                  const statusInfo = getStatusInfo(campaign.submissionStatus);
+                  const statusInfo = getStatusInfo(campaign.status);
                   return (
                     <TableRow key={campaign.id} className="hover:bg-gray-50">
                       <TableCell className="font-medium">
@@ -1258,7 +1030,7 @@ const ClientCampaignList: React.FC = () => {
 
       <div className="md:hidden space-y-4">
         {displayedCampaigns.map(campaign => {
-          const statusInfo = getStatusInfo(campaign.submissionStatus);
+          const statusInfo = getStatusInfo(campaign.status);
           return (
             <div
               key={campaign.id}

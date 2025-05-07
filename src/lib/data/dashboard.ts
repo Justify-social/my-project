@@ -155,6 +155,7 @@ export async function getUpcomingCampaigns(userId: string): Promise<CampaignData
 
     const campaignsWithInfluencers = await prisma.campaignWizard.findMany({
       where: {
+        userId: userId,
         status: { in: [Status.DRAFT, Status.APPROVED, Status.ACTIVE] }, // Include DRAFT status
         startDate: { lte: endOfNextFewMonths }, // Starting within window
         // TODO: Add user filtering

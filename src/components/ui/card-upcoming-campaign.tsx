@@ -137,7 +137,7 @@ export function UpcomingCampaignsTable({
               <TableRow>
                 <TableCell colSpan={columnCount} className="h-24 text-center text-muted-foreground">
                   <div className="flex flex-col items-center justify-center">
-                    <Icon iconId="faRectangleListLight" className="w-12 h-12 mb-3" />
+                    <Icon iconId="faCircleQuestionLight" className="w-12 h-12 mb-3" />
                     <p className="text-base font-medium">No Campaigns Yet</p>
                     <p className="text-sm">Get started by creating your first campaign.</p>
                   </div>

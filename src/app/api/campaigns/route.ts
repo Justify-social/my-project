@@ -355,10 +355,10 @@ const listCampaignsQuerySchema = z.object({
   status: z
     .nativeEnum(SubmissionStatus)
     .optional()
-    .refine(val => val === SubmissionStatus.submitted || val === undefined, {
-      message: "Status must be 'submitted' (mapped from COMPLETED concept) or omitted.",
-      // Defaulting to submitted as the likely equivalent of a completed campaign wizard
-    })
+    // .refine(val => val === SubmissionStatus.submitted || val === undefined, {
+    //   message: "Status must be 'submitted' (mapped from COMPLETED concept) or omitted.",
+    //   // Defaulting to submitted as the likely equivalent of a completed campaign wizard
+    // })
     .default(SubmissionStatus.submitted),
   // Removed user_accessible as orgId check handles this
 });
@@ -424,7 +424,7 @@ export const GET = async (req: NextRequest) => {
       userId,
       count: campaigns.length,
     });
-    return NextResponse.json(responseData);
+    return NextResponse.json({ success: true, data: responseData });
   } catch (error: any) {
     logger.error('Error fetching campaigns', { error: error.message });
     return handleApiError(error, req);
