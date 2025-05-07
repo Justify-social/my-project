@@ -8,7 +8,7 @@
 
 import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams as useNextSearchParams } from 'next/navigation';
 import {
   Card,
   CardHeader,
@@ -66,48 +66,49 @@ const getIconInfo = (
 
 export default function ComponentBrowserPage() {
   const router = useRouter();
-  const searchParams = useMemo(() => {
-    if (typeof window !== 'undefined') {
-      return new URLSearchParams(window.location.search);
-    }
-    return new URLSearchParams();
-  }, []);
-
-  const initialTab = searchParams.get('tab') || 'components';
-  const initialCategory = (searchParams.get('category') as ComponentCategory | null) || null;
+  const actualSearchParams = useNextSearchParams();
+  const currentSearchParams = actualSearchParams || new URLSearchParams();
 
   const [registry, setRegistry] = useState<ComponentRegistry | null>(null);
   const [isLoadingRegistry, setIsLoadingRegistry] = useState(true);
   const [errorLoadingRegistry, setErrorLoadingRegistry] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<ComponentCategory | null>(
-    initialCategory
-  );
+  const [selectedCategory, setSelectedCategory] = useState<ComponentCategory | null>(() => {
+    return (currentSearchParams.get('category') as ComponentCategory | null) || null;
+  });
   const [allIcons, setAllIcons] = useState<IconMetadata[]>([]);
   const [iconCategories, setIconCategories] = useState<string[]>([]);
   const [selectedIconCategory, setSelectedIconCategory] = useState<string>('All');
   const [hoverPairs, setHoverPairs] = useState<
     { lightId: string; solidId: string; name?: string }[]
   >([]);
-  const [currentTab, setCurrentTab] = useState(initialTab);
+  const [currentTab, setCurrentTab] = useState(() => {
+    return currentSearchParams.get('tab') || 'components';
+  });
 
   useEffect(() => {
-    const tab = searchParams.get('tab') || 'components';
-    const category = searchParams.get('category') as ComponentCategory | null;
-    setCurrentTab(tab);
+    const tab = currentSearchParams.get('tab') || 'components';
+    const category = currentSearchParams.get('category') as ComponentCategory | null;
+
+    if (currentTab !== tab) {
+      setCurrentTab(tab);
+    }
 
     if (tab === 'components') {
       if (category && registry?.allCategories?.includes(category)) {
-        setSelectedCategory(category);
-      } else if (!selectedCategory) {
+        if (selectedCategory !== category) setSelectedCategory(category);
+      } else if (
+        selectedCategory !==
+        (registry?.allCategories?.includes('atom') ? 'atom' : registry?.allCategories?.[0] || null)
+      ) {
         const defaultCategory = registry?.allCategories?.includes('atom')
           ? 'atom'
           : registry?.allCategories?.[0] || null;
         setSelectedCategory(defaultCategory);
       }
     } else {
-      setSelectedCategory(null);
+      if (selectedCategory !== null) setSelectedCategory(null);
     }
-  }, [searchParams, registry, selectedCategory]);
+  }, [currentSearchParams, registry, selectedCategory, currentTab]);
 
   useEffect(() => {
     const fetchRegistry = async () => {
@@ -180,11 +181,10 @@ export default function ComponentBrowserPage() {
   };
 
   const handleCategoryClick = (category: ComponentCategory) => {
-    setSelectedCategory(category);
-    const currentParams = new URLSearchParams(window.location.search);
-    currentParams.set('tab', 'components');
-    currentParams.set('category', category);
-    router.push(`?${currentParams.toString()}`);
+    const newParams = new URLSearchParams(currentSearchParams.toString());
+    newParams.set('tab', 'components');
+    newParams.set('category', category);
+    router.push(`?${newParams.toString()}`);
   };
 
   const filteredComponents = useMemo(() => {
@@ -199,22 +199,25 @@ export default function ComponentBrowserPage() {
   };
 
   const handleTabChange = (value: string) => {
-    setCurrentTab(value);
-    const currentParams = new URLSearchParams(window.location.search);
-    currentParams.set('tab', value);
+    const newParams = new URLSearchParams(currentSearchParams.toString());
+    newParams.set('tab', value);
     if (value === 'components') {
-      const categoryToSet =
-        selectedCategory ||
-        (registry?.allCategories?.includes('atom') ? 'atom' : registry?.allCategories?.[0]);
+      let categoryToSet = selectedCategory;
+      if (!categoryToSet || !registry?.allCategories?.includes(categoryToSet)) {
+        categoryToSet = registry?.allCategories?.includes('atom')
+          ? 'atom'
+          : registry?.allCategories?.[0] || null;
+      }
+
       if (categoryToSet) {
-        currentParams.set('category', categoryToSet);
+        newParams.set('category', categoryToSet);
       } else {
-        currentParams.delete('category');
+        newParams.delete('category');
       }
     } else {
-      currentParams.delete('category');
+      newParams.delete('category');
     }
-    router.push(`?${currentParams.toString()}`);
+    router.push(`?${newParams.toString()}`);
   };
 
   if (isLoadingRegistry) {

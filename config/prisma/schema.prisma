@@ -113,6 +113,7 @@ model CampaignWizardSubmission {
   user                 User?                 @relation(fields: [userId], references: [id])
   creativeAssets       CreativeAsset[]
   creativeRequirements CreativeRequirement[]
+  brandLiftStudies     BrandLiftStudy[]
 }
 
 model PrimaryContact {
@@ -433,3 +434,148 @@ model StripeEvent {
   @@map("stripe_events") // Optional: specify table name
 }
 // --- END DB-2 ---
+
+//
+// Brand Lift Feature Models
+//
+
+enum BrandLiftStudyStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  COLLECTING
+  COMPLETED
+  ARCHIVED
+}
+
+enum SurveyQuestionType {
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+}
+
+enum SurveyApprovalCommentStatus {
+  OPEN
+  RESOLVED
+}
+
+enum SurveyOverallApprovalStatus {
+  PENDING_REVIEW
+  CHANGES_REQUESTED
+  APPROVED
+  SIGNED_OFF
+}
+
+model BrandLiftStudy {
+  id                String                  @id @default(cuid())
+  name              String
+  campaignId        Int                     // Corrected to Int to match CampaignWizardSubmission.id
+  campaign          CampaignWizardSubmission @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  status            BrandLiftStudyStatus    @default(DRAFT)
+  funnelStage       String
+  primaryKpi        String
+  secondaryKpis     String[]
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  cintProjectId     String?                 @unique
+  cintTargetGroupId String?                 @unique
+
+  questions         SurveyQuestion[]
+  responses         SurveyResponse[]
+  reports           BrandLiftReport[]
+  approvalStatus    SurveyApprovalStatus?   // This is the one-to-one relation field, Prisma handles the foreign key implicitly if not named
+  
+  @@index([campaignId])
+  @@index([status])
+}
+
+model SurveyQuestion {
+  id               String               @id @default(cuid())
+  studyId          String
+  study            BrandLiftStudy       @relation(fields: [studyId], references: [id], onDelete: Cascade)
+  text             String
+  questionType     SurveyQuestionType
+  order            Int
+  isRandomized     Boolean?             @default(false)
+  isMandatory      Boolean?             @default(true)
+  kpiAssociation   String?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  options          SurveyOption[]
+  approvalComments SurveyApprovalComment[]
+
+  @@index([studyId])
+}
+
+model SurveyOption {
+  id         String         @id @default(cuid())
+  questionId String
+  question   SurveyQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  text       String
+  imageUrl   String?
+  order      Int
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@index([questionId])
+}
+
+model SurveyResponse {
+  id             String   @id @default(cuid())
+  studyId        String
+  study          BrandLiftStudy @relation(fields: [studyId], references: [id], onDelete: Cascade)
+  respondentId   String
+  cintResponseId String?  @unique
+  isControlGroup Boolean
+  answers        Json     // Example: [{ "questionId": "cuid...", "optionIds": ["cuid..."], "textAnswer": null }]
+  demographics   Json?    // Example: { "age": "18-24", "gender": "Female" }
+  respondedAt    DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([studyId])
+  @@index([respondentId])
+}
+
+model BrandLiftReport {
+  id              String   @id @default(cuid())
+  studyId         String   @unique
+  study           BrandLiftStudy @relation(fields: [studyId], references: [id], onDelete: Cascade)
+  generatedAt     DateTime @default(now())
+  metrics         Json?    // As defined in BrandLiftReportData in src/types/brand-lift.ts
+  recommendations String[]
+  status          String   @default("PENDING") // PENDING, GENERATED, ERROR
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model SurveyApprovalStatus {
+  id                 String                      @id @default(cuid())
+  studyId            String                      @unique // Foreign key for one-to-one with BrandLiftStudy
+  study              BrandLiftStudy              @relation(fields: [studyId], references: [id], onDelete: Cascade)
+  status             SurveyOverallApprovalStatus @default(PENDING_REVIEW)
+  requestedSignOff   Boolean                     @default(false)
+  signedOffBy        String?                     // Clerk User ID
+  signedOffAt        DateTime?
+  createdAt          DateTime                    @default(now())
+  updatedAt          DateTime                    @updatedAt
+
+  comments           SurveyApprovalComment[]     // All comments related to this approval status
+}
+
+model SurveyApprovalComment {
+  id               String                      @id @default(cuid())
+  approvalStatusId String                      // Foreign key to SurveyApprovalStatus
+  approvalStatus   SurveyApprovalStatus        @relation(fields: [approvalStatusId], references: [id], onDelete: Cascade)
+  questionId       String?                     // Optional: if comment is on a specific question
+  question         SurveyQuestion?             @relation(fields: [questionId], references: [id], onDelete: Cascade, map: "SurveyApprovalComment_questionId_fkey")
+  authorId         String                      // Clerk User ID (maps to User.clerkId if a direct relation is set up, otherwise just a string)
+  text             String
+  status           SurveyApprovalCommentStatus @default(OPEN)
+  createdAt        DateTime                    @default(now())
+  updatedAt        DateTime                    @updatedAt
+
+  @@index([approvalStatusId])
+  @@index([questionId])
+  @@index([authorId])
+}

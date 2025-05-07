@@ -9,6 +9,7 @@ import { Icon } from '@/components/ui/icon/icon';
 import { CalendarUpcoming, type CalendarEvent } from '@/components/ui/calendar-upcoming';
 import { UpcomingCampaignsTable, type CampaignData } from '@/components/ui/card-upcoming-campaign';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // (User interface definition can likely be removed if fetched internally)
 // interface DashboardUser {
@@ -122,10 +123,6 @@ export default function ClientDashboard() {
     return <div className="p-4 text-red-600">Error loading dashboard data: {fetchError}</div>;
   }
 
-  if (isLoadingData && isLoaded) {
-    return <div className="p-4">Loading dashboard data...</div>;
-  }
-
   if (isLoaded && !user) {
     return <div className="p-4">Redirecting to sign in...</div>;
   }
@@ -147,30 +144,69 @@ export default function ClientDashboard() {
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Calendar Card */}
+        {/* Calendar Card - Header Removed */}
         <Card className="h-full flex flex-col">
-          <CardHeader>
+          {/* <CardHeader>
             <CardTitle>Upcoming Schedule</CardTitle>
-          </CardHeader>
-          <CardContent className="flex-grow p-0">
-            {hasEvents ? (
+          </CardHeader> */}
+          <CardContent className="flex-grow p-4">
+            {isLoadingData ? (
+              <div className="space-y-3">
+                <Skeleton className="h-8 w-3/4" />
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-6 w-5/6" />
+              </div>
+            ) : hasEvents ? (
               <CalendarUpcoming events={events} />
             ) : (
-              !isLoadingData && <p className="p-4 text-muted-foreground">No upcoming events.</p>
+              <div className="flex flex-col items-center justify-center h-full text-center min-h-[200px]">
+                <Icon
+                  iconId="faCalendarDaysLight"
+                  className="w-16 h-16 text-muted-foreground mb-4"
+                />
+                <h3 className="text-xl font-semibold text-primary mb-1">Calendar Clear!</h3>
+                <p className="text-muted-foreground">
+                  No upcoming campaigns. Why not plan something new?
+                </p>
+              </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Campaigns Table Card */}
+        {/* Campaigns Table Card - Header Removed */}
         <Card className="h-full flex flex-col">
-          <CardHeader>
+          {/* <CardHeader>
             <CardTitle>Upcoming Campaigns</CardTitle>
-          </CardHeader>
+          </CardHeader> */}
           <CardContent className="flex-grow p-0">
-            {hasCampaigns ? (
-              <UpcomingCampaignsTable campaigns={campaigns} onRowClick={handleCampaignClick} />
+            {isLoadingData ? (
+              <div className="p-4 space-y-3">
+                {/* Skeleton for table headers */}
+                <div className="flex justify-between mb-2">
+                  <Skeleton className="h-5 w-1/4" />
+                  <Skeleton className="h-5 w-1/6" />
+                  <Skeleton className="h-5 w-1/6" />
+                  <Skeleton className="h-5 w-1/6" />
+                  <Skeleton className="h-5 w-1/6" />
+                </div>
+                {/* Skeleton for table rows */}
+                {[...Array(3)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="flex justify-between items-center py-2 border-b border-muted last:border-b-0"
+                  >
+                    <Skeleton className="h-5 w-1/3" />
+                    <Skeleton className="h-5 w-1/5" />
+                    <Skeleton className="h-5 w-1/5" />
+                    <Skeleton className="h-5 w-1/6" />
+                    <Skeleton className="h-5 w-1/6" />
+                  </div>
+                ))}
+              </div>
             ) : (
-              !isLoadingData && <p className="p-4 text-muted-foreground">No upcoming campaigns.</p>
+              // UpcomingCampaignsTable will render its own empty state if campaigns array is empty
+              <UpcomingCampaignsTable campaigns={campaigns} onRowClick={handleCampaignClick} />
             )}
           </CardContent>
         </Card>

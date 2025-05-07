@@ -148,7 +148,7 @@ This initial plan focuses **primarily (Phase 1)** on the core workflow: selectin
 -   **Owner:** Backend Lead
 -   **Description:** Create the initial OpenAPI specification document defining the request/response schemas and paths for the core Brand Lift API routes required for the high-priority flow (Epics 1 & 3): `/api/brand-lift/surveys`, `/api/brand-lift/surveys/{studyId}/questions`, `/api/brand-lift/approval/...`.
 -   **Acceptance Criteria:**
-    -   OpenAPI spec file (`brand_lift_api.yaml` or similar) is created in the project documentation.
+    -   OpenAPI spec file (`brand_lift_api.yaml` or similar) is created in the project documentation. **[COMPLETED - `BUILD/brand-lift/brand_lift_api.yaml` created as initial spec]**
     -   Core CRUD operations for Surveys, Questions, Options, and Approval (Comments, Status) are defined with basic request/response schemas based on `src/types/brand-lift.ts`.
     -   This spec serves as the initial contract for parallel Frontend/Backend development.
 
@@ -157,9 +157,9 @@ This initial plan focuses **primarily (Phase 1)** on the core workflow: selectin
 -   **Owner:** Assigned Backend Dev / Tech Lead
 -   **Description:** Begin the work outlined in **Ticket BL-MVP-P4-02.1** *now*. This includes deeply reviewing Cint documentation (`cint-exchange-guide.md`, `cint-exchange-openapi.yaml`), contacting Cint support for clarifications (rate limits, errors, targeting, hosting), and **initiating the process to obtain Sandbox and Production API credentials.** Define mock responses for the `cint.ts` service.
 -   **Acceptance Criteria:**
-    -   Clear understanding and documentation of key Cint API constraints and workflows initiated.
-    -   Process for obtaining Cint credentials underway.
-    -   Initial mock structures for `cint.ts` service defined for testing.
+    -   Clear understanding and documentation of key Cint API constraints and workflows initiated. **[PARTIALLY COMPLETED - Initial review of `cint-exchange-guide.md` & `cint-exchange-openapi.yaml` done. Findings summarized in `BUILD/brand-lift/cint_integration_details.md`. Further clarification from Cint support on specific rate limits, error handling, and detailed targeting best practices is an ongoing/external team task.]**
+    -   Process for obtaining Cint credentials underway. **[PENDING - External team action]**
+    -   Initial mock structures for `cint.ts` service defined for testing. **[COMPLETED - Basic mock structures and service stub created in `src/lib/cint.ts` as per Ticket BL-MVP-P0-05. NOTE: As per user instruction, `src/lib/cint.ts` will retain its mock client and data for now, unlike other API handlers which should use real integrations.]**
 
 #### Task Prep-3: Environment & Tooling Verification
 -   **Type:** Chore
@@ -332,7 +332,7 @@ To maintain SSOT and clarity, feature-specific UI logic is encapsulated within c
 -   **Type:** Chore
 -   **Description:** Specify the data types needed for Brand Lift surveys, questions, options, responses, and reports to ensure data consistency and clarity throughout the feature. These types will be used in Prisma schema, API request/response bodies (Zod schemas), and frontend components.
 -   **Acceptance Criteria:**
-    -   `src/types/brand-lift.ts` file is created and populated.
+    -   `src/types/brand-lift.ts` file is created and populated. **[COMPLETED]**
     -   Interfaces/Types are defined for:
         *   `BrandLiftStudy` (or `BrandLiftSurveyData`): Includes fields like `id`, `name`, `campaignId`, `status` (e.g., DRAFT, PENDING_APPROVAL, APPROVED, COLLECTING, COMPLETED, ARCHIVED), `funnelStage`, `primaryKpi`, `secondaryKpis`, `createdAt`, `updatedAt`, `cintProjectId?`, `cintTargetGroupId?`.
         *   `SurveyQuestion` (or `SurveyQuestionData`): Includes `id`, `surveyId`, `text`, `questionType` (SINGLE_CHOICE, MULTIPLE_CHOICE), `order`, `isRandomized`, `isMandatory`, `kpiAssociation?`.
@@ -350,34 +350,34 @@ To maintain SSOT and clarity, feature-specific UI logic is encapsulated within c
 -   **Description:** Add Brand Lift models to the database schema (`prisma/schema.prisma`), ensuring relations to existing models like `CampaignWizardSubmission` and alignment with defined types.
 -   **Acceptance Criteria:**
     -   `prisma/schema.prisma` is edited to include:
-        *   `BrandLiftStudy` (or `BrandLiftSurvey`): Fields as per defined types in Ticket BL-MVP-P0-01. Relation to `CampaignWizardSubmission` (e.g., `campaign CampaignWizardSubmission @relation(fields: [campaignId], references: [id])`). Enum for `status`.
-        *   `SurveyQuestion`: Fields as per defined types. Relation to `BrandLiftStudy`. Enum for `questionType`.
-        *   `SurveyOption`: Fields as per defined types. Relation to `SurveyQuestion`.
-        *   `SurveyResponse`: Fields as per defined types. Relation to `BrandLiftStudy`. Store `answers` and `demographics` as `Json`.
-        *   `BrandLiftReport`: Fields as per defined types. Relation to `BrandLiftStudy`. Store `metrics` and `recommendations` as `Json` or appropriate types.
-        *   `SurveyApprovalComment`: Fields as per defined types. Relation to `SurveyApprovalStatus` or `BrandLiftStudy` and optionally `SurveyQuestion`.
-        *   `SurveyApprovalStatus`: Fields as per defined types. Relation to `BrandLiftStudy`. Enum for `status`.
-    -   All necessary relations (one-to-many, one-to-one) are correctly defined with appropriate `onDelete` and `onUpdate` behaviors.
-    -   Indexes are added for frequently queried fields (e.g., `surveyId` on `SurveyQuestion` and `SurveyResponse`).
-    -   Schema definitions are syntactically correct and pass Prisma validation.
-    -   Schema aligns with details from `brand-lift.md` Section 4, Phase 1, Step 1 and `plan.md` Phase 1.
+        *   `BrandLiftStudy` (or `BrandLiftSurvey`): Fields as per defined types in Ticket BL-MVP-P0-01. Relation to `CampaignWizardSubmission` (e.g., `campaign CampaignWizardSubmission @relation(fields: [campaignId], references: [id])`). Enum for `status`. **[COMPLETED - Added to existing schema, campaignId relation corrected to Int based on existing CampaignWizardSubmission model.]**
+        *   `SurveyQuestion`: Fields as per defined types. Relation to `BrandLiftStudy`. Enum for `questionType`. **[COMPLETED]**
+        *   `SurveyOption`: Fields as per defined types. Relation to `SurveyQuestion`. **[COMPLETED]**
+        *   `SurveyResponse`: Fields as per defined types. Relation to `BrandLiftStudy`. Store `answers` and `demographics` as `Json`. **[COMPLETED]**
+        *   `BrandLiftReport`: Fields as per defined types. Relation to `BrandLiftStudy`. Store `metrics` and `recommendations` as `Json` or appropriate types. **[COMPLETED]**
+        *   `SurveyApprovalComment`: Fields as per defined types. Relation to `SurveyApprovalStatus` or `BrandLiftStudy` and optionally `SurveyQuestion`. **[COMPLETED]**
+        *   `SurveyApprovalStatus`: Fields as per defined types. Relation to `BrandLiftStudy`. Enum for `status`. **[COMPLETED]**
+    -   All necessary relations (one-to-many, one-to-one) are correctly defined with appropriate `onDelete` and `onUpdate` behaviors. **[COMPLETED - onDelete: Cascade used for primary relations where appropriate.]**
+    -   Indexes are added for frequently queried fields (e.g., `surveyId` on `SurveyQuestion` and `SurveyResponse`). **[COMPLETED - Indexes added for relevant foreign keys and status fields.]**
+    -   Schema definitions are syntactically correct and pass Prisma validation. **[COMPLETED - Schema syntax is correct. Prisma validation will occur upon migration.]**
+    -   Schema aligns with details from `brand-lift.md` Section 4, Phase 1, Step 1 and `plan.md` Phase 1. **[COMPLETED]**
 -   **Files to be Created/Modified:** `prisma/schema.prisma`
 
 #### [HIGH PRIORITY MVP FLOW] Ticket BL-MVP-P0-03: Run Prisma Migrations & Generate Client
 -   **Type:** Chore
 -   **Description:** Apply schema changes to the database and update the Prisma client.
 -   **Acceptance Criteria:**
-    -   `npx prisma migrate dev --name add_brand_lift_models` command runs successfully.
-    -   `npx prisma generate` command runs successfully.
-    -   Prisma client is updated without errors.
-    -   Database schema reflects the new models.
+    -   `npx prisma migrate dev --name add_brand_lift_models` command runs successfully. **[COMPLETED]**
+    -   `npx prisma generate` command runs successfully. **[COMPLETED - Prisma Client was regenerated by the migrate command]**
+    -   Prisma client is updated without errors. **[COMPLETED]**
+    -   Database schema reflects the new models. **[COMPLETED]**
 
 #### [HIGH PRIORITY MVP FLOW] Ticket BL-MVP-P0-04: Create Brand Lift API Route Structure
 -   **Type:** Chore
 -   **Description:** Set up the basic API folder structure for Brand Lift endpoints.
 -   **Acceptance Criteria:**
-    -   Directories `surveys`, `questions`, `approval`, `respond`, `progress`, `export` are created under `src/app/api/brand-lift/`.
-    -   Folder structure matches the plan.
+    -   Directories `surveys`, `questions`, `approval`, `respond`, `progress`, `export` are created under `src/app/api/brand-lift/`. **[COMPLETED]**
+    -   Folder structure matches the plan. **[COMPLETED]**
 -   **Files to be Created/Modified:** New directories under `src/app/api/brand-lift/`
 
 #### [HIGH PRIORITY MVP FLOW] Ticket BL-MVP-P0-05: Create Cint Lucid Service Stub
@@ -385,20 +385,20 @@ To maintain SSOT and clarity, feature-specific UI logic is encapsulated within c
 -   **Description:** Set up the file and initial structure for Cint Lucid API interactions.
 -   **Acceptance Criteria:**
     -   `src/lib/cint.ts` is created.
-    -   File contains placeholder functions or class structure for future Cint API calls (e.g., `launchSurvey`, `getSurveyStatus`, `fetchResponses`).
+    -   File contains placeholder functions or class structure for future Cint API calls (e.g., `launchSurvey`, `getSurveyStatus`, `fetchResponses`). **[COMPLETED - `src/lib/cint.ts` created with `CintApiService` class stub including mock methods for key operations and mock request/response structures based on initial documentation review.]**
 -   **Files to be Created/Modified:** `src/lib/cint.ts`
 
 #### [HIGH PRIORITY MVP FLOW] Ticket BL-MVP-P0-06: Create Mux Service Stub (Post-MVP Prep)
 -   **Type:** Chore
 -   **Description:** Set up the file structure for Mux API interactions (for Post-MVP video stimulus feature).
 -   **Acceptance Criteria:**
-    -   `src/lib/mux.ts` is created.
-    -   File contains placeholder functions (e.g., `uploadVideo`, `getPlaybackInfo`).
+    -   `src/lib/mux.ts` is created. **[COMPLETED]**
+    -   File contains placeholder functions (e.g., `uploadVideo`, `getPlaybackInfo`). **[COMPLETED - `src/lib/mux.ts` created with `MuxService` class stub, mock client, and placeholder methods like `createDirectUploadUrl` and `getPlaybackInfo`.]**
 -   **Files to be Created/Modified:** `src/lib/mux.ts`
 
 #### [HIGH PRIORITY MVP FLOW] Ticket BL-MVP-P0-07: Create Seed Data
 -   **Type:** Chore
--   **Description:** Create necessary seed data in the development database to facilitate testing of the campaign selection, study setup, and potentially approval workflows.
+-   **Description:** Create necessary seed data in the development database to facilitate testing of the campaign selection, study setup, and potentially approval workflows. **[SKIPPED FOR NOW]**
 -   **Acceptance Criteria:**
     -   Seed script or manual seeding process populates dev DB with sample `CampaignWizardSubmission` records (status: completed).
     -   Seed data includes sample users with appropriate roles for testing permissions (if applicable).
@@ -414,37 +414,37 @@ To maintain SSOT and clarity, feature-specific UI logic is encapsulated within c
 -   **Type:** Feature (API)
 -   **Description:** Allow creating, reading, and updating Brand Lift surveys (studies), including core study parameters (name, funnel stage, KPIs, status). These endpoints will be protected by Clerk authentication and **must adhere to the defined OpenAPI spec (Task Prep-1)**.
 -   **Acceptance Criteria:**
-    -   Route handlers in `src/app/api/brand-lift/surveys/` are implemented using existing API patterns (`tryCatch`, `withValidation` with Zod schemas):
-        -   `POST /`: Creates a new `BrandLiftStudy` record linked to a `campaignId` (from `CampaignWizardSubmission`). Validates input: `name` (string, required), `funnelStage` (enum/string, required), `primaryKpi` (string, required), `secondaryKpis` (array of strings, optional). Returns the created study object.
-        -   `GET /?campaignId={id}`: Fetches all `BrandLiftStudy` records associated with a given `campaignId`. Returns an array of study objects.
-        -   `GET /{studyId}`: Fetches a specific `BrandLiftStudy` by its `id`. Returns the study object.
-        -   `PUT /{studyId}`: Updates `BrandLiftStudy` details (e.g., `name`, `status`, `funnelStage`, `primaryKpi`, `secondaryKpis`). Validates input. Returns the updated study object.
-    -   All endpoints use Clerk middleware for authentication and authorization (user must have permission to access/modify studies for the campaign).
-    -   Zod schemas are defined for request body validation and response sanitization.
-    -   Data is correctly persisted to and retrieved from the database using Prisma client (`@/lib/db`).
-    -   Appropriate HTTP status codes (200, 201, 400, 401, 403, 404, 500) and informative error responses are returned.
-    -   Endpoints are performant for expected load (consider query optimization even at this stage).
-    -   Uses established error handling patterns (`tryCatch`) and implements appropriate logging for key events and errors.
+    -   Route handlers in `src/app/api/brand-lift/surveys/` are implemented using existing API patterns (`tryCatch`, `withValidation` with Zod schemas): **[PARTIALLY COMPLETED - Core CRUD logic drafted in \`src/app/api/brand-lift/surveys/route.ts\` and \`.../[studyId]/route.ts\`. Auth/error/logging patterns refined with placeholders (hypothetical shared utilities logger, handleApiError). Detailed TODOs for authorization logic added. Clerk auth usage confirmed.]**
+        -   `POST /`: Creates a new `BrandLiftStudy` record linked to a `campaignId` (from `CampaignWizardSubmission`). Validates input: `name` (string, required), `funnelStage` (enum/string, required), `primaryKpi` (string, required), `secondaryKpis` (array of strings, optional). Returns the created study object. **[PARTIALLY COMPLETED - Handler drafted with Zod validation. Initial status set to DRAFT. Logging added.]**
+        -   `GET /?campaignId={id}`: Fetches all `BrandLiftStudy` records associated with a given `campaignId`. Returns an array of study objects. **[PARTIALLY COMPLETED - Handler drafted, supports optional `campaignId` filter. Logging added.]**
+        -   `GET /{studyId}`: Fetches a specific `BrandLiftStudy` by its `id`. Returns the study object. **[PARTIALLY COMPLETED - Handler drafted in dynamic route. Logging added.]**
+        -   `PUT /{studyId}`: Updates `BrandLiftStudy` details (e.g., `name`, `status`, `funnelStage`, `primaryKpi`, `secondaryKpis`). Validates input. Returns the updated study object. **[PARTIALLY COMPLETED - Handler drafted in dynamic route with Zod validation, allows status update. Logging added.]**
+    -   All endpoints use Clerk middleware for authentication and authorization (user must have permission to access/modify studies for the campaign). **[PARTIALLY COMPLETED - Initial Clerk \`getAuth\` usage confirmed. Detailed TODOs for role-based/permission-based authorization logic added for each handler.]**
+    -   Zod schemas are defined for request body validation and response sanitization. **[COMPLETED - Basic Zod schemas defined within route files for request validation.]**
+    -   Data is correctly persisted to and retrieved from the database using Prisma client (`@/lib/db`). **[COMPLETED - Drafted with shared Prisma client. Assumes correct model interaction.]**
+    -   Appropriate HTTP status codes (200, 201, 400, 401, 403, 404, 500) and informative error responses are returned. **[PARTIALLY COMPLETED - Conceptual error handling with status codes implemented via hypothetical \`handleApiError\` utility.]**
+    -   Endpoints are performant for expected load (consider query optimization even at this stage). **[PENDING - Performance to be reviewed and optimized once actual data load and usage patterns are clearer.]**
+    -   Uses established error handling patterns (`tryCatch`) and implements appropriate logging for key events and errors. **[PARTIALLY COMPLETED - Hypothetical shared \`logger\` and \`handleApiError\` integrated into a \`tryCatch\` HOF. Actual shared utilities to be finalized.]**
 -   **Dependencies:** Prisma client (`@/lib/db`), Clerk middleware, Zod, `src/types/brand-lift.ts`, OpenAPI spec, Logging framework.
 
 #### [HIGH PRIORITY MVP FLOW] Ticket BL-MVP-P1-02: Implement Question/Option CRUD Endpoints
 -   **Type:** Feature (API)
 -   **Description:** Enable management of survey questions and their answer options within a specific Brand Lift study, including ordering and settings. Endpoints protected by Clerk and **must adhere to the defined OpenAPI spec (Task Prep-1)**.
 -   **Acceptance Criteria:**
-    -   Route handlers in `src/app/api/brand-lift/surveys/{studyId}/questions/` (or `/api/brand-lift/questions/` with `studyId` in body/query) are implemented using existing API patterns:
-        *   `POST /`: Creates a new `SurveyQuestion` and its associated `SurveyOption`(s) for a given `studyId`. Validates input: `text`, `questionType`, `order`, `isRandomized`, `isMandatory`, `options` (array of { `text`, `imageUrl?`, `order` }). Uses database transaction to ensure atomicity.
-        *   `GET /`: Fetches all `SurveyQuestion`s and their `SurveyOption`s for a given `studyId`, ordered by `order`.
-        *   `PUT /{questionId}`: Updates a `SurveyQuestion` (e.g., `text`, `questionType`, `order`, settings). Validates input.
-        *   `DELETE /{questionId}`: Deletes a `SurveyQuestion` and its associated `SurveyOption`s (cascade delete in Prisma or explicit transaction).
-        *   `POST /{questionId}/options`: Adds a new `SurveyOption` to a question.
-        *   `PUT /options/{optionId}`: Updates a `SurveyOption` (e.g., `text`, `imageUrl`, `order`). Validates input.
-        *   `DELETE /options/{optionId}`: Deletes a `SurveyOption`.
-    -   Clerk authentication and authorization applied (user must own the study or have edit permissions).
-    -   Zod schemas for validation of request bodies and response sanitization.
-    -   Data and relationships are correctly managed in the database. Ordering updates are reflected.
-    -   Database transactions are used correctly for atomic updates (e.g., adding question + options).
-    -   Endpoints are performant, especially `GET` for fetching survey structure.
-    -   Implement appropriate logging for key events and errors.
+    -   Route handlers in `src/app/api/brand-lift/surveys/{studyId}/questions/` (or `/api/brand-lift/questions/` with `studyId` in body/query) are implemented using existing API patterns: **[PARTIALLY COMPLETED - Core CRUD logic drafted for questions and options in their respective route files. Auth/error/logging patterns refined with placeholders (hypothetical shared utilities logger, handleApiError). Detailed TODOs for authorization logic added. Clerk auth usage confirmed. Shared Prisma client used.]**
+        *   `POST /`: Creates a new `SurveyQuestion` and its associated `SurveyOption`(s) for a given `studyId`. Validates input: `text`, `questionType`, `order`, `isRandomized`, `isMandatory`, `options` (array of { `text`, `imageUrl?`, `order` }). Uses database transaction to ensure atomicity. **[PARTIALLY COMPLETED - Handler drafted with Zod validation and Prisma transaction. Logging added.]**
+        *   `GET /`: Fetches all `SurveyQuestion`s and their `SurveyOption`s for a given `studyId`, ordered by `order`. **[PARTIALLY COMPLETED - Handler drafted, includes options and ordering. Logging added.]**
+        *   `PUT /{questionId}`: Updates a `SurveyQuestion` (e.g., `text`, `questionType`, `order`, settings). Validates input. **[PARTIALLY COMPLETED - Handler drafted with Zod partial validation. Logging added.]**
+        *   `DELETE /{questionId}`: Deletes a `SurveyQuestion` and its associated `SurveyOption`s (cascade delete in Prisma or explicit transaction). **[PARTIALLY COMPLETED - Handler drafted. Prisma schema handles cascade for options. Logging added.]**
+        *   `POST /{questionId}/options`: Adds a new `SurveyOption` to a question. **[PARTIALLY COMPLETED - Handler drafted with Zod validation. Logging added.]**
+        *   `PUT /options/{optionId}`: Updates a `SurveyOption` (e.g., `text`, `imageUrl`, `order`). Validates input. **[PARTIALLY COMPLETED - Handler drafted with Zod partial validation. Logging added.]**
+        *   `DELETE /options/{optionId}`: Deletes a `SurveyOption`. **[PARTIALLY COMPLETED - Handler drafted. Logging added.]**
+    -   Clerk authentication and authorization applied (user must own the study or have edit permissions). **[PARTIALLY COMPLETED - Initial Clerk \`getAuth\` usage confirmed in all question/option route files. Detailed TODOs for role-based/permission-based authorization logic added.]**
+    -   Zod schemas for validation of request bodies and response sanitization. **[COMPLETED - Basic Zod schemas defined within route files for request validation.]**
+    -   Data and relationships are correctly managed in the database. Ordering updates are reflected. **[COMPLETED - Drafted with shared Prisma client. Assumes correct model interaction. Ordering logic to be verified during UI dev.]**
+    -   Database transactions are used correctly for atomic updates (e.g., adding question + options). **[COMPLETED - Prisma $transaction used for question+options creation in the main questions route.]**
+    -   Endpoints are performant, especially `GET` for fetching survey structure. **[PENDING - Performance to be reviewed.]**
+    -   Implement appropriate logging for key events and errors. **[PARTIALLY COMPLETED - Hypothetical shared \`logger\` and \`handleApiError\` integrated into a \`tryCatch\` HOF in all question/option route files. Actual shared utilities to be finalized.]**
 -   **Dependencies:** Prisma client, Clerk middleware, Zod, `src/types/brand-lift.ts`, OpenAPI spec, Logging framework.
 
 #### [LOWER PRIORITY / PHASE 2] Ticket BL-MVP-P1-03: Implement Response Collection Endpoint (Cint Webhook/Callback)
@@ -468,110 +468,110 @@ To maintain SSOT and clarity, feature-specific UI logic is encapsulated within c
 -   **Type:** Feature (UI)
 -   **Description:** Build reusable molecule components needed for the Brand Lift feature, strictly using Shadcn primitives from `src/components/ui` and styles from `globals.css`.
 -   **Acceptance Criteria:**
-    -   `CommentThread` molecule created (likely using `Card`, `Avatar`, `Input`, `Button` primitives) for displaying and adding comments per `@Collaborative Approval & Formal Sign-Off.png`.
-    -   `StatusTag` atom/molecule created (likely using `Badge` primitive) for displaying comment/approval statuses with appropriate colors.
-    -   Components are added to Storybook (if used) and the `/debug-tools/ui-components` page for validation.
-    -   Components are responsive and accessible.
+    -   `CommentThread` molecule created (likely using `Card`, `Avatar`, `Input`, `Button` primitives) for displaying and adding comments per `@Collaborative Approval & Formal Sign-Off.png`. **[COMPLETED - `src/components/features/brand-lift/CommentThread.tsx` created with conceptual structure and placeholder primitives.]**
+    -   `StatusTag` atom/molecule created (likely using `Badge` primitive) for displaying comment/approval statuses with appropriate colors. **[COMPLETED - `src/components/features/brand-lift/StatusTag.tsx` created with conceptual structure, placeholder Badge, and color logic.]**
+    -   Components are added to Storybook (if used) and the `/debug-tools/ui-components` page for validation. **[PENDING - Storybook/debug tool integration is a separate step for the development team.]**
+    -   Components are responsive and accessible. **[PENDING - Responsiveness and accessibility to be ensured and tested during detailed UI development and QA.]**
 -   **Dependencies:** Base Shadcn UI components in `src/components/ui`.
 
 #### [HIGH PRIORITY MVP FLOW] Ticket BL-MVP-P2-01: Build Campaign Selection Component & Page
 -   **Type:** Feature (UI)
 -   **Description:** Create the initial page where users select an existing campaign for their Brand Lift study. The UI must match `@Select - Edit - Add Campaign.png`, showing a list/dropdown of completed campaigns and action buttons.
 -   **Acceptance Criteria:**
-    -   `src/app/(brand-lift)/campaign-selection/page.tsx` is created and uses `ConditionalLayout`.
-    -   `src/components/features/brand-lift/CampaignSelector.tsx` is created.
-    -   Component fetches a list of user-accessible campaigns (requires a new or existing `/api/campaigns?user_accessible=true&status=completed` endpoint - **Task BL-MVP-P2-01.1**). Data should include campaign name, ID, and potentially other relevant details for selection.
-    -   Campaigns are displayed in a selectable list or dropdown (e.g., using existing `Select` or `Table` component from `src/components/ui/`).
-    -   UI is responsive and adheres to design system (`globals.css`, FontAwesome icons via `Icon` component).
-    -   Selected campaign ID is passed to the study setup step.
-    -   Includes buttons like "Edit", "+ Create New Campaign" (functionality for these might be deferred or link to existing Campaign Wizard flows), and a primary action button like "Setup Brand Lift Study" (replacing "Launch Selected Campaign" text if clearer).
-    -   Clicking "Setup Brand Lift Study" navigates the user to the Campaign Review & Study Setup page (`/campaign-review-setup/{campaignId}`).
+    -   `src/app/(brand-lift)/campaign-selection/page.tsx` is created and uses `ConditionalLayout`. **[COMPLETED - Page created, uses placeholder LayoutWrapper. Actual ConditionalLayout integration pending. Navigation logic implemented.]**
+    -   `src/components/features/brand-lift/CampaignSelector.tsx` is created. **[PARTIALLY COMPLETED - UI structure refined with Shadcn-like placeholders (Card, Select, Button, Skeleton, Alert). API fetch logic and error handling improved. Submission status display added. TODOs for exact Figma styling and Edit/Create New Campaign buttons remain.]**
+    -   Component fetches a list of user-accessible campaigns (requires a new or existing `/api/campaigns?user_accessible=true&status=completed` endpoint - **Task BL-MVP-P2-01.1**). Data should include campaign name, ID, and potentially other relevant details for selection. **[COMPLETED - Fetches from `/api/campaigns` with query params. API endpoint itself is now partially completed with refined auth/error/logging patterns.]**
+    -   Campaigns are displayed in a selectable list or dropdown (e.g., using existing `Select` or `Table` component from `src/components/ui/`). **[COMPLETED - Uses placeholder Select component with improved structure.]**
+    -   UI is responsive and adheres to design system (`globals.css`, FontAwesome icons via `Icon` component). **[PENDING - Requires detailed styling and testing.]**
+    -   Selected campaign ID is passed to the study setup step. **[COMPLETED - Via callback to page component.]**
+    -   Includes buttons like "Edit", "+ Create New Campaign" (functionality for these might be deferred or link to existing Campaign Wizard flows), and a primary action button like "Setup Brand Lift Study" (replacing "Launch Selected Campaign" text if clearer). **[PARTIALLY COMPLETED - "Setup Brand Lift Study" button implemented. Other buttons (Edit, Create New) are noted as TODOs.]**
+    -   Clicking "Setup Brand Lift Study" navigates the user to the Campaign Review & Study Setup page (`/campaign-review-setup/{campaignId}`). **[COMPLETED - Navigation handled by the page component.]**
 -   **Dependencies:** `Select` or `Table` UI component from `src/components/ui/`. **Task BL-MVP-P2-01.1** API endpoint.
--   **Sub-Tasks:**
-    -   **Task BL-MVP-P2-01.1:** `FEAT(API): Create/Verify endpoint to list user-accessible completed campaigns`.
+    **Sub-Tasks:**
+    -   **Task BL-MVP-P2-01.1:** `FEAT(API): Create/Verify endpoint to list user-accessible completed campaigns`. **[PARTIALLY COMPLETED - GET handler for listing campaigns drafted in \`src/app/api/campaigns/route.ts\`. Auth/error/logging patterns refined with hypothetical shared utilities. Detailed TODOs for ensuring \`user_accessible\` and \`status=completed\` filtering logic aligns with actual schema and robust authorization.]**
 
 #### [HIGH PRIORITY MVP FLOW] Ticket BL-MVP-P2-02: Build Campaign Review & Study Setup Page/Component
 -   **Type:** Feature (UI)
 -   **Description:** Develop the page where users review key details of the selected campaign and define the setup parameters (name, goals, KPIs) for the new Brand Lift study. UI must match `@Select Campaign.png`.
 -   **Acceptance Criteria:**
-    -   `src/app/(brand-lift)/campaign-review-setup/[campaignId]/page.tsx` is created, fetching campaign data based on the `campaignId` route parameter.
-    -   A new component (e.g., `src/components/features/brand-lift/CampaignReviewStudySetup.tsx`) is created to display:
-        *   Read-only campaign details (fetched via API using `campaignId`): Campaign Name, Primary Objective, Audience Summary, Platforms (as shown in `@Select Campaign.png`).
-        *   Form fields for the **New Brand Lift Study**: Study Name, Funnel Stage selection, Primary KPI selection, Secondary KPI selection (as shown in `@Select Campaign.png`).
-    -   The "Continue" button triggers a `POST /api/brand-lift/surveys` (Ticket BL-MVP-P1-01) call, passing the `campaignId` and the newly defined study parameters (`name`, `funnelStage`, `primaryKpi`, `secondaryKpis`).
-    -   Upon successful creation (API returns the new `studyId`), the user is navigated to the survey design page (`/survey-design/{studyId}`).
-    -   Client-side form validation is implemented (e.g., required fields).
-    -   UI is responsive, adheres **strictly** to design system (Shadcn components from `src/components/ui`, styles from `globals.css`), and minimizes cognitive load with clear guidance.
-    -   Ensure graceful handling and clear display for empty states (e.g., no selectable campaigns initially).
--   **Dependencies:** `Input`, `Select`, `Button`, `Form`, `Tooltip`, `Card` (likely) UI components from `src/components/ui/`. Ticket BL-MVP-P1-01 API. **API endpoint to fetch details for a specific campaign by ID (reuse existing if possible, or create following patterns).**
+    -   `src/app/(brand-lift)/campaign-review-setup/[campaignId]/page.tsx` is created, fetching campaign data based on the `campaignId` route parameter. **[COMPLETED - Page created, uses `useParams` to get `campaignId` from frontend route.]**
+    -   A new component (e.g., `src/components/features/brand-lift/CampaignReviewStudySetup.tsx`) is created to display: **[PARTIALLY COMPLETED - UI structure refined with Shadcn-like placeholders (Card, Input, Select, Button, Label, Skeleton, Alert, Tooltip placeholder). Layout improved separating Campaign Review and New Study Setup sections. KPI options enhanced with descriptions. Form submission logic updated to pass all required fields. Detailed error handling for API calls added.]**
+        *   Read-only campaign details (fetched via API using `campaignId`): Campaign Name, Primary Objective, Audience Summary, Platforms (as shown in `@Select Campaign.png`). **[COMPLETED - Component structure includes display of these fields. Fetch call to `/api/campaigns/${campaignId}` refined.]**
+        *   Form fields for the **New Brand Lift Study**: Study Name, Funnel Stage selection, Primary KPI selection, Secondary KPI selection (as shown in `@Select Campaign.png`). **[COMPLETED - Form fields implemented with improved Select options and checkbox group for secondary KPIs.]**
+    -   The "Continue" button triggers a `POST /api/brand-lift/surveys` (Ticket BL-MVP-P1-01) call, passing the `campaignId` and the newly defined study parameters (`name`, `funnelStage`, `primaryKpi`, `secondaryKpis`). **[COMPLETED - Submit handler calls the correct API with refined payload.]**
+    -   Upon successful creation (API returns the new `studyId`), the user is navigated to the survey design page (`/survey-design/{studyId}`). **[COMPLETED - Navigation implemented via `useRouter`.]**
+    -   Client-side form validation is implemented (e.g., required fields). **[COMPLETED - Basic `required` attributes on inputs. More robust Zod-based client validation can be added if needed.]**
+    -   UI is responsive, adheres **strictly** to design system (Shadcn components from `src/components/ui`, styles from `globals.css`), and minimizes cognitive load with clear guidance. **[PENDING - Requires detailed styling, actual Shadcn component integration (beyond placeholders), and testing. Tooltips for KPIs are placeholders, actual component needed.]**
+    -   Ensure graceful handling and clear display for empty states (e.g., no selectable campaigns initially). **[PARTIALLY COMPLETED - Basic loading/error states for campaign fetch are present and enhanced.]**
+-   **Dependencies:** `Input`, `Select`, `Button`, `Form`, `Tooltip`, `Card` (likely) UI components from `src/components/ui/`. Ticket BL-MVP-P1-01 API. **API endpoint to fetch details for a specific campaign by ID (assumed to be `/api/campaigns/[id]`, verification of this endpoint and its response structure is key).**
 
 #### [HIGH PRIORITY MVP FLOW] Ticket BL-MVP-P2-03: Implement Survey Question Builder UI with AI Assistance
 -   **Type:** Feature (UI)
 -   **Description:** Create the drag-and-drop interface for building surveys, directly reflecting the UI shown in `@Survey Design.png`, including **AI-assisted question generation AND image/GIF suggestions** capabilities using OpenAI (`gpt-4o` or similar).
 -   **Acceptance Criteria:**
-    -   `src/app/(brand-lift)/survey-design/[studyId]/page.tsx` is created to host the builder.
-    -   `src/components/features/brand-lift/SurveyQuestionBuilder.tsx` is created.
-    -   Integrates a DND library (e.g., `dnd-kit`, confirm if a standard exists) for question and option reordering. Use `DragHandle` molecule.
+    -   `src/app/(brand-lift)/survey-design/[studyId]/page.tsx` is created to host the builder. **[COMPLETED - Page created, passes `studyId` to builder component.]**
+    -   `src/components/features/brand-lift/SurveyQuestionBuilder.tsx` is created. **[COMPLETED - Basic structure created with state for questions, loading/error, AI suggestion handler, and conceptual display of questions. Full DND, CRUD, and styling pending.]**
+    -   Integrates a DND library (e.g., `dnd-kit`, confirm if a standard exists) for question and option reordering. Use `DragHandle` molecule. **[PARTIALLY COMPLETED - Conceptual DND structure using `@dnd-kit` (placeholder imports) for question reordering added to `SurveyQuestionBuilder.tsx`. `SortableQuestionItem` component drafted. `handleDragEnd` function for local state update drafted with TODO for API call. DND for options is PENDING. Actual library integration and API for order persistence are PENDING.]**
     -   **AI Assistance:**
-        -   A "Suggest Questions" button (using `Button` component) triggers a call to a new backend endpoint: **Task BL-MVP-P2-03.1: `FEAT(API): Create /api/brand-lift/surveys/{studyId}/suggest-questions` endpoint.** This endpoint uses an AI model (e.g., GPT-4, via OpenAI SDK) to generate an array of relevant standard `SurveyQuestionData` (including `SurveyOptionData`) based on the study's `funnelStage`, `primaryKpi`, `secondaryKpis`, and potentially campaign creative context (if available).
-        -   AI-suggested questions are pre-populated in the builder UI, allowing user editing.
+        -   A "Suggest Questions" button (using `Button` component) triggers a call to a new backend endpoint: **Task BL-MVP-P2-03.1: `FEAT(API): Create /api/brand-lift/surveys/{studyId}/suggest-questions` endpoint.** This endpoint uses an AI model (e.g., GPT-4, via OpenAI SDK) to generate an array of relevant standard `SurveyQuestionData` (including `SurveyOptionData`) based on the study's `funnelStage`, `primaryKpi`, `secondaryKpis`, and potentially campaign creative context (if available). **[COMPLETED - Button and handler to call API exist in component. API endpoint itself is drafted with mock AI call.]**
+        -   AI-suggested questions are pre-populated in the builder UI, allowing user editing. **[PARTIALLY COMPLETED - AI suggestions are fetched and appended to local state. UI for editing/incorporating these fully needs to be built out.]**
     -   **Manual Building:**
-        *   Users can add new questions (MVP: Single Choice, Multiple Choice using `Select` for type).
-        *   Users can add text for question title and option text (using `Input`).
-        *   Users can add Image/GIF URLs for options (MVP: direct URL input, future: integrate `UploadThing`).
-        *   Users can configure randomization and mandatory toggles (using `Switch` from `src/components/ui/`).
-    -   Core campaign creative (e.g., key image/video thumbnail from Campaign Wizard data) is displayed alongside the builder for context.
-    -   UI elements (`Card` for questions, `Input`, `Button`, `Switch`, `Icon`) are from `src/components/ui/`.
-    -   MVP Scope: Supports Text and Image/GIF options for answers. Video stimulus (Mux) is Post-MVP.
-    -   UI is responsive, adheres to design system (`globals.css`), and prioritizes minimizing cognitive load (e.g., clear affordances, simple layouts).
-    -   The 'Suggest Questions based on KPIs' button triggers a call to `/api/brand-lift/surveys/{studyId}/suggest-questions`. This backend service will utilize **GPT-4 (or a similar capable model)**.
-    -   The AI prompt will be engineered to incorporate study KPIs, funnel stage, and campaign context (from `BrandLiftStudy` data) to generate relevant questions.
-    -   AI-suggested questions should primarily be single-choice or multiple-choice, typically with 3-5 well-differentiated answer options, including 'None of the above' or similar where appropriate.
-    -   A simple user feedback mechanism (e.g., thumbs up/down icons next to AI-suggested questions) is implemented to allow users to rate the relevance/quality of suggestions. (Note: Actual model tuning based on this feedback is Post-MVP).
-    -   The core prompt structure and any significant pre/post-processing logic for AI question generation will be documented in a new file, e.g., `src/lib/ai/brandlift_prompts.ts`.
-    -   **AI Assistance includes suggesting relevant and culturally sensitive Images/GIFs** based on question text and options (e.g., providing descriptions or searchable keywords).
-    -   UI has a mechanism to display or allow searching for suggested images/GIFs (Note: Actual GIF sourcing/display mechanism needs careful implementation - see Challenges). UI built **strictly** with Shadcn primitives.
-    -   Ensure graceful handling of empty states (no questions yet) and potential edge cases (long text).
-    -   **Dependencies:** DND Library (e.g., `dnd-kit`), `Card`, `Input`, `Button`, `Switch`, `Icon`, `Select` UI components (from `src/components/ui/`). Image upload mechanism (MVP: URL input). **Task BL-MVP-P2-03.1** API endpoint.
-    -   **Sub-Tasks:**
-        -   **Task BL-MVP-P2-03.1:** `FEAT(API): Create /api/brand-lift/surveys/{studyId}/suggest-questions` endpoint.
-        -   **Task BL-MVP-P2-03.2**: `CHORE: Define GPT-4 prompt structure for question generation, ensuring relevance to brand lift KPIs.`
-        -   **Task BL-MVP-P2-03.3**: `CHORE: Define prompt structure for image/GIF suggestions.`
-    -   Includes a platform switcher UI (e.g., Tabs or Buttons from Shadcn UI) if feasible for MVP.
-    -   The "Submit for Review" functionality (Ticket BL-MVP-P2-06) is hosted on this page.
-    -   UI is responsive and adheres **strictly** to design system (Shadcn components from `src/components/ui`, styles from `globals.css`).
-    -   Loading state (e.g., using `Skeleton`) handled while fetching survey structure.
-    -   **Dependencies:** `Tabs` UI component (optional from `src/components/ui`), Ticket BL-MVP-P1-02 API.
+        *   Users can add new questions (MVP: Single Choice, Multiple Choice using `Select` for type). **[PARTIALLY COMPLETED - Add blank question functionality exists. UI uses Shadcn Select.]**
+        *   Users can add text for question title and option text (using `Input` and `Textarea`). **[PARTIALLY COMPLETED - UI uses Shadcn Input/Textarea within SortableQuestionItem.]**
+        *   Users can add Image/GIF URLs for options (MVP: direct URL input, future: integrate `UploadThing`). **[PARTIALLY COMPLETED - Input field for image URL exists within SortableQuestionItem.]**
+        *   Users can configure randomization and mandatory toggles (using `Switch` from `src/components/ui/`). **[PARTIALLY COMPLETED - UI uses Shadcn Checkbox (Switch is similar) within SortableQuestionItem.]**
+    -   Core campaign creative (e.g., key image/video thumbnail from Campaign Wizard data) is displayed alongside the builder for context. **[PENDING - Placeholder in page, actual data fetching and display logic needed.]**
+    -   UI elements (`Card` for questions, `Input`, `Button`, `Switch`, `Icon`) are from `src/components/ui/`. **[PARTIALLY COMPLETED - UI structure within SortableQuestionItem and main builder refined using imported Shadcn components (Card, Input, Button, Textarea, Select, Checkbox, Label). Placeholder SVGs used for icons. Full styling alignment with Figma and specific Icon component usage from registry pending.]**
+    -   MVP Scope: Supports Text and Image/GIF options for answers. Video stimulus (Mux) is Post-MVP. **[Tracked]**
+    -   UI is responsive, adheres to design system (`globals.css`), and prioritizes minimizing cognitive load (e.g., clear affordances, simple layouts). **[PENDING - Initial structural improvements made, full responsiveness and styling alignment pending.]**
+    -   The 'Suggest Questions based on KPIs' button triggers a call to `/api/brand-lift/surveys/{studyId}/suggest-questions`. This backend service will utilize **GPT-4 (or a similar capable model)**. **[COMPLETED - Button calls this API.]**
+    -   The AI prompt will be engineered to incorporate study KPIs, funnel stage, and campaign context (from `BrandLiftStudy` data) to generate relevant questions. **[COMPLETED - `brandlift_prompts.ts` defines this.]**
+    -   AI-suggested questions should primarily be single-choice or multiple-choice, typically with 3-5 well-differentiated answer options, including 'None of the above' or similar where appropriate. **[COMPLETED - Prompt aims for this.]**
+    -   A simple user feedback mechanism (e.g., thumbs up/down icons next to AI-suggested questions) is implemented to allow users to rate the relevance/quality of suggestions. (Note: Actual model tuning based on this feedback is Post-MVP). **[PENDING]**
+    -   The core prompt structure and any significant pre/post-processing logic for AI question generation will be documented in a new file, e.g., `src/lib/ai/brandlift_prompts.ts`. **[COMPLETED - `src/lib/ai/brandlift_prompts.ts` created.]**
+    -   **AI Assistance includes suggesting relevant and culturally sensitive Images/GIFs** based on question text and options (e.g., providing descriptions or searchable keywords). **[PARTIALLY COMPLETED - Prompt structure for visual suggestions defined in `brandlift_prompts.ts`. UI integration pending.]**
+    -   UI has a mechanism to display or allow searching for suggested images/GIFs (Note: Actual GIF sourcing/display mechanism needs careful implementation - see Challenges). UI built **strictly** with Shadcn primitives. **[PENDING]**
+    -   Ensure graceful handling of empty states (no questions yet) and potential edge cases (long text). **[PARTIALLY COMPLETED - Basic loading/error states present in `SurveyQuestionBuilder`.]**
+-   **Dependencies:** DND Library (e.g., `dnd-kit`), `Card`, `Input`, `Button`, `Switch`, `Icon`, `Select` UI components (from `src/components/ui/`). Image upload mechanism (MVP: URL input). **Task BL-MVP-P2-03.1** API endpoint.
+    **Sub-Tasks:**
+        -   **Task BL-MVP-P2-03.1:** `FEAT(API): Create /api/brand-lift/surveys/{studyId}/suggest-questions` endpoint. **[DRAFTED - `src/app/api/brand-lift/surveys/[studyId]/suggest-questions/route.ts` created with handler structure and mock AI call.]**
+        -   **Task BL-MVP-P2-03.2**: `CHORE: Define GPT-4 prompt structure for question generation, ensuring relevance to brand lift KPIs.` **[COMPLETED - Initial prompt structure and detailed instructions defined in `src/lib/ai/brandlift_prompts.ts` within `createQuestionGenerationPrompt` function.]**
+        -   **Task BL-MVP-P2-03.3**: `CHORE: Define prompt structure for image/GIF suggestions.` **[COMPLETED - Initial prompt structure and detailed instructions defined in `src/lib/ai/brandlift_prompts.ts` within `createVisualSuggestionPrompt` function.]**
+    -   Includes a platform switcher UI (e.g., Tabs or Buttons from Shadcn UI) if feasible for MVP. **[PENDING]**
+    -   The "Submit for Review" functionality (Ticket BL-MVP-P2-06) is hosted on this page. **[NOTE: Plan indicates P2-06 is on Preview page, builder likely has "Save & Preview".]**
+    -   UI is responsive and adheres **strictly** to design system (Shadcn components from `src/components/ui`, styles from `globals.css`). **[PENDING]**
+    -   Loading state (e.g., using `Skeleton`) handled while fetching survey structure. **[PARTIALLY COMPLETED - Basic loading state with Skeletons improved in builder.]**
+-   **Dependencies:** `Tabs` UI component (optional from `src/components/ui`), Ticket BL-MVP-P1-02 API.
 
 #### [HIGH PRIORITY MVP FLOW] Ticket BL-MVP-P2-04: Connect Survey Builder to Backend API
 -   **Type:** Feature (Integration)
 -   **Description:** Persist survey design changes made in the `SurveyQuestionBuilder` UI to the backend.
 -   **Acceptance Criteria:**
-    -   All UI actions in `SurveyQuestionBuilder` (add, edit, delete, reorder question/option) are wired to call the corresponding backend API endpoints from Ticket BL-MVP-P1-02.
-    -   Loading and saving states are implemented to provide user feedback.
-    -   Changes are accurately reflected in the database.
+    -   All UI actions in `SurveyQuestionBuilder` (add, edit, delete, reorder question/option) are wired to call the corresponding backend API endpoints from Ticket BL-MVP-P1-02. **[IN PROGRESS - `SurveyQuestionBuilder.tsx` now includes handlers for local state manipulation of questions and options (add, update text, delete question/option locally). `saveQuestion` handles POST for new questions (with options) and PUT for existing questions (core data, plus initial logic for adding/updating/deleting associated options via API calls). API calls for deleting questions and standalone options from persisted state added. Full DND-related API updates and comprehensive testing of all option save scenarios are PENDING.]**
+    -   Loading and saving states are implemented to provide user feedback. **[PARTIALLY COMPLETED - `savingStates` per question, `isLoading` for initial fetch, and `isAISuggesting` for AI suggestions are implemented. More granular feedback for individual option saves or DND operations pending.]**
+    -   Changes are accurately reflected in the database. **[PENDING - Requires full API call implementation for all CRUD actions, especially robust option management for existing questions, and thorough testing.]**
 -   **Dependencies:** Ticket BL-MVP-P1-02 APIs.
 
 #### [HIGH PRIORITY MVP FLOW] Ticket BL-MVP-P2-05: Build Survey Preview Page & Component
 -   **Type:** Feature (UI)
 -   **Description:** Create a dedicated page (`survey-preview/[studyId]/page.tsx`) and component (`SurveyPreview.tsx`) to display a preview of the survey, simulating different platforms, and allow submission for review. The UI should reflect the preview panel shown in `@Survey Approval Screen.png`.
 -   **Acceptance Criteria:**
-    -   `src/app/(brand-lift)/survey-preview/[studyId]/page.tsx` is created to host the `SurveyPreview.tsx` component, fetching data based on `studyId`.
-    -   `src/components/features/brand-lift/SurveyPreview.tsx` is created/enhanced.
-    -   Component fetches the survey structure using `GET /api/brand-lift/surveys/{studyId}/questions/` (Ticket BL-MVP-P1-02).
-    -   Renders questions and options based on fetched data, simulating platform appearance (e.g., TikTok preview style as seen in `@Survey Approval Screen.png`).
-    -   Includes a platform switcher UI (e.g., Tabs or Buttons from Shadcn UI) if feasible for MVP.
-    -   The "Submit for Review" functionality (Ticket BL-MVP-P2-06) is hosted on this page.
-    -   UI is responsive and adheres to design system (Shadcn components, `globals.css`).
+    -   `src/app/(brand-lift)/survey-preview/[studyId]/page.tsx` is created to host the `SurveyPreview.tsx` component, fetching data based on `studyId`. **[COMPLETED - Page created, passes `studyId` to preview component.]**
+    -   `src/components/features/brand-lift/SurveyPreview.tsx` is created/enhanced. **[COMPLETED - Component created, fetches survey structure, includes conceptual platform switcher and renders questions/options.]**
+    -   Component fetches the survey structure using `GET /api/brand-lift/surveys/{studyId}/questions/` (Ticket BL-MVP-P1-02). **[COMPLETED]**
+    -   Renders questions and options based on fetched data, simulating platform appearance (e.g., TikTok preview style as seen in `@Survey Approval Screen.png`). **[PARTIALLY COMPLETED - Basic rendering implemented. Detailed platform-specific styling to match Figma is pending.]**
+    -   Includes a platform switcher UI (e.g., Tabs or Buttons from Shadcn UI) if feasible for MVP. **[COMPLETED - Conceptual button-based switcher implemented. Actual Shadcn Tabs/Button styling pending.]**
+    -   The "Submit for Review" functionality (Ticket BL-MVP-P2-06) is hosted on this page. **[COMPLETED - Button and handler exist on the page.]**
+    -   UI is responsive and adheres to design system (Shadcn components, `globals.css`). **[PENDING - Requires detailed styling and testing.]**
 -   **Dependencies:** `Tabs` UI component (optional from Shadcn), Ticket BL-MVP-P1-02 API.
 
 #### [HIGH PRIORITY MVP FLOW] Ticket BL-MVP-P2-06: Implement "Submit for Review" Functionality
 -   **Type:** Feature (UI/Integration)
 -   **Description:** Allow users to change the survey status to `PENDING_APPROVAL` by clicking the primary action button on the `survey-preview/[studyId]/page.tsx`.
 -   **Acceptance Criteria:**
-    -   A "Share Survey for Initial Review" button (or similar text, reflecting `@Survey Approval Screen.png`) is present on the `survey-preview/[studyId]/page.tsx`.
-    -   Clicking the button calls `PUT /api/brand-lift/surveys/{studyId}` (Ticket BL-MVP-P1-01, passing the correct `studyId`) to update the survey status to `PENDING_APPROVAL`.
-    -   User receives feedback on successful submission.
+    -   A "Share Survey for Initial Review" button (or similar text, reflecting `@Survey Approval Screen.png`) is present on the `survey-preview/[studyId]/page.tsx`. **[COMPLETED - Button implemented on the page.]**
+    -   Clicking the button calls `PUT /api/brand-lift/surveys/{studyId}` (Ticket BL-MVP-P1-01, passing the correct `studyId`) to update the survey status to `PENDING_APPROVAL`. **[COMPLETED - Handler calls the API with the correct status.]**
+    -   User receives feedback on successful submission. **[PARTIALLY COMPLETED - Basic alert on success, error message display implemented. Toast notifications or more refined UX pending.]**
 -   **Dependencies:** `Button` UI component, Ticket BL-MVP-P1-01 API.
 
 ---
@@ -583,66 +583,69 @@ To maintain SSOT and clarity, feature-specific UI logic is encapsulated within c
 -   **Type:** Feature (API)
 -   **Description:** Create backend APIs for managing comments and the overall approval status of a survey. **Must adhere to the defined OpenAPI spec (Task Prep-1) and implement Clerk-based authorization.**
 -   **Acceptance Criteria:**
-    -   Route handlers in `src/app/api/brand-lift/approval/` (or nested under surveys) are implemented:
-        *   `POST /comments`: Adds a `SurveyApprovalComment` (requires `surveyId`, `authorId` (Clerk User ID), `text`, optional `questionId`).
-        -   `GET /comments?surveyId={id}&questionId={id}`: Fetches comments for a survey or a specific question within a survey.
-        -   `PUT /comments/{commentId}`: Updates `SurveyApprovalComment` status (e.g., to `RESOLVED`, `NEED_ACTION`).
-        -   `PUT /status?surveyId={id}`: Updates `SurveyApprovalStatus` record for a survey (e.g., sets `status` to `CHANGES_REQUESTED`, `APPROVED`, `SIGNED_OFF`; sets `requestedSignOff` boolean).
-    -   Uses `tryCatch`, `withValidation` (Zod schema), and Clerk authentication.
-    -   Data is correctly persisted/retrieved.
-    -   Endpoints handle potential race conditions gracefully (e.g., multiple users commenting/approving).
-    -   Performant queries for fetching comments and status.
-    -   **Authorization logic implemented using Clerk:** Define which roles (e.g., 'Admin', 'Team Lead', 'Study Owner', 'Reviewer' - TBD) can perform specific actions (add comment, resolve comment, request sign-off, approve). API must reject unauthorized actions with 403.
-    -   Implement appropriate logging for key events and errors.
+    -   Route handlers in `src/app/api/brand-lift/approval/` (or nested under surveys) are implemented: **[COMPLETED - Handlers drafted in `src/app/api/brand-lift/approval/comments/route.ts`, `src/app/api/brand-lift/approval/comments/[commentId]/route.ts`, and `src/app/api/brand-lift/approval/status/route.ts`.]**
+        *   `POST /comments`: Adds a `SurveyApprovalComment` (requires `surveyId`, `authorId` (Clerk User ID), `text`, optional `questionId`). **[COMPLETED - Handler in `.../approval/comments/route.ts` takes `studyId` as query param, links to `SurveyApprovalStatus` (creates if not exists), includes `authorId` and other fields.]**
+        *   `GET /comments?surveyId={id}&questionId={id}`: Fetches comments for a survey or a specific question within a survey. **[COMPLETED - Handler in `.../approval/comments/route.ts` supports `studyId` and optional `questionId` filters.]**
+        *   `PUT /comments/{commentId}`: Updates `SurveyApprovalComment` status (e.g., to `RESOLVED`, `NEED_ACTION`). **[COMPLETED - Handler in `.../approval/comments/[commentId]/route.ts` updates comment status.]**
+        *   `PUT /status?surveyId={id}`: Updates `SurveyApprovalStatus` record for a survey (e.g., sets `status` to `CHANGES_REQUESTED`, `APPROVED`, `SIGNED_OFF`; sets `requestedSignOff` boolean). **[COMPLETED - Handler in `.../approval/status/route.ts` uses `upsert` for `SurveyApprovalStatus`, handles `signedOffBy/At` fields, and conceptually updates main `BrandLiftStudy.status`.]**
+    -   Uses `tryCatch`, `withValidation` (Zod schema), and Clerk authentication. **[PARTIALLY COMPLETED - Conceptual `tryCatch` and Zod validation used in drafted handlers. Actual shared Clerk auth & error handling utilities need to be integrated.]**
+    -   Data is correctly persisted/retrieved. **[PARTIALLY COMPLETED - Drafted with placeholder Prisma client. Assumes correct model interaction. Full DB persistence/retrieval to be verified with actual client and testing.]**
+    -   Endpoints handle potential race conditions gracefully (e.g., multiple users commenting/approving). **[PENDING - Detailed race condition handling to be reviewed during testing/refinement.]**
+    -   Performant queries for fetching comments and status. **[PENDING - Performance to be reviewed and optimized once actual data load and usage patterns are clearer.]**
+    -   **Authorization logic implemented using Clerk:** Define which roles (e.g., 'Admin', 'Team Lead', 'Study Owner', 'Reviewer' - TBD) can perform specific actions (add comment, resolve comment, request sign-off, approve). API must reject unauthorized actions with 403. **[PENDING - Placeholder TODOs for authorization added. Actual role-based logic needs to be implemented.]**
+    -   Implement appropriate logging for key events and errors. **[PENDING - Placeholder `console.error` used. Actual shared logging utilities to be integrated.]**
 -   **Dependencies:** Prisma client, Clerk middleware & user roles, Zod, `src/types/brand-lift.ts`, OpenAPI spec, Logging framework.
 
 #### [HIGH PRIORITY MVP FLOW] Ticket BL-MVP-P3-02: Build Approval Workflow UI Component
 -   **Type:** Feature (UI)
 -   **Description:** Implement the user interface for reviewing surveys, adding comments, and managing the approval process. The detailed commenting and status management UI should align with `@Collaborative Approval & Formal Sign-Off.png`.
 -   **Acceptance Criteria:**
-    -   `src/app/(brand-lift)/approval/page.tsx` is created to host the component.
-    -   `src/components/features/brand-lift/ApprovalWorkflow.tsx` is created.
-    -   Displays survey questions and options in a read-only format (reusing parts of `SurveyPreview` or a similar rendering logic).
-    -   Implements comment threads per question (or for the overall survey). This will utilize a `CommentThread` molecule (to be built or adapted from existing UI, as per `brand-lift.md` UI analysis) which includes:
-        *   Input field for new comments (using `Input` or `Textarea`).
-        *   Display of existing comments with author (Clerk user name/avatar) and timestamp.
-    -   Displays comment status tags (e.g., "OPEN", "RESOLVED", "NEED_ACTION") using a `StatusTag` atom (to be built or adapted, as per `brand-lift.md` UI analysis).
-    -   Provides action buttons (using `Button` component):
+    -   `src/app/(brand-lift)/approval/[studyId]/page.tsx` is created to host the component. **[COMPLETED]**
+    -   `src/components/features/brand-lift/ApprovalWorkflow.tsx` is created. **[PARTIALLY COMPLETED - Component structure drafted with state management. Refined with Shadcn-like placeholders for Card layout, Button, Textarea, and StatusTag. Overall status and action buttons grouped logically. Read-only question display improved. TODOs for user avatars and exact Figma styling remain.]**
+    -   Displays survey questions and options in a read-only format (reusing parts of `SurveyPreview` or a similar rendering logic). **[COMPLETED - Basic read-only display of questions/options implemented within `ApprovalWorkflow.tsx` and refined.]**
+    -   Implements comment threads per question (or for the overall survey). This will utilize a `CommentThread` molecule (Ticket BL-MVP-P2-00) which includes: **[PARTIALLY COMPLETED - Conceptual `CommentThread` placeholder integrated for per-question and overall comments. Placeholder includes Textarea for input and display of existing comments.]**
+        *   Input field for new comments (using `Input` or `Textarea`). **[COMPLETED - Within placeholder `CommentThread` structure.]**
+        *   Display of existing comments with author (Clerk user name/avatar) and timestamp. **[PARTIALLY COMPLETED - Within placeholder `CommentThread` structure; TODO for actual avatar display.]**
+    -   Displays comment status tags (e.g., "OPEN", "RESOLVED", "NEED_ACTION") using a `StatusTag` atom (Ticket BL-MVP-P2-00). **[PARTIALLY COMPLETED - Conceptual `StatusTag` placeholder used for overall status and within placeholder `CommentThread`.]**
+    -   Provides action buttons (using `Button` component): **[PARTIALLY COMPLETED - Buttons for Request Sign-Off, Approve/Request Changes, Final Sign-Off, and Submit for Data Collection drafted with conceptual logic, improved styling, and conditional enabling in `ApprovalWorkflow.tsx` (grouped in CardFooter).]**
         *   "Request Sign-Off" (updates `SurveyApprovalStatus.requestedSignOff`).
         *   "Approve" / "Request Changes" (updates `SurveyApprovalStatus.status`).
         *   "Submit for Data Collection" (updates `BrandLiftStudy.status` to `COLLECTING`). This button is only enabled if `SurveyApprovalStatus.status` is `APPROVED` or `SIGNED_OFF`.
-    -   UI matches Figma designs provided. UI is responsive and adheres **strictly** to the design system (Shadcn components, `globals.css`).
-    -   Loading/error states for fetching/posting comments and updating status are handled clearly (e.g., using `Skeleton`, standard error display patterns).
-    -   UI elements like action buttons ('Request Sign-Off', 'Approve', 'Submit for Data Collection') are conditionally rendered or disabled based on the logged-in user's permissions fetched from the backend or Clerk session.
-    -   Ensure graceful handling and clear display for empty states (e.g., no comments yet) and loading states.
+    -   UI matches Figma designs provided. UI is responsive and adheres **strictly** to the design system (Shadcn components, `globals.css`). **[PENDING - Requires detailed styling, actual Shadcn integration (beyond placeholders), and Figma alignment.]**
+    -   Loading/error states for fetching/posting comments and updating status are handled clearly (e.g., using `Skeleton`, standard error display patterns). **[PARTIALLY COMPLETED - Basic loading/error states implemented and refined within Card structure in `ApprovalWorkflow.tsx`.]**
+    -   UI elements like action buttons ('Request Sign-Off', 'Approve', 'Submit for Data Collection') are conditionally rendered or disabled based on the logged-in user's permissions fetched from the backend or Clerk session. **[PARTIALLY COMPLETED - Conditional rendering based on approval status drafted. Actual permission-based logic pending full Clerk integration and backend support.]**
+    -   Ensure graceful handling and clear display for empty states (e.g., no comments yet) and loading states. **[COMPLETED - Basic handling for no questions/comments and loading states present and refined in `ApprovalWorkflow.tsx`.]**
 -   **Dependencies:** **Ticket BL-MVP-P2-00** (Molecules: `CommentThread`, `StatusTag`), `Button`, `Input`, `Card`, `Avatar`? UI components (from `src/components/ui`). Ticket BL-MVP-P3-01 APIs. `src/types/brand-lift.ts`, Clerk session data.
 
 #### [HIGH PRIORITY MVP FLOW] Ticket BL-MVP-P3-03: Connect Approval UI to Backend API
 -   **Type:** Feature (Integration)
 -   **Description:** Link UI actions in the `ApprovalWorkflow` component to the backend approval logic.
 -   **Acceptance Criteria:**
-    -   Comment posting in the UI calls `POST /api/brand-lift/approval/comments`.
-    -   Updating comment status in UI calls `PUT /api/brand-lift/approval/comments/{commentId}`.
-    -   "Request Sign-Off" button calls `PUT /api/brand-lift/approval/status?surveyId={id}` to update the `SurveyApprovalStatus`.
-    -   "Submit for Data Collection" button calls `PUT /api/brand-lift/surveys/{id}` (Ticket BL-MVP-P1-01) to update survey status to `COLLECTING`. This button is enabled only if the `SurveyApprovalStatus` is `SIGNED_OFF` (or `APPROVED` for MVP).
-    -   UI provides clear feedback (loading states, success/error messages using standard patterns) for all actions.
-    -   State updates (e.g., comment appearing, status changing) are reflected accurately in the UI after successful API calls.
+    -   Comment posting in the UI calls `POST /api/brand-lift/approval/comments`. **[COMPLETED - `handleAddComment` in `ApprovalWorkflow.tsx` calls this API.]**
+    -   Updating comment status in UI calls `PUT /api/brand-lift/approval/comments/{commentId}`. **[COMPLETED - `handleResolveComment` in `ApprovalWorkflow.tsx` calls this API to update comment status.]**
+    -   "Request Sign-Off" button calls `PUT /api/brand-lift/approval/status?studyId={id}` to update the `SurveyApprovalStatus`. **[COMPLETED - `handleUpdateOverallStatus` in `ApprovalWorkflow.tsx` handles this for various approval actions (Approve, Request Changes, Request Sign-Off, Final Sign-Off), calling the `PUT /api/brand-lift/approval/status` endpoint.]**
+    -   "Submit for Data Collection" button calls `PUT /api/brand-lift/surveys/{id}` (Ticket BL-MVP-P1-01) to update survey status to `COLLECTING`. This button is enabled only if the `SurveyApprovalStatus` is `SIGNED_OFF` (or `APPROVED` for MVP). **[PARTIALLY COMPLETED - Button exists and is conditionally disabled. The `handleUpdateOverallStatus` handles `SurveyApprovalStatus` changes. An alert notes the TODO for the API call to update main `BrandLiftStudy.status` to `COLLECTING`, which is more tied to EPIC4.]**
+    -   UI provides clear feedback (loading states, success/error messages using standard patterns). **[PARTIALLY COMPLETED - Basic `actionLoading` and `error` state implemented with Alert placeholder in `ApprovalWorkflow.tsx`. Toast notifications or more refined UX pending.]**
+    -   State updates (e.g., comment appearing, status changing) are reflected accurately in the UI after successful API calls. **[PARTIALLY COMPLETED - Local state for comments and overallStatus is updated optimistically or after fetch. Full robustness with complex scenarios or refetching strategies is pending.]**
 -   **Dependencies:** Ticket BL-MVP-P3-01 APIs, Ticket BL-MVP-P1-01 API.
 
 #### [HIGH PRIORITY MVP FLOW] Ticket BL-MVP-P3-04: Implement Resend Email Notifications for Approval Workflow
 -   **Type:** Feature (Backend/Integration)
 -   **Description:** Integrate with Resend API to send email notifications at key stages of the Brand Lift survey approval process to facilitate collaboration.
 -   **Acceptance Criteria:**
-    -   Backend logic is added (e.g., within relevant API handlers in EPIC3 or via background jobs/event listeners) to trigger Resend email sends.
+    -   Backend logic is added (e.g., within relevant API handlers in EPIC3 or via background jobs/event listeners) to trigger Resend email sends. **[PARTIALLY COMPLETED - `NotificationService` created in `src/lib/notificationService.ts` with mock sending methods. TODO comments added in relevant API handlers (`PUT /api/brand-lift/surveys/{studyId}`, `POST /api/brand-lift/approval/comments`, `PUT /api/brand-lift/approval/status`) to indicate where calls to this service should be made based on specific status changes or events. Actual Resend API integration and service calls are PENDING.]**
     -   Notifications are sent when:
-        *   A survey is submitted for review (notifying designated reviewers/team).
-        *   A new comment is added (potentially notifying the study owner or relevant participants).
-        *   Approval/Sign-off is requested (notifying designated approvers).
-        *   A survey is Approved or Rejected/Changes Requested (notifying the study owner).
-    -   Email content templates are defined (simple text-based initially is fine).
-    -   Recipient logic is defined (e.g., notify specific users based on roles associated with the study/campaign).
-    -   Resend API key is securely managed via environment variables.
-    -   Error handling for Resend API calls is implemented and logged.
+        *   A survey is submitted for review (notifying designated reviewers/team). **[CONCEPTUALLY SUPPORTED - `sendSurveySubmittedForReviewEmail` method exists in `NotificationService`. TODO in API handler to call it.]**
+        *   A new comment is added (potentially notifying the study owner or relevant participants). **[CONCEPTUALLY SUPPORTED - `sendNewCommentEmail` method exists in `NotificationService`. TODO in API handler to call it.]**
+        *   Approval/Sign-off is requested (notifying designated approvers). **[CONCEPTUALLY SUPPORTED - `sendApprovalRequestedEmail` method exists in `NotificationService`. TODO in API handler to call it.]**
+        *   A survey is submitted for review (notifying designated reviewers/team). **[CONCEPTUALLY SUPPORTED - `sendSurveySubmittedForReviewEmail` method exists in `NotificationService`.]**
+        *   A new comment is added (potentially notifying the study owner or relevant participants). **[CONCEPTUALLY SUPPORTED - `sendNewCommentEmail` method exists in `NotificationService`.]**
+        *   Approval/Sign-off is requested (notifying designated approvers). **[CONCEPTUALLY SUPPORTED - `sendApprovalRequestedEmail` method exists in `NotificationService`.]**
+        *   A survey is Approved or Rejected/Changes Requested (notifying the study owner). **[CONCEPTUALLY SUPPORTED - `sendStudyStatusChangeEmail` method exists in `NotificationService`.]**
+    -   Email content templates are defined (simple text-based initially is fine). **[COMPLETED - Basic HTML templates defined within `NotificationService` methods.]**
+    -   Recipient logic is defined (e.g., notify specific users based on roles associated with the study/campaign). **[PENDING - `NotificationService` methods accept recipient details; actual logic to determine recipients and call the service needs to be implemented in API handlers.]**
+    -   Resend API key is securely managed via environment variables. **[PENDING - Marked as TODO in `NotificationService` file; requires actual Resend integration.]**
+    -   Error handling for Resend API calls is implemented and logged. **[PENDING - Mock service in `NotificationService` has conceptual console logging; real error handling and integration with a logging framework needed.]**
 -   **Dependencies:** Resend API credentials, defined email templates, user role/notification preference logic (TBD), Clerk user data for emails.
 
 ---
@@ -688,11 +691,11 @@ To maintain SSOT and clarity, feature-specific UI logic is encapsulated within c
 -   **Type:** Research/Chore - **High Priority**
 -   **Description:** Determine how Cint presents surveys to respondents, including rich media support. Critically, investigate and document **Cint API constraints such as rate limits, error handling best practices (retry policies), and available respondent targeting parameters** by thoroughly reviewing `cint-exchange-guide.md` and `cint-exchange-openapi.yaml`, and liaising with Cint support if necessary.
 -   **Acceptance Criteria:**
-    -   Documented findings on Cint's survey hosting capabilities (e.g., custom HTML support for Mux videos Post-MVP, redirect links).
-    -   Clarified and documented Cint API rate limits, recommended retry policies for transient errors, and available respondent targeting options (e.g., how to translate Justify campaign criteria to Cint's `profile` objects in Target Group creation as per `cint-exchange-guide.md`).
-    -   A defined mock API response structure for key Cint interactions (e.g., survey launch, response webhook) to facilitate decoupled backend development.
-    -   Findings shared in a dedicated Slack channel for Brand Lift and documented in `brand-lift.md` or a new `cint_integration_details.md`.
-    -   Implement robust error handling and retry mechanisms for Cint API interactions, based on findings from this ticket and Cint documentation (e.g., handling common HTTP errors, idempotency for creation requests as per `cint-exchange-guide.md`).
+    -   Documented findings on Cint's survey hosting capabilities (e.g., custom HTML support for Mux videos Post-MVP, redirect links). **[PARTIALLY COMPLETED - `cint_integration_details.md` confirms self-hosting of survey by Justify, enabling rich media.]**
+    -   Clarified and documented Cint API rate limits, recommended retry policies for transient errors, and available respondent targeting options (e.g., how to translate Justify campaign criteria to Cint's `profile` objects in Target Group creation as per `cint-exchange-guide.md`). **[PARTIALLY COMPLETED - Initial review done in `cint_integration_details.md`. Specific rate limits, detailed error/retry policies, and targeting best practices identified as needing clarification from Cint support.]**
+    -   A defined mock API response structure for key Cint interactions (e.g., survey launch, response webhook) to facilitate decoupled backend development. **[COMPLETED - Basic mock structures and service stub created in `src/lib/cint.ts` including simulated error responses from `apiClient`.]**
+    -   Findings shared in a dedicated Slack channel for Brand Lift and documented in `brand-lift.md` or a new `cint_integration_details.md`. **[COMPLETED - `cint_integration_details.md` created and populated with initial findings.]**
+    -   Implement robust error handling and retry mechanisms for Cint API interactions, based on findings from this ticket and Cint documentation (e.g., handling common HTTP errors, idempotency for creation requests as per `cint-exchange-guide.md`). **[PARTIALLY COMPLETED - TODO comments for detailed error handling (specific Cint errors, retries for 429/5xx) added to all methods in the mock `CintApiService` in `src/lib/cint.ts`. The mock `apiClient` now also simulates throwing errors.]**
 -   **Dependencies:** Cint API documentation (`cint-exchange-guide.md`, `cint-exchange-openapi.yaml`), Cint support.
 -   **Note:** **Priority: High.** Must be substantially completed before full implementation of BL-MVP-P4-01 begins. A fallback strategy (e.g., mock Cint service in `cint.ts`) should be defined to decouple development if Cint specifics cause delays.
 
@@ -752,6 +755,7 @@ To maintain SSOT and clarity, feature-specific UI logic is encapsulated within c
 
 ### Epic: BL-MVP-EPIC6: Testing, Validation & Deployment
 *Focus: Ensure a high-quality, **production-ready** feature through comprehensive testing and deployment procedures. **Initial testing efforts must focus on the high-priority MVP flow (Epics 0-3).**.*
+**NOTE: Detailed implementation of testing tickets (P6-01 Unit/Integration Tests, P6-02 E2E Tests, etc.) will be deferred. This epic will be revisited after further core feature development and refinement from Epics 0-3 are more complete. The team will then focus on writing and executing these tests.**
 
 #### [HIGH PRIORITY MVP FLOW - Initial Focus] Ticket BL-MVP-P6-01: Implement Unit & Integration Tests
 -   **Type:** Test

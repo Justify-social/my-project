@@ -22,4 +22,7 @@ yarn-error.log*
 .DS_Store
 
 # Ignore locked icon registry files
-public/static/*-icon-registry.json 
+public/static/*-icon-registry.json
+
+# Ignore files for Prettier formatting
+src/app/api/campaigns/route.ts 
