@@ -1,5 +1,6 @@
 import {
   PrismaClient,
+  Prisma,
   SubmissionStatus,
   BrandLiftStudyStatus,
   SurveyQuestionType,
@@ -10,7 +11,7 @@ import {
   Currency,
   Position,
   Feature
-} from '@prisma/client';
+} from '.prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -99,7 +100,7 @@ async function main() {
     data: {
       name: 'Q1 Awareness Study - Draft',
       submissionId: campaign1.id,
-      status: BrandLiftStudyStatus.DRAFT, // Use Enum
+      status: Prisma.BrandLiftStudyStatus.DRAFT, // Use Prisma namespace
       funnelStage: 'Top Funnel',
       primaryKpi: 'Brand Awareness',
       secondaryKpis: ['Ad Recall'],
@@ -110,7 +111,7 @@ async function main() {
     data: {
       name: 'Summer Launch Study - Pending',
       submissionId: campaign2.id,
-      status: BrandLiftStudyStatus.PENDING_APPROVAL, // Use Enum
+      status: Prisma.BrandLiftStudyStatus.PENDING_APPROVAL, // Use Prisma namespace
       funnelStage: 'Bottom Funnel',
       primaryKpi: 'Purchase Intent',
       secondaryKpis: ['Consideration'],
@@ -119,11 +120,11 @@ async function main() {
   });
   console.log('Created studies: ' + study1.id + ', ' + study2.id);
 
-  const question1Study2 = await prisma.surveyQuestion.create({
+  const _question1Study2 = await prisma.surveyQuestion.create({
     data: {
       studyId: study2.id,
       text: 'How familiar are you with BrandX after seeing our summer ads?',
-      questionType: SurveyQuestionType.SINGLE_CHOICE, // Use Enum
+      questionType: Prisma.SurveyQuestionType.SINGLE_CHOICE, // Use Prisma namespace
       order: 1,
       isRandomized: false,
       isMandatory: true,
@@ -138,11 +139,11 @@ async function main() {
     },
   });
 
-  const question2Study2 = await prisma.surveyQuestion.create({
+  const _question2Study2 = await prisma.surveyQuestion.create({
     data: {
       studyId: study2.id,
       text: 'How likely are you to purchase BrandX this summer?',
-      questionType: SurveyQuestionType.SINGLE_CHOICE, // Use Enum
+      questionType: Prisma.SurveyQuestionType.SINGLE_CHOICE, // Use Prisma namespace
       order: 2,
       isRandomized: false,
       isMandatory: true,
@@ -161,27 +162,27 @@ async function main() {
   const approvalStatusStudy2 = await prisma.surveyApprovalStatus.create({
     data: {
       studyId: study2.id,
-      status: SurveyOverallApprovalStatus.PENDING_REVIEW, // Use Enum
+      status: Prisma.SurveyOverallApprovalStatus.PENDING_REVIEW, // Use Prisma namespace
       requestedSignOff: false,
     },
   });
 
-  const comment1Study2 = await prisma.surveyApprovalComment.create({
+  const _comment1Study2 = await prisma.surveyApprovalComment.create({
     data: {
       approvalStatusId: approvalStatusStudy2.id,
-      questionId: question1Study2.id,
+      questionId: _question1Study2.id,
       authorId: 'clerk_user_id_reviewer_1',
       text: 'Could we rephrase option 3 to be less negative?',
-      status: SurveyApprovalCommentStatus.OPEN, // Use Enum
+      status: Prisma.SurveyApprovalCommentStatus.OPEN, // Use Prisma namespace
     },
   });
 
-  const comment2Study2 = await prisma.surveyApprovalComment.create({
+  const _comment2Study2 = await prisma.surveyApprovalComment.create({
     data: {
       approvalStatusId: approvalStatusStudy2.id,
       authorId: 'clerk_user_id_reviewer_2',
       text: 'Looks good overall, approved from my side.',
-      status: SurveyApprovalCommentStatus.RESOLVED, // Use Enum
+      status: Prisma.SurveyApprovalCommentStatus.RESOLVED, // Use Prisma namespace
       resolutionNote: 'Approved by Reviewer 2',
     },
   });
