@@ -26,6 +26,35 @@ import { cn } from '@/lib/utils';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 
+// Define AGE_BRACKETS for the age distribution summary UI
+const AGE_BRACKETS = [
+  { key: 'age18_24', label: '18-24' },
+  { key: 'age25_34', label: '25-34' },
+  { key: 'age35_44', label: '35-44' },
+  { key: 'age45_54', label: '45-54' },
+  { key: 'age55_64', label: '55-64' },
+  { key: 'age65plus', label: '65+' },
+] as const;
+
+// Language mapping (ideally from a shared constants file, mirroring Step3Content.tsx)
+const TOP_LANGUAGES_MAP: Array<{ value: string; label: string }> = [
+  { value: 'ar', label: 'Arabic' },
+  { value: 'bn', label: 'Bengali' },
+  { value: 'zh', label: 'Chinese (Mandarin)' },
+  { value: 'en', label: 'English' },
+  { value: 'fr', label: 'French' },
+  { value: 'de', label: 'German' },
+  { value: 'hi', label: 'Hindi' },
+  { value: 'id', label: 'Indonesian' },
+  { value: 'ja', label: 'Japanese' },
+  { value: 'ko', label: 'Korean' },
+  { value: 'pt', label: 'Portuguese' },
+  { value: 'ru', label: 'Russian' },
+  { value: 'es', label: 'Spanish' },
+  { value: 'tr', label: 'Turkish' },
+  { value: 'vi', label: 'Vietnamese' },
+];
+
 // Define necessary types
 interface CampaignData {
   id: string;
@@ -210,11 +239,37 @@ const DataItem = ({
   </div>
 );
 
+// PageSection wrapper component for consistent spacing between major page sections
+const PageSection = ({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => (
+  <section className={cn('mb-12', className)}>
+    {' '}
+    {/* Consistent bottom margin for all sections */}
+    {children}
+  </section>
+);
+
 // Section Header component
 const SectionHeader = ({ title, className }: { title: string; className?: string }) => (
-  <div className={cn('flex items-center gap-2 mb-5', className)}>
+  <div className={cn('flex items-center gap-2 mb-6', className)}>
+    {' '}
+    {/* Standardized bottom margin */}
     <h2 className="text-xl font-semibold tracking-tight whitespace-nowrap">{title}</h2>
     <Separator className="flex-grow" />
+  </div>
+);
+
+// Section Header without separator (for grid layouts)
+const SectionHeaderNoSeparator = ({ title, className }: { title: string; className?: string }) => (
+  <div className={cn('mb-6', className)}>
+    {' '}
+    {/* Standardized bottom margin */}
+    <h2 className="text-xl font-semibold tracking-tight whitespace-nowrap">{title}</h2>
   </div>
 );
 
@@ -250,12 +305,14 @@ const KpiBadge = ({ kpi, isPrimary = false }: { kpi: string; isPrimary?: boolean
     <div className="group relative">
       <div
         className={cn(
-          'flex items-center gap-2 px-3 py-2 rounded-md border',
-          isPrimary ? 'bg-accent/15 border-accent/30' : 'bg-accent/10 border-accent/20'
+          'flex items-center gap-2 rounded-md border',
+          isPrimary
+            ? 'bg-accent/15 border-accent/30 px-4 py-3'
+            : 'bg-accent/10 border-accent/20 px-3 py-2'
         )}
       >
         {iconPath && (
-          <div className="flex-shrink-0 h-5 w-5 relative">
+          <div className={cn('flex-shrink-0 relative', isPrimary ? 'h-6 w-6' : 'h-5 w-5')}>
             <Image
               src={iconPath}
               alt={displayName}
@@ -268,7 +325,12 @@ const KpiBadge = ({ kpi, isPrimary = false }: { kpi: string; isPrimary?: boolean
             />
           </div>
         )}
-        <span className={cn('text-sm font-medium text-accent', isPrimary && 'font-semibold')}>
+        <span
+          className={cn(
+            'font-medium text-accent',
+            isPrimary ? 'text-base font-semibold' : 'text-sm'
+          )}
+        >
           {displayName}
         </span>
       </div>
@@ -320,6 +382,12 @@ export default function CampaignDetail() {
           throw new Error('Invalid campaign data received from API');
         }
 
+        // Log the demographics object to inspect its structure for completed campaigns
+        console.log(
+          '[CampaignDetail] Demographics data from API:',
+          JSON.stringify(data.demographics, null, 2)
+        );
+
         // Enhanced transformation logic
         const transformedData: CampaignData = {
           id: data.id ? data.id.toString() : 'N/A',
@@ -369,21 +437,24 @@ export default function CampaignDetail() {
           },
           audience: {
             genders:
-              data.demographics?.gender && Array.isArray(data.demographics.gender)
-                ? data.demographics.gender
+              data.demographics?.genders && Array.isArray(data.demographics.genders)
+                ? data.demographics.genders
                 : [],
-            ageRanges: data.demographics?.ageRanges || {},
+            ageRanges: data.demographics || {},
             languages:
-              data.targeting?.languages && Array.isArray(data.targeting.languages)
-                ? data.targeting.languages.map((l: ApiLanguage) => l?.language || 'N/A')
+              data.demographics?.languages && Array.isArray(data.demographics.languages)
+                ? data.demographics.languages.map((langCode: string) => {
+                    const langObj = TOP_LANGUAGES_MAP.find(l => l.value === langCode.toLowerCase()); // Ensure case-insensitivity for code matching
+                    return langObj ? langObj.label : langCode; // Fallback to code if no match found
+                  })
                 : [],
             interests:
-              data.demographics?.interests && Array.isArray(data.demographics.interests)
-                ? data.demographics.interests
+              data.targeting?.interests && Array.isArray(data.targeting.interests)
+                ? data.targeting.interests
                 : [],
             locations:
               data.locations && Array.isArray(data.locations)
-                ? data.locations.map((loc: ApiLocation) => loc?.location || 'N/A')
+                ? data.locations.map((loc: { city?: string }) => loc?.city || 'N/A')
                 : [],
             competitors:
               data.competitors && Array.isArray(data.competitors) ? data.competitors : [],
@@ -635,9 +706,9 @@ export default function CampaignDetail() {
   );
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-10">
+    <div className="p-6 max-w-7xl mx-auto">
       {/* Header Section with Campaign Name & Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-12">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold tracking-tight">{campaignData.name}</h1>
           <Badge className={`px-3 py-1 rounded-full text-sm font-medium ${statusInfo.className}`}>
@@ -684,334 +755,124 @@ export default function CampaignDetail() {
       </div>
 
       {/* Campaign Overview Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
-        {/* Business Goal */}
-        <Card className="shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden xl:col-span-2">
-          <CardHeader className="bg-muted/10 border-b px-5 py-3 flex items-center gap-2">
-            <Icon iconId="faBullseyeLight" className="h-4 w-4 text-accent flex-shrink-0" />
-            <CardTitle className="text-sm font-medium">Business Goal</CardTitle>
-          </CardHeader>
-          <CardContent className="px-5 py-4">
-            <p className="font-medium text-base">{campaignData.businessGoal}</p>
-          </CardContent>
-        </Card>
+      <PageSection>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {/* Business Goal - takes 1/3rd */}
+          <Card className="shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden">
+            <CardHeader className="bg-muted/10 border-b px-5 py-3">
+              <CardTitle className="text-sm font-medium">Business Goal</CardTitle>
+            </CardHeader>
+            <CardContent className="px-5 py-4">
+              <p className="font-medium text-base">{campaignData.businessGoal}</p>
+            </CardContent>
+          </Card>
 
-        {/* Campaign Duration */}
-        <Card className="shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden">
-          <CardHeader className="bg-muted/10 border-b px-5 py-3 flex items-center gap-2">
-            <Icon iconId="faCalendarDaysLight" className="h-4 w-4 text-accent flex-shrink-0" />
-            <CardTitle className="text-sm font-medium">Campaign Duration</CardTitle>
-          </CardHeader>
-          <CardContent className="px-5 py-4">
-            <p className="font-medium text-base">
-              {campaignData.startDate} - {campaignData.endDate}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">{campaignData.timeZone}</p>
-          </CardContent>
-        </Card>
-
-        {/* Budget */}
-        <Card className="shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden">
-          <CardHeader className="bg-muted/10 border-b px-5 py-3 flex items-center gap-2">
-            <Icon iconId="faDollarSignLight" className="h-4 w-4 text-accent flex-shrink-0" />
-            <CardTitle className="text-sm font-medium">Budget</CardTitle>
-          </CardHeader>
-          <CardContent className="px-5 py-4">
-            <div className="font-medium text-base">
-              Total: {formatCurrency(campaignData.budget.total, campaignData.budget.currency)}
-            </div>
-            <div className="text-sm text-muted-foreground mt-1 flex items-center">
-              <Icon iconId="faShareNodesLight" className="mr-1.5 h-3 w-3 opacity-80" />
-              Social: {formatCurrency(campaignData.budget.social, campaignData.budget.currency)}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Primary Contact */}
-        <Card className="shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden">
-          <CardHeader className="bg-muted/10 border-b px-5 py-3 flex items-center gap-2">
-            <Icon iconId="faUserLight" className="h-4 w-4 text-accent flex-shrink-0" />
-            <CardTitle className="text-sm font-medium">Primary Contact</CardTitle>
-          </CardHeader>
-          <CardContent className="px-5 py-4">
-            <p className="font-medium text-base">{campaignData.primaryContact.name}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {campaignData.primaryContact.position}
-            </p>
-            <p className="text-xs text-accent mt-1.5 flex items-center">
-              <Icon iconId="faEnvelopeLight" className="mr-1.5 h-3 w-3 opacity-80" />
-              {campaignData.primaryContact.email}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* KPIs (From original Performance & Outcomes) */}
-      <div>
-        <SectionHeader title="Performance" />
-        <Card className="shadow-sm hover:shadow-md transition-all border bg-card">
-          <CardHeader className="bg-muted/10 border-b px-5 py-4">
-            <div className="flex items-center gap-2">
-              <Icon iconId="faChartBarLight" className="h-5 w-5 text-accent flex-shrink-0" />
-              <CardTitle className="text-base font-medium">Key Performance Indicators</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="px-5 py-4 space-y-5">
-            <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-3">Primary KPI</h3>
-              <KpiBadge kpi={campaignData.primaryKPI} isPrimary={true} />
-            </div>
-            {campaignData.secondaryKPIs && campaignData.secondaryKPIs.length > 0 && (
-              <div>
-                <h3 className="text-sm font-semibold text-muted-foreground mb-3">Secondary KPIs</h3>
-                <div className="flex flex-wrap gap-3">
-                  {campaignData.secondaryKPIs.map((kpi, index) => (
-                    <KpiBadge key={index} kpi={kpi} />
-                  ))}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* NEW: Hypotheses (Expected Outcomes) Card */}
-      <div>
-        <SectionHeader title="Hypotheses" />
-        <Card className="shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden">
-          <CardHeader className="bg-muted/10 border-b px-5 py-4">
-            <div className="flex items-center gap-2">
-              <Icon iconId="faClipboardCheckLight" className="h-5 w-5 text-accent flex-shrink-0" />
-              <CardTitle className="text-base font-medium">Expected Outcomes</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="p-5 space-y-5">
-            <div>
-              <h4 className="text-sm font-semibold text-muted-foreground mb-1">
-                Memorability / Ad Recall Hypothesis
-              </h4>
-              <p className="text-sm text-foreground bg-muted/30 p-3 rounded-md leading-relaxed">
-                {campaignData.expectedOutcomes?.memorability || 'Not specified'}
-              </p>
-            </div>
-            <div>
-              <h4 className="text-sm font-semibold text-muted-foreground mb-1">
-                Purchase/Action Intent Hypothesis
-              </h4>
-              <p className="text-sm text-foreground bg-muted/30 p-3 rounded-md leading-relaxed">
-                {campaignData.expectedOutcomes?.purchaseIntent || 'Not specified'}
-              </p>
-            </div>
-            <div>
-              <h4 className="text-sm font-semibold text-muted-foreground mb-1">
-                Brand Perception Hypothesis
-              </h4>
-              <p className="text-sm text-foreground bg-muted/30 p-3 rounded-md leading-relaxed">
-                {campaignData.expectedOutcomes?.brandPerception || 'Not specified'}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* NEW: Campaign Messaging Card */}
-      <div>
-        <SectionHeader title="Messaging" />
-        <Card className="shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden">
-          <CardHeader className="bg-muted/10 border-b px-5 py-4">
-            <div className="flex items-center gap-2">
-              <Icon iconId="faMegaphoneLight" className="h-5 w-5 text-accent flex-shrink-0" />
-              <CardTitle className="text-base font-medium">Campaign Messaging</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="p-6 space-y-6">
-            <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-1.5">Main Message</h3>
-              <p className="text-sm text-foreground bg-muted/30 p-3 rounded-md leading-relaxed">
-                {campaignData.mainMessage || 'Not specified'}
-              </p>
-            </div>
-            <Separator />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-              <div>
-                <h3 className="text-sm font-semibold text-muted-foreground mb-2">Hashtags</h3>
-                <BadgeGroup items={campaignData.hashtags || []} />
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-muted-foreground mb-1.5">Key Benefits</h3>
-                <p className="text-sm text-foreground bg-muted/30 p-3 rounded-md leading-relaxed">
-                  {campaignData.keyBenefits || 'Not specified'}
+          {/* Wrapper for the remaining 2/3rds, containing 3 cards */}
+          <div className="md:col-span-2 grid grid-cols-1 lg:grid-cols-3 gap-5">
+            {/* Campaign Duration */}
+            <Card className="shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden">
+              <CardHeader className="bg-muted/10 border-b px-5 py-3">
+                <CardTitle className="text-sm font-medium">Campaign Duration</CardTitle>
+              </CardHeader>
+              <CardContent className="px-5 py-4">
+                <p className="font-medium text-base">
+                  {campaignData.startDate} - {campaignData.endDate}
                 </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                <p className="text-xs text-muted-foreground mt-1">{campaignData.timeZone}</p>
+              </CardContent>
+            </Card>
 
-      {/* Target Audience Section */}
-      <div>
-        <SectionHeader title="Target Audience" />
-        <Card className="shadow-sm border bg-card overflow-hidden">
-          {/* Ensure icon is to the left of the title */}
-          <CardHeader className="bg-muted/10 border-b px-5 py-4 flex items-center gap-2">
-            <Icon iconId="faUsersLight" className="h-5 w-5 text-accent flex-shrink-0" />
-            <CardTitle className="text-base font-medium">Audience Profile</CardTitle>
-          </CardHeader>
-          <CardContent className="p-6 space-y-6">
-            {/* Demographics Row: Age Ranges, Genders, Languages */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-8">
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center">
-                  <Icon iconId="faChartBarLight" className="mr-2 h-4 w-4 flex-shrink-0" />{' '}
-                  {/* Corrected Icon */}
-                  Age Ranges
-                </h3>
-                {Object.keys(campaignData.audience.ageRanges || {}).length > 0 ? (
-                  <div className="flex flex-col space-y-1.5">
-                    {Object.entries(campaignData.audience.ageRanges || {}).map(
-                      ([range, percentage]) =>
-                        percentage > 0 && (
-                          <div key={range} className="flex items-center text-sm">
-                            <span className="text-accent font-medium w-20">
-                              {range.replace('age', '').replace('_', '-')}:
-                            </span>
-                            <span className="text-foreground">{percentage}%</span>
-                          </div>
-                        )
-                    )}
-                  </div>
-                ) : (
-                  <span className="text-sm text-muted-foreground italic">
-                    Specific ranges not active or data unavailable. Overall:{' '}
-                    {campaignData.audience.ageRanges
-                      ? Object.values(campaignData.audience.ageRanges).reduce((a, b) => a + b, 0)
-                      : 'N/A'}
-                  </span>
-                )}
-              </div>
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center">
-                  <Icon iconId="faUsersLight" className="mr-2 h-4 w-4 flex-shrink-0" />
-                  Genders
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {campaignData.audience.genders.length > 0 ? (
-                    campaignData.audience.genders.map((gender, index) => (
-                      <Badge
-                        key={index}
-                        variant="outline"
-                        className="bg-background border-border px-2.5 py-0.5 text-xs"
-                      >
-                        {gender}
-                      </Badge>
-                    ))
-                  ) : (
-                    <span className="text-muted-foreground text-xs italic">Not specified</span>
-                  )}
+            {/* Budget */}
+            <Card className="shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden">
+              <CardHeader className="bg-muted/10 border-b px-5 py-3">
+                <CardTitle className="text-sm font-medium">Budget</CardTitle>
+              </CardHeader>
+              <CardContent className="px-5 py-4">
+                <div className="text-lg font-semibold text-foreground mb-1">
+                  Social: {formatCurrency(campaignData.budget.social, campaignData.budget.currency)}
                 </div>
-              </div>
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center">
-                  <Icon iconId="faGlobeLight" className="mr-2 h-4 w-4 flex-shrink-0" />{' '}
-                  {/* Corrected Icon */}
-                  Languages
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {campaignData.audience.languages.length > 0 ? (
-                    campaignData.audience.languages.map((lang, index) => (
-                      <Badge
-                        key={index}
-                        variant="outline"
-                        className="bg-background border-border px-2.5 py-0.5 text-xs"
-                      >
-                        {lang}
-                      </Badge>
-                    ))
-                  ) : (
-                    <span className="text-muted-foreground text-xs italic">Not specified</span>
-                  )}
+                <div className="text-sm text-muted-foreground">
+                  Total: {formatCurrency(campaignData.budget.total, campaignData.budget.currency)}
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
-            <Separator />
+            {/* Primary Contact */}
+            <Card className="shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden">
+              <CardHeader className="bg-muted/10 border-b px-5 py-3">
+                <CardTitle className="text-sm font-medium">Primary Contact</CardTitle>
+              </CardHeader>
+              <CardContent className="px-5 py-4">
+                <p className="font-medium text-base">{campaignData.primaryContact.name}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {campaignData.primaryContact.position}
+                </p>
+                <p className="text-xs text-accent mt-1.5">{campaignData.primaryContact.email}</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </PageSection>
 
-            {/* Interests Row */}
-            <div>
-              <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center">
-                <Icon iconId="faHeartLight" className="mr-2 h-4 w-4 flex-shrink-0" />
-                Interests
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {campaignData.audience.interests.length > 0 ? (
-                  campaignData.audience.interests.map((interest, index) => (
-                    <Badge
-                      key={index}
-                      variant="outline"
-                      className="bg-background border-border px-2.5 py-0.5 text-xs"
-                    >
-                      {interest}
-                    </Badge>
-                  ))
-                ) : (
-                  <span className="text-muted-foreground text-xs italic">Not specified</span>
-                )}
-              </div>
-            </div>
+      {/* Influencers Section */}
+      {campaignData.influencers && campaignData.influencers.length > 0 && (
+        <PageSection>
+          <SectionHeader title="Influencers" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {campaignData.influencers.map((influencer, index) => {
+              const platformKey = influencer.platform.toLowerCase();
+              const platformDisplayMap: Record<
+                string,
+                { brandIconId: string; displayName: string }
+              > = {
+                instagram: { brandIconId: 'brandsInstagram', displayName: 'Instagram' },
+                youtube: { brandIconId: 'brandsYoutube', displayName: 'YouTube' },
+                tiktok: { brandIconId: 'brandsTiktok', displayName: 'TikTok' },
+                twitter: { brandIconId: 'brandsXTwitter', displayName: 'X (Twitter)' },
+                facebook: { brandIconId: 'brandsFacebook', displayName: 'Facebook' },
+                linkedin: { brandIconId: 'brandsLinkedin', displayName: 'LinkedIn' },
+              };
 
-            <Separator />
+              const platformInfo = platformDisplayMap[platformKey];
 
-            {/* Locations & Competitors Row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8">
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center">
-                  <Icon iconId="faMapLight" className="mr-2 h-4 w-4 flex-shrink-0" />
-                  Locations
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {campaignData.audience.locations.length > 0 ? (
-                    campaignData.audience.locations.map((location, index) => (
-                      <Badge
-                        key={index}
-                        variant="outline"
-                        className="bg-background border-border px-2.5 py-0.5 text-xs"
-                      >
-                        {location}
-                      </Badge>
-                    ))
-                  ) : (
-                    <span className="text-muted-foreground text-xs italic">Not specified</span>
-                  )}
-                </div>
-              </div>
-              <div>
-                <h3 className="text-sm font-memory text-muted-foreground mb-3 flex items-center">
-                  <Icon iconId="faBuildingLight" className="mr-2 h-4 w-4 flex-shrink-0" />
-                  Competitors
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {campaignData.audience.competitors.length > 0 ? (
-                    campaignData.audience.competitors.map((competitor, index) => (
-                      <Badge
-                        key={index}
-                        variant="outline"
-                        className="bg-background border-border px-2.5 py-0.5 text-xs"
-                      >
-                        {competitor}
-                      </Badge>
-                    ))
-                  ) : (
-                    <span className="text-muted-foreground text-xs italic">Not specified</span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+              return (
+                <Card
+                  key={index}
+                  className="shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden group"
+                >
+                  <CardContent className="p-4 flex flex-col items-center text-center">
+                    {/* Updated Avatar Structure */}
+                    <div className="mb-4 h-24 w-24 rounded-full bg-accent/15 flex items-center justify-center group-hover:bg-accent/25 transition-colors">
+                      <Icon iconId={'faUserCircleLight'} className="h-full w-full text-accent" />
+                      {/* This Icon can be replaced by an <Image /> component for actual profile pictures later */}
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      {platformInfo ? (
+                        <Icon
+                          iconId={platformInfo.brandIconId}
+                          className="h-5 w-5 flex-shrink-0 text-muted-foreground group-hover:text-foreground transition-colors"
+                        />
+                      ) : (
+                        <Icon
+                          iconId="faLinkSimpleLight"
+                          className="h-5 w-5 flex-shrink-0 text-muted-foreground"
+                        />
+                      )}
+                      <p className="text-sm font-semibold text-foreground truncate">
+                        {influencer.handle}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </PageSection>
+      )}
 
       {/* Contacts Section */}
-      <div>
+      <PageSection>
         <SectionHeader title="Contacts" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {campaignData.contacts.map((contact, index) => (
@@ -1052,72 +913,258 @@ export default function CampaignDetail() {
             </Card>
           ))}
         </div>
-      </div>
+      </PageSection>
 
-      {/* Influencers Section */}
-      {campaignData.influencers && campaignData.influencers.length > 0 && (
-        <div>
-          <SectionHeader title="Influencers" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-            {campaignData.influencers.map((influencer, index) => {
-              const platformKey = influencer.platform.toLowerCase();
-              const platformDisplayMap: Record<
-                string,
-                { brandIconId: string; displayName: string }
-              > = {
-                instagram: { brandIconId: 'brandsInstagram', displayName: 'Instagram' },
-                youtube: { brandIconId: 'brandsYoutube', displayName: 'YouTube' },
-                tiktok: { brandIconId: 'brandsTiktok', displayName: 'TikTok' },
-                twitter: { brandIconId: 'brandsXTwitter', displayName: 'X (Twitter)' },
-                facebook: { brandIconId: 'brandsFacebook', displayName: 'Facebook' },
-                linkedin: { brandIconId: 'brandsLinkedin', displayName: 'LinkedIn' },
-              };
+      {/* KPIs Section - Now two cards */}
+      <PageSection>
+        <SectionHeader title="Performance" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
+          {/* Primary KPI Card */}
+          <Card className="shadow-sm hover:shadow-md transition-all border bg-card md:col-span-1 h-full flex flex-col">
+            <CardHeader className="bg-muted/10 border-b px-5 py-4 flex-shrink-0">
+              <CardTitle className="text-base font-medium">Primary KPI</CardTitle>
+            </CardHeader>
+            <CardContent className="px-5 py-4 flex-grow flex justify-center items-center">
+              <KpiBadge kpi={campaignData.primaryKPI} isPrimary={true} />
+            </CardContent>
+          </Card>
 
-              const platformInfo = platformDisplayMap[platformKey];
+          {/* Secondary KPIs Card */}
+          {campaignData.secondaryKPIs && campaignData.secondaryKPIs.length > 0 && (
+            <Card className="shadow-sm hover:shadow-md transition-all border bg-card md:col-span-2 h-full">
+              <CardHeader className="bg-muted/10 border-b px-5 py-4">
+                <CardTitle className="text-base font-medium">Secondary KPIs</CardTitle>
+              </CardHeader>
+              <CardContent className="px-5 py-4 flex flex-wrap gap-3 items-center">
+                {campaignData.secondaryKPIs.map((kpi, index) => (
+                  <KpiBadge key={index} kpi={kpi} />
+                ))}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </PageSection>
 
-              return (
-                <Card
-                  key={index}
-                  className="shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden group"
-                >
-                  <CardContent className="p-4 flex flex-col items-center text-center">
-                    <Icon
-                      iconId={'faUserCircleLight'}
-                      className="h-20 w-20 mb-3 text-muted-foreground group-hover:text-foreground transition-colors"
-                    />
-                    <div className="flex items-center space-x-2">
-                      {platformInfo ? (
-                        <Icon
-                          iconId={platformInfo.brandIconId}
-                          className="h-5 w-5 flex-shrink-0 text-muted-foreground group-hover:text-foreground transition-colors"
-                        />
-                      ) : (
-                        <Icon
-                          iconId="faLinkSimpleLight"
-                          className="h-5 w-5 flex-shrink-0 text-muted-foreground"
-                        />
-                      )}
-                      <p className="text-sm font-semibold text-foreground truncate">
-                        {influencer.handle}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+      {/* Hypotheses and Campaign Messaging Section */}
+      <PageSection>
+        <SectionHeader title="Hypotheses and Messaging" />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+          {/* Hypotheses Card */}
+          <div>
+            <Card className="shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden h-full">
+              <CardHeader className="bg-muted/10 border-b px-5 py-4">
+                <CardTitle className="text-base font-medium">Expected Outcomes</CardTitle>
+              </CardHeader>
+              <CardContent className="p-5 space-y-5">
+                <div>
+                  <h4 className="text-sm font-semibold text-muted-foreground mb-1">
+                    Memorability / Ad Recall Hypothesis
+                  </h4>
+                  <p className="text-sm text-foreground bg-muted/30 p-3 rounded-md leading-relaxed">
+                    {campaignData.expectedOutcomes?.memorability || 'Not specified'}
+                  </p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-muted-foreground mb-1">
+                    Purchase/Action Intent Hypothesis
+                  </h4>
+                  <p className="text-sm text-foreground bg-muted/30 p-3 rounded-md leading-relaxed">
+                    {campaignData.expectedOutcomes?.purchaseIntent || 'Not specified'}
+                  </p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-muted-foreground mb-1">
+                    Brand Perception Hypothesis
+                  </h4>
+                  <p className="text-sm text-foreground bg-muted/30 p-3 rounded-md leading-relaxed">
+                    {campaignData.expectedOutcomes?.brandPerception || 'Not specified'}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          {/* Campaign Messaging Card */}
+          <div>
+            <Card className="shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden h-full">
+              <CardHeader className="bg-muted/10 border-b px-5 py-4">
+                <CardTitle className="text-base font-medium">Campaign Messaging</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 flex flex-col space-y-4">
+                <div>
+                  <h3 className="text-sm font-semibold text-muted-foreground mb-1.5">
+                    Main Message
+                  </h3>
+                  <p className="text-sm text-foreground bg-muted/30 p-3 rounded-md leading-relaxed">
+                    {campaignData.mainMessage || 'Not specified'}
+                  </p>
+                </div>
+                <Separator />
+                <div>
+                  <h3 className="text-sm font-semibold text-muted-foreground mb-2">Hashtags</h3>
+                  <BadgeGroup items={campaignData.hashtags || []} />
+                </div>
+                <Separator />
+                <div>
+                  <h3 className="text-sm font-semibold text-muted-foreground mb-1.5">
+                    Key Benefits
+                  </h3>
+                  <p className="text-sm text-foreground bg-muted/30 p-3 rounded-md leading-relaxed">
+                    {campaignData.keyBenefits || 'Not specified'}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
-      )}
+      </PageSection>
+
+      {/* Target Audience Section */}
+      <PageSection>
+        <SectionHeader title="Target Audience" />
+        <Card className="shadow-sm border bg-card overflow-hidden">
+          <CardHeader className="bg-muted/10 border-b px-5 py-4">
+            <CardTitle className="text-base font-medium">Audience Profile</CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8">
+              <div>
+                <h3 className="text-sm font-medium text-muted-foreground mb-3">Age Ranges</h3>
+                {campaignData.audience.ageRanges &&
+                typeof campaignData.audience.ageRanges === 'object' &&
+                Object.keys(campaignData.audience.ageRanges).length > 0 ? (
+                  <div className="mt-2 flex flex-wrap gap-2 justify-start items-center">
+                    {AGE_BRACKETS.map(bracket => {
+                      const percentage =
+                        (campaignData.audience.ageRanges as Record<string, number>)[bracket.key] ||
+                        0;
+                      const colorClass =
+                        percentage > 10
+                          ? 'bg-accent/10 border-accent'
+                          : percentage > 0
+                            ? 'bg-secondary/10 border-secondary'
+                            : 'border-input bg-transparent opacity-60';
+                      return (
+                        <div
+                          key={`${bracket.key}-summary`}
+                          className={cn(
+                            'relative h-12 w-16 rounded-md border-2 flex flex-col items-center justify-center p-1 transition-colors duration-200',
+                            percentage > 0 ? colorClass : 'border-input bg-transparent opacity-60'
+                          )}
+                          title={`${bracket.label}: ${Number(percentage).toFixed(0)}%`}
+                        >
+                          <span
+                            className={cn(
+                              'text-xs font-semibold',
+                              percentage > 0 ? 'text-foreground' : 'text-muted-foreground'
+                            )}
+                          >
+                            {Number(percentage).toFixed(0)}%
+                          </span>
+                          <span className="text-[10px] text-muted-foreground mt-0.5">
+                            {bracket.label}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <span className="text-sm text-muted-foreground italic">Not specified</span>
+                )}
+                <h3 className="text-sm font-medium text-muted-foreground mt-4 mb-3">Genders</h3>
+                <div className="flex flex-wrap gap-2">
+                  {campaignData.audience.genders.length > 0 ? (
+                    campaignData.audience.genders.map((gender, index) => (
+                      <Badge
+                        key={index}
+                        variant="outline"
+                        className="bg-background border-border px-2.5 py-0.5 text-xs"
+                      >
+                        {gender}
+                      </Badge>
+                    ))
+                  ) : (
+                    <span className="text-muted-foreground text-xs italic">Not specified</span>
+                  )}
+                </div>
+                <h3 className="text-sm font-medium text-muted-foreground mt-4 mb-3">Locations</h3>
+                <div className="flex flex-wrap gap-2">
+                  {campaignData.audience.locations.length > 0 ? (
+                    campaignData.audience.locations.map((location, index) => (
+                      <Badge
+                        key={index}
+                        variant="outline"
+                        className="bg-background border-border px-2.5 py-0.5 text-xs"
+                      >
+                        {location}
+                      </Badge>
+                    ))
+                  ) : (
+                    <span className="text-muted-foreground text-xs italic">Not specified</span>
+                  )}
+                </div>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-muted-foreground mb-3">Languages</h3>
+                <div className="flex flex-wrap gap-2">
+                  {campaignData.audience.languages.length > 0 ? (
+                    campaignData.audience.languages.map((lang, index) => (
+                      <Badge
+                        key={index}
+                        variant="outline"
+                        className="bg-background border-border px-2.5 py-0.5 text-xs"
+                      >
+                        {lang}
+                      </Badge>
+                    ))
+                  ) : (
+                    <span className="text-muted-foreground text-xs italic">Not specified</span>
+                  )}
+                </div>
+                <h3 className="text-sm font-medium text-muted-foreground mt-4 mb-3">Competitors</h3>
+                <div className="flex flex-wrap gap-2">
+                  {campaignData.audience.competitors.length > 0 ? (
+                    campaignData.audience.competitors.map((competitor, index) => (
+                      <Badge
+                        key={index}
+                        variant="outline"
+                        className="bg-background border-border px-2.5 py-0.5 text-xs"
+                      >
+                        {competitor}
+                      </Badge>
+                    ))
+                  ) : (
+                    <span className="text-muted-foreground text-xs italic">Not specified</span>
+                  )}
+                </div>
+                <h3 className="text-sm font-medium text-muted-foreground mt-4 mb-3">Interests</h3>
+                <div className="flex flex-wrap gap-2">
+                  {campaignData.audience.interests.length > 0 ? (
+                    campaignData.audience.interests.map((interest, index) => (
+                      <Badge
+                        key={index}
+                        variant="outline"
+                        className="bg-background border-border px-2.5 py-0.5 text-xs"
+                      >
+                        {interest}
+                      </Badge>
+                    ))
+                  ) : (
+                    <span className="text-muted-foreground text-xs italic">Not specified</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </PageSection>
 
       {/* Creative Assets Section */}
-      <div>
+      <PageSection>
         <SectionHeader title="Creative Assets" />
         <Card className="shadow-sm border bg-card overflow-hidden">
           <CardHeader className="bg-muted/10 border-b px-5 py-4 flex flex-row items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Icon iconId="faImageLight" className="h-5 w-5 text-accent flex-shrink-0" />
-              <CardTitle className="text-base font-medium">Creative Assets</CardTitle>
-            </div>
+            <CardTitle className="text-base font-medium">Creative Assets</CardTitle>
             {/* Conditional Download Button */}
             {campaignData.assets.uploaded && campaignData.assets.uploaded.length > 0 && (
               <Button
@@ -1170,7 +1217,6 @@ export default function CampaignDetail() {
                     <div className="mt-6 pt-6 border-t">
                       {/* ... Guidelines display ... */}
                       <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center">
-                        <Icon iconId="faClipboardListLight" className="mr-2 h-4 w-4" />
                         Guidelines Summary
                       </h3>
                       <div className="p-4 bg-muted/10 rounded-md border text-sm">
@@ -1183,7 +1229,6 @@ export default function CampaignDetail() {
                     <div className="mt-6 pt-6 border-t">
                       {/* ... Requirements display ... */}
                       <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center">
-                        <Icon iconId="faListCheckLight" className="mr-2 h-4 w-4" />
                         Requirements
                       </h3>
                       <div className="space-y-2">
@@ -1225,7 +1270,7 @@ export default function CampaignDetail() {
             )}
           </CardContent>
         </Card>
-      </div>
+      </PageSection>
     </div>
   );
 }
