@@ -60,11 +60,14 @@ import { Table } from '@/components/ui/table';
 import { Tabs } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { Toast } from '@/components/ui/toast';
-import { Toaster } from '@/components/ui/toaster';
+// import { Toast } from '@/components/ui/toast'; // Commented out - File deleted
+// import { Toaster } from '@/components/ui/toaster'; // Commented out - File deleted
 import { Tooltip } from '@/components/ui/tooltip';
 import UISidebar from '@/components/ui/navigation/sidebar-ui-components';
 import { Skeleton } from '@/components/ui/skeleton';
+
+// Import the SSOT Toaster
+import { Toaster as HotToaster } from 'react-hot-toast';
 
 export const componentMap: Record<string, React.ComponentType<unknown>> = {
   Accordion: Accordion as React.ComponentType<unknown>,
@@ -124,9 +127,11 @@ export const componentMap: Record<string, React.ComponentType<unknown>> = {
   Tabs: Tabs as React.ComponentType<unknown>,
   Textarea: Textarea as React.ComponentType<unknown>,
   ThemeToggle: ThemeToggle as React.ComponentType<unknown>,
-  Toast: Toast as React.ComponentType<unknown>,
-  Toaster: Toaster as React.ComponentType<unknown>,
+  // Toast: Toast as React.ComponentType<unknown>,
+  // Toaster: Toaster as React.ComponentType<unknown>,
   Tooltip: Tooltip as React.ComponentType<unknown>,
   UISidebar: UISidebar as React.ComponentType<unknown>,
   Skeleton: Skeleton as React.ComponentType<unknown>,
+  // Add the SSOT Toaster
+  HotToaster: HotToaster as React.ComponentType<unknown>,
 };
