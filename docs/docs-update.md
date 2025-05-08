@@ -321,27 +321,31 @@ _(Definition of Done: For AI-involved tasks, 'Done' means content/structure gene
 
 **Ticket ID:** DOCS-RECOV-015
 **Title:** Validate User Guides
-**Description:** Review and validate the content of all user-facing guides against the current application.
+**Description:** Review and validate the content of all user-facing guides (`/docs/guides/user/`) against the current application.
 **Effort Type:** Manual Validation & Review
 **Acceptance Criteria (AC):**
 
-- [ ] `/docs/guides/user/getting-started.md` validated for accuracy, clarity, and up-to-date screenshots.
-- [ ] `/docs/guides/user/common-tasks.md` validated for accuracy and clarity of steps.
-- [ ] `/docs/guides/user/journey.md` validated against typical user workflows.
+- [ ] `/docs/guides/user/getting-started.md` validated for accuracy, clarity, step-by-step correctness, and presence of up-to-date screenshots/GIFs.
+- [ ] `/docs/guides/user/common-tasks.md` validated for accuracy, clarity of instructions for frequent user actions, and updated screenshots/GIFs.
+- [ ] `/docs/guides/user/journey.md` validated against typical user workflows, ensuring it accurately reflects the application flow and key interaction points.
+- [ ] All user guides reviewed for appropriate tone and language for the target audience (Marketers, Agencies).
       **Assignee:** Product Team / QA / UX Team
-      **Status:** To Do (Blocked by DOCS-RECOV-009 Review)
+      **Status:** To Do (Blocked by DOCS-RECOV-009 initial population)
 
 ---
 
 **Ticket ID:** DOCS-RECOV-016
 **Title:** Technical Documentation Accuracy Review
-**Description:** Perform a final technical review of all architecture, standards, and developer guide documents.
+**Description:** Perform a final technical review of all architecture, standards, and developer guide documents to ensure accuracy, completeness, and adherence to SSOT principles.
 **Effort Type:** Manual Review
 **Acceptance Criteria (AC):**
 
-- [ ] All documents in `/docs/architecture/` reviewed for technical accuracy.
-- [ ] All documents in `/docs/standards/` reviewed for technical accuracy and enforceability.
-- [ ] All documents in `/docs/guides/developer/` reviewed for technical accuracy.
+- [ ] All documents in `/docs/architecture/` reviewed for technical accuracy, including diagrams and explanations. Verify alignment with actual implemented architecture.
+- [ ] Content in `/docs/architecture/adr/` (when populated) reviewed for clarity of decisions, context, and consequences.
+- [ ] All documents in `/docs/standards/` reviewed for technical accuracy, enforceability, and reflection of current project practices (SSOT).
+- [ ] All documents in `/docs/guides/developer/` reviewed for technical accuracy, correctness of code examples, and practical usability for developers.
+- [ ] Review incorporation of visuals/diagrams (e.g., Mermaid) for clarity in architecture and complex guides.
+- [ ] (Future) Verify accuracy and relevance of any links pointing directly to source code.
       **Assignee:** Architect / Tech Lead(s)
       **Status:** To Do (Blocked by content population tickets 012, 013, 014)
 
@@ -349,29 +353,32 @@ _(Definition of Done: For AI-involved tasks, 'Done' means content/structure gene
 
 **Ticket ID:** DOCS-RECOV-017
 **Title:** Comprehensive Link Validation
-**Description:** Check all internal links within the `/docs` directory to ensure they are valid and point to the correct locations.
-**Effort Type:** Manual Check / Automated Tool
+**Description:** Check all internal links within the `/docs` directory and potentially external/code links to ensure they are valid and point to the correct locations.
+**Effort Type:** Automated Tool + Manual Check
 **Acceptance Criteria (AC):**
 
-- [ ] Automated link checker run across `/docs`.
-- [ ] All reported broken internal links fixed.
-- [ ] Manual spot checks performed on key navigational links.
+- [ ] Automated link checker (e.g., `markdown-link-check` or similar, integrated into CI if possible) run across the `/docs` directory.
+- [ ] All reported broken internal Markdown links (`./`, `../`) fixed.
+- [ ] Manual spot checks performed on key navigational links (TOC, cross-references between core sections like Getting Started -> Architecture).
+- [ ] (Future) Verification strategy defined and executed for links pointing to external sites or specific lines of code (recognizing their potential fragility).
       **Assignee:** AI Assistant (Initial Check Possible) / Tech Lead / Documentation Lead
-      **Status:** To Do (Blocked by content population tickets)
+      **Status:** To Do (Blocked by content population & review tickets)
 
 ---
 
 **Ticket ID:** DOCS-RECOV-018
 **Title:** Refinement, Polish & Gitbook Preview
-**Description:** Review all documentation for consistency in tone, style, formatting. Refine content based on Gitbook previews.
+**Description:** Perform a final review of all documentation for consistency, style, formatting, and effective cross-linking. Ensure optimal rendering and usability in GitBook.
 **Effort Type:** Manual Review & Refinement
 **Acceptance Criteria (AC):**
 
-- [ ] Consistent terminology used throughout (referencing `glossary.md`).
-- [ ] Consistent formatting applied (headings, code blocks, lists).
-- [ ] Tone is appropriate for the target audience of each section.
-- [ ] Documentation builds and renders correctly in a Gitbook preview environment.
-- [ ] Cross-linking between related documents is effective and sufficient.
+- [ ] Consistent terminology used throughout, aligning with `/docs/concepts/glossary.md`. Perform a specific check for term consistency **and ensure key terms link back to the glossary where appropriate**.
+- [ ] Consistent formatting applied (headings, code blocks, lists, admonitions/callouts if used).
+- [ ] Tone reviewed and confirmed appropriate for the target audience of each section (e.g., onboarding vs. deep architecture).
+- [ ] Documentation successfully builds and renders correctly in a Gitbook preview environment without errors.
+- [ ] GitBook navigation structure (left sidebar) accurately reflects `SUMMARY.md`.
+- [ ] Cross-linking between related documents reviewed for effectiveness and sufficiency (e.g., standards linked from guides, architecture linked from concepts, onboarding sections linked sequentially).
+- [ ] Spot check rendering on different screen sizes (desktop, tablet) within GitBook preview.
       **Assignee:** Documentation Lead / Tech Lead / AI Assistant (for consistency checks)
       **Status:** To Do (Blocked by content population & review tickets)
 
@@ -379,29 +386,98 @@ _(Definition of Done: For AI-involved tasks, 'Done' means content/structure gene
 
 **Ticket ID:** DOCS-RECOV-019
 **Title:** Turbopack Guide Decision & Action
-**Description:** Confirm if Turbopack is actively used/supported. Create/update the guide if relevant, or remove references if deprecated.
-**Effort Type:** Decision & Manual Content Creation/Deletion
+**Description:** Confirm Turbopack relevance, move/update the guide, and ensure links are correct.
+**Effort Type:** Decision & Manual Content Creation/Deletion/Review
 **Acceptance Criteria (AC):**
 
-- [ ] Decision made by Tech Lead regarding Turbopack relevance.
-- [ ] If relevant: `/docs/guides/developer/turbopack.md` created/updated with accurate information.
-- [ ] If deprecated: `/docs/guides/developer/turbopack.md` file deleted and all links/references to it removed from other documents.
+- [x] Decision made by Tech Lead regarding Turbopack relevance (Determined Relevant 2025-05-08).
+- [x] Existing guide moved from `docs/guides/TURBOPACK.md` to `docs/guides/developer/turbopack.md` (Done 2025-05-08).
+- [x] Links in `SUMMARY.md`, `glossary.md`, `guides/developer/README.md` verified/updated (Done 2025-05-08).
+- [ ] Content of `docs/guides/developer/turbopack.md` reviewed and updated for technical accuracy, reflecting current project usage (e.g., env var activation), stability status (`dev` stable, `build` alpha), and alignment with official Next.js Turbopack documentation.
       **Assignee:** Tech Lead
-      **Status:** To Do
+      **Status:** In Progress (Content Review Pending)
 
 ---
 
 **Ticket ID:** DOCS-RECOV-020
 **Title:** Establish Documentation Maintenance Process
-**Description:** Define and document the ongoing process for keeping documentation accurate and up-to-date.
-**Effort Type:** Process Definition
+**Description:** Define and document the definitive ongoing process for keeping all project documentation accurate, up-to-date, and discoverable.
+**Effort Type:** Process Definition & Documentation
 **Acceptance Criteria (AC):**
 
-- [ ] Process defined for assigning ownership of documents/sections.
-- [ ] Process defined for updating documentation alongside code changes (e.g., part of PR checklist).
-- [ ] Regular review cadence established (e.g., quarterly).
-- [ ] Maintenance process documented (e.g., within `documentation-guide.md`).
+- [ ] Clear ownership defined for each major section/document within `/docs`.
+- [ ] Process defined for triggering documentation updates alongside relevant code changes (e.g., mandatory part of PR checklist for features affecting documented areas, automated reminders?).
+- [ ] Regular review cadence established and documented (e.g., quarterly owner reviews, pre-release checks).
+- [ ] Mechanism for team members to easily report documentation issues or suggest improvements defined **and documented** (e.g., specific GitHub label, Slack channel, GitBook feedback button if applicable).
+- [ ] Process for adding new documentation (e.g., new ADRs, feature guides) defined.
+- [ ] The complete maintenance process, including ownership, triggers, cadence, and feedback loop, is documented within `/docs/documentation-guide.md`.
       **Assignee:** Tech Lead / Documentation Lead
       **Status:** To Do
+
+---
+
+## Documentation Improvement Backlog (Post-Recovery)
+
+These tickets capture enhancements identified during the recovery review to further elevate documentation quality beyond the initial reconstruction scope.
+
+**Ticket ID:** DOCS-IMPROVE-001
+**Title:** Deepen Technical Content & SSOT Links
+**Description:** Enhance the documentation's role as a Single Source of Truth by directly linking to code artifacts and capturing architectural decisions.
+**Effort Type:** Manual Content Enhancement & Tooling (Potentially)
+**Acceptance Criteria (AC):**
+
+- [ ] Key architectural documents (`architecture/*`) systematically reviewed to add links to relevant source code files/directories (e.g., using Git provider permalinks).
+- [ ] Core standards documents (`standards/*`) reviewed to link principles/rules to specific code examples or configuration files.
+- [ ] Core developer guides (`guides/developer/*`) reviewed to link steps or concepts to relevant source code.
+- [ ] Process established for maintaining code links during refactoring (may require tooling or specific PR review focus).
+- [ ] `/docs/architecture/adr/` directory populated with initial set of critical Architecture Decision Records (ADRs) covering past significant technical choices (e.g., technology selection, major patterns).
+- [ ] Template and process for creating new ADRs defined (potentially in `documentation-guide.md`).
+      **Assignee:** Architect / Tech Lead(s) / Senior Developers
+      **Status:** To Do (Post-Recovery)
+
+---
+
+**Ticket ID:** DOCS-IMPROVE-002
+**Title:** Enhance Comprehension (Diagrams & Practical Guides)
+**Description:** Improve understanding and practical application of documentation through visualizations and enhanced guides.
+**Effort Type:** Manual Content Creation & Enhancement
+**Acceptance Criteria (AC):**
+
+- [ ] Key architectural documents (`system-overview.md`, potentially others) enhanced with Mermaid.js diagrams illustrating component interactions, data flows, or request lifecycles.
+- [ ] Core developer guides reviewed; code examples verified for correctness and enhanced for clarity/runnability where possible.
+- [ ] New task-oriented developer guides created based on common developer needs (e.g., "How to Add a New API Endpoint", "How to Add a UI Component Following Atomic Design").
+- [ ] `/docs/guides/developer/features/` populated with initial practical guides for at least 1-2 core complex features (e.g., Campaign Wizard, Brand Lift), focusing on common development/customization tasks for those features.
+      **Assignee:** Architect / Tech Lead(s) / Feature Leads / Senior Developers
+      **Status:** To Do (Post-Recovery)
+
+---
+
+**Ticket ID:** DOCS-IMPROVE-003
+**Title:** Explore Auto-Generated Documentation (Future)
+**Description:** Investigate the feasibility and value of auto-generating specific documentation sections to improve accuracy and reduce maintenance overhead.
+**Effort Type:** Investigation & Potential Implementation
+**Acceptance Criteria (AC):**
+
+- [ ] Investigate tools/techniques for generating API Reference (`api-reference.md`) from code (e.g., OpenAPI/Swagger specs via JSDoc/TSDoc comments).
+- [ ] Investigate tools/techniques for generating component prop documentation from TypeScript types/interfaces (if a dedicated component library section is built).
+- [ ] Assess effort vs. reward for implementation.
+- [ ] Decision documented (e.g., in an ADR or `documentation-guide.md`) on whether/how to proceed with auto-generation for specific sections.
+      **Assignee:** Tech Lead / Architect
+      **Status:** Future Consideration
+
+---
+
+**Ticket ID:** DOCS-IMPROVE-004
+**Title:** Explore Advanced GitBook Features (Future)
+**Description:** Investigate leveraging advanced GitBook features to enhance documentation usability and interactivity.
+**Effort Type:** Investigation & Potential Implementation
+**Acceptance Criteria (AC):**
+
+- [ ] Investigate GitBook features like Tabs, Hints (callouts), Content Snippets/Includes, custom integrations (e.g., CodeSandbox embeds).
+- [ ] Identify areas in the existing documentation where these features could significantly improve clarity or user experience.
+- [ ] Assess implementation effort.
+- [ ] Decision documented on which advanced features to adopt, with guidelines added to `documentation-guide.md` if applicable.
+      **Assignee:** Documentation Lead / Tech Lead
+      **Status:** Future Consideration
 
 ---

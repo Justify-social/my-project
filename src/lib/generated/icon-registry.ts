@@ -485,6 +485,13 @@ export const iconRegistryData: IconRegistryData = {
     },
     {
       category: 'light',
+      id: 'faClipboardLight',
+      name: 'Clipboard',
+      path: '/icons/light/faClipboardLight.svg',
+      faVersion: 'fal fa-clipboard',
+    },
+    {
+      category: 'light',
       id: 'faClockLight',
       name: 'Clock',
       faVersion: 'fal fa-clock',
@@ -1469,6 +1476,13 @@ export const iconRegistryData: IconRegistryData = {
       name: 'Clock',
       faVersion: 'fas fa-clock',
       path: '/icons/solid/faClockSolid.svg',
+    },
+    {
+      category: 'solid',
+      id: 'faClipboardSolid',
+      name: 'Clipboard',
+      path: '/icons/solid/faClipboardSolid.svg',
+      faVersion: 'fas fa-clipboard',
     },
     {
       category: 'solid',

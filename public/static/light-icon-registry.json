@@ -275,6 +275,13 @@
     },
     {
       "category": "light",
+      "id": "faClipboardLight",
+      "name": "Clipboard",
+      "path": "/icons/light/faClipboardLight.svg",
+      "faVersion": "fal fa-clipboard"
+    },
+    {
+      "category": "light",
       "id": "faClockLight",
       "name": "Clock",
       "faVersion": "fal fa-clock",

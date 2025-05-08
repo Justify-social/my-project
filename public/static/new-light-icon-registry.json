@@ -6,10 +6,10 @@
   "icons": [
     {
       "category": "light",
-      "id": "faExampleLight",
-      "name": "Example",
-      "path": "/icons/light/faExampleLight.svg",
-      "faVersion": "fal fa-example"
+      "id": "faClipboardLight",
+      "name": "Clipboard",
+      "path": "/icons/light/faClipboardLight.svg",
+      "faVersion": "fal fa-clipboard"
     }
   ]
 }

@@ -289,6 +289,13 @@
     },
     {
       "category": "solid",
+      "id": "faClipboardSolid",
+      "name": "Clipboard",
+      "path": "/icons/solid/faClipboardSolid.svg",
+      "faVersion": "fas fa-clipboard"
+    },
+    {
+      "category": "solid",
       "id": "faCodeSolid",
       "name": "Code",
       "faVersion": "fas fa-code",

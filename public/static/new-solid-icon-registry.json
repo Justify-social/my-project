@@ -6,10 +6,10 @@
   "icons": [
     {
       "category": "solid",
-      "id": "faExampleSolid",
-      "name": "Example",
-      "path": "/icons/solid/faExampleSolid.svg",
-      "faVersion": "fas fa-example"
+      "id": "faClipboardSolid",
+      "name": "Clipboard",
+      "path": "/icons/solid/faClipboardSolid.svg",
+      "faVersion": "fas fa-clipboard"
     }
   ]
 }
