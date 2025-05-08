@@ -62,3 +62,6 @@ src/**/__tests__/**/*.test.jsx
 
 # Ignore build artifacts and large generated files
 BUILD/
+
+# Ignore Graphiti source submodule/directory
+graphiti_src/
