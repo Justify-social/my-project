@@ -2,13 +2,14 @@
 
 'use client'; // This layout needs hooks
 
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import { usePathname } from 'next/navigation';
-import { WizardProvider, useWizard } from '@/components/features/campaigns/WizardContext';
-import { AutosaveIndicator, AutosaveStatus } from '@/components/ui/autosave-indicator';
+import { WizardProvider } from '@/components/features/campaigns/WizardContext';
+// AutosaveIndicator is no longer needed here as the status display is removed
+// import { AutosaveIndicator, AutosaveStatus } from '@/components/ui/autosave-indicator';
 
-// Component to render the indicator using context
-// This component is rendered *inside* WizardProvider, so calling useWizard here is safe.
+// Component to render the indicator using context - REMOVED
+/*
 function WizardStatusIndicator() {
   const wizardContext = useWizard();
   const [showIndicator, setShowIndicator] = useState(false);
@@ -64,20 +65,20 @@ function WizardStatusIndicator() {
     </div>
   );
 }
+*/
 
-// Main layout component
 export default function WizardLayout({ children }: { children: React.ReactNode }) {
-  // Hooks needed for conditional rendering can stay here
+  // This layout assumes it wraps individual step pages.
+  // It provides the WizardContext.
   const pathname = usePathname();
-  const isWizardStepPage = pathname?.includes('/wizard/step-');
 
   return (
+    // Provide Wizard context to all wizard steps
     <WizardProvider>
-      {' '}
-      {/* Provider wraps the children */}
-      {/* Conditionally render the component that uses the hook */}
-      {isWizardStepPage && <WizardStatusIndicator />}
-      {children} {/* The actual step page content */}
+      {/* Remove the WizardStatusIndicator component */}
+      {/* <WizardStatusIndicator /> */}
+      {/* Render the actual step content */}
+      <div className="container mx-auto px-4 md:px-6 lg:px-8 py-8">{children}</div>
     </WizardProvider>
   );
 }

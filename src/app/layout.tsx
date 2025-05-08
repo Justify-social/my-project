@@ -15,8 +15,9 @@ import { SearchProvider } from '@/providers/SearchProvider';
 import { LocalizationProvider } from '@/providers/LocalizationProvider'; // Import the new provider
 // Remove the custom AuthStateProvider import
 // import { AuthStateProvider } from '@/lib/auth/authCoordinator';
-// Import Shadcn Toaster
-import { Toaster } from '@/components/ui/toaster';
+// Import react-hot-toast Toaster and Icon component
+import { Toaster as HotToaster } from 'react-hot-toast';
+import { Icon } from '@/components/ui/icon/icon'; // Assuming Icon component path
 // Import ClerkProvider and UI components
 import { ClerkProvider } from '@clerk/nextjs';
 // Remove dynamic import: import dynamic from 'next/dynamic';
@@ -63,7 +64,27 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </Suspense>
                 {/* Use ConditionalLayout to wrap children */}
                 <ConditionalLayout>{children}</ConditionalLayout>
-                <Toaster />
+                {/* Replace Shadcn Toaster with react-hot-toast HotToaster and apply SSOT configurations */}
+                <HotToaster
+                  position="top-center"
+                  toastOptions={{
+                    duration: 5000, // Default duration 5s
+                    success: {
+                      duration: 3000, // Success duration 3s
+                      icon: <Icon iconId="faFloppyDiskLight" className="h-5 w-5 text-success" />,
+                      className: 'toast-success-custom',
+                    },
+                    error: {
+                      icon: (
+                        <Icon
+                          iconId="faTriangleExclamationLight"
+                          className="h-5 w-5 text-destructive"
+                        />
+                      ),
+                      className: 'toast-error-custom',
+                    },
+                  }}
+                />
               </SearchProvider>
             </SidebarProvider>
           </LocalizationProvider>

@@ -49,12 +49,12 @@ import { differenceInDays, isValid as isValidDate } from 'date-fns';
 import { IconButtonAction } from '@/components/ui/button-icon-action';
 import { logger } from '@/lib/logger';
 import { toast } from 'react-hot-toast';
-import { convertCurrencyUsingApi } from '@/utils/currency'; // Import the new utility
-import { InfluencerCard } from '@/components/ui/card-influencer'; // Import InfluencerCard
+import { convertCurrencyUsingApi } from '@/utils/currency';
 import { Badge } from '@/components/ui/badge';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocalization } from '@/hooks/useLocalization';
 import timezonesData from '@/lib/timezones.json';
+import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 
 // --- Formatting Helpers ---
 
@@ -459,7 +459,8 @@ function Step1Content() {
     const isValid = await form.trigger();
     if (!isValid) {
       logger.warn('[Step 1] Validation failed.');
-      toast.error('Please fix the errors before proceeding.');
+      // Use imported helper
+      showErrorToast('Please fix the errors before proceeding.');
       setIsSubmitting(false);
       return;
     }
@@ -484,7 +485,8 @@ function Step1Content() {
       logger.error('[Step 1] Error during submission:', {
         error: error instanceof Error ? error : String(error),
       });
-      toast.error('An unexpected error occurred. Please try again.');
+      // Use imported helper
+      showErrorToast('An unexpected error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -497,7 +499,8 @@ function Step1Content() {
     const isValid = await form.trigger();
     if (!isValid) {
       logger.warn('[Step 1] Validation failed for manual save.');
-      toast.error('Please fix the errors before saving.');
+      // Use imported helper
+      showErrorToast('Please fix the errors before saving.');
       setIsSubmitting(false);
       return false;
     }
@@ -512,18 +515,22 @@ function Step1Content() {
 
       if (saveSuccess) {
         logger.info('[Step 1] Manual save successful!');
-        toast.success('Progress saved!');
+        // Use imported helper (default icon is floppy disk)
+        showSuccessToast('Progress saved!');
         return true;
       } else {
         logger.error('[Step 1] Manual save failed.');
         // saveProgress should show specific error
+        // Use imported helper (default icon is triangle exclamation)
+        showErrorToast('An unexpected error occurred during save.');
         return false;
       }
     } catch (error) {
       logger.error('[Step 1] Error during manual save:', {
         error: error instanceof Error ? error : String(error),
       });
-      toast.error('An unexpected error occurred during save.');
+      // Use imported helper
+      showErrorToast('An unexpected error occurred during save.');
       return false;
     } finally {
       setIsSubmitting(false);

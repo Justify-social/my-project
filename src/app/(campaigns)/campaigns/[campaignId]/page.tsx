@@ -8,9 +8,7 @@ import {
   Card,
   CardHeader,
   CardTitle,
-  CardDescription,
   CardContent,
-  CardFooter,
   Button,
   Separator,
 } from '@/components/ui';
@@ -25,6 +23,8 @@ import { badgeVariants } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
+// Import the centralized toast helpers (pointing to .tsx file, without extension)
+import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 
 // Define AGE_BRACKETS for the age distribution summary UI
 const AGE_BRACKETS = [
@@ -598,11 +598,12 @@ export default function CampaignDetail() {
       !campaignData.assets.uploaded ||
       campaignData.assets.uploaded.length === 0
     ) {
-      toast.error('No assets to download.');
+      // Use imported helper
+      showErrorToast('No assets to download.');
       return;
     }
 
-    const toastId = toast.loading('Preparing assets for download...');
+    // For simplicity now, we removed loading toast. Can be added back via helper if needed.
     const zip = new JSZip();
 
     try {
@@ -631,16 +632,19 @@ export default function CampaignDetail() {
       await Promise.all(assetPromises);
 
       if (Object.keys(zip.files).length === 0) {
-        toast.error('No assets could be fetched for download.', { id: toastId });
+        // Use imported helper
+        showErrorToast('No assets could be fetched for download.');
         return;
       }
 
       const zipBlob = await zip.generateAsync({ type: 'blob' });
       saveAs(zipBlob, `${campaignData.name || 'campaign'}_assets.zip`);
-      toast.success('Assets downloaded successfully!', { id: toastId });
+      // Use imported helper (default icon is floppy disk)
+      showSuccessToast('Download successful');
     } catch (error) {
       console.error('Error creating zip file:', error);
-      toast.error('Failed to download assets. See console for details.', { id: toastId });
+      // Use imported helper
+      showErrorToast('Failed to download assets. See console for details.');
     }
   };
 

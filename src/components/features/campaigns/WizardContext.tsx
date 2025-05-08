@@ -18,9 +18,9 @@ import {
 // TODO: Replace WizardCampaignFormData with a proper type derived from schema.prisma CampaignWizard model in types.ts
 // import { CampaignFormData as WizardCampaignFormData } from '@/types/influencer';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { toast } from 'react-hot-toast';
 import { standardizeApiResponse } from '@/utils/api-response-formatter';
 import { logger } from '@/utils/logger';
+import { showErrorToast } from '@/utils/toastUtils'; // Keep showErrorToast, remove unused showSuccessToast
 // TODO: Remove this import if useCampaignWizard hook becomes obsolete after RHF migration
 // import useCampaignWizard, {
 //   WizardStep,
@@ -260,7 +260,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
             'WizardContext: Failed to parse loaded data against schema:',
             parseResult.error.errors
           );
-          toast.error('Loaded campaign data has an unexpected format.');
+          showErrorToast('Loaded campaign data has an unexpected format.');
           setWizardState(null);
         }
       } else {
@@ -268,13 +268,13 @@ export function WizardProvider({ children }: { children: ReactNode }) {
           'WizardContext: Failed to load or normalize initial data',
           normalizedData?.error
         );
-        toast.error(`Failed to load campaign data: ${normalizedData?.error || 'Unknown error'}`);
+        showErrorToast(`Failed to load campaign data: ${normalizedData?.error || 'Unknown error'}`);
         setWizardState(null);
       }
     } catch (error: unknown) {
       logger.error('WizardContext: Error fetching initial campaign data:', error);
       const message = error instanceof Error ? error.message : 'Unknown error';
-      toast.error(`Error fetching campaign data: ${message}`);
+      showErrorToast(`Error fetching campaign data: ${message}`);
       setWizardState(null);
     } finally {
       setIsLoading(false);
@@ -392,7 +392,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
         } catch (error: unknown) {
           logger.error('Error creating new campaign draft:', error);
           const message = error instanceof Error ? error.message : 'Unknown error';
-          toast.error(`Error creating campaign: ${message}`);
+          showErrorToast(`Error creating campaign: ${message}`);
           return null; // ADD EXPLICIT RETURN NULL HERE
         }
       }
@@ -459,14 +459,14 @@ export function WizardProvider({ children }: { children: ReactNode }) {
         } else {
           // ... error handling ...
           logger.error('Failed to save progress (API failure):', result);
-          toast.error(`Failed to save progress: ${result.error || 'Unknown API error'}`);
+          showErrorToast(`Failed to save progress: ${result.error || 'Unknown API error'}`);
           return null; // Return null on PATCH API failure
         }
       } catch (error: unknown) {
         // ... error handling ...
         logger.error('Error saving progress:', error);
         const message = error instanceof Error ? error.message : 'Unknown error';
-        toast.error(`Error saving progress: ${message}`);
+        showErrorToast(`Error saving progress: ${message}`);
         return null; // Return null on fetch/other error
       }
       // Remove wizardState dependency, add campaignId

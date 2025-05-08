@@ -7,7 +7,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
 import { useWizard } from '@/components/features/campaigns/WizardContext';
 import { toast } from 'react-hot-toast';
-import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -41,6 +40,7 @@ import {
 } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
+import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 
 // --- Constants for Display ---
 const kpis = [
@@ -272,7 +272,7 @@ function Step2Content() {
   const onSubmitAndNavigate = async () => {
     const isValid = await form.trigger();
     if (!isValid) {
-      toast.error('Please fix the errors before proceeding.');
+      showErrorToast('Please fix the errors before proceeding.');
       return;
     }
     const data = form.getValues();
@@ -300,10 +300,10 @@ function Step2Content() {
       if (wizard.campaignId) {
         router.push(`/campaigns/wizard/step-3?id=${wizard.campaignId}`); // Navigate to Step 3
       } else {
-        toast.error('Could not navigate: campaign ID not found.');
+        showErrorToast('Could not navigate: campaign ID not found.');
       }
     } else {
-      toast.error('Failed to save progress before navigating.');
+      showErrorToast('Failed to save progress before navigating.');
     }
   };
 
@@ -379,7 +379,7 @@ function Step2Content() {
     const isValid = await form.trigger();
     if (!isValid) {
       console.warn('[Step 2] Validation failed for manual save.');
-      toast.error('Please fix the errors before saving.');
+      showErrorToast('Please fix the errors before saving.');
       return false;
     }
     const data = form.getValues();
@@ -408,7 +408,7 @@ function Step2Content() {
 
       if (saveSuccess) {
         console.log('[Step 2] Manual save successful!');
-        toast.success('Progress saved!');
+        showSuccessToast('Progress saved!');
         // Optionally reset dirty state if needed after successful save
         // form.reset(data, { keepValues: true, keepDirty: false, keepErrors: true });
         return true;
@@ -419,7 +419,7 @@ function Step2Content() {
       }
     } catch (error) {
       console.error('[Step 2] Error during manual save:', error);
-      toast.error('An unexpected error occurred during save.');
+      showErrorToast('An unexpected error occurred during save.');
       return false;
     }
     // No finally block to change isSubmitting, handled by ProgressBarWizard now

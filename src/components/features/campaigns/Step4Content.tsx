@@ -15,13 +15,13 @@ import {
   CreativeAssetTypeEnum,
 } from '@/components/features/campaigns/types';
 import { toast } from 'react-hot-toast';
-import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form } from '@/components/ui/form';
 import { FileUploader, UploadThingResult } from '@/components/ui/file-uploader';
 import { ProgressBarWizard } from '@/components/ui/progress-bar-wizard';
 import { IconButtonAction } from '@/components/ui/button-icon-action';
 import AssetCardStep4 from '@/components/ui/card-asset-step-4';
+import { showSuccessToast, showErrorToast } from '@/utils/toastUtils'; // Ensure this points correctly
 
 // Infer the DraftAsset type
 type DraftAsset = z.infer<typeof DraftAssetSchema>;
@@ -136,7 +136,8 @@ function Step4Content() {
   const onSubmitAndNavigate = async () => {
     const isValid = await form.trigger();
     if (!isValid) {
-      toast.error('Please fix the errors before proceeding.');
+      // Use helper
+      showErrorToast('Please fix the errors before proceeding.');
       return;
     }
     const data = form.getValues();
@@ -163,10 +164,12 @@ function Step4Content() {
       if (wizard.campaignId) {
         router.push(`/campaigns/wizard/step-5?id=${wizard.campaignId}`); // Navigate to Step 5
       } else {
-        toast.error('Could not navigate: campaign ID not found.');
+        // Use helper
+        showErrorToast('Could not navigate: campaign ID not found.');
       }
     } else {
-      toast.error('Failed to save progress before navigating.');
+      // Use helper
+      showErrorToast('Failed to save progress before navigating.');
     }
   };
 
@@ -177,7 +180,8 @@ function Step4Content() {
     const isValid = await form.trigger();
     if (!isValid) {
       console.warn('[Step 4] Validation failed for manual save.');
-      toast.error('Please fix the errors before saving.');
+      // Use helper
+      showErrorToast('Please fix the errors before saving.');
       return false;
     }
     const data = form.getValues();
@@ -199,7 +203,8 @@ function Step4Content() {
 
       if (saveSuccess) {
         console.log('[Step 4] Manual save successful!');
-        toast.success('Progress saved!');
+        // Use helper (default icon)
+        showSuccessToast('Progress saved!');
         // Optionally reset dirty state
         // form.reset(data, { keepValues: true, keepDirty: false, keepErrors: true });
         return true;
@@ -210,7 +215,8 @@ function Step4Content() {
       }
     } catch (error) {
       console.error('[Step 4] Error during manual save:', error);
-      toast.error('An unexpected error occurred during save.');
+      // Use helper
+      showErrorToast('An unexpected error occurred during save.');
       return false;
     }
   };

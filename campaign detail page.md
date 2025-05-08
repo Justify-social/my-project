@@ -29,7 +29,7 @@ This document summarizes the improvements and changes made to the campaign detai
   - Regenerated the consolidated `src/lib/generated/icon-registry.ts` module using `generate-registry-module.mjs` after fixes.
   - Locked and unlocked registry files using the provided shell scripts (`lock-registry-files.sh`, `unlock-registry-files.sh`) and manual commands to ensure they could be edited and then secured again.
 
-## 3. Toast Notification System (SSOT Standardization)
+## 3. Toast Notification System (SSOT Standardization) [DONE]
 
 - **Identified Conflict:** Recognized the coexistence of two toast systems: Shadcn UI (`useToast`/`<Toaster>`) and `react-hot-toast` (`toast`/`<HotToaster>`).
 - **Determined SSOT:** Confirmed that the working Campaign Wizard steps used `react-hot-toast` calls, establishing it as the intended SSOT for triggering toasts.

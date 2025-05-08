@@ -30,6 +30,7 @@ import { ProgressBarWizard } from '@/components/ui/progress-bar-wizard';
 import { AgeDistributionSliderGroup } from '@/components/ui/slider-age-distribution';
 import { GenderSelector } from '@/components/ui/selector-gender';
 import { LanguageSelector } from '@/components/ui/selector-language';
+import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 
 // --- Mock Data (Replace with actual data fetching/static data) ---
 // Updated list of top 15 languages, sorted alphabetically
@@ -120,7 +121,7 @@ function Step3Content() {
   const onSubmitAndNavigate = async () => {
     const isValid = await form.trigger();
     if (!isValid) {
-      toast.error('Please fix the errors before proceeding.');
+      showErrorToast('Please fix the errors before proceeding.');
       return;
     }
     const data = form.getValues();
@@ -147,10 +148,10 @@ function Step3Content() {
       if (wizard.campaignId) {
         router.push(`/campaigns/wizard/step-4?id=${wizard.campaignId}`); // Navigate to Step 4
       } else {
-        toast.error('Could not navigate: campaign ID not found.');
+        showErrorToast('Could not navigate: campaign ID not found.');
       }
     } else {
-      toast.error('Failed to save progress before navigating.');
+      showErrorToast('Failed to save progress before navigating.');
     }
   };
 
@@ -160,7 +161,7 @@ function Step3Content() {
     const isValid = await form.trigger();
     if (!isValid) {
       console.warn('[Step 3] Validation failed for manual save.');
-      toast.error('Please fix the errors before saving.');
+      showErrorToast('Please fix the errors before saving.');
       return false;
     }
     const data = form.getValues();
@@ -184,7 +185,7 @@ function Step3Content() {
 
       if (saveSuccess) {
         console.log('[Step 3] Manual save successful!');
-        toast.success('Progress saved!');
+        showSuccessToast('Progress saved!');
         // Optionally reset dirty state if needed
         // form.reset(data, { keepValues: true, keepDirty: false, keepErrors: true });
         return true;
@@ -195,7 +196,7 @@ function Step3Content() {
       }
     } catch (error) {
       console.error('[Step 3] Error during manual save:', error);
-      toast.error('An unexpected error occurred during save.');
+      showErrorToast('An unexpected error occurred during save.');
       return false;
     }
   };

@@ -402,3 +402,21 @@ main {
   /* Accent Blue for Ended */
   color: hsl(var(--accent-foreground)) !important;
 }
+
+/* =========================================
+   REACT-HOT-TOAST STYLING (SSOT)
+   ========================================= */
+
+/* Add custom border based on className set in layout.tsx toastOptions */
+.toast-success-custom {
+  border: 2px solid hsl(var(--success)) !important;
+  /* You might need to adjust padding/background here if defaults aren't right */
+  /* padding: 16px; */
+  /* background-color: hsl(var(--background)); */
+}
+
+.toast-error-custom {
+  border: 2px solid hsl(var(--destructive)) !important;
+  /* padding: 16px; */
+  /* background-color: hsl(var(--background)); */
+}

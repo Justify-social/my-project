@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,7 +11,6 @@ import {
   SubmissionPayloadData,
   StatusEnum,
 } from '@/components/features/campaigns/types';
-import { toast } from 'react-hot-toast';
 import { WizardSkeleton } from '@/components/ui/loading-skeleton';
 import { Icon } from '@/components/ui/icon/icon';
 import { Button } from '@/components/ui/button';
@@ -33,6 +32,152 @@ import { InfluencerCard } from '@/components/ui/card-influencer';
 import { ProgressBarWizard } from '@/components/ui/progress-bar-wizard';
 import { IconButtonAction } from '@/components/ui/button-icon-action';
 import { AssetCard } from '@/components/ui/card-asset';
+import Image from 'next/image';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
+import { toast } from 'react-hot-toast';
+
+// --- Utility Functions ---
+const formatDate = (dateString: string | null | undefined): string => {
+  if (!dateString) return 'N/A';
+  try {
+    return new Date(dateString).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  } catch (e) {
+    return 'Invalid Date';
+  }
+};
+
+const formatCurrency = (
+  amount: number | null | undefined,
+  currency: string | null | undefined
+): string => {
+  if (amount === null || amount === undefined || !currency) return 'N/A';
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  } catch (e) {
+    return String(amount); // Fallback
+  }
+};
+
+// --- KPI & Feature Utilities (adapted from campaign profile page) ---
+const kpiDisplayNames: Record<string, string> = {
+  adRecall: 'Ad Recall',
+  brandAwareness: 'Brand Awareness',
+  consideration: 'Consideration',
+  messageAssociation: 'Message Association',
+  brandPreference: 'Brand Preference',
+  purchaseIntent: 'Purchase Intent',
+  actionIntent: 'Action Intent',
+  recommendationIntent: 'Recommendation Intent',
+  advocacy: 'Advocacy',
+};
+
+const kpiTooltips: Record<string, string> = {
+  adRecall: 'Measures how well consumers remember seeing your ad after exposure',
+  brandAwareness: 'Tracks the percentage of your target audience that recognizes your brand',
+  consideration:
+    'Measures if consumers would consider your product when making a purchase decision',
+  messageAssociation: 'Tracks how strongly consumers associate your brand with specific messaging',
+  brandPreference:
+    'Measures if consumers prefer your brand over competitors for specific attributes',
+  purchaseIntent: 'Tracks likelihood of consumers to purchase your product after campaign exposure',
+  actionIntent: 'Measures likelihood of consumers taking a specific action (signing up, etc.)',
+  recommendationIntent: 'Tracks if consumers would recommend your brand/product to others',
+  advocacy: 'Measures how likely consumers are to actively advocate for your brand',
+};
+
+const formatKpiName = (kpiKey: string | null | undefined): string => {
+  if (!kpiKey) return 'N/A';
+  const normalizedKey = kpiKey.toLowerCase().replace(/_([a-z])/g, (_, char) => char.toUpperCase());
+  return (
+    kpiDisplayNames[normalizedKey] ||
+    kpiKey
+      .replace(/_/g, ' ')
+      .split(' ')
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(' ')
+  );
+};
+
+const getKpiTooltipText = (kpiKey: string | null | undefined): string | undefined => {
+  if (!kpiKey) return undefined;
+  const normalizedKey = kpiKey.toLowerCase().replace(/_([a-z])/g, (_, char) => char.toUpperCase());
+  return kpiTooltips[normalizedKey];
+};
+
+const formatFeatureName = (featureKey: string | null | undefined): string => {
+  if (!featureKey) return 'N/A';
+  return featureKey
+    .replace(/_/g, ' ')
+    .split(' ')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ');
+};
+
+// --- KPI Icon Map (from kpis-icon-registry.json) ---
+const kpiIconMap: Record<string, string> = {
+  actionIntent: '/icons/kpis/kpisActionIntent.svg',
+  adRecall: '/icons/kpis/kpisAdRecall.svg',
+  advocacy: '/icons/kpis/kpisAdvocacy.svg',
+  brandAwareness: '/icons/kpis/kpisBrandAwareness.svg',
+  brandPreference: '/icons/kpis/kpisBrandPreference.svg',
+  consideration: '/icons/kpis/kpisConsideration.svg',
+  messageAssociation: '/icons/kpis/kpisMessageAssociation.svg',
+  purchaseIntent: '/icons/kpis/kpisPurchaseIntent.svg',
+  recommendationIntent: '/icons/kpis/kpisRecommendationIntent.svg',
+};
+
+// Helper to get KPI icon path (normalized key)
+const getKpiIconPath = (kpiKey: string | null | undefined): string => {
+  if (!kpiKey) return '';
+  const normalizedKey = kpiKey.toLowerCase().replace(/_([a-z])/g, (_, char) => char.toUpperCase());
+  return kpiIconMap[normalizedKey] || '';
+};
+
+// Language mapping (from campaign profile page)
+const TOP_LANGUAGES_MAP: Array<{ value: string; label: string }> = [
+  { value: 'ar', label: 'Arabic' },
+  { value: 'bn', label: 'Bengali' },
+  { value: 'zh', label: 'Chinese (Mandarin)' },
+  { value: 'en', label: 'English' },
+  { value: 'fr', label: 'French' },
+  { value: 'de', label: 'German' },
+  { value: 'hi', label: 'Hindi' },
+  { value: 'id', label: 'Indonesian' },
+  { value: 'ja', label: 'Japanese' },
+  { value: 'ko', label: 'Korean' },
+  { value: 'pt', label: 'Portuguese' },
+  { value: 'ru', label: 'Russian' },
+  { value: 'es', label: 'Spanish' },
+  { value: 'tr', label: 'Turkish' },
+  { value: 'vi', label: 'Vietnamese' },
+  // Add more or use a more comprehensive list/library if needed
+];
+
+const getLanguageName = (langCode: string | null | undefined): string => {
+  if (!langCode) return 'N/A';
+  const lang = TOP_LANGUAGES_MAP.find(l => l.value.toLowerCase() === langCode.toLowerCase());
+  return lang ? lang.label : langCode.toUpperCase(); // Fallback to uppercase code
+};
+
+// Age brackets for audience display (from campaign profile page)
+const AGE_BRACKETS = [
+  { key: 'age18_24', label: '18-24' },
+  { key: 'age25_34', label: '25-34' },
+  { key: 'age35_44', label: '35-44' },
+  { key: 'age45_54', label: '45-54' },
+  { key: 'age55_64', label: '55-64' },
+  { key: 'age65plus', label: '65+' },
+] as const;
 
 // --- Data Display Components ---
 
@@ -52,10 +197,7 @@ const SummarySection: React.FC<SummarySectionProps> = ({
   isComplete,
 }) => {
   return (
-    <AccordionItem
-      value={`step-${stepNumber}`}
-      className="group border rounded-lg mb-2 overflow-hidden"
-    >
+    <AccordionItem value={`step-${stepNumber}`} className="group border rounded-lg mb-2">
       <div
         className={cn(
           'flex justify-between items-center w-full p-4 cursor-pointer hover:bg-accent/10',
@@ -96,7 +238,7 @@ const SummarySection: React.FC<SummarySectionProps> = ({
           />
         </div>
       </div>
-      <AccordionContent className="p-4 pt-0 border-t">
+      <AccordionContent className="p-4 pt-0 border-t overflow-visible">
         <div className="pl-[calc(1rem_+_1.5rem_+_0.75rem)] mt-2">{children}</div>
       </AccordionContent>
     </AccordionItem>
@@ -140,27 +282,89 @@ const DataItem: React.FC<DataItemProps> = ({ label, value, children, className }
   );
 };
 
+// --- KpiBadge Component (adapted from campaign profile) ---
+const KpiBadge = ({ kpi, isPrimary = false }: { kpi: string; isPrimary?: boolean }) => {
+  const iconPath = getKpiIconPath(kpi);
+  const displayName = formatKpiName(kpi); // Use existing formatter
+  const tooltipText = getKpiTooltipText(kpi); // Use existing getter
+
+  const badgeContent = (
+    <div
+      className={cn(
+        'inline-flex items-center gap-2 rounded-md border',
+        isPrimary
+          ? 'bg-accent/15 border-accent/30 px-4 py-3' // Style for primary KPI
+          : 'bg-accent/10 border-accent/20 px-3 py-2' // Style for secondary KPIs
+      )}
+    >
+      {iconPath && (
+        <div className={cn('flex-shrink-0 relative', isPrimary ? 'h-5 w-5' : 'h-4 w-4')}>
+          {' '}
+          {/* Adjusted size slightly */}
+          <Image
+            src={iconPath}
+            alt={displayName}
+            fill
+            className="object-contain"
+            style={{
+              filter:
+                'invert(47%) sepia(98%) saturate(1776%) hue-rotate(179deg) brightness(104%) contrast(105%)', // Preserving the accent color filter
+            }}
+          />
+        </div>
+      )}
+      <span
+        className={cn('font-medium text-accent', isPrimary ? 'text-base font-semibold' : 'text-sm')}
+      >
+        {displayName}
+      </span>
+    </div>
+  );
+
+  if (!tooltipText) {
+    return badgeContent; // Render badge without tooltip if no text
+  }
+
+  return (
+    <Tooltip delayDuration={300}>
+      <TooltipTrigger asChild>{badgeContent}</TooltipTrigger>
+      <TooltipContent
+        side="top" // Position tooltip above the trigger
+        align="center" // Align center relative to trigger
+        className="max-w-xs bg-gray-900 text-white text-xs rounded-md py-2 px-3 shadow-lg" // Match style of old tooltip, adjust as needed
+      >
+        <p>{tooltipText}</p>
+      </TooltipContent>
+    </Tooltip>
+  );
+};
+
 // --- Review Sub-Components ---
 
 const Step1Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
     <DataItem label="Campaign Name" value={data.name} />
     <DataItem label="Business Goal" value={data.businessGoal} className="md:col-span-2" />
-    <DataItem
-      label="Start Date"
-      value={data.startDate ? new Date(data.startDate).toLocaleDateString() : null}
-    />
-    <DataItem
-      label="End Date"
-      value={data.endDate ? new Date(data.endDate).toLocaleDateString() : null}
-    />
+    <DataItem label="Campaign Duration">
+      {data.startDate && data.endDate
+        ? `${formatDate(data.startDate)} - ${formatDate(data.endDate)}`
+        : 'N/A'}
+    </DataItem>
     <DataItem label="Timezone" value={data.timeZone} />
-    <DataItem label="Currency" value={data.budget?.currency} />
-    <DataItem label="Total Budget" value={data.budget?.total?.toLocaleString()} />
-    <DataItem label="Social Media Budget" value={data.budget?.socialMedia?.toLocaleString()} />
+    <DataItem
+      label="Total Budget"
+      value={formatCurrency(data.budget?.total, data.budget?.currency)}
+    />
+    <DataItem
+      label="Social Budget"
+      value={formatCurrency(data.budget?.socialMedia, data.budget?.currency)}
+    />
     <DataItem
       label="Primary Contact Name"
-      value={`${data.primaryContact?.firstName} ${data.primaryContact?.surname}`}
+      value={
+        `${data.primaryContact?.firstName || ''} ${data.primaryContact?.surname || ''}`.trim() ||
+        'N/A'
+      }
     />
     <DataItem label="Primary Contact Email" value={data.primaryContact?.email} />
     <DataItem label="Primary Contact Position" value={data.primaryContact?.position} />
@@ -168,7 +372,10 @@ const Step1Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
       <>
         <DataItem
           label="Secondary Contact Name"
-          value={`${data.secondaryContact?.firstName} ${data.secondaryContact?.surname}`}
+          value={
+            `${data.secondaryContact?.firstName || ''} ${data.secondaryContact?.surname || ''}`.trim() ||
+            'N/A'
+          }
         />
         <DataItem label="Secondary Contact Email" value={data.secondaryContact?.email} />
         <DataItem label="Secondary Contact Position" value={data.secondaryContact?.position} />
@@ -183,7 +390,7 @@ const Step1Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
               key={idx}
               platform={inf.platform}
               handle={inf.handle}
-              className="bg-muted/30"
+              className="bg-muted/30 max-w-sm"
             />
           ))}
         </div>
@@ -196,11 +403,51 @@ const Step1Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
 
 const Step2Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
-    <DataItem label="Primary KPI" value={data.primaryKPI} />
-    <DataItem label="Secondary KPIs" value={data.secondaryKPIs?.join(', ')} />
-    <DataItem label="Features" value={data.features?.join(', ')} />
+    <DataItem label="Primary KPI">
+      {data.primaryKPI ? (
+        <KpiBadge kpi={data.primaryKPI} isPrimary={true} />
+      ) : (
+        <span className="text-muted-foreground italic">Not provided</span>
+      )}
+    </DataItem>
+    <DataItem label="Secondary KPIs">
+      {data.secondaryKPIs && data.secondaryKPIs.length > 0 ? (
+        <div className="flex flex-wrap gap-2">
+          {data.secondaryKPIs.map((kpi, idx) => (
+            <KpiBadge key={idx} kpi={kpi} isPrimary={false} />
+          ))}
+        </div>
+      ) : (
+        <span className="text-muted-foreground italic">None</span>
+      )}
+    </DataItem>
+    <DataItem label="Features">
+      {data.features && data.features.length > 0 ? (
+        <div className="flex flex-wrap gap-2">
+          {data.features.map((feature, idx) => (
+            <Badge key={idx} variant="outline" className="py-1 px-2 text-sm">
+              {formatFeatureName(feature)}
+            </Badge>
+          ))}
+        </div>
+      ) : (
+        <span className="text-muted-foreground italic">None</span>
+      )}
+    </DataItem>
     <DataItem label="Main Message" value={data.messaging?.mainMessage} className="md:col-span-2" />
-    <DataItem label="Hashtags" value={data.messaging?.hashtags} />
+    <DataItem label="Hashtags">
+      {data.messaging?.hashtags && data.messaging.hashtags.length > 0 ? (
+        <div className="flex flex-wrap gap-2">
+          {data.messaging.hashtags.map((tag, idx) => (
+            <Badge key={idx} variant="secondary" className="py-1 px-2 text-sm flex items-center">
+              {tag}
+            </Badge>
+          ))}
+        </div>
+      ) : (
+        <span className="text-muted-foreground italic">None</span>
+      )}
+    </DataItem>
     <DataItem label="Key Benefits" value={data.messaging?.keyBenefits} />
     <DataItem label="Memorability Hypothesis" value={data.expectedOutcomes?.memorability} />
     <DataItem label="Purchase Intent Hypothesis" value={data.expectedOutcomes?.purchaseIntent} />
@@ -208,29 +455,84 @@ const Step2Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
   </div>
 );
 
-const Step3Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
-    {/* <DataItem label="Age Range" value={data.demographics?.ageRange?.join(' - ')} /> */}
-    <DataItem label="Genders" value={data.demographics?.genders} />
-    <DataItem label="Languages" value={data.demographics?.languages} />
-    <DataItem label="Interests" value={data.targeting?.interests} />
-    <DataItem label="Keywords" value={data.targeting?.keywords} />
-    <DataItem label="Locations" className="md:col-span-2">
-      {data.locations && data.locations.length > 0 ? (
-        <div className="flex flex-wrap gap-1">
-          {data.locations.map((loc, idx) => (
-            <Badge key={idx} variant="outline">
-              {[loc.city, loc.region, loc.country].filter(Boolean).join(', ') || 'Invalid Location'}
-            </Badge>
-          ))}
-        </div>
-      ) : (
-        <span className="text-muted-foreground italic">None specified</span>
-      )}
-    </DataItem>
-    <DataItem label="Competitors" value={data.competitors} />
-  </div>
-);
+const Step3Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => {
+  // Calculate max age value for highlighting (similar to profile page)
+  const ageValues = AGE_BRACKETS.map(bracket => data.demographics?.[bracket.key] ?? 0);
+  const maxAgeValue = Math.max(...ageValues);
+  const hasAgeData = ageValues.some(v => v > 0);
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+      <DataItem label="Genders" value={data.demographics?.genders} />
+      <DataItem label="Languages">
+        {data.demographics?.languages && data.demographics.languages.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {data.demographics.languages.map((langCode, idx) => (
+              <Badge key={idx} variant="secondary" className="py-1 px-2 text-sm">
+                {getLanguageName(langCode)}
+              </Badge>
+            ))}
+          </div>
+        ) : (
+          <span className="text-muted-foreground italic">None</span>
+        )}
+      </DataItem>
+      <div className="md:col-span-2 pt-2">
+        <p className="text-sm font-medium text-muted-foreground mb-2">Age Ranges</p>
+        {hasAgeData ? (
+          <div className="flex flex-wrap gap-3">
+            {AGE_BRACKETS.map(bracket => {
+              const value = data.demographics?.[bracket.key];
+              if (value === undefined || value === null || value === 0) return null; // Skip if 0 or undefined
+              const isMax = value === maxAgeValue;
+              const borderColorClass = isMax ? 'border-accent' : 'border-gray-300';
+
+              return (
+                <div
+                  key={bracket.key}
+                  className={cn(
+                    'flex flex-col items-center justify-center p-3 rounded-lg border min-w-[70px] text-center',
+                    borderColorClass,
+                    isMax ? 'bg-accent/10' : 'bg-gray-50'
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'text-lg font-semibold block mb-0.5',
+                      isMax ? 'text-accent' : 'text-foreground'
+                    )}
+                  >
+                    {value}%
+                  </span>
+                  <span className="text-xs text-muted-foreground">{bracket.label}</span>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground italic">Not specified</p>
+        )}
+      </div>
+      <DataItem label="Interests" value={data.targeting?.interests} />
+      <DataItem label="Keywords" value={data.targeting?.keywords} />
+      <DataItem label="Locations" className="md:col-span-2">
+        {data.locations && data.locations.length > 0 ? (
+          <div className="flex flex-wrap gap-1">
+            {data.locations.map((loc, idx) => (
+              <Badge key={idx} variant="outline">
+                {[loc.city, loc.region, loc.country].filter(Boolean).join(', ') ||
+                  'Invalid Location'}
+              </Badge>
+            ))}
+          </div>
+        ) : (
+          <span className="text-muted-foreground italic">None specified</span>
+        )}
+      </DataItem>
+      <DataItem label="Competitors" value={data.competitors} />
+    </div>
+  );
+};
 
 const Step4Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
   <div className="space-y-4">
@@ -302,7 +604,8 @@ function Step5Content() {
   // Submit Handler (Uses validated payload)
   const onSubmit: SubmitHandler<ConfirmationFormData> = async formData => {
     if (!formData.confirm) {
-      toast.error('Please confirm the details before submitting.');
+      // Use helper
+      showErrorToast('Please confirm the details before submitting.');
       return;
     }
     setIsSubmitting(true);
@@ -326,7 +629,8 @@ function Step5Content() {
       const saveSuccess = await wizard.saveProgress(payload); // Use saveProgress for PATCH
 
       if (saveSuccess) {
-        toast.success('Campaign submitted successfully!');
+        // Use helper (default icon)
+        showSuccessToast('Campaign submitted successfully!');
         console.log(
           '[Step5Content] Submission save successful. Attempting to navigate to submission page...'
         );
@@ -338,18 +642,23 @@ function Step5Content() {
           console.error(
             'Navigation to submission page failed: Campaign ID missing after successful submission.'
           );
-          toast.error('Could not display submission confirmation (missing ID).');
+          // Use helper
+          showErrorToast('Could not display submission confirmation (missing ID).');
           router.push('/dashboard?submission=success'); // Fallback
         }
       } else {
-        // saveProgress already shows specific errors via toast
+        // saveProgress already shows specific errors via toast (in WizardContext)
+        // We might still show a generic error here if saveProgress returns false but didn't show a toast
+        // For now, assume saveProgress handles its own errors.
+        // showErrorToast('Failed to submit campaign. Please try again.');
         setSubmitError('Failed to submit campaign. Please try again.');
       }
     } catch (err: unknown) {
       console.error('Submission Error:', err);
       const message = err instanceof Error ? err.message : 'Failed to submit campaign.';
       setSubmitError(message);
-      toast.error(message);
+      // Use helper
+      showErrorToast(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -394,44 +703,46 @@ function Step5Content() {
 
       <h1 className="text-2xl font-semibold">Review Campaign Details</h1>
 
-      <Accordion
-        type="multiple"
-        defaultValue={['step-1', 'step-2', 'step-3', 'step-4']}
-        className="w-full space-y-2"
-      >
-        <SummarySection
-          title="Basic Information & Contacts"
-          stepNumber={1}
-          onEdit={() => handleStepClick(1)}
-          isComplete={wizardState.step1Complete}
+      <TooltipProvider>
+        <Accordion
+          type="multiple"
+          defaultValue={['step-1', 'step-2', 'step-3', 'step-4']}
+          className="w-full space-y-2"
         >
-          <Step1Review data={wizardState} />
-        </SummarySection>
-        <SummarySection
-          title="Objectives & Messaging"
-          stepNumber={2}
-          onEdit={() => handleStepClick(2)}
-          isComplete={wizardState.step2Complete}
-        >
-          <Step2Review data={wizardState} />
-        </SummarySection>
-        <SummarySection
-          title="Audience Targeting"
-          stepNumber={3}
-          onEdit={() => handleStepClick(3)}
-          isComplete={wizardState.step3Complete}
-        >
-          <Step3Review data={wizardState} />
-        </SummarySection>
-        <SummarySection
-          title="Assets & Guidelines"
-          stepNumber={4}
-          onEdit={() => handleStepClick(4)}
-          isComplete={wizardState.step4Complete}
-        >
-          <Step4Review data={wizardState} />
-        </SummarySection>
-      </Accordion>
+          <SummarySection
+            title="Basic Information & Contacts"
+            stepNumber={1}
+            onEdit={() => handleStepClick(1)}
+            isComplete={wizardState.step1Complete}
+          >
+            <Step1Review data={wizardState} />
+          </SummarySection>
+          <SummarySection
+            title="Objectives & Messaging"
+            stepNumber={2}
+            onEdit={() => handleStepClick(2)}
+            isComplete={wizardState.step2Complete}
+          >
+            <Step2Review data={wizardState} />
+          </SummarySection>
+          <SummarySection
+            title="Audience Targeting"
+            stepNumber={3}
+            onEdit={() => handleStepClick(3)}
+            isComplete={wizardState.step3Complete}
+          >
+            <Step3Review data={wizardState} />
+          </SummarySection>
+          <SummarySection
+            title="Assets & Guidelines"
+            stepNumber={4}
+            onEdit={() => handleStepClick(4)}
+            isComplete={wizardState.step4Complete}
+          >
+            <Step4Review data={wizardState} />
+          </SummarySection>
+        </Accordion>
+      </TooltipProvider>
 
       <Card className="mt-6">
         <CardHeader>
