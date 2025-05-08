@@ -64,32 +64,20 @@ interface CampaignData {
   };
   audience: {
     genders: string[];
-    ageRanges?: Record<string, number>;
+    ageRange?: string;
     languages: string[];
     interests: string[];
+    keywords: string[];
     locations: string[];
     competitors: string[];
   };
   assets: {
     guidelinesSummary: string;
     requirements: Array<{ text: string; mandatory: boolean }>;
-    uploaded: Array<{
-      id: string | number;
-      name: string;
-      url: string;
-      type: string;
-      description: string;
-      budget: number;
-    }>;
+    uploaded: Array<{ id?: string | number; name: string; url: string; type?: string }>;
     notes: string;
   };
-  contacts: Array<{
-    name: string;
-    email: string;
-    position: string;
-    phone?: string;
-    isPrimary?: boolean;
-  }>;
+  contacts?: Array<{ name: string; email: string; position: string; phone?: string }>;
 }
 
 // Define type for raw influencer data from API
@@ -288,7 +276,7 @@ const formatMeasurementName = (name: string): string => {
     .join(' ');
 };
 
-// Add this helper function within the CampaignDetail component scope,
+// Add this helper function within the CampaignDetail component scope, 
 // or ensure it's imported if defined elsewhere and accessible.
 const getAssetTypeFromUrl = (url: string): string => {
   if (!url) return 'file'; // Default or 'unknown'
@@ -343,17 +331,17 @@ export default function CampaignDetail() {
           },
           secondaryContact: data.secondaryContact
             ? {
-                name: `${data.secondaryContact.firstName || ''} ${data.secondaryContact.surname || ''}`.trim(),
-                email: data.secondaryContact?.email || 'N/A',
-                position: data.secondaryContact?.position || 'N/A',
-              }
+              name: `${data.secondaryContact.firstName || ''} ${data.secondaryContact.surname || ''}`.trim(),
+              email: data.secondaryContact?.email || 'N/A',
+              position: data.secondaryContact?.position || 'N/A',
+            }
             : undefined,
           influencers:
             data.Influencer && Array.isArray(data.Influencer)
               ? data.Influencer.map((inf: ApiInfluencer) => ({
-                  handle: inf.handle || 'N/A',
-                  platform: inf.platform || 'N/A',
-                }))
+                handle: inf.handle || 'N/A',
+                platform: inf.platform || 'N/A',
+              }))
               : [],
           primaryKPI: data.primaryKPI || 'Not Set',
           secondaryKPIs:
@@ -372,7 +360,11 @@ export default function CampaignDetail() {
               data.demographics?.gender && Array.isArray(data.demographics.gender)
                 ? data.demographics.gender
                 : [],
-            ageRanges: data.demographics?.ageRanges || {},
+            ageRange: data.demographics?.ageRange
+              ? Array.isArray(data.demographics.ageRange)
+                ? data.demographics.ageRange.join('-')
+                : data.demographics.ageRange
+              : 'Not Set',
             languages:
               data.targeting?.languages && Array.isArray(data.targeting.languages)
                 ? data.targeting.languages.map((l: ApiLanguage) => l?.language || 'N/A')
@@ -381,6 +373,7 @@ export default function CampaignDetail() {
               data.demographics?.interests && Array.isArray(data.demographics.interests)
                 ? data.demographics.interests
                 : [],
+            keywords: [],
             locations:
               data.locations && Array.isArray(data.locations)
                 ? data.locations.map((loc: ApiLocation) => loc?.location || 'N/A')
@@ -394,73 +387,68 @@ export default function CampaignDetail() {
               data.assetDetails?.guidelines ||
               data.guidelines ||
               'Not Set',
-            requirements: (data.assetsDetails?.requirements &&
-            Array.isArray(data.assetsDetails.requirements)
-              ? data.assetsDetails.requirements
-              : data.assetDetails?.requirementsList &&
+            requirements: (
+              data.assetsDetails?.requirements &&
+                Array.isArray(data.assetsDetails.requirements)
+                ? data.assetsDetails.requirements
+                : data.assetDetails?.requirementsList &&
                   Array.isArray(data.assetDetails.requirementsList)
-                ? data.assetDetails.requirementsList
-                : data.requirements && Array.isArray(data.requirements)
-                  ? data.requirements
-                  : []
+                  ? data.assetDetails.requirementsList
+                  : data.requirements && Array.isArray(data.requirements)
+                    ? data.requirements
+                    : []
             ).map((req: ApiRequirement | any) => ({
               text: req?.text || req?.requirement || 'N/A',
               mandatory: req?.mandatory || false,
             })),
-            uploaded: (data.assetsDetails?.uploadedFiles &&
-            Array.isArray(data.assetsDetails.uploadedFiles)
-              ? data.assetsDetails.uploadedFiles
-              : data.assetDetails?.files && Array.isArray(data.assetDetails.files)
-                ? data.assetDetails.files
-                : data.assets && Array.isArray(data.assets)
-                  ? data.assets
-                  : []
-            ).map((asset: ApiAsset | any, index: number) => {
-              const assetUrl = asset?.url || asset?.ufsUrl || '#';
-              const assetType = asset?.type || getAssetTypeFromUrl(assetUrl);
-              return {
-                id: asset?.id || `asset-${index}`,
-                name: asset?.name || asset?.fileName || 'Unnamed Asset',
-                url: assetUrl,
-                type: assetType,
-                description: asset?.rationale || asset?.description || '',
-                budget: asset?.budget || 0,
-              };
-            }),
+            uploaded: (
+              data.assetsDetails?.uploadedFiles && Array.isArray(data.assetsDetails.uploadedFiles)
+                ? data.assetsDetails.uploadedFiles
+                : data.assetDetails?.files && Array.isArray(data.assetDetails.files)
+                  ? data.assetDetails.files
+                  : data.assets && Array.isArray(data.assets)
+                    ? data.assets
+                    : []
+            ).map((asset: ApiAsset | any, index: number) => ({
+              id: asset?.id || `asset-${index}`,
+              name: asset?.name || asset?.fileName || 'Unnamed Asset',
+              url: asset?.url || '#',
+              type: getAssetTypeFromUrl(asset?.url || ''),
+            })),
             notes: data.assetsDetails?.notes || data.assetDetails?.notes || data.notes || 'Not Set',
           },
           contacts: [
             ...(data.primaryContact
               ? [
-                  {
-                    name:
-                      `${data.primaryContact.firstName || ''} ${data.primaryContact.surname || ''}`.trim() ||
-                      'N/A',
-                    email: data.primaryContact.email || 'N/A',
-                    position: data.primaryContact.position || 'N/A',
-                    isPrimary: true,
-                  },
-                ]
+                {
+                  name:
+                    `${data.primaryContact.firstName || ''} ${data.primaryContact.surname || ''}`.trim() ||
+                    'N/A',
+                  email: data.primaryContact.email || 'N/A',
+                  position: data.primaryContact.position || 'N/A',
+                  phone: undefined,
+                },
+              ]
               : []),
             ...(data.secondaryContact
               ? [
-                  {
-                    name:
-                      `${data.secondaryContact.firstName || ''} ${data.secondaryContact.surname || ''}`.trim() ||
-                      'N/A',
-                    email: data.secondaryContact.email || 'N/A',
-                    position: data.secondaryContact.position || 'N/A',
-                    isPrimary: false,
-                  },
-                ]
+                {
+                  name:
+                    `${data.secondaryContact.firstName || ''} ${data.secondaryContact.surname || ''}`.trim() ||
+                    'N/A',
+                  email: data.secondaryContact.email || 'N/A',
+                  position: data.secondaryContact.position || 'N/A',
+                  phone: undefined,
+                },
+              ]
               : []),
             ...(data.additionalContacts && Array.isArray(data.additionalContacts)
               ? data.additionalContacts.map((contact: ApiContact) => ({
-                  name: `${contact.firstName || ''} ${contact.surname || ''}`.trim() || 'N/A',
-                  email: contact.email || 'N/A',
-                  position: contact.position || 'N/A',
-                  isPrimary: false,
-                }))
+                name: `${contact.firstName || ''} ${contact.surname || ''}`.trim() || 'N/A',
+                email: contact.email || 'N/A',
+                position: contact.position || 'N/A',
+                phone: undefined,
+              }))
               : []),
           ],
         };
@@ -616,23 +604,13 @@ export default function CampaignDetail() {
 
   const statusInfo = getStatusInfo(campaignData.status);
   const ageRanges = [
-    { label: '18-24: 25%', isActive: campaignData.audience.ageRanges?.age18_24 === 25 },
-    { label: '25-34: 15%', isActive: campaignData.audience.ageRanges?.age25_34 === 35 },
-    { label: '35-44: 15%', isActive: campaignData.audience.ageRanges?.age35_44 === 45 },
-    { label: '45-54: 15%', isActive: campaignData.audience.ageRanges?.age45_54 === 55 },
-    { label: '55-64: 15%', isActive: campaignData.audience.ageRanges?.age55_64 === 65 },
-    { label: '65+: 15%', isActive: campaignData.audience.ageRanges?.age65_plus === 100 },
+    { label: '18-24: 25%', isActive: campaignData.audience.ageRange?.includes('18-24') },
+    { label: '25-34: 15%', isActive: campaignData.audience.ageRange?.includes('25-34') },
+    { label: '35-44: 15%', isActive: campaignData.audience.ageRange?.includes('35-44') },
+    { label: '45-54: 15%', isActive: campaignData.audience.ageRange?.includes('45-54') },
+    { label: '55-64: 15%', isActive: campaignData.audience.ageRange?.includes('55-64') },
+    { label: '65+: 15%', isActive: campaignData.audience.ageRange?.includes('65+') },
   ];
-
-  console.log(
-    'Asset details for rendering:',
-    campaignData.assets.uploaded.map(asset => ({
-      name: asset.name,
-      url: asset.url,
-      type: asset.type,
-      source: asset.url !== '#' ? 'API' : 'Default',
-    }))
-  );
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-10">
@@ -763,7 +741,9 @@ export default function CampaignDetail() {
             </div>
             {campaignData.secondaryKPIs && campaignData.secondaryKPIs.length > 0 && (
               <div>
-                <h3 className="text-sm font-semibold text-muted-foreground mb-3">Secondary KPIs</h3>
+                <h3 className="text-sm font-semibold text-muted-foreground mb-3">
+                  Secondary KPIs
+                </h3>
                 <div className="flex flex-wrap gap-3">
                   {campaignData.secondaryKPIs.map((kpi, index) => (
                     <KpiBadge key={index} kpi={kpi} />
@@ -787,25 +767,19 @@ export default function CampaignDetail() {
           </CardHeader>
           <CardContent className="p-5 space-y-5">
             <div>
-              <h4 className="text-sm font-semibold text-muted-foreground mb-1">
-                Memorability / Ad Recall Hypothesis
-              </h4>
+              <h4 className="text-sm font-semibold text-muted-foreground mb-1">Memorability / Ad Recall Hypothesis</h4>
               <p className="text-sm text-foreground bg-muted/30 p-3 rounded-md leading-relaxed">
                 {campaignData.expectedOutcomes?.memorability || 'Not specified'}
               </p>
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-muted-foreground mb-1">
-                Purchase/Action Intent Hypothesis
-              </h4>
+              <h4 className="text-sm font-semibold text-muted-foreground mb-1">Purchase/Action Intent Hypothesis</h4>
               <p className="text-sm text-foreground bg-muted/30 p-3 rounded-md leading-relaxed">
                 {campaignData.expectedOutcomes?.purchaseIntent || 'Not specified'}
               </p>
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-muted-foreground mb-1">
-                Brand Perception Hypothesis
-              </h4>
+              <h4 className="text-sm font-semibold text-muted-foreground mb-1">Brand Perception Hypothesis</h4>
               <p className="text-sm text-foreground bg-muted/30 p-3 rounded-md leading-relaxed">
                 {campaignData.expectedOutcomes?.brandPerception || 'Not specified'}
               </p>
@@ -866,27 +840,30 @@ export default function CampaignDetail() {
                   {/* Corrected Icon */}
                   Age Ranges
                 </h3>
-                {Object.keys(campaignData.audience.ageRanges || {}).length > 0 ? (
+                {campaignData.audience.ageRange && campaignData.audience.ageRange !== 'Not Set' ? (
                   <div className="flex flex-col space-y-1.5">
-                    {Object.entries(campaignData.audience.ageRanges || {}).map(
-                      ([range, percentage]) =>
-                        percentage > 0 && (
-                          <div key={range} className="flex items-center text-sm">
+                    {ageRanges.filter(range => range.isActive).length > 0 ? (
+                      ageRanges
+                        .filter(range => range.isActive)
+                        .map((range, index) => (
+                          <div key={index} className="flex items-center text-sm">
                             <span className="text-accent font-medium w-20">
-                              {range.replace('age', '').replace('_', '-')}:
+                              {range.label.split(':')[0]}:
                             </span>
-                            <span className="text-foreground">{percentage}%</span>
+                            <span className="text-foreground">
+                              {range.label.split(':')[1]?.trim()}
+                            </span>
                           </div>
-                        )
+                        ))
+                    ) : (
+                      <span className="text-sm text-muted-foreground italic">
+                        Specific ranges not active or data unavailable. Overall:{' '}
+                        {campaignData.audience.ageRange}
+                      </span>
                     )}
                   </div>
                 ) : (
-                  <span className="text-sm text-muted-foreground italic">
-                    Specific ranges not active or data unavailable. Overall:{' '}
-                    {campaignData.audience.ageRanges
-                      ? Object.values(campaignData.audience.ageRanges).reduce((a, b) => a + b, 0)
-                      : 'N/A'}
-                  </span>
+                  <span className="text-sm text-muted-foreground italic">Not specified</span>
                 )}
               </div>
               <div>
@@ -1014,43 +991,44 @@ export default function CampaignDetail() {
       <div>
         <SectionHeader title="Contacts" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {campaignData.contacts.map((contact, index) => (
-            <Card
-              key={index}
-              className="shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden group"
-            >
-              <CardContent className="p-5">
-                <div className="flex items-start">
-                  <div className="h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center mr-3 group-hover:bg-accent/20 transition-colors">
-                    <Icon
-                      iconId="faUserLight"
-                      className="h-5 w-5 text-accent group-hover:fa-solid transition-all"
-                    />
+          {campaignData.contacts &&
+            campaignData.contacts.map((contact, index) => (
+              <Card
+                key={index}
+                className="shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden group"
+              >
+                <CardContent className="p-5">
+                  <div className="flex items-start">
+                    <div className="h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center mr-3 group-hover:bg-accent/20 transition-colors">
+                      <Icon
+                        iconId="faUserLight"
+                        className="h-5 w-5 text-accent group-hover:fa-solid transition-all"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-medium">{contact.name || 'N/A'}</h3>
+                      <p className="text-xs text-muted-foreground">{contact.position || 'N/A'}</p>
+                      {contact.email && (
+                        <p className="text-xs text-accent break-words mt-2 flex items-center">
+                          <Icon iconId="faEnvelopeLight" className="mr-1.5 opacity-70 h-3 w-3" />
+                          <a href={`mailto:${contact.email}`} className="hover:underline">
+                            {contact.email}
+                          </a>
+                        </p>
+                      )}
+                      {contact.phone && (
+                        <p className="text-xs text-accent break-words mt-1 flex items-center">
+                          <Icon iconId="faPhoneLight" className="mr-1.5 opacity-70 h-3 w-3" />
+                          <a href={`tel:${contact.phone}`} className="hover:underline">
+                            {contact.phone}
+                          </a>
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-medium">{contact.name || 'N/A'}</h3>
-                    <p className="text-xs text-muted-foreground">{contact.position || 'N/A'}</p>
-                    {contact.email && (
-                      <p className="text-xs text-accent break-words mt-2 flex items-center">
-                        <Icon iconId="faEnvelopeLight" className="mr-1.5 opacity-70 h-3 w-3" />
-                        <a href={`mailto:${contact.email}`} className="hover:underline">
-                          {contact.email}
-                        </a>
-                      </p>
-                    )}
-                    {contact.phone && (
-                      <p className="text-xs text-accent break-words mt-1 flex items-center">
-                        <Icon iconId="faPhoneLight" className="mr-1.5 opacity-70 h-3 w-3" />
-                        <a href={`tel:${contact.phone}`} className="hover:underline">
-                          {contact.phone}
-                        </a>
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))}
         </div>
       </div>
 
@@ -1140,15 +1118,13 @@ export default function CampaignDetail() {
               <div className="space-y-6">
                 {/* Asset Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {campaignData.assets.uploaded.map(assetItem => {
+                  {campaignData.assets.uploaded.map((assetItem) => {
                     // Create the object for the AssetCard prop
                     const assetObjectForCard = {
                       id: assetItem.id,
                       name: assetItem.name,
                       url: assetItem.url,
                       type: assetItem.type,
-                      description: assetItem.description,
-                      budget: assetItem.budget,
                     };
                     // Render the correctly imported AssetCard
                     return (
@@ -1165,43 +1141,38 @@ export default function CampaignDetail() {
                 {/* End Asset Grid */}
 
                 {/* Guidelines and Requirements (Optional, based on original structure) */}
-                {campaignData.assets.guidelinesSummary &&
-                  campaignData.assets.guidelinesSummary !== 'Not Set' && (
-                    <div className="mt-6 pt-6 border-t">
-                      {/* ... Guidelines display ... */}
-                      <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center">
-                        <Icon iconId="faClipboardListLight" className="mr-2 h-4 w-4" />
-                        Guidelines Summary
-                      </h3>
-                      <div className="p-4 bg-muted/10 rounded-md border text-sm">
-                        {campaignData.assets.guidelinesSummary}
-                      </div>
+                {campaignData.assets.guidelinesSummary && campaignData.assets.guidelinesSummary !== 'Not Set' && (
+                  <div className="mt-6 pt-6 border-t">
+                    {/* ... Guidelines display ... */}
+                    <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center">
+                      <Icon iconId="faClipboardListLight" className="mr-2 h-4 w-4" />
+                      Guidelines Summary
+                    </h3>
+                    <div className="p-4 bg-muted/10 rounded-md border text-sm">
+                      {campaignData.assets.guidelinesSummary}
                     </div>
-                  )}
-                {campaignData.assets.requirements &&
-                  campaignData.assets.requirements.length > 0 && (
-                    <div className="mt-6 pt-6 border-t">
-                      {/* ... Requirements display ... */}
-                      <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center">
-                        <Icon iconId="faListCheckLight" className="mr-2 h-4 w-4" />
-                        Requirements
-                      </h3>
-                      <div className="space-y-2">
-                        {campaignData.assets.requirements.map((req, index) => (
-                          <div
-                            key={index}
-                            className="flex items-start gap-2 p-3 bg-muted/10 rounded-md border"
-                          >
-                            <Icon
-                              iconId={req.mandatory ? 'faCircleCheckLight' : 'faCircleInfoLight'}
-                              className={`h-5 w-5 mt-0.5 ${req.mandatory ? 'text-green-500' : 'text-accent'}`}
-                            />
-                            <span className="text-sm">{req.text}</span>
-                          </div>
-                        ))}
-                      </div>
+                  </div>
+                )}
+                {campaignData.assets.requirements && campaignData.assets.requirements.length > 0 && (
+                  <div className="mt-6 pt-6 border-t">
+                    {/* ... Requirements display ... */}
+                    <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center">
+                      <Icon iconId="faListCheckLight" className="mr-2 h-4 w-4" />
+                      Requirements
+                    </h3>
+                    <div className="space-y-2">
+                      {campaignData.assets.requirements.map((req, index) => (
+                        <div key={index} className="flex items-start gap-2 p-3 bg-muted/10 rounded-md border">
+                          <Icon
+                            iconId={req.mandatory ? 'faCircleCheckLight' : 'faCircleInfoLight'}
+                            className={`h-5 w-5 mt-0.5 ${req.mandatory ? 'text-green-500' : 'text-accent'}`}
+                          />
+                          <span className="text-sm">{req.text}</span>
+                        </div>
+                      ))}
                     </div>
-                  )}
+                  </div>
+                )}
               </div> // End space-y-6 div
             ) : (
               // Display if no assets are uploaded
