@@ -1,114 +1,116 @@
 # Middleware Architecture
 
-## Overview
+**Last Reviewed:** 2025-05-09
 
-Middleware plays a crucial role in this application, handling cross-cutting concerns like authentication, request validation, error handling, and data transformation, particularly for API routes. This document outlines the structure, location, and usage patterns for middleware components.
+## 1. Overview
 
-## Single Source of Truth (SSOT) & Location
+Middleware in this application serves two primary purposes:
 
-**Principle:** All application-specific code, including middleware helpers and utilities used within API routes or server components, resides within the `/src` directory. Middleware specifically designed for API routes should be located under `/src/lib/middleware/`.
+1.  **Edge Middleware (`src/middleware.ts`):** Intercepts requests at the Edge before they hit the main application code. Used for broad concerns like authentication, redirects, and setting request headers.
+2.  **API Route Middleware Helpers (`src/lib/middleware/`)**: Utility functions and Higher-Order Functions (HOFs) applied _within_ specific API route handlers (`src/app/api/**/route.ts`) to handle tasks like request validation, error handling, and permission checks.
 
-**Rationale:**
+This document outlines the structure, location, and usage patterns for both types.
 
-- **Collocation:** Keeps related utilities together within the standard application source directory.
-- **Clarity:** Provides a clear separation between application logic (`/src`) and project configuration (`/config`, `/scripts`, etc.).
-- **Next.js Conventions:** Aligns with standard Next.js project structures and simplifies path aliasing (`@/lib/...`).
-- **Maintainability:** Reduces ambiguity and potential path resolution issues previously encountered when middleware was located outside `/src`.
+## 2. Edge Middleware (`src/middleware.ts`)
 
-**Key Locations:**
+- **Location**: `src/middleware.ts` (Project Root Level `src` directory)
+- **Runtime**: Vercel Edge Functions / Node.js (depending on configuration/usage).
+- **Purpose**: Handles cross-cutting concerns before requests reach specific pages or API routes.
+  - **Authentication**: Redirecting unauthenticated users from protected routes (using Clerk's `clerkMiddleware`).
+  - **Routing**: Implementing simple redirects or A/B testing logic.
+  - **Request Headers**: Adding or modifying request headers.
+- **Execution**: Next.js automatically invokes this middleware based on the `matcher` defined in the exported `config` object.
+- **Example (`src/middleware.ts`)**: (Illustrative - Refer to actual file for implementation)
 
-1.  **Edge Middleware:** `src/middleware.ts`
-    - This is the standard Next.js middleware file.
-    - Runs on the Edge runtime before requests are processed by specific pages or API routes.
-    - Primarily used for authentication checks (e.g., redirecting unauthenticated users), routing logic, and setting request headers.
-2.  **API Route Middleware Helpers:** `src/lib/middleware/`
-    - Contains helper functions and higher-order functions (HOFs) used _within_ API route handlers (`src/app/api/**/route.ts`).
-    - These are **not** run automatically by Next.js but are explicitly imported and applied by developers within the route handlers.
-    - Organized into subdirectories based on functionality.
+  ```typescript
+  import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
-## Middleware Directory (`src/lib/middleware/`)
+  // Define public routes that DON'T require authentication
+  const isPublicRoute = createRouteMatcher([
+    '/', // Example: landing page
+    '/api/webhooks/(.*)', // Allow webhooks
+    '/sign-in(.*)',
+    '/sign-up(.*)',
+  ]);
 
-This directory contains utilities specifically designed to be used within API route handlers.
+  export default clerkMiddleware((auth, req) => {
+    // Protect all routes that are not public
+    if (!isPublicRoute(req)) {
+      auth().protect();
+    }
+  });
 
-- **`api/`**: General-purpose middleware for API routes.
-  - `index.ts`: Re-exports core helpers (`withValidation`, `tryCatch`, `handleDbError`) from subdirectories.
-  - **`validation/`**: Contains middleware related to request validation.
-    - `validate-api.ts`: Provides `withValidation` HOF.
-    - `validate-request.ts`: (Other validation helpers).
-  - **`errorHandling/`**: Contains middleware related to error handling and formatting.
-    - `handle-api-errors.ts`: Provides `tryCatch` HOF.
-    - `handle-db-errors.ts`: Provides `handleDbError` function.
-  - `check-permissions.ts`: (Helpers for permission checks - import directly via path).
-  - `api-response-middleware.ts`: (Helpers for standardizing API responses - import directly via path).
-  - `util-middleware.ts`: (Miscellaneous utility middleware - import directly via path).
-- **`cursor-ai/`**: Middleware specifically related to Cursor AI integration.
-  - `index.ts`: Exports Cursor AI middleware functions (`graphitiCheckEnforcer`, `getGraphitiTelemetry`).
-  - `graphiti-check-enforcer.ts`: Contains core logic.
+  export const config = {
+    matcher: [
+      // Standard matcher to exclude static files, _next internal files, etc.
+      '/((?!_next|[^?]*\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+      // Apply middleware to API routes
+      '/(api|trpc)(.*)',
+    ],
+  };
+  ```
 
-## Usage Patterns
+## 3. API Route Middleware Helpers (`src/lib/middleware/`)
 
-1.  **Edge Middleware (`src/middleware.ts`):**
+- **Location**: `src/lib/middleware/` (Organized into subdirectories like `api/`, `validation/`, `errorHandling/`).
+- **Runtime**: Node.js (within the API route handler's environment).
+- **Purpose**: Provides reusable logic specifically for use _within_ API route handlers (`route.ts` files) to structure request processing.
+  - **Validation (`withValidation`)**: Validating request bodies or parameters against Zod schemas.
+  - **Error Handling (`tryCatch`, `handleDbError`)**: Standardizing error responses, especially for database errors or common exceptions.
+  - **Permissions (`checkPermissions` - example)**: Checking if the authenticated user has the necessary permissions for the requested operation.
+  - **Response Formatting**: Ensuring consistent API response structures.
+- **Execution**: These are **not** automatically invoked by Next.js. Developers explicitly import and apply these helper functions or HOFs within their `route.ts` handlers.
+- **Organization**: Helpers are grouped by function within `src/lib/middleware/api/`, and core utilities are often re-exported from `src/lib/middleware/api/index.ts` for convenience.
+- **Usage Patterns**:
 
-    - This file exports a `middleware` function and optionally a `config` object to specify the `matcher` (which routes the middleware applies to).
-    - Next.js automatically invokes this based on the matcher.
-    - Example (`src/middleware.ts`):
+  - **HOFs (Wrapping Handlers):** Functions like `tryCatch` or `withValidation` wrap the exported route handler.
 
-      ```typescript
-      import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+  ```typescript
+  // src/app/api/some-resource/route.ts
+  import { withValidation, tryCatch } from '@/lib/middleware/api'; // Import re-exported helpers
+  import { someSchema } from '@/lib/schemas';
 
-      const isProtectedRoute = createRouteMatcher([
-        '/dashboard(.*)', // Protect dashboard routes
-        '/settings(.*)', // Protect settings routes
-        '/api/(.*)', // Protect most API routes (adjust as needed)
-      ]);
+  // Wrap the handler with validation and error catching
+  export const POST = tryCatch(
+    withValidation(someSchema, async (validatedData, request) => {
+      // Handler logic using validatedData...
+      // ...
+      return NextResponse.json({ success: true /* ... */ });
+    })
+  );
+  ```
 
-      export default clerkMiddleware((auth, req) => {
-        if (isProtectedRoute(req)) {
-          auth().protect(); // Protect routes that match
-        }
-      });
+  - **Utility Functions (Inside Handlers):** Functions like `handleDbError` are typically called within `try...catch` blocks inside the handler logic.
 
-      export const config = {
-        matcher: ['/((?!.*\..*|_next).*)', '/', '/(api|trpc)(.*)'],
-      };
-      ```
+  ```typescript
+  // src/app/api/other-resource/route.ts
+  import { handleDbError } from '@/lib/middleware/api'; // Import re-exported helper
+  import { DbOperation } from '@/lib/data-mapping/db-logger';
+  import { prisma } from '@/lib/db';
+  import { NextResponse } from 'next/server';
 
-2.  **API Route Middleware Helpers (`src/lib/middleware/...`):**
+  export async function GET(request: NextRequest) {
+    try {
+      const data = await prisma.resource.findMany();
+      return NextResponse.json({ success: true, data });
+    } catch (error) {
+      // Use helper to format DB errors
+      return handleDbError(error, 'Resource', DbOperation.FETCH);
+    }
+  }
+  ```
 
-    - These are typically Higher-Order Functions (HOFs) or utility functions imported into `route.ts` files.
-    - **HOFs (Wrapping Handlers):** Functions like `tryCatch` or `withValidation` wrap the exported route handler. These are typically imported from the main index file (`@/lib/middleware/api`).
+## 4. Rationale for Separation
 
-      ```typescript
-      // src/app/api/some-resource/route.ts
-      import { withValidation, tryCatch } from '@/lib/middleware/api';
-      import { someSchema } from '@/lib/schemas';
+Keeping the Edge middleware (`src/middleware.ts`) separate from the API route helpers (`src/lib/middleware/`) provides clarity:
 
-      export const POST = tryCatch(
-        withValidation(someSchema, async (validatedData, request) => {
-          // ... handler logic ...
-        })
-      );
-      ```
+- `src/middleware.ts` focuses on **request interception** and broad concerns before specific route logic runs.
+- `src/lib/middleware/` focuses on **reusable logic blocks** applied explicitly within the detailed processing of specific API endpoints.
 
-    - **Utility Functions (Inside Handlers):** Functions like `handleDbError` are called within `try...catch` blocks. These are also typically imported from the main index file (`@/lib/middleware/api`). Less common helpers might be imported directly from their specific file (e.g., `@/lib/middleware/api/check-permissions`).
+This separation aligns with Next.js conventions and promotes a structured approach to handling different stages of request processing.
 
-      ```typescript
-      // src/app/api/other-resource/route.ts
-      import { handleDbError } from '@/lib/middleware/api';
-      import { DbOperation } from '@/lib/data-mapping/db-logger';
+## 5. Troubleshooting
 
-      export async function GET(request: NextRequest) {
-        try {
-          // ... database operation ...
-        } catch (error) {
-          return handleDbError(error, 'Resource', DbOperation.FETCH);
-        }
-      }
-      ```
-
-## Troubleshooting
-
-- **Module Not Found Errors:** Ensure imports use the correct alias (`@/lib/middleware/api` for re-exported functions, or the specific path like `@/lib/middleware/api/validation/validate-request` for others). Verify middleware files exist in the correct subdirectories within `src/lib/middleware/` and that `index.ts` files correctly export/re-export needed functions.
-- **Type Errors:** Ensure route handlers wrapped in HOFs (like `tryCatch`, `withValidation`) still conform to the expected Next.js `RouteHandler` signature. Sometimes HOFs might alter the expected function signature if not implemented carefully. If a handler is wrapped, ensure the wrapper function correctly returns a `NextResponse` or `Promise<NextResponse>`.
-
-By adhering to the SSOT principle of keeping middleware within `/src/lib/middleware` and using the standard `@/` alias, we aim for a more robust and maintainable middleware structure.
+- **Middleware Not Running**: Check the `matcher` in `src/middleware.ts`. Ensure it correctly includes the routes you expect the Edge middleware to run on. Check server logs for errors during middleware execution.
+- **API Helper Errors**: Ensure correct import paths (`@/lib/middleware/api/...`). Check for errors within the helper function logic itself or within the API route handler where it's applied.
+- **Type Errors**: Ensure Zod schemas used with `withValidation` match the expected request body structure. Ensure types are consistent between the helper functions and the route handlers.

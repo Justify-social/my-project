@@ -1,44 +1,15 @@
-# Guides
+# How-To Guides
 
-This section contains practical, step-by-step guides for common development tasks and workflows.
+**Last Reviewed:** 2025-05-09
 
-## Key Guides
+Welcome to the Guides section. This area contains practical, task-oriented documentation answering "How do I...?" questions for various aspects of the Justify platform.
 
-- **[Developer Guide](./developer/developer-guide.md):** Essential standards, practices, and workflows for all developers contributing to the project.
-- **(Add links to other guides as they are created, e.g., Deployment Guide, Troubleshooting Guide)**
+Guides are distinct from the conceptual explanations in `/docs/concepts/` or the architectural overviews in `/docs/architecture/`. They provide step-by-step instructions and best practices for specific tasks.
 
-## Purpose
+## Guide Categories
 
-Guides should provide clear, actionable instructions to help developers perform specific tasks efficiently and consistently.
+- **[Developer Guides](./developer/README.md)**: Instructions specifically for developers working on the Justify codebase. This includes contribution workflows, debugging techniques, deployment procedures, using specific systems like icons or testing, and guides for developing specific features.
 
-## Getting Started
+- **[User Guides](./user/README.md)**: Instructions aimed at end-users of the Justify platform (e.g., Marketers, Agency Professionals). This covers topics like getting started with the platform, performing common tasks, and understanding user journeys.
 
-- **[Project Overview](./project-overview.md)**: Introduction to the project and its key features
-- **[Development Setup](./developer/setup.md)**: Setting up your local development environment
-- **[Contributing Guide](./contributing.md)**: How to contribute code to the project
-
-## Development Guidelines
-
-- **[Naming Conventions](./naming-conventions.md)**: Standards for naming files, components, and variables
-- **[Development Workflow](./developer/workflow.md)**: Day-to-day development processes
-- **[Troubleshooting](./developer/troubleshooting.md)**: Solutions to common development issues
-
-## User Documentation
-
-- **[User Journey](./user/journey.md)**: Overview of key user flows in the application
-- **[Getting Started](./user/getting-started.md)**: Guide for new users
-- **[Common Tasks](./user/common-tasks.md)**: How to perform frequent user tasks
-
-## Other Resources
-
-- **[Icon Usage Guide](./icon-unification.md)**: How to use icons consistently in the application
-- **[Turbopack Integration](./TURBOPACK.md)**: Information about our Turbopack setup
-
-## Best Practices
-
-When following these guides:
-
-1. Always start with the setup instructions
-2. Follow coding standards and naming conventions
-3. Use the troubleshooting guide if you encounter issues
-4. Refer to specific feature documentation for implementation details
+Please select the relevant category above to find the guide you need.

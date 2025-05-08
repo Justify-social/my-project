@@ -1,60 +1,27 @@
 # Getting Started with Justify
 
-Welcome to Justify! This guide will help you get up and running quickly.
+**Last Reviewed:** 2025-05-09
 
-## For New Developers
+Welcome to Justify! This section provides the essential information to get you onboarded, whether you are a new developer or looking to understand our core project tenets.
 
-If you're new to the project, follow these steps:
+## Essential Reading
 
-1.  **[Project Overview](./project-overview.md)** - Learn what Justify does and why.
-2.  **Setup Your Environment** - Follow the setup instructions below.
-3.  **[Directory Structure](../architecture/directory-structure.md)** - Understand how the codebase is organised.
-4.  **[Contribution Guide](../CONTRIBUTING.md)** - Learn our development workflow and how to make your first contribution.
-5.  **[Code Standards](../standards/code-standards.md)** - Familiarise yourself with our coding practices.
+1.  **[Project Overview](./project-overview.md)**: Understand what Justify is, its core purpose, value proposition, key features, and the types of users it serves. This is the foundational document for understanding _what_ we are building.
+2.  **[Developer Setup](./developer-setup.md)**: A step-by-step guide to get your local development environment configured, including prerequisites, cloning, dependency installation, environment variables, database setup, and running the development server. This is your actionable guide to _start coding_.
+3.  **[Project Goals](./project-goals.md)**: Learn about the vision behind Justify, our primary business objectives, and the key user personas we are building for. This provides the _why_ behind our work.
+4.  **[Key Workflows](./key-workflows.md)**: Discover how we operate, including common development tasks such as debugging, local testing strategies, using our UI component browser (Storybook or similar), and managing different development environments.
 
-## Development Setup
+## Project Roadmap
 
-1.  **Prerequisites:**
-    - Node.js (Check `.nvmrc` or `package.json` engines field for the required version - currently `20.x`).
-    - `npm` (usually included with Node.js).
-    - Git.
-    - Access to the project repository on GitHub.
-2.  **Clone the Repository:**
-    ```bash
-    git clone <repository-url>
-    cd my-project
-    ```
-3.  **Install Dependencies:**
-    ```bash
-    npm install
-    ```
-4.  **Environment Variables:**
-    - Copy the example environment file: `cp .env.example .env.local`
-    - Fill in the necessary values in `.env.local` (e.g., database connection string, Auth0 credentials, API keys). Obtain sensitive values from project leads or password management system.
-5.  **Database Setup (if applicable):**
-    - Ensure your database (e.g., PostgreSQL) is running.
-    - Run Prisma migrations: `npx prisma migrate dev` (Check `package.json` scripts for exact command).
-6.  **Run the Development Server:**
-    ```bash
-    npm run dev
-    ```
-    - The application should now be running, typically at `http://localhost:3000`.
-
-## What You'll Find Here
-
-This directory contains essential introductory information:
-
-| Document                                  | Description                                       |
-| ----------------------------------------- | ------------------------------------------------- |
-| [Project Overview](./project-overview.md) | High-level explanation of Justify and its purpose |
+For an overview of our current development priorities, upcoming features, and long-term vision, please refer to the **[Project Roadmap](../guides/roadmap.md)** (Link to be confirmed or tool to be specified).
 
 ## Next Steps
 
-After setting up and reviewing the overview:
+After familiarizing yourself with these getting-started documents, we recommend exploring:
 
-1. Explore the **[Architecture](../architecture/README.md)** documentation.
-2. Review the **[Standards](../standards/README.md)** for coding requirements.
-3. Check the **[Guides](../guides/README.md)** for specific development tasks.
+- **[Architecture](../architecture/README.md)**: For a deeper dive into how Justify is built.
+- **[Guides](../guides/README.md)**: For specific how-to instructions on various development and user tasks.
+- **[Standards](../standards/README.md)**: For understanding the rules and conventions we adhere to.
 
 ## Need Help?
 

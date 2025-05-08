@@ -1,67 +1,59 @@
-# Architecture
+# Justify Platform Architecture
 
-This section explains how our codebase is structured and the key architectural decisions that shape our project.
+**Last Reviewed:** 2025-05-09
 
-## Key Topics
+Welcome to the architecture section of the Justify platform documentation. This area provides a comprehensive overview of our system design, key components, architectural decisions, and the rationale behind them. Our goal is to offer a clear understanding of how Justify is built, enabling developers to contribute effectively and make informed technical decisions.
 
-- **[Directory Structure](./directory-structure.md)**: How the codebase is organised into folders and files
-- **[Performance Optimization](./performance-optimization.md)**: Strategies for tree-shaking and bundle analysis
-- **[Server vs. Client Components](../server-client-components.md)**: Understanding and using RSCs effectively
-- **Configuration System** (see below)
-- **[Component Dependencies](../dependency-graphs/component-dependencies.mmd)**: Visual representation of how components relate to each other
+This section is crucial for understanding the "how" and "why" of our technical landscape.
 
-## Design Principles
+## Key Architectural Documents
 
-Our architecture follows these core principles:
+Navigate through the following documents to gain a complete picture of our architecture:
 
-1. **Separation of Concerns**: Each component or module has a clear, focused responsibility
-2. **Modularity & Composability**: Code is organised into reusable, independent modules (features, UI components, utilities)
-3. **Single Source of Truth (SSOT):** Configuration, core logic, types, and documentation should reside in clear, canonical locations
-4. **Scalability & Maintainability**: Architectural patterns chosen allow for project growth and straightforward maintenance
+1.  **[System Overview](./system-overview.md)**: _(Placeholder - To be created)_
 
-## Configuration System
+    - Provides a high-level visual and textual explanation of Justify's major components and their interactions. This is the best place to start for a big-picture understanding.
 
-The project uses a centralised configuration system located in the root `/config` directory. This approach ensures consistency and follows SSOT principles.
+2.  **[Directory Structure](./directory-structure.md)**: _(To be reviewed/updated based on previous version)_
 
-### Key Features
+    - The Single Source of Truth (SSOT) for the organization of our codebase (`src/`) and root configuration (`/config`). Explains the rationale behind our chosen layout.
 
-- **Environment-based:** Separate configurations for development, testing, and production
-- **Centralised:** All tool configurations (ESLint, TypeScript, Jest, Next.js, Tailwind, etc.) reside within `/config`
-- **Validation:** Includes scripts for validating configuration integrity
+3.  **[Core Libraries & Services](./core-libraries.md)**: _(Placeholder - To be created)_
 
-### Structure Overview
+    - Details the purpose, location, and usage guidelines for key internal code modules, such as those found in `src/lib`, `src/services`, `src/utils`, and `src/hooks`, as well as any shared platform configurations (`src/config`).
 
-```text
-config/
-├── core/         # Core values (constants, defaults)
-├── environment/  # Environment-specific overrides
-├── platform/     # Platform-specific adjustments (e.g., Next.js webpack)
-├── scripts/      # Config management scripts
-├── ui/           # UI-related configs (e.g., component registry)
-├── [tool-name]/  # Tool-specific directories (eslint, jest, typescript, etc.)
-└── index.js      # (Potentially) Main config entrypoint
-```
+4.  **[External Integrations](./external-integrations.md)**: _(Placeholder - To be created)_
 
-_For detailed information on using and modifying the configuration system, please refer to the README within the `/config` directory itself (if one exists) or specific tool documentation._
+    - An overview of critical external services and third-party integrations that Justify relies on (e.g., Clerk for authentication, Stripe for payments, Cint for survey panels, InsightIQ for analytics). Explains their roles and high-level integration patterns.
 
-## Frontend Architecture
+5.  **Specific Technology & Pattern Deep Dives**:
 
-The frontend uses Next.js App Router with React and TypeScript. Key elements include:
+    - **[Authentication (Clerk)](./authentication.md)**: _(To be created)_ Detailed information on our Clerk integration and authentication patterns.
+    - **[Database (Prisma)](./database.md)**: _(To be reviewed/updated)_ Schema overview, key data models, and rationale. Links to the Prisma schema file.
+    - **[State Management (TanStack Query, Zustand)](./state-management.md)**: _(To be reviewed/updated)_ Our approach to client and server state management.
+    - **[Middleware](./middleware.md)**: _(To be reviewed/updated)_ Explanation of Edge function middleware and API Route helpers.
+    - **[Modules & Dependency Rules](./modules.md)**: _(To be reviewed/updated)_ Guidelines for module interaction and dependency management.
+    - **[Performance Strategies](./performance.md)**: _(To be reviewed/updated)_ Key strategies and considerations for application performance.
 
-- React Server Components (RSC) for server-rendered logic and data fetching
-- Client Components (`'use client'`) for interactivity and browser APIs
-- A modular UI library (`src/components/ui`) based on Radix UI and styled with Tailwind CSS
-- Feature-specific components organised in `src/components/features`
-- Centralised state management (likely Zustand, based on previous context)
-- Path aliases (`@/`) for clean imports
+6.  **[Feature-Specific Architectures](./features/README.md)**: _(To be reviewed/updated)_
 
-## Backend Architecture
+    - Detailed architectural breakdowns for complex features within Justify (e.g., Brand Lift, Campaign Wizard).
 
-The backend logic primarily resides within:
+7.  **[Architecture Decision Records (ADRs)](./adr/README.md)**: _(Placeholder - To be created)_
 
-- **API Routes (`src/app/api/`)**: Handlers for client requests
-- **Services (`src/services/`)**: Encapsulated business logic
-- **Library (`src/lib/`)**: Core utilities, database interactions (Prisma), external API clients
-- **Middleware (`src/middleware.ts`)**: For handling requests before they reach API routes or pages (e.g., authentication)
+    - A log of significant architectural decisions, including the context, decision made, and consequences. This is the SSOT for _why_ certain architectural choices were made.
 
-_(Self-correction: Removed link to Backend Features doc as its existence is unverified)_
+8.  **[Assets (Diagrams & Images)](./assets/README.md)**: _(Placeholder - To be created)_
+    - A repository for shared architectural diagrams, images, and Mermaid files used across the documentation.
+
+## Guiding Principles
+
+Our architecture strives to adhere to principles such as:
+
+- **Modularity & Reusability**: Designing components and services that can be reused.
+- **Scalability & Performance**: Ensuring the system can handle growth and perform efficiently.
+- **Maintainability & Testability**: Writing clean, well-documented, and testable code.
+- **Security**: Prioritizing secure coding practices and data protection.
+- **Single Source of Truth (SSOT)**: Centralizing key information and configurations.
+
+We encourage all developers to familiarize themselves with these documents. For any questions or clarifications, please reach out to the architecture team or your tech lead.
