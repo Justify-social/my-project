@@ -2,7 +2,7 @@
 
 This document summarizes the improvements and changes made to the campaign detail page (`/campaigns/[campaignId]`) and related components/systems during the pair programming session. The primary goal was to elevate the UI/UX to a higher standard and ensure consistency (SSOT) across functionalities.
 
-## 1. Campaign Detail Page UI/UX Overhaul (Target: 6/10 -> 10/10)
+## 1. Campaign Detail Page UI/UX Overhaul (Target: 6/10 -> 10/10) [DONE]
 
 - **Layout & Spacing:** Increased padding between major sections and standardized spacing within cards for better visual flow and breathing room. Subtle background tints were considered for section separation.
 - **Visual Hierarchy:** Enhanced hierarchy through improved typography (contrast, font-weights, letter-spacing) and section dividers.
@@ -12,7 +12,7 @@ This document summarizes the improvements and changes made to the campaign detai
 - **Empty/Loading States:** Enhanced skeleton loading states and improved designs for empty content sections (e.g., asset list, contacts).
 - **Assets Display:** Improved grid layout and added hover effects for asset cards. Linked the "Upload Assets" button in the empty state to Step 4 of the wizard.
 
-## 2. Icon System Management & Updates
+## 2. Icon System Management & Updates [DONE]
 
 - **Icon Corrections:**
   - Fixed the "Campaign Details" card title icon to use `faClipboardLight`.
@@ -61,7 +61,7 @@ This document summarizes the improvements and changes made to the campaign detai
   - Refactored the campaigns list page (`/campaigns/page.tsx`) to also remove its simple dialog and use `<ConfirmDeleteDialog />`, ensuring consistent delete behavior across the app.
 - **Toast:** Ensured the delete success toast uses the correct custom styling (red border, trash icon).
 
-## 6. Download All Assets Functionality
+## 6. Download All Assets Functionality [DONE]
 
 - **Implementation:** Installed `jszip` and `file-saver` libraries.
 - **Functionality:** Implemented client-side asset fetching, zipping using JSZip, and triggering a download of the zip archive via `saveAs`.

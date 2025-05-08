@@ -21,7 +21,7 @@ export async function GET(_req: NextRequest) {
     const metadata = (sessionClaims as CustomSessionClaims | null)?.metadata;
     const userRole = metadata?.role;
 
-    if (!userId || (!userRole?.includes('admin') && !userRole?.includes('super_admin'))) {
+    if (!userId || (userRole !== 'admin' && userRole !== 'super_admin')) {
       console.warn(
         `Unauthorized access attempt to Graphiti telemetry by user ${userId || 'unknown'}`
       );

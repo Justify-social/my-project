@@ -76,7 +76,7 @@ const TeamPageSkeleton = () => (
 const SuperAdminSettingsPage = () => {
   const { isLoaded: isUserLoaded } = useUser(); // Need user for checks
   const { isLoaded: isAuthLoaded, sessionClaims } = useAuth();
-  const isSuperAdmin = sessionClaims?.['metadata.role'] === 'SUPER_ADMIN';
+  const isSuperAdmin = sessionClaims?.['metadata.role'] === 'super_admin';
 
   const [users, setUsers] = useState<UserData[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);

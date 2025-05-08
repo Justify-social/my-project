@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
   const userRole = metadata?.role || 'USER';
 
   // Only allow admins to run scripts (or anyone in development mode)
-  if (!isDevelopment && userRole !== 'ADMIN' && userRole !== 'SUPER_ADMIN') {
+  if (!isDevelopment && userRole !== 'ADMIN' && userRole !== 'super_admin') {
     console.warn(`Forbidden access attempt to run-script by user ${userId} with role ${userRole}`);
     return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
   }

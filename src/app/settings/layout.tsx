@@ -30,7 +30,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
   }, [sessionClaims]);
 
   // Check the flat metadata.role claim
-  const isSuperAdmin = sessionClaims?.['metadata.role'] === 'SUPER_ADMIN';
+  const isSuperAdmin = sessionClaims?.['metadata.role'] === 'super_admin';
 
   // Base navigation items
   const baseNavItems = [

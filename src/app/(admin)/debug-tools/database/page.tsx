@@ -218,7 +218,7 @@ export default function DatabaseHealthPage() {
     const metadata = user.publicMetadata as PublicMetadata;
     const claimsRole = sessionClaims?.['metadata.role'];
     const userRole = metadata?.role || claimsRole;
-    return userRole === 'ADMIN' || userRole === 'SUPER_ADMIN';
+    return userRole === 'ADMIN' || userRole === 'super_admin';
   }, [isLoaded, user, sessionClaims]);
 
   const isDevelopment = process.env.NODE_ENV === 'development';

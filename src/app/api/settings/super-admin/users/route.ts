@@ -12,7 +12,7 @@ export async function GET(_request: Request) {
     const { userId: _userId, sessionClaims } = await auth();
 
     // Verify Super Admin role from custom claims
-    if (sessionClaims?.['metadata.role'] !== 'SUPER_ADMIN') {
+    if (sessionClaims?.['metadata.role'] !== 'super_admin') {
       return NextResponse.json(
         { success: false, error: 'Forbidden: Super Admin role required.' },
         { status: 403 }

@@ -109,7 +109,7 @@ export default function SubmissionContent() {
         transition={{ type: 'spring', stiffness: 100, damping: 10 }}
         className="p-6 md:p-10 bg-card rounded-full shadow-lg border border-divider mb-8"
       >
-        <Icon iconId="faCheckToSlotSolid" className="w-12 h-12 md:w-16 md:h-16 text-accent" />
+        <Icon iconId="faCheckSolid" className="w-12 h-12 md:w-16 md:h-16 text-accent" />
       </motion.div>
       <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 tracking-tight text-primary">
         Campaign Ready for Review!
@@ -119,11 +119,11 @@ export default function SubmissionContent() {
         <span className="font-semibold text-foreground">{campaign?.name || '...'}</span>" has been
         successfully submitted and is now in review.
       </p>
-      <div className="flex flex-col sm:flex-row gap-4 w-full max-w-lg">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-lg mx-auto">
         <Button
           variant="default"
           size="lg"
-          className="w-full shadow-lg bg-accent hover:bg-accent/90 text-primary-foreground flex-1 py-3 text-base"
+          className="w-full sm:w-auto shadow-lg bg-accent hover:bg-accent/90 text-primary-foreground flex-1 sm:flex-none py-3 text-base"
           onClick={() => router.push(`/brand-lift?campaignId=${campaignId}`)}
           disabled={!campaignId}
         >
@@ -131,26 +131,24 @@ export default function SubmissionContent() {
           Start Brand Lift
         </Button>
 
-        <div className="flex flex-col sm:flex-row gap-4 flex-1">
-          <Button
-            variant="outline"
-            size="lg"
-            className="w-full bg-background/80 flex-1 py-3 text-base"
-            onClick={() => router.push('/campaigns')}
-          >
-            <Icon iconId="faListLight" className="mr-2" />
-            View Campaigns
-          </Button>
-          <Button
-            variant="secondary"
-            size="lg"
-            className="w-full flex-1 py-3 text-base"
-            onClick={() => router.push('/dashboard')}
-          >
-            <Icon iconId="faChartLineLight" className="mr-2" />
-            Go to Dashboard
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          size="lg"
+          className="w-full sm:w-auto bg-background/80 flex-1 sm:flex-none py-3 text-base"
+          onClick={() => router.push('/campaigns')}
+        >
+          <Icon iconId="faListLight" className="mr-2" />
+          View Campaigns
+        </Button>
+        <Button
+          variant="secondary"
+          size="lg"
+          className="w-full sm:w-auto flex-1 sm:flex-none py-3 text-base"
+          onClick={() => router.push('/dashboard')}
+        >
+          <Icon iconId="faChartLineLight" className="mr-2" />
+          Go to Dashboard
+        </Button>
       </div>
     </div>
   );
