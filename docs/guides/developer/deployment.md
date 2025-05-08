@@ -1,99 +1,70 @@
 # Deployment Guide
 
-**Last Updated:** 2025-03-07  
-**Status:** Active
+**Last Reviewed:** 2025-05-09
+**Status:** Active (Needs Review for current process)
 
-## Overview
+## 1. Overview
 
-This guide covers deployment processes for Justify.social, focusing on Vercel deployment configuration and common troubleshooting steps.
+This guide covers the deployment process for the Justify platform, focusing on our hosting provider (Vercel), the different deployment environments, and common troubleshooting steps.
 
-## Deployment Environments
+## 2. Deployment Environments
 
-| Environment | URL                            | Branch  | Auto-Deploy |
-| ----------- | ------------------------------ | ------- | ----------- |
-| Production  | https://justify.social         | main    | Yes         |
-| Staging     | https://staging.justify.social | staging | Yes         |
-| Development | https://dev.justify.social     | develop | Yes         |
+We utilize several environments hosted on Vercel:
 
-## Deployment Process
+| Environment          | URL                              | Source Branch  | Auto-Deploy | Purpose                                             |
+| -------------------- | -------------------------------- | -------------- | ----------- | --------------------------------------------------- |
+| **Production**       | `https://justify.social`         | `main`         | Yes         | Live application for end-users.                     |
+| **Staging**          | `https://staging.justify.social` | `staging` ?    | Yes         | Pre-production testing, mirrors production.         |
+| **Development**      | `https://dev.justify.social`     | `develop` ?    | Yes         | Shared development/integration testing.             |
+| **Preview (Branch)** | `[unique-url].vercel.app`        | Feature Branch | Yes         | Isolated testing/review of specific features (PRs). |
 
-1. Merge code to the appropriate branch
-2. Vercel automatically builds and deploys
-3. Verify deployment in the Vercel dashboard
-4. Run smoke tests on deployed environment
+_(Note: Verify the exact branch names used for Staging and Development environments with the team lead/CI configuration.)_
 
-## Vercel Configuration
+## 3. Deployment Process (Automated via Vercel & GitHub Actions)
 
-The application uses these key Vercel settings:
+Our deployment process is largely automated:
 
-```js
-// next.config.js
-module.exports = {
-  output: 'standalone',
-  experimental: {
-    appDir: true,
-    excludeDefaultMomentLocales: true,
-  },
-};
-```
+1.  **Code Merge**: Changes are merged into the relevant deployment branch (`main`, `staging`, `develop`) via Pull Requests.
+2.  **GitHub Actions Trigger (Optional)**: Merges may trigger GitHub Actions workflows (`.github/workflows/deploy.yml`) that run tests, linting, and potentially other checks before initiating deployment.
+3.  **Vercel Build & Deploy**: Vercel automatically detects pushes to the connected branches and triggers a new build and deployment.
+    - It installs dependencies (`npm ci`).
+    - It runs the build command (`npm run build`).
+    - It deploys the build artifacts to its global Edge network.
+4.  **Verification**: After deployment, automated checks might run (e.g., smoke tests via GitHub Actions), and manual verification should be performed on the relevant environment URL.
 
-## Server vs Client Components
+## 4. Vercel Configuration
 
-When deploying to Vercel, proper separation of server and client components is critical:
+Key configurations are managed through:
 
-- **Server Components**: Use the `.server.tsx` extension for server components
-- **Client Components**: Use the `"use client"` directive at the top of the file
-- **Layout Components**: Use for setting page-wide server directives like `dynamic` and `revalidate`
+- **`next.config.js`**: Contains Next.js specific build configurations like `output: 'standalone'`. (May point to `config/platform/next/index.mjs`).
+- **`vercel.json` (Root or `/config/vercel/`)**: Defines Vercel-specific settings (build commands, framework detection - though often inferred).
+- **Vercel Project Settings (Dashboard)**: Environment variables, connected Git repository, build settings overrides.
 
-## Preventing Common Build Errors
+## 5. Important Considerations for Deployment
 
-### Invalid Revalidate Value Error
+- **Server vs. Client Components**: Correct usage of React Server Components and Client Components (`'use client'`) is critical for successful builds and optimal performance on Vercel.
+- **Environment Variables**: Ensure all necessary environment variables (`DATABASE_URL`, Clerk Keys, Stripe Keys, etc.) are correctly configured in the Vercel project settings for each environment (Production, Staging, Development, Preview). **Never commit `.env.local` files.**
+- **Build Errors**: Common build errors often relate to:
+  - Type errors (run `npm run type-check` locally).
+  - Incorrect Server/Client component usage.
+  - Missing environment variables during build time.
+  - Configuration issues in `next.config.js`.
+- **Database Migrations**: Migrations (`prisma migrate deploy`) need to be applied to the corresponding database environment _before_ the application code relying on schema changes is deployed. This is often handled as a separate step in a CI/CD pipeline or manually before promoting a build.
 
-**Problem**: Build fails with error about invalid revalidate values on client components.
+## 6. Deployment Checklist (Manual Checks)
 
-**Solution**:
+Before promoting changes (especially to Production):
 
-1. Move `dynamic` and `revalidate` directives to layout components:
+- [ ] All automated tests (unit, integration, E2E) passed in CI.
+- [ ] Changes successfully deployed and verified on Staging environment.
+- [ ] Relevant database migrations have been applied to the target environment.
+- [ ] Environment variables in Vercel dashboard for the target environment are correct.
+- [ ] Perform manual smoke tests on critical user flows after deployment.
 
-   ```tsx
-   // campaigns/layout.tsx
-   export const dynamic = 'force-dynamic';
-   export const revalidate = 0;
-   ```
+## 7. Troubleshooting Deployments
 
-2. Create proper component separation:
+- **Build Failures**: Check the Vercel deployment logs for detailed error messages. Common issues include type errors, config errors, or memory limits.
+- **Runtime Errors (Post-Deployment)**: Check Vercel Function logs. Verify environment variables are set correctly in Vercel. Check for issues related to Server/Client component boundaries or database connectivity.
+- **API Errors**: Inspect function logs for API routes. Ensure error handling within API routes is robust.
 
-   ```
-   /campaigns
-     ├── layout.tsx        (server component with directives)
-     ├── page.tsx          (client component)
-     └── ServerCampaigns.tsx (server data fetching)
-   ```
-
-3. Ensure Next.js config has proper output settings:
-   ```js
-   output: 'standalone';
-   ```
-
-## Environment Variables
-
-Ensure these environment variables are configured in Vercel:
-
-- `DATABASE_URL`
-- `AUTH_SECRET`
-- `NEXT_PUBLIC_API_URL`
-
-## Deployment Checklist
-
-- [ ] All tests pass locally
-- [ ] Environment variables are configured
-- [ ] Build completes successfully
-- [ ] Initial page load works
-- [ ] Authentication flows work
-- [ ] Critical user journeys function
-
-## Troubleshooting
-
-- **Build fails**: Check server/client component separation
-- **Runtime errors**: Verify environment variables
-- **API errors**: Confirm API routes use proper error handling
+Consult the **[Troubleshooting Guide](./troubleshooting.md)** for more general development issues.

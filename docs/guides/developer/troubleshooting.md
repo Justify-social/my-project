@@ -1,242 +1,124 @@
 # Developer Troubleshooting Guide
 
-**Last Updated:** 2025-03-07  
-**Status:** Active  
+**Last Reviewed:** 2025-05-09
+**Status:** Active (Needs Content Completion)
 **Owner:** Platform Team
 
 ## Overview
 
-This guide addresses common issues developers encounter when working with Justify.social, offering both quick solutions and deeper insights into the underlying architecture.
+This guide addresses common issues developers encounter when working with the Justify platform, offering both quick solutions and deeper insights into the underlying architecture. It aims to be a living document, updated with new issues and solutions as they arise.
+
+_(Action: Team to contribute specific examples and solutions encountered during development.)_
 
 ## Architectural Context
 
-Understanding Justify.social's architecture helps troubleshoot issues more effectively:
+Understanding Justify's architecture helps troubleshoot issues more effectively:
 
 ```
 Client (React/Next.js) ↔ API Layer (Next.js API Routes) ↔ Database (PostgreSQL/Prisma)
 ```
 
-Most issues occur at the boundaries between these layers, especially during data transformation.
+Most issues occur at the boundaries between these layers, especially during data transformation or state synchronization.
 
-## Common Issue Patterns
+## Common Issue Patterns & Solutions
+
+_(Action: Populate this section with detailed examples specific to Justify.)_
 
 ### 1. Frontend-Backend Data Mismatches
 
-**Symptoms:**
-
-- "Validation failed" errors during form submission
-- Unexpected null values in the UI
-- Form fields not populating with API data
-
-**Root Causes:**
-
-- Enum format mismatches (camelCase vs. UPPERCASE_SNAKE_CASE)
-- Date format inconsistencies
-- JSON serialization/deserialization issues
-
-**Solutions:**
-
-```typescript
-// Use the EnumTransformers consistently at API boundaries
-import { EnumTransformers } from '@/utils/enum-transformers';
-
-// For outgoing data (frontend → backend)
-const apiData = EnumTransformers.transformObjectToBackend(formData);
-
-// For incoming data (backend → frontend)
-const uiData = EnumTransformers.transformObjectFromBackend(apiResponse);
-```
-
-**Key Insight:** Always transform data at system boundaries, not within components.
+- **Symptoms:** "Validation failed" errors, unexpected nulls in UI, forms not populating correctly.
+- **Root Causes:** Enum format differences, date format inconsistencies, JSON serialization issues, mismatched Zod schemas between client/server.
+- **Solutions:**
+  - Consistently use data transformers (e.g., `EnumTransformers` if applicable) at API boundaries.
+  - Ensure Zod schemas used in forms align with those used in API route validation.
+  - Verify date serialization/deserialization.
+  - _(Example needed: Show a common data mismatch error and its fix in Justify.)_
+- **Key Insight:** Always transform data at system boundaries.
 
 ### 2. Component Rendering Issues
 
-**Symptoms:**
-
-- Client/server hydration warnings
-- "Cannot update a component while rendering" errors
-- Unresponsive UI after state updates
-
-**Root Causes:**
-
-- Mixing server and client components incorrectly
-- State updates during render
-- Missing key props in lists
-
-**Solutions:**
-
-```tsx
-// Clear separation of server/client components
-// layout.tsx (Server Component)
-export const dynamic = 'force-dynamic';
-
-// page.tsx (Client Component)
-('use client');
-import { useEffect, useState } from 'react';
-```
-
-**Key Insight:** Design components with clear responsibilities - data fetching in server components, interactivity in client components.
+- **Symptoms:** Hydration warnings, "Cannot update during render" errors, UI not updating, infinite loops.
+- **Root Causes:** Incorrect Server/Client component boundaries, state updates during render phase, missing `key` props in lists, improper dependency arrays in `useEffect`.
+- **Solutions:**
+  - Clearly separate Server (`.server.tsx` or default) and Client (`'use client'`) components.
+  - Move state updates into `useEffect` or event handlers.
+  - Ensure unique `key` props are provided for list items.
+  - Carefully manage dependency arrays for hooks.
+  - _(Example needed: Show a common rendering pitfall specific to Justify's component library or patterns.)_
+- **Key Insight:** Understand the React/Next.js rendering lifecycle and component types.
 
 ### 3. API Route Issues
 
-**Symptoms:**
+- **Symptoms:** 500/4xx errors from API routes, timeouts, inconsistent responses, unexpected behavior.
+- **Root Causes:** Incorrect error handling, Prisma query errors, missing request validation, environment variable issues, auth/permission failures.
+- **Solutions:**
+  - Use standardized error handling (e.g., `tryCatch` / `handleDbError` helpers from `src/lib/middleware/`).
+  - Validate incoming requests using Zod (`withValidation` helper).
+  - Implement proper authentication/authorization checks (e.g., using Clerk's `auth()` helper).
+  - Check server logs (Vercel logs or local console) for detailed error messages.
+  - _(Example needed: Show debugging steps for a frequent API error.)_
+- **Key Insight:** Structure API routes consistently with validation, business logic, and error handling.
 
-- 500 errors from API routes
-- Timeouts during API calls
-- Inconsistent response formats
+### 4. Form Data Handling (React Hook Form / Zustand / Context)
 
-**Root Causes:**
+- **Symptoms:** Form state not updating, lost data between steps (e.g., Campaign Wizard), unexpected validation errors, fields not resetting.
+- **Root Causes:** Incorrect `useForm` default values or reset logic, context provider missing or incorrectly placed, Zod schema mismatches, issues with controlled vs. uncontrolled components.
+- **Solutions:**
+  - Ensure `useForm` `defaultValues` are correctly populated (often asynchronously in `useEffect`).
+  - Use `form.reset()` appropriately when loading data into a form.
+  - Verify context providers wrap the necessary components.
+  - Double-check Zod schema logic against form field names and types.
+  - _(Example needed: Show troubleshooting steps for Campaign Wizard context/form interactions.)_
+- **Key Insight:** Understand how RHF state interacts with global state (Zustand/Context) if applicable.
 
-- Incorrect error handling
-- Prisma query issues
-- Missing request validation
+### 5. Database Connection / Prisma Issues
 
-**Solutions:**
-
-```typescript
-// Consistent API route pattern
-export async function GET(request: Request) {
-  try {
-    // 1. Extract and validate parameters
-    // 2. Perform database operation
-    // 3. Transform response data
-    return NextResponse.json({ success: true, data });
-  } catch (error) {
-    console.error('API Error:', error);
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: error.status || 500 }
-    );
-  }
-}
-```
-
-**Key Insight:** Every API route should follow the same pattern for consistency and predictability.
-
-### 4. Form Data Handling
-
-**Symptoms:**
-
-- Form state not updating
-- Lost data between form steps
-- Unexpected validation errors
-
-**Root Causes:**
-
-- Incorrect form initialization
-- Missing context providers
-- Improper validation schemas
-
-**Solutions:**
-
-```tsx
-// WizardContext proper usage
-const { updateFormData, formData } = useWizardContext();
-
-// Initialize with useEffect, not in render
-useEffect(() => {
-  if (campaignData && !hasLoadedData) {
-    setFormValues(transformData(campaignData));
-    setHasLoadedData(true);
-  }
-}, [campaignData, hasLoadedData]);
-```
-
-**Key Insight:** Use the WizardContext for all multi-step form state management to prevent data loss.
-
-### 5. Database Connection Issues
-
-**Symptoms:**
-
-- "Connection refused" errors
-- Prisma client initialization failures
-- Slow database operations
-
-**Root Causes:**
-
-- Environment variable misconfiguration
-- Connection pool exhaustion
-- Missing database indexes
-
-**Solutions:**
-
-```typescript
-// Proper Prisma client initialization
-import { PrismaClient } from '@prisma/client';
-
-// Use global singleton to prevent connection leaks
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
-
-export const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
-    log: ['query', 'error', 'warn'],
-  });
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
-```
-
-**Key Insight:** Database connections are limited resources; manage them carefully.
+- **Symptoms:** "Connection refused", Prisma client init failures, slow queries, unexpected query results, migration failures.
+- **Root Causes:** Incorrect `DATABASE_URL` env var, DB server not running, connection pool issues (less common with Prisma defaults), missing indexes, schema/migration mismatches.
+- **Solutions:**
+  - Verify `DATABASE_URL` in `.env.local` and Vercel environment settings.
+  - Ensure PostgreSQL server is running locally.
+  - Use the global Prisma client singleton (`src/lib/db.ts` or `src/lib/prisma.ts`).
+  - Analyze slow queries using logging or `EXPLAIN ANALYZE`.
+  - Ensure migrations (`npm run db:migrate`) have been run correctly.
+  - _(Example needed: Add details on interpreting common Prisma error codes.)_
+- **Key Insight:** Treat DB connections as critical resources; ensure schema and client are synchronized via migrations.
 
 ## Debugging Tools & Techniques
 
-### Console Debugging
+_(This section provides a good overview - specific usage examples for Justify could be added for each tool.)_
 
-Strategic console logging provides visibility into application flow:
-
-```typescript
-// Tagged console logs for easier filtering
-console.log('[API:Campaign]', data);
-console.log('[Component:Step1]', formState);
-console.log('[Context:Wizard]', contextValue);
-```
-
-### Network Monitoring
-
-Monitor API calls through the browser's Network tab:
-
-1. Filter by XHR/Fetch requests
-2. Examine request payloads and response bodies
-3. Look for error status codes (4xx, 5xx)
-
-### React DevTools
-
-Use React DevTools to inspect:
-
-1. Component hierarchy
-2. Props and state values
-3. Context providers and consumers
-4. Render performance
-
-### Prisma Studio
-
-For database issues:
-
-1. Run `npx prisma studio`
-2. Examine table relationships
-3. Verify data integrity
-4. Test queries directly
+- **Console Debugging**: Use tagged logs (e.g., `console.log('[API:Campaign]', data);`).
+- **Network Monitoring**: Browser DevTools Network tab.
+- **React DevTools**: Component hierarchy, props, state, hooks.
+- **Prisma Studio**: `npx prisma studio` for data inspection.
+- **VS Code Debugger**: Breakpoints in frontend and backend code.
 
 ## Common Error Messages Explained
 
-| Error Message                                    | Likely Cause                                      | Solution                                  |
-| ------------------------------------------------ | ------------------------------------------------- | ----------------------------------------- |
-| "Invalid enum value"                             | Enum value format mismatch                        | Use EnumTransformers at API boundaries    |
-| "Cannot update during render"                    | State change during component render              | Move updates to effects or event handlers |
-| "Invalid revalidate value"                       | Server/client component confusion                 | Move directives to layout components      |
-| "Influencer data incomplete"                     | Missing required fields in influencer object      | Use draft validation for incomplete data  |
-| "TypeError: Cannot read properties of undefined" | Attempting to access properties on null/undefined | Add null checks and default values        |
+_(Action: Populate this table with common error messages specific to Justify and their typical resolutions.)_
+
+| Error Message                                    | Likely Cause                                  | Potential Solution(s)                           |
+| ------------------------------------------------ | --------------------------------------------- | ----------------------------------------------- |
+| "Invalid enum value"                             | Enum format mismatch (client vs. server)      | Use EnumTransformers; Check Prisma Enum defs.   |
+| "Cannot update during render"                    | State update during component render          | Move updates to `useEffect` or event handlers.  |
+| "Invalid revalidate value"                       | Next.js caching directive on Client Component | Move `dynamic`, `revalidate` to Layout/Page.    |
+| "TypeError: Cannot read properties of undefined" | Accessing property on null/undefined variable | Add null checks (`?.`), provide default values. |
+| _Add Justify-specific errors here_               | _Common cause in Justify_                     | _Specific fix/check in Justify_                 |
 
 ## Prevention Strategies
 
-1. **Code Reviews**: Focus on boundary transformations and state management
-2. **TypeScript Strict Mode**: Enable strict null checks and no implicit any
-3. **Automated Tests**: Unit test transformers, integration test API routes
-4. **Error Boundaries**: Implement React error boundaries to contain failures
-5. **Logging**: Use structured logging with context tags
+_(These are good general practices)_
+
+1.  **Code Reviews**: Focus on boundary transformations, state management, error handling.
+2.  **TypeScript Strict Mode**: Keep enabled.
+3.  **Automated Tests**: Cover data transformations, API logic, key user flows.
+4.  **Error Boundaries**: Implement React error boundaries for graceful UI failure.
+5.  **Logging**: Use structured logging with context.
 
 ## Related Resources
 
-- [Database Schema Updates](../../features-backend/database/schema-updates.md)
-- [Campaign Wizard Workflow](../../features-frontend/campaign-wizard/workflow.md)
-- [Deployment Guide](./deployment.md)
+- **[Debugging Guide](./debugging-guide.md)** (This document)
+- **[Local Testing Guide](./local-testing-guide.md)**
+- **[Deployment Guide](./deployment.md)**
+- Specific feature documentation in `/docs/architecture/features/`.

@@ -221,19 +221,19 @@ _(Definition of Done: For AI-involved tasks, 'Done' means content/structure gene
 **Acceptance Criteria (AC):**
 
 - [x] `/docs/guides/developer/features/` directory exists (Verified path).
-- [ ] `/docs/guides/README.md` recreated (index).
-- [ ] `/docs/guides/developer/README.md` recreated (index).
-- [ ] `/docs/guides/developer/contributing.md` created (content moved/recreated from root `docs/contributing.md`).
-- [ ] `/docs/guides/developer/debugging-guide.md` created (placeholder needs content).
-- [ ] `/docs/guides/developer/deployment.md` recreated (based on previous version).
-- [ ] `/docs/guides/developer/icon-system-guide.md` recreated (based on previous version).
-- [ ] `/docs/guides/developer/local-testing-guide.md` created (placeholder needs content).
-- [ ] `/docs/guides/developer/troubleshooting.md` recreated (based on previous structure, needs content completion).
-- [ ] `/docs/guides/developer/turbopack.md` recreated (Confirm relevance/rename if deprecated).
-- [ ] `/docs/guides/developer/features/README.md` recreated (placeholder index).
-- [ ] Ensure all files have correct freshness indicators.
+- [x] `/docs/guides/README.md` recreated (index, 2025-05-09).
+- [x] `/docs/guides/developer/README.md` recreated (index, 2025-05-09).
+- [x] `/docs/guides/developer/contributing.md` created (content moved/recreated from root `docs/contributing.md`, updated 2025-05-09).
+- [x] `/docs/guides/developer/debugging-guide.md` created (placeholder needs content, 2025-05-09).
+- [x] `/docs/guides/developer/deployment.md` recreated (based on previous version, 2025-05-09).
+- [x] `/docs/guides/developer/icon-system-guide.md` recreated (based on previous version, 2025-05-09).
+- [x] `/docs/guides/developer/local-testing-guide.md` created (placeholder needs content, 2025-05-09).
+- [x] `/docs/guides/developer/troubleshooting.md` recreated (based on previous structure, needs content completion, 2025-05-09).
+- [x] `/docs/guides/developer/turbopack.md` skipped (Previous guide found, but relevance needs confirmation; potentially deprecated).
+- [x] `/docs/guides/developer/features/README.md` recreated (placeholder index, 2025-05-09).
+- [x] Ensure all files have correct freshness indicators (All files created/updated 2025-05-09).
       **Assignee:** AI Assistant (content generation), Tech Lead (review, confirm Turbopack, add guide content)
-      **Status:** To Do
+      **Status:** ✅ Done (Pending Review & Content for placeholders; Turbopack guide skipped)
 
 ---
 
@@ -243,13 +243,13 @@ _(Definition of Done: For AI-involved tasks, 'Done' means content/structure gene
 **Acceptance Criteria (AC):**
 
 - [x] `/docs/guides/user/` directory exists (Verified path).
-- [ ] `/docs/guides/user/README.md` recreated (index).
-- [ ] `/docs/guides/user/getting-started.md` recreated (based on previous version, needs validation).
-- [ ] `/docs/guides/user/common-tasks.md` recreated (based on previous version, needs validation).
-- [ ] `/docs/guides/user/journey.md` recreated (based on previous version, needs validation).
-- [ ] Ensure all files have correct freshness indicators.
+- [x] `/docs/guides/user/README.md` recreated (index, 2025-05-09).
+- [x] `/docs/guides/user/getting-started.md` recreated (based on previous version, needs validation, 2025-05-09).
+- [x] `/docs/guides/user/common-tasks.md` recreated (based on previous version, needs validation, 2025-05-09).
+- [x] `/docs/guides/user/journey.md` recreated (based on previous version, needs validation, 2025-05-09).
+- [x] Ensure all files have correct freshness indicators (All files created/updated 2025-05-09).
       **Assignee:** AI Assistant (content generation), Product/QA/UX (validation)
-      **Status:** To Do
+      **Status:** ✅ Done (Pending Validation)
 
 ---
 
@@ -259,31 +259,148 @@ _(Definition of Done: For AI-involved tasks, 'Done' means content/structure gene
 **Acceptance Criteria (AC):**
 
 - [x] `/docs/standards/` directory exists (Verified path).
-- [ ] `/docs/standards/README.md` recreated (index).
-- [ ] `/docs/standards/code-standards.md` recreated (based on previous version, excluding linting/formatting).
-- [ ] `/docs/standards/naming-conventions.md` recreated (based on previous version).
-- [ ] `/docs/standards/linting-formatting.md` created (extracting relevant info from old code-standards).
-- [ ] `/docs/standards/testing-strategy.md` recreated (based on previous version).
-- [ ] `/docs/standards/api-design.md` created (placeholder needs content).
-- [ ] `/docs/standards/commit-messages.md` created (placeholder needs content).
-- [ ] `/docs/standards/accessibility.md` created (placeholder needs content).
-- [ ] `/docs/standards/security.md` created (placeholder needs content).
-- [ ] Ensure all files have correct freshness indicators.
+- [x] `/docs/standards/README.md` recreated (index, 2025-05-09).
+- [x] `/docs/standards/code-standards.md` recreated (based on previous version, excluding linting/formatting, 2025-05-09).
+- [x] `/docs/standards/naming-conventions.md` recreated (based on previous version, 2025-05-09).
+- [x] `/docs/standards/linting-formatting.md` created (extracting relevant info from old code-standards, 2025-05-09).
+- [x] `/docs/standards/testing-strategy.md` recreated (based on previous version, 2025-05-09).
+- [x] `/docs/standards/api-design.md` created (placeholder needs content, 2025-05-09).
+- [x] `/docs/standards/commit-messages.md` created (placeholder needs content, 2025-05-09).
+- [x] `/docs/standards/accessibility.md` created (placeholder needs content, 2025-05-09).
+- [x] `/docs/standards/security.md` created (placeholder needs content, 2025-05-09).
+- [x] Ensure all files have correct freshness indicators (All files created/updated 2025-05-09).
       **Assignee:** AI Assistant (content generation), Tech Lead/Architect (review & content)
+      **Status:** ✅ Done (Pending Review & Content for placeholders)
+
+---
+
+**Ticket ID:** DOCS-RECOV-012
+**Title:** Populate Placeholder Architecture Documents
+**Description:** Fill in the detailed content for core architecture documents currently marked as placeholders.
+**Effort Type:** Manual Content Creation & Review
+**Acceptance Criteria (AC):**
+
+- [x] `/docs/architecture/system-overview.md` populated with accurate diagram and component explanations (2025-05-09).
+- [x] `/docs/architecture/core-libraries.md` populated with details on `src/lib`, `services`, `utils`, `hooks`, `config` (2025-05-09).
+- [x] `/docs/architecture/external-integrations.md` populated with confirmed details for Clerk, Stripe, Cint, InsightIQ, UploadThing, Resend (2025-05-09).
+      **Assignee:** Architect / Tech Lead / AI Assistant
+      **Status:** ✅ Done (Pending Review)
+
+---
+
+**Ticket ID:** DOCS-RECOV-013
+**Title:** Populate Placeholder Standards Documents
+**Description:** Fill in the detailed content for standards documents currently marked as placeholders.
+**Effort Type:** Manual Content Creation & Review
+**Acceptance Criteria (AC):**
+
+- [ ] `/docs/standards/api-design.md` populated with specific API design guidelines.
+- [ ] `/docs/standards/commit-messages.md` populated with full details and examples (if Conventional Commits link isn't sufficient).
+- [ ] `/docs/standards/accessibility.md` populated with specific project guidelines, testing procedures, and tool usage.
+- [ ] `/docs/standards/security.md` populated with specific project standards, procedures, and tool usage.
+      **Assignee:** Tech Lead / Architect / Security Lead / Accessibility Lead
+      **Status:** To Do (Blocked by DOCS-RECOV-010 Review)
+
+---
+
+**Ticket ID:** DOCS-RECOV-014
+**Title:** Populate Placeholder Developer Guides
+**Description:** Fill in the detailed content for developer guides currently marked as placeholders.
+**Effort Type:** Manual Content Creation & Review
+**Acceptance Criteria (AC):**
+
+- [ ] `/docs/guides/developer/debugging-guide.md` populated with Justify-specific examples and techniques.
+- [ ] `/docs/guides/developer/local-testing-guide.md` populated with Justify-specific commands, examples, and mocking strategies.
+- [ ] `/docs/guides/developer/troubleshooting.md` reviewed and populated with specific Justify error examples and solutions.
+- [ ] `/docs/guides/developer/features/` populated with relevant feature-specific developer guides (as needed).
+      **Assignee:** Tech Lead / Senior Developers / QA Lead
+      **Status:** To Do (Blocked by DOCS-RECOV-008 Review)
+
+---
+
+**Ticket ID:** DOCS-RECOV-015
+**Title:** Validate User Guides
+**Description:** Review and validate the content of all user-facing guides against the current application.
+**Effort Type:** Manual Validation & Review
+**Acceptance Criteria (AC):**
+
+- [ ] `/docs/guides/user/getting-started.md` validated for accuracy, clarity, and up-to-date screenshots.
+- [ ] `/docs/guides/user/common-tasks.md` validated for accuracy and clarity of steps.
+- [ ] `/docs/guides/user/journey.md` validated against typical user workflows.
+      **Assignee:** Product Team / QA / UX Team
+      **Status:** To Do (Blocked by DOCS-RECOV-009 Review)
+
+---
+
+**Ticket ID:** DOCS-RECOV-016
+**Title:** Technical Documentation Accuracy Review
+**Description:** Perform a final technical review of all architecture, standards, and developer guide documents.
+**Effort Type:** Manual Review
+**Acceptance Criteria (AC):**
+
+- [ ] All documents in `/docs/architecture/` reviewed for technical accuracy.
+- [ ] All documents in `/docs/standards/` reviewed for technical accuracy and enforceability.
+- [ ] All documents in `/docs/guides/developer/` reviewed for technical accuracy.
+      **Assignee:** Architect / Tech Lead(s)
+      **Status:** To Do (Blocked by content population tickets 012, 013, 014)
+
+---
+
+**Ticket ID:** DOCS-RECOV-017
+**Title:** Comprehensive Link Validation
+**Description:** Check all internal links within the `/docs` directory to ensure they are valid and point to the correct locations.
+**Effort Type:** Manual Check / Automated Tool
+**Acceptance Criteria (AC):**
+
+- [ ] Automated link checker run across `/docs`.
+- [ ] All reported broken internal links fixed.
+- [ ] Manual spot checks performed on key navigational links.
+      **Assignee:** AI Assistant (Initial Check Possible) / Tech Lead / Documentation Lead
+      **Status:** To Do (Blocked by content population tickets)
+
+---
+
+**Ticket ID:** DOCS-RECOV-018
+**Title:** Refinement, Polish & Gitbook Preview
+**Description:** Review all documentation for consistency in tone, style, formatting. Refine content based on Gitbook previews.
+**Effort Type:** Manual Review & Refinement
+**Acceptance Criteria (AC):**
+
+- [ ] Consistent terminology used throughout (referencing `glossary.md`).
+- [ ] Consistent formatting applied (headings, code blocks, lists).
+- [ ] Tone is appropriate for the target audience of each section.
+- [ ] Documentation builds and renders correctly in a Gitbook preview environment.
+- [ ] Cross-linking between related documents is effective and sufficient.
+      **Assignee:** Documentation Lead / Tech Lead / AI Assistant (for consistency checks)
+      **Status:** To Do (Blocked by content population & review tickets)
+
+---
+
+**Ticket ID:** DOCS-RECOV-019
+**Title:** Turbopack Guide Decision & Action
+**Description:** Confirm if Turbopack is actively used/supported. Create/update the guide if relevant, or remove references if deprecated.
+**Effort Type:** Decision & Manual Content Creation/Deletion
+**Acceptance Criteria (AC):**
+
+- [ ] Decision made by Tech Lead regarding Turbopack relevance.
+- [ ] If relevant: `/docs/guides/developer/turbopack.md` created/updated with accurate information.
+- [ ] If deprecated: `/docs/guides/developer/turbopack.md` file deleted and all links/references to it removed from other documents.
+      **Assignee:** Tech Lead
       **Status:** To Do
 
 ---
 
-**Ticket ID:** DOCS-RECOV-011
-**Title:** Final Cleanup & Verification
-**Description:** Perform final cleanup steps and checks once content is restored.
+**Ticket ID:** DOCS-RECOV-020
+**Title:** Establish Documentation Maintenance Process
+**Description:** Define and document the ongoing process for keeping documentation accurate and up-to-date.
+**Effort Type:** Process Definition
 **Acceptance Criteria (AC):**
 
-- [ ] Manual deletion of remnant directories (`/docs/authentication/`, `/docs/components/`, `/docs/_archive/`) confirmed complete.
-- [ ] Comprehensive internal link validation performed across all `/docs`.
-- [ ] Final review of all documents for consistency and adherence to `documentation-guide.md`.
-- [ ] This `docs-update.md` file is removed.
+- [ ] Process defined for assigning ownership of documents/sections.
+- [ ] Process defined for updating documentation alongside code changes (e.g., part of PR checklist).
+- [ ] Regular review cadence established (e.g., quarterly).
+- [ ] Maintenance process documented (e.g., within `documentation-guide.md`).
       **Assignee:** Tech Lead / Documentation Lead
-      **Status:** Blocked (Pending completion of previous tickets)
+      **Status:** To Do
 
 ---
