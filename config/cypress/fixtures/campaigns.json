@@ -2,101 +2,131 @@
   {
     "id": "1",
     "campaignName": "Summer Promotion 2023",
-    "submissionStatus": "active",
+    "campaignObjective": "brandAwareness",
+    "creativeElements": ["logo", "productImages"],
+    "submissionStatus": "review",
     "primaryKPI": "brand_awareness",
     "startDate": "2023-06-01",
     "endDate": "2023-09-01",
     "budget": 50000,
-    "description": "Summer promotional campaign targeting new customers"
+    "description": "Summer promotional campaign targeting new customers",
+    "feedback": []
   },
   {
     "id": "2",
     "campaignName": "Winter Sale 2023",
-    "submissionStatus": "draft",
+    "campaignObjective": "sales",
+    "creativeElements": ["logo", "productImages"],
+    "submissionStatus": "review",
     "primaryKPI": "conversion_rate",
     "startDate": "2023-11-01",
     "endDate": "2024-01-15",
     "budget": 35000,
-    "description": "Winter sales campaign focusing on holiday shopping season"
+    "description": "Winter sales campaign focusing on holiday shopping season",
+    "feedback": []
   },
   {
     "id": "3",
     "campaignName": "Product Launch - Alpha Series",
-    "submissionStatus": "in_review",
+    "campaignObjective": "productConsideration",
+    "creativeElements": ["logo", "productImages"],
+    "submissionStatus": "review",
     "primaryKPI": "product_consideration",
     "startDate": "2023-08-15",
     "endDate": "2023-10-15",
     "budget": 75000,
-    "description": "New product line launch campaign"
+    "description": "New product line launch campaign",
+    "feedback": []
   },
   {
     "id": "4",
     "campaignName": "Brand Awareness - Q2",
-    "submissionStatus": "completed",
+    "campaignObjective": "brandAwareness",
+    "creativeElements": ["logo", "productImages"],
+    "submissionStatus": "review",
     "primaryKPI": "brand_awareness",
     "startDate": "2023-04-01",
     "endDate": "2023-06-30",
     "budget": 45000,
-    "description": "Second quarter brand awareness campaign"
+    "description": "Second quarter brand awareness campaign",
+    "feedback": []
   },
   {
     "id": "5",
     "campaignName": "Social Media Engagement",
-    "submissionStatus": "paused",
+    "campaignObjective": "engagement",
+    "creativeElements": ["logo", "productImages"],
+    "submissionStatus": "review",
     "primaryKPI": "engagement",
     "startDate": "2023-07-01",
     "endDate": "2023-12-31",
     "budget": 30000,
-    "description": "Campaign to boost social media engagement metrics"
+    "description": "Campaign to boost social media engagement metrics",
+    "feedback": []
   },
   {
     "id": "6",
     "campaignName": "Lead Generation - Enterprise",
-    "submissionStatus": "approved",
+    "campaignObjective": "leadGeneration",
+    "creativeElements": ["logo", "productImages"],
+    "submissionStatus": "review",
     "primaryKPI": "lead_generation",
     "startDate": "2023-09-01",
     "endDate": "2023-11-30",
     "budget": 60000,
-    "description": "B2B lead generation campaign targeting enterprise customers"
+    "description": "B2B lead generation campaign targeting enterprise customers",
+    "feedback": []
   },
   {
     "id": "7",
     "campaignName": "Loyalty Program Promotion",
-    "submissionStatus": "draft",
+    "campaignObjective": "customerRetention",
+    "creativeElements": ["logo", "productImages"],
+    "submissionStatus": "review",
     "primaryKPI": "customer_retention",
     "startDate": "2023-10-01",
     "endDate": "2024-03-31",
     "budget": 40000,
-    "description": "Campaign to promote our customer loyalty program"
+    "description": "Campaign to promote our customer loyalty program",
+    "feedback": []
   },
   {
     "id": "8",
     "campaignName": "Holiday Special Campaign",
-    "submissionStatus": "active",
+    "campaignObjective": "sales",
+    "creativeElements": ["logo", "productImages"],
+    "submissionStatus": "review",
     "primaryKPI": "sales",
     "startDate": "2023-12-01",
     "endDate": "2023-12-31",
     "budget": 85000,
-    "description": "Special holiday promotion with limited time offers"
+    "description": "Special holiday promotion with limited time offers",
+    "feedback": []
   },
   {
     "id": "9",
     "campaignName": "Spring Collection Launch",
-    "submissionStatus": "submitted",
+    "campaignObjective": "productConsideration",
+    "creativeElements": ["logo", "productImages"],
+    "submissionStatus": "review",
     "primaryKPI": "product_consideration",
     "startDate": "2024-02-01",
     "endDate": "2024-04-30",
     "budget": 55000,
-    "description": "Spring fashion collection launch campaign"
+    "description": "Spring fashion collection launch campaign",
+    "feedback": []
   },
   {
     "id": "10",
     "campaignName": "Back to School",
-    "submissionStatus": "draft",
+    "campaignObjective": "conversionRate",
+    "creativeElements": ["logo", "productImages"],
+    "submissionStatus": "review",
     "primaryKPI": "conversion_rate",
     "startDate": "2023-08-01",
     "endDate": "2023-09-15",
     "budget": 42000,
-    "description": "Back to school seasonal promotion targeting students and parents"
+    "description": "Back to school seasonal promotion targeting students and parents",
+    "feedback": []
   }
 ]

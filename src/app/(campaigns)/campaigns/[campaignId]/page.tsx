@@ -308,7 +308,8 @@ export default function CampaignDetail() {
         return { variant: 'default', text: 'Draft', className: 'badge-draft' };
       case 'pending':
       case 'in_review':
-        return { variant: 'secondary', text: 'In Review', className: '' };
+      case 'review':
+        return { variant: 'default', text: 'Review', className: 'bg-yellow-100 text-yellow-800' };
       case 'approved':
       case 'active':
         return {

@@ -60,7 +60,8 @@ const getStatusInfo = (status: string | null | undefined) => {
     case 'active':
       return { class: 'bg-green-100 text-green-800', text: 'Active' };
     case 'in_review':
-      return { class: 'bg-yellow-100 text-yellow-800', text: 'In Review' };
+    case 'review':
+      return { class: 'bg-yellow-100 text-yellow-800', text: 'Review' };
     case 'draft':
       return { class: 'bg-gray-100 text-gray-800', text: 'Draft' };
     case 'completed':

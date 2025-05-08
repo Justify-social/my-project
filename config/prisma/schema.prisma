@@ -314,10 +314,11 @@ enum Feature {
 
 enum Status {
   DRAFT
-  IN_REVIEW
+  REVIEW
   APPROVED
   ACTIVE
   COMPLETED
+  PAUSED
 }
 
 enum Currency {

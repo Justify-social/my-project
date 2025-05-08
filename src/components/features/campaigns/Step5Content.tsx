@@ -313,8 +313,9 @@ function Step5Content() {
     // we prepare a smaller payload for PATCH via saveProgress.
     const payload: Partial<DraftCampaignData> = {
       currentStep: 5,
-      status: StatusEnum.Values.IN_REVIEW, // Set desired final status (e.g., IN_REVIEW)
+      status: StatusEnum.Values.REVIEW, // Set desired final status to REVIEW
       isComplete: true, // Mark the campaign as complete
+      submittedAt: new Date(),
       // We don't need to resend all previous step data,
       // the PATCH endpoint for step 5 should only handle status/completion update.
     };

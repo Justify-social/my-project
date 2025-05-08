@@ -9,7 +9,7 @@ import { PlatformEnum } from '@/types/enums';
 /** Base Currency Enum (from Prisma) */
 export const CurrencyEnum = z.enum(['GBP', 'USD', 'EUR']);
 /** Campaign Status Enum (from Prisma) */
-export const StatusEnum = z.enum(['DRAFT', 'IN_REVIEW', 'APPROVED', 'ACTIVE', 'COMPLETED']);
+export const StatusEnum = z.enum(['DRAFT', 'REVIEW', 'APPROVED', 'ACTIVE', 'COMPLETED']);
 /** Key Performance Indicator Enum (from Prisma) */
 export const KPIEnum = z.enum([
   'AD_RECALL',

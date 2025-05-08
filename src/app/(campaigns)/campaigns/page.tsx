@@ -36,7 +36,7 @@ import {
 import { Prisma } from '@prisma/client'; // Ensure Prisma namespace is imported
 
 // Define expected status values
-type CampaignStatus = 'DRAFT' | 'IN_REVIEW' | 'APPROVED' | 'ACTIVE' | 'COMPLETED' | string;
+type CampaignStatus = 'DRAFT' | 'REVIEW' | 'APPROVED' | 'ACTIVE' | 'COMPLETED' | string;
 type Platform = 'Instagram' | 'YouTube' | 'TikTok' | 'N/A';
 
 // Define the shape of the data coming from /api/list-campaigns
@@ -134,10 +134,15 @@ const transformCampaignData = (campaign: ApiListData): Campaign => {
     }
   }
 
+  let newStatus = campaign.status || 'DRAFT';
+  if (newStatus.toUpperCase() === 'IN_REVIEW') {
+    newStatus = 'REVIEW';
+  }
+
   return {
     id: campaign.id,
     campaignName: campaign.name || 'Untitled Campaign',
-    status: (campaign.status || 'DRAFT') as CampaignStatus,
+    status: newStatus as CampaignStatus,
     platform: platform,
     startDate: formatDateToString(campaign.startDate),
     endDate: formatDateToString(campaign.endDate),
@@ -649,8 +654,8 @@ const ClientCampaignList: React.FC = () => {
         return { class: 'bg-green-100 text-green-800', text: 'Approved' };
       case 'active':
         return { class: 'bg-green-100 text-green-800', text: 'Active' };
-      case 'in_review':
-        return { class: 'bg-yellow-100 text-yellow-800', text: 'In Review' };
+      case 'review':
+        return { class: 'bg-yellow-100 text-yellow-800', text: 'Review' };
       case 'draft':
         return { class: 'bg-gray-100 text-gray-800', text: 'Draft' };
       case 'completed':
@@ -754,7 +759,7 @@ const ClientCampaignList: React.FC = () => {
               <SelectItem value="approved">Approved</SelectItem>
               <SelectItem value="completed">Completed</SelectItem>
               <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="in_review">In Review</SelectItem>
+              <SelectItem value="review">Review</SelectItem>
               <SelectItem value="paused">Paused</SelectItem>
             </SelectContent>
           </Select>

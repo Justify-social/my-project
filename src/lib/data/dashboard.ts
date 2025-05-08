@@ -186,7 +186,7 @@ export async function getUpcomingCampaigns(clerkUserId: string): Promise<Campaig
 
     const whereClause = {
       userId: internalUserId, // Use the internal UUID for filtering
-      status: { in: [Status.DRAFT, Status.IN_REVIEW, Status.APPROVED, Status.ACTIVE] },
+      status: { in: [Status.DRAFT, Status.REVIEW, Status.APPROVED, Status.ACTIVE] },
       startDate: { lte: endOfNextFewMonths }, // Starting within window
     };
     logger.info('[getUpcomingCampaigns] Prisma whereClause:', whereClause);
