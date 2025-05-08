@@ -23,8 +23,8 @@ import { badgeVariants } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
-// Import the centralized toast helpers (pointing to .tsx file, without extension)
-import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
+// Import the Duplicate Button using relative path
+import { DuplicateCampaignButton } from '@/components/ui/button-duplicate-campaigns';
 
 // Define AGE_BRACKETS for the age distribution summary UI
 const AGE_BRACKETS = [
@@ -254,11 +254,9 @@ const PageSection = ({
   </section>
 );
 
-// Section Header component
+// Section Header component (Ensure defined before use)
 const SectionHeader = ({ title, className }: { title: string; className?: string }) => (
   <div className={cn('flex items-center gap-2 mb-6', className)}>
-    {' '}
-    {/* Standardized bottom margin */}
     <h2 className="text-xl font-semibold tracking-tight whitespace-nowrap">{title}</h2>
     <Separator className="flex-grow" />
   </div>
@@ -367,6 +365,28 @@ export default function CampaignDetail() {
   const [campaignData, setCampaignData] = useState<CampaignData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // --- Restore Local Toast Helper Functions ---
+  const showSuccessToast = (message: string, iconId?: string) => {
+    const finalIconId = iconId || 'faFloppyDiskLight';
+    const successIcon = <Icon iconId={finalIconId} className="h-5 w-5 text-success" />;
+    toast.success(message, {
+      duration: 3000,
+      className: 'toast-success-custom', // Defined in globals.css
+      icon: successIcon,
+    });
+  };
+
+  const showErrorToast = (message: string, iconId?: string) => {
+    const finalIconId = iconId || 'faTriangleExclamationLight';
+    const errorIcon = <Icon iconId={finalIconId} className="h-5 w-5 text-destructive" />;
+    toast.error(message, {
+      duration: 5000,
+      className: 'toast-error-custom', // Defined in globals.css
+      icon: errorIcon,
+    });
+  };
+  // --- End Restored Local Helpers ---
 
   useEffect(() => {
     const fetchCampaignData = async () => {
@@ -722,37 +742,34 @@ export default function CampaignDetail() {
 
         <div className="flex gap-2">
           <Link href={`/campaigns/wizard/step-1?id=${campaignIdParam}`}>
-            <Button
-              variant="outline"
-              className="group rounded-md border border-gray-200 shadow-sm hover:shadow bg-background"
-              size="sm"
-            >
-              <Icon
-                iconId="faPenToSquareLight"
-                className="mr-2 text-muted-foreground group-hover:fa-solid group-hover:text-foreground transition-all"
-              />
+            <Button variant="outline" size="sm">
+              <Icon iconId="faPenToSquareLight" className="mr-2 h-4 w-4 text-muted-foreground" />
               Edit
             </Button>
           </Link>
-          <Button
+          {/* Replace the placeholder Button with the actual component */}
+          <DuplicateCampaignButton
+            campaignId={campaignIdParam}
+            campaignName={campaignData.name}
+            onDuplicateSuccess={() => {
+              console.log('Duplicate successful, parent notified.');
+              // Example: router.push('/campaigns');
+            }}
             variant="outline"
-            className="group rounded-md border border-gray-200 shadow-sm hover:shadow bg-background"
             size="sm"
-            onClick={() => toast.success('Duplicate functionality to be implemented')}
-          >
-            <Icon
-              iconId="faCopyLight"
-              className="mr-2 text-muted-foreground group-hover:fa-solid group-hover:text-foreground transition-all"
-            />
-            Duplicate
-          </Button>
+            buttonContent={
+              <>
+                <Icon iconId="faCopyLight" className="mr-2 h-4 w-4 text-muted-foreground" />
+                Duplicate
+              </>
+            }
+          />
           <Button
             variant="destructive"
-            className="group rounded-md"
             size="sm"
-            onClick={() => toast.error('Delete functionality to be implemented')}
+            onClick={() => showErrorToast('Delete functionality to be implemented')}
           >
-            <Icon iconId="faTrashCanLight" className="mr-2 group-hover:fa-solid transition-all" />
+            <Icon iconId="faTrashCanLight" className="mr-2 h-4 w-4" />
             Delete
           </Button>
         </div>

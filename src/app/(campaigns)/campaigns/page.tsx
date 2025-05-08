@@ -32,8 +32,11 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogClose,
 } from '@/components/ui/dialog';
 import { Prisma } from '@prisma/client'; // Ensure Prisma namespace is imported
+import { Label } from '@/components/ui/label';
+import { logger } from '@/utils/logger';
 
 // Define expected status values
 type CampaignStatus = 'DRAFT' | 'REVIEW' | 'APPROVED' | 'ACTIVE' | 'COMPLETED' | string;
@@ -245,14 +248,40 @@ const ClientCampaignList: React.FC = () => {
 
   // Modal states
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
-  const [campaignToAction, setCampaignToAction] = useState<{
+  const [campaignToDelete, setCampaignToDelete] = useState<{ id: string; name: string } | null>(
+    null
+  );
+  const [deleteInProgress, setDeleteInProgress] = useState(false);
+  const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
+  const [campaignToDuplicate, setCampaignToDuplicate] = useState<{
     id: string;
     name: string;
   } | null>(null);
-  const [duplicateName, setDuplicateName] = useState('');
-  const [deleteInProgress, setDeleteInProgress] = useState(false);
+  const [newDuplicateName, setNewDuplicateName] = useState('');
+  const [isCheckingName, setIsCheckingName] = useState(false);
+  const [isDuplicating, setIsDuplicating] = useState(false);
+  const [nameError, setNameError] = useState<string | null>(null);
   const router = useRouter();
+
+  // Define Toast Helper Functions Locally
+  const showSuccessToast = (message: string, iconId?: string) => {
+    const finalIconId = iconId || 'faFloppyDiskLight';
+    const successIcon = <Icon iconId={finalIconId} className="h-5 w-5 text-success" />;
+    toast.success(message, {
+      duration: 3000,
+      className: 'toast-success-custom',
+      icon: successIcon,
+    });
+  };
+  const showErrorToast = (message: string, iconId?: string) => {
+    const finalIconId = iconId || 'faTriangleExclamationLight';
+    const errorIcon = <Icon iconId={finalIconId} className="h-5 w-5 text-destructive" />;
+    toast.error(message, {
+      duration: 5000,
+      className: 'toast-error-custom',
+      icon: errorIcon,
+    });
+  };
 
   // Fetch campaigns from the NEW API endpoint
   useEffect(() => {
@@ -525,7 +554,7 @@ const ClientCampaignList: React.FC = () => {
   const handleDeleteClick = (campaign: Campaign) => {
     const campaignId = campaign.id.toString();
     console.log(`Preparing to delete campaign: ${campaignId}, type: ${typeof campaign.id}`);
-    setCampaignToAction({
+    setCampaignToDelete({
       id: campaignId,
       name: campaign.campaignName,
     });
@@ -594,54 +623,17 @@ const ClientCampaignList: React.FC = () => {
   };
 
   const confirmDelete = async () => {
-    if (!campaignToAction) return;
+    if (!campaignToDelete) return;
     setDeleteInProgress(true);
     try {
-      await deleteCampaign(campaignToAction.id);
+      await deleteCampaign(campaignToDelete.id);
       // Success toast is handled within deleteCampaign now
       setShowDeleteModal(false);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to delete campaign');
     } finally {
       setDeleteInProgress(false);
-      setCampaignToAction(null); // Clear the action target
-    }
-  };
-
-  const handleDuplicateClick = (campaign: Campaign) => {
-    setCampaignToAction({
-      id: campaign.id.toString(),
-      name: campaign.campaignName,
-    });
-    setDuplicateName(`Copy of ${campaign.campaignName}`);
-    setShowDuplicateModal(true);
-  };
-
-  const duplicateCampaign = async () => {
-    // NOTE: Assumes POST /api/campaigns/[campaignId]/duplicate targets CampaignWizard correctly.
-    // If not, this endpoint needs to be created/updated.
-    if (!campaignToAction || !duplicateName.trim()) return;
-    setIsLoadingData(true);
-    try {
-      const response = await fetch(`/api/campaigns/${campaignToAction.id}/duplicate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ newName: duplicateName.trim() }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || `Failed to duplicate campaign: ${response.status}`);
-      }
-      toast.success('Campaign duplicated successfully');
-      setShowDuplicateModal(false);
-      refetchCampaigns(); // Refresh list with the new duplicate
-    } catch (error) {
-      console.error('Error duplicating campaign:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to duplicate campaign');
-    } finally {
-      setIsLoadingData(false);
-      setCampaignToAction(null); // Clear action target
+      setCampaignToDelete(null); // Clear the action target
     }
   };
 
@@ -675,6 +667,98 @@ const ClientCampaignList: React.FC = () => {
     const kpiOption = KPI_OPTIONS.find(option => option.key === camelCaseKey);
     return kpiOption ? kpiOption.title : kpiKey;
   };
+
+  // --- Restore Local Duplicate Click Handler and Logic ---
+  const handleDuplicateClick = (campaign: Campaign) => {
+    setCampaignToDuplicate({
+      id: campaign.id.toString(),
+      name: campaign.campaignName,
+    });
+    setNewDuplicateName(`Copy of ${campaign.campaignName}`);
+    setIsDuplicateDialogOpen(true);
+    setNameError(null);
+    setIsCheckingName(false);
+    setIsDuplicating(false);
+  };
+
+  const checkNameExists = async (name: string): Promise<boolean> => {
+    if (!isLoaded) {
+      showErrorToast('Authentication state is not loaded yet. Please wait and try again.');
+      return true; // Indicate failure to prevent proceeding
+    }
+    if (!user) {
+      showErrorToast('You must be signed in to perform this action. Please sign in and try again.');
+      router.push('/sign-in'); // Optional: redirect to sign-in
+      return true; // Indicate failure
+    }
+
+    setIsCheckingName(true);
+    setNameError(null);
+    try {
+      // TODO: Use actual API endpoint
+      const response = await fetch(`/api/campaigns/check-name?name=${encodeURIComponent(name)}`);
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to check name');
+      }
+      if (result.exists) {
+        setNameError('This campaign name already exists. Please choose another.');
+        return true;
+      }
+      return false;
+    } catch (error) {
+      logger.error('Failed to check campaign name existence:', error);
+      showErrorToast('Could not verify campaign name. Please try again.');
+      return true; // Explicitly return true on error
+    } finally {
+      setIsCheckingName(false);
+    }
+  };
+
+  const handleDuplicateConfirm = async () => {
+    if (!isLoaded) {
+      showErrorToast('Authentication state is not loaded yet. Please wait and try again.');
+      return;
+    }
+    if (!user) {
+      showErrorToast('You must be signed in to duplicate campaigns. Please sign in and try again.');
+      router.push('/sign-in'); // Optional: redirect to sign-in
+      return;
+    }
+
+    if (!campaignToDuplicate) return;
+    const trimmedName = newDuplicateName.trim();
+    if (!trimmedName) {
+      setNameError('Campaign name cannot be empty.');
+      return;
+    }
+    const nameExists = await checkNameExists(trimmedName);
+    if (nameExists) return;
+
+    setIsDuplicating(true);
+    try {
+      const response = await fetch(`/api/campaigns/${campaignToDuplicate.id}/duplicate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ newName: trimmedName }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.message || `Failed to duplicate campaign: ${response.status}`);
+      }
+      showSuccessToast('Campaign duplicated successfully!');
+      setIsDuplicateDialogOpen(false); // Close dialog
+      refetchCampaigns(); // Refresh list
+    } catch (error) {
+      logger.error('Error duplicating campaign:', error);
+      showErrorToast(error instanceof Error ? error.message : 'Failed to duplicate campaign');
+    } finally {
+      setIsDuplicating(false);
+      setCampaignToDuplicate(null); // Clear target
+    }
+  };
+  // --- End Restore Local Duplicate Logic ---
 
   // Render loading state
   if (isLoadingData && !campaigns.length) {
@@ -983,7 +1067,7 @@ const ClientCampaignList: React.FC = () => {
             <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete{' '}
-              <span className="font-medium">{campaignToAction?.name}</span>? This action cannot be
+              <span className="font-medium">{campaignToDelete?.name}</span>? This action cannot be
               undone.
             </DialogDescription>
           </DialogHeader>
@@ -1002,31 +1086,60 @@ const ClientCampaignList: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showDuplicateModal} onOpenChange={setShowDuplicateModal}>
+      <Dialog open={isDuplicateDialogOpen} onOpenChange={setIsDuplicateDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Duplicate Campaign</DialogTitle>
-            <DialogDescription>Please name the duplicate campaign:</DialogDescription>
+            <DialogDescription>
+              Enter a new name for the duplicated campaign (originally "{campaignToDuplicate?.name}
+              ").
+            </DialogDescription>
           </DialogHeader>
-          <div className="py-4">
+          <div className="py-4 space-y-2">
+            <Label htmlFor="duplicate-name">New Campaign Name</Label>
             <Input
-              id="duplicateName"
-              value={duplicateName}
-              onChange={e => setDuplicateName(e.target.value)}
-              placeholder="Enter campaign name"
-              className="border-divider"
+              id="duplicate-name"
+              value={newDuplicateName}
+              onChange={e => {
+                setNewDuplicateName(e.target.value);
+                if (nameError) setNameError(null);
+              }}
+              placeholder="Enter new campaign name"
+              className={nameError ? 'border-destructive' : ''}
             />
+            {isCheckingName && <p className="text-xs text-muted-foreground">Checking name...</p>}
+            {nameError && <p className="text-xs text-destructive">{nameError}</p>}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDuplicateModal(false)}>
-              Cancel
-            </Button>
+            <DialogClose asChild>
+              <Button
+                variant="outline"
+                onClick={() => setIsDuplicateDialogOpen(false)}
+                disabled={isDuplicating}
+              >
+                Cancel
+              </Button>
+            </DialogClose>
             <Button
-              onClick={duplicateCampaign}
-              disabled={!duplicateName.trim() || isLoadingData}
-              className="bg-interactive hover:bg-interactive/90 text-white"
+              onClick={handleDuplicateConfirm}
+              disabled={
+                !isLoaded ||
+                !user ||
+                isDuplicating ||
+                isCheckingName ||
+                !newDuplicateName.trim() ||
+                !!nameError
+              }
+              className="bg-accent text-primary-foreground hover:bg-accent/90 hover:text-foreground"
             >
-              {isLoadingData ? 'Duplicating...' : 'Duplicate'}
+              {isDuplicating ? (
+                <>
+                  <Icon iconId="faCircleNotchLight" className="animate-spin mr-2 h-4 w-4" />{' '}
+                  Duplicating...
+                </>
+              ) : (
+                'Duplicate Campaign'
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
