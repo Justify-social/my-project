@@ -1,21 +1,14 @@
 # Feature-Specific Developer Guides
 
-**Last Reviewed:** 2025-05-09
+**Last Reviewed:** 2025-05-08
 **Status:** Placeholder
 
-This section provides links to detailed developer guides focused on working with specific, complex features within the Justify platform. These guides complement the architectural documentation by providing practical "how-to" information for common development tasks related to these features.
+This directory contains detailed guides for developers working on specific, complex features within the Justify platform.
 
-## Index
+These guides go beyond the architectural overviews found in `/docs/architecture/features/` and focus on the practical aspects of development, customization, and troubleshooting for individual features.
 
-_(Action: Feature Leads/Developers to add links to specific guides as they are created.)_
+_(Action: Feature Leads/Developers to populate this section with relevant guides as complex features are developed or modified. Examples might include: `campaign-wizard-custom-steps.md`, `brand-lift-kpi-calculation.md`, `influencer-discovery-algorithm.md`.)_
 
-- **Example:** `[Developing Campaign Wizard Custom Steps](./campaign-wizard-customization.md)` - _(Placeholder)_
-- **Example:** `[Adding New KPIs to Brand Lift](./brand-lift-kpi-addition.md)` - _(Placeholder)_
-- **Example:** `[Integrating New Data Sources for Influencer Discovery](./influencer-discovery-data-sources.md)` - _(Placeholder)_
+## Available Guides
 
-These guides should cover topics such as:
-
-- Common customization patterns.
-- Extending feature functionality.
-- Understanding feature-specific data flows for development.
-- Debugging tips unique to the feature.
+- _(Link to feature guides as they are created here)_

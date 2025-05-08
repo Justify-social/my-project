@@ -1,17 +1,31 @@
-# Commit Message Guidelines (Conventional Commits)
+# Commit Message Standards
 
-**Last Reviewed:** 2025-05-09
+**Last Reviewed:** 2025-05-08
 **Status:** Active
 
-## Overview
+## 1. Overview
 
-This document defines the standard format for Git commit messages in the Justify project. We adhere strictly to the **Conventional Commits specification (v1.0.0)**. This practice is mandatory as it enables automated changelog generation, helps track features/fixes/breaking changes clearly, and improves the overall readability and navigability of the project history.
+This project adheres to the **Conventional Commits 1.0.0** specification for all Git commit messages. Following this standard is mandatory for all contributors.
 
-Reference: [https://www.conventionalcommits.org/](https://www.conventionalcommits.org/)
+## 2. Why Conventional Commits?
 
-## Format
+Using Conventional Commits provides several key benefits:
 
-The commit message must follow this structure:
+- **Automated Changelog Generation:** Allows for the automatic generation of human-readable CHANGELOG files.
+- **Semantic Versioning:** Enables automatic determination of semantic version bumps (PATCH, MINOR, MAJOR) based on commit types.
+- **Clear Communication:** Provides a clear and structured commit history, making it easier for teammates, reviewers, and future developers to understand the nature of changes.
+- **Tooling Integration:** Facilitates integration with CI/CD pipelines for automated builds, testing, and deployments based on commit types.
+- **Improved Contribution:** Makes the contribution process more straightforward by providing a clear format for commit messages.
+
+## 3. Specification
+
+This project follows the **Conventional Commits specification version 1.0.0**. The full specification can be found here:
+
+[**Conventional Commits 1.0.0 Specification**](https://www.conventionalcommits.org/en/v1.0.0/)
+
+## 4. Basic Structure
+
+The commit message structure is as follows:
 
 ```
 <type>[optional scope]: <description>
@@ -21,85 +35,82 @@ The commit message must follow this structure:
 [optional footer(s)]
 ```
 
-### 1. Header
+- **`<type>`:** Indicates the nature of the change (see Section 5).
+- **`[optional scope]`:** A noun describing the section of the codebase affected (e.g., `api`, `ui`, `billing`, `docs`). Enclosed in parentheses.
+- **`<description>`:** A short, imperative summary of the change (e.g., "add user login endpoint", "fix campaign budget validation"). Use lowercase.
+- **`[optional body]`:** Provides additional context, motivation, or details about the change. Starts one blank line after the description.
+- **`[optional footer(s)]`:** Contains metadata like related issue numbers (`Refs: #123`), reviewers, or breaking change notices (`BREAKING CHANGE:`).
 
-The header is mandatory and consists of `type`, optional `scope`, and `description`.
+## 5. Common Types
 
-- **`<type>`:** Describes the kind of change introduced by the commit. Must be one of the allowed types listed below.
-- **`[optional scope]`:** A noun describing the section of the codebase affected by the change, enclosed in parentheses. Examples: `api`, `ui`, `auth`, `deps`, `config`, `wizard`, `brand-lift`.
-- **`<description>`:** A concise, imperative, lower-case description of the change, starting with a verb. It should not end with a period.
+The following types are commonly used in this project:
 
-  - _Bad:_ ~~Fixed bug with login redirect.~~
-  - _Good:_ `fix(auth): correct login redirect on successful sign-in`
-
-The entire header line must not exceed 100 characters.
-
-### 2. Body (Optional)
-
-- Provides additional context about the code changes.
-- Use imperative, present tense ("change" not "changed" nor "changes").
-- Explain the _why_ behind the change, not just the _what_.
-- Must be separated from the header by one blank line.
-
-### 3. Footer(s) (Optional)
-
-- Contains metadata about the commit.
-- Must be separated from the body (or header, if no body) by one blank line.
-- **Breaking Changes:** Use `BREAKING CHANGE:` followed by a description of the breaking change. A `!` can also be added after the type/scope in the header (e.g., `feat(api)!:`) to draw attention to breaking changes.
-- **Issue References:** Link to related issues using keywords like `Closes #123`, `Fixes #456`, `Refs #789`.
-
-## Allowed Types
-
-- **`feat`**: A new feature for the end-user.
-- **`fix`**: A bug fix for the end-user.
+- **`feat`**: Introduces a new feature to the codebase (correlates with MINOR in SemVer).
+- **`fix`**: Patches a bug in the codebase (correlates with PATCH in SemVer).
+- **`build`**: Changes that affect the build system or external dependencies (e.g., gulp, broccoli, npm).
+- **`chore`**: Other changes that don't modify `src` or `test` files (e.g., updating dependencies, managing config files).
+- **`ci`**: Changes to our CI configuration files and scripts (e.g., GitHub Actions).
 - **`docs`**: Documentation only changes.
-- **`style`**: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc). **Must not** be used if code logic changes.
-- **`refactor`**: A code change that neither fixes a bug nor adds a feature (e.g., renaming variables, improving code structure).
+- **`style`**: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc).
+- **`refactor`**: A code change that neither fixes a bug nor adds a feature.
 - **`perf`**: A code change that improves performance.
-- **`test`**: Adding missing tests or correcting existing tests. **Must not** be used if source code (`src/`) is also changed (use `feat` or `fix` instead).
-- **`build`**: Changes that affect the build system or external dependencies (example scopes: `deps`, `ci`, `vercel`, `docker`).
-- **`ci`**: Changes to our CI configuration files and scripts (example scopes: `github-actions`, `cypress`).
-- **`chore`**: Other changes that don't modify `src` or `test` files (e.g., updating dependencies, housekeeping tasks).
+- **`test`**: Adding missing tests or correcting existing tests.
 - **`revert`**: Reverts a previous commit.
 
-## Examples
+_Note: Only `feat` and `fix` directly impact semantic versioning unless a BREAKING CHANGE is included._
 
-**Simple Fix:**
+## 6. Breaking Changes
 
-```
-fix(ui): resolve button overflow on small screens
-```
+Breaking changes (changes that alter the API or behavior in a non-backward-compatible way) MUST be clearly indicated:
 
-**New Feature with Scope:**
+1.  **Footer:** Add a footer starting with `BREAKING CHANGE:` followed by a description of the breaking change.
+    ```
+    BREAKING CHANGE: User ID is now required for campaign creation API.
+    ```
+2.  **`!` Indicator:** Append a `!` immediately before the `:` in the type/scope prefix.
+    ```
+    feat(api)!: require user ID for campaign creation
+    ```
+    (The commit body/description should still explain the breaking change if using `!`).
 
-```
-feat(wizard): add support for secondary contact details
+A commit with a breaking change (regardless of type) correlates with a MAJOR version bump in SemVer.
 
-Allows users to optionally provide a secondary contact person during campaign creation in Step 1.
+## 7. Examples
 
-Closes #234
-```
+```git
+feat(billing): add stripe checkout integration
 
-**Refactor with Breaking Change:**
+Implements the necessary API endpoints and frontend components
+to integrate Stripe Checkout for subscription management.
 
-```
-refactor(auth)!: replace legacy auth context with Clerk hooks
-
-Removes the custom AuthStateProvider and updates all components
-to use useAuth() and useUser() from @clerk/nextjs for authentication state.
-
-BREAKING CHANGE: Components previously consuming AuthStateContext must be updated to use Clerk hooks directly.
-```
-
-**Chore (Dependency Update):**
-
-```
-chore(deps): update react and nextjs to latest versions
+Refs: #456
 ```
 
-## Enforcement
+```git
+fix(ui): correct alignment issue in settings modal
 
-- Commit messages will be linted (e.g., using `commitlint`) as part of CI checks or pre-commit hooks.
-- Pull Requests with non-compliant commit messages (after squashing) may be rejected.
+Resolved a CSS flexbox issue causing button misalignment on smaller screens.
+```
 
-Adhering to these guidelines ensures a clean, informative, and useful Git history.
+```git
+chore: update eslint dependency to latest version
+```
+
+```git
+docs(api): clarify rate limiting behavior for /users endpoint
+```
+
+```git
+refactor(auth)!: migrate user session management from cookies to JWT
+
+BREAKING CHANGE: Authentication tokens are now JWTs instead of opaque session cookies.
+Frontend clients must update token handling logic.
+```
+
+## 8. Tooling & Enforcement
+
+Commit message format may be enforced automatically via pre-commit hooks (e.g., using `husky` and `commitlint`). Ensure your commits adhere to this standard to avoid commit failures.
+
+---
+
+Please refer to the full [Conventional Commits 1.0.0 Specification](https://www.conventionalcommits.org/en/v1.0.0/) for complete details.

@@ -1,100 +1,197 @@
 # Local Testing Guide
 
-**Last Reviewed:** 2025-05-09
-**Status:** Placeholder - Needs Content
+**Last Reviewed:** 2025-05-08
+**Status:** Active
 
-## Overview
+## 1. Overview
 
-This guide explains how to run various types of automated tests locally and provides guidance on writing effective tests for the Justify platform.
+This guide explains how to run and write various types of automated tests locally for the Justify platform. Consistent local testing before committing code is crucial for maintaining code quality, preventing regressions, and ensuring features work as expected.
 
-Refer to the **[Testing Strategy](../../standards/testing-strategy.md)** document for the overall approach, philosophy, and goals of our testing efforts.
+Refer to the **[Testing Strategy](../standards/testing-strategy.md)** document for the overall approach and philosophy regarding different test types.
 
-_(Action: Tech Lead/QA Lead to populate this guide with specific commands, examples, and best practices.)_
+## 2. Testing Stack
 
-## Running Tests Locally
+We utilize the following primary tools for testing:
 
-### 1. Running All Tests
+- **Test Runner & Framework:** [Jest](https://jestjs.io/) - Used for running unit and integration tests.
+- **React Component Testing:** [React Testing Library (RTL)](https://testing-library.com/docs/react-testing-library/intro/) - Used for querying and interacting with React components in a user-centric way.
+- **DOM Assertions:** `@testing-library/jest-dom` - Provides custom Jest matchers for asserting on DOM state.
+- **User Interactions:** `@testing-library/user-event` - Simulates real user interactions more realistically than basic DOM events.
+- **End-to-End (E2E) Testing:** [Cypress](https://www.cypress.io/) - Used for testing complete user flows through the application in a real browser.
 
-- **Command:**
+## 3. Running Tests Locally
+
+Use the following npm scripts defined in `package.json` to run tests:
+
+- **Run All Unit & Integration Tests:**
+
   ```bash
   npm test
   ```
-- **Description:** This command typically executes the primary test suite, which usually includes unit and integration tests run via Jest.
 
-### 2. Running Specific Test Suites
+  (This runs `test:unit` and `test:integration` in parallel using `npm-run-all`)
 
-- **Unit Tests:**
+- **Run Unit Tests Only:**
+
   ```bash
   npm run test:unit
-  # or potentially: npm test -- --testPathPattern=src/lib
   ```
-  _(Verify exact command/pattern)_ Focuses on testing isolated functions and components.
-- **Integration Tests:**
+
+  (Targets files matching the `tests/unit` path pattern)
+
+- **Run Integration Tests Only:**
+
   ```bash
   npm run test:integration
-  # or potentially: npm test -- --testPathPattern=src/components/features
   ```
-  _(Verify exact command/pattern)_ Tests the interaction between multiple components or modules within a feature.
-- **End-to-End (E2E) Tests (e.g., Cypress):**
+
+  (Targets files matching the `tests/integration` path pattern)
+
+- **Run Tests within `src` Directory:**
 
   ```bash
-  # To run headlessly:
+  npm run test:local
+  ```
+
+  (Useful for running tests co-located with source code during development)
+
+- **Run Tests in Watch Mode:**
+
+  ```bash
+  npm run test:watch
+  ```
+
+  (Runs Jest in watch mode, re-running tests automatically when files change)
+
+- **Run Tests with Coverage Report:**
+
+  ```bash
+  npm run test:coverage
+  ```
+
+  (Generates a test coverage report)
+
+- **Run E2E Tests (Headless):**
+
+  ```bash
   npm run test:e2e
-  # or: npx cypress run
-
-  # To open the Cypress GUI:
-  npm run cypress:open
-  # or: npx cypress open
+  # OR
+  npm run cypress
   ```
 
-  _(Verify exact commands)_ These tests simulate full user flows through the application and often require the development server (`npm run dev`) to be running separately.
+  (Runs all Cypress tests defined in `cypress/e2e/` in the terminal)
 
-### 3. Running Individual Test Files or Suites
-
-- **Jest/RTL:** You can usually target specific files or use test name patterns:
+- **Open Cypress Interactive Runner:**
   ```bash
-  npm test -- MyComponent.test.tsx
-  npm test -- -t "should render correctly"
+  npm run cypress:open
   ```
-  _(Consult Jest documentation for specific CLI options)_
-- **Cypress:** Use the Cypress GUI (`cypress:open`) to select and run specific spec files interactively.
+  (Opens the Cypress GUI for interactively running, viewing, and debugging E2E tests)
 
-## Writing Tests
+## 4. Writing Tests
 
-### 1. General Principles
+### 4.1. Unit Tests (`tests/unit/` or `*.test.ts` in `src`)
 
-- **Test Behavior, Not Implementation:** Focus tests on verifying the component or function behaves as expected from a user or consumer perspective.
-- **Arrange, Act, Assert (AAA):** Structure tests clearly with setup, action execution, and result verification steps.
-- **Independence:** Tests should be independent and not rely on the state or outcome of previous tests.
-- **Readability:** Write clear, descriptive test names (`it('should do X when Y happens')`).
+- **Focus:** Test individual functions, hooks, or simple components in isolation.
+- **Naming:** Use `*.test.ts` or `*.spec.ts` file extension.
+- **Structure (Arrange-Act-Assert):**
+  1.  **Arrange:** Set up necessary preconditions, mock data, and dependencies.
+  2.  **Act:** Execute the function or render the component being tested.
+  3.  **Assert:** Verify the outcome using Jest matchers (`expect(...)`).
+- **Mocking:** Use `jest.fn()`, `jest.spyOn()`, and `jest.mock()` to mock dependencies (functions, modules, API calls).
+- **Example (Utility Function):**
 
-### 2. Unit Testing (Jest & RTL)
+  ```typescript
+  // src/utils/calculations.test.ts
+  import { calculateTotal } from './calculations';
 
-- **Location:** Typically co-located with the source file (`MyComponent.test.tsx`) or in a `__tests__` subdirectory.
-- **Focus:** Test utility functions, custom hooks, and simple UI components in isolation.
-- **Tools:** Use React Testing Library (RTL) utilities (`render`, `screen`, `fireEvent`, `waitFor`) for component tests.
-- **Queries:** Prefer user-centric RTL queries (`getByRole`, `getByLabelText`, `getByText`). Avoid implementation-detail queries (`getByTestId`) unless necessary.
-- **Mocking:** Use Jest's mocking capabilities (`jest.fn()`, `jest.mock()`) to isolate the unit under test from its dependencies (e.g., API calls, other modules).
+  describe('calculateTotal', () => {
+    it('should return the sum of item prices', () => {
+      const items = [{ price: 10 }, { price: 20 }, { price: 5 }];
+      expect(calculateTotal(items)).toBe(35);
+    });
 
-### 3. Integration Testing (Jest & RTL)
+    it('should return 0 for an empty array', () => {
+      expect(calculateTotal([])).toBe(0);
+    });
+  });
+  ```
 
-- **Location:** Can be co-located or in a central `tests/integration` directory.
-- **Focus:** Test the interaction between several components within a feature (e.g., a form with multiple inputs and validation, a list with filtering/sorting).
-- **Mocking:** Mock external dependencies (APIs, external services) but allow components within the feature boundary to interact naturally.
+### 4.2. Integration Tests (`tests/integration/` or `*.test.ts` in `src`)
 
-### 4. End-to-End Testing (Cypress)
+- **Focus:** Test the interaction between multiple components, hooks, context providers, or modules.
+- **Tools:** Use React Testing Library (`render`, `screen`, `fireEvent`, `waitFor`) and `user-event`.
+- **Philosophy:** Test components from the user's perspective. Query elements by accessible roles, text, labels, etc. (`screen.getByRole`, `screen.getByText`). Avoid testing implementation details.
+- **Example (Form Component):**
 
-- **Location:** Typically in a root `/cypress` directory.
-- **Focus:** Simulate complete user workflows across multiple pages (e.g., login -> create campaign -> view campaign).
-- **Selectors:** Use stable selectors (like `data-cy` attributes) that are less likely to break with UI refactoring. Avoid relying heavily on CSS classes or text content.
-- **Assertions:** Verify key application states, UI visibility, and data persistence resulting from the workflow.
-- **Setup/Teardown:** Use `beforeEach` / `afterEach` hooks for setting up necessary preconditions (e.g., user login, database seeding via API) and cleaning up afterward.
+  ```typescript
+  // tests/integration/CampaignForm.test.tsx
+  import { render, screen } from '@testing-library/react';
+  import userEvent from '@testing-library/user-event';
+  import { CampaignForm } from '@/components/features/campaigns/CampaignForm';
+  // Mock necessary providers or API calls
 
-## Best Practices
+  describe('CampaignForm', () => {
+    it('should display validation error when submitting empty form', async () => {
+      render(<CampaignForm />);
+      const submitButton = screen.getByRole('button', { name: /submit/i });
 
-- **Test Coverage:** While aiming for high coverage is good, prioritize testing critical paths, complex logic, and areas prone to regression.
-- **Maintainability:** Write tests that are easy to understand and update as the codebase evolves.
-- **Speed:** Keep unit and integration tests fast. E2E tests are naturally slower.
-- **CI Integration:** Ensure tests are running reliably in the CI/CD pipeline.
+      await userEvent.click(submitButton);
 
-_(Action: Tech Lead/QA Lead to add specific examples, common patterns, and mocking strategies relevant to the Justify codebase.)_
+      // Expect validation errors to appear (adjust query as needed)
+      expect(await screen.findByText(/campaign name is required/i)).toBeInTheDocument();
+      expect(screen.getByText(/brand name is required/i)).toBeInTheDocument();
+    });
+
+    // Add more tests for filling form, successful submission, etc.
+  });
+  ```
+
+### 4.3. End-to-End (E2E) Tests (`cypress/e2e/`)
+
+- **Focus:** Simulate complete user journeys through the application in a browser.
+- **Tools:** Cypress (`cy` commands).
+- **Structure:** Organize tests by feature or user flow in `cypress/e2e/`.
+- **Selectors:** Prefer stable, user-facing selectors (`data-testid`, accessible roles, text) over brittle CSS selectors.
+- **Example (Login Flow):**
+
+  ```typescript
+  // cypress/e2e/auth/login.cy.ts
+  describe('Login Flow', () => {
+    it('should allow a user to log in and redirect to dashboard', () => {
+      cy.visit('/signin');
+
+      cy.get('input[name="email"]').type('test@example.com');
+      cy.get('input[name="password"]').type('correct-password');
+      cy.get('button[type="submit"]').click();
+
+      cy.url().should('include', '/dashboard');
+      cy.contains(/welcome back/i).should('be.visible');
+    });
+
+    // Add tests for invalid login, etc.
+  });
+  ```
+
+## 5. Debugging Tests
+
+- **Jest/RTL:**
+  - Use `console.log` within tests.
+  - Use `screen.debug()` to print the current DOM structure.
+  - Use the VS Code debugger with a Jest launch configuration.
+- **Cypress:**
+  - Use the Cypress interactive runner (`npm run cypress:open`) for time-travel debugging, DOM snapshots, and console output.
+  - Use `cy.log(...)` within tests.
+  - Use `.debug()` command on Cypress chains.
+
+## 6. Best Practices
+
+- **Write Clear Descriptions:** Use `describe` and `it` blocks with clear, descriptive names.
+- **Test Behavior, Not Implementation:** Focus on what the user experiences or what the code outputs, not how it does it internally.
+- **Keep Tests Independent:** Tests should not rely on the state or outcome of previous tests.
+- **Use Factories/Fixtures:** Create reusable functions or fixtures for generating test data.
+- **Mock Effectively:** Mock only what's necessary for the test in isolation.
+- **Aim for Readability:** Write tests that are easy to understand.
+
+---
+
+Regularly running and writing effective local tests is a key part of our development workflow.

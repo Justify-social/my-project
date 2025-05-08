@@ -1,13 +1,13 @@
 # Accessibility (a11y) Standards
 
-**Last Reviewed:** 2025-05-09
-**Status:** Draft (Needs Review & Expansion)
+**Last Reviewed:** 2025-05-08
+**Status:** Active
 
 ## 1. Overview
 
 This document outlines the accessibility standards and guidelines for the Justify platform. Our goal is to ensure the application is usable and understandable by everyone, including people with disabilities, by aiming for **WCAG 2.1 Level AA** compliance.
 
-_(Action: Accessibility Lead/Frontend Lead to review, expand, and formally adopt these standards.)_
+Building an accessible application is a continuous effort and a shared responsibility across the entire team.
 
 ## 2. Target Standard
 
@@ -35,7 +35,7 @@ Development must adhere to the four core principles of accessibility:
   - Visible focus indicators MUST be present and clear (Tailwind's `focus-visible:` utilities are preferred over generic `focus:`).
 - **Focus Management:**
   - For dynamic UI changes (modals, popovers, expanding sections), manage focus programmatically. When a modal opens, focus should move into it. When it closes, focus should return to the element that triggered it.
-  - Leverage Radix UI primitives (used by Shadcn) which often handle focus management internally.
+  - Leverage Primitives: **Strongly prefer** leveraging the built-in focus management capabilities of Radix UI primitives (used by Shadcn) over manual focus scripting whenever possible.
 - **Images (`next/image`):**
   - Provide descriptive `alt` text for all images conveying information.
   - Use `alt=""` for purely decorative images.
@@ -46,13 +46,12 @@ Development must adhere to the four core principles of accessibility:
   - Ensure validation errors are clearly communicated visually and programmatically.
   - Group related controls using `<fieldset>` and `<legend>` where appropriate.
 - **Color Contrast:**
-  - Ensure text and interactive elements have sufficient contrast against their background (WCAG AA: 4.5:1 for normal text, 3:1 for large text/UI components).
-  - Use browser developer tools or online contrast checkers to verify.
+  - Ensure text and interactive elements have sufficient contrast against their background (WCAG AA: 4.5:1 for normal text, 3:1 for large text/UI components). Refer to the project's **[Brand Colors](./../ui/globals.css)** (or relevant style guide) and verify combinations used.
+  - Use browser developer tools or online contrast checkers (e.g., WebAIM Contrast Checker) to verify contrast ratios.
   - Do not rely on color alone to convey information.
 - **ARIA Attributes:**
-  - Use ARIA (`role`, `aria-*` attributes) primarily when semantic HTML is insufficient (e.g., for complex custom components like tabs, accordions, custom menus).
-  - Leverage the ARIA implementations provided by Radix UI primitives within Shadcn components where possible.
-  - Avoid redundant or incorrect ARIA usage (e.g., adding `role="button"` to a `<button>` element).
+  - Use ARIA (`role`, `aria-*` attributes) **only** when semantic HTML is insufficient (e.g., for complex custom components like tabs, accordions, custom menus not based on accessible primitives).
+  - Leverage Primitives: **Strongly prefer** leveraging the ARIA implementations provided by Radix UI primitives within Shadcn components. Avoid overriding or duplicating ARIA attributes provided by these base components unless absolutely necessary and fully understood.
   - Use `aria-live` regions for announcing dynamic content changes (e.g., toast notifications, validation errors).
 - **Content & Structure:**
   - Use proper heading levels (`<h1>` to `<h6>`) to structure page content logically.
@@ -61,14 +60,20 @@ Development must adhere to the four core principles of accessibility:
 
 ## 5. Testing & Verification
 
-Accessibility testing should be integrated throughout the development process:
+Accessibility testing MUST be integrated throughout the development lifecycle:
 
-- **Automated Linting:** Use `eslint-plugin-jsx-a11y` (configured via ESLint config) to catch common issues during development.
-- **Automated Testing (CI/E2E):** Integrate automated accessibility checks (e.g., using `axe-core` with Jest/RTL or Cypress) into the CI pipeline to catch regressions.
-- **Manual Keyboard Testing:** Regularly navigate and interact with features using only the keyboard.
-- **Screen Reader Testing:** Perform periodic checks using major screen readers (NVDA on Windows, VoiceOver on macOS, TalkBack on Android).
-- **Browser Tools:** Use browser extensions like Axe DevTools, WAVE, or built-in accessibility inspectors.
-- **Checklists:** Utilize WCAG 2.1 AA checklists during development and QA.
+- **Developer Responsibility:** Individual developers are responsible for testing the accessibility of the components and features they build against these standards _before_ submitting pull requests.
+- **Automated Linting:** Utilize `eslint-plugin-jsx-a11y` (configured via `/config/eslint/eslint.config.mjs`) to catch common issues during development within the IDE.
+- **Automated Testing (CI/E2E):**
+  - _(Current State: Confirm if Axe is integrated)_ Recommendation: Integrate automated accessibility checks (e.g., using `axe-core` with Jest/RTL for unit/integration tests, or `cypress-axe` for E2E tests) into the CI pipeline to catch regressions.
+- **Manual Keyboard Testing:** Regularly navigate and interact with all features and components using only the keyboard (Tab, Shift+Tab, Enter, Space, Arrow Keys).
+- **Screen Reader Testing:** Perform periodic checks using major screen reader/browser combinations. Prioritize testing with:
+  - NVDA with Firefox (Windows)
+  - VoiceOver with Safari (macOS)
+  - (Checks with JAWS, TalkBack/Android, VoiceOver/iOS are also encouraged).
+- **Browser Tools:** Use browser extensions like Axe DevTools, WAVE, or built-in accessibility inspectors during development and QA.
+- **Zoom & High Contrast:** Test usability with browser zoom levels (up to 200%) and operating system high-contrast modes.
+- **Checklists:** Utilize WCAG 2.1 AA checklists during development and QA phases.
 
 ## 6. Resources
 
