@@ -77,7 +77,7 @@ async function verifyOptionAccess(optionId: string, clerkUserId: string) {
 }
 
 // PUT handler - Restoring context parameter
-export async function PUT(req: NextRequest, { params }: { params: { optionId: string } }) {
+export async function PUT(req: NextRequest, { params }: any) {
   try {
     const { userId: clerkUserId } = await auth(); // Changed
     if (!clerkUserId) throw new UnauthenticatedError('Authentication required.'); // Changed
@@ -129,7 +129,7 @@ export async function PUT(req: NextRequest, { params }: { params: { optionId: st
 }
 
 // DELETE handler - Restoring context parameter
-export async function DELETE(req: NextRequest, { params }: { params: { optionId: string } }) {
+export async function DELETE(req: NextRequest, { params }: any) {
   try {
     const { userId: clerkUserId } = await auth(); // Changed
     if (!clerkUserId) throw new UnauthenticatedError('Authentication required.'); // Changed

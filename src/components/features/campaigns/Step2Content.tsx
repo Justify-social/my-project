@@ -41,53 +41,61 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
+import { KPI as PrismaKPI, Feature as PrismaFeature } from '@prisma/client';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 // --- Constants for Display ---
 const kpis = [
   {
-    key: KPIEnum.Values.AD_RECALL,
+    key: PrismaKPI.AD_RECALL,
     title: 'Ad Recall',
     iconId: 'kpisAdRecall',
     description: 'The percentage of people who remember seeing your advertisement.',
     example: "After a week, 60% of viewers can recall your ad's main message.",
   },
   {
-    key: KPIEnum.Values.BRAND_AWARENESS,
+    key: PrismaKPI.BRAND_AWARENESS,
     title: 'Brand Awareness',
     iconId: 'kpisBrandAwareness',
     description: 'The increase in recognition of your brand.',
     example: 'Your brand name is recognised by 30% more people after the campaign.',
   },
   {
-    key: KPIEnum.Values.CONSIDERATION,
+    key: PrismaKPI.CONSIDERATION,
     title: 'Consideration',
     iconId: 'kpisConsideration',
     description: 'The percentage of people considering purchasing from your brand.',
     example: '25% of your audience considers buying your product after seeing your campaign.',
   },
   {
-    key: KPIEnum.Values.MESSAGE_ASSOCIATION,
+    key: PrismaKPI.MESSAGE_ASSOCIATION,
     title: 'Message Association',
     iconId: 'kpisMessageAssociation',
     description: 'How well people link your key messages to your brand.',
     example: 'When hearing your slogan, 70% of people associate it directly with your brand.',
   },
   {
-    key: KPIEnum.Values.BRAND_PREFERENCE,
+    key: PrismaKPI.BRAND_PREFERENCE,
     title: 'Brand Preference',
     iconId: 'kpisBrandPreference',
     description: "Preference for your brand over competitors'.",
     example: '40% of customers prefer your brand when choosing between similar products.',
   },
   {
-    key: KPIEnum.Values.PURCHASE_INTENT,
+    key: PrismaKPI.PURCHASE_INTENT,
     title: 'Purchase Intent',
     iconId: 'kpisPurchaseIntent',
     description: 'Likelihood of purchasing your product or service.',
     example: '50% of viewers intend to buy your product after seeing the ad.',
   },
   {
-    key: KPIEnum.Values.ACTION_INTENT,
+    key: PrismaKPI.ACTION_INTENT,
     title: 'Action Intent',
     iconId: 'kpisActionIntent',
     description:
@@ -95,14 +103,14 @@ const kpis = [
     example: '35% of people are motivated to visit your website after the campaign.',
   },
   {
-    key: KPIEnum.Values.RECOMMENDATION_INTENT,
+    key: PrismaKPI.RECOMMENDATION_INTENT,
     title: 'Recommendation Intent',
     iconId: 'kpisRecommendationIntent',
     description: 'Likelihood of recommending your brand to others.',
     example: '45% of customers are willing to recommend your brand to friends and family.',
   },
   {
-    key: KPIEnum.Values.ADVOCACY,
+    key: PrismaKPI.ADVOCACY,
     title: 'Advocacy',
     iconId: 'kpisAdvocacy',
     description: 'Willingness to actively promote your brand.',
@@ -113,18 +121,18 @@ const kpis = [
 
 const features = [
   {
-    key: FeatureEnum.Values.CREATIVE_ASSET_TESTING,
+    key: PrismaFeature.CREATIVE_ASSET_TESTING,
     title: 'Creative Asset Testing',
     icon: '/icons/app/appCreativeAssetTesting.svg',
   },
-  { key: FeatureEnum.Values.BRAND_LIFT, title: 'Brand Lift', icon: '/icons/app/appBrandLift.svg' },
+  { key: PrismaFeature.BRAND_LIFT, title: 'Brand Lift', icon: '/icons/app/appBrandLift.svg' },
   {
-    key: FeatureEnum.Values.BRAND_HEALTH,
+    key: PrismaFeature.BRAND_HEALTH,
     title: 'Brand Health',
     icon: '/icons/app/appBrandHealth.svg',
   },
   {
-    key: FeatureEnum.Values.MIXED_MEDIA_MODELING,
+    key: PrismaFeature.MIXED_MEDIA_MODELING,
     title: 'Mixed Media Modelling',
     icon: '/icons/app/appMmm.svg',
   },

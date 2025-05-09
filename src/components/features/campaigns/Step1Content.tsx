@@ -21,6 +21,7 @@ import {
   PositionEnum,
   BudgetSchema,
 } from '@/components/features/campaigns/types';
+import { Currency as PrismaCurrency, Position as PrismaPosition } from '@prisma/client';
 import { PlatformEnum } from '@/types/enums';
 import { WizardSkeleton } from '@/components/ui/loading-skeleton';
 import { Icon } from '@/components/ui/icon/icon';
@@ -198,14 +199,14 @@ async function preparePayload(
       firstName: data.primaryContact?.firstName || '',
       surname: data.primaryContact?.surname || '',
       email: data.primaryContact?.email || '',
-      position: data.primaryContact?.position || PositionEnum.Values.Director,
+      position: data.primaryContact?.position || PrismaPosition.Director,
     },
     secondaryContact: data.secondaryContact?.email
       ? {
           firstName: data.secondaryContact?.firstName || '',
           surname: data.secondaryContact?.surname || '',
           email: data.secondaryContact?.email || '',
-          position: data.secondaryContact?.position || PositionEnum.Values.Director,
+          position: data.secondaryContact?.position || PrismaPosition.Director,
         }
       : null,
     additionalContacts:
@@ -215,17 +216,17 @@ async function preparePayload(
           firstName: c.firstName || '',
           surname: c.surname || '',
           email: c.email || '',
-          position: c.position || PositionEnum.Values.Director,
+          position: c.position || PrismaPosition.Director,
         })) || [],
     budget: data.budget
       ? {
-          currency: data.budget.currency || CurrencyEnum.Values.USD,
+          currency: data.budget.currency || PrismaCurrency.USD,
           total: parseFloat(parseCurrencyInput(data.budget.total?.toString() || '0')) || 0,
           socialMedia:
             parseFloat(parseCurrencyInput(data.budget.socialMedia?.toString() || '0')) || 0,
         }
       : ({
-          currency: CurrencyEnum.Values.USD,
+          currency: PrismaCurrency.USD,
           total: 0,
           socialMedia: 0,
         } as z.infer<typeof BudgetSchema>),
@@ -324,7 +325,7 @@ function Step1Content() {
         firstName: '',
         surname: '',
         email: '',
-        position: PositionEnum.Values.Director,
+        position: PrismaPosition.Director,
       },
       additionalContacts: [],
       Influencer: [{ id: uuidv4(), platform: PlatformEnum.Instagram, handle: '' }],
@@ -363,7 +364,7 @@ function Step1Content() {
 
       const isExistingCampaign = !!wizardState.id;
       let timezoneToUse: string | null = null;
-      let currencyToUse: z.infer<typeof CurrencyEnum> | null = null;
+      let currencyToUse: PrismaCurrency | null = null;
 
       const savedTimezone = wizardState.timeZone;
       if (isExistingCampaign && savedTimezone) {
@@ -378,21 +379,26 @@ function Step1Content() {
         );
       }
 
-      const savedCurrency = wizardState.budget?.currency;
-      if (isExistingCampaign && savedCurrency && CurrencyEnum.safeParse(savedCurrency).success) {
-        currencyToUse = savedCurrency;
+      const savedWizardCurrency = wizardState.budget?.currency;
+      if (isExistingCampaign && savedWizardCurrency) {
+        currencyToUse = savedWizardCurrency;
         logger.info(
           `[Initial Value Calc Effect] Existing campaign: Using saved currency: ${currencyToUse}`
         );
-      } else {
-        currencyToUse = localization.currency;
+      } else if (!isExistingCampaign && localization.currency) {
+        currencyToUse = localization.currency as PrismaCurrency;
         logger.info(
-          `[Initial Value Calc Effect] ${isExistingCampaign ? 'Existing campaign (no saved currency)' : 'New campaign'}: Using localized currency: ${currencyToUse}`
+          `[Initial Value Calc Effect] New campaign: Using localized currency: ${currencyToUse}`
+        );
+      } else if (isExistingCampaign && !savedWizardCurrency && localization.currency) {
+        currencyToUse = localization.currency as PrismaCurrency;
+        logger.info(
+          `[Initial Value Calc Effect] Existing campaign (no saved currency): Using localized currency: ${currencyToUse}`
         );
       }
 
       const finalTimezone = timezoneToUse || 'UTC';
-      const finalCurrency = currencyToUse || CurrencyEnum.Values.USD;
+      const finalCurrency = currencyToUse || PrismaCurrency.USD;
 
       logger.info('[Initial Value Calc Effect] Determined final initial values:', {
         finalTimezone,
@@ -411,7 +417,7 @@ function Step1Content() {
           firstName: '',
           surname: '',
           email: '',
-          position: PositionEnum.Values.Director,
+          position: PrismaPosition.Director,
         },
         secondaryContact: wizardState.secondaryContact ?? null,
         additionalContacts: wizardState.additionalContacts ?? [],
@@ -653,7 +659,7 @@ function Step1Content() {
   ]);
   const totalBudgetRaw = parseFloat(parseCurrencyInput(String(watchedTotal || '0')));
   const socialMediaBudgetRaw = parseFloat(parseCurrencyInput(String(watchedSocial || '0')));
-  const selectedCurrencyForConversion = watchedCurrency || CurrencyEnum.Values.USD;
+  const selectedCurrencyForConversion = watchedCurrency || PrismaCurrency.USD;
 
   useEffect(() => {
     let isMounted = true;
@@ -985,7 +991,7 @@ function Step1Content() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {PositionEnum.options.map(option => (
+                            {Object.values(PrismaPosition).map(option => (
                               <SelectItem key={option} value={option}>
                                 {option}
                               </SelectItem>
@@ -1056,7 +1062,7 @@ function Step1Content() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {PositionEnum.options.map(option => (
+                            {Object.values(PrismaPosition).map(option => (
                               <SelectItem key={option} value={option}>
                                 {option}
                               </SelectItem>
@@ -1085,14 +1091,14 @@ function Step1Content() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Currency *</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value || ''}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select currency..." />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {CurrencyEnum.options.map(option => (
+                          {Object.values(PrismaCurrency).map(option => (
                             <SelectItem key={option} value={option}>
                               {option}
                             </SelectItem>

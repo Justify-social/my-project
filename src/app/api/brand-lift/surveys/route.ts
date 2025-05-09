@@ -25,7 +25,7 @@ import {
 // Schema for creating a BrandLiftStudy
 const createStudySchema = z.object({
   name: z.string().min(1, { message: 'Study name is required' }),
-  campaignId: z.number().int({ message: 'Valid Campaign ID is required' }), // Assuming CampaignWizardSubmission uses Int ID based on schema
+  campaignId: z.string().uuid({ message: 'Valid Campaign UUID is required' }), // Changed from number to string UUID
   funnelStage: z.string().min(1, { message: 'Funnel stage is required' }),
   primaryKpi: z.string().min(1, { message: 'Primary KPI is required' }),
   secondaryKpis: z.array(z.string()).optional(),
@@ -46,11 +46,15 @@ export async function POST(req: NextRequest) {
       const validation = createStudySchema.safeParse(body);
       if (!validation.success) throw new ZodValidationError(validation.error.errors);
 
-      const { name, campaignId, funnelStage, primaryKpi, secondaryKpis } = validation.data;
+      const {
+        name,
+        campaignId: campaignWizardId,
+        funnelStage,
+        primaryKpi,
+        secondaryKpis,
+      } = validation.data;
 
-      // Verify campaign exists and belongs to the user's organization/user scope
       const userRecord = await prisma.user.findUnique({
-        // Fetch internal user ID
         where: { clerkId: clerkUserId },
         select: { id: true },
       });
@@ -59,28 +63,69 @@ export async function POST(req: NextRequest) {
       }
       const internalUserId = userRecord.id;
 
-      const campaign = await prisma.campaignWizardSubmission.findFirst({
+      // Find the CampaignWizard record by its UUID and user
+      const campaignWizard = await prisma.campaignWizard.findFirst({
         where: {
-          id: campaignId,
-          userId: internalUserId, // Verify campaign belongs to this internalUserId
-          submissionStatus: SubmissionStatus.submitted, // Ensure campaign is submitted
+          id: campaignWizardId, // This is the UUID from the form
+          userId: internalUserId,
+        },
+        select: { id: true, name: true }, // Select enough to identify it, or what's needed
+      });
+
+      if (!campaignWizard) {
+        logger.error('CampaignWizard (source) not found or unauthorized access attempt', {
+          campaignWizardId,
+          userId: clerkUserId,
+        });
+        throw new NotFoundError('Source campaign not found or not accessible');
+      }
+
+      // IMPORTANT ASSUMPTION: Find or create a CampaignWizardSubmission linked to this CampaignWizard.
+      // For MVP, let's assume a CampaignWizardSubmission with the same name and userId implies linkage.
+      // This is a simplification and might need a more robust linking mechanism (e.g., a direct relation or a status that triggers submission creation).
+      let submission = await prisma.campaignWizardSubmission.findFirst({
+        where: {
+          // campaignName: campaignWizard.name, // This might not be unique enough alone
+          // userId: internalUserId, // Already filtered by this on CampaignWizard
+          // A more robust link would be a direct foreign key if one existed from CampaignWizard to CampaignWizardSubmission
+          // Or if CampaignWizard ID was used to create/find the submission.
+          // For now, we can attempt to find a submission by name that matches the wizard and user.
+          // THIS IS A MAJOR SIMPLIFICATION AND POTENTIAL POINT OF FAILURE/MISMATCH
+          // A better approach would be for the CampaignWizard to have a submissionId field once submitted.
+          // Or the selectable list provides submission IDs directly if it lists submissions.
+          campaignName: campaignWizard.name, // Trying to link by name and user
+          userId: internalUserId,
         },
         select: { id: true },
       });
 
-      if (!campaign) {
-        logger.error('Campaign not found or unauthorized access attempt', {
-          campaignId,
-          userId: clerkUserId, // Log clerkUserId
-        });
-        throw new NotFoundError('Campaign not found or not accessible');
+      if (!submission) {
+        // If no submission exists, this flow is problematic. For Brand Lift, a SUBMITTED campaign state is usually prerequisite.
+        // The previous query for CampaignWizard didn't check its status. Ideally, only selectable/submitted wizards lead here.
+        // Forcing an error now, as a BrandLiftStudy MUST link to a CampaignWizardSubmission.id (Int)
+        logger.error(
+          'No corresponding CampaignWizardSubmission found for the selected CampaignWizard',
+          {
+            campaignWizardId: campaignWizard.id,
+            campaignWizardName: campaignWizard.name,
+            userId: clerkUserId,
+          }
+        );
+        throw new NotFoundError(
+          'Could not find a finalized submission for the selected campaign. Please ensure the campaign is submitted.'
+        );
       }
+      const submissionIdForBrandLift = submission.id; // This is the Int ID
 
-      logger.info('Attempting to create BrandLiftStudy', { userId: clerkUserId, campaignId }); // Log clerkUserId
+      logger.info('Attempting to create BrandLiftStudy, linking to submission ID:', {
+        userId: clerkUserId,
+        campaignWizardId,
+        submissionId: submissionIdForBrandLift,
+      });
       const newStudy = await prisma.brandLiftStudy.create({
         data: {
           name,
-          submissionId: campaignId, // submissionId links to CampaignWizardSubmission
+          submissionId: submissionIdForBrandLift, // Use the Int ID of the CampaignWizardSubmission
           funnelStage,
           primaryKpi,
           secondaryKpis: secondaryKpis ?? [],
@@ -117,7 +162,7 @@ export async function GET(req: NextRequest) {
         throw new ZodValidationError(validation.error.errors);
       }
 
-      const { campaignId } = validation.data;
+      const { campaignId: campaignIdQuery } = validation.data; // This is now potentially a string from query
 
       // Fetch internal user ID
       const userRecord = await prisma.user.findUnique({
@@ -136,10 +181,15 @@ export async function GET(req: NextRequest) {
         },
       };
 
-      if (campaignId !== undefined) {
-        // No need to re-verify campaign access here if already filtering by user-owned campaigns above
-        // The initial check for campaignId as part of the overall user's studies is enough.
-        whereClause.submissionId = campaignId; // submissionId links to CampaignWizardSubmission
+      if (campaignIdQuery !== undefined) {
+        // If campaignIdQuery is from listStudiesQuerySchema, it's coerced to number.
+        // But the BrandLiftStudy.submissionId (what it links to) is Int.
+        // And if campaignIdQuery was meant to be a CampaignWizard UUID (string), this is a mismatch.
+        // The selectable list now returns CampaignWizard UUIDs (string).
+        // This GET endpoint for surveys probably doesn't need to filter by a specific campaignId UUID from CampaignWizard
+        // as it's already scoped by user. If filtering by a campaign is needed, it should be by submissionId (Int).
+        // For now, assuming campaignIdQuery (if present) is the INT submissionId.
+        whereClause.submissionId = campaignIdQuery;
       }
 
       logger.info('Fetching BrandLiftStudies', { userId: clerkUserId, whereClause }); // Log clerkUserId

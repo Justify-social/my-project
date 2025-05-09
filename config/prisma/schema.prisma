@@ -51,6 +51,9 @@ model CampaignWizard {
   Influencer       Influencer[]
   WizardHistory    WizardHistory[]
 
+  submissionId     Int?            @unique // Foreign key to CampaignWizardSubmission
+  submission       CampaignWizardSubmission? @relation("WizardToSubmission", fields: [submissionId], references: [id])
+
   @@index([status, createdAt])
 }
 
@@ -87,12 +90,12 @@ model CampaignWizardSubmission {
   startDate            DateTime
   endDate              DateTime
   timeZone             String
-  contacts             String
+  contacts             String // This field seems to hold stringified contact info; might need re-evaluation if primary/secondary are separate.
   currency             Currency
   totalBudget          Float
   socialMediaBudget    Float
-  platform             Platform
-  influencerHandle     String
+  platform             Platform // This seems to imply a single platform for the whole submission?
+  influencerHandle     String // Single influencer handle for the submission?
   primaryContactId     Int                   @unique
   secondaryContactId   Int?                  @unique
   mainMessage          String                @db.VarChar(3000)
@@ -115,6 +118,8 @@ model CampaignWizardSubmission {
   creativeAssets       CreativeAsset[]
   creativeRequirements CreativeRequirement[]
   brandLiftStudies     BrandLiftStudy[]
+
+  wizard               CampaignWizard?       @relation("WizardToSubmission") // Back-relation
 }
 
 model PrimaryContact {
@@ -314,11 +319,11 @@ enum Feature {
 
 enum Status {
   DRAFT
-  REVIEW
   APPROVED
   ACTIVE
   COMPLETED
   PAUSED
+  SUBMITTED_FINAL
 }
 
 enum Currency {

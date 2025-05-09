@@ -296,7 +296,7 @@ const CampaignPostApiSchema = z
   // Re-apply refinements needed for API validation (budget, dates)
   .refine(
     data => {
-      if (data.budget?.socialMedia !== undefined && data.budget?.total !== undefined) {
+      if (data.budget?.socialMedia != null && data.budget?.total != null) {
         return data.budget.socialMedia <= data.budget.total;
       }
       return true;
@@ -555,7 +555,7 @@ export const POST = async (request: NextRequest) => {
     };
     logger.info('Campaign POST: Data prepared for DB create', { dbData });
 
-    const campaign = await prisma.$transaction(async tx => {
+    const campaign = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const newCampaign = await tx.campaignWizard.create({
         data: dbData as Prisma.CampaignWizardCreateInput,
       });
@@ -679,7 +679,11 @@ export const PATCH = async (request: NextRequest) => {
     }
 
     const { id, ...updateData } = data;
-    // TODO: Check if updateData is empty after extracting id?
+
+    // Addressing: // TODO: Check if updateData is empty after extracting id?
+    if (Object.keys(updateData).length === 0) {
+      throw new BadRequestError('No update fields provided.');
+    }
 
     logger.info('Campaign PATCH: Updating campaign', { userId, orgId, campaignId: id, updateData });
 
@@ -710,10 +714,8 @@ export const PATCH = async (request: NextRequest) => {
           wizardId: campaign.id,
           step: updateData.step ?? existingCampaign.currentStep ?? 1,
           timestamp: new Date(),
-          action: 'UPDATE',
-          changes: {
-            /* Diffing logic would go here */
-          },
+          action: 'UPDATE', // General update via this PATCH route
+          changes: updateData, // Log the fields that were attempted to be updated
           performedBy: userId,
         },
       });

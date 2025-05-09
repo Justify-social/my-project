@@ -10,14 +10,14 @@ import { Icon } from '@/components/ui/icon/icon';
 
 const CampaignReviewSetupPage: React.FC = () => {
   const params = useParams();
-  // params can be null or { campaignId: string | string[] } initially
   const campaignIdParam = params?.campaignId;
-  const campaignId = typeof campaignIdParam === 'string' ? parseInt(campaignIdParam, 10) : null;
+  // campaignId is now directly the string from the route, or null if not a string
+  const campaignId = typeof campaignIdParam === 'string' ? campaignIdParam : null;
 
   // Basic validation for campaignId
-  if (campaignId === null || isNaN(campaignId)) {
-    logger.error('Invalid campaign ID in route parameter', { param: campaignIdParam });
-    // Render an error state or redirect
+  if (!campaignId) {
+    // Simplified check: if campaignId is null/undefined/empty string
+    logger.error('Invalid or missing campaign ID in route parameter', { param: campaignIdParam });
     return (
       <>
         <h1 className="text-2xl font-bold mb-6 text-destructive">Error</h1>
@@ -30,8 +30,7 @@ const CampaignReviewSetupPage: React.FC = () => {
 
   return (
     <>
-      {/* Pass validated numeric campaignId to the main component */}
-      {/* Add a Suspense boundary or loading check if CampaignReviewStudySetup fetches data internally */}
+      {/* Pass validated string campaignId to the main component */}
       <CampaignReviewStudySetup campaignId={campaignId} />
     </>
   );

@@ -8,8 +8,8 @@ import logger from '@/lib/logger';
 const CampaignSelectionPage: React.FC = () => {
   const router = useRouter();
 
-  const handleCampaignSelected = (campaignId: number | null) => {
-    if (typeof campaignId === 'number' && !isNaN(campaignId)) {
+  const handleCampaignSelected = (campaignId: string | null) => {
+    if (campaignId) {
       logger.info(`Campaign selected, navigating to review/setup for campaign ID: ${campaignId}`);
       router.push(`/brand-lift/campaign-review-setup/${campaignId}`);
     } else {

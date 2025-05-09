@@ -4,7 +4,8 @@ import React, { useState, useEffect, createContext, useMemo, ReactNode, useCallb
 import { z } from 'zod';
 import { LocalizationContextType, DetectionSource } from './LocalizationProvider.types';
 // Assuming these paths are correct
-import { CurrencyEnum } from '@/components/features/campaigns/types';
+// import { CurrencyEnum } from '@/components/features/campaigns/types'; // No longer need the Zod schema here for values
+import { Currency as PrismaCurrency } from '@prisma/client'; // Import the Prisma enum directly
 import timezonesData from '@/lib/timezones.json';
 import { logger } from '@/lib/logger';
 
@@ -15,23 +16,30 @@ export const LocalizationContext = createContext<LocalizationContextType | undef
 export const LocalizationProvider = ({ children }: { children: ReactNode }) => {
   const [timezone, setTimezone] = useState<string | null>(null);
   const [countryCode, setCountryCode] = useState<string | null>(null);
-  const [currency, setCurrency] = useState<z.infer<typeof CurrencyEnum> | null>(null);
+  // const [currency, setCurrency] = useState<z.infer<typeof CurrencyEnum> | null>(null); // Old type
+  const [currency, setCurrency] = useState<PrismaCurrency | null>(null); // New type using Prisma enum directly
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
   const [detectionSource, setDetectionSource] = useState<DetectionSource>('none');
 
   // --- Helper function to determine currency from country code ---
   const determineCurrencyForCountry = useCallback(
-    (code: string | null): z.infer<typeof CurrencyEnum> => {
-      if (!code) return CurrencyEnum.Values.USD; // Default if no code
+    // (code: string | null): z.infer<typeof CurrencyEnum> => { // Old type
+    (code: string | null): PrismaCurrency => {
+      // New type
+      // if (!code) return CurrencyEnum.Values.USD; // Old access
+      if (!code) return PrismaCurrency.USD; // New access
       // Define mappings
       const euCountryCodes = ['DE', 'FR', 'ES', 'IT']; // Add more as needed
       if (code === 'GB') {
-        return CurrencyEnum.Values.GBP;
+        // return CurrencyEnum.Values.GBP; // Old access
+        return PrismaCurrency.GBP; // New access
       } else if (euCountryCodes.includes(code)) {
-        return CurrencyEnum.Values.EUR;
+        // return CurrencyEnum.Values.EUR; // Old access
+        return PrismaCurrency.EUR; // New access
       } else {
-        return CurrencyEnum.Values.USD; // Default for others
+        // return CurrencyEnum.Values.USD; // Old access
+        return PrismaCurrency.USD; // New access
       }
     },
     []

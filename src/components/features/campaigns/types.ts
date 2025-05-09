@@ -1,4 +1,13 @@
 import { z } from 'zod';
+import {
+  Platform as PrismaPlatform,
+  KPI as PrismaKPI,
+  Feature as PrismaFeature,
+  Status as PrismaStatus, // For CampaignWizard status
+  Currency as PrismaCurrency,
+  Position as PrismaPosition,
+  // CreativeAssetType as PrismaCreativeAssetType // Already defined locally if needed
+} from '@prisma/client';
 // Import the SSOT PlatformEnum
 import { PlatformEnum } from '@/types/enums';
 import { checkCampaignNameExists } from '@/lib/actions/campaigns'; // Placeholder import
@@ -9,30 +18,15 @@ import { logger } from '@/utils/logger'; // Import logger
 //---------------------------------------------------------------------------
 
 /** Base Currency Enum (from Prisma) */
-export const CurrencyEnum = z.enum(['GBP', 'USD', 'EUR']);
+export const CurrencyEnum = z.nativeEnum(PrismaCurrency);
 /** Campaign Status Enum (from Prisma) */
-export const StatusEnum = z.enum(['DRAFT', 'REVIEW', 'APPROVED', 'ACTIVE', 'COMPLETED']);
+export const StatusEnum = z.nativeEnum(PrismaStatus);
 /** Key Performance Indicator Enum (from Prisma) */
-export const KPIEnum = z.enum([
-  'AD_RECALL',
-  'BRAND_AWARENESS',
-  'CONSIDERATION',
-  'MESSAGE_ASSOCIATION',
-  'BRAND_PREFERENCE',
-  'PURCHASE_INTENT',
-  'ACTION_INTENT',
-  'RECOMMENDATION_INTENT',
-  'ADVOCACY',
-]);
+export const KPIEnum = z.nativeEnum(PrismaKPI);
 /** Campaign Feature Enum (from Prisma) */
-export const FeatureEnum = z.enum([
-  'CREATIVE_ASSET_TESTING',
-  'BRAND_LIFT',
-  'BRAND_HEALTH',
-  'MIXED_MEDIA_MODELING',
-]);
+export const FeatureEnum = z.nativeEnum(PrismaFeature);
 /** Contact Position Enum (from Prisma) */
-export const PositionEnum = z.enum(['VP', 'Director', 'Manager', 'Researcher', 'Associate']);
+export const PositionEnum = z.nativeEnum(PrismaPosition);
 /** Creative Asset Type Enum (from Prisma) */
 export const CreativeAssetTypeEnum = z.enum(['image', 'video']);
 /** Submission Status Enum (from Prisma) */
@@ -55,29 +49,11 @@ export const ContactSchema = z
 /** Schema for Budget object (used within DraftCampaignData). Handles string input cleanup. */
 export const BudgetSchema = z
   .object({
-    currency: CurrencyEnum.default('GBP'),
-    /** Total campaign budget. Renamed key to match API response. */
-    total: z.preprocess(
-      val =>
-        typeof val === 'string' && val.trim() !== ''
-          ? parseFloat(val.replace(/[^\d.-]/g, ''))
-          : val,
-      z
-        .number({ invalid_type_error: 'Total budget must be a number' })
-        .nonnegative({ message: 'Total budget cannot be negative' })
-    ),
-    /** Social media portion of the budget. Renamed key to match API response. */
-    socialMedia: z.preprocess(
-      val =>
-        typeof val === 'string' && val.trim() !== ''
-          ? parseFloat(val.replace(/[^\d.-]/g, ''))
-          : val,
-      z
-        .number({ invalid_type_error: 'Social media budget must be a number' })
-        .nonnegative({ message: 'Social media budget cannot be negative' })
-    ),
+    currency: CurrencyEnum.nullable().optional(), // Make currency optional here if it can be
+    total: z.number().nullable().optional(),
+    socialMedia: z.number().nullable().optional(),
   })
-  .passthrough(); // Add passthrough here
+  .nullable(); // Allow the whole budget object to be null
 
 /** Schema for Influencer object (used in DraftCampaignData). */
 export const InfluencerSchema = z.object({
@@ -318,8 +294,11 @@ export const DraftCampaignDataSchema = DraftCampaignDataBaseSchema
   // Refine budget
   .refine(
     data => {
-      if (data.budget?.socialMedia !== undefined && data.budget?.total !== undefined) {
-        return data.budget.socialMedia <= data.budget.total;
+      const budget = data.budget; // Assign to a const for potentially better type narrowing
+      // Explicitly check if budget itself exists, and then if its properties are numbers
+      if (budget && typeof budget.socialMedia === 'number' && typeof budget.total === 'number') {
+        // At this point, TypeScript *must* know they are numbers
+        return budget.socialMedia <= budget.total;
       }
       return true;
     },

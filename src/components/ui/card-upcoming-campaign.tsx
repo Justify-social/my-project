@@ -60,15 +60,12 @@ const getStatusInfo = (status: string | null | undefined) => {
       return { class: 'bg-green-100 text-green-800', text: 'Approved' };
     case 'active':
       return { class: 'bg-green-100 text-green-800', text: 'Active' };
-    case 'in_review':
-    case 'review':
-      return { class: 'bg-yellow-100 text-yellow-800', text: 'Review' };
     case 'draft':
       return { class: 'bg-gray-100 text-gray-800', text: 'Draft' };
     case 'completed':
       return { class: 'bg-blue-100 text-blue-800', text: 'Completed' };
-    case 'paused': // Assuming style for paused
-      return { class: 'bg-red-100 text-red-800', text: 'Paused' };
+    case 'paused':
+      return { class: 'bg-orange-100 text-orange-800', text: 'Paused' };
     default:
       const defaultText = status
         ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()

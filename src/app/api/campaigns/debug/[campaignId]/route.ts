@@ -1,54 +1,76 @@
-// TODO: Reinstate and fix GET handler which was removed due to persistent build errors related to type signatures (RouteContext).
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
+import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
+import { handleApiError } from '@/lib/apiErrorHandler';
+import { UnauthenticatedError, NotFoundError, BadRequestError } from '@/lib/errors';
+import { tryCatch } from '@/lib/middleware/api/util-middleware'; // Restore tryCatch
+import { z } from 'zod';
 
-// Define type for route context parameters
-/* // Interface removed due to build errors with handlers
-interface RouteContext {
-  params: { campaignId: string };
+// Remove or comment out RouteContext if not used with `any`
+// interface RouteContext {
+//   params: { campaignId: string };
+// }
+
+export async function GET(req: NextRequest, { params }: any) {
+  // Revert to any for params
+  return tryCatch(
+    async () => {
+      // Restore tryCatch wrapper
+      const { userId: clerkUserId } = await auth();
+      if (!clerkUserId) {
+        throw new UnauthenticatedError('User not authenticated');
+      }
+
+      const { campaignId } = params; // Access campaignId from params (which is now any)
+
+      if (!campaignId || !z.string().uuid().safeParse(campaignId).success) {
+        throw new BadRequestError('Valid Campaign Wizard ID (UUID) is required.');
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { clerkId: clerkUserId },
+        select: { id: true },
+      });
+
+      if (!user) {
+        throw new NotFoundError('Authenticated user not found in database.');
+      }
+
+      const campaignWizard = await prisma.campaignWizard.findUnique({
+        where: {
+          id: campaignId,
+          userId: user.id,
+        },
+        include: {
+          Influencer: true,
+          WizardHistory: {
+            orderBy: { timestamp: 'asc' },
+          },
+          submission: {
+            include: {
+              audience: true,
+              creativeAssets: true,
+              brandLiftStudies: true,
+            },
+          },
+        },
+      });
+
+      if (!campaignWizard) {
+        throw new NotFoundError(
+          `Campaign Wizard with ID ${campaignId} not found or not accessible by user.`
+        );
+      }
+
+      logger.info('Successfully fetched Campaign Wizard for debug', {
+        campaignId,
+        userId: clerkUserId,
+      });
+      return NextResponse.json(campaignWizard);
+    },
+    error => handleApiError(error, req)
+  ); // Restore tryCatch error handler
 }
-*/
-
-// GET handler previously here was removed due to build errors.
-// See TODO at the top of the file.
-
-/*
-// Removed GET handler block below
-export async function GET(
-  request: NextRequest,
-  context: RouteContext // Use specific type
-) {
-  // Safely access id
-  const campaignId = context?.params?.campaignId;
-  console.log(`GET /api/campaigns/debug/${campaignId}`);
-
-  // Ensure ID was extracted
-  if (!campaignId) {
-    console.error('Failed to extract campaign ID from request context/params in GET debug');
-    return NextResponse.json({ error: 'Invalid request: Missing campaign ID' }, { status: 400 });
-  }
-
-  try {
-    // TODO: Add actual DB connection and fetch logic referencing backup
-    // await connectToDatabase();
-    // Check if UUID or numeric, query appropriate table (CampaignWizard or CampaignWizardSubmission)
-    // const campaign = await prisma...findUnique...
-    // const dbStatus = await prisma.$queryRaw`SELECT 1`;
-
-    // Simulated response
-    const simulatedCampaign = { id: campaignId, name: 'Simulated Debug Campaign', details: '...' };
-    const simulatedDbStatus = [{ connected: 1 }];
-
-    return NextResponse.json({
-      success: true,
-      exists: true, // Assuming found for simulation
-      campaign: simulatedCampaign,
-      dbStatus: simulatedDbStatus,
-      message: `Campaign ${campaignId} found (simulated)`,
-    });
-  } catch (error) {
-    console.error(`Error in GET /api/campaigns/debug/${campaignId}:`, error);
-    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
-  }
-}
-*/
 
 export {};

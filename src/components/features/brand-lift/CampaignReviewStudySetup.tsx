@@ -100,7 +100,7 @@ const studySetupSchema = z.object({
 type StudySetupFormValues = z.infer<typeof studySetupSchema>;
 
 interface CampaignReviewStudySetupProps {
-  campaignId: number;
+  campaignId: string;
 }
 
 const CampaignReviewStudySetup: React.FC<CampaignReviewStudySetupProps> = ({ campaignId }) => {
@@ -153,7 +153,13 @@ const CampaignReviewStudySetup: React.FC<CampaignReviewStudySetupProps> = ({ cam
     setIsSubmitting(true);
     setSubmitError(null);
     try {
-      const payload = { ...data, campaignId, secondaryKpis: data.secondaryKpis ?? [] };
+      const payload = {
+        name: data.studyName,
+        funnelStage: data.funnelStage,
+        primaryKpi: data.primaryKpi,
+        secondaryKpis: data.secondaryKpis ?? [],
+        campaignId: campaignId,
+      };
       logger.info('Submitting new Brand Lift study', { payload });
       const response = await fetch('/api/brand-lift/surveys', {
         method: 'POST',

@@ -21,49 +21,64 @@ export async function GET(
 ) {
   return tryCatch(
     async () => {
-      const { userId, orgId } = await auth();
-      if (!userId) throw new UnauthenticatedError('User must be authenticated.');
-      if (!orgId) throw new ForbiddenError('Organization membership required to access campaigns.');
+      const { userId: clerkUserId } = await auth();
+      if (!clerkUserId) throw new UnauthenticatedError('Authentication required.');
 
-      const { campaignId } = await paramsPromise;
-      const campaignIdNum = parseInt(campaignId);
+      const userRecord = await prisma.user.findUnique({
+        where: { clerkId: clerkUserId },
+        select: { id: true },
+      });
+      if (!userRecord) {
+        logger.error('User record not found for clerkId:', { clerkUserId });
+        throw new NotFoundError('User not found.');
+      }
+      const internalUserId = userRecord.id;
 
-      if (isNaN(campaignIdNum)) {
-        logger.error('Campaign ID missing or invalid in path parameters.', { campaignId });
-        throw new BadRequestError('Campaign ID is required and must be a number.');
+      const { campaignId: campaignWizardId } = await paramsPromise;
+
+      if (!campaignWizardId || typeof campaignWizardId !== 'string') {
+        logger.error('Campaign ID (UUID) missing or invalid in path parameters.', {
+          campaignWizardId,
+        });
+        throw new BadRequestError('Campaign ID (UUID) is required.');
       }
 
-      logger.info('Fetching campaign by ID for Brand Lift setup', {
-        userId,
-        orgId,
-        campaignId: campaignIdNum,
+      logger.info('Fetching CampaignWizard by ID for Brand Lift setup', {
+        userId: clerkUserId,
+        campaignId: campaignWizardId,
       });
 
-      const campaign = await prisma.campaignWizardSubmission.findFirst({
+      const campaign = await prisma.campaignWizard.findFirst({
         where: {
-          id: campaignIdNum,
-          userId: userId,
-          submissionStatus: SubmissionStatus.submitted,
+          id: campaignWizardId,
+          userId: internalUserId,
         },
         select: {
           id: true,
-          campaignName: true,
+          name: true,
           primaryKPI: true,
-          secondaryKPIs: true,
-          platform: true,
+          businessGoal: true,
+          targetPlatforms: true,
         },
       });
 
       if (!campaign) {
-        throw new NotFoundError('Completed campaign not found or not accessible.');
+        throw new NotFoundError('CampaignWizard not found or not accessible by this user.');
       }
 
-      logger.info('Successfully fetched campaign by ID', {
-        userId,
-        orgId,
-        campaignId: campaignIdNum,
+      const responseData = {
+        id: campaign.id,
+        campaignName: campaign.name,
+        primaryKPI: campaign.primaryKPI,
+        platform: campaign.targetPlatforms?.[0]?.toString() || null,
+        audience: { description: campaign.businessGoal },
+      };
+
+      logger.info('Successfully fetched CampaignWizard by ID', {
+        userId: clerkUserId,
+        campaignId: campaignWizardId,
       });
-      return NextResponse.json(campaign);
+      return NextResponse.json(responseData);
     },
     error => handleApiError(error, req)
   );

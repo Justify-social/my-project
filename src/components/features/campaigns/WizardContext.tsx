@@ -13,8 +13,13 @@ import React, {
 import {
   DraftCampaignData,
   DraftCampaignDataSchema,
-  PositionEnum,
+  // PositionEnum, // This Zod enum wrapper is not needed here for default value
 } from '@/components/features/campaigns/types';
+import {
+  Position as PrismaPosition,
+  Status as PrismaStatus,
+  Currency as PrismaCurrency,
+} from '@prisma/client'; // Import Prisma enums
 // TODO: Replace WizardCampaignFormData with a proper type derived from schema.prisma CampaignWizard model in types.ts
 // import { CampaignFormData as WizardCampaignFormData } from '@/types/influencer';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -169,10 +174,10 @@ const defaultWizardState: DraftCampaignData = {
   startDate: null,
   endDate: null,
   timeZone: 'UTC', // Default timezone
-  primaryContact: { firstName: '', surname: '', email: '', position: PositionEnum.Values.Director },
+  primaryContact: { firstName: '', surname: '', email: '', position: PrismaPosition.Director },
   secondaryContact: null, // Default to null
   additionalContacts: [],
-  budget: { currency: 'USD', total: 0, socialMedia: 0 },
+  budget: { currency: PrismaCurrency.USD, total: 0, socialMedia: 0 },
   Influencer: [],
   primaryKPI: null,
   secondaryKPIs: [],
@@ -203,7 +208,7 @@ const defaultWizardState: DraftCampaignData = {
   currentStep: 1,
   isComplete: false,
   isDraft: true,
-  status: 'DRAFT',
+  status: PrismaStatus.DRAFT,
   createdAt: null,
   updatedAt: null,
   userId: null,

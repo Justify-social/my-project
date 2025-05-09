@@ -604,60 +604,58 @@ function Step5Content() {
   // Submit Handler (Uses validated payload)
   const onSubmit: SubmitHandler<ConfirmationFormData> = async formData => {
     if (!formData.confirm) {
-      // Use helper
       showErrorToast('Please confirm the details before submitting.');
       return;
     }
     setIsSubmitting(true);
     setSubmitError(null);
 
-    // --- REVISED LOGIC ---
-    // Instead of preparing a full submission payload for POST,
-    // we prepare a smaller payload for PATCH via saveProgress.
-    const payload: Partial<DraftCampaignData> = {
-      currentStep: 5,
-      status: StatusEnum.Values.REVIEW, // Set desired final status to REVIEW
-      isComplete: true, // Mark the campaign as complete
-      submittedAt: new Date(),
-      // We don't need to resend all previous step data,
-      // the PATCH endpoint for step 5 should only handle status/completion update.
-    };
+    if (!wizard.campaignId) {
+      showErrorToast('Campaign ID is missing. Cannot submit.');
+      setIsSubmitting(false);
+      return;
+    }
 
-    console.log('[Step 5] Payload prepared for final submission (PATCH):', payload);
+    console.log('[Step 5] Attempting final campaign submission for ID:', wizard.campaignId);
 
     try {
-      const saveSuccess = await wizard.saveProgress(payload); // Use saveProgress for PATCH
+      // const saveSuccess = await wizard.saveProgress(payload); // OLD LOGIC
+      const response = await fetch(`/api/campaigns/${wizard.campaignId}/submit`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // The body for the submit endpoint might be empty if all data is read from the CampaignWizard on the backend
+        // Or it might expect a minimal payload, e.g., just a confirmation.
+        // For now, sending an empty body as the backend submit route should fetch the wizard data itself.
+        body: JSON.stringify({}),
+      });
 
-      if (saveSuccess) {
-        // Use helper (default icon)
+      if (response.ok) {
+        const submissionData = await response.json(); // Contains the new CampaignWizardSubmission
         showSuccessToast('Campaign submitted successfully!');
         console.log(
-          '[Step5Content] Submission save successful. Attempting to navigate to submission page...'
+          '[Step5Content] Actual submission to POST .../submit successful. Data:',
+          submissionData
         );
-        if (wizard.campaignId) {
-          // Navigate to a confirmation/summary page (adjust URL if needed)
-          router.push(`/campaigns/wizard/submission?id=${wizard.campaignId}`);
-          console.log('[Step5Content] Navigation to /campaigns/wizard/submission initiated.');
-        } else {
-          console.error(
-            'Navigation to submission page failed: Campaign ID missing after successful submission.'
-          );
-          // Use helper
-          showErrorToast('Could not display submission confirmation (missing ID).');
-          router.push('/dashboard?submission=success'); // Fallback
-        }
+        // Navigate to a suitable page, perhaps a dashboard or a campaign list showing the new status.
+        // The previous navigation to /campaigns/wizard/submission?id=... might still be relevant
+        // if that page can now display the status of the *actual* submission.
+        // Or perhaps navigate to the main campaigns list or dashboard.
+        router.push(`/dashboard?campaignSubmitted=${wizard.campaignId}`); // Example: redirect to dashboard
+        console.log('[Step5Content] Navigation after successful POST .../submit initiated.');
       } else {
-        // saveProgress already shows specific errors via toast (in WizardContext)
-        // We might still show a generic error here if saveProgress returns false but didn't show a toast
-        // For now, assume saveProgress handles its own errors.
-        // showErrorToast('Failed to submit campaign. Please try again.');
-        setSubmitError('Failed to submit campaign. Please try again.');
+        const errorData = await response.json();
+        const errorMessage = errorData.error || errorData.message || 'Failed to submit campaign.';
+        showErrorToast(errorMessage);
+        setSubmitError(errorMessage);
+        console.error('[Step5Content] POST .../submit failed:', errorData);
       }
     } catch (err: unknown) {
-      console.error('Submission Error:', err);
-      const message = err instanceof Error ? err.message : 'Failed to submit campaign.';
+      console.error('Submission Error (catch block):', err);
+      const message =
+        err instanceof Error ? err.message : 'An unexpected error occurred during submission.';
       setSubmitError(message);
-      // Use helper
       showErrorToast(message);
     } finally {
       setIsSubmitting(false);

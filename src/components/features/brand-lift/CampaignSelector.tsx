@@ -24,14 +24,14 @@ import logger from '@/lib/logger';
 
 // Matches the data structure returned by the corrected /api/campaigns GET endpoint
 interface Campaign {
-  id: number; // Changed to number based on CampaignWizardSubmission schema
+  id: string; // Changed to string to match CampaignWizard.id
   campaignName: string;
   createdAt: string;
-  status: string; // Mapped status (e.g., COMPLETED)
+  status: string;
 }
 
 interface CampaignSelectorProps {
-  onCampaignSelected: (campaignId: number | null) => void; // Expecting number | null
+  onCampaignSelected: (campaignId: string | null) => void; // Expecting string | null
 }
 
 const CampaignSelector: React.FC<CampaignSelectorProps> = ({ onCampaignSelected }) => {
@@ -45,16 +45,37 @@ const CampaignSelector: React.FC<CampaignSelectorProps> = ({ onCampaignSelected 
       setIsLoading(true);
       setError(null);
       try {
-        // Fetch campaigns (no specific status filter, API might apply defaults or none)
-        const response = await fetch('/api/campaigns');
+        const response = await fetch('/api/campaigns/selectable-list');
         if (!response.ok) {
-          const errorData = await response.json();
+          const errorData = await response
+            .json()
+            .catch(() => ({ error: `Failed to fetch campaigns: ${response.statusText}` }));
           throw new Error(errorData.error || `Failed to fetch campaigns: ${response.statusText}`);
         }
-        const data: Campaign[] = await response.json();
-        setCampaigns(data);
-        if (data.length === 0) {
-          setError('No campaigns found. Please create a campaign first.');
+        const result = await response.json();
+
+        if (result.success && Array.isArray(result.data)) {
+          // Map API data to the local Campaign interface
+          const campaignsData: Campaign[] = result.data.map((item: any) => ({
+            id: String(item.id), // Ensure id is a string for the Campaign interface and SelectItem value
+            campaignName: item.name, // API returns 'name', component expects 'campaignName' via interface
+            status: item.status,
+            // API selectable-list returns startDate, endDate, not createdAt.
+            // For display, we can use one of those or a fixed string if createdAt is not critical here.
+            // Or, adjust API to return createdAt/updatedAt for this display if needed.
+            createdAt: item.startDate || item.updatedAt || new Date().toISOString(),
+          }));
+
+          setCampaigns(campaignsData);
+          if (campaignsData.length === 0) {
+            setError('No suitable campaigns available to set up a Brand Lift study.');
+          }
+        } else {
+          logger.error(
+            '[CampaignSelector] API call did not return success or data is not an array',
+            result
+          );
+          throw new Error(result.error || 'Invalid data format received from API.');
         }
       } catch (err: any) {
         logger.error('Error fetching campaigns for Brand Lift Selector:', { error: err.message });
@@ -71,12 +92,11 @@ const CampaignSelector: React.FC<CampaignSelectorProps> = ({ onCampaignSelected 
   };
 
   const handleSubmit = () => {
-    const numericId = parseInt(selectedCampaignId, 10);
-    if (!isNaN(numericId)) {
-      onCampaignSelected(numericId);
+    if (selectedCampaignId) {
+      onCampaignSelected(selectedCampaignId);
     } else {
-      logger.error('Attempted to submit with invalid campaign ID:', { selectedCampaignId });
-      onCampaignSelected(null); // Pass null if invalid
+      logger.error('No campaign selected or invalid ID state.');
+      onCampaignSelected(null);
     }
   };
 
@@ -112,9 +132,7 @@ const CampaignSelector: React.FC<CampaignSelectorProps> = ({ onCampaignSelected 
     <Card className="w-full max-w-lg mx-auto">
       <CardHeader>
         <CardTitle>Select a Campaign</CardTitle>
-        <CardDescription>
-          Choose a completed campaign to set up your Brand Lift study.
-        </CardDescription>
+        <CardDescription>Choose a campaign to set up your Brand Lift study.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 pt-4">
         {error && campaigns.length > 0 && (
@@ -126,13 +144,13 @@ const CampaignSelector: React.FC<CampaignSelectorProps> = ({ onCampaignSelected 
         )}
         {campaigns.length === 0 && !isLoading && !error && (
           <p className="text-sm text-muted-foreground text-center py-4">
-            No completed campaigns available.
+            No suitable campaigns available to set up a Brand Lift study.
           </p>
         )}
         {campaigns.length > 0 && (
           <Select onValueChange={handleSelectChange} value={selectedCampaignId}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select a completed campaign..." />
+              <SelectValue placeholder="Select a campaign..." />
             </SelectTrigger>
             <SelectContent>
               {campaigns.map(campaign => (
