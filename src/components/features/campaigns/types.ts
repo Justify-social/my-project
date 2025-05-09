@@ -594,6 +594,7 @@ export const Step4BaseSchema = z.object({
   guidelines: DraftCampaignDataBaseSchema.shape.guidelines,
   requirements: DraftCampaignDataBaseSchema.shape.requirements,
   notes: DraftCampaignDataBaseSchema.shape.notes,
+  step4Complete: DraftCampaignDataBaseSchema.shape.step4Complete,
 });
 /** FULL Validation schema for Step 4: Assets & Guidelines (Used in UI) */
 export const Step4ValidationSchema = Step4BaseSchema.extend({

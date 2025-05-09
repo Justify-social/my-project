@@ -638,11 +638,16 @@ function Step5Content() {
           '[Step5Content] Actual submission to POST .../submit successful. Data:',
           submissionData
         );
-        // Navigate to a suitable page, perhaps a dashboard or a campaign list showing the new status.
-        // The previous navigation to /campaigns/wizard/submission?id=... might still be relevant
-        // if that page can now display the status of the *actual* submission.
-        // Or perhaps navigate to the main campaigns list or dashboard.
-        router.push(`/dashboard?campaignSubmitted=${wizard.campaignId}`); // Example: redirect to dashboard
+        // Navigate to the campaign submission page using the ID from the submission data
+        if (submissionData && submissionData.id) {
+          router.push(`/campaigns/submission/${submissionData.id}`);
+        } else {
+          // Fallback or error handling if submissionData.id is not available
+          console.error(
+            '[Step5Content] Submission ID not found in response, redirecting to dashboard.'
+          );
+          router.push(`/dashboard?campaignSubmitted=${wizard.campaignId}`);
+        }
         console.log('[Step5Content] Navigation after successful POST .../submit initiated.');
       } else {
         const errorData = await response.json();

@@ -118,7 +118,10 @@ type CampaignWizardWithSubmission = Prisma.CampaignWizardGetPayload<{
   include: { Influencer: true };
 }> & { submissionId?: number | null };
 
-export async function POST(req: NextRequest, { params }: any) {
+export async function POST(req: NextRequest, { params }: { params: { campaignId: string } }) {
+  // Access campaignId at the top level of the POST handler
+  const wizardIdFromParams = params.campaignId;
+
   return tryCatch(
     async () => {
       const { userId: clerkUserId } = await auth();
@@ -126,7 +129,8 @@ export async function POST(req: NextRequest, { params }: any) {
         throw new UnauthenticatedError('User not authenticated');
       }
 
-      const { campaignId: wizardId } = params;
+      // Use the campaignId obtained from the outer scope
+      const wizardId = wizardIdFromParams;
 
       if (
         !wizardId ||

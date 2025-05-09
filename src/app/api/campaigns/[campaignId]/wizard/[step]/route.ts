@@ -49,6 +49,17 @@ export async function PATCH(
     // Connect to database
     await connectToDatabase();
 
+    // Fetch current campaign state
+    const currentCampaign = await prisma.campaignWizard.findUnique({
+      where: { id: campaignId },
+      // Select specific fields if known to optimize, otherwise Prisma fetches all scalar fields by default
+      // For this logic, we need step1Complete, step2Complete, step3Complete, step4Complete
+    });
+
+    if (!currentCampaign) {
+      return NextResponse.json({ error: 'Campaign not found for update' }, { status: 404 });
+    }
+
     // Parse request body
     console.log(`Received Step ${step} body:`, JSON.stringify(body, null, 2));
 
@@ -61,13 +72,6 @@ export async function PATCH(
       updatedAt: new Date(),
       currentStep: step,
     };
-
-    // Set step completion flag based on current step
-    if (step >= 1) mappedData.step1Complete = true;
-    if (step >= 2) mappedData.step2Complete = true;
-    if (step >= 3) mappedData.step3Complete = true;
-    if (step >= 4) mappedData.step4Complete = true;
-    if (step >= 5) mappedData.isComplete = true;
 
     // Revert validationResult back to any
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -129,6 +133,8 @@ export async function PATCH(
       if (dataToSave.additionalContacts !== undefined) {
         mappedData.additionalContacts = dataToSave.additionalContacts ?? [];
       }
+      if (dataToSave.step1Complete !== undefined)
+        mappedData.step1Complete = dataToSave.step1Complete;
     } else if (step === 2) {
       if (dataToSave.primaryKPI !== undefined)
         mappedData.primaryKPI = dataToSave.primaryKPI ?? null;
@@ -139,6 +145,8 @@ export async function PATCH(
         mappedData.messaging = dataToSave.messaging ?? Prisma.JsonNull;
       if (dataToSave.expectedOutcomes !== undefined)
         mappedData.expectedOutcomes = dataToSave.expectedOutcomes ?? Prisma.JsonNull;
+      if (dataToSave.step2Complete !== undefined)
+        mappedData.step2Complete = dataToSave.step2Complete;
     } else if (step === 3) {
       if (dataToSave.demographics !== undefined) {
         // Logging received demographics
@@ -172,6 +180,8 @@ export async function PATCH(
         );
         mappedData.competitors = dataToSave.competitors ?? [];
       }
+      if (dataToSave.step3Complete !== undefined)
+        mappedData.step3Complete = dataToSave.step3Complete;
       // Log the mapped data specifically for step 3 before transformation
       console.log(
         '[API Step 3] mappedData before transformation:',
@@ -179,12 +189,36 @@ export async function PATCH(
       );
     } else if (step === 4) {
       if (dataToSave.assets !== undefined) mappedData.assets = dataToSave.assets ?? [];
+      if (dataToSave.step4Complete !== undefined)
+        mappedData.step4Complete = dataToSave.step4Complete;
     } else if (step === 5) {
       if ('status' in dataToSave && dataToSave.status) {
         // Ensure Status enum is imported from @prisma/client
         mappedData.status = String(dataToSave.status).toUpperCase() as Status;
       }
+      // Note: step5Complete might be sent from client, but isComplete is derived from steps 1-4.
+      // if (dataToSave.step5Complete !== undefined) { /* handle if needed, but not for main isComplete logic */ }
     }
+
+    // Determine the overall isComplete status
+    const s1c =
+      mappedData.step1Complete !== undefined
+        ? mappedData.step1Complete
+        : currentCampaign.step1Complete;
+    const s2c =
+      mappedData.step2Complete !== undefined
+        ? mappedData.step2Complete
+        : currentCampaign.step2Complete;
+    const s3c =
+      mappedData.step3Complete !== undefined
+        ? mappedData.step3Complete
+        : currentCampaign.step3Complete;
+    const s4c =
+      mappedData.step4Complete !== undefined
+        ? mappedData.step4Complete
+        : currentCampaign.step4Complete;
+
+    mappedData.isComplete = !!(s1c && s2c && s3c && s4c);
 
     // Transform enums only for the fields being updated in this step
     const transformedDataForDb = EnumTransformers.transformObjectToBackend(mappedData);
