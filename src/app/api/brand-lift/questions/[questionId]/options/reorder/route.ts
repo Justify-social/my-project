@@ -21,29 +21,44 @@ const reorderOptionsPayloadSchema = z
 // Helper to verify question access and modifiable status of its parent study
 async function verifyQuestionAccessForOptionReorder(
   questionId: string,
-  orgId: string
+  clerkUserId: string
 ): Promise<SurveyQuestion & { study: { status: BrandLiftStudyStatus } }> {
+  const userRecord = await db.user.findUnique({
+    where: { clerkId: clerkUserId },
+    select: { id: true },
+  });
+  if (!userRecord) {
+    throw new NotFoundError('User not found for authorization.');
+  }
+  const internalUserId = userRecord.id;
+
   const question = await db.surveyQuestion.findUnique({
-    where: { id: questionId },
+    where: {
+      id: questionId,
+      study: {
+        campaign: {
+          userId: internalUserId,
+        },
+      },
+    },
     include: {
-      study: { select: { status: true, organizationId: true } },
+      study: { select: { status: true } }, // organizationId removed
     },
   });
 
-  if (!question) throw new NotFoundError('Question not found.');
-  if (question.study.organizationId !== orgId)
-    throw new ForbiddenError("Access denied to this question's study.");
+  if (!question) throw new NotFoundError('Question not found or not accessible by this user.');
 
   const currentStudyStatus = question.study.status as BrandLiftStudyStatus;
   if (
     currentStudyStatus !== BrandLiftStudyStatus.DRAFT &&
-    currentStudyStatus !== BrandLiftStudyStatus.PENDING_APPROVAL
+    currentStudyStatus !== BrandLiftStudyStatus.PENDING_APPROVAL &&
+    currentStudyStatus !== BrandLiftStudyStatus.CHANGES_REQUESTED
   ) {
     throw new ForbiddenError(
       `Options cannot be reordered when study status is ${currentStudyStatus}.`
     );
   }
-  return question as SurveyQuestion & { study: { status: BrandLiftStudyStatus } }; // Cast for type safety
+  return question as SurveyQuestion & { study: { status: BrandLiftStudyStatus } };
 }
 
 export const PATCH = async (
@@ -51,13 +66,13 @@ export const PATCH = async (
   { params: paramsPromise }: { params: Promise<{ questionId: string }> }
 ) => {
   try {
-    const { userId, orgId } = await auth();
-    if (!userId || !orgId) throw new UnauthenticatedError('Unauthorized');
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) throw new UnauthenticatedError('Authentication required.');
 
-    const { questionId } = await paramsPromise; // Await the promise here
+    const { questionId } = await paramsPromise;
     if (!questionId) throw new BadRequestError('Question ID is required.');
 
-    await verifyQuestionAccessForOptionReorder(questionId, orgId);
+    await verifyQuestionAccessForOptionReorder(questionId, clerkUserId);
 
     const body = await req.json();
     const validation = reorderOptionsPayloadSchema.safeParse(body);
@@ -66,7 +81,7 @@ export const PATCH = async (
       logger.warn('Invalid option reorder data', {
         questionId,
         errors: validation.error.flatten().fieldErrors,
-        orgId,
+        userId: clerkUserId, // Changed from orgId
       });
       throw validation.error;
     }
@@ -74,31 +89,32 @@ export const PATCH = async (
     const updates = validation.data;
     const optionIdsToUpdate = updates.map(u => u.id);
 
-    // Verify all options belong to the specified question
     const optionsInQuestion = await db.surveyOption.findMany({
       where: {
         id: { in: optionIdsToUpdate },
         questionId: questionId,
+        // Access is already verified by verifyQuestionAccessForOptionReorder through user ownership of the campaign
       },
       select: { id: true },
     });
 
     if (optionsInQuestion.length !== updates.length) {
-      logger.error('Mismatch in option IDs provided for reorder', {
+      logger.error('Mismatch in option IDs provided for reorder or access denied', {
+        // Updated message
         questionId,
-        orgId,
+        userId: clerkUserId, // Changed from orgId
         providedIds: optionIdsToUpdate,
         foundIds: optionsInQuestion.map((o: { id: string }) => o.id),
       });
       throw new BadRequestError(
-        'Invalid option ID(s) for reorder. All options must belong to the specified question.'
+        'Invalid option ID(s) for reorder. All options must belong to the specified question and be accessible.'
       );
     }
 
     await db.$transaction(
       updates.map(update =>
         db.surveyOption.update({
-          where: { id: update.id, questionId: questionId }, // Ensure option belongs to the question
+          where: { id: update.id, questionId: questionId },
           data: { order: update.order },
         })
       )
@@ -106,7 +122,7 @@ export const PATCH = async (
 
     logger.info('Successfully reordered options for question', {
       questionId,
-      orgId,
+      userId: clerkUserId, // Changed from orgId
       count: updates.length,
     });
     return NextResponse.json({ message: 'Options reordered successfully' }, { status: 200 });

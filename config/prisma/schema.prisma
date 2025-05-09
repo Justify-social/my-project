@@ -448,6 +448,7 @@ enum BrandLiftStudyStatus {
   COLLECTING
   COMPLETED
   ARCHIVED
+  CHANGES_REQUESTED
 }
 
 enum SurveyQuestionType {
@@ -480,7 +481,6 @@ model BrandLiftStudy {
   updatedAt         DateTime                @updatedAt
   cintProjectId     String?                 @unique
   cintTargetGroupId String?                 @unique
-  organizationId    String                  // To scope studies to an organization, assuming User model has orgId or similar
 
   questions         SurveyQuestion[]
   responses         SurveyResponse[]
@@ -489,7 +489,6 @@ model BrandLiftStudy {
 
   @@index([submissionId]) // Updated index field
   @@index([status])
-  @@index([organizationId])
 }
 
 model SurveyQuestion {

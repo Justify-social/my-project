@@ -31,14 +31,26 @@ const updateQuestionSchema = z.object({
 });
 
 // Helper to verify study access, question existence, and modifiability status
-async function getAndVerifyQuestion(studyId: string, questionId: string, orgId: string) {
+async function getAndVerifyQuestion(studyId: string, questionId: string, clerkUserId: string) {
+  // Fetch internal user ID from Clerk User ID
+  const userRecord = await prisma.user.findUnique({
+    where: { clerkId: clerkUserId },
+    select: { id: true },
+  });
+  if (!userRecord) {
+    throw new NotFoundError('User not found for authorization.');
+  }
+  const internalUserId = userRecord.id;
+
   const question = await prisma.surveyQuestion.findFirst({
     where: {
       id: questionId,
       studyId: studyId,
       study: {
-        // Ensures study belongs to the org
-        organizationId: orgId,
+        // Ensures study belongs to the user via CampaignWizardSubmission
+        campaign: {
+          userId: internalUserId,
+        },
       },
     },
     include: {
@@ -47,11 +59,11 @@ async function getAndVerifyQuestion(studyId: string, questionId: string, orgId: 
   });
 
   if (!question) {
-    throw new NotFoundError('Question not found or not accessible.');
+    throw new NotFoundError('Question not found or not accessible by this user.');
   }
 
   // Prevent changes if study is in a non-editable state
-  if (!['DRAFT', 'PENDING_APPROVAL'].includes(question.study.status)) {
+  if (!['DRAFT', 'PENDING_APPROVAL', 'CHANGES_REQUESTED'].includes(question.study.status)) {
     throw new ForbiddenError(
       `Questions cannot be modified when study status is ${question.study.status}.`
     );
@@ -63,18 +75,16 @@ export async function PUT(
   req: NextRequest,
   { params: paramsPromise }: { params: Promise<{ studyId: string; questionId: string }> }
 ) {
-  // Remove withValidation wrapping, handle validation inside
   return tryCatch(
     async () => {
-      const { userId, orgId } = await auth();
-      if (!userId || !orgId)
-        throw new UnauthenticatedError('Authentication and organization membership required.');
+      const { userId: clerkUserId } = await auth();
+      if (!clerkUserId) throw new UnauthenticatedError('Authentication required.');
 
       const { studyId, questionId } = await paramsPromise;
       if (!studyId || !questionId)
         throw new ZodValidationError('Study ID and Question ID are required.');
 
-      await getAndVerifyQuestion(studyId, questionId, orgId); // Verifies access and modifiability
+      await getAndVerifyQuestion(studyId, questionId, clerkUserId);
 
       const body = await req.json();
       const parsedBody = updateQuestionSchema.safeParse(body);
@@ -86,8 +96,7 @@ export async function PUT(
       }
 
       logger.info('Attempting to update SurveyQuestion', {
-        userId,
-        orgId,
+        userId: clerkUserId,
         studyId,
         questionId,
         updateData,
@@ -96,11 +105,11 @@ export async function PUT(
         where: { id: questionId },
         data: updateData,
       });
-      logger.info('SurveyQuestion updated successfully', { userId, orgId, questionId });
+      logger.info('SurveyQuestion updated successfully', { userId: clerkUserId, questionId });
       return NextResponse.json(updatedQuestion);
     },
     error => handleApiError(error, req)
-  ); // Pass req to error handler
+  );
 }
 
 export async function DELETE(
@@ -109,23 +118,26 @@ export async function DELETE(
 ) {
   return tryCatch(
     async () => {
-      const { userId, orgId } = await auth();
-      if (!userId || !orgId)
-        throw new UnauthenticatedError('Authentication and organization membership required.');
+      const { userId: clerkUserId } = await auth();
+      if (!clerkUserId) throw new UnauthenticatedError('Authentication required.');
 
       const { studyId, questionId } = await paramsPromise;
       if (!studyId || !questionId)
         throw new ZodValidationError('Study ID and Question ID are required.');
 
-      await getAndVerifyQuestion(studyId, questionId, orgId); // Verifies access and modifiability
+      await getAndVerifyQuestion(studyId, questionId, clerkUserId);
 
-      logger.info('Attempting to delete SurveyQuestion', { userId, orgId, studyId, questionId });
+      logger.info('Attempting to delete SurveyQuestion', {
+        userId: clerkUserId,
+        studyId,
+        questionId,
+      });
       await prisma.surveyQuestion.delete({
         where: { id: questionId },
       });
-      logger.info('SurveyQuestion deleted successfully', { userId, orgId, questionId });
-      return NextResponse.json({ message: 'Question deleted successfully' }, { status: 200 }); // Or 204 No Content
+      logger.info('SurveyQuestion deleted successfully', { userId: clerkUserId, questionId });
+      return NextResponse.json({ message: 'Question deleted successfully' }, { status: 200 });
     },
     error => handleApiError(error, req)
-  ); // Pass req to error handler
+  );
 }

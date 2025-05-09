@@ -11,9 +11,24 @@ import { CintApiService } from '@/lib/cint'; // For fetching live Cint progress
 const cintService = new CintApiService(); // Relies on env vars
 
 // Helper to verify study access
-async function verifyStudyAccess(studyId: string, orgId: string) {
+async function verifyStudyAccess(studyId: string, clerkUserId: string) {
+  const userRecord = await db.user.findUnique({
+    where: { clerkId: clerkUserId },
+    select: { id: true },
+  });
+  if (!userRecord) {
+    throw new NotFoundError('User not found for authorization.');
+  }
+  const internalUserId = userRecord.id;
+
   const study = await db.brandLiftStudy.findFirst({
-    where: { id: studyId, organizationId: orgId },
+    where: {
+      id: studyId,
+      campaign: {
+        // Check access via campaign and user
+        userId: internalUserId,
+      },
+    },
     select: {
       id: true,
       status: true,
@@ -41,14 +56,13 @@ export const GET = async (
   { params: paramsPromise }: { params: Promise<{ studyId: string }> }
 ) => {
   try {
-    const { userId, orgId } = await auth();
-    if (!userId || !orgId)
-      throw new UnauthenticatedError('Authentication and organization membership required.');
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) throw new UnauthenticatedError('Authentication required.');
 
     const { studyId } = await paramsPromise;
     if (!studyId) throw new BadRequestError('Study ID is required.');
 
-    const study = await verifyStudyAccess(studyId, orgId);
+    const study = await verifyStudyAccess(studyId, clerkUserId);
 
     // 1. Get response count from our database
     const localResponseCount = await db.surveyResponse.count({
@@ -106,7 +120,7 @@ export const GET = async (
       interimLiftMetrics: interimMetrics, // Placeholder for now
     };
 
-    logger.info('Fetched study progress', { studyId, orgId });
+    logger.info('Fetched study progress', { studyId, userId: clerkUserId });
     return NextResponse.json(responsePayload);
   } catch (error: any) {
     return handleApiError(error, req);

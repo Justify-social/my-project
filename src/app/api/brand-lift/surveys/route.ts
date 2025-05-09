@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 
 import { logger } from '@/lib/logger';
 import { handleApiError } from '@/lib/apiErrorHandler'; // Correct import path
@@ -38,8 +39,8 @@ const listStudiesQuerySchema = z.object({
 export async function POST(req: NextRequest) {
   return tryCatch(
     async () => {
-      const { userId, orgId } = await auth();
-      if (!userId || !orgId) throw new UnauthenticatedError();
+      const { userId: clerkUserId } = await auth(); // Renamed
+      if (!clerkUserId) throw new UnauthenticatedError('Authentication required.'); // Updated
 
       const body = await req.json();
       const validation = createStudySchema.safeParse(body);
@@ -48,10 +49,20 @@ export async function POST(req: NextRequest) {
       const { name, campaignId, funnelStage, primaryKpi, secondaryKpis } = validation.data;
 
       // Verify campaign exists and belongs to the user's organization/user scope
+      const userRecord = await prisma.user.findUnique({
+        // Fetch internal user ID
+        where: { clerkId: clerkUserId },
+        select: { id: true },
+      });
+      if (!userRecord) {
+        throw new NotFoundError('User not found for campaign verification.');
+      }
+      const internalUserId = userRecord.id;
+
       const campaign = await prisma.campaignWizardSubmission.findFirst({
         where: {
           id: campaignId,
-          userId: userId, // Verify campaign belongs to user
+          userId: internalUserId, // Verify campaign belongs to this internalUserId
           submissionStatus: SubmissionStatus.submitted, // Ensure campaign is submitted
         },
         select: { id: true },
@@ -60,25 +71,28 @@ export async function POST(req: NextRequest) {
       if (!campaign) {
         logger.error('Campaign not found or unauthorized access attempt', {
           campaignId,
-          userId,
-          orgId,
+          userId: clerkUserId, // Log clerkUserId
         });
         throw new NotFoundError('Campaign not found or not accessible');
       }
 
-      logger.info('Attempting to create BrandLiftStudy', { userId, orgId, campaignId });
+      logger.info('Attempting to create BrandLiftStudy', { userId: clerkUserId, campaignId }); // Log clerkUserId
       const newStudy = await prisma.brandLiftStudy.create({
         data: {
           name,
-          submissionId: campaignId,
+          submissionId: campaignId, // submissionId links to CampaignWizardSubmission
           funnelStage,
           primaryKpi,
           secondaryKpis: secondaryKpis ?? [],
           status: PrismaBrandLiftStudyStatus.DRAFT,
-          organizationId: orgId,
+          // organizationId: orgId, // Removed organizationId
+          // The link to user is via submissionId -> CampaignWizardSubmission.userId
         },
       });
-      logger.info('BrandLiftStudy created successfully', { userId, orgId, studyId: newStudy.id });
+      logger.info('BrandLiftStudy created successfully', {
+        userId: clerkUserId,
+        studyId: newStudy.id,
+      }); // Log clerkUserId
       return NextResponse.json(newStudy, { status: 201 });
     },
     error => handleApiError(error, req)
@@ -88,8 +102,8 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   return tryCatch(
     async () => {
-      const { userId, orgId } = await auth();
-      if (!userId || !orgId) throw new UnauthenticatedError();
+      const { userId: clerkUserId } = await auth(); // Renamed
+      if (!clerkUserId) throw new UnauthenticatedError('Authentication required.'); // Updated
 
       const { searchParams } = new URL(req.url);
       const queryParams = Object.fromEntries(searchParams.entries());
@@ -98,38 +112,37 @@ export async function GET(req: NextRequest) {
       if (!validation.success) {
         logger.warn('Invalid query parameters for fetching studies', {
           errors: validation.error.errors,
-          orgId,
+          userId: clerkUserId, // Log clerkUserId
         });
         throw new ZodValidationError(validation.error.errors);
       }
 
       const { campaignId } = validation.data;
 
-      const whereClause: { organizationId: string; campaignId?: number } = {
-        organizationId: orgId, // Always scope by organization
+      // Fetch internal user ID
+      const userRecord = await prisma.user.findUnique({
+        where: { clerkId: clerkUserId },
+        select: { id: true },
+      });
+      if (!userRecord) {
+        throw new NotFoundError('User not found for fetching studies.');
+      }
+      const internalUserId = userRecord.id;
+
+      // Base whereClause to filter by user
+      const whereClause: Prisma.BrandLiftStudyWhereInput = {
+        campaign: {
+          userId: internalUserId,
+        },
       };
 
       if (campaignId !== undefined) {
-        // Verify campaign exists and belongs to user before using it in filter
-        const campaignCheck = await prisma.campaignWizardSubmission.findFirst({
-          where: {
-            id: campaignId,
-            userId: userId, // Check user scope
-          },
-          select: { id: true },
-        });
-        if (!campaignCheck) {
-          logger.warn('Attempted to filter studies by inaccessible campaign', {
-            campaignId,
-            userId,
-            orgId,
-          });
-          return NextResponse.json({ studies: [] }); // Return empty if campaign not accessible
-        }
-        whereClause.campaignId = campaignId;
+        // No need to re-verify campaign access here if already filtering by user-owned campaigns above
+        // The initial check for campaignId as part of the overall user's studies is enough.
+        whereClause.submissionId = campaignId; // submissionId links to CampaignWizardSubmission
       }
 
-      logger.info('Fetching BrandLiftStudies', { userId, orgId, whereClause });
+      logger.info('Fetching BrandLiftStudies', { userId: clerkUserId, whereClause }); // Log clerkUserId
       const studies = await prisma.brandLiftStudy.findMany({
         where: whereClause,
         orderBy: { createdAt: 'desc' },
@@ -141,8 +154,7 @@ export async function GET(req: NextRequest) {
         },
       });
       logger.info(`Successfully fetched ${studies.length} BrandLiftStudies`, {
-        userId,
-        orgId,
+        userId: clerkUserId, // Log clerkUserId
         count: studies.length,
       });
       return NextResponse.json(studies);

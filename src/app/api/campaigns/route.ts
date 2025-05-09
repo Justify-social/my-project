@@ -366,9 +366,9 @@ export const GET = async (req: NextRequest) => {
   try {
     const { userId, orgId } = await auth();
 
-    if (!userId || !orgId) {
+    if (!userId) {
       // Throw consistent error
-      throw new UnauthenticatedError('Authentication and organization membership required.');
+      throw new UnauthenticatedError('Authentication required.');
     }
 
     const searchParams = req.nextUrl.searchParams;

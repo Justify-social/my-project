@@ -34,12 +34,34 @@ const getCommentsQuerySchema = z.object({
 const notificationServiceInstance = new NotificationService();
 
 // Helper to verify study access for commenting/viewing comments
-async function verifyStudyAccessForComments(studyId: string, orgId: string) {
-  const study = await db.brandLiftStudy.findFirst({
-    where: { id: studyId, organizationId: orgId },
-    select: { id: true, status: true, approvalStatus: { select: { id: true } } },
+async function verifyStudyAccessForComments(studyId: string, clerkUserId: string) {
+  const userRecord = await db.user.findUnique({
+    where: { clerkId: clerkUserId },
+    select: { id: true },
   });
-  if (!study) throw new NotFoundError('Study not found or not accessible.');
+  if (!userRecord) {
+    throw new NotFoundError('User not found for authorization.');
+  }
+  const internalUserId = userRecord.id;
+
+  const study = await db.brandLiftStudy.findFirst({
+    where: {
+      id: studyId,
+      campaign: {
+        // Check access via campaign and user
+        userId: internalUserId,
+      },
+    },
+    // Select campaignName for notifications, and campaign.userId for ownership checks
+    select: {
+      id: true,
+      status: true,
+      name: true,
+      approvalStatus: { select: { id: true } },
+      campaign: { select: { userId: true, campaignName: true } },
+    },
+  });
+  if (!study) throw new NotFoundError('Study not found or not accessible by this user.');
 
   const currentStatus = study.status as BrandLiftStudyStatus;
   if (
@@ -56,8 +78,9 @@ async function verifyStudyAccessForComments(studyId: string, orgId: string) {
 // POST handler to add a new SurveyApprovalComment
 export const POST = async (req: NextRequest) => {
   try {
-    const { userId, orgId } = await auth();
-    if (!userId || !orgId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId)
+      return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
 
     const { searchParams } = new URL(req.url);
     const studyId = searchParams.get('studyId');
@@ -65,7 +88,7 @@ export const POST = async (req: NextRequest) => {
       throw new BadRequestError('Valid Study ID is required as a query parameter.');
     }
 
-    const study = await verifyStudyAccessForComments(studyId, orgId);
+    const study = await verifyStudyAccessForComments(studyId, clerkUserId);
 
     const approvalStatus = await db.surveyApprovalStatus.upsert({
       where: { studyId: study.id },
@@ -74,10 +97,11 @@ export const POST = async (req: NextRequest) => {
         studyId: study.id,
         status: SurveyOverallApprovalStatus.PENDING_REVIEW,
       },
-      select: {
-        id: true,
-        study: { select: { name: true, campaign: { select: { userId: true } } } },
-      }, // Select needed for notification
+      // Select what's needed for notification, study.name is now directly available from 'study' variable
+      // select: {
+      //   id: true,
+      //   study: { select: { name: true, campaign: { select: { userId: true } } } },
+      // },
     });
 
     const body = await req.json();
@@ -86,7 +110,7 @@ export const POST = async (req: NextRequest) => {
       logger.warn('Invalid comment creation data', {
         studyId,
         errors: validation.error.flatten().fieldErrors,
-        orgId,
+        userId: clerkUserId,
       });
       throw validation.error;
     }
@@ -106,7 +130,7 @@ export const POST = async (req: NextRequest) => {
       data: {
         approvalStatusId: approvalStatus.id,
         questionId: questionId,
-        authorId: userId,
+        authorId: clerkUserId,
         text: text,
         status: SurveyApprovalCommentStatus.OPEN,
       },
@@ -115,23 +139,27 @@ export const POST = async (req: NextRequest) => {
     // --- Notification Trigger ---
     try {
       const commenterDetails = await db.user.findUnique({
-        where: { id: userId },
-        select: { email: true, name: true },
+        where: { clerkId: clerkUserId },
+        select: { email: true, name: true, id: true },
       });
-      const studyOwnerId = approvalStatus.study.campaign?.userId;
+      const studyOwnerInternalId = study.campaign?.userId; // Use campaign.userId from the 'study' object returned by verifyStudyAccessForComments
       let studyOwnerDetails: { id: string; email: string; name?: string | null } | null = null;
-      if (studyOwnerId) {
+      if (studyOwnerInternalId) {
         studyOwnerDetails = await db.user.findUnique({
-          where: { id: studyOwnerId },
+          where: { id: studyOwnerInternalId },
           select: { id: true, email: true, name: true },
         });
       }
 
-      if (commenterDetails?.email && studyOwnerDetails?.email && studyOwnerDetails.id !== userId) {
-        const approvalPageUrl = `${BASE_URL}/approval/${study.id}`;
+      if (
+        commenterDetails?.email &&
+        studyOwnerDetails?.email &&
+        studyOwnerDetails.id !== commenterDetails.id
+      ) {
+        const approvalPageUrl = `${BASE_URL}/brand-lift/approval/${study.id}`;
         await notificationServiceInstance.sendNewCommentEmail(
           [{ email: studyOwnerDetails.email, name: studyOwnerDetails.name ?? undefined }],
-          { id: study.id, name: approvalStatus.study.name, approvalPageUrl },
+          { id: study.id, name: study.name, approvalPageUrl }, // Use study.name directly
           {
             commentText: newComment.text,
             commentAuthorName: commenterDetails.name ?? commenterDetails.email,
@@ -142,7 +170,7 @@ export const POST = async (req: NextRequest) => {
       } else {
         logger.warn(
           'Could not send new comment notification due to missing details or self-commenting.',
-          { studyId, commenterId: userId, ownerId: studyOwnerId }
+          { studyId, commenterId: clerkUserId, ownerId: studyOwnerInternalId }
         );
       }
     } catch (emailError: any) {
@@ -154,7 +182,11 @@ export const POST = async (req: NextRequest) => {
     }
     // --- End Notification Trigger ---
 
-    logger.info('Survey approval comment created', { commentId: newComment.id, studyId, orgId });
+    logger.info('Survey approval comment created', {
+      commentId: newComment.id,
+      studyId,
+      userId: clerkUserId,
+    });
     return NextResponse.json(newComment, { status: 201 });
   } catch (error: any) {
     return handleApiError(error, req);
@@ -164,8 +196,8 @@ export const POST = async (req: NextRequest) => {
 // GET handler to list SurveyApprovalComments for a study (and optionally a question)
 export const GET = async (req: NextRequest) => {
   try {
-    const { userId, orgId } = await auth();
-    if (!userId || !orgId) throw new UnauthenticatedError('Unauthorized');
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) throw new UnauthenticatedError('Authentication required.');
 
     const { searchParams } = new URL(req.url);
     const queryParams = Object.fromEntries(searchParams.entries());
@@ -174,19 +206,19 @@ export const GET = async (req: NextRequest) => {
     if (!validation.success) {
       logger.warn('Invalid query params for fetching comments', {
         errors: validation.error.flatten().fieldErrors,
-        orgId,
+        userId: clerkUserId,
       });
       throw validation.error;
     }
 
     const { studyId, questionId } = validation.data;
 
-    // Verify study access first. This also ensures orgId matches.
-    const study = await verifyStudyAccessForComments(studyId, orgId);
+    // Verify study access first.
+    const verifiedStudy = await verifyStudyAccessForComments(studyId, clerkUserId);
 
     // Construct where clause for comments
     const whereClause: Prisma.SurveyApprovalCommentWhereInput = {
-      approvalStatus: { studyId: study.id }, // Comments linked via approvalStatus to the study
+      approvalStatus: { studyId: verifiedStudy.id }, // Use verifiedStudy.id
     };
     if (questionId) {
       whereClause.questionId = questionId;
@@ -201,7 +233,11 @@ export const GET = async (req: NextRequest) => {
       // include: { author: { select: { name: true, avatarUrl: true } } }
     });
 
-    logger.info(`Fetched ${comments.length} comments`, { studyId, questionId, orgId });
+    logger.info(`Fetched ${comments.length} comments`, {
+      studyId,
+      questionId,
+      userId: clerkUserId,
+    });
     return NextResponse.json(comments);
   } catch (error: any) {
     return handleApiError(error, req);

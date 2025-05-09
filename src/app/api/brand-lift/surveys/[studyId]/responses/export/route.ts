@@ -13,14 +13,30 @@ import db from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { handleApiError } from '@/lib/apiErrorHandler';
 import { BadRequestError, NotFoundError, UnauthenticatedError, ForbiddenError } from '@/lib/errors';
+import { CintApiService } from '@/lib/cint'; // For fetching live Cint progress -- This import seems incorrect for this export file, consider removing if not used.
 
 // Helper to verify study access and if it's in a state suitable for export (e.g., COMPLETED)
-async function verifyStudyForExport(studyId: string, orgId: string) {
+async function verifyStudyForExport(studyId: string, clerkUserId: string) {
+  const userRecord = await db.user.findUnique({
+    where: { clerkId: clerkUserId },
+    select: { id: true },
+  });
+  if (!userRecord) {
+    throw new NotFoundError('User not found for authorization.');
+  }
+  const internalUserId = userRecord.id;
+
   const study = await db.brandLiftStudy.findFirst({
-    where: { id: studyId, organizationId: orgId },
+    where: {
+      id: studyId,
+      campaign: {
+        // Check access via campaign and user
+        userId: internalUserId,
+      },
+    },
     select: { id: true, status: true, name: true }, // Include name for filename
   });
-  if (!study) throw new NotFoundError('Study not found or not accessible.');
+  if (!study) throw new NotFoundError('Study not found or not accessible by this user.');
 
   // Typically, export is allowed for COMPLETED or perhaps COLLECTING studies
   const allowedStatuses: BrandLiftStudyStatus[] = [
@@ -40,14 +56,13 @@ export const GET = async (
   { params: paramsPromise }: { params: Promise<{ studyId: string }> }
 ) => {
   try {
-    const { userId, orgId } = await auth();
-    if (!userId || !orgId)
-      throw new UnauthenticatedError('Authentication and organization membership required.');
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) throw new UnauthenticatedError('Authentication required.');
 
     const { studyId } = await paramsPromise;
     if (!studyId) throw new BadRequestError('Study ID is required.');
 
-    const study = await verifyStudyForExport(studyId, orgId);
+    const study = await verifyStudyForExport(studyId, clerkUserId);
 
     const responses: (SurveyResponse & {
       study: { questions: (SurveyQuestion & { options: SurveyOption[] })[] };
@@ -63,7 +78,7 @@ export const GET = async (
     if (responses.length === 0) {
       // Return a 200 with an empty CSV or a message, rather than 404, as the study exists.
       // Or a specific status code like 204 No Content if preferred and handled by client.
-      logger.info('No responses found to export for study', { studyId, orgId });
+      logger.info('No responses found to export for study', { studyId, userId: clerkUserId });
       const emptyCsv = stringify([['No responses found for this study']]);
       return new NextResponse(emptyCsv, {
         status: 200,
@@ -205,7 +220,10 @@ export const GET = async (
     const csvString = stringify(csvData);
     const safeFilename = study.name.replace(/[^a-z0-9_\-\. ]/gi, '') || 'brand_lift_export';
 
-    logger.info(`Exporting ${responses.length} responses for study`, { studyId, orgId });
+    logger.info(`Exporting ${responses.length} responses for study`, {
+      studyId,
+      userId: clerkUserId,
+    });
     return new NextResponse(csvString, {
       status: 200,
       headers: {

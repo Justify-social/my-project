@@ -37,22 +37,35 @@ export const GET = async (
   { params: paramsPromise }: { params: Promise<{ studyId: string }> }
 ) => {
   try {
-    const { userId, orgId } = await auth();
-    if (!userId || !orgId)
-      throw new UnauthenticatedError('Authentication and organization membership required.');
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) throw new UnauthenticatedError('Authentication required.');
 
     const { studyId } = await paramsPromise;
     if (!studyId) throw new BadRequestError('Study ID is required.');
 
+    const userRecord = await db.user.findUnique({
+      where: { clerkId: clerkUserId },
+      select: { id: true },
+    });
+    if (!userRecord) {
+      throw new NotFoundError('User not found for authorization.');
+    }
+    const internalUserId = userRecord.id;
+
     const study = await db.brandLiftStudy.findFirst({
-      where: { id: studyId, organizationId: orgId },
+      where: {
+        id: studyId,
+        campaign: {
+          userId: internalUserId,
+        },
+      },
       include: {
         campaign: { select: { campaignName: true } },
         _count: { select: { questions: true } },
       },
     });
-    if (!study) throw new NotFoundError('Study not found');
-    logger.info('Fetched Brand Lift Study details', { studyId, orgId });
+    if (!study) throw new NotFoundError('Study not found or not accessible by this user.');
+    logger.info('Fetched Brand Lift Study details', { studyId, userId: clerkUserId });
     return NextResponse.json(study);
   } catch (error: any) {
     return handleApiError(error, req);
@@ -64,9 +77,8 @@ export const PUT = async (
   { params: paramsPromise }: { params: Promise<{ studyId: string }> }
 ) => {
   try {
-    const { userId, orgId } = await auth();
-    if (!userId || !orgId)
-      throw new UnauthenticatedError('Authentication and organization membership required.');
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) throw new UnauthenticatedError('Authentication required.');
 
     const { studyId } = await paramsPromise;
     if (!studyId) throw new BadRequestError('Study ID is required.');
@@ -77,15 +89,29 @@ export const PUT = async (
       logger.warn('Invalid study update data', {
         studyId,
         errors: validation.error.flatten().fieldErrors,
-        orgId,
+        userId: clerkUserId,
       });
       throw validation.error;
     }
 
     const updateData = validation.data;
 
+    const userRecord = await db.user.findUnique({
+      where: { clerkId: clerkUserId },
+      select: { id: true },
+    });
+    if (!userRecord) {
+      throw new NotFoundError('User not found for study update authorization.');
+    }
+    const internalUserId = userRecord.id;
+
     const existingStudy = await db.brandLiftStudy.findFirst({
-      where: { id: studyId, organizationId: orgId },
+      where: {
+        id: studyId,
+        campaign: {
+          userId: internalUserId,
+        },
+      },
       select: {
         id: true,
         status: true,
@@ -93,7 +119,7 @@ export const PUT = async (
         campaign: { select: { userId: true, campaignName: true } },
       },
     });
-    if (!existingStudy) throw new NotFoundError('Study not found or not accessible');
+    if (!existingStudy) throw new NotFoundError('Study not found or not accessible by this user.');
 
     const currentStatus = existingStudy.status as BrandLiftStudyStatus;
     if (
@@ -115,7 +141,7 @@ export const PUT = async (
       updateData.status === BrandLiftStudyStatus.COLLECTING &&
       existingStudy.status !== BrandLiftStudyStatus.COLLECTING
     ) {
-      logger.info(`Attempting to launch study ${studyId} on Cint...`, { orgId });
+      logger.info(`Attempting to launch study ${studyId} on Cint...`, { userId: clerkUserId });
       try {
         const fullStudyForCint = await db.brandLiftStudy.findUnique({
           where: { id: studyId },
@@ -207,7 +233,7 @@ export const PUT = async (
           });
         } else {
           submitterDetails = await db.user.findUnique({
-            where: { id: userId },
+            where: { id: clerkUserId },
             select: { email: true, name: true },
           });
         }
@@ -238,7 +264,7 @@ export const PUT = async (
 
     logger.info('Brand Lift Study updated successfully', {
       studyId,
-      orgId,
+      userId: clerkUserId,
       newStatus: finalUpdatedStudy.status,
     });
     return NextResponse.json(finalUpdatedStudy);

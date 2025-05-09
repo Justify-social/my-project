@@ -30,19 +30,30 @@ const createQuestionSchema = z.object({
 // Helper to verify study access and status
 async function verifyStudyAccess(
   studyId: string,
-  orgId: string,
+  clerkUserId: string,
   allowedStatuses: BrandLiftStudyStatus[]
 ) {
+  const userRecord = await db.user.findUnique({
+    where: { clerkId: clerkUserId },
+    select: { id: true },
+  });
+  if (!userRecord) {
+    throw new NotFoundError('User not found for authorization.');
+  }
+  const internalUserId = userRecord.id;
+
   const study = await db.brandLiftStudy.findFirst({
     where: {
       id: studyId,
-      organizationId: orgId,
+      campaign: {
+        userId: internalUserId,
+      },
     },
     select: { id: true, status: true },
   });
 
   if (!study) {
-    throw new NotFoundError('Study not found or not accessible');
+    throw new NotFoundError('Study not found or not accessible by this user.');
   }
 
   // Cast the status string from DB to the local enum for comparison
@@ -60,9 +71,9 @@ export const POST = async (
   { params: paramsPromise }: { params: Promise<{ studyId: string }> }
 ) => {
   try {
-    const { userId, orgId } = await auth();
-    if (!userId || !orgId) {
-      throw new UnauthenticatedError('Authentication and organization membership required.');
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) {
+      throw new UnauthenticatedError('Authentication required.');
     }
 
     const { studyId } = await paramsPromise;
@@ -70,11 +81,10 @@ export const POST = async (
       throw new BadRequestError('Study ID is required.');
     }
 
-    // Verify user can edit this study (must exist, belong to org, and be in an editable status)
-    await verifyStudyAccess(studyId, orgId, [
+    // Verify user can edit this study
+    await verifyStudyAccess(studyId, clerkUserId, [
       BrandLiftStudyStatus.DRAFT,
       BrandLiftStudyStatus.PENDING_APPROVAL,
-      // Add CHANGES_REQUESTED if needed
     ]);
 
     const body = await req.json();
@@ -84,7 +94,7 @@ export const POST = async (
       logger.warn('Invalid question creation data', {
         studyId,
         errors: validation.error.flatten().fieldErrors,
-        orgId,
+        userId: clerkUserId,
       });
       throw new BadRequestError('Invalid question data.');
     }
@@ -117,7 +127,7 @@ export const POST = async (
     logger.info('Survey question created successfully', {
       questionId: newQuestion?.id,
       studyId,
-      orgId,
+      userId: clerkUserId,
     });
     return NextResponse.json(newQuestion, { status: 201 });
   } catch (error: any) {
@@ -132,9 +142,9 @@ export const GET = async (
   { params: paramsPromise }: { params: Promise<{ studyId: string }> }
 ) => {
   try {
-    const { userId, orgId } = await auth();
-    if (!userId || !orgId) {
-      throw new UnauthenticatedError('Authentication and organization membership required.');
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) {
+      throw new UnauthenticatedError('Authentication required.');
     }
 
     const { studyId } = await paramsPromise;
@@ -144,7 +154,7 @@ export const GET = async (
 
     // Verify user can access the study (just need existence and org match for GET)
     const allStatuses = Object.values(BrandLiftStudyStatus) as BrandLiftStudyStatus[];
-    await verifyStudyAccess(studyId, orgId, allStatuses);
+    await verifyStudyAccess(studyId, clerkUserId, allStatuses);
 
     const questions = await db.surveyQuestion.findMany({
       where: {
@@ -162,7 +172,10 @@ export const GET = async (
       },
     });
 
-    logger.info(`Fetched ${questions.length} questions for study`, { studyId, orgId });
+    logger.info(`Fetched ${questions.length} questions for study`, {
+      studyId,
+      userId: clerkUserId,
+    });
     return NextResponse.json(questions);
   } catch (error: any) {
     return handleApiError(error);

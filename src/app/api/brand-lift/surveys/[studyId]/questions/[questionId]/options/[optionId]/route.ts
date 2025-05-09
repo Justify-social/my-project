@@ -6,13 +6,14 @@ import logger from '@/lib/logger';
 import { handleApiError } from '@/lib/apiErrorHandler';
 import { UnauthenticatedError, ForbiddenError, BadRequestError, NotFoundError } from '@/lib/errors';
 
-// TODO: SSOT - This enum should be defined in and imported from src/types/brand-lift.ts
-// Defining locally for now
-enum BrandLiftStudyStatus_API {
-  DRAFT = 'DRAFT',
-  PENDING_APPROVAL = 'PENDING_APPROVAL',
-  // ... other statuses
-}
+// Define BrandLiftStudyStatus locally if not imported, or import from Prisma
+const BrandLiftStudyStatus = {
+  DRAFT: 'DRAFT',
+  PENDING_APPROVAL: 'PENDING_APPROVAL',
+  CHANGES_REQUESTED: 'CHANGES_REQUESTED',
+  // Add other statuses as defined in your Prisma schema
+} as const;
+type BrandLiftStudyStatus = (typeof BrandLiftStudyStatus)[keyof typeof BrandLiftStudyStatus];
 
 // Zod schema for updating a survey option
 const surveyOptionUpdateSchema = z
@@ -40,54 +41,95 @@ const surveyOptionUpdateSchema = z
 // Original putOptionHandler logic, to be inlined or called directly
 // async function putOptionHandler(request: NextRequest, { params: paramsPromise }: { params: Promise<{ studyId: string, questionId: string, optionId: string }> }) { ... }
 
-// Original deleteOptionHandler logic
+// Helper to verify option access and parent study status
+async function verifyOptionAccess(
+  optionId: string,
+  questionId: string,
+  studyId: string,
+  clerkUserId: string,
+  allowedStatuses: BrandLiftStudyStatus[]
+) {
+  const userRecord = await prisma.user.findUnique({
+    where: { clerkId: clerkUserId },
+    select: { id: true },
+  });
+  if (!userRecord) {
+    throw new NotFoundError('User not found for authorization.');
+  }
+  const internalUserId = userRecord.id;
+
+  const option = await prisma.surveyOption.findFirst({
+    where: {
+      id: optionId,
+      questionId: questionId,
+      question: {
+        studyId: studyId,
+        study: {
+          campaign: {
+            userId: internalUserId,
+          },
+        },
+      },
+    },
+    include: {
+      question: { include: { study: { select: { status: true } } } },
+    },
+  });
+
+  if (!option) {
+    throw new NotFoundError('Option not found or not accessible by this user.');
+  }
+
+  const currentStudyStatus = option.question.study.status as BrandLiftStudyStatus;
+  if (!allowedStatuses.includes(currentStudyStatus)) {
+    throw new ForbiddenError(`Operation not allowed for study status: ${currentStudyStatus}.`);
+  }
+  return option;
+}
+
+// Original deleteOptionHandler logic, refactored
 async function deleteOptionHandler(
   request: NextRequest,
   {
     params: paramsPromise,
   }: { params: Promise<{ studyId: string; questionId: string; optionId: string }> }
 ) {
-  const { userId, orgId } = await auth();
-  if (!userId) {
-    throw new UnauthenticatedError('User not authenticated for deleting option.');
-  }
-  const { studyId, questionId, optionId } = await paramsPromise;
-  logger.info('Authenticated user for DELETE .../options/{optionId}', {
-    userId,
-    orgId,
-    studyId,
-    questionId,
-    optionId,
-  });
+  try {
+    const { userId: clerkUserId } = await auth(); // Changed
+    if (!clerkUserId) {
+      // Changed
+      throw new UnauthenticatedError('User not authenticated for deleting option.'); // Changed
+    }
+    const { studyId, questionId, optionId } = await paramsPromise;
+    logger.info('Authenticated user for DELETE .../options/{optionId}', {
+      userId: clerkUserId, // Changed
+      studyId,
+      questionId,
+      optionId,
+    });
 
-  // TODO: Authorization Logic (similar to PUT) - P1-02 (Refined)
-  const optionToDelete = await prisma.surveyOption.findFirst({
-    where: {
-      id: optionId,
-      questionId: questionId,
-      question: {
-        studyId: studyId,
+    await verifyOptionAccess(optionId, questionId, studyId, clerkUserId, [
+      BrandLiftStudyStatus.DRAFT,
+      BrandLiftStudyStatus.PENDING_APPROVAL,
+      BrandLiftStudyStatus.CHANGES_REQUESTED,
+    ]);
+
+    const deleteResult = await prisma.surveyOption.deleteMany({
+      where: {
+        id: optionId,
+        // Add questionId and studyId through question linkage if needed for extra safety, though verifyOptionAccess should cover it.
+        question: { id: questionId, studyId: studyId },
       },
-    },
-  });
+    });
 
-  if (!optionToDelete) {
-    throw new NotFoundError(
-      'Option not found, or it does not belong to the specified question/study, or study is not in an editable state.'
-    );
+    if (deleteResult.count === 0) {
+      throw new NotFoundError('Option not found during delete operation.');
+    }
+    logger.info('SurveyOption deleted', { optionId, questionId, studyId, userId: clerkUserId }); // Changed
+    return new NextResponse(null, { status: 204 });
+  } catch (error: any) {
+    return handleApiError(error, request);
   }
-
-  const deleteResult = await prisma.surveyOption.deleteMany({
-    where: {
-      id: optionId,
-    },
-  });
-
-  if (deleteResult.count === 0) {
-    throw new NotFoundError('Option not found during delete operation.');
-  }
-  logger.info('SurveyOption deleted', { optionId, questionId, studyId, userId });
-  return new NextResponse(null, { status: 204 });
 }
 
 export const PUT = async (
@@ -97,20 +139,24 @@ export const PUT = async (
   }: { params: Promise<{ studyId: string; questionId: string; optionId: string }> }
 ) => {
   try {
-    const { userId, orgId } = await auth();
-    if (!userId) {
-      throw new UnauthenticatedError('User not authenticated for updating option.');
+    const { userId: clerkUserId } = await auth(); // Changed
+    if (!clerkUserId) {
+      // Changed
+      throw new UnauthenticatedError('User not authenticated for updating option.'); // Changed
     }
     const { studyId, questionId, optionId } = await paramsPromise;
     logger.info('Authenticated user for PUT .../options/{optionId}', {
-      userId,
-      orgId,
+      userId: clerkUserId, // Changed
       studyId,
       questionId,
       optionId,
     });
 
-    // TODO: Authorization Logic - P1-02 (Refined)
+    await verifyOptionAccess(optionId, questionId, studyId, clerkUserId, [
+      BrandLiftStudyStatus.DRAFT,
+      BrandLiftStudyStatus.PENDING_APPROVAL,
+      BrandLiftStudyStatus.CHANGES_REQUESTED,
+    ]);
 
     const body = await request.json();
     const validatedData = surveyOptionUpdateSchema.parse(body);
@@ -138,6 +184,8 @@ export const PUT = async (
     const updateResult = await prisma.surveyOption.updateMany({
       where: {
         id: optionId,
+        // Add questionId and studyId for extra safety, though verifyOptionAccess should cover it.
+        question: { id: questionId, studyId: studyId },
       },
       data: validatedData,
     });
@@ -149,7 +197,7 @@ export const PUT = async (
     const optionToReturn = await prisma.surveyOption.findUniqueOrThrow({
       where: { id: optionId },
     });
-    logger.info('SurveyOption updated', { optionId, questionId, studyId, userId });
+    logger.info('SurveyOption updated', { optionId, questionId, studyId, userId: clerkUserId }); // Changed
     return NextResponse.json(optionToReturn, { status: 200 });
   } catch (error: any) {
     return handleApiError(error, request);

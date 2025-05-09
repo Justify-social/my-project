@@ -19,9 +19,24 @@ const reorderPayloadSchema = z
   .min(1, 'At least one item required for reorder.');
 
 // Helper to verify study access and modifiable status
-async function verifyStudyAccessForReorder(studyId: string, orgId: string) {
+async function verifyStudyAccessForReorder(studyId: string, clerkUserId: string) {
+  const userRecord = await db.user.findUnique({
+    where: { clerkId: clerkUserId },
+    select: { id: true },
+  });
+  if (!userRecord) {
+    throw new NotFoundError('User not found for authorization.');
+  }
+  const internalUserId = userRecord.id;
+
   const study = await db.brandLiftStudy.findFirst({
-    where: { id: studyId, organizationId: orgId },
+    where: {
+      id: studyId,
+      campaign: {
+        // Check access via campaign and user
+        userId: internalUserId,
+      },
+    },
     select: { id: true, status: true },
   });
   if (!study)
@@ -42,13 +57,13 @@ export const PATCH = async (
   { params: paramsPromise }: { params: Promise<{ studyId: string }> }
 ) => {
   try {
-    const { userId, orgId } = await auth();
-    if (!userId || !orgId) throw new UnauthenticatedError('Unauthorized');
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) throw new UnauthenticatedError('Authentication required.');
 
     const { studyId } = await paramsPromise;
     if (!studyId) throw new BadRequestError('Study ID is required.');
 
-    await verifyStudyAccessForReorder(studyId, orgId);
+    await verifyStudyAccessForReorder(studyId, clerkUserId);
 
     const body = await req.json();
     const validation = reorderPayloadSchema.safeParse(body);
@@ -57,33 +72,39 @@ export const PATCH = async (
       logger.warn('Invalid question reorder data', {
         studyId,
         errors: validation.error.flatten().fieldErrors,
-        orgId,
+        userId: clerkUserId,
       });
       throw validation.error; // Let handleApiError format Zod errors
     }
 
     const updates = validation.data;
 
-    // Ensure all provided question IDs belong to the specified studyId and organizationId
-    // This is an important security and data integrity check.
+    // Ensure all provided question IDs belong to the specified studyId and user
+    const userRecord = await db.user.findUnique({
+      where: { clerkId: clerkUserId },
+      select: { id: true },
+    });
+    if (!userRecord) throw new NotFoundError('User not found for reorder operation validation.');
+    const internalUserId = userRecord.id;
+
     const questionIdsToUpdate = updates.map(u => u.id);
     const questionsInStudy = await db.surveyQuestion.findMany({
       where: {
         id: { in: questionIdsToUpdate },
         studyId: studyId,
-        study: { organizationId: orgId },
+        study: { campaign: { userId: internalUserId } },
       },
       select: { id: true },
     });
 
     if (questionsInStudy.length !== updates.length) {
-      logger.error('Mismatch in question IDs provided for reorder', {
+      logger.error('Mismatch in question IDs provided for reorder or access denied', {
         studyId,
-        orgId,
+        userId: clerkUserId,
         providedIds: questionIdsToUpdate,
         foundIds: questionsInStudy.map((q: { id: string }) => q.id),
       });
-      throw new BadRequestError('Invalid question ID(s) for reorder.');
+      throw new BadRequestError('Invalid question ID(s) for reorder or access denied.');
     }
 
     await db.$transaction(
@@ -94,7 +115,11 @@ export const PATCH = async (
         })
       )
     );
-    logger.info('Successfully reordered questions', { studyId, orgId, count: updates.length });
+    logger.info('Successfully reordered questions', {
+      studyId,
+      userId: clerkUserId,
+      count: updates.length,
+    });
     return NextResponse.json({ message: 'Questions reordered successfully' }, { status: 200 });
   } catch (error: any) {
     // logger.error('Error in PATCH reorder questions:', { studyId, error: error.message, stack: error.stack }); // Redundant if handleApiError logs

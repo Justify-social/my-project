@@ -44,8 +44,8 @@ export const POST = async (
 ) => {
   try {
     const { userId, orgId } = await auth();
-    if (!userId || !orgId) {
-      throw new UnauthenticatedError('User not authenticated or not part of an organization.');
+    if (!userId) {
+      throw new UnauthenticatedError('User not authenticated.');
     }
     const { studyId, questionId } = await paramsPromise;
     logger.info('Authenticated user for POST .../questions/{questionId}/options', {

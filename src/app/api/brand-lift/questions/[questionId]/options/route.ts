@@ -20,16 +20,34 @@ const createOptionSchema = z.object({
 });
 
 // Helper to verify question access for adding an option
-async function verifyQuestionAccessForAddOption(questionId: string, orgId: string) {
+async function verifyQuestionAccessForAddOption(questionId: string, clerkUserId: string) {
+  const userRecord = await db.user.findUnique({
+    where: { clerkId: clerkUserId },
+    select: { id: true },
+  });
+  if (!userRecord) {
+    throw new NotFoundError('User not found for authorization.');
+  }
+  const internalUserId = userRecord.id;
+
   const question = await db.surveyQuestion.findUnique({
     where: { id: questionId },
-    include: { study: { select: { status: true, organizationId: true } } },
+    // Include study and campaign for user-based authorization
+    include: {
+      study: {
+        select: {
+          status: true,
+          campaign: { select: { userId: true } },
+        },
+      },
+    },
   });
 
   if (!question) {
     throw new NotFoundError('Parent question not found. Cannot add option.');
   }
-  if (question.study.organizationId !== orgId) {
+  // Check ownership via campaign
+  if (question.study?.campaign?.userId !== internalUserId) {
     throw new ForbiddenError("Access denied to this question's study. Cannot add option.");
   }
 
@@ -48,9 +66,8 @@ export const POST = async (
   { params: paramsPromise }: { params: Promise<{ questionId: string }> }
 ) => {
   try {
-    const { userId, orgId } = await auth();
-    if (!userId || !orgId)
-      throw new UnauthenticatedError('Authentication and organization membership required.');
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) throw new UnauthenticatedError('Authentication required.');
 
     const { questionId } = await paramsPromise;
     if (!questionId || !z.string().cuid().safeParse(questionId).success) {
@@ -58,7 +75,7 @@ export const POST = async (
       throw new BadRequestError('Valid Question ID is required in the path.');
     }
 
-    await verifyQuestionAccessForAddOption(questionId, orgId);
+    await verifyQuestionAccessForAddOption(questionId, clerkUserId);
 
     const body = await req.json();
     const validation = createOptionSchema.safeParse(body);
@@ -66,7 +83,7 @@ export const POST = async (
       logger.warn('Invalid option creation data', {
         questionId,
         errors: validation.error.flatten().fieldErrors,
-        orgId,
+        userId: clerkUserId,
       });
       throw validation.error;
     }
@@ -80,7 +97,7 @@ export const POST = async (
     logger.info('Survey option created successfully', {
       optionId: newOption.id,
       questionId,
-      orgId,
+      userId: clerkUserId,
     });
     return NextResponse.json(newOption, { status: 201 });
   } catch (error: any) {

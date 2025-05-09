@@ -36,10 +36,24 @@ type EnrichedStudyState = Prisma.BrandLiftStudyGetPayload<{
 
 async function verifyStudyForApprovalInteraction(
   studyId: string,
-  orgId: string
+  clerkUserId: string
 ): Promise<EnrichedStudyState> {
+  const userRecord = await db.user.findUnique({
+    where: { clerkId: clerkUserId },
+    select: { id: true },
+  });
+  if (!userRecord) {
+    throw new NotFoundError('User not found for authorization.');
+  }
+  const internalUserId = userRecord.id;
+
   const study = await db.brandLiftStudy.findFirst({
-    where: { id: studyId, organizationId: orgId },
+    where: {
+      id: studyId,
+      campaign: {
+        userId: internalUserId,
+      },
+    },
     select: {
       id: true,
       name: true,
@@ -49,12 +63,10 @@ async function verifyStudyForApprovalInteraction(
     },
   });
 
-  if (!study) throw new NotFoundError('Study not found or not accessible.');
+  if (!study) throw new NotFoundError('Study not found or not accessible by this user.');
 
-  // Allowed main study statuses for updating/viewing approval status:
-  // If SurveyOverallApprovalStatus is CHANGES_REQUESTED, the main BrandLiftStudy.status would be PENDING_APPROVAL.
   const allowedInteractionStatuses: BrandLiftStudyStatus[] = [
-    BrandLiftStudyStatus.PENDING_APPROVAL, // Covers initial review and when changes were requested
+    BrandLiftStudyStatus.PENDING_APPROVAL,
     BrandLiftStudyStatus.APPROVED,
   ];
 
@@ -69,8 +81,9 @@ async function verifyStudyForApprovalInteraction(
 
 export const GET = async (req: NextRequest) => {
   try {
-    const { userId, orgId } = await auth();
-    if (!userId || !orgId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId)
+      return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
 
     const { searchParams } = new URL(req.url);
     const studyIdQueryParam = searchParams.get('studyId');
@@ -79,13 +92,13 @@ export const GET = async (req: NextRequest) => {
     if (!parsedQuery.success) {
       logger.warn('Invalid query params for fetching approval status', {
         errors: parsedQuery.error.flatten().fieldErrors,
-        orgId,
+        userId: clerkUserId,
       });
       throw parsedQuery.error;
     }
     const { studyId } = parsedQuery.data;
 
-    await verifyStudyForApprovalInteraction(studyId, orgId); // Verifies access and correct study state
+    await verifyStudyForApprovalInteraction(studyId, clerkUserId);
 
     const approvalStatus = await db.surveyApprovalStatus.findUnique({
       where: { studyId: studyId },
@@ -96,7 +109,7 @@ export const GET = async (req: NextRequest) => {
       // For GET, returning 404 if not explicitly created is reasonable.
       throw new NotFoundError('Approval status record not found for this study.');
     }
-    logger.info('SurveyApprovalStatus fetched successfully', { studyId, orgId });
+    logger.info('SurveyApprovalStatus fetched successfully', { studyId, userId: clerkUserId });
     return NextResponse.json(approvalStatus);
   } catch (error: any) {
     return handleApiError(error, req);
@@ -105,8 +118,9 @@ export const GET = async (req: NextRequest) => {
 
 export const PUT = async (req: NextRequest) => {
   try {
-    const { userId, orgId } = await auth();
-    if (!userId || !orgId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId)
+      return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
 
     const { searchParams } = new URL(req.url);
     const studyId = searchParams.get('studyId');
@@ -117,7 +131,7 @@ export const PUT = async (req: NextRequest) => {
     // verifyStudyForApprovalInteraction is called, which now uses the corrected allowed statuses
     const currentStudyState: EnrichedStudyState = await verifyStudyForApprovalInteraction(
       studyId,
-      orgId
+      clerkUserId
     );
 
     const body = await req.json();
@@ -126,7 +140,7 @@ export const PUT = async (req: NextRequest) => {
       logger.warn('Invalid approval status update data', {
         studyId,
         errors: validation.error.flatten().fieldErrors,
-        orgId,
+        userId: clerkUserId,
       });
       throw validation.error;
     }
@@ -166,7 +180,7 @@ export const PUT = async (req: NextRequest) => {
     if (typeof requestedSignOff === 'boolean')
       approvalStatusDataToUpdate.requestedSignOff = requestedSignOff;
     if (newApprovalStatusEnumValue === SurveyOverallApprovalStatus.SIGNED_OFF) {
-      approvalStatusDataToUpdate.signedOffBy = userId;
+      approvalStatusDataToUpdate.signedOffBy = clerkUserId;
       approvalStatusDataToUpdate.signedOffAt = new Date();
     }
 
@@ -181,7 +195,7 @@ export const PUT = async (req: NextRequest) => {
             status: newApprovalStatusEnumValue,
             requestedSignOff: requestedSignOff ?? false,
             ...(newApprovalStatusEnumValue === SurveyOverallApprovalStatus.SIGNED_OFF && {
-              signedOffBy: userId,
+              signedOffBy: clerkUserId,
               signedOffAt: new Date(),
             }),
           },
@@ -213,7 +227,7 @@ export const PUT = async (req: NextRequest) => {
     }
 
     const requesterDetailsFull = await db.user.findUnique({
-      where: { id: userId },
+      where: { id: clerkUserId },
       select: { id: true, email: true, name: true },
     });
     const requesterDetails: UserDetails | null = requesterDetailsFull
@@ -284,7 +298,7 @@ export const PUT = async (req: NextRequest) => {
       studyId,
       newApprovalStatus: updatedApprovalStatus.status,
       newStudyStatus: finalStudyDbState.status,
-      orgId,
+      userId: clerkUserId,
     });
     return NextResponse.json({
       approvalStatus: updatedApprovalStatus,

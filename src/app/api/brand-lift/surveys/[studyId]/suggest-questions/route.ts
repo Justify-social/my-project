@@ -32,9 +32,26 @@ interface StudyContextForPrompt {
   } | null;
 }
 
-async function verifyStudyAccess(studyId: string, orgId: string): Promise<StudyContextForPrompt> {
+async function verifyStudyAccess(
+  studyId: string,
+  clerkUserId: string
+): Promise<StudyContextForPrompt> {
+  const userRecord = await db.user.findUnique({
+    where: { clerkId: clerkUserId },
+    select: { id: true },
+  });
+  if (!userRecord) {
+    throw new NotFoundError('User not found for authorization.');
+  }
+  const internalUserId = userRecord.id;
+
   const study = await db.brandLiftStudy.findFirst({
-    where: { id: studyId, organizationId: orgId },
+    where: {
+      id: studyId,
+      campaign: {
+        userId: internalUserId,
+      },
+    },
     select: {
       id: true,
       name: true,
@@ -81,19 +98,18 @@ export const POST = async (
   { params: paramsPromise }: { params: Promise<{ studyId: string }> }
 ) => {
   try {
-    const { userId, orgId } = await auth();
-    if (!userId || !orgId)
-      throw new UnauthenticatedError('Authentication and organization membership required.');
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) throw new UnauthenticatedError('Authentication required.');
 
     const { studyId } = await paramsPromise;
     if (!studyId) throw new BadRequestError('Study ID is required.');
 
     if (!process.env.OPENAI_API_KEY) {
-      logger.error('OpenAI API Key not configured', { orgId, studyId });
+      logger.error('OpenAI API Key not configured', { userId: clerkUserId, studyId });
       throw new Error('AI features are currently unavailable due to configuration.');
     }
 
-    const studyDataForPrompt: StudyContextForPrompt = await verifyStudyAccess(studyId, orgId);
+    const studyDataForPrompt: StudyContextForPrompt = await verifyStudyAccess(studyId, clerkUserId);
 
     const promptContext: Partial<BrandLiftStudyData> = {
       id: studyDataForPrompt.id,
@@ -110,7 +126,11 @@ export const POST = async (
     };
     const userPrompt = createQuestionGenerationPrompt(promptContext);
 
-    logger.info('Requesting AI question suggestions', { studyId, orgId, model: AiConfig.model });
+    logger.info('Requesting AI question suggestions', {
+      studyId,
+      userId: clerkUserId,
+      model: AiConfig.model,
+    });
 
     const completion = await openai.chat.completions.create({
       model: AiConfig.model,

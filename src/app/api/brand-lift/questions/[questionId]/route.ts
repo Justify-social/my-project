@@ -28,26 +28,36 @@ const updateQuestionSchema = z
 // Helper to verify question access and parent study status
 async function verifyQuestionAccess(
   questionId: string,
-  orgId: string,
+  clerkUserId: string,
   allowedStatuses: BrandLiftStudyStatus[]
 ) {
+  const userRecord = await db.user.findUnique({
+    where: { clerkId: clerkUserId },
+    select: { id: true },
+  });
+  if (!userRecord) {
+    throw new NotFoundError('User not found for authorization.');
+  }
+  const internalUserId = userRecord.id;
+
   const question = await db.surveyQuestion.findUnique({
     where: {
       id: questionId,
+      study: {
+        campaign: {
+          userId: internalUserId,
+        },
+      },
     },
     include: {
       study: {
-        select: { id: true, status: true, organizationId: true },
+        select: { id: true, status: true },
       },
     },
   });
 
   if (!question) {
-    throw new NotFoundError('Question not found');
-  }
-
-  if (question.study.organizationId !== orgId) {
-    throw new ForbiddenError("Access denied to this question's study");
+    throw new NotFoundError('Question not found or not accessible by this user.');
   }
 
   const currentStatus = question.study.status as BrandLiftStudyStatus;
@@ -63,9 +73,9 @@ const putHandler = async (
   req: NextRequest,
   { params: paramsPromise }: { params: Promise<{ questionId: string }> }
 ) => {
-  const { userId, orgId } = await auth();
-  if (!userId || !orgId) {
-    throw new UnauthenticatedError('Unauthorized');
+  const { userId: clerkUserId } = await auth();
+  if (!clerkUserId) {
+    throw new UnauthenticatedError('Authentication required.');
   }
 
   const { questionId } = await paramsPromise;
@@ -73,9 +83,17 @@ const putHandler = async (
     throw new BadRequestError('Question ID is required.');
   }
 
-  await verifyQuestionAccess(questionId, orgId, [
+  const userRecord = await db.user.findUnique({
+    where: { clerkId: clerkUserId },
+    select: { id: true },
+  });
+  if (!userRecord) throw new NotFoundError('User for update operation not found');
+  const internalUserId = userRecord.id;
+
+  await verifyQuestionAccess(questionId, clerkUserId, [
     BrandLiftStudyStatus.DRAFT,
     BrandLiftStudyStatus.PENDING_APPROVAL,
+    BrandLiftStudyStatus.CHANGES_REQUESTED,
   ]);
 
   const body = await req.json();
@@ -85,7 +103,7 @@ const putHandler = async (
     logger.warn('Invalid question update data', {
       questionId,
       errors: validation.error.flatten().fieldErrors,
-      orgId,
+      userId: clerkUserId,
     });
     throw validation.error;
   }
@@ -94,15 +112,18 @@ const putHandler = async (
     const updatedQuestion = await db.surveyQuestion.update({
       where: {
         id: questionId,
-        study: { organizationId: orgId },
+        study: { campaign: { userId: internalUserId } },
       },
       data: validation.data,
     });
-    logger.info('Survey question updated successfully', { questionId, orgId });
+    logger.info('Survey question updated successfully', { questionId, userId: clerkUserId });
     return NextResponse.json(updatedQuestion);
   } catch (error) {
     if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
-      logger.warn('Attempted to update non-existent question record', { questionId, orgId });
+      logger.warn('Attempted to update non-existent question record', {
+        questionId,
+        userId: clerkUserId,
+      });
       throw new NotFoundError('Question not found for update.');
     }
     throw error;
@@ -114,9 +135,9 @@ const deleteHandler = async (
   req: NextRequest,
   { params: paramsPromise }: { params: Promise<{ questionId: string }> }
 ) => {
-  const { userId, orgId } = await auth();
-  if (!userId || !orgId) {
-    throw new UnauthenticatedError('Unauthorized');
+  const { userId: clerkUserId } = await auth();
+  if (!clerkUserId) {
+    throw new UnauthenticatedError('Authentication required.');
   }
 
   const { questionId } = await paramsPromise;
@@ -124,23 +145,34 @@ const deleteHandler = async (
     throw new BadRequestError('Question ID is required.');
   }
 
-  await verifyQuestionAccess(questionId, orgId, [
+  const userRecord = await db.user.findUnique({
+    where: { clerkId: clerkUserId },
+    select: { id: true },
+  });
+  if (!userRecord) throw new NotFoundError('User for delete operation not found');
+  const internalUserId = userRecord.id;
+
+  await verifyQuestionAccess(questionId, clerkUserId, [
     BrandLiftStudyStatus.DRAFT,
     BrandLiftStudyStatus.PENDING_APPROVAL,
+    BrandLiftStudyStatus.CHANGES_REQUESTED,
   ]);
 
   try {
     await db.surveyQuestion.delete({
       where: {
         id: questionId,
-        study: { organizationId: orgId },
+        study: { campaign: { userId: internalUserId } },
       },
     });
-    logger.info('Survey question deleted successfully', { questionId, orgId });
+    logger.info('Survey question deleted successfully', { questionId, userId: clerkUserId });
     return new NextResponse(null, { status: 204 });
   } catch (error) {
     if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
-      logger.warn('Attempted to delete non-existent question record', { questionId, orgId });
+      logger.warn('Attempted to delete non-existent question record', {
+        questionId,
+        userId: clerkUserId,
+      });
       throw new NotFoundError('Question not found for deletion.');
     }
     throw error;
