@@ -1,6 +1,8 @@
 import { z } from 'zod';
 // Import the SSOT PlatformEnum
 import { PlatformEnum } from '@/types/enums';
+import { checkCampaignNameExists } from '@/lib/actions/campaigns'; // Placeholder import
+import { logger } from '@/utils/logger'; // Import logger
 
 //---------------------------------------------------------------------------
 // Prisma Enum Definitions & Zod Schemas
@@ -343,6 +345,28 @@ export const DraftCampaignDataSchema = DraftCampaignDataBaseSchema
     {
       message: 'Total age distribution must equal 100%',
       path: ['demographics', 'age18_24'],
+    }
+  )
+  // ADD ASYNC NAME VALIDATION (Reverted approach without ctx)
+  .refine(
+    async data => {
+      if (!data.name || data.name.trim().length === 0) {
+        return true;
+      }
+      try {
+        const exists = await checkCampaignNameExists(data.name);
+        return !exists; // Return true if name does NOT exist (passes validation)
+      } catch (error) {
+        // If check fails, treat as validation failure
+        // The message below will be shown
+        logger.error('Async name validation failed:', error);
+        return false;
+      }
+    },
+    {
+      // This message now applies if name exists OR if the check fails
+      message: "A campaign with this name already exists or couldn't be verified.",
+      path: ['name'],
     }
   );
 

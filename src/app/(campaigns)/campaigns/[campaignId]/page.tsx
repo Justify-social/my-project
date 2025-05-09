@@ -25,6 +25,7 @@ import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 // Import the Duplicate Button using relative path
 import { DuplicateCampaignButton } from '@/components/ui/button-duplicate-campaigns';
+import { ConfirmDeleteDialog } from '@/components/ui/dialog-confirm-delete';
 
 // Define AGE_BRACKETS for the age distribution summary UI
 const AGE_BRACKETS = [
@@ -365,14 +366,22 @@ export default function CampaignDetail() {
   const [campaignData, setCampaignData] = useState<CampaignData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // --- Restore Local Toast Helper Functions ---
-  const showSuccessToast = (message: string, iconId?: string) => {
+  const showSuccessToast = (
+    message: string,
+    iconId?: string,
+    customClassName?: string,
+    iconClassName?: string
+  ) => {
     const finalIconId = iconId || 'faFloppyDiskLight';
-    const successIcon = <Icon iconId={finalIconId} className="h-5 w-5 text-success" />;
+    const successIcon = (
+      <Icon iconId={finalIconId} className={`h-5 w-5 ${iconClassName || 'text-success'}`} />
+    );
     toast.success(message, {
       duration: 3000,
-      className: 'toast-success-custom', // Defined in globals.css
+      className: customClassName || 'toast-success-custom',
       icon: successIcon,
     });
   };
@@ -382,11 +391,70 @@ export default function CampaignDetail() {
     const errorIcon = <Icon iconId={finalIconId} className="h-5 w-5 text-destructive" />;
     toast.error(message, {
       duration: 5000,
-      className: 'toast-error-custom', // Defined in globals.css
+      className: 'toast-error-custom',
       icon: errorIcon,
     });
   };
   // --- End Restored Local Helpers ---
+
+  const executeDeleteCampaign = async () => {
+    if (!campaignIdParam) {
+      showErrorToast('Campaign ID is missing, cannot delete.');
+      return;
+    }
+    try {
+      const response = await fetch(`/api/campaigns/${campaignIdParam}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (response.status === 401) {
+        showErrorToast('Authentication failed. Please log in and try again.');
+        throw new Error('Authentication failed when deleting campaign');
+      }
+
+      let data = { success: false, message: 'Unknown delete error' };
+      if (response.status !== 204) {
+        try {
+          data = await response.json();
+        } catch (jsonError) {
+          if (!response.ok && response.status !== 404) {
+            throw new Error(
+              `Failed to delete campaign: Server returned non-JSON response with status ${response.status}`
+            );
+          }
+          data.success = response.ok || response.status === 404;
+          data.message = response.status === 404 ? 'Campaign not found' : 'Campaign deleted';
+        }
+      }
+
+      if (response.status === 404) {
+        showSuccessToast(
+          'Campaign already removed or not found.',
+          'faCircleInfoLight',
+          'toast-success-custom',
+          'text-accent'
+        );
+        router.push('/campaigns');
+      } else if (!response.ok && response.status !== 204) {
+        showErrorToast(data.message || `Failed to delete campaign: ${response.status}`);
+        throw new Error(data.message || `Failed to delete campaign: ${response.status}`);
+      } else {
+        showSuccessToast(
+          'Campaign deleted successfully',
+          'faTrashCanLight',
+          'toast-delete-custom',
+          'text-destructive'
+        );
+        router.push('/campaigns');
+      }
+    } catch (error) {
+      console.error('Error in executeDeleteCampaign:', error);
+      if (!(error instanceof Error && error.message.includes('Authentication failed'))) {
+        showErrorToast('An unexpected error occurred while deleting the campaign.');
+      }
+    }
+  };
 
   useEffect(() => {
     const fetchCampaignData = async () => {
@@ -402,13 +470,11 @@ export default function CampaignDetail() {
           throw new Error('Invalid campaign data received from API');
         }
 
-        // Log the demographics object to inspect its structure for completed campaigns
         console.log(
           '[CampaignDetail] Demographics data from API:',
           JSON.stringify(data.demographics, null, 2)
         );
 
-        // Enhanced transformation logic
         const transformedData: CampaignData = {
           id: data.id ? data.id.toString() : 'N/A',
           name: data.name || 'Unnamed Campaign',
@@ -464,8 +530,8 @@ export default function CampaignDetail() {
             languages:
               data.demographics?.languages && Array.isArray(data.demographics.languages)
                 ? data.demographics.languages.map((langCode: string) => {
-                    const langObj = TOP_LANGUAGES_MAP.find(l => l.value === langCode.toLowerCase()); // Ensure case-insensitivity for code matching
-                    return langObj ? langObj.label : langCode; // Fallback to code if no match found
+                    const langObj = TOP_LANGUAGES_MAP.find(l => l.value === langCode.toLowerCase());
+                    return langObj ? langObj.label : langCode;
                   })
                 : [],
             interests:
@@ -603,7 +669,6 @@ export default function CampaignDetail() {
     }
   };
 
-  // Formatted display for currency
   const formatCurrency = (amount: number, currency: string) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -618,27 +683,24 @@ export default function CampaignDetail() {
       !campaignData.assets.uploaded ||
       campaignData.assets.uploaded.length === 0
     ) {
-      // Use imported helper
       showErrorToast('No assets to download.');
       return;
     }
 
-    // For simplicity now, we removed loading toast. Can be added back via helper if needed.
     const zip = new JSZip();
 
     try {
       const assetPromises = campaignData.assets.uploaded.map(async asset => {
         try {
-          const response = await fetch(asset.url); // Assuming asset.url is directly downloadable
+          const response = await fetch(asset.url);
           if (!response.ok) {
             console.error(
               `Failed to fetch asset ${asset.name} from ${asset.url}: ${response.statusText}`
             );
-            return; // Skip this asset
+            return;
           }
           const blob = await response.blob();
           let fileName = asset.name;
-          // Basic extension check - might need improvement for more complex cases or if names don't have extensions
           if (!fileName.includes('.')) {
             const type = blob.type.split('/')[1];
             if (type) fileName = `${fileName}.${type}`;
@@ -652,18 +714,15 @@ export default function CampaignDetail() {
       await Promise.all(assetPromises);
 
       if (Object.keys(zip.files).length === 0) {
-        // Use imported helper
         showErrorToast('No assets could be fetched for download.');
         return;
       }
 
       const zipBlob = await zip.generateAsync({ type: 'blob' });
       saveAs(zipBlob, `${campaignData.name || 'campaign'}_assets.zip`);
-      // Use imported helper (default icon is floppy disk)
       showSuccessToast('Download successful');
     } catch (error) {
       console.error('Error creating zip file:', error);
-      // Use imported helper
       showErrorToast('Failed to download assets. See console for details.');
     }
   };
@@ -731,11 +790,12 @@ export default function CampaignDetail() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      {/* Header Section with Campaign Name & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-12">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold tracking-tight">{campaignData.name}</h1>
-          <Badge className={`px-3 py-1 rounded-full text-sm font-medium ${statusInfo.className}`}>
+          <Badge
+            className={`px-3 py-1 rounded-full text-sm font-medium ${statusInfo.className} hover:${statusInfo.className}`}
+          >
             {statusInfo.text}
           </Badge>
         </div>
@@ -747,13 +807,11 @@ export default function CampaignDetail() {
               Edit
             </Button>
           </Link>
-          {/* Replace the placeholder Button with the actual component */}
           <DuplicateCampaignButton
             campaignId={campaignIdParam}
             campaignName={campaignData.name}
             onDuplicateSuccess={() => {
               console.log('Duplicate successful, parent notified.');
-              // Example: router.push('/campaigns');
             }}
             variant="outline"
             size="sm"
@@ -764,21 +822,15 @@ export default function CampaignDetail() {
               </>
             }
           />
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => showErrorToast('Delete functionality to be implemented')}
-          >
+          <Button variant="destructive" size="sm" onClick={() => setShowDeleteModal(true)}>
             <Icon iconId="faTrashCanLight" className="mr-2 h-4 w-4" />
             Delete
           </Button>
         </div>
       </div>
 
-      {/* Campaign Overview Section */}
       <PageSection>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {/* Business Goal - takes 1/3rd */}
           <Card className="shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden">
             <CardHeader className="bg-muted/10 border-b px-5 py-3">
               <CardTitle className="text-sm font-medium">Business Goal</CardTitle>
@@ -788,9 +840,7 @@ export default function CampaignDetail() {
             </CardContent>
           </Card>
 
-          {/* Wrapper for the remaining 2/3rds, containing 3 cards */}
           <div className="md:col-span-2 grid grid-cols-1 lg:grid-cols-3 gap-5">
-            {/* Campaign Duration */}
             <Card className="shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden">
               <CardHeader className="bg-muted/10 border-b px-5 py-3">
                 <CardTitle className="text-sm font-medium">Campaign Duration</CardTitle>
@@ -803,7 +853,6 @@ export default function CampaignDetail() {
               </CardContent>
             </Card>
 
-            {/* Budget */}
             <Card className="shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden">
               <CardHeader className="bg-muted/10 border-b px-5 py-3">
                 <CardTitle className="text-sm font-medium">Budget</CardTitle>
@@ -818,7 +867,6 @@ export default function CampaignDetail() {
               </CardContent>
             </Card>
 
-            {/* Primary Contact */}
             <Card className="shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden">
               <CardHeader className="bg-muted/10 border-b px-5 py-3">
                 <CardTitle className="text-sm font-medium">Primary Contact</CardTitle>
@@ -835,7 +883,6 @@ export default function CampaignDetail() {
         </div>
       </PageSection>
 
-      {/* Influencers Section */}
       {campaignData.influencers && campaignData.influencers.length > 0 && (
         <PageSection>
           <SectionHeader title="Influencers" />
@@ -862,10 +909,8 @@ export default function CampaignDetail() {
                   className="shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden group"
                 >
                   <CardContent className="p-4 flex flex-col items-center text-center">
-                    {/* Updated Avatar Structure */}
                     <div className="mb-4 h-24 w-24 rounded-full bg-accent/15 flex items-center justify-center group-hover:bg-accent/25 transition-colors">
                       <Icon iconId={'faUserCircleLight'} className="h-full w-full text-accent" />
-                      {/* This Icon can be replaced by an <Image /> component for actual profile pictures later */}
                     </div>
 
                     <div className="flex items-center space-x-2">
@@ -892,7 +937,6 @@ export default function CampaignDetail() {
         </PageSection>
       )}
 
-      {/* Contacts Section */}
       <PageSection>
         <SectionHeader title="Contacts" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -936,11 +980,9 @@ export default function CampaignDetail() {
         </div>
       </PageSection>
 
-      {/* KPIs Section - Now two cards */}
       <PageSection>
         <SectionHeader title="Performance" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
-          {/* Primary KPI Card */}
           <Card className="shadow-sm hover:shadow-md transition-all border bg-card md:col-span-1 h-full flex flex-col">
             <CardHeader className="bg-muted/10 border-b px-5 py-4 flex-shrink-0">
               <CardTitle className="text-base font-medium">Primary KPI</CardTitle>
@@ -950,7 +992,6 @@ export default function CampaignDetail() {
             </CardContent>
           </Card>
 
-          {/* Secondary KPIs Card */}
           {campaignData.secondaryKPIs && campaignData.secondaryKPIs.length > 0 && (
             <Card className="shadow-sm hover:shadow-md transition-all border bg-card md:col-span-2 h-full">
               <CardHeader className="bg-muted/10 border-b px-5 py-4">
@@ -966,12 +1007,10 @@ export default function CampaignDetail() {
         </div>
       </PageSection>
 
-      {/* Hypotheses and Campaign Messaging Section */}
       <PageSection>
         <SectionHeader title="Hypotheses and Messaging" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-          {/* Hypotheses Card */}
           <div>
             <Card className="shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden h-full">
               <CardHeader className="bg-muted/10 border-b px-5 py-4">
@@ -1005,7 +1044,6 @@ export default function CampaignDetail() {
               </CardContent>
             </Card>
           </div>
-          {/* Campaign Messaging Card */}
           <div>
             <Card className="shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden h-full">
               <CardHeader className="bg-muted/10 border-b px-5 py-4">
@@ -1040,7 +1078,6 @@ export default function CampaignDetail() {
         </div>
       </PageSection>
 
-      {/* Target Audience Section */}
       <PageSection>
         <SectionHeader title="Target Audience" />
         <Card className="shadow-sm border bg-card overflow-hidden">
@@ -1180,13 +1217,11 @@ export default function CampaignDetail() {
         </Card>
       </PageSection>
 
-      {/* Creative Assets Section */}
       <PageSection>
         <SectionHeader title="Creative Assets" />
         <Card className="shadow-sm border bg-card overflow-hidden">
           <CardHeader className="bg-muted/10 border-b px-5 py-4 flex flex-row items-center justify-between">
             <CardTitle className="text-base font-medium">Creative Assets</CardTitle>
-            {/* Conditional Download Button */}
             {campaignData.assets.uploaded && campaignData.assets.uploaded.length > 0 && (
               <Button
                 variant="outline"
@@ -1203,13 +1238,10 @@ export default function CampaignDetail() {
             )}
           </CardHeader>
           <CardContent className="px-5 py-6">
-            {/* Check if assets exist */}
             {campaignData.assets.uploaded && campaignData.assets.uploaded.length > 0 ? (
               <div className="space-y-6">
-                {/* Asset Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                   {campaignData.assets.uploaded.map(assetItem => {
-                    // Create the object for the AssetCard prop
                     const assetObjectForCard = {
                       id: assetItem.id,
                       name: assetItem.name,
@@ -1218,7 +1250,6 @@ export default function CampaignDetail() {
                       description: assetItem.description,
                       budget: assetItem.budget,
                     };
-                    // Render the correctly imported AssetCard
                     return (
                       <AssetCard
                         key={assetObjectForCard.id}
@@ -1230,13 +1261,10 @@ export default function CampaignDetail() {
                     );
                   })}
                 </div>
-                {/* End Asset Grid */}
 
-                {/* Guidelines and Requirements (Optional, based on original structure) */}
                 {campaignData.assets.guidelinesSummary &&
                   campaignData.assets.guidelinesSummary !== 'Not Set' && (
                     <div className="mt-6 pt-6 border-t">
-                      {/* ... Guidelines display ... */}
                       <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center">
                         Guidelines Summary
                       </h3>
@@ -1248,7 +1276,6 @@ export default function CampaignDetail() {
                 {campaignData.assets.requirements &&
                   campaignData.assets.requirements.length > 0 && (
                     <div className="mt-6 pt-6 border-t">
-                      {/* ... Requirements display ... */}
                       <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center">
                         Requirements
                       </h3>
@@ -1268,9 +1295,8 @@ export default function CampaignDetail() {
                       </div>
                     </div>
                   )}
-              </div> // End space-y-6 div
+              </div>
             ) : (
-              // Display if no assets are uploaded
               <div className="flex flex-col items-center justify-center py-8 text-center px-4">
                 <div className="h-20 w-20 rounded-full bg-muted/20 flex items-center justify-center mb-4">
                   <Icon iconId="faFileImageLight" className="h-10 w-10 text-muted-foreground" />
@@ -1292,6 +1318,15 @@ export default function CampaignDetail() {
           </CardContent>
         </Card>
       </PageSection>
+
+      {campaignData && (
+        <ConfirmDeleteDialog
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={executeDeleteCampaign}
+          itemName={campaignData.name || 'this campaign'}
+        />
+      )}
     </div>
   );
 }

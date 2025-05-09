@@ -20,7 +20,8 @@ import {
 import { useSearchParams, useRouter } from 'next/navigation';
 import { standardizeApiResponse } from '@/utils/api-response-formatter';
 import { logger } from '@/utils/logger';
-import { showErrorToast } from '@/utils/toastUtils'; // Keep showErrorToast, remove unused showSuccessToast
+import { toast } from 'react-hot-toast'; // Import toast
+import { Icon } from '@/components/ui/icon/icon'; // Import Icon for toast
 // TODO: Remove this import if useCampaignWizard hook becomes obsolete after RHF migration
 // import useCampaignWizard, {
 //   WizardStep,
@@ -210,6 +211,17 @@ const defaultWizardState: DraftCampaignData = {
 
 const WizardContext = createContext<WizardContextType | undefined>(undefined);
 
+// Define showErrorToast locally
+const showErrorToast = (message: string, iconId?: string) => {
+  const finalIconId = iconId || 'faTriangleExclamationLight';
+  const errorIcon = <Icon iconId={finalIconId} className="h-5 w-5 text-destructive" />;
+  toast.error(message, {
+    duration: 5000,
+    className: 'toast-error-custom',
+    icon: errorIcon,
+  });
+};
+
 /**
  * Provides the Campaign Wizard state and associated actions to child components.
  * Handles data loading, state updates, autosaving, and manual saving.
@@ -369,22 +381,33 @@ export function WizardProvider({ children }: { children: ReactNode }) {
           const currentPath = window.location.pathname;
           router.replace(`${currentPath}?id=${newCampaignId}`);
 
-          // Update state with the full data returned from creation
-          const parsedData = DraftCampaignDataSchema.safeParse(result.data);
-          if (parsedData.success) {
-            setWizardState(parsedData.data);
+          // Update state with the data returned from creation, WITHOUT re-validating with the full schema
+          if (result.data && typeof result.data === 'object') {
+            const returnedData = result.data as Partial<DraftCampaignData>;
+            setWizardState(prevState => ({
+              ...(prevState ?? defaultWizardState),
+              ...returnedData,
+              id: newCampaignId ?? undefined, // Ensure id matches string | undefined type
+            }));
+            logger.info('Updated wizard state with data from successful campaign creation.');
           } else {
-            // Log the detailed Zod parsing errors
             logger.error(
-              'Failed to parse response from campaign creation (Zod Errors):',
-              JSON.stringify(parsedData.error.errors, null, 2) // Log the detailed errors array
+              'Received unexpected data format from campaign creation API:',
+              result.data
             );
-            // Fallback: update state minimally only if necessary (ensure ID is set)
-            setWizardState(prevState =>
-              prevState?.id === newCampaignId
-                ? prevState
-                : ({ ...creationPayload, id: newCampaignId } as DraftCampaignData)
-            );
+            // Fallback: Only update if newCampaignId is a valid string
+            if (newCampaignId) {
+              setWizardState(
+                prevState =>
+                  ({
+                    ...(prevState ?? defaultWizardState),
+                    id: newCampaignId,
+                  }) as DraftCampaignData
+              ); // Assert type here
+            } else {
+              // If somehow newCampaignId is null even after successful API call, log error
+              logger.error('Campaign creation reported success but returned null ID.');
+            }
           }
 
           setLastSaved(new Date());
@@ -421,8 +444,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
         const response = await fetch(apiUrl, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          // Send the data received as argument
-          body: JSON.stringify(dataForApi), // Use dataForApi
+          body: JSON.stringify(dataForApi),
         });
 
         if (!response.ok) {
@@ -440,22 +462,21 @@ export function WizardProvider({ children }: { children: ReactNode }) {
         if (result.success) {
           setLastSaved(new Date());
           logger.info('Progress saved successfully');
-          if (result.data) {
-            logger.debug('Data received from PATCH API:', JSON.stringify(result.data, null, 2));
-            const parsedUpdate = DraftCampaignDataSchema.safeParse(result.data);
-            if (parsedUpdate.success) {
-              // Update context state with the final data from backend
-              setWizardState(prevState =>
-                prevState ? { ...prevState, ...parsedUpdate.data } : parsedUpdate.data
-              );
-            } else {
-              logger.warn(
-                'Backend save response data failed validation',
-                parsedUpdate.error.errors
-              );
-            }
+
+          // Update state with data returned from PATCH, WITHOUT re-validating with the full schema
+          if (result.data && typeof result.data === 'object') {
+            const returnedData = result.data as Partial<DraftCampaignData>;
+            setWizardState(prevState => ({
+              ...(prevState ?? defaultWizardState),
+              ...returnedData,
+            }));
+            logger.info('Updated wizard state with data from successful campaign update.');
+          } else {
+            logger.warn('PATCH API did not return updated data, only updating lastSaved time.');
+            // If no data returned, just update lastSaved (already done above)
           }
-          return currentCampaignId; // Return the currentCampaignId on successful PATCH
+
+          return currentCampaignId;
         } else {
           // ... error handling ...
           logger.error('Failed to save progress (API failure):', result);

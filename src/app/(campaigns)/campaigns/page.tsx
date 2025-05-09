@@ -37,6 +37,7 @@ import {
 import { Prisma } from '@prisma/client'; // Ensure Prisma namespace is imported
 import { Label } from '@/components/ui/label';
 import { logger } from '@/utils/logger';
+import { ConfirmDeleteDialog } from '@/components/ui/dialog-confirm-delete'; // Added import
 
 // Define expected status values
 type CampaignStatus = 'DRAFT' | 'REVIEW' | 'APPROVED' | 'ACTIVE' | 'COMPLETED' | string;
@@ -264,12 +265,19 @@ const ClientCampaignList: React.FC = () => {
   const router = useRouter();
 
   // Define Toast Helper Functions Locally
-  const showSuccessToast = (message: string, iconId?: string) => {
+  const showSuccessToast = (
+    message: string,
+    iconId?: string,
+    customClassName?: string,
+    iconClassName?: string
+  ) => {
     const finalIconId = iconId || 'faFloppyDiskLight';
-    const successIcon = <Icon iconId={finalIconId} className="h-5 w-5 text-success" />;
+    const successIcon = (
+      <Icon iconId={finalIconId} className={`h-5 w-5 ${iconClassName || 'text-success'}`} />
+    );
     toast.success(message, {
       duration: 3000,
-      className: 'toast-success-custom',
+      className: customClassName || 'toast-success-custom',
       icon: successIcon,
     });
   };
@@ -561,6 +569,25 @@ const ClientCampaignList: React.FC = () => {
     setShowDeleteModal(true);
   };
 
+  const executeDeleteCampaign = async () => {
+    if (!campaignToDelete) {
+      showErrorToast('No campaign selected for deletion.');
+      return;
+    }
+    // The deleteCampaign function already handles API call, toasts, and state updates.
+    // It throws an error on failure, which ConfirmDeleteDialog doesn't need to explicitly handle beyond its own processing state.
+    // ConfirmDeleteDialog will call onClose, which sets showDeleteModal to false.
+    try {
+      await deleteCampaign(campaignToDelete.id);
+      // Success toast is in deleteCampaign
+      // No need to call setShowDeleteModal(false) here, ConfirmDeleteDialog's onClose will handle it.
+    } catch (error) {
+      // Error toast is in deleteCampaign or caught by it and re-thrown
+      // showErrorToast(error instanceof Error ? error.message : 'Failed to delete campaign from dialog');
+      // No need to call setShowDeleteModal(false) here, ConfirmDeleteDialog's onClose will handle it.
+    }
+  };
+
   const deleteCampaign = async (campaignId: string) => {
     // NOTE: Assumes DELETE /api/campaigns/[campaignId] targets CampaignWizard correctly.
     // If not, this endpoint needs to be created/updated.
@@ -610,7 +637,12 @@ const ClientCampaignList: React.FC = () => {
 
       // Trigger refetch to ensure consistency
       // Use the updated refetchCampaigns which calls the correct list endpoint
-      toast.success('Campaign deleted successfully');
+      showSuccessToast(
+        'Campaign deleted successfully',
+        'faTrashCanLight',
+        'toast-delete-custom',
+        'text-destructive'
+      );
       setTimeout(() => {
         refetchCampaigns();
       }, 500); // Short delay
@@ -619,21 +651,6 @@ const ClientCampaignList: React.FC = () => {
     } catch (error) {
       console.error('Error in deleteCampaign function:', error);
       throw error; // Re-throw to be caught by confirmDelete
-    }
-  };
-
-  const confirmDelete = async () => {
-    if (!campaignToDelete) return;
-    setDeleteInProgress(true);
-    try {
-      await deleteCampaign(campaignToDelete.id);
-      // Success toast is handled within deleteCampaign now
-      setShowDeleteModal(false);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to delete campaign');
-    } finally {
-      setDeleteInProgress(false);
-      setCampaignToDelete(null); // Clear the action target
     }
   };
 
@@ -747,7 +764,12 @@ const ClientCampaignList: React.FC = () => {
       if (!response.ok) {
         throw new Error(result.message || `Failed to duplicate campaign: ${response.status}`);
       }
-      showSuccessToast('Campaign duplicated successfully!');
+      showSuccessToast(
+        'Campaign duplicated successfully!',
+        'faCircleCheckLight',
+        'toast-success-custom',
+        'text-success'
+      );
       setIsDuplicateDialogOpen(false); // Close dialog
       refetchCampaigns(); // Refresh list
     } catch (error) {
@@ -1061,30 +1083,17 @@ const ClientCampaignList: React.FC = () => {
         </>
       )}
 
-      <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm Deletion</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete{' '}
-              <span className="font-medium">{campaignToDelete?.name}</span>? This action cannot be
-              undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowDeleteModal(false)}
-              disabled={deleteInProgress}
-            >
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={confirmDelete} disabled={deleteInProgress}>
-              {deleteInProgress ? 'Deleting...' : 'Delete'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {campaignToDelete && (
+        <ConfirmDeleteDialog
+          isOpen={showDeleteModal}
+          onClose={() => {
+            setShowDeleteModal(false);
+            setCampaignToDelete(null); // Clear selection on close
+          }}
+          onConfirm={executeDeleteCampaign}
+          itemName={campaignToDelete?.name || 'this item'}
+        />
+      )}
 
       <Dialog open={isDuplicateDialogOpen} onOpenChange={setIsDuplicateDialogOpen}>
         <DialogContent>

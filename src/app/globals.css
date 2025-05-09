@@ -409,14 +409,20 @@ main {
 
 /* Add custom border based on className set in layout.tsx toastOptions */
 .toast-success-custom {
-  border: 2px solid hsl(var(--success)) !important;
-  /* You might need to adjust padding/background here if defaults aren't right */
-  /* padding: 16px; */
-  /* background-color: hsl(var(--background)); */
+  @apply bg-green-50 border border-green-200 text-green-700 rounded-md shadow-lg;
 }
 
 .toast-error-custom {
-  border: 2px solid hsl(var(--destructive)) !important;
-  /* padding: 16px; */
-  /* background-color: hsl(var(--background)); */
+  @apply bg-red-50 border border-red-200 text-red-700 rounded-md shadow-lg;
+}
+
+.toast-delete-custom {
+  @apply bg-red-50 border border-red-500 text-red-700 rounded-md shadow-lg;
+}
+
+/* Remove default icon styling if custom icons are always used */
+/* For react-hot-toast, if you want to hide the default emoji/icon */
+.go2072408551 {
+  /* This is an example class, inspect your toast elements to find the correct one */
+  /* display: none !important; */
 }

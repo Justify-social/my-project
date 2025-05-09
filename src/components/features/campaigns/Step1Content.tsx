@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useDebouncedCallback } from 'use-debounce';
 import {
   useForm,
   useFieldArray,
@@ -54,7 +55,28 @@ import { Badge } from '@/components/ui/badge';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocalization } from '@/hooks/useLocalization';
 import timezonesData from '@/lib/timezones.json';
-import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
+
+// --- Define Toast Helper Functions Locally ---
+const showSuccessToast = (message: string, iconId?: string) => {
+  const finalIconId = iconId || 'faFloppyDiskLight';
+  const successIcon = <Icon iconId={finalIconId} className="h-5 w-5 text-success" />;
+  toast.success(message, {
+    duration: 3000,
+    className: 'toast-success-custom', // Defined in globals.css
+    icon: successIcon,
+  });
+};
+
+const showErrorToast = (message: string, iconId?: string) => {
+  const finalIconId = iconId || 'faTriangleExclamationLight';
+  const errorIcon = <Icon iconId={finalIconId} className="h-5 w-5 text-destructive" />;
+  toast.error(message, {
+    duration: 5000,
+    className: 'toast-error-custom', // Defined in globals.css
+    icon: errorIcon,
+  });
+};
+// --- End Toast Helper Functions ---
 
 // --- Formatting Helpers ---
 
@@ -307,6 +329,14 @@ function Step1Content() {
     },
     mode: 'onChange',
   });
+
+  // Debounced validation trigger specifically for the name field
+  const debouncedNameValidation = useDebouncedCallback(async nameValue => {
+    // Only trigger validation for the 'name' field
+    // This relies on Zod executing the async refine when `trigger` is called for 'name'
+    logger.debug(`[Debounce] Triggering validation for name: ${nameValue}`);
+    await form.trigger('name');
+  }, 500); // 500ms debounce delay
 
   // --- Initial Value Calculation Effect (Updated) ---
   useEffect(() => {
@@ -641,7 +671,14 @@ function Step1Content() {
                     <FormItem>
                       <FormLabel>Campaign Name *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Summer Skincare Launch" {...field} />
+                        <Input
+                          placeholder="Summer Skincare Launch"
+                          {...field}
+                          onChange={e => {
+                            field.onChange(e);
+                            debouncedNameValidation(e.target.value);
+                          }}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
