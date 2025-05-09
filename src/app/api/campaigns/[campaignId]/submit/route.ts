@@ -3,11 +3,9 @@
 // import { prisma } from '@/lib/prisma'; // Unused
 
 // Define type for route context parameters
-/* // Interface removed due to build errors with handlers
 interface RouteContext {
   params: { campaignId: string };
 }
-*/
 
 // POST, GET, DELETE handlers previously here were removed due to build errors.
 // See TODO at the top of the file.
@@ -38,10 +36,6 @@ import {
   DatabaseError,
 } from '@/lib/errors';
 import { tryCatch } from '@/lib/middleware/api/util-middleware';
-
-interface RouteContext {
-  params: { campaignId: string }; // campaignId is the CampaignWizard ID (UUID)
-}
 
 // Helper function to safely parse JSON - assuming wizard fields are already parsed by Prisma if Json type
 // but useful if we were dealing with stringified JSON from elsewhere.
@@ -118,9 +112,14 @@ type CampaignWizardWithSubmission = Prisma.CampaignWizardGetPayload<{
   include: { Influencer: true };
 }> & { submissionId?: number | null };
 
-export async function POST(req: NextRequest, { params }: { params: { campaignId: string } }) {
-  // Access campaignId at the top level of the POST handler
-  const wizardIdFromParams = params.campaignId;
+export async function POST(
+  req: NextRequest,
+  // Type params as a Promise, similar to the other dynamic route
+  { params }: { params: Promise<{ campaignId: string }> }
+) {
+  // Await the params before accessing campaignId
+  const resolvedParams = await params;
+  const wizardIdFromParams = resolvedParams.campaignId;
 
   return tryCatch(
     async () => {
