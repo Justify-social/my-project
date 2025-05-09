@@ -26,6 +26,7 @@ import { SurveyQuestionType } from '@prisma/client'; // Import directly from Pri
 
 // Shadcn UI Imports
 import { Button } from '@/components/ui/button';
+import { IconButtonAction } from '@/components/ui/button-icon-action';
 import {
   Card,
   CardContent,
@@ -50,6 +51,36 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Icon } from '@/components/ui/icon/icon';
 import logger from '@/lib/logger';
 import { SurveyQuestionData, SurveyOptionData, BrandLiftStudyData } from '@/types/brand-lift';
+
+// --- KPI Formatting Utilities --- START ---
+const kpiDisplayNames: Record<string, string> = {
+  adRecall: 'Ad Recall',
+  brandAwareness: 'Brand Awareness',
+  consideration: 'Consideration',
+  messageAssociation: 'Message Association',
+  brandPreference: 'Brand Preference',
+  purchaseIntent: 'Purchase Intent',
+  actionIntent: 'Action Intent',
+  recommendationIntent: 'Recommendation Intent',
+  advocacy: 'Advocacy',
+  // Add any other KPIs that might appear here
+};
+
+const formatKpiName = (kpiKey: string | null | undefined): string => {
+  if (!kpiKey) return 'N/A';
+  // Normalizes keys like BRAND_AWARENESS or brand_awareness to brandAwareness
+  const normalizedKey = kpiKey.toLowerCase().replace(/_([a-z])/g, (_, char) => char.toUpperCase());
+  return (
+    kpiDisplayNames[normalizedKey] || // Check against map first
+    // Fallback formatting if not in map
+    kpiKey
+      .replace(/_/g, ' ')
+      .split(' ')
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(' ')
+  );
+};
+// --- KPI Formatting Utilities --- END ---
 
 // --- Zod Schemas for AI Response Validation ---
 const aiOptionSchema = z.object({
@@ -133,23 +164,23 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
 
     return (
       <Card ref={setNodeRef} style={style} className="mb-4 bg-white shadow-sm relative group">
-        <div
-          {...attributes}
-          {...listeners}
-          className="absolute top-2 right-2 p-2 cursor-grab opacity-50 group-hover:opacity-100"
-        >
-          <Icon iconId="faUpDownLeftRightLight" className="h-4 w-4 text-muted-foreground" />
-        </div>
         <CardHeader className="flex flex-row items-center justify-between p-4">
-          <CardTitle className="text-md">Question {index + 1}</CardTitle>
-          <Button
-            variant="ghost"
-            size="icon"
+          <div className="flex items-center space-x-2">
+            <div
+              {...attributes}
+              {...listeners}
+              className="p-1 cursor-grab opacity-50 hover:opacity-100"
+            >
+              <Icon iconId="faBarsLight" className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <CardTitle className="text-md">Question {index + 1}</CardTitle>
+          </div>
+          <IconButtonAction
+            iconBaseName="faTrashCan"
+            hoverColorClass="text-destructive"
+            ariaLabel="Delete question"
             onClick={() => onDeleteQuestion(qId)}
-            className="text-destructive hover:text-destructive-hover"
-          >
-            <Icon iconId="faTrashCanLight" className="h-4 w-4" />
-          </Button>
+          />
         </CardHeader>
         <CardContent className="p-4 space-y-3">
           <Textarea
@@ -185,7 +216,7 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
                 checked={question.isRandomized ?? false}
                 onCheckedChange={c => onToggleRandomized(qId, c)}
               />
-              <Label htmlFor={`rand-${qId}`}>Randomize Options</Label>
+              <Label htmlFor={`rand-${qId}`}>Randomise Options</Label>
             </div>
             <div className="flex items-center space-x-2">
               <Switch
@@ -199,7 +230,7 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
           <Input
             value={question.kpiAssociation || ''}
             onChange={e => onUpdateKpiAssociation(qId, e.target.value || null)}
-            placeholder="KPI Association (e.g., BRAND_AWARENESS)"
+            placeholder={`KPI Association (e.g. ${formatKpiName('BRAND_AWARENESS')})`}
           />
           <div>
             <Label className="text-sm font-medium">Options:</Label>
@@ -631,7 +662,12 @@ const SurveyQuestionBuilder: React.FC<SurveyQuestionBuilderProps> = ({ studyId }
             Campaign: {studyDetails?.campaign?.campaignName || <Skeleton className="h-4 w-2/3" />}
           </p>
           <p className="text-sm">
-            Primary KPI: {studyDetails?.primaryKpi || <Skeleton className="h-4 w-1/2" />}
+            Primary KPI:{' '}
+            {studyDetails?.primaryKpi ? (
+              formatKpiName(studyDetails.primaryKpi)
+            ) : (
+              <Skeleton className="h-4 w-1/2" />
+            )}
           </p>
           <div className="mt-4 p-2 bg-slate-50 border rounded text-xs text-muted-foreground min-h-[50px]">
             {studyDetails?.campaign?.primaryCreativeUrl ? (
@@ -659,7 +695,7 @@ const SurveyQuestionBuilder: React.FC<SurveyQuestionBuilderProps> = ({ studyId }
               {isAISuggesting ? (
                 <Icon iconId="faSpinnerLight" className="animate-spin mr-2 h-4 w-4" />
               ) : (
-                <Icon iconId="faWandMagicSparklesLight" className="mr-2 h-4 w-4" />
+                <Icon iconId="faLightbulbLight" className="mr-2 h-4 w-4" />
               )}
               Suggest (AI)
             </Button>
@@ -707,7 +743,7 @@ const SurveyQuestionBuilder: React.FC<SurveyQuestionBuilderProps> = ({ studyId }
           <Card className="text-center py-12">
             <CardContent className="flex flex-col items-center">
               <Icon
-                iconId="faClipboardQuestionLight"
+                iconId="faCircleQuestionLight"
                 className="h-16 w-16 mx-auto text-muted-foreground mb-4 opacity-50"
               />
               <p className="text-muted-foreground">No questions yet.</p>

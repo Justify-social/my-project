@@ -32,6 +32,34 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Icon } from '@/components/ui/icon/icon';
 import logger from '@/lib/logger';
 
+// --- KPI Formatting Utilities --- START ---
+const kpiDisplayNames: Record<string, string> = {
+  adRecall: 'Ad Recall',
+  brandAwareness: 'Brand Awareness',
+  consideration: 'Consideration',
+  messageAssociation: 'Message Association',
+  brandPreference: 'Brand Preference',
+  purchaseIntent: 'Purchase Intent',
+  actionIntent: 'Action Intent',
+  recommendationIntent: 'Recommendation Intent',
+  advocacy: 'Advocacy',
+  // Add any other KPIs that might appear here from campaignData?.primaryKPI
+};
+
+const formatKpiName = (kpiKey: string | null | undefined): string => {
+  if (!kpiKey) return 'N/A';
+  const normalizedKey = kpiKey.toLowerCase().replace(/_([a-z])/g, (_, char) => char.toUpperCase());
+  return (
+    kpiDisplayNames[normalizedKey] ||
+    kpiKey
+      .replace(/_/g, ' ')
+      .split(' ')
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(' ')
+  );
+};
+// --- KPI Formatting Utilities --- END ---
+
 // Assume KPI enum/options are available (e.g., imported or defined)
 // Replace with actual KPI options/enum from types or config
 const ALL_KPIS = [
@@ -232,7 +260,9 @@ const CampaignReviewStudySetup: React.FC<CampaignReviewStudySetupProps> = ({ cam
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <div>
             <Label>Primary Objective:</Label>{' '}
-            <span className="text-muted-foreground">{campaignData?.primaryKPI ?? 'N/A'}</span>
+            <span className="text-muted-foreground">
+              {campaignData?.primaryKPI ? formatKpiName(campaignData.primaryKPI) : 'N/A'}
+            </span>
           </div>
           <div>
             <Label>Platform:</Label>{' '}

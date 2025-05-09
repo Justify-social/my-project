@@ -358,7 +358,7 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({ studyId }) => {
                   {actionLoading['updateStatus-APPROVED'] ? (
                     <Icon iconId="faSpinnerLight" className="animate-spin" />
                   ) : (
-                    <Icon iconId="faCheckLight" className="mr-2" />
+                    <Icon iconId="faCheckSolid" className="mr-2" />
                   )}{' '}
                   Approve Study
                 </Button>
@@ -373,7 +373,7 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({ studyId }) => {
                   {actionLoading['updateStatus-CHANGES_REQUESTED'] ? (
                     <Icon iconId="faSpinnerLight" className="animate-spin" />
                   ) : (
-                    <Icon iconId="faEditLight" className="mr-2" />
+                    <Icon iconId="faPenToSquareLight" className="mr-2" />
                   )}{' '}
                   Request Changes
                 </Button>
@@ -390,7 +390,7 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({ studyId }) => {
                 {actionLoading['updateStatus-APPROVED-reqSignOff'] ? (
                   <Icon iconId="faSpinnerLight" className="animate-spin" />
                 ) : (
-                  <Icon iconId="faFileSignatureLight" className="mr-2" />
+                  <Icon iconId="faPaperPlaneLight" className="mr-2" />
                 )}{' '}
                 Request Final Sign-Off
               </Button>
@@ -409,14 +409,14 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({ studyId }) => {
                 {actionLoading['updateStatus-SIGNED_OFF'] ? (
                   <Icon iconId="faSpinnerLight" className="animate-spin" />
                 ) : (
-                  <Icon iconId="faStampLight" className="mr-2" />
+                  <Icon iconId="faLockLight" className="mr-2" />
                 )}{' '}
                 Final Sign-Off & Lock Survey
               </Button>
             )}
             {isStudySignedOff && (
               <div className="p-3 border rounded-md bg-green-50 border-green-300 text-center">
-                <Icon iconId="faCheckCircleLight" className="h-6 w-6 text-green-600 mx-auto mb-2" />
+                <Icon iconId="faCheckSolid" className="h-6 w-6 text-green-600 mx-auto mb-2" />
                 <p className="font-semibold text-green-700">Survey Signed Off!</p>
               </div>
             )}

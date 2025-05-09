@@ -13,15 +13,18 @@ import { iconRegistryData } from '@/lib/generated/icon-registry'; // Use path al
 const registry = iconRegistryData; // Use the imported data object
 
 // Debug flag
-const DEBUG = process.env.NODE_ENV === 'development';
+// Workaround for potential process.env typing issues to enable debug logs
+const DEBUG =
+  (typeof process !== 'undefined' && (process as any).env && (process as any).env.NODE_ENV) ===
+  'development';
 
 // Set to keep track of logged warnings
 const loggedWarnings = new Set<string>();
 
 // Helper for debug logging
-const debug = (..._args: unknown[]) => {
+const debug = (...args: unknown[]) => {
   if (DEBUG) {
-    // console.log('[Icons]', ..._args); // Commented out debug logs
+    console.log('[icons.ts]', ...args);
   }
 };
 
@@ -31,16 +34,19 @@ const debug = (..._args: unknown[]) => {
  * @returns The icon metadata or null if not found.
  */
 export function findIconById(id: string): IconMetadata | null {
-  // Use the imported registry data
+  debug(`findIconById: Attempting to find ID: "${id}"`);
   if (!registry?.icons || !Array.isArray(registry.icons)) {
-    debug('Icon registry data is not properly loaded or not an array');
+    debug('findIconById: Icon registry data is not properly loaded or not an array');
     return null;
   }
 
-  // Direct lookup using the provided ID
   const icon = registry.icons.find((item: IconMetadata) => item.id === id);
 
-  // debug(icon ? `Found icon by ID '${id}'` : `Icon '${id}' not found by ID`); // Commented out
+  if (icon) {
+    debug(`findIconById: Found icon for ID: "${id}"`, icon);
+  } else {
+    debug(`findIconById: Icon NOT FOUND for ID: "${id}"`);
+  }
   return icon || null;
 }
 
@@ -51,30 +57,31 @@ export function findIconById(id: string): IconMetadata | null {
  * @returns URL to the icon image file from the registry or a fallback path.
  */
 export function getIconPath(iconId: string): string {
-  const defaultFallbackPath = '/icons/light/faQuestionLight.svg'; // Consistent fallback
+  debug(`getIconPath: Called with iconId: "${iconId}"`);
+  const defaultFallbackPath = '/icons/light/faQuestionLight.svg';
 
   if (!iconId) {
-    // debug('No iconId provided, returning default fallback path.'); // Commented out
+    debug('getIconPath: No iconId provided, returning default fallback path.');
     return defaultFallbackPath;
   }
 
-  // Attempt to find the icon directly by its ID in the registry
   const iconMetadata = findIconById(iconId);
 
   if (iconMetadata?.path) {
-    // debug(`Found icon '${id}', using path from registry: ${iconMetadata.path}`); // Commented out
+    debug(`getIconPath: Found metadata with path for "${iconId}":`, iconMetadata.path);
     return iconMetadata.path;
   } else {
-    // debug(`Icon '${id}' not found in registry. Returning fallback path.`); // Commented out
-    // Check if it looks like an app icon trying to use a variant
+    debug(`getIconPath: Metadata or path NOT FOUND for "${iconId}". iconMetadata:`, iconMetadata);
     if (iconId.startsWith('app') && (iconId.endsWith('Light') || iconId.endsWith('Solid'))) {
       const baseAppId = iconId.replace(/(Light|Solid)$/, '');
+      debug(`getIconPath: Attempting app icon fallback for "${iconId}", baseAppId: "${baseAppId}"`);
       const baseAppIcon = findIconById(baseAppId);
       if (baseAppIcon?.path) {
-        // debug(`Attempted to use variant for app icon '${id}'. Found base app icon '${baseAppId}'. Returning its path: ${baseAppIcon.path}`); // Commented out
-        return baseAppIcon.path; // Return the base app icon path
+        debug(`getIconPath: Found base app icon path for "${baseAppId}":`, baseAppIcon.path);
+        return baseAppIcon.path;
       }
     }
+    debug(`getIconPath: Returning default fallback path for "${iconId}"`);
     return defaultFallbackPath;
   }
 }
