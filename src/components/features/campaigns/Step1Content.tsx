@@ -55,6 +55,7 @@ import { Badge } from '@/components/ui/badge';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocalization } from '@/hooks/useLocalization';
 import timezonesData from '@/lib/timezones.json';
+import { checkCampaignNameExists } from '@/lib/actions/campaigns';
 
 // --- Define Toast Helper Functions Locally ---
 const showSuccessToast = (message: string, iconId?: string) => {
@@ -310,6 +311,7 @@ function Step1Content() {
   );
   const [campaignDuration, setCampaignDuration] = useState<string | null>(null);
   const [initialFormState, setInitialFormState] = useState<Step1FormData | null>(null);
+  const [isNameChecking, setIsNameChecking] = useState(false);
 
   const form = useForm<Step1FormData>({
     resolver: zodResolver(Step1ValidationSchema),
@@ -331,12 +333,18 @@ function Step1Content() {
   });
 
   // Debounced validation trigger specifically for the name field
-  const debouncedNameValidation = useDebouncedCallback(async nameValue => {
-    // Only trigger validation for the 'name' field
-    // This relies on Zod executing the async refine when `trigger` is called for 'name'
-    logger.debug(`[Debounce] Triggering validation for name: ${nameValue}`);
+  const debouncedNameCheck = useDebouncedCallback(async (nameValue: string) => {
+    if (!nameValue || nameValue.trim().length === 0) {
+      form.clearErrors('name');
+      setIsNameChecking(false);
+      return;
+    }
+
+    setIsNameChecking(true);
+    logger.debug(`[Debounce] Triggering Zod validation for name: ${nameValue}`);
     await form.trigger('name');
-  }, 500); // 500ms debounce delay
+    setIsNameChecking(false);
+  }, 750);
 
   // --- Initial Value Calculation Effect (Updated) ---
   useEffect(() => {
@@ -344,7 +352,7 @@ function Step1Content() {
       isWizardLoading,
       isLocationLoading: localization.isLoading,
       hasWizardState: !!wizardState,
-      isExistingCampaign: !!wizardState?.id, // Add check for existing campaign
+      isExistingCampaign: !!wizardState?.id,
       initialFormStateExists: !!initialFormState,
       localizedTz: localization.timezone,
       localizedCurrency: localization.currency,
@@ -353,11 +361,10 @@ function Step1Content() {
     if (!isWizardLoading && !localization.isLoading && wizardState && initialFormState === null) {
       logger.info('[Initial Value Calc Effect] Conditions met. Calculating initial values...');
 
-      const isExistingCampaign = !!wizardState.id; // Explicitly check if it's an existing campaign
+      const isExistingCampaign = !!wizardState.id;
       let timezoneToUse: string | null = null;
       let currencyToUse: z.infer<typeof CurrencyEnum> | null = null;
 
-      // Determine Timezone: Prioritize saved only if it's an existing campaign
       const savedTimezone = wizardState.timeZone;
       if (isExistingCampaign && savedTimezone) {
         timezoneToUse = savedTimezone;
@@ -365,14 +372,12 @@ function Step1Content() {
           `[Initial Value Calc Effect] Existing campaign: Using saved timezone: ${timezoneToUse}`
         );
       } else {
-        // For new campaigns OR existing ones without a saved TZ, use localized
         timezoneToUse = localization.timezone;
         logger.info(
           `[Initial Value Calc Effect] ${isExistingCampaign ? 'Existing campaign (no saved TZ)' : 'New campaign'}: Using localized timezone: ${timezoneToUse}`
         );
       }
 
-      // Determine Currency: Prioritize saved only if it's an existing campaign
       const savedCurrency = wizardState.budget?.currency;
       if (isExistingCampaign && savedCurrency && CurrencyEnum.safeParse(savedCurrency).success) {
         currencyToUse = savedCurrency;
@@ -380,14 +385,12 @@ function Step1Content() {
           `[Initial Value Calc Effect] Existing campaign: Using saved currency: ${currencyToUse}`
         );
       } else {
-        // For new campaigns OR existing ones without a saved currency, use localized
         currencyToUse = localization.currency;
         logger.info(
           `[Initial Value Calc Effect] ${isExistingCampaign ? 'Existing campaign (no saved currency)' : 'New campaign'}: Using localized currency: ${currencyToUse}`
         );
       }
 
-      // Final fallbacks remain the same (belt-and-suspenders)
       const finalTimezone = timezoneToUse || 'UTC';
       const finalCurrency = currencyToUse || CurrencyEnum.Values.USD;
 
@@ -396,7 +399,6 @@ function Step1Content() {
         finalCurrency,
       });
 
-      // Construct the full initial data object (structure remains the same)
       const initialData: Step1FormData = {
         name: wizardState.name || '',
         businessGoal: wizardState.businessGoal ?? null,
@@ -414,25 +416,24 @@ function Step1Content() {
         secondaryContact: wizardState.secondaryContact ?? null,
         additionalContacts: wizardState.additionalContacts ?? [],
         budget: {
-          currency: finalCurrency, // Removed 'as any' - check if TS error returns
+          currency: finalCurrency,
           total: parseFloat(wizardState.budget?.total?.toString() || '0') || 0,
           socialMedia: parseFloat(wizardState.budget?.socialMedia?.toString() || '0') || 0,
         },
         Influencer:
           wizardState.Influencer && wizardState.Influencer.length > 0
             ? wizardState.Influencer
-            : [{ id: uuidv4(), platform: PlatformEnum.Instagram, handle: '' }], // Ensure it's just the array
+            : [{ id: uuidv4(), platform: PlatformEnum.Instagram, handle: '' }],
       };
 
       setInitialFormState(initialData);
     }
-    // Dependencies remain largely the same, adding wizardState.id implicitly via wizardState dependency
   }, [
     isWizardLoading,
     localization.isLoading,
     localization.timezone,
     localization.currency,
-    wizardState, // Includes wizardState.id
+    wizardState,
     initialFormState,
   ]);
 
@@ -441,10 +442,9 @@ function Step1Content() {
     logger.debug('[Form Reset Effect] Running Check...', {
       initialFormStateExists: !!initialFormState,
       initialDataLoaded: initialDataLoaded.current,
-      isLocationLoading: localization.isLoading, // Check localization loading
+      isLocationLoading: localization.isLoading,
     });
 
-    // Only run ONCE when initialFormState is set AND localization detection is finished
     if (initialFormState && !initialDataLoaded.current && !localization.isLoading) {
       logger.info(
         '[Form Reset Effect] Conditions met. Applying calculated initial values to form:',
@@ -453,8 +453,7 @@ function Step1Content() {
       form.reset(initialFormState);
       initialDataLoaded.current = true;
     }
-    // Depend on initialFormState, form.reset, form object, and localization.isLoading
-  }, [initialFormState, form.reset, form, localization.isLoading]); // Add form dependency
+  }, [initialFormState, form.reset, form, localization.isLoading]);
 
   const {
     fields: influencerFields,
@@ -466,7 +465,6 @@ function Step1Content() {
     keyName: 'fieldId',
   });
 
-  // Prefix unused contact useFieldArray results
   const {
     fields: _contactFields,
     append: _appendContact,
@@ -477,23 +475,67 @@ function Step1Content() {
   });
 
   const handleStepClick = (step: number) => {
-    // Only allow clicking if the step has been completed or is the current step
-    // This depends on having completion status in wizardState or stepsConfig
     console.log('Navigate to step', step);
-    // router.push(`/campaigns/wizard/step-${step}?id=${wizardState?.campaignId}`);
   };
 
   const onSubmitAndNavigate = async () => {
     setIsSubmitting(true);
     logger.info('[Step 1] Attempting Next...');
-    const isValid = await form.trigger();
-    if (!isValid) {
-      logger.warn('[Step 1] Validation failed.');
-      // Use imported helper
+
+    // --- START NEW EXPLICIT CHECK ---
+    const currentName = form.getValues('name');
+    if (currentName && currentName.trim().length > 0) {
+      setIsNameChecking(true); // Show loading indicator for the button potentially
+      // Clear previous manual name error before re-checking
+      // Check if form.clearErrors can take a specific field, otherwise let Zod handle it or use setError with no message
+      // For now, we rely on setError below to override or Zod to clear if it becomes valid.
+
+      try {
+        const nameExists = await checkCampaignNameExists(currentName);
+        if (nameExists) {
+          const msg = 'A campaign with this name already exists. Please choose a different name.';
+          form.setError('name', {
+            type: 'manual',
+            message: msg,
+          });
+          showErrorToast(msg);
+          setIsNameChecking(false);
+          setIsSubmitting(false);
+          return; // Block submission
+        }
+      } catch (apiError) {
+        logger.error(
+          '[Submit] API Error checking campaign name:',
+          apiError instanceof Error
+            ? { message: apiError.message, stack: apiError.stack }
+            : { error: String(apiError) }
+        );
+        const msg = 'Could not verify campaign name due to a server issue. Please try again.';
+        form.setError('name', {
+          type: 'manual',
+          message: msg,
+        });
+        showErrorToast(msg);
+        setIsNameChecking(false);
+        setIsSubmitting(false);
+        return; // Block submission
+      } finally {
+        setIsNameChecking(false); // Ensure it's always turned off
+      }
+    }
+    // --- END NEW EXPLICIT CHECK ---
+
+    const isValid = await form.trigger(); // This will run all other Zod validations
+    if (!isValid || form.formState.errors.name) {
+      // Also check specifically for name error after trigger
+      logger.warn('[Step 1] Validation failed or name error still present after trigger.', {
+        errors: form.formState.errors,
+      });
       showErrorToast('Please fix the errors before proceeding.');
       setIsSubmitting(false);
       return;
     }
+
     const formData = form.getValues();
     logger.info('[Step 1] Form data is valid.');
 
@@ -506,30 +548,71 @@ function Step1Content() {
 
       if (saveSuccess) {
         logger.info('[Step 1] Save successful, navigating to Step 2');
-        router.push(`/campaigns/wizard/step-2?id=${wizardState?.campaignId || saveSuccess}`); // Use returned ID if new
+        router.push(`/campaigns/wizard/step-2?id=${wizardState?.campaignId || saveSuccess}`);
       } else {
         logger.error('[Step 1] Save failed after validation.');
-        // saveProgress should have shown an error toast
       }
     } catch (error) {
       logger.error('[Step 1] Error during submission:', {
         error: error instanceof Error ? error : String(error),
       });
-      // Use imported helper
       showErrorToast('An unexpected error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // NEW: Handler for the manual Save button
   const handleSave = async (): Promise<boolean> => {
     setIsSubmitting(true);
     logger.info('[Step 1] Attempting Manual Save...');
-    const isValid = await form.trigger();
-    if (!isValid) {
-      logger.warn('[Step 1] Validation failed for manual save.');
-      // Use imported helper
+
+    // --- START NEW EXPLICIT NAME CHECK for SAVE ---
+    const currentName = form.getValues('name');
+    if (currentName && currentName.trim().length > 0) {
+      setIsNameChecking(true); // Show visual cue if any tied to this
+      try {
+        const nameExists = await checkCampaignNameExists(currentName);
+        if (nameExists) {
+          const msg =
+            'A campaign with this name already exists. Please update the name before saving.';
+          form.setError('name', {
+            type: 'manual',
+            message: msg,
+          });
+          showErrorToast(msg);
+          setIsNameChecking(false);
+          setIsSubmitting(false);
+          return false; // Indicate save failed
+        }
+      } catch (apiError) {
+        logger.error(
+          '[Save] API Error checking campaign name:',
+          apiError instanceof Error
+            ? { message: apiError.message, stack: apiError.stack }
+            : { error: String(apiError) }
+        );
+        const msg =
+          'Could not verify campaign name due to a server issue. Please try again before saving.';
+        form.setError('name', {
+          type: 'manual',
+          message: msg,
+        });
+        showErrorToast(msg);
+        setIsNameChecking(false);
+        setIsSubmitting(false);
+        return false; // Indicate save failed
+      } finally {
+        setIsNameChecking(false);
+      }
+    }
+    // --- END NEW EXPLICIT NAME CHECK for SAVE ---
+
+    const isValid = await form.trigger(); // Validate other fields
+    if (!isValid || form.formState.errors.name) {
+      // Re-check name error after trigger, in case Zod caught something else
+      logger.warn('[Step 1] Validation failed for manual save, or name error exists.', {
+        errors: form.formState.errors,
+      });
       showErrorToast('Please fix the errors before saving.');
       setIsSubmitting(false);
       return false;
@@ -545,13 +628,10 @@ function Step1Content() {
 
       if (saveSuccess) {
         logger.info('[Step 1] Manual save successful!');
-        // Use imported helper (default icon is floppy disk)
         showSuccessToast('Progress saved!');
         return true;
       } else {
         logger.error('[Step 1] Manual save failed.');
-        // saveProgress should show specific error
-        // Use imported helper (default icon is triangle exclamation)
         showErrorToast('An unexpected error occurred during save.');
         return false;
       }
@@ -559,7 +639,6 @@ function Step1Content() {
       logger.error('[Step 1] Error during manual save:', {
         error: error instanceof Error ? error : String(error),
       });
-      // Use imported helper
       showErrorToast('An unexpected error occurred during save.');
       return false;
     } finally {
@@ -567,20 +646,17 @@ function Step1Content() {
     }
   };
 
-  // --- Currency Conversion Effect ---
-  // Watch the specific budget fields
   const [watchedTotal, watchedSocial, watchedCurrency] = form.watch([
     'budget.total',
     'budget.socialMedia',
     'budget.currency',
   ]);
-  // Process watched values
   const totalBudgetRaw = parseFloat(parseCurrencyInput(String(watchedTotal || '0')));
   const socialMediaBudgetRaw = parseFloat(parseCurrencyInput(String(watchedSocial || '0')));
   const selectedCurrencyForConversion = watchedCurrency || CurrencyEnum.Values.USD;
 
   useEffect(() => {
-    let isMounted = true; // Prevent state update on unmounted component
+    let isMounted = true;
 
     const updateConvertedValues = async () => {
       if (selectedCurrencyForConversion === 'USD') {
@@ -591,7 +667,6 @@ function Step1Content() {
         return;
       }
 
-      // Convert Total Budget
       if (!isNaN(totalBudgetRaw) && totalBudgetRaw > 0) {
         const convertedTotal = await convertCurrencyUsingApi(
           totalBudgetRaw,
@@ -609,7 +684,6 @@ function Step1Content() {
         if (isMounted) _setConvertedTotalBudget(null);
       }
 
-      // Convert Social Media Budget
       if (!isNaN(socialMediaBudgetRaw) && socialMediaBudgetRaw > 0) {
         const convertedSocial = await convertCurrencyUsingApi(
           socialMediaBudgetRaw,
@@ -632,11 +706,9 @@ function Step1Content() {
 
     return () => {
       isMounted = false;
-    }; // Cleanup function
-    // Rerun effect when raw values or currency change
+    };
   }, [totalBudgetRaw, socialMediaBudgetRaw, selectedCurrencyForConversion]);
 
-  // --- Duration Calculation Effect (Add back) ---
   const watchedStartDate = form.watch('startDate');
   const watchedEndDate = form.watch('endDate');
   useEffect(() => {
@@ -644,11 +716,9 @@ function Step1Content() {
     setCampaignDuration(duration);
   }, [watchedStartDate, watchedEndDate]);
 
-  // Get the currency symbol based on the watched currency value
   const currencySymbol = getCurrencySymbol(watchedCurrency);
 
   if (isWizardLoading || localization.isLoading || !initialDataLoaded.current) {
-    // Show skeleton while wizard context is loading OR localization is loading OR initial form data hasn't been loaded yet
     return <WizardSkeleton step={1} />;
   }
 
@@ -656,7 +726,6 @@ function Step1Content() {
     <FormProvider {...form}>
       <Form {...form}>
         <form onSubmit={e => e.preventDefault()} className="space-y-8 pb-[var(--footer-height)]">
-          {/* === Basic Info Section === */}
           <Card>
             <CardHeader>
               <CardTitle>Basic Information</CardTitle>
@@ -676,11 +745,12 @@ function Step1Content() {
                           {...field}
                           onChange={e => {
                             field.onChange(e);
-                            debouncedNameValidation(e.target.value);
+                            debouncedNameCheck(e.target.value);
                           }}
                         />
                       </FormControl>
                       <FormMessage />
+                      {isNameChecking && <FormDescription>Checking name...</FormDescription>}
                     </FormItem>
                   )}
                 />
@@ -741,7 +811,6 @@ function Step1Content() {
             </CardContent>
           </Card>
 
-          {/* === Schedule & Timezone Section === */}
           <Card>
             <CardHeader>
               <CardTitle>Schedule & Timezone</CardTitle>
@@ -814,7 +883,7 @@ function Step1Content() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="flex items-center">
-                        Time Zone *{/* Use localization hook's loading state */}
+                        Time Zone *
                         {localization.isLoading && (
                           <Icon
                             iconId="faCircleNotchLight"
@@ -824,19 +893,15 @@ function Step1Content() {
                       </FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        value={field.value || ''} // Default value might need adjustment if field.value can be null
-                        // Disable while localization is loading
+                        value={field.value || ''}
                         disabled={localization.isLoading}
                       >
                         <FormControl>
                           <SelectTrigger className="w-full">
-                            {/* Ensure SelectValue has a valid value or placeholder displays */}
                             <SelectValue placeholder="Select timezone..." />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {/* Populate from static data */}
-                          {/* Add type for option */}
                           {timezonesData.map((option: { value: string; label: string }) => (
                             <SelectItem key={option.value} value={option.value}>
                               {option.label}
@@ -855,7 +920,6 @@ function Step1Content() {
             </CardContent>
           </Card>
 
-          {/* === Contacts Section === */}
           <Card>
             <CardHeader>
               <CardTitle>Contact Information</CardTitle>
@@ -864,7 +928,6 @@ function Step1Content() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Primary Contact */}
               <div className="p-4 border rounded-md bg-muted/30">
                 <h4 className="font-medium mb-3 text-sm text-muted-foreground">
                   Primary Contact *
@@ -936,7 +999,6 @@ function Step1Content() {
                 </div>
               </div>
 
-              {/* Secondary Contact */}
               <div className="p-4 border rounded-md bg-muted/30">
                 <h4 className="font-medium mb-3 text-sm text-muted-foreground">
                   Secondary Contact (Optional)
@@ -1007,35 +1069,15 @@ function Step1Content() {
                   />
                 </div>
               </div>
-
-              {/* Additional Contacts */}
-              {/* TODO: Add logic for _contactFields, _appendContact, _removeContact if this section is uncommented */}
-              {/*
-               <div className="p-4 border rounded-md">
-                 <h4 className="font-medium mb-3 text-sm text-muted-foreground">Additional Contacts</h4>
-                 {_contactFields.map((field, index) => (
-                   <div key={field.id} className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4 items-end">
-                     <FormField control={form.control} name={`additionalContacts.${index}.firstName`} render={({ field }) => (<FormItem className="md:col-span-1"><FormLabel>First</FormLabel><FormControl><Input {...field} value={field.value ?? ''}/></FormControl></FormItem>)} />
-                     <FormField control={form.control} name={`additionalContacts.${index}.surname`} render={({ field }) => (<FormItem className="md:col-span-1"><FormLabel>Surname</FormLabel><FormControl><Input {...field} value={field.value ?? ''}/></FormControl></FormItem>)} />
-                     <FormField control={form.control} name={`additionalContacts.${index}.email`} render={({ field }) => (<FormItem className="md:col-span-1"><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
-                     <FormField control={form.control} name={`additionalContacts.${index}.position`} render={({ field }) => (<FormItem className="md:col-span-1"><FormLabel>Position</FormLabel><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger /></FormControl><SelectContent>{PositionEnum.options.map(option => (<SelectItem key={option} value={option}>{option}</SelectItem>))}</SelectContent></Select></FormItem>)} />
-                     <IconButtonAction iconBaseName="faTrashCan" hoverColorClass="text-destructive" ariaLabel="Remove Contact" onClick={() => _removeContact(index)} />
-                   </div>
-                 ))}
-                 <Button type="button" variant="outline" size="sm" onClick={() => _appendContact({ firstName: '', surname: '', email: '', position: PositionEnum.Values.Director })}> <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" /> Add Contact</Button>
-               </div>
-               */}
             </CardContent>
           </Card>
 
-          {/* === Budget Section === */}
           <Card>
             <CardHeader>
               <CardTitle>Budget</CardTitle>
               <CardDescription>Set the budget for the campaign.</CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Currency Selection */}
               <div className="md:col-span-1">
                 <FormField
                   control={form.control}
@@ -1062,8 +1104,7 @@ function Step1Content() {
                   )}
                 />
               </div>
-              <div className="md:col-span-1"></div> {/* Placeholder */}
-              {/* Total Budget */}
+              <div className="md:col-span-1"></div>
               <div className="md:col-span-1">
                 <FormField
                   control={form.control}
@@ -1072,24 +1113,20 @@ function Step1Content() {
                     <FormItem>
                       <FormLabel>Total Budget *</FormLabel>
                       <div className="relative">
-                        {/* Add symbol as an absolutely positioned element */}
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                           {currencySymbol}
                         </span>
                         <FormControl>
                           <Input
-                            type="text" // Change type to text
+                            type="text"
                             placeholder="0"
-                            // Add padding to the left to avoid overlapping the symbol
-                            className="pl-7" // Adjust padding as needed
+                            className="pl-7"
                             {...field}
-                            value={formatNumberWithCommas(field.value)} // Display formatted value
+                            value={formatNumberWithCommas(field.value)}
                             onChange={e => {
-                              // Update form state with parsed number
                               field.onChange(parseFormattedNumber(e.target.value));
                             }}
                             onFocus={e => {
-                              // Select content if it's "0"
                               if (e.target.value === '0') {
                                 e.target.select();
                               }
@@ -1097,7 +1134,6 @@ function Step1Content() {
                           />
                         </FormControl>
                       </div>
-                      {/* Display converted value from state */}
                       {_convertedTotalBudget && (
                         <FormDescription>{_convertedTotalBudget}</FormDescription>
                       )}
@@ -1106,7 +1142,6 @@ function Step1Content() {
                   )}
                 />
               </div>
-              {/* Social Media Budget */}
               <div className="md:col-span-1">
                 <FormField
                   control={form.control}
@@ -1115,23 +1150,20 @@ function Step1Content() {
                     <FormItem>
                       <FormLabel>Social Media Budget *</FormLabel>
                       <div className="relative">
-                        {/* Add symbol */}
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                           {currencySymbol}
                         </span>
                         <FormControl>
                           <Input
-                            type="text" // Change type to text
+                            type="text"
                             placeholder="0"
-                            className="pl-7" // Add padding
+                            className="pl-7"
                             {...field}
-                            value={formatNumberWithCommas(field.value)} // Display formatted value
+                            value={formatNumberWithCommas(field.value)}
                             onChange={e => {
-                              // Update form state with parsed number
                               field.onChange(parseFormattedNumber(e.target.value));
                             }}
                             onFocus={e => {
-                              // Select content if it's "0"
                               if (e.target.value === '0') {
                                 e.target.select();
                               }
@@ -1139,7 +1171,6 @@ function Step1Content() {
                           />
                         </FormControl>
                       </div>
-                      {/* Display converted value from state */}
                       {_convertedSocialMediaBudget && (
                         <FormDescription>{_convertedSocialMediaBudget}</FormDescription>
                       )}
@@ -1151,7 +1182,6 @@ function Step1Content() {
             </CardContent>
           </Card>
 
-          {/* === Influencer Section === */}
           <Card>
             <CardHeader>
               <CardTitle>Influencer Selection</CardTitle>
@@ -1162,7 +1192,7 @@ function Step1Content() {
             <CardContent>
               {influencerFields.map((field, index) => (
                 <InfluencerEntry
-                  key={field.fieldId} // Use fieldId provided by useFieldArray
+                  key={field.fieldId}
                   index={index}
                   control={form.control}
                   errors={form.formState.errors}
@@ -1188,7 +1218,6 @@ function Step1Content() {
             </CardContent>
           </Card>
 
-          {/* Error Summary */}
           {Object.keys(form.formState.errors).length > 0 && (
             <Alert variant="destructive">
               <Icon iconId="faTriangleExclamationLight" className="h-4 w-4" />
@@ -1206,6 +1235,7 @@ function Step1Content() {
         onNext={onSubmitAndNavigate}
         onSave={handleSave}
         isLoadingNext={isSubmitting}
+        isNextDisabled={!!form.formState.errors.name || isNameChecking}
         onStepClick={handleStepClick}
         onBack={null}
       />

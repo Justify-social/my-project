@@ -609,6 +609,24 @@ export const POST = async (request: NextRequest) => {
   } catch (error: any) {
     // --- Start: Inlined tryCatch logic ---
     logger.error('Campaign POST: Error occurred', { error: error.message, stack: error.stack });
+
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      // Inferring P2002 on CampaignWizard is likely due to name unique constraint (userId, name)
+      // For more precision, you could check error.meta.target if it reliably shows the constraint fields.
+      // Example: if (error.meta && Array.isArray(error.meta.target) && error.meta.target.includes('name'))
+      logger.warn('Campaign POST: Prisma P2002 (Unique Constraint Violation) detected.', {
+        target: error.meta?.target,
+      });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'A campaign with this name already exists. Please update the name.',
+          errorCode: 'NAME_ALREADY_EXISTS',
+        },
+        { status: 409 } // 409 Conflict
+      );
+    }
+
     // Using handleApiError directly, passing the original request
     return handleApiError(error, request);
     // --- End: Inlined tryCatch logic ---

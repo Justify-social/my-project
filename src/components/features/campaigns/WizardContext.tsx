@@ -369,6 +369,13 @@ export function WizardProvider({ children }: { children: ReactNode }) {
           const result = await response.json();
 
           if (!response.ok || !result.success || !result.data?.id) {
+            // Check for specific error code from API
+            if (result.errorCode === 'NAME_ALREADY_EXISTS') {
+              // Use the exact error message from the API if available, or the desired one
+              const specificMessage =
+                result.error || 'A campaign with this name already exists. Please update the name.';
+              throw new Error(specificMessage); // Throw with the specific message
+            }
             throw new Error(
               `Failed to create campaign draft: ${result.error || response.statusText}`
             );
@@ -415,6 +422,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
         } catch (error: unknown) {
           logger.error('Error creating new campaign draft:', error);
           const message = error instanceof Error ? error.message : 'Unknown error';
+          // The toast will now show the specific message if it was thrown above
           showErrorToast(`Error creating campaign: ${message}`);
           return null; // ADD EXPLICIT RETURN NULL HERE
         }
