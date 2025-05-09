@@ -166,7 +166,7 @@ const CampaignReviewStudySetup: React.FC<CampaignReviewStudySetupProps> = ({ cam
       }
       const newStudy = await response.json();
       logger.info('Brand Lift study created successfully', { newStudyId: newStudy.id });
-      router.push(`/survey-design/${newStudy.id}`);
+      router.push(`/brand-lift/survey-design/${newStudy.id}`);
     } catch (err: any) {
       logger.error('Error creating Brand Lift study:', { error: err.message });
       setSubmitError(err.message || 'An unexpected error occurred.');

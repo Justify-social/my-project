@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import ConditionalLayout from '@/components/layouts/conditional-layout';
 import SurveyPreview from '@/components/features/brand-lift/SurveyPreview';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -22,7 +21,7 @@ const SurveyPreviewSubmitPage: React.FC = () => {
   if (!studyId) {
     logger.error('Invalid study ID for survey preview page', { param: studyIdParam });
     return (
-      <ConditionalLayout>
+      <>
         <div className="container mx-auto p-4 text-center">
           <Alert variant="destructive">
             <Icon iconId="faTriangleExclamationLight" className="h-4 w-4" />
@@ -32,7 +31,7 @@ const SurveyPreviewSubmitPage: React.FC = () => {
             </AlertDescription>
           </Alert>
         </div>
-      </ConditionalLayout>
+      </>
     );
   }
 
@@ -59,7 +58,7 @@ const SurveyPreviewSubmitPage: React.FC = () => {
       logger.info(`Study ${studyId} submitted for review successfully.`);
       setSubmitSuccess(true);
       setTimeout(() => {
-        router.push(`/approval/${studyId}`);
+        router.push(`/brand-lift/approval/${studyId}`);
       }, 1500);
     } catch (err: any) {
       logger.error('Error submitting survey for review', { studyId, error: err.message });
@@ -70,7 +69,7 @@ const SurveyPreviewSubmitPage: React.FC = () => {
   };
 
   return (
-    <ConditionalLayout>
+    <>
       <div className="container mx-auto p-4 md:p-6">
         <div className="mb-6 flex flex-wrap justify-between items-center gap-4">
           <h1 className="text-2xl font-bold">Preview &amp; Submit Survey</h1>
@@ -111,7 +110,7 @@ const SurveyPreviewSubmitPage: React.FC = () => {
 
         {!submitSuccess && <SurveyPreview studyId={studyId} />}
       </div>
-    </ConditionalLayout>
+    </>
   );
 };
 
