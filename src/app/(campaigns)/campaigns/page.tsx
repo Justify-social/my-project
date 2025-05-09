@@ -815,8 +815,7 @@ const ClientCampaignList: React.FC = () => {
           <div className="relative w-full md:w-auto md:min-w-[250px]">
             <Icon
               iconId="faMagnifyingGlassLight"
-              size="sm"
-              className="absolute left-3 inset-y-0 my-auto text-gray-500 pointer-events-none h-4 w-4"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none h-4 w-4"
             />
             <Input
               type="text"
@@ -827,7 +826,7 @@ const ClientCampaignList: React.FC = () => {
                 setCurrentPage(1);
               }}
               aria-label="Search campaigns by name"
-              className="pl-10 w-full border-divider"
+              className="pl-10 w-full border-divider h-10"
             />
           </div>
 
