@@ -400,7 +400,6 @@ function MarketplacePage() {
     <div className="container mx-auto px-4 py-6">
       <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
         <h1 className="text-2xl font-semibold">Influencer Marketplace</h1>
-        {/* Keep only the Filters button */}
         <div className="flex items-center gap-2">
           <Sheet open={isFiltersSheetOpen} onOpenChange={setIsFiltersSheetOpen}>
             <SheetTrigger asChild>
@@ -429,91 +428,24 @@ function MarketplacePage() {
             </SheetContent>
           </Sheet>
 
-          {/* Bulk Add to Campaign Button and Dialog - NEW FOR TASK 2.2 */}
+          {/* Bulk Add to Campaign Button and Dialog - MODIFIED FOR NEW PLACEMENT & VISIBILITY */}
           {selectedIds.length > 0 && (
             <AlertDialog open={isBulkAddDialogOpen} onOpenChange={setIsBulkAddDialogOpen}>
               <AlertDialogTrigger asChild>
                 <Button
                   size="sm"
-                  className="bg-accent hover:bg-accent/90 text-white" // Applied requested styling
+                  className="bg-accent hover:bg-accent/90 text-white"
                   onClick={() => {
-                    setBulkSelectedCampaignId(null); // Reset selection
-                    // fetchBulkCampaignsForDropdown(); // Will be called by useEffect
+                    setBulkSelectedCampaignId(null);
                     setIsBulkAddDialogOpen(true);
                   }}
-                  disabled={isLoading} // Disable if page is loading
+                  disabled={isLoading}
                 >
                   Add {selectedIds.length} to Campaign
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    Add {selectedIds.length} Influencers to Campaign
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Select a campaign to add the selected influencers to.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-
-                <div className="py-2">
-                  <label
-                    htmlFor="bulk-campaign-select"
-                    className="block text-sm font-medium text-gray-900 mb-1"
-                  >
-                    Campaign
-                  </label>
-                  {isFetchingBulkCampaigns ? (
-                    <Skeleton className="h-10 w-full rounded-md" />
-                  ) : bulkCampaignsList.length === 0 ? (
-                    <p className="text-sm text-gray-500 py-2">
-                      {isFetchingBulkCampaigns ? '' : 'No draft or active campaigns found.'}{' '}
-                      {/* Avoid double message during fetch */}
-                    </p>
-                  ) : (
-                    <Select
-                      onValueChange={setBulkSelectedCampaignId}
-                      value={bulkSelectedCampaignId || ''}
-                      disabled={isFetchingBulkCampaigns}
-                    >
-                      <SelectTrigger id="bulk-campaign-select" className="w-full">
-                        <SelectValue placeholder="Select a campaign..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {bulkCampaignsList.map(campaign => (
-                          <SelectItem key={campaign.id} value={campaign.id}>
-                            {campaign.name}{' '}
-                            <span className="text-xs opacity-70 ml-2">({campaign.status})</span>
-                            {campaign.startDate && campaign.endDate && (
-                              <span className="text-xs opacity-50 ml-2">
-                                {new Date(campaign.startDate).toLocaleDateString()} -{' '}
-                                {new Date(campaign.endDate).toLocaleDateString()}
-                              </span>
-                            )}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                </div>
-
-                <AlertDialogFooter>
-                  <AlertDialogCancel
-                    onClick={() => setIsBulkAddDialogOpen(false)}
-                    disabled={isBulkAddingToCampaign}
-                  >
-                    Cancel
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleBulkAddToCampaignSubmit} // Wire up the handler here
-                    disabled={
-                      isBulkAddingToCampaign || isFetchingBulkCampaigns || !bulkSelectedCampaignId
-                    }
-                  >
-                    {isBulkAddingToCampaign ? 'Adding...' : 'Add Influencers'}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
+              {/* AlertDialogContent for bulk add is ALREADY DEFINED LATER IN THE FILE (lines ~504-550) */}
+              {/* NO NEED TO DUPLICATE AlertDialogContent HERE, it will use the existing one. */}
             </AlertDialog>
           )}
         </div>
@@ -574,6 +506,87 @@ function MarketplacePage() {
             </PaginationItem>
           </PaginationContent>
         </Pagination>
+      )}
+
+      {/* Keep the existing AlertDialog for bulk add here, ensure it's controlled by isBulkAddDialogOpen */}
+      {selectedIds.length > 0 && (
+        <AlertDialog open={isBulkAddDialogOpen} onOpenChange={setIsBulkAddDialogOpen}>
+          {/* The AlertDialogTrigger is now moved above, this Dialog purely for content */}
+          {/* We can keep the structure if open/onOpenChange are correctly managed, */}
+          {/* OR simplify this to only render AlertDialogContent if isBulkAddDialogOpen is true */}
+          {/* For minimal changes, keeping AlertDialog wrapper and relying on state is fine. */}
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Add {selectedIds.length} Influencers to Campaign</AlertDialogTitle>
+              <AlertDialogDescription>
+                Select a campaign to add the selected influencers to.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+
+            <div className="py-2">
+              <label
+                htmlFor="bulk-campaign-select"
+                className="block text-sm font-medium text-gray-900 mb-1"
+              >
+                Campaign
+              </label>
+              {isFetchingBulkCampaigns ? (
+                <Skeleton className="h-10 w-full rounded-md" />
+              ) : bulkCampaignsList.length === 0 ? (
+                <p className="text-sm text-gray-500 py-2">
+                  {isFetchingBulkCampaigns ? '' : 'No draft or active campaigns found.'}
+                </p>
+              ) : (
+                <Select
+                  onValueChange={setBulkSelectedCampaignId}
+                  value={bulkSelectedCampaignId || ''}
+                  disabled={isFetchingBulkCampaigns}
+                >
+                  <SelectTrigger id="bulk-campaign-select" className="w-full">
+                    <SelectValue placeholder="Select a campaign..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {bulkCampaignsList.map(campaign => (
+                      <SelectItem key={campaign.id} value={campaign.id}>
+                        {campaign.name}{' '}
+                        <span className="text-xs opacity-70 ml-2">({campaign.status})</span>
+                        {campaign.startDate && campaign.endDate && (
+                          <span className="text-xs opacity-50 ml-2">
+                            {new Date(campaign.startDate).toLocaleDateString()} -{' '}
+                            {new Date(campaign.endDate).toLocaleDateString()}
+                          </span>
+                        )}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+
+            <AlertDialogFooter>
+              <AlertDialogCancel
+                onClick={() => setIsBulkAddDialogOpen(false)}
+                disabled={isBulkAddingToCampaign}
+              >
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleBulkAddToCampaignSubmit}
+                disabled={
+                  isBulkAddingToCampaign || isFetchingBulkCampaigns || !bulkSelectedCampaignId
+                }
+              >
+                {isBulkAddingToCampaign ? (
+                  <>
+                    <Icon iconId="faSpinnerLight" className="animate-spin mr-2 h-4 w-4" /> Adding...
+                  </>
+                ) : (
+                  'Add Influencers'
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
     </div>
   );

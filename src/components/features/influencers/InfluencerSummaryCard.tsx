@@ -15,6 +15,8 @@ import { cn } from '@/lib/utils';
 import { getInitials } from '@/lib/utils'; // Import from utils
 import { useRouter } from 'next/navigation';
 import { logger } from '@/utils/logger'; // Import logger
+import { ButtonAddToCampaign } from '@/components/ui/button-add-to-campaign'; // Import the new component
+import { showSuccessToast } from '@/components/ui/toast'; // Updated import path
 
 interface InfluencerSummaryCardProps {
   influencer: InfluencerSummary;
@@ -187,26 +189,22 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
             {influencer.engagementRate ? `${(influencer.engagementRate * 100).toFixed(2)}%` : 'N/A'}
           </div>
         </div>
-        {/* Action Button */}
-        <div className="mt-auto pt-2">
+        {/* Action Buttons */}
+        <div className="mt-auto pt-3 space-y-2">
           {' '}
-          {/* Pushes button to the bottom, add padding top */}
+          {/* Adjusted for multiple buttons */}
           <Button
             variant="outline"
             size="sm"
             className="w-full"
             onClick={() => {
-              // influencer.id now holds the stable identifier (external_id or composite)
-              // Pass this single identifier to the handler
               if (influencer.id) {
-                // Ensure id exists before calling
                 onViewProfile(influencer.id);
               } else {
                 logger.error(
                   '[InfluencerSummaryCard] Missing influencer.id, cannot view profile.',
                   { influencerData: influencer }
                 );
-                // Optionally show an error to the user
               }
             }}
           >
