@@ -48,22 +48,78 @@ export interface CalendarUpcomingProps {
   // onEventClick?: (eventId: string | number, event: CalendarEvent) => void; // Removed unused prop
 }
 
-// Re-add getStatusColor function needed for tooltip status dot
-const getStatusColor = (status?: string): string => {
-  // Using Shadcn semantic colors where possible
-  switch (status?.toLowerCase()) {
-    case 'live':
-      return 'bg-success text-success-foreground';
-    case 'scheduled':
-      return 'bg-primary text-primary-foreground';
+// Adapted getStatusInfo function (from card-upcoming-campaign.tsx)
+const getStatusInfo = (status: string | null | undefined) => {
+  const normalizedStatus = (status || '').toLowerCase();
+  // Note: These color classes might need to map to actual CSS if not using Tailwind utility classes directly
+  // For now, using similar semantic naming to what's in card-upcoming-campaign
+  switch (normalizedStatus) {
+    case 'live': // from original calendar-upcoming
+    case 'active': // from card-upcoming-campaign
+    case 'approved': // from card-upcoming-campaign
+      return {
+        class: 'bg-green-500',
+        text: status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Active',
+      };
+    case 'scheduled': // from original calendar-upcoming
+    case 'planning': // from original calendar-upcoming
+      return {
+        class: 'bg-blue-500',
+        text: status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Scheduled',
+      };
     case 'draft':
-      return 'bg-warning text-warning-foreground';
+      return { class: 'bg-yellow-500', text: 'Draft' };
     case 'completed':
-      return 'bg-muted text-muted-foreground';
-    case 'planning':
-      return 'bg-interactive text-interactive-foreground';
+      return { class: 'bg-gray-400', text: 'Completed' };
+    case 'paused':
+      return { class: 'bg-red-500', text: 'Paused' };
     default:
-      return 'bg-secondary text-secondary-foreground';
+      const defaultText = status
+        ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
+        : 'Unknown';
+      return { class: 'bg-gray-500', text: defaultText };
+  }
+};
+
+// Helper to format currency (from card-upcoming-campaign.tsx)
+const formatCurrency = (value?: number) => {
+  if (value === undefined || value === null) return '-';
+  return value.toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD', // Assuming USD, make dynamic if needed
+    minimumFractionDigits: 0,
+  });
+};
+
+// Helper to format campaign duration (from card-upcoming-campaign.tsx)
+const formatCampaignDuration = (startDate?: Date, endDate?: Date): string => {
+  if (!startDate) return '-';
+  try {
+    const startFormatted = format(new Date(startDate), 'MMM d');
+    const startYearFormatted = format(new Date(startDate), 'yyyy');
+    const startFullFormatted = format(new Date(startDate), 'MMM d, yyyy');
+
+    if (!endDate || isSameDay(new Date(startDate), new Date(endDate))) {
+      return startFullFormatted;
+    }
+
+    const endFormatted = format(new Date(endDate), 'd');
+    const endMonthFormatted = format(new Date(endDate), 'MMM d');
+    const endYearFormatted = format(new Date(endDate), 'yyyy');
+    const endFullFormatted = format(new Date(endDate), 'MMM d, yyyy');
+
+    if (isSameYear(new Date(startDate), new Date(endDate))) {
+      if (isSameMonth(new Date(startDate), new Date(endDate))) {
+        return `${startFormatted} - ${endFormatted}, ${startYearFormatted}`;
+      } else {
+        return `${startFormatted} - ${endMonthFormatted}, ${startYearFormatted}`;
+      }
+    } else {
+      return `${startFullFormatted} - ${endFullFormatted}`;
+    }
+  } catch (e) {
+    console.error('Error formatting campaign duration:', e);
+    return 'Invalid date range';
   }
 };
 
@@ -208,37 +264,14 @@ export function CalendarUpcoming({
                   <TooltipContent
                     side="top"
                     align="start"
-                    className="text-xs max-w-[300px] z-50 bg-background text-foreground border shadow-md rounded-md p-3"
+                    className="w-64 p-3 text-sm bg-background text-foreground border shadow-md rounded-md" // Matched style from card-upcoming-campaign
                   >
-                    <p className="font-semibold mb-1 text-primary">{event.title}</p>
-                    {/* Updated date display for clarity and format */}
-                    <div className="text-muted-foreground text-xs mb-2">
-                      <span className="font-medium">Campaign Duration: </span>
-                      {
-                        isSameDay(eventStart, eventEnd)
-                          ? format(eventStart, 'MMM d, yyyy') // e.g., May 7, 2025
-                          : isSameMonth(eventStart, eventEnd) && isSameYear(eventStart, eventEnd)
-                            ? `${format(eventStart, 'MMM d')} - ${format(eventEnd, 'd, yyyy')}` // e.g., May 7 - 14, 2025
-                            : isSameYear(eventStart, eventEnd)
-                              ? `${format(eventStart, 'MMM d')} - ${format(eventEnd, 'MMM d, yyyy')}` // e.g., May 7 - Jun 14, 2025
-                              : `${format(eventStart, 'MMM d, yyyy')} - ${format(eventEnd, 'MMM d, yyyy')}` // e.g., Dec 7, 2024 - Jan 5, 2025
-                      }
-                    </div>
-                    {/* Grid Container for Details */}
-                    <div className="grid grid-cols-[auto_1fr] gap-x-1.5 gap-y-1.5">
-                      {' '}
-                      {/* Grid definition */}
-                      {/* Display Platform Icons */}
-                      {event.platform && (
-                        <>
-                          {' '}
-                          {/* Use Fragment to place multiple items in the second column */}
-                          {/* Empty first column cell for alignment */}
-                          <div></div>
-                          {/* Platform icons in the second column */}
+                    <div className="space-y-1.5">
+                      <p className="font-semibold text-base mb-1 text-primary">{event.title}</p>
+                      <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-xs">
+                        <span className="font-medium text-muted-foreground">Platform:</span>
+                        {event.platform && event.platform.trim() !== '' ? (
                           <div className="flex items-center space-x-1.5">
-                            {' '}
-                            {/* Keep inner flex for icons */}
                             {event.platform
                               .split(/[,\s]+/)
                               .map(p => p.trim())
@@ -255,64 +288,46 @@ export function CalendarUpcoming({
                                     title={platformName}
                                     className="opacity-80"
                                   />
-                                ) : null;
+                                ) : (
+                                  <span
+                                    key={platformName}
+                                    className="text-muted-foreground text-xs"
+                                  >
+                                    {platformName} {/* Fallback to text if icon not found */}
+                                  </span>
+                                );
                               })}
                           </div>
-                        </>
-                      )}
-                      {/* Display Influencers */}
-                      {event.influencerHandles && event.influencerHandles.length > 0 && (
-                        <>
-                          {' '}
-                          {/* Use Fragment to place icon and text in separate columns */}
-                          <Icon
-                            iconId="faUserGroupLight"
-                            className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 self-center"
-                          />{' '}
-                          {/* Icon in Col 1, self-center for vertical align */}
-                          <span
-                            className="text-muted-foreground text-xs truncate"
-                            title={event.influencerHandles.join(', ')}
-                          >
-                            {' '}
-                            {/* Text in Col 2 */}
-                            {event.influencerHandles.join(', ')}
-                          </span>
-                        </>
-                      )}
-                      {/* Display budget */}
-                      {event.budget !== undefined && event.budget !== null && (
-                        <>
-                          {' '}
-                          {/* Use Fragment */}
-                          {/* Empty first column cell for alignment */}
-                          <div></div>
-                          <span className="text-muted-foreground text-xs">
-                            {' '}
-                            {/* Budget text in Col 2 */}${event.budget.toLocaleString()} Budget
-                          </span>
-                        </>
-                      )}
-                      {/* Display status */}
-                      {event.status && (
-                        <>
-                          {' '}
-                          {/* Use Fragment */}
-                          <span
-                            className={cn(
-                              'w-2 h-2 rounded-full self-center',
-                              getStatusColor(event.status).split(' ')[0]
-                            )}
-                          ></span>{' '}
-                          {/* Status dot in Col 1 */}
-                          <span className="text-muted-foreground text-xs">
-                            Status: {event.status}
-                          </span>{' '}
-                          {/* Status text in Col 2 */}
-                        </>
-                      )}
-                    </div>{' '}
-                    {/* End Grid Container */}
+                        ) : (
+                          <span className="text-muted-foreground">N/A</span>
+                        )}
+
+                        <span className="font-medium text-muted-foreground">Status:</span>
+                        <span className="text-muted-foreground">
+                          {getStatusInfo(event.status).text || 'N/A'}
+                        </span>
+
+                        <span className="font-medium text-muted-foreground">Duration:</span>
+                        <span className="text-muted-foreground">
+                          {formatCampaignDuration(event.start, event.end)}
+                        </span>
+
+                        <span className="font-medium text-muted-foreground">Budget:</span>
+                        <span className="text-muted-foreground">
+                          {formatCurrency(event.budget)}
+                        </span>
+
+                        <span className="font-medium text-muted-foreground">Influencer:</span>
+                        <span
+                          className="text-muted-foreground truncate"
+                          title={event.influencerHandles?.join(', ')}
+                        >
+                          {event.influencerHandles && event.influencerHandles.length > 0
+                            ? event.influencerHandles[0] // Display first handle
+                            : 'N/A'}
+                        </span>
+                      </div>
+                    </div>
                   </TooltipContent>
                 </Tooltip>
               );

@@ -27,6 +27,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Icon } from '@/components/ui/icon/icon'; // Assuming Icon component is available
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'; // Import Tooltip components
+import Image from 'next/image'; // Import Image
 
 // Data structure for a single campaign row
 export interface CampaignData {
@@ -74,6 +75,24 @@ const getStatusInfo = (status: string | null | undefined) => {
         : 'Unknown';
       return { class: 'bg-gray-100 text-gray-800', text: defaultText };
   }
+};
+
+// Helper function to map platform names to icon registry IDs/paths
+// (Copied from calendar-upcoming.tsx for consistency)
+const platformIconMapForCard: Record<string, string> = {
+  facebook: '/icons/brands/brandsFacebook.svg',
+  github: '/icons/brands/brandsGithub.svg',
+  instagram: '/icons/brands/brandsInstagram.svg',
+  linkedin: '/icons/brands/brandsLinkedin.svg',
+  tiktok: '/icons/brands/brandsTiktok.svg',
+  x: '/icons/brands/brandsXTwitter.svg',
+  twitter: '/icons/brands/brandsXTwitter.svg', // Alias
+  youtube: '/icons/brands/brandsYoutube.svg',
+};
+
+const getPlatformIconPathForCard = (platformName?: string): string | undefined => {
+  if (!platformName) return undefined;
+  return platformIconMapForCard[platformName.toLowerCase()];
 };
 
 export function UpcomingCampaignsTable({
@@ -138,17 +157,6 @@ export function UpcomingCampaignsTable({
     }
   };
 
-  // Map platform names to correct brand icon IDs
-  const platformIconMap: { [key: string]: string } = {
-    instagram: 'brandsInstagram',
-    tiktok: 'brandsTiktok',
-    youtube: 'brandsYoutube',
-    facebook: 'brandsFacebook',
-    twitter: 'brandsXTwitter',
-    linkedin: 'brandsLinkedin',
-    // Add other platforms if needed
-  };
-
   // Determine the number of columns for the empty state cell
   const columnCount = 5; // Campaign, Status, Influencer, Budget, Date (Platform removed, Dates combined)
 
@@ -190,12 +198,24 @@ export function UpcomingCampaignsTable({
                   >
                     <TableCell className="font-medium">
                       <div className="flex items-center space-x-2">
-                        {campaign.platform && platformIconMap[campaign.platform.toLowerCase()] && (
-                          <Icon
-                            iconId={platformIconMap[campaign.platform.toLowerCase()]}
-                            className="h-4 w-4 text-muted-foreground flex-shrink-0"
-                          />
-                        )}
+                        {(() => {
+                          if (campaign.platform) {
+                            const iconPath = getPlatformIconPathForCard(campaign.platform);
+                            if (iconPath) {
+                              return (
+                                <Image
+                                  src={iconPath}
+                                  alt={campaign.platform}
+                                  width={16}
+                                  height={16}
+                                  title={campaign.platform}
+                                  className="opacity-80"
+                                />
+                              );
+                            }
+                          }
+                          return null;
+                        })()}
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Link
@@ -205,24 +225,69 @@ export function UpcomingCampaignsTable({
                               {campaign.title}
                             </Link>
                           </TooltipTrigger>
-                          <TooltipContent className="w-64 p-3 text-sm">
+                          <TooltipContent className="w-64 p-3 text-sm bg-background text-foreground border shadow-md rounded-md">
                             <div className="space-y-1.5">
-                              <p className="font-semibold text-base mb-1">{campaign.title}</p>
-                              <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1">
+                              <p className="font-semibold text-base mb-1 text-primary">
+                                {campaign.title}
+                              </p>
+                              <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-xs">
                                 <span className="font-medium text-muted-foreground">Platform:</span>
-                                <span>{campaign.platform || 'N/A'}</span>
+                                {campaign.platform && campaign.platform.trim() !== '' ? (
+                                  <div className="flex items-center space-x-1.5">
+                                    {campaign.platform
+                                      .split(/[,\s]+/)
+                                      .map(p => p.trim())
+                                      .filter(Boolean)
+                                      .map(platformName => {
+                                        const iconPath = getPlatformIconPathForCard(platformName);
+                                        return iconPath ? (
+                                          <Image
+                                            key={platformName}
+                                            src={iconPath}
+                                            alt={platformName}
+                                            width={14}
+                                            height={14}
+                                            title={platformName}
+                                            className="opacity-80"
+                                          />
+                                        ) : (
+                                          <span
+                                            key={platformName}
+                                            className="text-muted-foreground text-xs"
+                                          >
+                                            {platformName}
+                                          </span>
+                                        );
+                                      })}
+                                  </div>
+                                ) : (
+                                  <span className="text-muted-foreground">N/A</span>
+                                )}
+
                                 <span className="font-medium text-muted-foreground">Status:</span>
-                                <span>{statusInfo.text || 'N/A'}</span>
+                                <span className="text-muted-foreground">
+                                  {statusInfo.text || 'N/A'}
+                                </span>
+
                                 <span className="font-medium text-muted-foreground">Duration:</span>
-                                <span>
+                                <span className="text-muted-foreground">
                                   {formatCampaignDuration(campaign.startDate, campaign.endDate)}
                                 </span>
+
                                 <span className="font-medium text-muted-foreground">Budget:</span>
-                                <span>{formatCurrency(campaign.budget)}</span>
+                                <span className="text-muted-foreground">
+                                  {formatCurrency(campaign.budget)}
+                                </span>
+
                                 <span className="font-medium text-muted-foreground">
                                   Influencer:
                                 </span>
-                                <span>{campaign.influencer?.name || 'N/A'}</span>
+                                <span
+                                  className="text-muted-foreground truncate"
+                                  title={campaign.influencer?.name}
+                                >
+                                  {campaign.influencer?.name || 'N/A'}
+                                </span>
                               </div>
                             </div>
                           </TooltipContent>
