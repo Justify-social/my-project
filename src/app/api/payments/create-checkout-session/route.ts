@@ -5,7 +5,7 @@ import { logger } from '@/utils/logger';
 
 // Initialize Stripe with explicit API version required by installed SDK types
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-02-24.acacia', // Using version format expected by types
+  apiVersion: '2025-04-30.basil', // Update API version to match SDK types
 });
 
 // Function to get or create a Stripe Customer ID for a Justify User

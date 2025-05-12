@@ -866,7 +866,7 @@ export async function verifyStripeApiServerSide(): Promise<ApiVerificationResult
   const startTime = Date.now();
   try {
     console.info(`[Server Verify] Testing ${apiName}`);
-    const stripe = new Stripe(secretKey, { apiVersion: '2025-02-24.acacia' }); // Use the specific apiVersion required by the installed Stripe library
+    const stripe = new Stripe(secretKey, { apiVersion: '2025-04-30.basil' }); // Use the specific apiVersion required by the installed Stripe library
 
     // Make a simple read call, e.g., list products with a limit of 1
     const productList = await stripe.products.list({ limit: 1 });

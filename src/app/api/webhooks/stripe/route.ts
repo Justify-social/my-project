@@ -29,7 +29,7 @@ interface _SubscriptionAnalyticsProps {
 
 // Initialize Stripe with explicit API version
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-02-24.acacia', // Using version format expected by types
+  apiVersion: '2025-04-30.basil', // Update API version to match SDK types
 });
 
 // No longer need custom body parser config or buffer function
@@ -153,7 +153,9 @@ export async function POST(request: Request) {
               stripeCustomerId: stripeCustomerId,
               stripeSubscriptionId: subscription.id,
               stripePriceId: subscription.items.data[0]?.price.id,
-              stripeCurrentPeriodEnd: new Date(subscription.current_period_end * 1000),
+              stripeCurrentPeriodEnd: new Date(
+                subscription.items.data[0].current_period_end * 1000
+              ),
               // Add a field to your User model for subscription status if needed
               // subscriptionStatus: subscription.status,
             },
