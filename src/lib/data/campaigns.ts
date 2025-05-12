@@ -21,6 +21,7 @@ const campaignWizardSelectForList = Prisma.validator<Prisma.CampaignWizardSelect
     take: 1,
   },
   locations: true, // Keep as JSON, parse on client
+  // orgId: true, // Add if needed for client-side logic, otherwise filtering is server-side
 });
 
 export type CampaignForList = Prisma.CampaignWizardGetPayload<{
@@ -67,6 +68,67 @@ export async function getAllCampaignsForUser(clerkUserId: string): Promise<Campa
       `[getAllCampaignsForUser] Error fetching campaigns for clerkUserId ${clerkUserId}:`,
       { error }
     );
+    throw error;
+  }
+}
+
+/**
+ * Fetches all campaigns for a specific organization.
+ * Can optionally filter by the user who created them within that organization.
+ */
+export async function getAllCampaignsForOrg(
+  orgId: string,
+  clerkUserIdForFilter?: string // Optional: for "Created by me" filter
+): Promise<CampaignForList[]> {
+  logger.info(`[getAllCampaignsForOrg] Fetching for orgId: ${orgId}`, {
+    clerkUserIdForFilter,
+  });
+  try {
+    let internalUserIdForFilter: string | undefined = undefined;
+
+    if (clerkUserIdForFilter) {
+      const userRecord = await prisma.user.findUnique({
+        where: { clerkId: clerkUserIdForFilter },
+        select: { id: true },
+      });
+      if (userRecord) {
+        internalUserIdForFilter = userRecord.id;
+        logger.info('[getAllCampaignsForOrg] Found internal User ID for filter', {
+          internalUserIdForFilter,
+          clerkUserIdForFilter,
+        });
+      } else {
+        logger.warn(
+          '[getAllCampaignsForOrg] No User record found for clerkUserIdForFilter, filter will not be applied',
+          {
+            clerkUserIdForFilter,
+          }
+        );
+      }
+    }
+
+    const whereClause: Prisma.CampaignWizardWhereInput = {
+      orgId: orgId,
+    };
+
+    if (internalUserIdForFilter) {
+      whereClause.userId = internalUserIdForFilter;
+    }
+
+    const campaigns = await prisma.campaignWizard.findMany({
+      where: whereClause,
+      select: campaignWizardSelectForList,
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+    logger.info(
+      `[getAllCampaignsForOrg] Found ${campaigns.length} campaigns from DB query for orgId ${orgId}`,
+      { filterApplied: !!internalUserIdForFilter }
+    );
+    return campaigns;
+  } catch (error) {
+    logger.error(`[getAllCampaignsForOrg] Error fetching campaigns for orgId ${orgId}:`, { error });
     throw error;
   }
 }

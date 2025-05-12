@@ -37,35 +37,27 @@ export const GET = async (
   { params: paramsPromise }: { params: Promise<{ studyId: string }> }
 ) => {
   try {
-    const { userId: clerkUserId } = await auth();
+    const { userId: clerkUserId, orgId } = await auth();
     if (!clerkUserId) throw new UnauthenticatedError('Authentication required.');
+    if (!orgId)
+      throw new BadRequestError('Active organization context is required to view this study.');
 
     const { studyId } = await paramsPromise;
     if (!studyId) throw new BadRequestError('Study ID is required.');
 
-    const userRecord = await db.user.findUnique({
-      where: { clerkId: clerkUserId },
-      select: { id: true },
-    });
-    if (!userRecord) {
-      throw new NotFoundError('User not found for authorization.');
-    }
-    const internalUserId = userRecord.id;
-
     const study = await db.brandLiftStudy.findFirst({
       where: {
         id: studyId,
-        campaign: {
-          userId: internalUserId,
-        },
+        orgId: orgId,
       },
       include: {
         campaign: { select: { campaignName: true } },
         _count: { select: { questions: true } },
       },
     });
-    if (!study) throw new NotFoundError('Study not found or not accessible by this user.');
-    logger.info('Fetched Brand Lift Study details', { studyId, userId: clerkUserId });
+    if (!study)
+      throw new NotFoundError('Study not found or you do not have permission to view it.');
+    logger.info('Fetched Brand Lift Study details', { studyId, userId: clerkUserId, orgId });
     return NextResponse.json(study);
   } catch (error: any) {
     return handleApiError(error, req);
@@ -77,8 +69,12 @@ export const PUT = async (
   { params: paramsPromise }: { params: Promise<{ studyId: string }> }
 ) => {
   try {
-    const { userId: clerkUserId } = await auth();
+    const { userId: clerkUserId, orgId } = await auth();
     if (!clerkUserId) throw new UnauthenticatedError('Authentication required.');
+    if (!orgId)
+      throw new BadRequestError(
+        'Active organization context is required to update a brand lift study.'
+      );
 
     const { studyId } = await paramsPromise;
     if (!studyId) throw new BadRequestError('Study ID is required.');
@@ -90,36 +86,40 @@ export const PUT = async (
         studyId,
         errors: validation.error.flatten().fieldErrors,
         userId: clerkUserId,
+        orgId,
       });
       throw validation.error;
     }
 
     const updateData = validation.data;
 
-    const userRecord = await db.user.findUnique({
-      where: { clerkId: clerkUserId },
-      select: { id: true },
-    });
-    if (!userRecord) {
-      throw new NotFoundError('User not found for study update authorization.');
-    }
-    const internalUserId = userRecord.id;
-
-    const existingStudy = await db.brandLiftStudy.findFirst({
+    const existingStudy = await db.brandLiftStudy.findUnique({
       where: {
         id: studyId,
-        campaign: {
-          userId: internalUserId,
-        },
       },
       select: {
         id: true,
         status: true,
         name: true,
+        orgId: true,
         campaign: { select: { userId: true, campaignName: true } },
       },
     });
-    if (!existingStudy) throw new NotFoundError('Study not found or not accessible by this user.');
+    if (!existingStudy) throw new NotFoundError('Study not found.');
+
+    if (existingStudy.orgId === null) {
+      logger.warn(
+        `User ${clerkUserId} in org ${orgId} attempted to update legacy brand lift study ${studyId} (null orgId). Action denied.`
+      );
+      throw new ForbiddenError(
+        'This study is not associated with an organization and cannot be updated.'
+      );
+    } else if (existingStudy.orgId !== orgId) {
+      logger.warn(
+        `User ${clerkUserId} in org ${orgId} attempted to update brand lift study ${studyId} belonging to org ${existingStudy.orgId}. Action denied.`
+      );
+      throw new ForbiddenError('You do not have permission to update this study.');
+    }
 
     const currentStatus = existingStudy.status as BrandLiftStudyStatus;
     if (
@@ -141,7 +141,10 @@ export const PUT = async (
       updateData.status === BrandLiftStudyStatus.COLLECTING &&
       existingStudy.status !== BrandLiftStudyStatus.COLLECTING
     ) {
-      logger.info(`Attempting to launch study ${studyId} on Cint...`, { userId: clerkUserId });
+      logger.info(`Attempting to launch study ${studyId} on Cint...`, {
+        userId: clerkUserId,
+        orgId,
+      });
       try {
         const fullStudyForCint = await db.brandLiftStudy.findUnique({
           where: { id: studyId },
@@ -157,7 +160,7 @@ export const PUT = async (
           fullStudyForCint.name,
           CINT_PROJECT_MANAGER_ID
         );
-        logger.info('Cint Project created', { studyId, cintProjectId: cintProject.id });
+        logger.info('Cint Project created', { studyId, cintProjectId: cintProject.id, orgId });
 
         const surveyLiveUrl = `${BASE_URL}/survey/${studyId}?rid=[%RID%]`;
 
@@ -171,6 +174,7 @@ export const PUT = async (
         logger.info('Cint Target Group created', {
           studyId,
           cintTargetGroupId: cintTargetGroup.id,
+          orgId,
         });
 
         const endFieldingAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
@@ -178,6 +182,7 @@ export const PUT = async (
         logger.info('Cint Target Group launched', {
           studyId,
           cintTargetGroupId: cintTargetGroup.id,
+          orgId,
         });
 
         const dataToUpdate: Prisma.BrandLiftStudyUpdateInput = {
@@ -197,11 +202,12 @@ export const PUT = async (
             id: true,
             name: true,
             status: true,
+            orgId: true,
             campaign: { select: { userId: true, campaignName: true } },
           },
         });
       } catch (cintLaunchError: any) {
-        logger.error('Cint launch failed', { studyId, error: cintLaunchError.message });
+        logger.error('Cint launch failed', { studyId, error: cintLaunchError.message, orgId });
         throw new Error(
           `Cint launch failed: ${cintLaunchError.message}. Study status not changed to COLLECTING.`
         );
@@ -214,6 +220,7 @@ export const PUT = async (
           id: true,
           name: true,
           status: true,
+          orgId: true,
           campaign: { select: { userId: true, campaignName: true } },
         },
       });
@@ -224,19 +231,10 @@ export const PUT = async (
       existingStudy.status !== BrandLiftStudyStatus.PENDING_APPROVAL
     ) {
       try {
-        const studyCreatorCampaignUserId = finalUpdatedStudy.campaign?.userId;
-        let submitterDetails: { email: string; name?: string | null } | null = null;
-        if (studyCreatorCampaignUserId) {
-          submitterDetails = await db.user.findUnique({
-            where: { id: studyCreatorCampaignUserId },
-            select: { email: true, name: true },
-          });
-        } else {
-          submitterDetails = await db.user.findUnique({
-            where: { id: clerkUserId },
-            select: { email: true, name: true },
-          });
-        }
+        const submitterDetails = await db.user.findUnique({
+          where: { clerkId: clerkUserId },
+          select: { email: true, name: true },
+        });
 
         const designatedReviewerEmails = ['team-review@example.com'];
 
@@ -247,17 +245,23 @@ export const PUT = async (
             { id: finalUpdatedStudy.id, name: finalUpdatedStudy.name, approvalPageUrl },
             { email: submitterDetails.email, name: submitterDetails.name ?? undefined }
           );
-          logger.info('"Study Submitted for Review" notification sent', { studyId });
+          logger.info('"Study Submitted for Review" notification sent', { studyId, orgId });
         } else {
           logger.warn(
             'Could not send "Study Submitted for Review" notification due to missing submitter/reviewer details',
-            { studyId, submitterDetailsProvided: !!submitterDetails, designatedReviewerEmails }
+            {
+              studyId,
+              submitterDetailsProvided: !!submitterDetails,
+              designatedReviewerEmails,
+              orgId,
+            }
           );
         }
       } catch (emailError: any) {
         logger.error('Failed to send "Study Submitted for Review" email', {
           studyId,
           error: emailError.message,
+          orgId,
         });
       }
     }
@@ -265,6 +269,7 @@ export const PUT = async (
     logger.info('Brand Lift Study updated successfully', {
       studyId,
       userId: clerkUserId,
+      orgId,
       newStatus: finalUpdatedStudy.status,
     });
     return NextResponse.json(finalUpdatedStudy);
@@ -276,4 +281,57 @@ export const PUT = async (
   }
 };
 
-// DELETE handler can be added here if needed later, following similar structure.
+// DELETE handler
+export async function DELETE(
+  req: NextRequest,
+  { params: paramsPromise }: { params: Promise<{ studyId: string }> }
+) {
+  try {
+    const { userId: clerkUserId, orgId } = await auth();
+    if (!clerkUserId) {
+      throw new UnauthenticatedError('Authentication required.');
+    }
+    if (!orgId) {
+      throw new BadRequestError(
+        'Active organization context is required to delete a brand lift study.'
+      );
+    }
+
+    const { studyId } = await paramsPromise;
+    if (!studyId) {
+      throw new BadRequestError('Study ID is required for deletion.');
+    }
+
+    const studyToDelete = await db.brandLiftStudy.findUnique({
+      where: { id: studyId },
+      select: { orgId: true, name: true, status: true },
+    });
+
+    if (!studyToDelete) {
+      throw new NotFoundError('Study not found.');
+    }
+
+    if (studyToDelete.orgId === null) {
+      logger.warn(
+        `User ${clerkUserId} in org ${orgId} attempted to delete legacy brand lift study ${studyId} (null orgId). Action denied.`
+      );
+      throw new ForbiddenError(
+        'This study is not associated with an organization and cannot be deleted.'
+      );
+    } else if (studyToDelete.orgId !== orgId) {
+      logger.warn(
+        `User ${clerkUserId} in org ${orgId} attempted to delete brand lift study ${studyId} belonging to org ${studyToDelete.orgId}. Action denied.`
+      );
+      throw new ForbiddenError('You do not have permission to delete this study.');
+    }
+
+    await db.brandLiftStudy.delete({
+      where: { id: studyId },
+    });
+
+    logger.info('Brand Lift Study deleted successfully', { studyId, userId: clerkUserId, orgId });
+    return NextResponse.json({ message: 'Study deleted successfully' }, { status: 200 });
+  } catch (error: any) {
+    return handleApiError(error, req);
+  }
+}

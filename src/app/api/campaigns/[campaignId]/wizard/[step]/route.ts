@@ -14,6 +14,7 @@ import {
   Step5BaseSchema, // Assuming this exists for step 5 logic
 } from '@/components/features/campaigns/types'; // Using types.ts as source
 import { addOrUpdateCampaignInAlgolia } from '@/lib/algolia'; // Import Algolia utility
+import { BadRequestError, ForbiddenError, UnauthenticatedError, NotFoundError } from '@/lib/errors'; // Import custom errors
 
 // Define interface for influencer data locally if not exported
 interface ApiInfluencer {
@@ -36,7 +37,30 @@ export async function PATCH(
     const resolvedParams = await params;
     const campaignId = resolvedParams.campaignId;
     const step = parseInt(resolvedParams.step, 10);
-    const { userId: _userId } = await auth(); // Prefixed userId
+    const { userId: clerkUserId, orgId } = await auth(); // Fetch Clerk user and org IDs
+
+    if (!clerkUserId) {
+      throw new UnauthenticatedError('Authentication required to update campaign wizard.');
+    }
+
+    if (!orgId) {
+      throw new BadRequestError(
+        'Active organization context is required to update campaign wizard.'
+      );
+    }
+
+    // Fetch the internal User record using the clerkUserId
+    const userRecord = await prisma.user.findUnique({
+      where: { clerkId: clerkUserId },
+      select: { id: true },
+    });
+
+    if (!userRecord) {
+      logger.error('Campaign Wizard PATCH: No User record found for clerkUserId', { clerkUserId });
+      throw new NotFoundError('User record not found. Cannot update campaign wizard.');
+    }
+    const internalUserId = userRecord.id;
+
     const body = await request.json();
 
     if (!campaignId || isNaN(step)) {
@@ -54,12 +78,35 @@ export async function PATCH(
     // Fetch current campaign state
     const currentCampaign = await prisma.campaignWizard.findUnique({
       where: { id: campaignId },
-      // Select specific fields if known to optimize, otherwise Prisma fetches all scalar fields by default
-      // For this logic, we need step1Complete, step2Complete, step3Complete, step4Complete
+      select: {
+        orgId: true,
+        userId: true,
+        step1Complete: true,
+        step2Complete: true,
+        step3Complete: true,
+        step4Complete: true,
+        currentStep: true,
+      },
     });
 
     if (!currentCampaign) {
-      return NextResponse.json({ error: 'Campaign not found for update' }, { status: 404 });
+      // return NextResponse.json({ error: 'Campaign not found for update' }, { status: 404 });
+      throw new NotFoundError('Campaign not found for update.');
+    }
+
+    // Authorization Check
+    if (currentCampaign.orgId === null) {
+      logger.warn(
+        `Attempt to update legacy campaign (ID: ${campaignId}, null orgId) by user ${internalUserId} in org ${orgId}. Access denied as per current rules.`
+      );
+      throw new ForbiddenError(
+        'This campaign is not associated with an organization and cannot be updated in this context.'
+      );
+    } else if (currentCampaign.orgId !== orgId) {
+      logger.warn(
+        `User ${internalUserId} in org ${orgId} attempted to update campaign ${campaignId} belonging to org ${currentCampaign.orgId}. Access denied.`
+      );
+      throw new ForbiddenError('You do not have permission to update this campaign.');
     }
 
     // Parse request body
@@ -73,6 +120,7 @@ export async function PATCH(
     const mappedData: Prisma.CampaignWizardUpdateInput = {
       updatedAt: new Date(),
       currentStep: step,
+      user: { connect: { id: internalUserId } }, // Update user relation for "last editor"
     };
 
     // Revert validationResult back to any

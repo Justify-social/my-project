@@ -20,24 +20,18 @@ const createOptionSchema = z.object({
 });
 
 // Helper to verify question access for adding an option
-async function verifyQuestionAccessForAddOption(questionId: string, clerkUserId: string) {
-  const userRecord = await db.user.findUnique({
-    where: { clerkId: clerkUserId },
-    select: { id: true },
-  });
-  if (!userRecord) {
-    throw new NotFoundError('User not found for authorization.');
-  }
-  const internalUserId = userRecord.id;
-
+async function verifyQuestionAccessAndStudyOrgForAddOption(
+  questionId: string,
+  clerkUserId: string,
+  orgId: string
+) {
   const question = await db.surveyQuestion.findUnique({
     where: { id: questionId },
-    // Include study and campaign for user-based authorization
     include: {
       study: {
         select: {
           status: true,
-          campaign: { select: { userId: true } },
+          orgId: true,
         },
       },
     },
@@ -46,15 +40,31 @@ async function verifyQuestionAccessForAddOption(questionId: string, clerkUserId:
   if (!question) {
     throw new NotFoundError('Parent question not found. Cannot add option.');
   }
-  // Check ownership via campaign
-  if (question.study?.campaign?.userId !== internalUserId) {
-    throw new ForbiddenError("Access denied to this question's study. Cannot add option.");
+
+  if (!question.study) {
+    logger.error('Question found without a study during option creation auth', { questionId });
+    throw new NotFoundError('Study associated with question not found.');
+  }
+
+  if (question.study.orgId === null) {
+    logger.warn(
+      `User ${clerkUserId} in org ${orgId} attempted to add option to question ${questionId} in legacy study (null orgId). Action denied.`
+    );
+    throw new ForbiddenError(
+      'Options cannot be added to studies not associated with an organization.'
+    );
+  } else if (question.study.orgId !== orgId) {
+    logger.warn(
+      `User ${clerkUserId} in org ${orgId} attempted to add option to question ${questionId} in study belonging to org ${question.study.orgId}. Action denied.`
+    );
+    throw new ForbiddenError('You do not have permission to modify this study.');
   }
 
   const currentStudyStatus = question.study.status as BrandLiftStudyStatus;
   if (
     currentStudyStatus !== BrandLiftStudyStatus.DRAFT &&
-    currentStudyStatus !== BrandLiftStudyStatus.PENDING_APPROVAL
+    currentStudyStatus !== BrandLiftStudyStatus.PENDING_APPROVAL &&
+    currentStudyStatus !== BrandLiftStudyStatus.CHANGES_REQUESTED
   ) {
     throw new ForbiddenError(`Options cannot be added when study status is ${currentStudyStatus}.`);
   }
@@ -66,8 +76,9 @@ export const POST = async (
   { params: paramsPromise }: { params: Promise<{ questionId: string }> }
 ) => {
   try {
-    const { userId: clerkUserId } = await auth();
+    const { userId: clerkUserId, orgId } = await auth();
     if (!clerkUserId) throw new UnauthenticatedError('Authentication required.');
+    if (!orgId) throw new BadRequestError('Active organization context is required.');
 
     const { questionId } = await paramsPromise;
     if (!questionId || !z.string().cuid().safeParse(questionId).success) {
@@ -75,7 +86,7 @@ export const POST = async (
       throw new BadRequestError('Valid Question ID is required in the path.');
     }
 
-    await verifyQuestionAccessForAddOption(questionId, clerkUserId);
+    await verifyQuestionAccessAndStudyOrgForAddOption(questionId, clerkUserId, orgId);
 
     const body = await req.json();
     const validation = createOptionSchema.safeParse(body);

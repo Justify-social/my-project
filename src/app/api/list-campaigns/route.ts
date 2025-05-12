@@ -2,29 +2,40 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { logger } from '@/lib/logger';
 import { handleApiError } from '@/lib/apiErrorHandler';
-import { getAllCampaignsForUser } from '@/lib/data/campaigns'; // Import the new function
-import { UnauthenticatedError } from '@/lib/errors';
+import { getAllCampaignsForOrg } from '@/lib/data/campaigns'; // Updated import
+import { UnauthenticatedError, BadRequestError } from '@/lib/errors'; // Added BadRequestError
 
 export async function GET(req: NextRequest) {
   try {
-    const { userId } = await auth();
+    const { userId: clerkUserId, orgId } = await auth(); // Fetch orgId
 
-    if (!userId) {
+    if (!clerkUserId) {
+      // clerkUserId is used for potential "created by me" filter
       throw new UnauthenticatedError('Authentication required.');
     }
 
-    // TODO: Implement parsing of filter query parameters (status, search, etc.)
-    // const searchParams = req.nextUrl.searchParams;
-    // const statusFilter = searchParams.get('status');
-    // ... etc
+    if (!orgId) {
+      logger.info('[GET /api/list-campaigns] No active organization found for user.', {
+        clerkUserId,
+      });
+      // As per plan: return empty list or appropriate error/message.
+      // Returning empty list with success true, frontend can display a message.
+      return NextResponse.json({
+        success: true,
+        data: [],
+        message:
+          'No active organization selected. Please select or create an organization to view campaigns.',
+      });
+    }
 
-    // Call the data fetching function (passing filters in the future)
-    const campaigns = await getAllCampaignsForUser(userId);
+    const searchParams = req.nextUrl.searchParams;
+    const filterByCreator = searchParams.get('filterByCreator') === 'true';
+
+    const campaigns = await getAllCampaignsForOrg(orgId, filterByCreator ? clerkUserId : undefined);
 
     return NextResponse.json({ success: true, data: campaigns });
   } catch (error: any) {
     logger.error('Error in /api/list-campaigns:', { error: error.message });
-    // Use the shared error handler
     return handleApiError(error, req);
   }
 }

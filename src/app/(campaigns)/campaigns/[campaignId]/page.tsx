@@ -27,6 +27,7 @@ import { saveAs } from 'file-saver';
 import { DuplicateCampaignButton } from '@/components/ui/button-duplicate-campaigns';
 import { ConfirmDeleteDialog } from '@/components/ui/dialog-confirm-delete';
 import { getCampaignStatusInfo, CampaignStatusKey } from '@/utils/statusUtils'; // Import centralized utility
+import { useAuth } from '@clerk/nextjs'; // Import useAuth
 
 // Define AGE_BRACKETS for the age distribution summary UI
 const AGE_BRACKETS = [
@@ -363,6 +364,7 @@ const getAssetTypeFromUrl = (url: string): string => {
 export default function CampaignDetail() {
   const router = useRouter();
   const params = useParams();
+  const { orgId: activeOrgId, isLoaded: isAuthLoaded, userId: clerkUserId } = useAuth(); // Get auth context
   const campaignIdParam = (params?.campaignId as string) || '';
   const [campaignData, setCampaignData] = useState<CampaignData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -704,6 +706,9 @@ export default function CampaignDetail() {
     }
   };
 
+  // Add a check before rendering action buttons
+  const canPerformActions = isAuthLoaded && activeOrgId;
+
   if (isLoading) {
     return (
       <div className="p-6 max-w-7xl mx-auto space-y-6">
@@ -779,10 +784,18 @@ export default function CampaignDetail() {
         </div>
 
         <div className="flex gap-2">
-          <Link href={`/campaigns/wizard/step-1?id=${campaignIdParam}`}>
-            <Button variant="outline" size="sm">
-              <Icon iconId="faPenToSquareLight" className="mr-2 h-4 w-4 text-muted-foreground" />
-              Edit
+          <Link href={`/campaigns/wizard/step-1?id=${campaignIdParam}`} passHref legacyBehavior>
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              disabled={!canPerformActions}
+              title={!canPerformActions ? 'Select an active organization to edit' : 'Edit Campaign'}
+            >
+              <a>
+                <Icon iconId="faPenToSquareLight" className="mr-2 h-4 w-4 text-muted-foreground" />
+                Edit
+              </a>
             </Button>
           </Link>
           <DuplicateCampaignButton
@@ -800,7 +813,15 @@ export default function CampaignDetail() {
               </>
             }
           />
-          <Button variant="destructive" size="sm" onClick={() => setShowDeleteModal(true)}>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => setShowDeleteModal(true)}
+            disabled={!canPerformActions} // Disable delete button
+            title={
+              !canPerformActions ? 'Select an active organization to delete' : 'Delete Campaign'
+            }
+          >
             <Icon iconId="faTrashCanLight" className="mr-2 h-4 w-4" />
             Delete
           </Button>

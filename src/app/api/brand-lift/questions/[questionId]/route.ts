@@ -26,38 +26,44 @@ const updateQuestionSchema = z
   });
 
 // Helper to verify question access and parent study status
-async function verifyQuestionAccess(
+async function verifyQuestionAndStudyOrgAuth(
   questionId: string,
   clerkUserId: string,
+  orgId: string,
   allowedStatuses: BrandLiftStudyStatus[]
 ) {
-  const userRecord = await db.user.findUnique({
-    where: { clerkId: clerkUserId },
-    select: { id: true },
-  });
-  if (!userRecord) {
-    throw new NotFoundError('User not found for authorization.');
-  }
-  const internalUserId = userRecord.id;
-
   const question = await db.surveyQuestion.findUnique({
     where: {
       id: questionId,
-      study: {
-        campaign: {
-          userId: internalUserId,
-        },
-      },
     },
     include: {
       study: {
-        select: { id: true, status: true },
+        select: { id: true, status: true, orgId: true },
       },
     },
   });
 
   if (!question) {
-    throw new NotFoundError('Question not found or not accessible by this user.');
+    throw new NotFoundError('Question not found.');
+  }
+
+  if (!question.study) {
+    logger.error('Question found without a study during auth check', { questionId });
+    throw new NotFoundError('Study associated with question not found.');
+  }
+
+  if (question.study.orgId === null) {
+    logger.warn(
+      `User ${clerkUserId} in org ${orgId} attempted to access question ${questionId} in legacy study (null orgId). Action denied.`
+    );
+    throw new ForbiddenError(
+      'Operation not allowed for studies not associated with an organization.'
+    );
+  } else if (question.study.orgId !== orgId) {
+    logger.warn(
+      `User ${clerkUserId} in org ${orgId} attempted to access question ${questionId} in study belonging to org ${question.study.orgId}. Action denied.`
+    );
+    throw new ForbiddenError('You do not have permission to modify this question or its study.');
   }
 
   const currentStatus = question.study.status as BrandLiftStudyStatus;
@@ -73,9 +79,12 @@ const putHandler = async (
   req: NextRequest,
   { params: paramsPromise }: { params: Promise<{ questionId: string }> }
 ) => {
-  const { userId: clerkUserId } = await auth();
+  const { userId: clerkUserId, orgId } = await auth();
   if (!clerkUserId) {
     throw new UnauthenticatedError('Authentication required.');
+  }
+  if (!orgId) {
+    throw new BadRequestError('Active organization context is required.');
   }
 
   const { questionId } = await paramsPromise;
@@ -83,14 +92,7 @@ const putHandler = async (
     throw new BadRequestError('Question ID is required.');
   }
 
-  const userRecord = await db.user.findUnique({
-    where: { clerkId: clerkUserId },
-    select: { id: true },
-  });
-  if (!userRecord) throw new NotFoundError('User for update operation not found');
-  const internalUserId = userRecord.id;
-
-  await verifyQuestionAccess(questionId, clerkUserId, [
+  await verifyQuestionAndStudyOrgAuth(questionId, clerkUserId, orgId, [
     BrandLiftStudyStatus.DRAFT,
     BrandLiftStudyStatus.PENDING_APPROVAL,
     BrandLiftStudyStatus.CHANGES_REQUESTED,
@@ -112,11 +114,10 @@ const putHandler = async (
     const updatedQuestion = await db.surveyQuestion.update({
       where: {
         id: questionId,
-        study: { campaign: { userId: internalUserId } },
       },
       data: validation.data,
     });
-    logger.info('Survey question updated successfully', { questionId, userId: clerkUserId });
+    logger.info('Survey question updated successfully', { questionId, userId: clerkUserId, orgId });
     return NextResponse.json(updatedQuestion);
   } catch (error) {
     if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
@@ -135,9 +136,12 @@ const deleteHandler = async (
   req: NextRequest,
   { params: paramsPromise }: { params: Promise<{ questionId: string }> }
 ) => {
-  const { userId: clerkUserId } = await auth();
+  const { userId: clerkUserId, orgId } = await auth();
   if (!clerkUserId) {
     throw new UnauthenticatedError('Authentication required.');
+  }
+  if (!orgId) {
+    throw new BadRequestError('Active organization context is required.');
   }
 
   const { questionId } = await paramsPromise;
@@ -145,14 +149,7 @@ const deleteHandler = async (
     throw new BadRequestError('Question ID is required.');
   }
 
-  const userRecord = await db.user.findUnique({
-    where: { clerkId: clerkUserId },
-    select: { id: true },
-  });
-  if (!userRecord) throw new NotFoundError('User for delete operation not found');
-  const internalUserId = userRecord.id;
-
-  await verifyQuestionAccess(questionId, clerkUserId, [
+  await verifyQuestionAndStudyOrgAuth(questionId, clerkUserId, orgId, [
     BrandLiftStudyStatus.DRAFT,
     BrandLiftStudyStatus.PENDING_APPROVAL,
     BrandLiftStudyStatus.CHANGES_REQUESTED,
@@ -162,10 +159,9 @@ const deleteHandler = async (
     await db.surveyQuestion.delete({
       where: {
         id: questionId,
-        study: { campaign: { userId: internalUserId } },
       },
     });
-    logger.info('Survey question deleted successfully', { questionId, userId: clerkUserId });
+    logger.info('Survey question deleted successfully', { questionId, userId: clerkUserId, orgId });
     return new NextResponse(null, { status: 204 });
   } catch (error) {
     if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {

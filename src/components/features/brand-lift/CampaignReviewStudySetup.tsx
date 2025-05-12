@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { z } from 'zod';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useAuth } from '@clerk/nextjs';
 
 // Shadcn UI Imports
 import { Button } from '@/components/ui/button';
@@ -133,6 +134,7 @@ interface CampaignReviewStudySetupProps {
 
 const CampaignReviewStudySetup: React.FC<CampaignReviewStudySetupProps> = ({ campaignId }) => {
   const router = useRouter();
+  const { orgId: activeOrgId, isLoaded: isAuthLoaded, isSignedIn } = useAuth();
   const [campaignData, setCampaignData] = useState<CampaignDetails | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -178,6 +180,19 @@ const CampaignReviewStudySetup: React.FC<CampaignReviewStudySetupProps> = ({ cam
   }, [campaignId, setValue]);
 
   const onSubmit: SubmitHandler<StudySetupFormValues> = async data => {
+    if (!isAuthLoaded || !isSignedIn || !activeOrgId) {
+      logger.error('Brand Lift Study creation attempt without active user or organization.', {
+        isAuthLoaded,
+        isSignedIn,
+        activeOrgId,
+      });
+      setSubmitError(
+        'An active user session and organization are required to create a study. Please check your login and organization settings.'
+      );
+      setIsSubmitting(false);
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitError(null);
     try {
@@ -244,6 +259,19 @@ const CampaignReviewStudySetup: React.FC<CampaignReviewStudySetupProps> = ({ cam
         <Icon iconId="faTriangleExclamationLight" className="h-4 w-4" />
         <AlertTitle>Error Loading Campaign Data</AlertTitle>
         <AlertDescription>{fetchError}</AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (isAuthLoaded && !activeOrgId) {
+    return (
+      <Alert variant="default">
+        <Icon iconId="faTriangleExclamationLight" className="h-4 w-4 text-yellow-500" />
+        <AlertTitle>Organization Required</AlertTitle>
+        <AlertDescription>
+          You need to have an active organization selected to set up a Brand Lift study. Please
+          select or create an organization in your settings.
+        </AlertDescription>
       </Alert>
     );
   }
@@ -417,7 +445,11 @@ const CampaignReviewStudySetup: React.FC<CampaignReviewStudySetupProps> = ({ cam
                 <AlertDescription>{submitError}</AlertDescription>
               </Alert>
             )}
-            <Button type="submit" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              disabled={isSubmitting || !isAuthLoaded || !activeOrgId || !campaignData}
+              title={!activeOrgId ? 'Select an organization to proceed' : undefined}
+            >
               {isSubmitting ? (
                 <Icon iconId="faSpinnerLight" className="mr-2 h-4 w-4 animate-spin" />
               ) : null}

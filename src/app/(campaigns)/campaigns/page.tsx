@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { Icon } from '@/components/ui/icon/icon';
-import { useUser } from '@clerk/nextjs';
+import { useUser, useAuth } from '@clerk/nextjs';
 import { LoadingSkeleton, TableSkeleton } from '@/components/ui';
 import { Button } from '@/components/ui/button';
 import { IconButtonAction } from '@/components/ui/button-icon-action';
@@ -39,6 +39,7 @@ import { Label } from '@/components/ui/label';
 import { logger } from '@/utils/logger';
 import { ConfirmDeleteDialog } from '@/components/ui/dialog-confirm-delete'; // Added import
 import { getCampaignStatusInfo, CampaignStatusKey } from '@/utils/statusUtils'; // Import centralized utility
+import { Checkbox } from '@/components/ui/checkbox'; // Import Checkbox
 
 // Define expected status values
 // type CampaignStatus = 'DRAFT' | 'REVIEW' | 'APPROVED' | 'ACTIVE' | 'COMPLETED' | string;
@@ -235,13 +236,15 @@ interface Campaign {
 type SortDirection = 'ascending' | 'descending';
 
 const ClientCampaignList: React.FC = () => {
-  const { user, isLoaded } = useUser();
+  const { user, isLoaded: isUserLoaded } = useUser();
+  const { orgId, isLoaded: isAuthLoaded } = useAuth();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [objectiveFilter, setObjectiveFilter] = useState('');
   const [startDateFilter, setStartDateFilter] = useState('');
   const [endDateFilter, setEndDateFilter] = useState('');
+  const [myCampaignsFilter, setMyCampaignsFilter] = useState(false); // State for "Created by me" filter
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -295,62 +298,83 @@ const ClientCampaignList: React.FC = () => {
     });
   };
 
-  // Fetch campaigns from the NEW API endpoint
-  useEffect(() => {
-    const fetchCampaigns = async () => {
-      setIsLoadingData(true);
-      setError(''); // Clear previous errors
-      try {
-        const response = await fetch('/api/list-campaigns', {
-          // Use new endpoint
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          // TODO: Pass filters as query params for server-side filtering
-        });
-        if (!response.ok) {
-          let errorDetails = `Failed to load campaigns: ${response.status}`;
-          try {
-            const errorData = await response.json();
-            errorDetails = errorData.error || errorData.message || errorDetails;
-          } catch {
-            /* Ignore JSON parsing error */
-          }
-          if (response.status === 401 || response.status === 403) {
-            throw new Error('Unauthorized to fetch campaigns.');
-          }
-          throw new Error(errorDetails);
-        }
-        const data = await response.json(); // Assign response.json() to data
-        console.log('API Response from /api/list-campaigns:', data);
-
-        if (data.success && Array.isArray(data.data)) {
-          console.log('Setting campaigns:', data.data);
-          const transformedCampaigns = data.data.map(transformCampaignData);
-          console.log('Transformed campaigns:', transformedCampaigns);
-          setCampaigns(transformedCampaigns);
-        } else {
-          const errorMsg = data.error || 'Invalid data format received from server.';
-          console.log('Invalid data format:', data);
-          throw new Error(errorMsg);
-        }
-      } catch (err) {
-        console.error('Error fetching campaigns:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load campaigns');
-        setCampaigns([]);
-      } finally {
-        setIsLoadingData(false);
+  const fetchCampaigns = useCallback(async () => {
+    // Make fetchCampaigns useCallback
+    setIsLoadingData(true);
+    setError('');
+    try {
+      const queryParams = new URLSearchParams();
+      if (myCampaignsFilter) {
+        queryParams.append('filterByCreator', 'true');
       }
-    };
+      // Add other filters to queryParams here if implementing server-side filtering for them
+      // e.g., if (statusFilter) queryParams.append('status', statusFilter);
 
-    if (isLoaded && user) {
-      fetchCampaigns();
-    } else if (isLoaded && !user) {
-      setIsLoadingData(false);
+      const response = await fetch(`/api/list-campaigns?${queryParams.toString()}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        let errorDetails = `Failed to load campaigns: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorDetails = errorData.error || errorData.message || errorDetails;
+        } catch {
+          /* Ignore JSON parsing error */
+        }
+        if (response.status === 401 || response.status === 403) {
+          throw new Error('Unauthorized to fetch campaigns.');
+        }
+        throw new Error(errorDetails);
+      }
+      const data = await response.json();
+      console.log('API Response from /api/list-campaigns:', data);
+
+      if (data.success && Array.isArray(data.data)) {
+        const transformedCampaigns = data.data.map(transformCampaignData);
+        setCampaigns(transformedCampaigns);
+        if (data.message && data.data.length === 0) {
+          setError(data.message);
+        }
+      } else {
+        const errorMsg = data.error || data.message || 'Invalid data format received from server.';
+        console.log('Invalid data format or error message from API:', data);
+        setError(errorMsg);
+        setCampaigns([]);
+      }
+    } catch (err) {
+      console.error('Error fetching campaigns:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load campaigns');
       setCampaigns([]);
+    } finally {
+      setIsLoadingData(false);
     }
-  }, [isLoaded, user]);
+  }, [myCampaignsFilter]); // Add myCampaignsFilter to dependency array
+
+  useEffect(() => {
+    if (isUserLoaded && isAuthLoaded) {
+      if (user && orgId) {
+        fetchCampaigns();
+      } else if (user && !orgId) {
+        setIsLoadingData(false);
+        setCampaigns([]);
+        setError(
+          'Please select an active organization to view campaigns, or create one in Settings.'
+        );
+      } else if (!user) {
+        setIsLoadingData(false);
+        setCampaigns([]);
+      }
+    }
+  }, [isUserLoaded, user, isAuthLoaded, orgId, fetchCampaigns]); // Add fetchCampaigns to dependencies
+
+  const refetchCampaigns = useCallback(async () => {
+    // Make refetchCampaigns useCallback
+    // This function essentially calls fetchCampaigns, so can be simplified or directly call fetchCampaigns
+    await fetchCampaigns();
+  }, [fetchCampaigns]);
 
   // Get unique start and end dates from campaigns
   const uniqueDates = useMemo(() => {
@@ -514,50 +538,6 @@ const ClientCampaignList: React.FC = () => {
     });
   };
 
-  // Function to refetch campaigns from the server
-  const refetchCampaigns = async () => {
-    try {
-      setIsLoadingData(true);
-      setError('');
-      const response = await fetch('/api/list-campaigns', {
-        // Use new endpoint
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache',
-        },
-        // TODO: Pass filters here as well
-      });
-      if (!response.ok) {
-        let errorDetails = `Failed to refresh campaigns: ${response.status}`;
-        try {
-          const errorData = await response.json();
-          errorDetails = errorData.error || errorData.message || errorDetails;
-        } catch {
-          /* Ignore JSON parsing error */
-        }
-        console.error(errorDetails);
-        setError(errorDetails);
-        return;
-      }
-      const data = await response.json(); // Assign response.json() to data
-      if (data.success && Array.isArray(data.data)) {
-        console.log('Refreshed campaigns data:', data.data);
-        const transformedCampaigns = data.data.map(transformCampaignData);
-        setCampaigns(transformedCampaigns);
-      } else {
-        const errorMsg = data.error || 'Invalid data format on refresh.';
-        console.error('Invalid data format on refresh:', data);
-        setError(errorMsg);
-      }
-    } catch (err) {
-      console.error('Error refreshing campaigns:', err);
-      setError(err instanceof Error ? err.message : 'Failed to refresh campaigns');
-    } finally {
-      setIsLoadingData(false);
-    }
-  };
-
   // RESTORED HANDLER FUNCTIONS:
   const handleViewCampaign = (campaignId: string) => {
     router.push(`/campaigns/${campaignId}`);
@@ -706,7 +686,7 @@ const ClientCampaignList: React.FC = () => {
   };
 
   const checkNameExists = async (name: string): Promise<boolean> => {
-    if (!isLoaded) {
+    if (!isUserLoaded) {
       showErrorToast('Authentication state is not loaded yet. Please wait and try again.');
       return true; // Indicate failure to prevent proceeding
     }
@@ -740,7 +720,7 @@ const ClientCampaignList: React.FC = () => {
   };
 
   const handleDuplicateConfirm = async () => {
-    if (!isLoaded) {
+    if (!isUserLoaded) {
       showErrorToast('Authentication state is not loaded yet. Please wait and try again.');
       return;
     }
@@ -790,7 +770,7 @@ const ClientCampaignList: React.FC = () => {
   // --- End Restore Local Duplicate Logic ---
 
   // Render loading state
-  if (isLoadingData && !campaigns.length) {
+  if (isLoadingData && !campaigns.length && !error) {
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-center">
@@ -807,8 +787,12 @@ const ClientCampaignList: React.FC = () => {
     return <div className="p-4 text-red-600">Error: {error}</div>;
   }
 
-  if (isLoaded && !user) {
+  if (isUserLoaded && !user) {
     return <div className="p-4 text-muted-foreground">Please sign in to view campaigns.</div>;
+  }
+
+  if (isUserLoaded && user && !orgId && error.includes('organization')) {
+    return <div className="p-4 text-center text-muted-foreground">{error}</div>;
   }
 
   return (
@@ -913,23 +897,48 @@ const ClientCampaignList: React.FC = () => {
               ))}
             </SelectContent>
           </Select>
+
+          <div className="flex items-center space-x-2 pt-2 md:pt-0">
+            <Checkbox
+              id="my-campaigns-filter"
+              checked={myCampaignsFilter}
+              onCheckedChange={checked => setMyCampaignsFilter(Boolean(checked))}
+              disabled={!orgId} // Disable if no org is active
+            />
+            <Label htmlFor="my-campaigns-filter" className="text-sm font-medium whitespace-nowrap">
+              Show only my campaigns
+            </Label>
+          </div>
         </div>
 
         <div className="flex-shrink-0 w-full md:w-auto md:ml-auto mt-4 md:mt-0">
-          <Link href="/campaigns/wizard/step-1">
-            <Button className="bg-accent hover:bg-accent/90 text-white w-full md:w-auto">
-              <Icon iconId="faPlusLight" className="-ml-1 mr-2 h-5 w-5" />
-              New Campaign
+          <Link href="/campaigns/wizard/step-1" passHref legacyBehavior>
+            <Button
+              asChild
+              className="bg-accent hover:bg-accent/90 text-white w-full md:w-auto"
+              disabled={!orgId || !isAuthLoaded}
+              title={!orgId ? 'Select an organization to create a new campaign' : 'New Campaign'}
+            >
+              <a>
+                <Icon iconId="faPlusLight" className="-ml-1 mr-2 h-5 w-5" />
+                New Campaign
+              </a>
             </Button>
           </Link>
         </div>
       </div>
 
-      {sortedCampaigns.length === 0 ? (
+      {error && campaigns.length === 0 && (
+        <div className="bg-white p-6 text-center text-destructive">{error}</div>
+      )}
+
+      {!error && sortedCampaigns.length === 0 && !isLoadingData && (
         <div className="bg-white p-6 text-center">
-          No campaigns found. Try adjusting your search criteria.
+          No campaigns found. Try adjusting your search criteria or create a new campaign.
         </div>
-      ) : (
+      )}
+
+      {sortedCampaigns.length > 0 && (
         <>
           <div className="hidden md:block border rounded-lg border-divider overflow-hidden">
             <Table>
@@ -990,10 +999,7 @@ const ClientCampaignList: React.FC = () => {
                           {statusInfo.text}
                         </span>
                       </TableCell>
-                      <TableCell>
-                        {/* Use the helper function here */}
-                        {getKpiDisplayName(campaign.primaryKPI)}
-                      </TableCell>
+                      <TableCell>{getKpiDisplayName(campaign.primaryKPI)}</TableCell>
                       <TableCell>
                         {campaign.startDate ? formatDate(campaign.startDate) : 'N/A'}
                       </TableCell>
@@ -1138,7 +1144,7 @@ const ClientCampaignList: React.FC = () => {
             <Button
               onClick={handleDuplicateConfirm}
               disabled={
-                !isLoaded ||
+                !isUserLoaded ||
                 !user ||
                 isDuplicating ||
                 isCheckingName ||

@@ -6,6 +6,8 @@ import { connectToDatabase } from '@/lib/db';
 import { auth } from '@clerk/nextjs/server';
 import { campaignService as _campaignService } from '@/lib/data-mapping/campaign-service';
 import { deleteCampaignFromAlgolia } from '@/lib/algolia'; // Import Algolia utility
+import { logger } from '@/lib/logger'; // Added logger import back
+import { UnauthenticatedError, NotFoundError, ForbiddenError, BadRequestError } from '@/lib/errors';
 
 // type RouteParams = { params: { id: string } }; // Unused
 
@@ -194,60 +196,90 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ campaignId: string }> }
 ) {
-  // Rely solely on the inner try...catch for robust error handling
   try {
-    console.log('[API GET /api/campaigns/[campaignId]] Handler started'); // Log start
-    // Get campaign ID from params - properly awaiting
+    console.log('[API GET /api/campaigns/[campaignId]] Handler started');
     const { campaignId } = await params;
+    const { userId: clerkUserId, orgId } = await auth(); // Fetch orgId
 
-    // Check if the ID is a UUID (string format) or a numeric ID
-    const _isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+    if (!clerkUserId) {
+      throw new UnauthenticatedError('Authentication required.');
+    }
+
+    const userRecord = await prisma.user.findUnique({
+      where: { clerkId: clerkUserId },
+      select: { id: true },
+    });
+
+    if (!userRecord) {
+      throw new NotFoundError('User record not found.');
+    }
+    const internalUserId = userRecord.id;
+
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
       campaignId
     );
 
-    // Connect to database
     await connectToDatabase();
-    console.log('[API GET /api/campaigns/[campaignId]] Database connected'); // Log DB connection
+    console.log('[API GET /api/campaigns/[campaignId]] Database connected');
 
-    let campaign = null;
+    let campaign: any = null;
     let isSubmittedCampaign = false;
 
-    // Try to find the campaign based on ID format
-    if (_isUuid) {
+    if (isUuid) {
       console.log('Using UUID format for campaign ID:', campaignId);
-      // Look for draft in CampaignWizard table with string ID
-      console.log('[API GET /api/campaigns/[campaignId]] Querying CampaignWizard...'); // Log before query
-      try {
-        campaign = await prisma.campaignWizard.findUnique({
-          where: { id: campaignId },
-          include: {
-            Influencer: true, // Include the Influencer relation
-          },
-        });
-        console.log('[API GET /api/campaigns/[campaignId]] Prisma query successful.'); // Log success
-      } catch (prismaError) {
-        console.error('[API GET /api/campaigns/[campaignId]] Prisma query failed:', prismaError);
-        throw prismaError; // Re-throw to be caught by the outer handler
-      }
+      campaign = await prisma.campaignWizard.findUnique({
+        where: { id: campaignId },
+        include: { Influencer: true },
+      });
       console.log(
         '[API GET /api/campaigns/[campaignId]] CampaignWizard query complete.',
         campaign ? 'Found.' : 'Not found.'
-      ); // Log after query
+      );
+
+      if (campaign) {
+        // Authorization Logic for CampaignWizard
+        if (campaign.orgId === null) {
+          // Legacy campaign
+          if (campaign.userId !== internalUserId) {
+            logger.warn(
+              `User ${internalUserId} attempting to access legacy campaign ${campaignId} not belonging to them. Access denied.`
+            );
+            throw new ForbiddenError('You do not have permission to access this legacy campaign.');
+          }
+        } else {
+          // Org-scoped campaign
+          if (!orgId) {
+            logger.warn(
+              `User ${internalUserId} (no active org) attempting to access org-scoped campaign ${campaignId}. Access denied.`
+            );
+            throw new ForbiddenError(
+              'This campaign belongs to an organization. Please select an active organization context to view it.'
+            );
+          }
+          if (campaign.orgId !== orgId) {
+            logger.warn(
+              `User ${internalUserId} in org ${orgId} attempting to access campaign ${campaignId} belonging to org ${campaign.orgId}. Access denied.`
+            );
+            throw new ForbiddenError('You do not have permission to access this campaign.');
+          }
+        }
+      } // campaign still null if not found, will be caught by the check below
     } else {
-      // Handle legacy numeric IDs
       const numericId = parseInt(campaignId);
       if (isNaN(numericId)) {
-        return NextResponse.json({ error: 'Invalid campaign ID format' }, { status: 400 });
+        throw new BadRequestError('Invalid campaign ID format');
       }
-      console.log('Using numeric format for campaign ID:', numericId);
-      // Look for submitted campaign in CampaignWizardSubmission table with numeric ID
-      console.log('[API GET /api/campaigns/[campaignId]] Querying CampaignWizardSubmission...'); // Log before query
-      campaign = await prisma.campaignWizardSubmission.findUnique({
-        where: { id: numericId },
+      console.log('Using numeric format for campaign ID (CampaignWizardSubmission):', numericId);
+      // Transitional rule for legacy numeric IDs: scope by user
+      campaign = await prisma.campaignWizardSubmission.findFirst({
+        where: {
+          id: numericId,
+          userId: internalUserId,
+        },
         include: {
           primaryContact: true,
           secondaryContact: true,
-          audience: true, // Simplified include to avoid type errors
+          audience: true,
           creativeAssets: true,
           creativeRequirements: true,
         },
@@ -255,19 +287,15 @@ export async function GET(
       console.log(
         '[API GET /api/campaigns/[campaignId]] CampaignWizardSubmission query complete.',
         campaign ? 'Found.' : 'Not found.'
-      ); // Log after query
-      isSubmittedCampaign = true;
+      );
+      if (campaign) {
+        isSubmittedCampaign = true;
+      }
     }
 
-    // If campaign not found, return 404
     if (!campaign) {
-      return NextResponse.json(
-        {
-          error: 'Campaign not found',
-          message: `No campaign found with ID ${campaignId}`,
-        },
-        { status: 404 }
-      );
+      // This will now catch cases where campaign was not found OR authorization failed implicitly by campaign being null
+      throw new NotFoundError(`Campaign not found with ID ${campaignId} or access denied.`);
     }
 
     // Log the raw campaign data fetched from DB *before* transformation
@@ -289,37 +317,32 @@ export async function GET(
     );
     const normalizedCampaign = {
       ...campaign,
-      // Transform locations if it's an array of strings to array of objects
       locations:
         'locations' in campaign &&
         Array.isArray(campaign.locations) &&
         campaign.locations.length > 0 &&
         typeof campaign.locations[0] === 'string'
-          ? campaign.locations.map(loc => ({ city: loc }))
+          ? campaign.locations.map((loc: string) => ({ city: loc }))
           : 'locations' in campaign
             ? campaign.locations
             : [],
-      // Ensure budget is in the correct format
       budget:
         'budget' in campaign && campaign.budget && typeof campaign.budget === 'object'
           ? {
-              currency: 'currency' in campaign.budget ? campaign.budget.currency : 'GBP',
-              total: 'total' in campaign.budget ? campaign.budget.total : 0,
-              socialMedia: 'socialMedia' in campaign.budget ? campaign.budget.socialMedia : 0,
+              currency: String((campaign.budget as any).currency ?? 'GBP'),
+              total: Number((campaign.budget as any).total ?? 0),
+              socialMedia: Number((campaign.budget as any).socialMedia ?? 0),
             }
           : { currency: 'GBP', total: 0, socialMedia: 0 },
-      // Normalize contacts if they exist
       primaryContact:
         'primaryContact' in campaign &&
         campaign.primaryContact &&
         typeof campaign.primaryContact === 'object'
           ? {
-              firstName:
-                'firstName' in campaign.primaryContact ? campaign.primaryContact.firstName : '',
-              surname: 'surname' in campaign.primaryContact ? campaign.primaryContact.surname : '',
-              email: 'email' in campaign.primaryContact ? campaign.primaryContact.email : '',
-              position:
-                'position' in campaign.primaryContact ? campaign.primaryContact.position : '',
+              firstName: String((campaign.primaryContact as any).firstName ?? ''),
+              surname: String((campaign.primaryContact as any).surname ?? ''),
+              email: String((campaign.primaryContact as any).email ?? ''),
+              position: String((campaign.primaryContact as any).position ?? ''),
             }
           : null,
       secondaryContact:
@@ -327,41 +350,35 @@ export async function GET(
         campaign.secondaryContact &&
         typeof campaign.secondaryContact === 'object'
           ? {
-              firstName:
-                'firstName' in campaign.secondaryContact ? campaign.secondaryContact.firstName : '',
-              surname:
-                'surname' in campaign.secondaryContact ? campaign.secondaryContact.surname : '',
-              email: 'email' in campaign.secondaryContact ? campaign.secondaryContact.email : '',
-              position:
-                'position' in campaign.secondaryContact ? campaign.secondaryContact.position : '',
+              firstName: String((campaign.secondaryContact as any).firstName ?? ''),
+              surname: String((campaign.secondaryContact as any).surname ?? ''),
+              email: String((campaign.secondaryContact as any).email ?? ''),
+              position: String((campaign.secondaryContact as any).position ?? ''),
             }
           : null,
-      // Ensure additionalContacts is always an array
       additionalContacts:
         'additionalContacts' in campaign && Array.isArray(campaign.additionalContacts)
           ? campaign.additionalContacts
           : [],
-      // Normalize assets if they exist
       assets:
         'assets' in campaign && Array.isArray(campaign.assets)
-          ? campaign.assets.map(asset => {
-              if (asset && typeof asset === 'object') {
+          ? campaign.assets.map((asset_item: any) => {
+              // asset_item to avoid conflict with 'assets' key
+              if (asset_item && typeof asset_item === 'object') {
                 return {
-                  id: 'id' in asset ? asset.id : '',
-                  name: 'name' in asset ? asset.name : '',
-                  type: 'type' in asset ? asset.type : 'image',
-                  url: 'url' in asset ? asset.url : '',
-                  fileName: 'fileName' in asset ? asset.fileName : '',
-                  fileSize: 'fileSize' in asset ? asset.fileSize : 0,
-                  description: 'description' in asset ? asset.description : '',
-                  temp: 'temp' in asset ? asset.temp : false,
-                  rationale: 'rationale' in asset ? asset.rationale : '',
-                  budget: 'budget' in asset ? asset.budget : undefined,
-                  associatedInfluencerIds:
-                    'associatedInfluencerIds' in asset &&
-                    Array.isArray(asset.associatedInfluencerIds)
-                      ? asset.associatedInfluencerIds
-                      : [],
+                  id: String(asset_item.id ?? ''),
+                  name: String(asset_item.name ?? ''),
+                  type: String(asset_item.type ?? 'image'),
+                  url: String(asset_item.url ?? ''),
+                  fileName: String(asset_item.fileName ?? ''),
+                  fileSize: Number(asset_item.fileSize ?? 0),
+                  description: String(asset_item.description ?? ''),
+                  temp: Boolean(asset_item.temp ?? false),
+                  rationale: String(asset_item.rationale ?? ''),
+                  budget: asset_item.budget !== undefined ? Number(asset_item.budget) : undefined,
+                  associatedInfluencerIds: Array.isArray(asset_item.associatedInfluencerIds)
+                    ? asset_item.associatedInfluencerIds.map(String)
+                    : [],
                 };
               }
               return {
@@ -379,14 +396,14 @@ export async function GET(
               };
             })
           : [],
-      // Normalize influencers if they exist
       Influencer:
         'Influencer' in campaign && Array.isArray(campaign.Influencer)
-          ? campaign.Influencer.map(inf => ({
-              id: 'id' in inf ? inf.id : '',
-              platform: 'platform' in inf ? inf.platform : 'INSTAGRAM',
-              handle: 'handle' in inf ? inf.handle : '',
-              platformId: 'platformId' in inf ? inf.platformId : '',
+          ? campaign.Influencer.map((influencer_item: any) => ({
+              // influencer_item to avoid conflict
+              id: String(influencer_item.id ?? ''),
+              platform: String(influencer_item.platform ?? 'INSTAGRAM'),
+              handle: String(influencer_item.handle ?? ''),
+              platformId: String(influencer_item.platformId ?? ''),
             }))
           : [],
     };
@@ -432,115 +449,132 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ campaignId: string }> }
 ) {
-  // Await params before using it
   const { campaignId } = await params;
-  console.log(`DELETE request started for campaign ID: ${campaignId}`);
+  logger.info(`DELETE /api/campaigns/${campaignId} - Request received`);
 
   try {
-    // Check authentication using Clerk
-    const { userId, sessionClaims } = await auth();
-    const userEmail = sessionClaims?.email; // Get email if needed for logging
+    const { userId: clerkUserId, orgId } = await auth();
 
-    // Log authentication status
-    console.log(`Authentication status: ${userId ? 'Authenticated' : 'Not authenticated'}`);
-
-    if (!userId) {
-      console.error('Delete failed: No authenticated user session');
-      return NextResponse.json({ error: 'Unauthorized - No session' }, { status: 401 });
+    if (!clerkUserId) {
+      logger.warn(`DELETE /api/campaigns/${campaignId} - Unauthenticated access attempt.`);
+      throw new UnauthenticatedError('Authentication required to delete a campaign.');
+    }
+    if (!orgId) {
+      logger.warn(`DELETE /api/campaigns/${campaignId} - Missing orgId for authenticated user.`, {
+        clerkUserId,
+      });
+      throw new BadRequestError('Active organization context is required to delete a campaign.');
     }
 
-    console.log(
-      `Authenticated user ID: ${userId} ${userEmail ? `(${userEmail})` : ''}, attempting to delete campaign with ID: ${campaignId}`
-    );
+    const userRecord = await prisma.user.findUnique({
+      where: { clerkId: clerkUserId },
+      select: { id: true },
+    });
 
-    // The ID differences:
-    // - CampaignWizard uses String UUIDs as IDs
-    // - CampaignWizardSubmission uses auto-increment Int IDs
+    if (!userRecord) {
+      // This case should ideally not happen if clerkUserId is valid, but good for robustness
+      logger.error(`DELETE /api/campaigns/${campaignId} - User record not found for clerkId.`, {
+        clerkUserId,
+      });
+      throw new NotFoundError('User not found, cannot authorize campaign deletion.');
+    }
+    const internalUserId = userRecord.id;
 
-    // Try to delete from CampaignWizard first (UUID string ID)
-    let campaignWizardDeleted = false;
+    logger.info(`DELETE /api/campaigns/${campaignId} - Attempting to delete.`, {
+      clerkUserId,
+      orgId,
+    });
 
-    try {
-      // Check if it exists first
-      const campaignWizard = await prisma.campaignWizard.findUnique({
+    // Fetch campaign to verify ownership by orgId before deleting
+    const campaignWizardToDelete = await prisma.campaignWizard.findUnique({
+      where: { id: campaignId },
+      select: { orgId: true, userId: true, name: true, submissionId: true }, // Added submissionId to select
+    });
+
+    if (!campaignWizardToDelete) {
+      logger.warn(`DELETE /api/campaigns/${campaignId} - Campaign not found.`, {
+        clerkUserId,
+        orgId,
+      });
+      throw new NotFoundError('Campaign not found.');
+    }
+
+    // Authorization check
+    if (campaignWizardToDelete.orgId === null) {
+      // Legacy campaign: check if the current user is the owner
+      if (campaignWizardToDelete.userId !== internalUserId) {
+        logger.warn(
+          `DELETE /api/campaigns/${campaignId} - Forbidden. User does not own legacy campaign.`,
+          { clerkUserId, campaignOrgId: null, campaignUserId: campaignWizardToDelete.userId }
+        );
+        throw new ForbiddenError('You do not have permission to delete this legacy campaign.');
+      }
+      logger.info(
+        `DELETE /api/campaigns/${campaignId} - Authorized to delete legacy campaign by owner.`,
+        { clerkUserId }
+      );
+    } else if (campaignWizardToDelete.orgId !== orgId) {
+      // Org-scoped campaign: check if user's current org matches campaign's org
+      logger.warn(`DELETE /api/campaigns/${campaignId} - Forbidden. Organization mismatch.`, {
+        clerkUserId,
+        userOrgId: orgId,
+        campaignOrgId: campaignWizardToDelete.orgId,
+      });
+      throw new ForbiddenError(
+        'You do not have permission to delete this campaign from this organization.'
+      );
+    }
+    // If orgId matches, or if it's a legacy campaign owned by the user, proceed.
+
+    // Use a transaction to delete related records and the campaign itself
+    await prisma.$transaction(async tx => {
+      await tx.influencer.deleteMany({
+        where: { campaignId: campaignId },
+      });
+      // Add deletion for WizardHistory if necessary
+      await tx.wizardHistory.deleteMany({
+        where: { wizardId: campaignId },
+      });
+      // Delete CampaignWizardSubmission if linked (handle if submissionId can be null)
+      if (campaignWizardToDelete.submissionId) {
+        // Check if submissionId exists before trying to delete
+        await tx.campaignWizardSubmission.deleteMany({
+          // deleteMany in case somehow multiple point to it, though submissionId is unique on wizard
+          where: { id: campaignWizardToDelete.submissionId },
+        });
+      }
+      await tx.campaignWizard.delete({
         where: { id: campaignId },
       });
+    });
 
-      if (campaignWizard) {
-        console.log(`Found campaign in CampaignWizard: ${campaignWizard.name}`);
+    logger.info(`DELETE /api/campaigns/${campaignId} - Successfully deleted campaign from DB.`, {
+      clerkUserId,
+      orgId,
+    });
 
-        // Use a transaction to delete related records
-        await prisma.$transaction(async tx => {
-          // Delete related influencers
-          await tx.influencer.deleteMany({
-            where: { campaignId: campaignId },
-          });
-
-          // Delete the campaign
-          await tx.campaignWizard.delete({
-            where: { id: campaignId },
-          });
-        });
-
-        console.log(`Successfully deleted campaign from CampaignWizard table: ${campaignId}`);
-        campaignWizardDeleted = true;
-
-        // Delete from Algolia if successfully deleted from DB
-        try {
-          await deleteCampaignFromAlgolia(campaignId);
-          console.log(`Successfully deleted campaign from Algolia: ${campaignId}`);
-        } catch (algoliaError) {
-          console.error(`Error deleting campaign from Algolia: ${campaignId}`, algoliaError);
-          // Decide if this should fail the entire operation or just be logged.
-          // For now, logging and continuing as the DB deletion was successful.
-        }
-      } else {
-        console.log(`No campaign found in CampaignWizard with ID: ${campaignId}`);
-      }
-    } catch (wizardError) {
-      console.error(`Error deleting from CampaignWizard:`, wizardError);
-      // Don't immediately return, try deleting from submission table
+    try {
+      await deleteCampaignFromAlgolia(campaignId);
+      logger.info(
+        `DELETE /api/campaigns/${campaignId} - Successfully deleted campaign from Algolia.`,
+        { clerkUserId, orgId }
+      );
+    } catch (algoliaError) {
+      logger.error(`DELETE /api/campaigns/${campaignId} - Error deleting campaign from Algolia.`, {
+        clerkUserId,
+        orgId,
+        error: algoliaError,
+      });
+      // Do not fail the request if only Algolia deletion fails, but log it.
     }
 
-    // Try to delete from CampaignWizardSubmission as fallback (numeric ID)
-    let submissionDeleted = false;
-    if (!campaignWizardDeleted) {
-      const numericId = parseInt(campaignId);
-      if (!isNaN(numericId)) {
-        try {
-          // Check if it exists first
-          const submission = await prisma.campaignWizardSubmission.findUnique({
-            where: { id: numericId },
-          });
-
-          if (submission) {
-            console.log(`Found campaign in CampaignWizardSubmission: ${submission.campaignName}`);
-            // Add transaction for submission deletion if complex relations exist
-            await prisma.campaignWizardSubmission.delete({
-              where: { id: numericId },
-            });
-            console.log(
-              `Successfully deleted campaign from CampaignWizardSubmission table: ${numericId}`
-            );
-            submissionDeleted = true;
-          } else {
-            console.log(`No campaign found in CampaignWizardSubmission with ID: ${numericId}`);
-          }
-        } catch (submissionError) {
-          console.error(`Error deleting from CampaignWizardSubmission:`, submissionError);
-        }
-      }
-    }
-
-    if (!campaignWizardDeleted && !submissionDeleted) {
-      console.log(`Campaign not found in either table for ID: ${campaignId}`);
-      return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
-    }
-
-    console.log(`DELETE request successful for campaign ID: ${campaignId}`);
-    return NextResponse.json({ success: true, message: 'Campaign deleted' });
-  } catch (error) {
-    console.error(`Error during DELETE for campaign ID ${campaignId}:`, error);
+    return NextResponse.json({ success: true, message: 'Campaign deleted successfully' });
+  } catch (error: any) {
+    // Log the error with campaignId if available from params
+    logger.error(`DELETE /api/campaigns/${campaignId} - Error:`, {
+      error: error.message,
+      stack: error.stack,
+    });
     return NextResponse.json(
       {
         error: 'Internal server error',

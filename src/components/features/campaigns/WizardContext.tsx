@@ -27,6 +27,7 @@ import { standardizeApiResponse } from '@/utils/api-response-formatter';
 import { logger } from '@/utils/logger';
 import { toast } from 'react-hot-toast'; // Import toast
 import { Icon } from '@/components/ui/icon/icon'; // Import Icon for toast
+import { useAuth } from '@clerk/nextjs'; // Import useAuth
 // TODO: Remove this import if useCampaignWizard hook becomes obsolete after RHF migration
 // import useCampaignWizard, {
 //   WizardStep,
@@ -233,14 +234,15 @@ const showErrorToast = (message: string, iconId?: string) => {
  */
 export function WizardProvider({ children }: { children: ReactNode }) {
   const searchParams = useSearchParams();
-  const campaignId = searchParams?.get('id');
+  const campaignIdFromUrl = searchParams?.get('id'); // Renamed for clarity
   const router = useRouter();
+  const { orgId: activeOrgId, isLoaded: isAuthLoaded } = useAuth(); // Get activeOrgId and its loading state
 
   const [wizardState, setWizardState] = useState<DraftCampaignData | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true); // True initially until data is loaded or new state set
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [autosaveEnabled, setAutosaveEnabled] = useState<boolean>(true);
-  const [hasLoaded, setHasLoaded] = useState<boolean>(false);
+  const [hasLoadedInitialData, setHasLoadedInitialData] = useState<boolean>(false); // To track if initial load effect has run
 
   // logger.debug('WizardProvider Init:', { campaignId, isLoading, hasLoaded, wizardState: !!wizardState });
 
@@ -249,7 +251,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
     if (!id) {
       setWizardState(null);
       setIsLoading(false);
-      setHasLoaded(true);
+      setHasLoadedInitialData(true);
       return;
     }
     logger.info(`Fetching campaign data for ID: ${id}`);
@@ -308,29 +310,32 @@ export function WizardProvider({ children }: { children: ReactNode }) {
       setWizardState(null);
     } finally {
       setIsLoading(false);
-      setHasLoaded(true);
+      setHasLoadedInitialData(true);
     }
   }, []);
 
-  // Effect to load data when campaignId changes or on initial mount with ID
+  // Effect to load data when campaignIdFromUrl changes or on initial mount
   useEffect(() => {
-    if (campaignId && !hasLoaded) {
-      loadCampaignData(campaignId);
-    } else if (!campaignId && !hasLoaded) {
-      // Condition for NEW campaign
-      logger.info('[WizardContext] Initializing default state for new campaign.');
-      setWizardState(defaultWizardState); // Set the default object state
-      setIsLoading(false); // Set loading false AFTER setting default state
-      setHasLoaded(true);
+    if (campaignIdFromUrl) {
+      if (!hasLoadedInitialData) {
+        logger.info(`[WizardContext] Initial load for campaign ID: ${campaignIdFromUrl}`);
+        loadCampaignData(campaignIdFromUrl);
+        setHasLoadedInitialData(true);
+      }
+    } else if (!hasLoadedInitialData) {
+      logger.info('[WizardContext] Initializing default state for new campaign (no ID in URL).');
+      setWizardState(defaultWizardState);
+      setIsLoading(false);
+      setHasLoadedInitialData(true);
     }
-  }, [campaignId, hasLoaded, loadCampaignData]);
+  }, [campaignIdFromUrl, hasLoadedInitialData, loadCampaignData]); // loadCampaignData added as dependency
 
   // Function to trigger reload
   const reloadCampaignData = useCallback(() => {
-    setHasLoaded(false);
-    setIsLoading(!!campaignId);
+    setHasLoadedInitialData(false);
+    setIsLoading(!!campaignIdFromUrl);
     setWizardState(null);
-  }, [campaignId]);
+  }, [campaignIdFromUrl]);
 
   // --- State Update ---
   const updateWizardState = useCallback((updates: Partial<DraftCampaignData>) => {
@@ -345,136 +350,123 @@ export function WizardProvider({ children }: { children: ReactNode }) {
   // --- Saving Progress ---
   const saveProgress = useCallback(
     async (dataToSave: Partial<DraftCampaignData>): Promise<string | null> => {
-      const currentCampaignId = campaignId; // Use state campaignId initially
-      const currentStep = dataToSave.currentStep;
+      setIsLoading(true); // Indicate saving is in progress
+      let currentCampaignIdToUse = wizardState?.id || campaignIdFromUrl; // Use ID from state first, then URL
+      const currentStep = dataToSave.currentStep; // Assume step is passed in dataToSave or is in wizardState
 
-      // --- Handle Campaign Creation if ID is missing ---
-      if (!currentCampaignId) {
+      if (!currentCampaignIdToUse) {
+        // This means it's a NEW campaign draft
         logger.info('No campaign ID found, attempting to create new draft...');
-        let newCampaignId: string | null = null; // Declare newCampaignId
+        if (!isAuthLoaded) {
+          // Wait for auth to be loaded
+          logger.warn('Cannot create campaign: Auth not loaded yet.');
+          showErrorToast(
+            'User and organization status is still loading. Please try again shortly.'
+          );
+          setIsLoading(false);
+          return null;
+        }
+        if (!activeOrgId) {
+          logger.error('Cannot create campaign: No active organization ID found.');
+          showErrorToast(
+            'An active organization is required to create a campaign. Please select or create one in settings.'
+          );
+          setIsLoading(false);
+          return null;
+        }
+
+        let newCampaignId: string | null = null;
         try {
-          // Ensure essential fields for creation are present (adjust as needed for API)
           const creationPayload = {
-            name: dataToSave.name || 'Untitled Campaign',
-            businessGoal: dataToSave.businessGoal || '',
-            brand: dataToSave.brand || '',
-            website: dataToSave.website,
-            startDate: dataToSave.startDate || new Date(),
-            endDate: dataToSave.endDate || new Date(),
-            timeZone: dataToSave.timeZone,
-            primaryContact: dataToSave.primaryContact,
-            secondaryContact: dataToSave.secondaryContact,
-            additionalContacts: dataToSave.additionalContacts,
-            budget: dataToSave.budget,
-            Influencer: dataToSave.Influencer, // Pass influencers too
-            // Set initial step states
-            step1Complete: true,
+            name: dataToSave.name || defaultWizardState.name || 'Untitled Campaign',
+            businessGoal: dataToSave.businessGoal ?? defaultWizardState.businessGoal,
+            brand: dataToSave.brand || defaultWizardState.brand || '',
+            website: dataToSave.website ?? defaultWizardState.website,
+            startDate: dataToSave.startDate || defaultWizardState.startDate,
+            endDate: dataToSave.endDate || defaultWizardState.endDate,
+            timeZone: dataToSave.timeZone ?? defaultWizardState.timeZone,
+            primaryContact: dataToSave.primaryContact ?? defaultWizardState.primaryContact,
+            secondaryContact: dataToSave.secondaryContact ?? defaultWizardState.secondaryContact,
+            additionalContacts:
+              dataToSave.additionalContacts ?? defaultWizardState.additionalContacts,
+            budget: dataToSave.budget ?? defaultWizardState.budget,
+            Influencer: dataToSave.Influencer ?? defaultWizardState.Influencer,
+            step1Complete: true, // Assume step 1 is complete if creating
             currentStep: 1, // Created at step 1
+            orgId: activeOrgId, // *** Add orgId to the payload ***
           };
 
           logger.debug(
             '[WizardContext saveProgress] Sending creation payload:',
             JSON.stringify(creationPayload, null, 2)
           );
-
-          logger.debug('Calling POST /api/campaigns with payload:', creationPayload);
           const response = await fetch('/api/campaigns', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(creationPayload),
           });
-
           const result = await response.json();
-
           if (!response.ok || !result.success || !result.data?.id) {
-            // Check for specific error code from API
             if (result.errorCode === 'NAME_ALREADY_EXISTS') {
-              // Use the exact error message from the API if available, or the desired one
               const specificMessage =
                 result.error || 'A campaign with this name already exists. Please update the name.';
-              throw new Error(specificMessage); // Throw with the specific message
+              throw new Error(specificMessage);
             }
             throw new Error(
               `Failed to create campaign draft: ${result.error || response.statusText}`
             );
           }
-
-          newCampaignId = result.data.id; // Assign to declared variable
+          newCampaignId = result.data.id;
           logger.info(`New campaign draft created successfully with ID: ${newCampaignId}`);
-
-          // Update URL without full navigation
-          const currentPath = window.location.pathname;
-          router.replace(`${currentPath}?id=${newCampaignId}`);
-
-          // Update state with the data returned from creation, WITHOUT re-validating with the full schema
-          if (result.data && typeof result.data === 'object') {
-            const returnedData = result.data as Partial<DraftCampaignData>;
-            setWizardState(prevState => ({
-              ...(prevState ?? defaultWizardState),
-              ...returnedData,
-              id: newCampaignId ?? undefined, // Ensure id matches string | undefined type
-            }));
-            logger.info('Updated wizard state with data from successful campaign creation.');
-          } else {
-            logger.error(
-              'Received unexpected data format from campaign creation API:',
-              result.data
-            );
-            // Fallback: Only update if newCampaignId is a valid string
-            if (newCampaignId) {
-              setWizardState(
-                prevState =>
-                  ({
-                    ...(prevState ?? defaultWizardState),
-                    id: newCampaignId,
-                  }) as DraftCampaignData
-              ); // Assert type here
-            } else {
-              // If somehow newCampaignId is null even after successful API call, log error
-              logger.error('Campaign creation reported success but returned null ID.');
-            }
+          if (typeof window !== 'undefined') {
+            const currentPath = window.location.pathname;
+            router.replace(`${currentPath}?id=${newCampaignId}`); // Update URL
           }
+          currentCampaignIdToUse = newCampaignId; // Use new ID for subsequent logic in this save call
 
+          setWizardState(prevState => ({
+            ...(prevState ?? defaultWizardState),
+            ...(result.data as Partial<DraftCampaignData>),
+            id: newCampaignId ?? undefined,
+          }));
           setLastSaved(new Date());
-          return newCampaignId; // Return new ID on successful creation
+          // Do not return here yet if we need to PATCH the current step's data to this new campaign ID
         } catch (error: unknown) {
           logger.error('Error creating new campaign draft:', error);
           const message = error instanceof Error ? error.message : 'Unknown error';
-          // The toast will now show the specific message if it was thrown above
           showErrorToast(`Error creating campaign: ${message}`);
-          return null; // ADD EXPLICIT RETURN NULL HERE
+          setIsLoading(false);
+          return null;
         }
       }
-      // --- End Campaign Creation Handling ---
 
-      // Proceed with PATCH if campaignId existed or was just created
-      if (!currentCampaignId || typeof currentStep !== 'number') {
-        // Re-check needed if creation failed? (Shouldn't happen)
-        logger.warn('Save prerequisites still not met after potential creation:', {
-          campaignId: !!currentCampaignId,
+      if (!currentCampaignIdToUse || typeof currentStep !== 'number') {
+        logger.warn('Save prerequisites not met (no campaignId or invalid step):', {
+          campaignId: currentCampaignIdToUse,
           currentStep,
         });
-        return null; // Return null on prerequisite failure
+        setIsLoading(false);
+        return null;
       }
 
-      // Use the dataToSave argument directly for PATCH
-      const dataForApi = dataToSave;
+      const dataForApi = { ...dataToSave };
+      // Remove id from dataForApi if it's for a PATCH to avoid Prisma issues if id is not a direct field for update
+      if ('id' in dataForApi && dataForApi.id === currentCampaignIdToUse) {
+        delete (dataForApi as any).id;
+      }
 
       logger.info(
-        `Attempting to save progress for campaign: ${currentCampaignId}, step: ${currentStep}`
+        `Attempting to save progress for campaign: ${currentCampaignIdToUse}, step: ${currentStep}`
       );
       try {
-        const apiUrl = `/api/campaigns/${currentCampaignId}/wizard/${currentStep}`;
+        const apiUrl = `/api/campaigns/${currentCampaignIdToUse}/wizard/${currentStep}`;
         logger.debug(`Calling API endpoint: PATCH ${apiUrl}`);
-
         const response = await fetch(apiUrl, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(dataForApi),
         });
-
         if (!response.ok) {
-          // ... error handling ...
           let errorBody = '';
           try {
             const errorData = await response.json();
@@ -488,37 +480,31 @@ export function WizardProvider({ children }: { children: ReactNode }) {
         if (result.success) {
           setLastSaved(new Date());
           logger.info('Progress saved successfully');
-
-          // Update state with data returned from PATCH, WITHOUT re-validating with the full schema
           if (result.data && typeof result.data === 'object') {
             const returnedData = result.data as Partial<DraftCampaignData>;
             setWizardState(prevState => ({
               ...(prevState ?? defaultWizardState),
               ...returnedData,
+              id: currentCampaignIdToUse ?? undefined, // Ensure ID from context/URL is used
             }));
             logger.info('Updated wizard state with data from successful campaign update.');
-          } else {
-            logger.warn('PATCH API did not return updated data, only updating lastSaved time.');
-            // If no data returned, just update lastSaved (already done above)
           }
-
-          return currentCampaignId;
+          return currentCampaignIdToUse; // Return the ID used for the PATCH
         } else {
-          // ... error handling ...
           logger.error('Failed to save progress (API failure):', result);
           showErrorToast(`Failed to save progress: ${result.error || 'Unknown API error'}`);
-          return null; // Return null on PATCH API failure
+          return null;
         }
       } catch (error: unknown) {
-        // ... error handling ...
         logger.error('Error saving progress:', error);
         const message = error instanceof Error ? error.message : 'Unknown error';
         showErrorToast(`Error saving progress: ${message}`);
-        return null; // Return null on fetch/other error
+        return null;
+      } finally {
+        setIsLoading(false); // Set loading false at the end of all save operations
       }
-      // Remove wizardState dependency, add campaignId
     },
-    [campaignId, router]
+    [campaignIdFromUrl, router, wizardState, activeOrgId, isAuthLoaded, loadCampaignData] // Added dependencies
   );
 
   // Debounced save function is no longer needed for autosave
@@ -535,7 +521,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
   */
 
   // Determine if we are editing an existing campaign
-  const isEditing = !!campaignId && wizardState !== null;
+  const isEditing = !!campaignIdFromUrl && wizardState !== null;
 
   // --- Context Value ---
   const contextValue = useMemo(() => {
@@ -550,7 +536,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
       autosaveEnabled,
       setAutosaveEnabled,
       reloadCampaignData,
-      campaignId: campaignId ?? null,
+      campaignId: campaignIdFromUrl ?? null,
       stepsConfig: WIZARD_STEPS,
     };
   }, [
@@ -563,7 +549,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
     autosaveEnabled,
     setAutosaveEnabled,
     reloadCampaignData,
-    campaignId,
+    campaignIdFromUrl,
   ]);
 
   return <WizardContext.Provider value={contextValue}>{children}</WizardContext.Provider>;

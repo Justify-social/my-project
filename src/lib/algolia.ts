@@ -90,6 +90,7 @@ export interface CampaignSearchResult {
 export interface CampaignAlgoliaRecord {
   objectID: string; // Must be unique, typically your campaign.id
   id: string;
+  orgId?: string; // Added for organization scoping
   campaignName: string;
   description: string;
   status?: string;
@@ -110,20 +111,15 @@ export interface CampaignAlgoliaRecord {
  * Transforms a CampaignWizard Prisma object (or similar) into the format for Algolia.
  * This is the SSOT for how campaign data is structured in Algolia.
  */
-export function transformCampaignForAlgolia(
-  campaign: CampaignWizard // Or your primary campaign data type
-): CampaignAlgoliaRecord {
-  // Apply any necessary transformations (e.g., EnumTransformers, date formatting)
-  // This logic should be robust and ensure all fields are correctly mapped.
-  // Based on scripts/algolia/reindex-algolia.ts transformation:
-  const frontendReady = EnumTransformers.transformObjectFromBackend(campaign) as any; // Cast as any for flexibility if not all fields match CampaignWizard
-
+export function transformCampaignForAlgolia(campaign: CampaignWizard): CampaignAlgoliaRecord {
+  const frontendReady = EnumTransformers.transformObjectFromBackend(campaign) as any;
   const record: CampaignAlgoliaRecord = {
     objectID: campaign.id,
     id: campaign.id,
+    orgId: campaign.orgId ?? undefined, // Handle potential null from Prisma type
     campaignName: frontendReady.name || 'Unknown Campaign',
     description: frontendReady.businessGoal || '',
-    status: frontendReady.status ? String(frontendReady.status).toUpperCase() : undefined, // Ensure canonical status
+    status: frontendReady.status ? String(frontendReady.status).toUpperCase() : undefined,
     startDate:
       frontendReady.startDate instanceof Date ? frontendReady.startDate.toISOString() : undefined,
     endDate:
@@ -131,7 +127,7 @@ export function transformCampaignForAlgolia(
     timeZone: frontendReady.timeZone || undefined,
     primaryKPI: frontendReady.primaryKPI || undefined,
     brand: frontendReady.brand || undefined,
-    platform: frontendReady.platform ? String(frontendReady.platform) : undefined, // Ensure string if it comes as enum object
+    platform: frontendReady.platform ? String(frontendReady.platform) : undefined,
     currency: frontendReady.budget?.currency || undefined,
     totalBudget:
       frontendReady.budget?.total !== undefined ? Number(frontendReady.budget.total) : undefined,
@@ -139,7 +135,6 @@ export function transformCampaignForAlgolia(
       frontendReady.budget?.socialMedia !== undefined
         ? Number(frontendReady.budget.socialMedia)
         : undefined,
-    // Ensure all fields from CampaignAlgoliaRecord are mapped here
   };
   return record;
 }
@@ -184,10 +179,9 @@ export async function deleteCampaignFromAlgolia(objectID: string): Promise<void>
     logger.info(`[Algolia] Successfully deleted object ${objectID}`);
   } catch (error) {
     logger.error('[Algolia] Error deleting object', { objectID, error });
-    // Consider if not found should be an error or handled gracefully
     if ((error as any).status === 404) {
       logger.warn(`[Algolia] Object ${objectID} not found for deletion, likely already deleted.`);
-      return; // Not an error if already gone
+      return;
     }
     throw error;
   }
@@ -215,12 +209,9 @@ export async function reindexAllCampaigns(campaigns: CampaignWizard[]): Promise<
         indexName: indexName,
         objects: algoliaRecords as unknown as Array<Record<string, unknown>>,
       });
-      // If saveResponse is BatchResponse[], then taskID is on each element.
-      // Assuming we wait for the first task as representative for the batch.
       if (Array.isArray(saveResponse) && saveResponse.length > 0 && saveResponse[0].taskID) {
         await adminClient.waitForTask({ indexName, taskID: saveResponse[0].taskID });
       } else if (!Array.isArray(saveResponse) && (saveResponse as any).taskID) {
-        // If it's a single response object with taskID (e.g. SaveObjectsResponse)
         await adminClient.waitForTask({ indexName, taskID: (saveResponse as any).taskID });
       }
       logger.info(`[Algolia] Successfully indexed ${algoliaRecords.length} campaigns.`);
@@ -235,11 +226,9 @@ export async function reindexAllCampaigns(campaigns: CampaignWizard[]): Promise<
 
 /**
  * Searches campaigns in Algolia.
- * (This replaces the previous fetch-based searchCampaigns)
  */
 export async function searchAlgoliaCampaigns(query: string): Promise<CampaignAlgoliaRecord[]> {
   if (!searchClient) {
-    // Fallback to an empty array or throw error if search client isn't configured
     logger.warn('[Algolia] Search client not initialized. Returning empty search results.');
     return [];
   }
@@ -262,27 +251,15 @@ export async function searchAlgoliaCampaigns(query: string): Promise<CampaignAlg
   }
 }
 
-// For potential use with react-instantsearch or direct client access if needed
-// The searchClient is already initialized if keys are present.
 export const getAlgoliaSearchClient = () => {
   if (!searchClient) {
-    // This case should ideally be handled by ensuring env vars are set,
-    // but provides a fallback or a point to throw a more critical error.
     logger.error('[Algolia] Search client not available. Check ENV variables.');
-    // return null; or throw new Error('Algolia search client not configured');
   }
   return searchClient;
 };
 
-// This replaces the old algoliaConfig export if it was used for react-instantsearch
-// For react-instantsearch-hooks-web, you usually pass the searchClient directly.
-// If you need the config object for older versions or other uses:
 export const algoliaFrontendConfig = {
   appId: appId || '',
   apiKey: searchOnlyApiKey || '',
   indexName: indexName,
 };
-
-// Note: The old `indexCampaigns` function that took `Partial<CampaignSearchResult>[]`
-// and used fetch for batch and clear has been replaced by `reindexAllCampaigns` which takes Prisma objects.
-// The old `searchCampaigns` that used fetch has been replaced by `searchAlgoliaCampaigns` using the SDK.

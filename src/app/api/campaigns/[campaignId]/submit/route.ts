@@ -124,9 +124,13 @@ export async function POST(
 
   return tryCatch(
     async () => {
-      const { userId: clerkUserId } = await auth();
+      const { userId: clerkUserId, orgId } = await auth();
       if (!clerkUserId) {
         throw new UnauthenticatedError('User not authenticated');
+      }
+
+      if (!orgId) {
+        throw new BadRequestError('Active organization context is required to submit a campaign.');
       }
 
       // Use the campaignId obtained from the outer scope
@@ -153,15 +157,26 @@ export async function POST(
       const wizardData = await prisma.campaignWizard.findUnique({
         where: {
           id: wizardId,
-          userId: internalUserId,
         },
         include: { Influencer: true },
       });
 
       if (!wizardData) {
-        throw new NotFoundError(
-          `Campaign Wizard with ID ${wizardId} not found or not accessible by user.`
+        throw new NotFoundError(`Campaign Wizard with ID ${wizardId} not found.`);
+      }
+
+      if (wizardData.orgId === null) {
+        logger.warn(
+          `User ${internalUserId} in org ${orgId} attempted to submit legacy campaign ${wizardId} (null orgId). Submission denied.`
         );
+        throw new ForbiddenError(
+          'This campaign is not associated with an organization and cannot be submitted.'
+        );
+      } else if (wizardData.orgId !== orgId) {
+        logger.warn(
+          `User ${internalUserId} in org ${orgId} attempted to submit campaign ${wizardId} belonging to org ${wizardData.orgId}. Submission denied.`
+        );
+        throw new ForbiddenError('You do not have permission to submit this campaign.');
       }
 
       // Cast to our extended type

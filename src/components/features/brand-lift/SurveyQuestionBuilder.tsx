@@ -9,7 +9,7 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
-  Modifiers,
+  // Modifiers, // Not used, can be removed if restrictTo... modifiers are not used
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -19,10 +19,14 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-// import { restrictToVerticalAxis, restrictToWindowEdges } from '@dnd-kit/modifiers'; // Comment out if types not found
 import yaml from 'js-yaml';
 import { z } from 'zod';
-import { SurveyQuestionType } from '@prisma/client'; // Import directly from Prisma
+import {
+  SurveyQuestionType,
+  BrandLiftStudyStatus as PrismaBrandLiftStudyStatusEnum,
+} from '@prisma/client';
+import { useAuth } from '@clerk/nextjs'; // Import useAuth
+import { ForbiddenError, NotFoundError, UnauthenticatedError, BadRequestError } from '@/lib/errors'; // Added import for custom errors
 
 // Shadcn UI Imports
 import { Button } from '@/components/ui/button';
@@ -109,6 +113,7 @@ interface SurveyQuestionBuilderProps {
 
 const generateTempId = () => `temp_${Math.random().toString(36).substring(2, 9)}`;
 
+// SortableQuestionItem Props - Add actionsDisabled and actionsDisabledTitle
 interface SortableQuestionItemProps {
   question: SurveyQuestionData;
   index: number;
@@ -132,6 +137,8 @@ interface SortableQuestionItemProps {
     order: number
   ) => void;
   onDeleteOption: (questionIdOrTempId: string, optionIdOrTempId: string) => void;
+  actionsDisabled: boolean;
+  actionsDisabledTitle?: string;
 }
 
 const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
@@ -150,6 +157,8 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
     onUpdateOptionImageUrl,
     onUpdateOptionOrder,
     onDeleteOption,
+    actionsDisabled,
+    actionsDisabledTitle,
   }) => {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
       id: question.id || question.tempId!,
@@ -248,6 +257,8 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
                           size="sm"
                           className="p-1 h-auto"
                           onClick={() => onDeleteOption(qId, optId)}
+                          disabled={actionsDisabled}
+                          title={actionsDisabled ? actionsDisabledTitle : 'Delete option'}
                         >
                           <Icon iconId="faXmarkLight" className="h-3 w-3" />
                         </Button>
@@ -275,7 +286,14 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
                   );
                 })}
             </div>
-            <Button variant="outline" size="sm" onClick={() => onAddOption(qId)} className="mt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onAddOption(qId)}
+              className="mt-2"
+              disabled={actionsDisabled}
+              title={actionsDisabled ? actionsDisabledTitle : 'Add Option'}
+            >
               <Icon iconId="faPlusLight" className="mr-1 h-3 w-3" />
               Add Option
             </Button>
@@ -288,6 +306,7 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
 SortableQuestionItem.displayName = 'SortableQuestionItem';
 
 const SurveyQuestionBuilder: React.FC<SurveyQuestionBuilderProps> = ({ studyId }) => {
+  const { orgId: activeOrgId, isLoaded: isAuthLoaded, isSignedIn } = useAuth();
   const [questions, setQuestions] = useState<SurveyQuestionData[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -303,10 +322,20 @@ const SurveyQuestionBuilder: React.FC<SurveyQuestionBuilderProps> = ({ studyId }
   );
 
   const fetchData = useCallback(async () => {
+    if (!isAuthLoaded) return; // Wait for auth to load
+    if (!isSignedIn) {
+      setError('Please sign in to manage survey questions.');
+      setIsLoading(false);
+      return;
+    }
+    if (!activeOrgId) {
+      setError('An active organization is required. Please select or create one in settings.');
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
-    setQuestions([]);
-    setStudyDetails(null);
     try {
       const [studyRes, questionsRes] = await Promise.all([
         fetch(`/api/brand-lift/surveys/${studyId}`),
@@ -316,7 +345,13 @@ const SurveyQuestionBuilder: React.FC<SurveyQuestionBuilderProps> = ({ studyId }
         throw new Error(
           (await studyRes.json().then(e => e.error)) || 'Failed to fetch study details'
         );
-      setStudyDetails(await studyRes.json());
+      const fetchedStudyDetails = await studyRes.json();
+      if (fetchedStudyDetails.orgId !== activeOrgId) {
+        // Backend should also do this, but good client check
+        throw new ForbiddenError('You do not have permission to access this study.');
+      }
+      setStudyDetails(fetchedStudyDetails);
+
       if (!questionsRes.ok)
         throw new Error(
           (await questionsRes.json().then(e => e.error)) || 'Failed to fetch questions'
@@ -329,11 +364,22 @@ const SurveyQuestionBuilder: React.FC<SurveyQuestionBuilderProps> = ({ studyId }
       setError(err.message);
     }
     setIsLoading(false);
-  }, [studyId]);
+  }, [studyId, isAuthLoaded, isSignedIn, activeOrgId]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  const actionsDisabled = !isAuthLoaded || !isSignedIn || !activeOrgId || isLoading; // Also disable if initial data is loading
+  const actionsDisabledTitle = !isAuthLoaded
+    ? 'Loading authentication...'
+    : !isSignedIn
+      ? 'Please sign in to manage questions'
+      : !activeOrgId
+        ? 'Select an active organization to manage questions'
+        : isLoading
+          ? 'Loading data...'
+          : undefined;
 
   const saveQuestion = useCallback(
     async (question: SurveyQuestionData) => {
@@ -629,7 +675,8 @@ const SurveyQuestionBuilder: React.FC<SurveyQuestionBuilderProps> = ({ studyId }
     setIsAISuggesting(false);
   };
 
-  if (isLoading && questions.length === 0) {
+  if (!isAuthLoaded || (isLoading && questions.length === 0 && !error)) {
+    // More robust initial loading state
     return (
       <div className="space-y-4">
         <Skeleton className="h-12 w-full" />
@@ -638,7 +685,32 @@ const SurveyQuestionBuilder: React.FC<SurveyQuestionBuilderProps> = ({ studyId }
       </div>
     );
   }
-  if (error && questions.length === 0) {
+
+  if (isAuthLoaded && !isSignedIn) {
+    return (
+      <Alert variant="default">
+        <Icon iconId="faSignInLight" className="h-4 w-4" />
+        <AlertTitle>Authentication Required</AlertTitle>
+        <AlertDescription>Please sign in to design this survey.</AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (isAuthLoaded && isSignedIn && !activeOrgId) {
+    return (
+      <Alert variant="default">
+        <Icon iconId="faTriangleExclamationLight" className="h-4 w-4 text-yellow-500" />
+        <AlertTitle>Organization Required</AlertTitle>
+        <AlertDescription>
+          An active organization is required to design this survey. Please select or create an
+          organization in your settings.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (error && questions.length === 0 && !isLoading) {
+    // Show error if loading finished and still error
     return (
       <Alert variant="destructive">
         <Icon iconId="faTriangleExclamationLight" className="h-4 w-4" />
@@ -690,7 +762,8 @@ const SurveyQuestionBuilder: React.FC<SurveyQuestionBuilderProps> = ({ studyId }
             <Button
               variant="outline"
               onClick={handleSuggestQuestions}
-              disabled={isAISuggesting || isLoading}
+              disabled={actionsDisabled || isAISuggesting}
+              title={actionsDisabled ? actionsDisabledTitle : 'Suggest questions using AI'}
             >
               {isAISuggesting ? (
                 <Icon iconId="faSpinnerLight" className="animate-spin mr-2 h-4 w-4" />
@@ -699,7 +772,11 @@ const SurveyQuestionBuilder: React.FC<SurveyQuestionBuilderProps> = ({ studyId }
               )}
               Suggest (AI)
             </Button>
-            <Button onClick={handleAddQuestion} disabled={isLoading}>
+            <Button
+              onClick={handleAddQuestion}
+              disabled={actionsDisabled}
+              title={actionsDisabled ? actionsDisabledTitle : 'Add new question'}
+            >
               <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" /> Add New Question
             </Button>
           </div>
@@ -734,6 +811,8 @@ const SurveyQuestionBuilder: React.FC<SurveyQuestionBuilderProps> = ({ studyId }
                 onUpdateOptionImageUrl={handleUpdateOptionImageUrl}
                 onUpdateOptionOrder={handleUpdateOptionOrder}
                 onDeleteOption={handleDeleteOptionWrapper}
+                actionsDisabled={actionsDisabled}
+                actionsDisabledTitle={actionsDisabledTitle}
               />
             ))}
           </SortableContext>

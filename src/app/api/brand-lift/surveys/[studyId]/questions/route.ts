@@ -28,35 +28,37 @@ const createQuestionSchema = z.object({
 });
 
 // Helper to verify study access and status
-async function verifyStudyAccess(
+async function verifyStudyAccessAndOrg(
   studyId: string,
   clerkUserId: string,
+  orgId: string,
   allowedStatuses: BrandLiftStudyStatus[]
 ) {
-  const userRecord = await db.user.findUnique({
-    where: { clerkId: clerkUserId },
-    select: { id: true },
-  });
-  if (!userRecord) {
-    throw new NotFoundError('User not found for authorization.');
-  }
-  const internalUserId = userRecord.id;
-
-  const study = await db.brandLiftStudy.findFirst({
+  const study = await db.brandLiftStudy.findUnique({
     where: {
       id: studyId,
-      campaign: {
-        userId: internalUserId,
-      },
     },
-    select: { id: true, status: true },
+    select: { id: true, status: true, orgId: true },
   });
 
   if (!study) {
-    throw new NotFoundError('Study not found or not accessible by this user.');
+    throw new NotFoundError('Study not found.');
   }
 
-  // Cast the status string from DB to the local enum for comparison
+  if (study.orgId === null) {
+    logger.warn(
+      `User ${clerkUserId} in org ${orgId} attempted to access questions for legacy study ${studyId} (null orgId). Action denied.`
+    );
+    throw new ForbiddenError(
+      'Operation not allowed for studies not associated with an organization.'
+    );
+  } else if (study.orgId !== orgId) {
+    logger.warn(
+      `User ${clerkUserId} in org ${orgId} attempted to access questions for study ${studyId} belonging to org ${study.orgId}. Action denied.`
+    );
+    throw new ForbiddenError("You do not have permission to access this study's questions.");
+  }
+
   const currentStatus = study.status as BrandLiftStudyStatus;
   if (!allowedStatuses.includes(currentStatus)) {
     throw new ForbiddenError(`Operation not allowed for study status: ${study.status}`);
@@ -71,9 +73,12 @@ export const POST = async (
   { params: paramsPromise }: { params: Promise<{ studyId: string }> }
 ) => {
   try {
-    const { userId: clerkUserId } = await auth();
+    const { userId: clerkUserId, orgId } = await auth();
     if (!clerkUserId) {
       throw new UnauthenticatedError('Authentication required.');
+    }
+    if (!orgId) {
+      throw new BadRequestError('Active organization context is required.');
     }
 
     const { studyId } = await paramsPromise;
@@ -82,9 +87,10 @@ export const POST = async (
     }
 
     // Verify user can edit this study
-    await verifyStudyAccess(studyId, clerkUserId, [
+    await verifyStudyAccessAndOrg(studyId, clerkUserId, orgId, [
       BrandLiftStudyStatus.DRAFT,
       BrandLiftStudyStatus.PENDING_APPROVAL,
+      BrandLiftStudyStatus.CHANGES_REQUESTED,
     ]);
 
     const body = await req.json();
@@ -128,6 +134,7 @@ export const POST = async (
       questionId: newQuestion?.id,
       studyId,
       userId: clerkUserId,
+      orgId,
     });
     return NextResponse.json(newQuestion, { status: 201 });
   } catch (error: any) {
@@ -142,9 +149,12 @@ export const GET = async (
   { params: paramsPromise }: { params: Promise<{ studyId: string }> }
 ) => {
   try {
-    const { userId: clerkUserId } = await auth();
+    const { userId: clerkUserId, orgId } = await auth();
     if (!clerkUserId) {
       throw new UnauthenticatedError('Authentication required.');
+    }
+    if (!orgId) {
+      throw new BadRequestError('Active organization context is required.');
     }
 
     const { studyId } = await paramsPromise;
@@ -152,9 +162,9 @@ export const GET = async (
       throw new BadRequestError('Study ID is required.');
     }
 
-    // Verify user can access the study (just need existence and org match for GET)
+    // Verify user can access the study (checks orgId and any status for GET)
     const allStatuses = Object.values(BrandLiftStudyStatus) as BrandLiftStudyStatus[];
-    await verifyStudyAccess(studyId, clerkUserId, allStatuses);
+    await verifyStudyAccessAndOrg(studyId, clerkUserId, orgId, allStatuses);
 
     const questions = await db.surveyQuestion.findMany({
       where: {
@@ -175,6 +185,7 @@ export const GET = async (
     logger.info(`Fetched ${questions.length} questions for study`, {
       studyId,
       userId: clerkUserId,
+      orgId,
     });
     return NextResponse.json(questions);
   } catch (error: any) {

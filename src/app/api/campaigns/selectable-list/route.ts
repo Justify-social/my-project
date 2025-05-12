@@ -3,39 +3,29 @@ import { prisma } from '@/lib/prisma'; // Assuming prisma client is exported fro
 import { Status } from '@prisma/client';
 import { auth } from '@clerk/nextjs/server'; // Import auth
 import { logger } from '@/lib/logger'; // Import logger
-import { UnauthenticatedError, NotFoundError } from '@/lib/errors'; // Import custom errors
+import { UnauthenticatedError, NotFoundError, BadRequestError } from '@/lib/errors'; // Import custom errors
 
 export async function GET() {
   try {
-    const { userId: clerkUserId } = await auth();
+    const { userId: clerkUserId, orgId } = await auth();
     if (!clerkUserId) {
-      // Use custom error for consistent handling by handleApiError if this were wrapped
-      // For now, returning a direct response as per original structure, but logging it.
       logger.error('[API /selectable-list GET] User not authenticated.');
-      return NextResponse.json(
-        { success: false, error: 'Authentication required.' },
-        { status: 401 }
+      throw new UnauthenticatedError('Authentication required.');
+    }
+
+    if (!orgId) {
+      logger.info(
+        '[API /selectable-list GET] No active organization for user, returning empty list.',
+        { clerkUserId }
       );
+      return NextResponse.json({ success: true, data: [] });
     }
-
-    const userRecord = await prisma.user.findUnique({
-      where: { clerkId: clerkUserId },
-      select: { id: true },
-    });
-
-    if (!userRecord) {
-      logger.error('[API /selectable-list GET] User record not found for clerkId:', {
-        clerkUserId,
-      });
-      return NextResponse.json({ success: false, error: 'User not found.' }, { status: 404 });
-    }
-    const internalUserId = userRecord.id;
 
     const campaigns = await prisma.campaignWizard.findMany({
       where: {
-        userId: internalUserId, // Scope by user
+        orgId: orgId,
         status: {
-          not: Status.COMPLETED, // Exclude COMPLETED campaigns
+          not: Status.COMPLETED,
         },
       },
       select: {
@@ -48,11 +38,11 @@ export async function GET() {
       orderBy: {
         updatedAt: 'desc',
       },
-      take: 200, // Limiting to 200 selectable campaigns, adjust if necessary
+      take: 200,
     });
 
     logger.info(
-      `[API /selectable-list GET] Found ${campaigns.length} selectable campaigns for user ${internalUserId}`
+      `[API /selectable-list GET] Found ${campaigns.length} selectable campaigns for org ${orgId}`
     );
     return NextResponse.json({ success: true, data: campaigns });
   } catch (error) {

@@ -19,34 +19,38 @@ const reorderOptionsPayloadSchema = z
   .min(1, 'At least one option required for reorder.');
 
 // Helper to verify question access and modifiable status of its parent study
-async function verifyQuestionAccessForOptionReorder(
+async function verifyQuestionAccessAndStudyOrg(
   questionId: string,
-  clerkUserId: string
-): Promise<SurveyQuestion & { study: { status: BrandLiftStudyStatus } }> {
-  const userRecord = await db.user.findUnique({
-    where: { clerkId: clerkUserId },
-    select: { id: true },
-  });
-  if (!userRecord) {
-    throw new NotFoundError('User not found for authorization.');
-  }
-  const internalUserId = userRecord.id;
-
+  clerkUserId: string,
+  orgId: string
+): Promise<SurveyQuestion & { study: { status: BrandLiftStudyStatus; orgId: string | null } }> {
   const question = await db.surveyQuestion.findUnique({
     where: {
       id: questionId,
-      study: {
-        campaign: {
-          userId: internalUserId,
-        },
-      },
     },
     include: {
-      study: { select: { status: true } }, // organizationId removed
+      study: { select: { status: true, orgId: true } }, // Select orgId from the study
     },
   });
 
-  if (!question) throw new NotFoundError('Question not found or not accessible by this user.');
+  if (!question) {
+    throw new NotFoundError('Question not found.');
+  }
+
+  // Authorization based on BrandLiftStudy's orgId
+  if (question.study.orgId === null) {
+    logger.warn(
+      `User ${clerkUserId} in org ${orgId} attempted to reorder options for question ${questionId} in legacy study (null orgId). Action denied.`
+    );
+    throw new ForbiddenError(
+      'Options cannot be reordered for studies not associated with an organization.'
+    );
+  } else if (question.study.orgId !== orgId) {
+    logger.warn(
+      `User ${clerkUserId} in org ${orgId} attempted to reorder options for question ${questionId} in study belonging to org ${question.study.orgId}. Action denied.`
+    );
+    throw new ForbiddenError('You do not have permission to modify options for this study.');
+  }
 
   const currentStudyStatus = question.study.status as BrandLiftStudyStatus;
   if (
@@ -58,7 +62,9 @@ async function verifyQuestionAccessForOptionReorder(
       `Options cannot be reordered when study status is ${currentStudyStatus}.`
     );
   }
-  return question as SurveyQuestion & { study: { status: BrandLiftStudyStatus } };
+  return question as SurveyQuestion & {
+    study: { status: BrandLiftStudyStatus; orgId: string | null };
+  };
 }
 
 export const PATCH = async (
@@ -66,13 +72,14 @@ export const PATCH = async (
   { params: paramsPromise }: { params: Promise<{ questionId: string }> }
 ) => {
   try {
-    const { userId: clerkUserId } = await auth();
+    const { userId: clerkUserId, orgId } = await auth();
     if (!clerkUserId) throw new UnauthenticatedError('Authentication required.');
+    if (!orgId) throw new BadRequestError('Active organization context is required.');
 
     const { questionId } = await paramsPromise;
     if (!questionId) throw new BadRequestError('Question ID is required.');
 
-    await verifyQuestionAccessForOptionReorder(questionId, clerkUserId);
+    await verifyQuestionAccessAndStudyOrg(questionId, clerkUserId, orgId);
 
     const body = await req.json();
     const validation = reorderOptionsPayloadSchema.safeParse(body);

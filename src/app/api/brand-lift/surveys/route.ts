@@ -39,8 +39,16 @@ const listStudiesQuerySchema = z.object({
 export async function POST(req: NextRequest) {
   return tryCatch(
     async () => {
-      const { userId: clerkUserId } = await auth(); // Renamed
-      if (!clerkUserId) throw new UnauthenticatedError('Authentication required.'); // Updated
+      const { userId: clerkUserId, orgId } = await auth(); // Fetch orgId as well
+
+      if (!clerkUserId) throw new UnauthenticatedError('Authentication required.');
+
+      // Enforce orgId presence
+      if (!orgId) {
+        throw new BadRequestError(
+          'Active organization context is required to create a brand lift study.'
+        );
+      }
 
       const body = await req.json();
       const validation = createStudySchema.safeParse(body);
@@ -63,85 +71,89 @@ export async function POST(req: NextRequest) {
       }
       const internalUserId = userRecord.id;
 
-      // Find the CampaignWizard record by its UUID and user
-      const campaignWizard = await prisma.campaignWizard.findFirst({
+      // Find the CampaignWizard record by its UUID and check its orgId
+      const campaignWizard = await prisma.campaignWizard.findUnique({
         where: {
           id: campaignWizardId, // This is the UUID from the form
-          userId: internalUserId,
         },
-        select: { id: true, name: true }, // Select enough to identify it, or what's needed
+        select: {
+          id: true,
+          orgId: true,
+          submissionId: true,
+          status: true,
+          name: true,
+        },
       });
 
       if (!campaignWizard) {
-        logger.error('CampaignWizard (source) not found or unauthorized access attempt', {
+        logger.error('Brand Lift POST: Source CampaignWizard not found', {
           campaignWizardId,
-          userId: clerkUserId,
+          userId: clerkUserId, // Log clerkUserId for context
         });
-        throw new NotFoundError('Source campaign not found or not accessible');
+        throw new NotFoundError('Source campaign not found.');
       }
 
-      // IMPORTANT ASSUMPTION: Find or create a CampaignWizardSubmission linked to this CampaignWizard.
-      // For MVP, let's assume a CampaignWizardSubmission with the same name and userId implies linkage.
-      // This is a simplification and might need a more robust linking mechanism (e.g., a direct relation or a status that triggers submission creation).
-      let submission = await prisma.campaignWizardSubmission.findFirst({
-        where: {
-          // campaignName: campaignWizard.name, // This might not be unique enough alone
-          // userId: internalUserId, // Already filtered by this on CampaignWizard
-          // A more robust link would be a direct foreign key if one existed from CampaignWizard to CampaignWizardSubmission
-          // Or if CampaignWizard ID was used to create/find the submission.
-          // For now, we can attempt to find a submission by name that matches the wizard and user.
-          // THIS IS A MAJOR SIMPLIFICATION AND POTENTIAL POINT OF FAILURE/MISMATCH
-          // A better approach would be for the CampaignWizard to have a submissionId field once submitted.
-          // Or the selectable list provides submission IDs directly if it lists submissions.
-          campaignName: campaignWizard.name, // Trying to link by name and user
-          userId: internalUserId,
-        },
-        select: { id: true },
-      });
+      // Authorization: Check if the CampaignWizard belongs to the user's active organization.
+      if (campaignWizard.orgId === null) {
+        logger.warn(
+          `User ${internalUserId} in org ${orgId} attempted to create Brand Lift for legacy campaign ${campaignWizardId} (null orgId). Action denied.`
+        );
+        throw new ForbiddenError(
+          'The selected campaign is not associated with an organization and cannot be used for a new brand lift study.'
+        );
+      } else if (campaignWizard.orgId !== orgId) {
+        logger.warn(
+          `User ${internalUserId} in org ${orgId} attempted to create Brand Lift for campaign ${campaignWizardId} belonging to org ${campaignWizard.orgId}. Action denied.`
+        );
+        throw new ForbiddenError(
+          'You do not have permission to use this campaign for a new brand lift study.'
+        );
+      }
 
-      if (!submission) {
-        // If no submission exists, this flow is problematic. For Brand Lift, a SUBMITTED campaign state is usually prerequisite.
-        // The previous query for CampaignWizard didn't check its status. Ideally, only selectable/submitted wizards lead here.
-        // Forcing an error now, as a BrandLiftStudy MUST link to a CampaignWizardSubmission.id (Int)
-        logger.error(
-          'No corresponding CampaignWizardSubmission found for the selected CampaignWizard',
+      // Check if the campaign has been submitted and has a submissionId
+      if (campaignWizard.status !== 'SUBMITTED' || !campaignWizard.submissionId) {
+        logger.warn(
+          'Brand Lift POST: Source CampaignWizard is not submitted or lacks a submission ID.',
           {
             campaignWizardId: campaignWizard.id,
-            campaignWizardName: campaignWizard.name,
-            userId: clerkUserId,
+            status: campaignWizard.status,
+            submissionId: campaignWizard.submissionId,
+            userId: clerkUserId, // Log clerkUserId for context
           }
         );
-        throw new NotFoundError(
-          'Could not find a finalized submission for the selected campaign. Please ensure the campaign is submitted.'
+        throw new BadRequestError(
+          'The selected campaign must be submitted before a brand lift study can be created for it.'
         );
       }
-      const submissionIdForBrandLift = submission.id; // This is the Int ID
+
+      const submissionIdForBrandLift = campaignWizard.submissionId; // This is the Int ID from the verified CampaignWizard
 
       logger.info('Attempting to create BrandLiftStudy, linking to submission ID:', {
-        userId: clerkUserId,
+        userId: clerkUserId, // Log clerkUserId for context
         campaignWizardId,
         submissionId: submissionIdForBrandLift,
+        orgId, // Log orgId being assigned
       });
       const newStudy = await prisma.brandLiftStudy.create({
         data: {
           name,
-          submissionId: submissionIdForBrandLift, // Use the Int ID of the CampaignWizardSubmission
+          submissionId: submissionIdForBrandLift,
           funnelStage,
           primaryKpi,
           secondaryKpis: secondaryKpis ?? [],
           status: PrismaBrandLiftStudyStatus.DRAFT,
-          // organizationId: orgId, // Removed organizationId
-          // The link to user is via submissionId -> CampaignWizardSubmission.userId
+          orgId: orgId, // Store the active orgId for ownership
         },
       });
       logger.info('BrandLiftStudy created successfully', {
-        userId: clerkUserId,
+        userId: clerkUserId, // Log clerkUserId for context
         studyId: newStudy.id,
-      }); // Log clerkUserId
+        orgId: newStudy.orgId,
+      });
       return NextResponse.json(newStudy, { status: 201 });
     },
     error => handleApiError(error, req)
-  ); // Pass req to error handler
+  );
 }
 
 export async function GET(req: NextRequest) {

@@ -19,33 +19,42 @@ const reorderPayloadSchema = z
   .min(1, 'At least one item required for reorder.');
 
 // Helper to verify study access and modifiable status
-async function verifyStudyAccessForReorder(studyId: string, clerkUserId: string) {
-  const userRecord = await db.user.findUnique({
-    where: { clerkId: clerkUserId },
-    select: { id: true },
-  });
-  if (!userRecord) {
-    throw new NotFoundError('User not found for authorization.');
-  }
-  const internalUserId = userRecord.id;
-
-  const study = await db.brandLiftStudy.findFirst({
+async function verifyStudyAccessAndModifiableStatus(
+  studyId: string,
+  clerkUserId: string,
+  orgId: string
+): Promise<{ id: string; status: BrandLiftStudyStatus; orgId: string | null }> {
+  const study = await db.brandLiftStudy.findUnique({
     where: {
       id: studyId,
-      campaign: {
-        // Check access via campaign and user
-        userId: internalUserId,
-      },
     },
-    select: { id: true, status: true },
+    select: { id: true, status: true, orgId: true },
   });
-  if (!study)
-    throw new NotFoundError('Study not found or not accessible for reordering questions.');
+
+  if (!study) {
+    throw new NotFoundError('Study not found.');
+  }
+
+  // Authorization based on BrandLiftStudy's orgId
+  if (study.orgId === null) {
+    logger.warn(
+      `User ${clerkUserId} in org ${orgId} attempted to reorder questions for legacy study ${studyId} (null orgId). Action denied.`
+    );
+    throw new ForbiddenError(
+      'Questions cannot be reordered for studies not associated with an organization.'
+    );
+  } else if (study.orgId !== orgId) {
+    logger.warn(
+      `User ${clerkUserId} in org ${orgId} attempted to reorder questions for study ${studyId} belonging to org ${study.orgId}. Action denied.`
+    );
+    throw new ForbiddenError('You do not have permission to modify this study.');
+  }
 
   const currentStatus = study.status as BrandLiftStudyStatus;
   if (
     currentStatus !== BrandLiftStudyStatus.DRAFT &&
-    currentStatus !== BrandLiftStudyStatus.PENDING_APPROVAL
+    currentStatus !== BrandLiftStudyStatus.PENDING_APPROVAL &&
+    currentStatus !== BrandLiftStudyStatus.CHANGES_REQUESTED
   ) {
     throw new ForbiddenError(`Questions cannot be reordered when study status is ${study.status}.`);
   }
@@ -57,13 +66,14 @@ export const PATCH = async (
   { params: paramsPromise }: { params: Promise<{ studyId: string }> }
 ) => {
   try {
-    const { userId: clerkUserId } = await auth();
+    const { userId: clerkUserId, orgId } = await auth();
     if (!clerkUserId) throw new UnauthenticatedError('Authentication required.');
+    if (!orgId) throw new BadRequestError('Active organization context is required.');
 
     const { studyId } = await paramsPromise;
     if (!studyId) throw new BadRequestError('Study ID is required.');
 
-    await verifyStudyAccessForReorder(studyId, clerkUserId);
+    await verifyStudyAccessAndModifiableStatus(studyId, clerkUserId, orgId);
 
     const body = await req.json();
     const validation = reorderPayloadSchema.safeParse(body);
@@ -79,20 +89,12 @@ export const PATCH = async (
 
     const updates = validation.data;
 
-    // Ensure all provided question IDs belong to the specified studyId and user
-    const userRecord = await db.user.findUnique({
-      where: { clerkId: clerkUserId },
-      select: { id: true },
-    });
-    if (!userRecord) throw new NotFoundError('User not found for reorder operation validation.');
-    const internalUserId = userRecord.id;
-
+    // Ensure all provided question IDs belong to the specified studyId
     const questionIdsToUpdate = updates.map(u => u.id);
     const questionsInStudy = await db.surveyQuestion.findMany({
       where: {
         id: { in: questionIdsToUpdate },
         studyId: studyId,
-        study: { campaign: { userId: internalUserId } },
       },
       select: { id: true },
     });
