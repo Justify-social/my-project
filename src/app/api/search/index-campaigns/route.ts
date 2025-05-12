@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { indexCampaigns } from '@/lib/algolia';
+import { reindexAllCampaigns } from '@/lib/algolia';
 import { prisma } from '@/lib/prisma';
 import { CampaignWizard } from '@prisma/client';
 
@@ -20,8 +20,8 @@ export async function POST(req: Request) {
       );
     }
 
-    // Index campaigns to Algolia
-    await indexCampaigns(campaigns);
+    // Index campaigns to Algolia - assuming 'campaigns' are CampaignWizard[]
+    await reindexAllCampaigns(campaigns as CampaignWizard[]);
 
     return NextResponse.json({
       success: true,
@@ -50,39 +50,28 @@ export async function GET() {
     try {
       // Fetch all campaigns directly from the database
       console.log('Fetching campaigns from database...');
-      const campaigns = await prisma.campaignWizard.findMany({
+      const campaignsFromDb = await prisma.campaignWizard.findMany({
         orderBy: {
           updatedAt: 'desc',
         },
-        take: 100, // Limit to 100 campaigns for performance
+        // Consider if a limit is appropriate or if all should be indexed.
+        // take: 100, // Limit to 100 campaigns for performance - re-instating for safety, can be removed if all must be indexed
       });
 
-      console.log(`Found ${campaigns.length} campaigns in the database.`);
+      console.log(`Found ${campaignsFromDb.length} campaigns in the database.`);
 
-      if (!campaigns.length) {
+      if (!campaignsFromDb.length) {
         return NextResponse.json({ warning: 'No campaigns found to index.' }, { status: 200 });
       }
 
-      // Transform campaigns for Algolia
-      console.log('Transforming campaigns for Algolia...');
-      const algoliaRecords = campaigns.map((campaign: CampaignWizard) => ({
-        objectID: campaign.id,
-        id: campaign.id,
-        campaignName: campaign.name || '',
-        description: campaign.businessGoal || '',
-        status: campaign.status || 'DRAFT',
-        startDate: campaign.startDate ? new Date(campaign.startDate).toISOString() : '',
-        endDate: campaign.endDate ? new Date(campaign.endDate).toISOString() : '',
-      }));
-
-      // Index to Algolia
-      console.log(`Indexing ${algoliaRecords.length} campaigns to Algolia...`);
-      await indexCampaigns(algoliaRecords);
+      // No manual transformation needed here, reindexAllCampaigns will handle it.
+      console.log(`Indexing ${campaignsFromDb.length} campaigns to Algolia...`);
+      await reindexAllCampaigns(campaignsFromDb);
 
       console.log('Indexing complete!');
       return NextResponse.json({
         success: true,
-        message: `Successfully indexed ${algoliaRecords.length} campaigns.`,
+        message: `Successfully indexed ${campaignsFromDb.length} campaigns.`,
       });
     } catch (dbError) {
       console.error('Database error:', dbError);

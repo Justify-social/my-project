@@ -20,7 +20,10 @@ import {
 } from '@prisma/client';
 
 // Enable debug logging in development
-const isDev = process.env.NODE_ENV === 'development';
+// Workaround for potential process.env typing issues
+const isDev =
+  (typeof process !== 'undefined' && (process as any).env && (process as any).env.NODE_ENV) ===
+  'development';
 const debugLog = (message: string) => {
   if (isDev) {
     console.log(message);
@@ -213,7 +216,10 @@ export const EnumTransformers = {
       } else if (key === 'role') {
         result[key] = this.teamRoleToBackend(value as string);
       } else if (key === 'status') {
-        result[key] = this.invitationStatusToBackend(value as string);
+        // Assuming 'status' here is CampaignStatus or other statuses that are already in correct backend format
+        // or do not need specific transformation via a dedicated function here.
+        // The previous mapping to invitationStatusToBackend was too specific and potentially incorrect for CampaignStatus.
+        result[key] = value; // Pass through
       } else if (key === 'userRole') {
         result[key] = this.userRoleToBackend(value as string);
       } else if (value instanceof Date) {

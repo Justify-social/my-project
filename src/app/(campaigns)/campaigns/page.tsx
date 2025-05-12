@@ -38,9 +38,10 @@ import { Prisma } from '@prisma/client'; // Ensure Prisma namespace is imported
 import { Label } from '@/components/ui/label';
 import { logger } from '@/utils/logger';
 import { ConfirmDeleteDialog } from '@/components/ui/dialog-confirm-delete'; // Added import
+import { getCampaignStatusInfo, CampaignStatusKey } from '@/utils/statusUtils'; // Import centralized utility
 
 // Define expected status values
-type CampaignStatus = 'DRAFT' | 'REVIEW' | 'APPROVED' | 'ACTIVE' | 'COMPLETED' | string;
+// type CampaignStatus = 'DRAFT' | 'REVIEW' | 'APPROVED' | 'ACTIVE' | 'COMPLETED' | string;
 type Platform = 'Instagram' | 'YouTube' | 'TikTok' | 'N/A';
 
 // Define the shape of the data coming from /api/list-campaigns
@@ -138,15 +139,18 @@ const transformCampaignData = (campaign: ApiListData): Campaign => {
     }
   }
 
-  let newStatus = campaign.status || 'DRAFT';
-  if (newStatus.toUpperCase() === 'IN_REVIEW') {
-    newStatus = 'REVIEW';
+  let normalizedStatus = (campaign.status || 'DRAFT').toUpperCase();
+  if (normalizedStatus === 'IN_REVIEW') {
+    normalizedStatus = 'REVIEW'; // Though REVIEW is not a target display status
+  }
+  if (normalizedStatus === 'SUBMITTED_FINAL') {
+    normalizedStatus = 'SUBMITTED'; // Normalize to canonical SUBMITTED
   }
 
   return {
     id: campaign.id,
     campaignName: campaign.name || 'Untitled Campaign',
-    status: newStatus as CampaignStatus,
+    status: normalizedStatus as CampaignStatusKey, // Use imported CampaignStatusKey
     platform: platform,
     startDate: formatDateToString(campaign.startDate),
     endDate: formatDateToString(campaign.endDate),
@@ -208,7 +212,7 @@ const KPI_OPTIONS: KpiOption[] = [
 interface Campaign {
   id: string | number;
   campaignName: string;
-  status: CampaignStatus; // Use the raw status string (e.g., 'DRAFT', 'ACTIVE')
+  status: CampaignStatusKey; // Use imported CampaignStatusKey
   platform: Platform;
   startDate: string; // ISO string format
   endDate: string; // ISO string format
@@ -655,25 +659,28 @@ const ClientCampaignList: React.FC = () => {
   };
 
   // Helper to get status color and text
-  // Adjusted to handle potential uppercase enum strings from Prisma Status
-  const getStatusInfo = (status: CampaignStatus | null | undefined) => {
+  const getStatusInfo = (status: CampaignStatusKey | null | undefined) => {
     const normalizedStatus = (status || '').toLowerCase();
     switch (normalizedStatus) {
-      case 'approved':
-        return { class: 'bg-green-100 text-green-800', text: 'Approved' };
-      case 'active':
-        return { class: 'bg-green-100 text-green-800', text: 'Active' };
-      case 'review':
-        return { class: 'bg-yellow-100 text-yellow-800', text: 'Review' };
       case 'draft':
-        return { class: 'bg-gray-100 text-gray-800', text: 'Draft' };
+        return { class: 'bg-muted text-muted-foreground', text: 'Draft' }; // Grey
+      case 'submitted_final': // Handle SUBMITTED_FINAL from backend
+      case 'submitted': // Allow filtering by "submitted"
+        return { class: 'bg-warning text-warning-foreground', text: 'Submitted' }; // Yellow
+      case 'active':
+        return { class: 'bg-success text-success-foreground', text: 'Active' }; // Green
+      case 'approved':
+        return { class: 'bg-success text-success-foreground', text: 'Approved' }; // Green
+      case 'paused':
+        return { class: 'bg-muted text-muted-foreground', text: 'Paused' }; // Grey
       case 'completed':
-        return { class: 'bg-blue-100 text-blue-800', text: 'Completed' };
+        return { class: 'bg-accent text-accent-foreground', text: 'Completed' }; // Deep Sky Blue
+      // Removed 'review' case
       default:
         const defaultText = status
           ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
           : 'Unknown';
-        return { class: 'bg-gray-100 text-gray-800', text: defaultText };
+        return { class: 'bg-muted text-muted-foreground', text: defaultText }; // Default to Grey
     }
   };
 
@@ -864,7 +871,7 @@ const ClientCampaignList: React.FC = () => {
               <SelectItem value="approved">Approved</SelectItem>
               <SelectItem value="completed">Completed</SelectItem>
               <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="review">Review</SelectItem>
+              <SelectItem value="submitted">Submitted</SelectItem>
               <SelectItem value="paused">Paused</SelectItem>
             </SelectContent>
           </Select>
@@ -965,7 +972,7 @@ const ClientCampaignList: React.FC = () => {
               </TableHeader>
               <TableBody>
                 {displayedCampaigns.map(campaign => {
-                  const statusInfo = getStatusInfo(campaign.status);
+                  const statusInfo = getCampaignStatusInfo(campaign.status);
                   return (
                     <TableRow key={campaign.id} className="hover:bg-gray-50">
                       <TableCell className="font-medium">
@@ -1155,7 +1162,7 @@ const ClientCampaignList: React.FC = () => {
 
       <div className="md:hidden space-y-4">
         {displayedCampaigns.map(campaign => {
-          const statusInfo = getStatusInfo(campaign.status);
+          const statusInfo = getCampaignStatusInfo(campaign.status);
           return (
             <div
               key={campaign.id}

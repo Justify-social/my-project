@@ -36,6 +36,7 @@ import {
   DatabaseError,
 } from '@/lib/errors';
 import { tryCatch } from '@/lib/middleware/api/util-middleware';
+import { addOrUpdateCampaignInAlgolia } from '@/lib/algolia'; // Import Algolia utility
 
 // Helper function to safely parse JSON - assuming wizard fields are already parsed by Prisma if Json type
 // but useful if we were dealing with stringified JSON from elsewhere.
@@ -408,13 +409,40 @@ export async function POST(
         await tx.campaignWizard.update({
           where: { id: wizardId },
           data: {
-            status: 'SUBMITTED_FINAL' as PrismaCampaignStatus,
+            status: 'SUBMITTED' as PrismaCampaignStatus,
             submissionId: newSubmission.id,
           },
         });
 
         return newSubmission;
       });
+
+      // After the transaction, fetch the updated CampaignWizard to index in Algolia
+      const updatedCampaignWizard = await prisma.campaignWizard.findUnique({
+        where: { id: wizardId },
+        include: { Influencer: true }, // Include relations needed by Algolia transformation
+      });
+
+      if (updatedCampaignWizard) {
+        try {
+          await addOrUpdateCampaignInAlgolia(updatedCampaignWizard);
+          logger.info('Campaign Submission: Successfully indexed submitted campaign in Algolia', {
+            wizardId,
+          });
+        } catch (algoliaError) {
+          logger.error('Campaign Submission: Failed to index submitted campaign in Algolia', {
+            wizardId,
+            error: algoliaError,
+          });
+          // Decide if this should be a critical error that fails the request,
+          // or just logged. For now, logging and continuing.
+        }
+      } else {
+        logger.warn(
+          'Campaign Submission: Could not refetch CampaignWizard for Algolia indexing after submission.',
+          { wizardId }
+        );
+      }
 
       logger.info('Campaign submitted successfully', {
         wizardId,

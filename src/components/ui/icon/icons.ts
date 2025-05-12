@@ -23,7 +23,7 @@ const loggedWarnings = new Set<string>();
 
 // Helper for debug logging
 const debug = (...args: unknown[]) => {
-  if (DEBUG) {
+  if (DEBUG && false) {
     console.log('[icons.ts]', ...args);
   }
 };

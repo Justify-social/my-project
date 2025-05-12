@@ -640,7 +640,17 @@ function Step5Content() {
         );
         // Navigate to the campaign submission page using the ID from the submission data
         if (submissionData && submissionData.id) {
-          router.push(`/campaigns/submission/${submissionData.id}`);
+          // Redirect to the submission page using the original CampaignWizard's UUID (wizard.campaignId)
+          // and the query parameter 'id' as expected by SubmissionContent.tsx
+          if (wizard.campaignId) {
+            router.push(`/campaigns/wizard/submission?id=${wizard.campaignId}`);
+          } else {
+            // Fallback if wizard.campaignId is somehow null (should not happen here)
+            console.error(
+              '[Step5Content] wizard.campaignId is null, cannot redirect to submission page correctly.'
+            );
+            router.push('/dashboard'); // Or a generic error page
+          }
         } else {
           // Fallback or error handling if submissionData.id is not available
           console.error(
@@ -763,15 +773,22 @@ function Step5Content() {
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow">
                     <FormControl>
-                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        id={field.name}
+                      />
                     </FormControl>
-                    <div className="space-y-1 leading-none">
+                    <label
+                      htmlFor={field.name}
+                      className="space-y-1 leading-none cursor-pointer flex-grow"
+                    >
                       <FormLabel>Confirm Campaign Details</FormLabel>
                       <FormDescription>
                         I have reviewed all the campaign information and confirm it is accurate.
                       </FormDescription>
                       <FormMessage />
-                    </div>
+                    </label>
                   </FormItem>
                 )}
               />

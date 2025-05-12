@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { EnumTransformers } from '@/utils/enum-transformers';
 import { connectToDatabase, prisma } from '@/lib/db';
 import { auth } from '@clerk/nextjs/server';
+import logger from '@/lib/logger'; // Added logger import
 // Import the specific schemas needed (adjust path if necessary)
 import {
   Step1BaseSchema,
@@ -12,6 +13,7 @@ import {
   Step4BaseSchema,
   Step5BaseSchema, // Assuming this exists for step 5 logic
 } from '@/components/features/campaigns/types'; // Using types.ts as source
+import { addOrUpdateCampaignInAlgolia } from '@/lib/algolia'; // Import Algolia utility
 
 // Define interface for influencer data locally if not exported
 interface ApiInfluencer {
@@ -339,6 +341,29 @@ export async function PATCH(
     // Transform the final, non-null data for the frontend
     // const transformedCampaignForFrontend =
     //   EnumTransformers.transformObjectFromBackend(campaignDataForResponse);
+
+    // Index the updated campaign in Algolia
+    if (campaignDataForResponse) {
+      try {
+        // Ensure campaignDataForResponse is not null and is the complete wizard object
+        await addOrUpdateCampaignInAlgolia(campaignDataForResponse as any); // Cast to any if type mismatch with CampaignWizard
+        logger.info(`PATCH Step ${step}: Successfully indexed updated campaign in Algolia`, {
+          campaignId,
+        });
+      } catch (algoliaError) {
+        logger.error(`PATCH Step ${step}: Failed to index updated campaign in Algolia`, {
+          campaignId,
+          error: algoliaError,
+        });
+        // Decide if this should be a critical error that fails the request,
+        // or just logged. For now, logging and continuing.
+      }
+    } else {
+      logger.warn(
+        `PATCH Step ${step}: campaignDataForResponse was null, skipping Algolia indexing.`,
+        { campaignId }
+      );
+    }
 
     return NextResponse.json({
       success: true,

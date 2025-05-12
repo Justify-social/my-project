@@ -26,6 +26,7 @@ import { saveAs } from 'file-saver';
 // Import the Duplicate Button using relative path
 import { DuplicateCampaignButton } from '@/components/ui/button-duplicate-campaigns';
 import { ConfirmDeleteDialog } from '@/components/ui/dialog-confirm-delete';
+import { getCampaignStatusInfo, CampaignStatusKey } from '@/utils/statusUtils'; // Import centralized utility
 
 // Define AGE_BRACKETS for the age distribution summary UI
 const AGE_BRACKETS = [
@@ -60,7 +61,7 @@ const TOP_LANGUAGES_MAP: Array<{ value: string; label: string }> = [
 interface CampaignData {
   id: string;
   name: string;
-  status: string;
+  status: CampaignStatusKey;
   startDate: string;
   endDate: string;
   timeZone: string;
@@ -470,15 +471,17 @@ export default function CampaignDetail() {
           throw new Error('Invalid campaign data received from API');
         }
 
-        console.log(
-          '[CampaignDetail] Demographics data from API:',
-          JSON.stringify(data.demographics, null, 2)
-        );
+        // Normalize status for SSOT
+        let rawStatus = (data.status || 'DRAFT').toUpperCase();
+        if (rawStatus === 'SUBMITTED_FINAL') {
+          rawStatus = 'SUBMITTED';
+        }
+        // Add any other necessary normalizations here if backend sends other variations
 
         const transformedData: CampaignData = {
           id: data.id ? data.id.toString() : 'N/A',
           name: data.name || 'Unnamed Campaign',
-          status: data.status ? data.status.toLowerCase() : 'Unknown',
+          status: rawStatus as CampaignStatusKey,
           startDate: data.startDate ? new Date(data.startDate).toLocaleDateString() : 'N/A',
           endDate: data.endDate ? new Date(data.endDate).toLocaleDateString() : 'N/A',
           timeZone: data.timeZone || 'N/A',
@@ -643,32 +646,6 @@ export default function CampaignDetail() {
     }
   }, [campaignIdParam]);
 
-  const getStatusInfo = (status: string): { className: string; text: string } => {
-    const normalizedStatus = status.toLowerCase();
-    switch (normalizedStatus) {
-      case 'draft':
-        return { className: 'bg-gray-100 text-gray-800', text: 'Draft' };
-      case 'pending':
-      case 'in_review':
-      case 'review':
-        return { className: 'bg-yellow-100 text-yellow-800', text: 'Review' };
-      case 'approved':
-      case 'active':
-        return {
-          className: 'bg-green-100 text-green-800',
-          text: status === 'approved' ? 'Approved' : 'Active',
-        };
-      case 'completed':
-        return { className: 'bg-blue-100 text-blue-800', text: 'Completed' };
-      case 'rejected':
-        return { className: 'bg-red-100 text-red-800', text: 'Rejected' };
-      case 'ended':
-        return { className: 'bg-gray-100 text-gray-800', text: 'Ended' };
-      default:
-        return { className: 'bg-gray-100 text-gray-800', text: status || 'Unknown' };
-    }
-  };
-
   const formatCurrency = (amount: number, currency: string) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -768,7 +745,8 @@ export default function CampaignDetail() {
     );
   }
 
-  const statusInfo = getStatusInfo(campaignData.status);
+  // Use the imported getCampaignStatusInfo
+  const statusInfo = getCampaignStatusInfo(campaignData.status);
   const ageRanges = [
     { label: '18-24: 25%', isActive: campaignData.audience.ageRanges?.age18_24 === 25 },
     { label: '25-34: 15%', isActive: campaignData.audience.ageRanges?.age25_34 === 35 },
@@ -794,7 +772,7 @@ export default function CampaignDetail() {
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold tracking-tight">{campaignData.name}</h1>
           <Badge
-            className={`px-3 py-1 rounded-full text-sm font-medium ${statusInfo.className} hover:${statusInfo.className}`}
+            className={`px-3 py-1 rounded-full text-sm font-medium ${statusInfo.class} hover:${statusInfo.class}`}
           >
             {statusInfo.text}
           </Badge>

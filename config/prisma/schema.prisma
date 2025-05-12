@@ -48,6 +48,7 @@ model CampaignWizard {
   step4Complete    Boolean         @default(false)
   userId           String?         @map("userId")
   user             User?           @relation(fields: [userId], references: [id])
+  orgId            String?         // Added orgId
   Influencer       Influencer[]
   WizardHistory    WizardHistory[]
 
@@ -55,6 +56,7 @@ model CampaignWizard {
   submission       CampaignWizardSubmission? @relation("WizardToSubmission", fields: [submissionId], references: [id])
 
   @@index([status, createdAt])
+  @@index([orgId]) // Added index for orgId
 }
 
 model Influencer {
@@ -323,7 +325,7 @@ enum Status {
   ACTIVE
   COMPLETED
   PAUSED
-  SUBMITTED_FINAL
+  SUBMITTED
 }
 
 enum Currency {
@@ -486,6 +488,7 @@ model BrandLiftStudy {
   updatedAt         DateTime                @updatedAt
   cintProjectId     String?                 @unique
   cintTargetGroupId String?                 @unique
+  orgId             String?                 // Added orgId
 
   questions         SurveyQuestion[]
   responses         SurveyResponse[]
@@ -494,6 +497,7 @@ model BrandLiftStudy {
 
   @@index([submissionId]) // Updated index field
   @@index([status])
+  @@index([orgId]) // Added index for orgId
 }
 
 model SurveyQuestion {

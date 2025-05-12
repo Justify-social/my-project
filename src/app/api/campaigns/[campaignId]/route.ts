@@ -5,6 +5,7 @@ import { Currency, SubmissionStatus } from '@prisma/client';
 import { connectToDatabase } from '@/lib/db';
 import { auth } from '@clerk/nextjs/server';
 import { campaignService as _campaignService } from '@/lib/data-mapping/campaign-service';
+import { deleteCampaignFromAlgolia } from '@/lib/algolia'; // Import Algolia utility
 
 // type RouteParams = { params: { id: string } }; // Unused
 
@@ -483,6 +484,16 @@ export async function DELETE(
 
         console.log(`Successfully deleted campaign from CampaignWizard table: ${campaignId}`);
         campaignWizardDeleted = true;
+
+        // Delete from Algolia if successfully deleted from DB
+        try {
+          await deleteCampaignFromAlgolia(campaignId);
+          console.log(`Successfully deleted campaign from Algolia: ${campaignId}`);
+        } catch (algoliaError) {
+          console.error(`Error deleting campaign from Algolia: ${campaignId}`, algoliaError);
+          // Decide if this should fail the entire operation or just be logged.
+          // For now, logging and continuing as the DB deletion was successful.
+        }
       } else {
         console.log(`No campaign found in CampaignWizard with ID: ${campaignId}`);
       }

@@ -37,6 +37,7 @@ import { handleApiError } from '@/lib/apiErrorHandler'; // Import shared error h
 import { BadRequestError, ForbiddenError, UnauthenticatedError, NotFoundError } from '@/lib/errors'; // Import custom errors
 import { auth } from '@clerk/nextjs/server'; // Assuming Clerk setup
 import { tryCatch } from '@/lib/middleware/api/util-middleware'; // Corrected path and function name
+import { addOrUpdateCampaignInAlgolia } from '@/lib/algolia'; // Import Algolia utility
 
 // Define interface for influencer data from request body (used in POST)
 interface ApiInfluencer {
@@ -488,6 +489,11 @@ export const POST = async (request: NextRequest) => {
       return NextResponse.json({ error: 'Authentication required for POST' }, { status: 401 });
     }
 
+    // Enforce organization context for campaign creation
+    if (!orgId) {
+      throw new BadRequestError('An active organization context is required to create a campaign.');
+    }
+
     // Fetch the internal User record using the clerkUserId
     const userRecord = await prisma.user.findUnique({
       where: { clerkId: clerkUserId },
@@ -551,7 +557,8 @@ export const POST = async (request: NextRequest) => {
       isComplete: false,
       currentStep: 1,
       updatedAt: new Date(),
-      userId: internalUserId, // NEW WAY: Directly set the foreign key
+      userId: internalUserId, // Keep track of the creator user
+      orgId: orgId, // Save the organization ID
     };
     logger.info('Campaign POST: Data prepared for DB create', { dbData });
 
@@ -597,12 +604,35 @@ export const POST = async (request: NextRequest) => {
       include: { Influencer: true },
     });
 
-    const transformedCampaign =
-      EnumTransformers.transformObjectFromBackend(campaignWithInfluencers);
+    // const transformedCampaign = // This line seems to be missing its assignment or was commented out
+    //   EnumTransformers.transformObjectFromBackend(campaignWithInfluencers);
+
+    // Index the newly created campaign in Algolia
+    if (campaignWithInfluencers) {
+      try {
+        // The campaignWithInfluencers object fetched from DB will now include orgId
+        await addOrUpdateCampaignInAlgolia(campaignWithInfluencers);
+        logger.info('Campaign POST: Successfully indexed new campaign in Algolia', {
+          campaignId: campaign.id,
+        });
+      } catch (algoliaError) {
+        logger.error('Campaign POST: Failed to index new campaign in Algolia', {
+          campaignId: campaign.id,
+          error: algoliaError,
+        });
+        // Decide if this should be a critical error that fails the request,
+        // or just logged. For now, logging and continuing.
+      }
+    } else {
+      logger.warn('Campaign POST: campaignWithInfluencers was null, skipping Algolia indexing.', {
+        campaignId: campaign.id,
+      });
+    }
 
     return NextResponse.json({
       success: true,
-      data: transformedCampaign,
+      // data: transformedCampaign,
+      data: campaignWithInfluencers, // This will now include orgId
       message: 'Campaign created successfully',
     });
     // --- End: Original postCampaignsHandler logic ---

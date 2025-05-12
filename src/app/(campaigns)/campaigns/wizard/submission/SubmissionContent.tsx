@@ -103,16 +103,12 @@ export default function SubmissionContent() {
   // --- Success State ---
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] text-center p-4 sm:p-6 bg-background">
-      <motion.div
-        initial={{ scale: 0.5, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: 'spring', stiffness: 100, damping: 10 }}
-        className="p-6 md:p-10 bg-card rounded-full shadow-lg border border-divider mb-8"
-      >
-        <Icon iconId="faCheckSolid" className="w-12 h-12 md:w-16 md:h-16 text-accent" />
-      </motion.div>
+      <Icon
+        iconId="faCircleCheckSolid"
+        className="w-16 h-16 md:w-20 md:h-20 text-accent mb-8 drop-shadow-lg"
+      />
       <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 tracking-tight text-primary">
-        Campaign Ready for Review!
+        Campaign Submitted!
       </h1>
       <p className="text-base sm:text-lg text-muted-foreground max-w-xl mb-8 px-2">
         Your campaign "

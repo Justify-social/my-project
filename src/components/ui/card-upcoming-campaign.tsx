@@ -28,6 +28,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Icon } from '@/components/ui/icon/icon'; // Assuming Icon component is available
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'; // Import Tooltip components
 import Image from 'next/image'; // Import Image
+import { getCampaignStatusInfo, CampaignStatusKey } from '@/utils/statusUtils'; // Import centralized utility
 
 // Data structure for a single campaign row
 export interface CampaignData {
@@ -41,7 +42,7 @@ export interface CampaignData {
   budget?: number;
   startDate: Date;
   endDate?: Date;
-  status?: string; // e.g., 'Planning', 'Active', 'Completed'
+  status?: CampaignStatusKey; // Use CampaignStatusKey
 }
 
 // Props for the UpcomingCampaignsTable component
@@ -50,29 +51,6 @@ export interface UpcomingCampaignsTableProps {
   className?: string;
   onRowClick?: (campaignId: string | number) => void;
 }
-
-// Added getStatusInfo function (logic copied from campaigns/page.tsx)
-// TODO: Consider moving this to a shared util file
-const getStatusInfo = (status: string | null | undefined) => {
-  const normalizedStatus = (status || '').toLowerCase();
-  switch (normalizedStatus) {
-    case 'approved':
-      return { class: 'bg-green-100 text-green-800', text: 'Approved' };
-    case 'active':
-      return { class: 'bg-green-100 text-green-800', text: 'Active' };
-    case 'draft':
-      return { class: 'bg-gray-100 text-gray-800', text: 'Draft' };
-    case 'completed':
-      return { class: 'bg-blue-100 text-blue-800', text: 'Completed' };
-    case 'paused':
-      return { class: 'bg-orange-100 text-orange-800', text: 'Paused' };
-    default:
-      const defaultText = status
-        ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
-        : 'Unknown';
-      return { class: 'bg-gray-100 text-gray-800', text: defaultText };
-  }
-};
 
 // Helper function to map platform names to icon registry IDs/paths
 // (Copied from calendar-upcoming.tsx for consistency)
@@ -183,7 +161,7 @@ export function UpcomingCampaignsTable({
               </TableRow>
             ) : (
               campaigns.map(campaign => {
-                const statusInfo = getStatusInfo(campaign.status);
+                const statusInfo = getCampaignStatusInfo(campaign.status);
                 return (
                   <TableRow
                     key={campaign.id}

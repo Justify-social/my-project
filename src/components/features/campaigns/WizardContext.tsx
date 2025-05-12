@@ -265,20 +265,33 @@ export function WizardProvider({ children }: { children: ReactNode }) {
 
       if (normalizedData?.success && normalizedData?.data) {
         logger.debug('WizardContext: Raw data received:', normalizedData.data);
-        logger.debug(
-          'WizardContext: Attempting to parse raw data against DraftCampaignDataSchema...'
-        );
-        const parseResult = DraftCampaignDataSchema.safeParse(normalizedData.data);
-        if (parseResult.success) {
-          setWizardState(parseResult.data);
-          logger.info('WizardContext: Successfully parsed and set wizardState.');
-        } else {
-          logger.error(
-            'WizardContext: Failed to parse loaded data against schema:',
-            parseResult.error.errors
+        const rawData = normalizedData.data as any; // Cast to any to check for status property
+
+        // Check if the campaign is already submitted by looking at the raw status
+        if (rawData && typeof rawData === 'object' && rawData.status === 'SUBMITTED') {
+          logger.info(
+            'WizardContext: Campaign is SUBMITTED. Storing raw data for context, bypassing strict draft schema parsing for this view.'
           );
-          showErrorToast('Loaded campaign data has an unexpected format.');
-          setWizardState(null);
+          setWizardState(rawData as DraftCampaignData); // Cast, acknowledge potential partial mismatch
+        } else {
+          // Proceed with Zod parsing for DRAFT or other non-SUBMITTED statuses
+          logger.debug(
+            'WizardContext: Attempting to parse (DRAFT or other status) data against DraftCampaignDataSchema...'
+          );
+          const parseResult = await DraftCampaignDataSchema.safeParseAsync(rawData); // Parse rawData
+          if (parseResult.success) {
+            setWizardState(parseResult.data);
+            logger.info(
+              'WizardContext: Successfully parsed and set wizardState for non-submitted campaign.'
+            );
+          } else {
+            logger.error(
+              'WizardContext: Failed to parse loaded data against schema (non-submitted campaign):',
+              parseResult.error.errors
+            );
+            showErrorToast('Loaded campaign data has an unexpected format.');
+            setWizardState(null);
+          }
         }
       } else {
         logger.error(

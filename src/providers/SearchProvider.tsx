@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 // Revert to standard type import
 import { SearchContextProps, SearchProviderProps } from './SearchProvider.types';
-import { searchCampaigns, CampaignSearchResult } from '@/lib/algolia';
+import { searchAlgoliaCampaigns, CampaignSearchResult } from '@/lib/algolia';
 
 // Keep context name as SearchContext for clarity internally
 const SearchContext = createContext<SearchContextProps | undefined>(undefined);
@@ -19,17 +19,15 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({ children }) => {
 
   const handleSearch = useCallback(
     async (searchQuery: string) => {
-      // Don't search if the query is the same as the current one and we already have results
-      if (searchQuery === query && results.length > 0) {
-        // Maybe open the results if they are closed?
-        // setIsOpen(true);
-        return;
-      }
-
+      // Immediately update the query state for consistency
       setQuery(searchQuery);
       setIsOpen(true); // Open results pane when searching
 
-      if (!searchQuery.trim()) {
+      // Clear previous results immediately if there is a new search query
+      if (searchQuery.trim()) {
+        setResults([]); // Clear old results from UI
+      } else {
+        // If search query is empty or just whitespace
         setResults([]);
         setIsOpen(false); // Close if query is cleared
         return;
@@ -47,7 +45,7 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({ children }) => {
       setIsSearching(true);
       console.time(`Search Execution: ${searchQuery}`); // Start timer
       try {
-        const searchResults = await searchCampaigns(searchQuery);
+        const searchResults = await searchAlgoliaCampaigns(searchQuery);
 
         // Only update if this is still the latest request
         if (!abortController.signal.aborted) {
@@ -65,7 +63,7 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({ children }) => {
         console.timeEnd(`Search Execution: ${searchQuery}`); // End timer
       }
     },
-    [query, results.length]
+    [] // EDITED: Changed dependencies to [] for a stable function reference
   );
 
   const clearSearch = useCallback(() => {
