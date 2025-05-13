@@ -10,7 +10,7 @@ export const UploadButton = () => (
   <UploadDropzone<OurFileRouter, UploadEndpoints>
     endpoint="campaignAsset"
     onClientUploadComplete={res => {
-      console.log('Files: ', res);
+      // console.log('Files: ', res);
     }}
     onUploadError={(error: Error) => {
       alert(`ERROR! ${error.message}`);

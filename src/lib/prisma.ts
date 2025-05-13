@@ -3,7 +3,7 @@ import { ExtendedPrismaClient } from '@/types/prisma-extensions';
 
 // Determine the correct database URL
 const effectiveDbUrl = process.env.POSTGRES_DATABASE_URL || process.env.DATABASE_URL;
-const dbUrlSource = process.env.POSTGRES_DATABASE_URL ? 'POSTGRES_DATABASE_URL' : 'DATABASE_URL';
+const dbUrlSource = process.env.DATABASE_URL_SOURCE || 'DATABASE_URL';
 
 // Log only once during initialization if needed for debugging deployed env
 if (typeof globalThis !== 'undefined' && !(globalThis as any)._prismaDbUrlLogged) {
@@ -44,9 +44,17 @@ const createPrismaClient = () => {
 };
 
 // Use the global instance in development to prevent multiple instances during hot reloading
-export const prisma = globalForPrisma.prisma ?? createPrismaClient();
+const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+if (process.env.NODE_ENV !== 'production') {
+  globalForPrisma.prisma = prisma;
+  if (process.env.NODE_ENV !== 'test') {
+    // Avoid logging during tests
+    // console.log('[src/lib/prisma.ts] Creating new PrismaClient instance.');
+  }
+}
 
 // Note: Removed $connect() call here to avoid eager connection on import.
 // Connections are managed automatically by PrismaClient when queries are executed.
+
+export { prisma };

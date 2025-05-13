@@ -7,3 +7,9 @@ export const Analytics = {
     // Example: mixpanel.track(eventName, properties);
   },
 };
+
+export const trackEvent = (eventName: string, properties: Record<string, any>) => {
+  // console.log(`[Analytics] ${eventName}`, properties);
+  // Replace with your actual analytics SDK call, e.g.:
+  // analytics.track(eventName, properties);
+};

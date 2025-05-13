@@ -8,18 +8,16 @@
 import { createServer } from 'http';
 import { parse } from 'url';
 import next from 'next';
+import { WebSocketServer } from 'ws';
 
 /**
  * Sets up and starts the Next.js server with WebSocket support
  */
 export async function setupServer() {
   const dev = process.env.NODE_ENV !== 'production';
-  const hostname = 'localhost';
-  // Parse PORT environment variable to number
-  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
-
-  // Log the port being used
-  console.log(`Custom server starting on port: ${port}`);
+  const hostname = process.env.HOSTNAME || 'localhost';
+  const port = parseInt(process.env.PORT || '3000', 10);
+  // console.log(`Custom server starting on port: ${port}`);
 
   // Initialize Next.js app with parsed port
   const app = next({ dev, hostname, port });
@@ -28,7 +26,7 @@ export async function setupServer() {
   // Prepare the app
   try {
     await app.prepare();
-    console.log('Custom server prepared successfully');
+    // console.log('Custom server prepared successfully');
 
     // Create HTTP server
     const httpServer = createServer((req, res) => {
@@ -47,7 +45,7 @@ export async function setupServer() {
     // Start server
     httpServer.listen(port, () => {
       // Callback takes no args on success
-      console.log(`> Ready on http://${hostname}:${port}`);
+      // console.log(`> Ready on http://${hostname}:${port}`);
 
       // --- TEMP: Comment out WebSocket initialization ---
       /*
@@ -64,6 +62,13 @@ export async function setupServer() {
       }
       */
       // --- END TEMP ---
+
+      const wss = new WebSocketServer({ server: httpServer });
+      global.WebSocketServerInstance = wss;
+
+      wss.on('connection', ws => {
+        // ... existing code ...
+      });
     });
   } catch (err) {
     console.error('Error occurred preparing the server:', err);

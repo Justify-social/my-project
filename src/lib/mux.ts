@@ -169,22 +169,33 @@ async function testMuxService() {
   try {
     // 1. Get an upload URL (client would use this to upload)
     const uploadDetails = await muxService.createDirectUploadUrl();
-    console.log("Mux Direct Upload URL (mock):", uploadDetails.uploadUrl);
+    if (isDevEnvironment()) {
+      // Mock implementation for development
+      // console.log("Mux Direct Upload URL (mock):", uploadDetails.uploadUrl);
+      return uploadDetails;
+    }
 
     // 2. Simulate client upload complete and asset creation initiated
-    if (uploadDetails.uploadId) {
-      const assetCreationStatus = await muxService.confirmUploadAndCreateAsset(uploadDetails.uploadId, "campaign_video.mp4");
-      console.log("Mux Asset Creation Initiated (mock):", assetCreationStatus);
+    if (uploadDetails.id) {
+      const assetCreationStatus = await muxService.confirmUploadAndCreateAsset(uploadDetails.id, "campaign_video.mp4");
+      if (isDevEnvironment()) {
+        // Mock implementation for development
+        const assetCreationStatus = { assetId: "mockAssetId_" + Date.now(), status: "preparing" };
+        // console.log("Mux Asset Creation Initiated (mock):", assetCreationStatus);
+        return assetCreationStatus;
+      }
 
       // 3. Get playback info (assuming assetId is now known, possibly after webhook)
       // For mock, using a simulated asset ID
       const readyAssetId = "mux_asset_sim_ready_123";
       const playbackInfo = await muxService.getPlaybackInfo(readyAssetId);
-      if (playbackInfo && playbackInfo.status === 'ready') {
-        console.log("Mux Playback Info (mock):", playbackInfo);
-        // Use playbackInfo.playbackId with Mux Player
+      if (isDevEnvironment()) {
+        // Mock implementation for development
+        // console.log("Mux Playback Info (mock):", playbackInfo);
+        return playbackInfo;
       } else {
-        console.log("Mux Asset not ready or not found (mock):", playbackInfo);
+        // console.log("Mux Asset not ready or not found (mock):", playbackInfo);
+        return { ...playbackInfo, status: "not_found_or_not_ready" }; 
       }
     }
 

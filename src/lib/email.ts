@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { logger } from '../utils/logger';
 
 // Initialize Resend with API key
 let resend: Resend | null = null;
@@ -30,8 +31,8 @@ export async function sendTeamInvitationEmail({
   expiresAt,
 }: TeamInvitationEmailProps): Promise<boolean> {
   if (!resend) {
-    console.log('Resend not initialized. Would send invitation email to', email);
-    return true; // Skip if Resend not initialized
+    // console.log('Resend not initialized. Would send invitation email to', email);
+    return true; // Reverted to boolean
   }
 
   try {
@@ -70,16 +71,20 @@ export async function sendTeamInvitationEmail({
     });
 
     if (error) {
-      console.error('Error sending invitation email via Resend:', error);
-      return false;
+      // console.error('Error sending invitation email via Resend:', error);
+      logger.error(`Failed to send invitation email to ${email}:`, { error: error.message }); // Keep logger.error
+      return false; // Reverted to boolean
     }
 
-    console.log(`Invitation email sent successfully to ${email}. Message ID: ${data?.id}`);
-    return true;
+    // console.log(`Invitation email sent successfully to ${email}. Message ID: ${data?.id}`);
+    logger.info(`Invitation email sent successfully to ${email}`, { messageId: data?.id }); // Keep logger.info
+    return true; // Reverted to boolean
   } catch (error) {
-    // Catch potential errors during date formatting or other unexpected issues
-    console.error('Unexpected error in sendTeamInvitationEmail:', error);
-    return false;
+    // console.error('Unexpected error in sendTeamInvitationEmail:', error);
+    logger.error('Unexpected error in sendTeamInvitationEmail:', {
+      error: (error as Error).message,
+    }); // Keep logger.error
+    return false; // Reverted to boolean
   }
 }
 
@@ -104,8 +109,8 @@ interface WelcomeEmailProps {
  */
 export async function sendWelcomeEmail({ email, name }: WelcomeEmailProps): Promise<boolean> {
   if (!resend) {
-    console.log('Resend not initialized. Would send welcome email to', email);
-    return true; // Skip if Resend not initialized (e.g., in development without key)
+    // console.log('Resend not initialized. Would send welcome email to', email);
+    return true; // Reverted to boolean
   }
 
   const recipientName = name || 'New User';
@@ -152,14 +157,17 @@ export async function sendWelcomeEmail({ email, name }: WelcomeEmailProps): Prom
     });
 
     if (error) {
-      console.error('Error sending welcome email via Resend:', error);
-      return false;
+      // console.error('Error sending welcome email via Resend:', error);
+      logger.error(`Failed to send welcome email to ${email}:`, { error: error.message }); // Keep logger.error
+      return false; // Reverted to boolean
     }
 
-    console.log(`Welcome email sent successfully to ${email}. Message ID: ${data?.id}`);
-    return true;
+    // console.log(`Welcome email sent successfully to ${email}. Message ID: ${data?.id}`);
+    logger.info(`Welcome email sent successfully to ${email}`, { messageId: data?.id }); // Keep logger.info
+    return true; // Reverted to boolean
   } catch (error) {
-    console.error('Unexpected error in sendWelcomeEmail:', error);
-    return false;
+    // console.error('Unexpected error in sendWelcomeEmail:', error);
+    logger.error('Unexpected error in sendWelcomeEmail:', { error: (error as Error).message }); // Keep logger.error
+    return false; // Reverted to boolean
   }
 }

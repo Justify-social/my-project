@@ -52,10 +52,14 @@ class DbLogger {
   private logToStorage: boolean = false;
   private logs: LogEntry[] = [];
   private maxLogSize: number = 100;
+  private isDevelopment: boolean;
 
   constructor() {
-    // Initialize logger
-    console.log('[DbLogger] Initialized in ' + process.env.NODE_ENV + ' mode');
+    this.isDevelopment = process.env.NODE_ENV === 'development';
+    // Only log initialization message if not in test environment to avoid cluttering test output
+    if (process.env.NODE_ENV !== 'test') {
+      // console.log('[DbLogger] Initialized in ' + process.env.NODE_ENV + ' mode');
+    }
   }
 
   /**

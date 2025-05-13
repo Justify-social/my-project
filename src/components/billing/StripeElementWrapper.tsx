@@ -51,7 +51,7 @@ const PaymentForm = () => {
       // --- Use Type Predicate ---
       if (isStripeSetupIntentResult(result)) {
         // Type is narrowed to { setupIntent: SetupIntent }
-        console.log('Stripe confirmSetup successful. Intent:', result.setupIntent);
+        // console.log('Stripe confirmSetup successful. Intent:', result.setupIntent);
         switch (result.setupIntent.status) {
           case 'succeeded':
             setMessage('Card saved successfully!');
