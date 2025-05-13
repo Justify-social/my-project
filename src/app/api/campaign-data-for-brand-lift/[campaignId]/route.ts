@@ -53,12 +53,8 @@ export async function GET(
           id: campaignWizardId,
           userId: internalUserId,
         },
-        select: {
-          id: true,
-          name: true,
-          primaryKPI: true,
-          businessGoal: true,
-          targetPlatforms: true,
+        include: {
+          Influencer: true,
         },
       });
 
@@ -66,19 +62,30 @@ export async function GET(
         throw new NotFoundError('CampaignWizard not found or not accessible by this user.');
       }
 
-      const responseData = {
-        id: campaign.id,
-        campaignName: campaign.name,
-        primaryKPI: campaign.primaryKPI,
-        platform: campaign.targetPlatforms?.[0]?.toString() || null,
-        audience: { description: campaign.businessGoal },
+      const campaignWithSerializableDates = {
+        ...campaign,
+        startDate:
+          campaign.startDate instanceof Date
+            ? campaign.startDate.toISOString()
+            : campaign.startDate,
+        endDate:
+          campaign.endDate instanceof Date ? campaign.endDate.toISOString() : campaign.endDate,
+        assets: campaign.assets
+          ? (campaign.assets as any[]).map(asset => ({
+              ...asset,
+              uploadedAt:
+                asset.uploadedAt instanceof Date
+                  ? asset.uploadedAt.toISOString()
+                  : asset.uploadedAt,
+            }))
+          : [],
       };
 
-      logger.info('Successfully fetched CampaignWizard by ID', {
+      logger.info('Successfully fetched full CampaignWizard by ID for Brand Lift Review', {
         userId: clerkUserId,
         campaignId: campaignWizardId,
       });
-      return NextResponse.json(responseData);
+      return NextResponse.json(campaignWithSerializableDates);
     },
     error => handleApiError(error, req)
   );

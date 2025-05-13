@@ -34,6 +34,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Icon } from '@/components/ui/icon/icon';
 import { Accordion, AccordionContent, AccordionItem } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
+import { IconButtonAction } from '@/components/ui/button-icon-action';
 import logger from '@/lib/logger';
 import Image from 'next/image';
 
@@ -44,6 +45,12 @@ import type {
   Position as PrismaPosition,
   Platform as PrismaPlatform,
 } from '@prisma/client';
+
+// Uncomment and verify paths if these components exist and are to be used
+import { InfluencerCard } from '@/components/ui/card-influencer';
+import { AssetCard } from '@/components/ui/card-asset';
+import { PlatformEnum } from '@/types/enums';
+// import type { Platform as PrismaPlatformType } from '@prisma/client'; // Already imported
 
 // --- START: Comprehensive CampaignDetails Interface & Helper Utilities (copied/adapted from Step5Content) ---
 
@@ -281,6 +288,29 @@ interface CampaignDetails {
 
 // --- END: Comprehensive CampaignDetails Interface & Helper Utilities ---
 
+// --- Funnel Stage Mapping ---
+const KpiFunnelStageMap: Record<string, string> = {
+  // Top Funnel
+  BRAND_AWARENESS: 'Top Funnel',
+  AD_RECALL: 'Top Funnel',
+  // Mid Funnel
+  CONSIDERATION: 'Mid Funnel',
+  BRAND_PREFERENCE: 'Mid Funnel',
+  MESSAGE_ASSOCIATION: 'Mid Funnel',
+  // Bottom Funnel
+  PURCHASE_INTENT: 'Bottom Funnel',
+  ACTION_INTENT: 'Bottom Funnel',
+  RECOMMENDATION_INTENT: 'Bottom Funnel',
+  ADVOCACY: 'Bottom Funnel',
+};
+
+const getFunnelStageFromKpi = (kpiKey: string | null | undefined): string => {
+  if (!kpiKey) return 'Unknown'; // Default or error case
+  // Normalize KPI key if it comes in different cases e.g. ad_recall vs AD_RECALL
+  const normalizedKpiKey = kpiKey.toUpperCase().replace(/-/g, '_');
+  return KpiFunnelStageMap[normalizedKpiKey] || 'Unknown';
+};
+
 // The old ALL_KPIS and FUNNEL_STAGES definitions are here in the original file
 // I will use the versions copied from Step5Content for consistency if they differ, or merge.
 // For now, assuming the copied ones above are the SSOT for this refactor.
@@ -410,7 +440,7 @@ const DataItem: React.FC<DataItemProps> = ({ label, value, children, className }
 interface SummarySectionProps {
   title: string;
   stepNumber: number;
-  onEdit: () => void;
+  onEdit: (step: number) => void;
   children: React.ReactNode;
   isComplete?: boolean;
 }
@@ -448,10 +478,15 @@ const SummarySection: React.FC<SummarySectionProps> = ({
           </div>
         </div>
         <div className="flex items-center flex-shrink-0">
-          <Button variant="outline" size="sm" onClick={onEdit}>
-            <Icon iconId="faPenToSquareLight" className="mr-2 h-3.5 w-3.5" />
-            Edit
-          </Button>
+          <IconButtonAction
+            iconBaseName="faPenToSquare"
+            hoverColorClass="text-accent"
+            ariaLabel={`Edit ${title}`}
+            onClick={e => {
+              e.stopPropagation();
+              onEdit(stepNumber);
+            }}
+          />
         </div>
       </div>
       <CardContent className="p-4 pt-2 border-t overflow-visible">
@@ -522,9 +557,31 @@ const KpiBadge = ({ kpi, isPrimary = false }: { kpi: string; isPrimary?: boolean
 
 // --- START: Step-Specific Review Components (copied from Step5Content.tsx) ---
 
-// Assuming InfluencerCard and AssetCard might be needed, ensure paths are correct if uncommented
-// import { InfluencerCard } from '@/components/ui/card-influencer'; // If needed by Step1Review or Step4Review
-// import { AssetCard } from '@/components/ui/card-asset'; // If needed by Step4Review
+// Helper to map Prisma Platform to PlatformEnum
+const mapPrismaPlatformToFrontendEnum = (
+  prismaPlatform: PrismaPlatform | null | undefined
+): PlatformEnum | null => {
+  if (!prismaPlatform) return null;
+  switch (prismaPlatform) {
+    case 'INSTAGRAM': // Assuming PrismaPlatform values are strings like 'INSTAGRAM'
+      return PlatformEnum.Instagram;
+    case 'YOUTUBE':
+      return PlatformEnum.YouTube;
+    case 'TIKTOK':
+      return PlatformEnum.TikTok;
+    // Add other Prisma Platform values if they exist and map to PlatformEnum
+    // Example:
+    // case 'FACEBOOK':
+    //   return PlatformEnum.Facebook;
+    // case 'TWITTER':
+    //   return PlatformEnum.Twitter;
+    default:
+      logger.warn(
+        `[mapPrismaPlatformToFrontendEnum] Unknown Prisma platform type encountered: ${prismaPlatform}`
+      );
+      return null;
+  }
+};
 
 const Step1Review: React.FC<{ data: CampaignDetails }> = ({ data }) => (
   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
@@ -575,11 +632,28 @@ const Step1Review: React.FC<{ data: CampaignDetails }> = ({ data }) => (
     <div className="md:col-span-2">
       <p className="text-sm font-medium text-muted-foreground mb-1">Influencers</p>
       {data.Influencer && data.Influencer.length > 0 ? (
-        <ul className="list-disc pl-5 text-sm text-foreground">
-          {data.Influencer.map((inf, idx) => (
-            <li key={inf.id || idx}>{`${inf.platform || 'N/A'}: ${inf.handle || 'N/A'}`}</li>
-          ))}
-        </ul>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          {data.Influencer.map((inf, idx) => {
+            const frontendPlatform = mapPrismaPlatformToFrontendEnum(inf.platform);
+            if (!frontendPlatform) {
+              // Optionally render something else or skip if platform is unknown/null
+              // For now, skipping if platform cannot be mapped.
+              // Consider a placeholder or logging if this case is frequent.
+              logger.warn(
+                `Skipping influencer card for ${inf.handle} due to unmappable platform: ${inf.platform}`
+              );
+              return null;
+            }
+            return (
+              <InfluencerCard
+                key={inf.id || idx}
+                platform={frontendPlatform}
+                handle={inf.handle || 'N/A'}
+                className="bg-muted/30 w-full"
+              />
+            );
+          })}
+        </div>
       ) : (
         <span className="text-sm text-muted-foreground italic">None added</span>
       )}
@@ -726,11 +800,28 @@ const Step4Review: React.FC<{ data: CampaignDetails }> = ({ data }) => (
     <div>
       <p className="text-sm font-medium text-muted-foreground mb-1">Uploaded Assets</p>
       {data.assets && data.assets.length > 0 ? (
-        <ul className="list-disc pl-5 text-sm text-foreground">
-          {data.assets.map((asset, idx) => (
-            <li key={asset.id || idx}>{asset.name || asset.fileName || `Asset ${idx + 1}`}</li>
-          ))}
-        </ul>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pt-2">
+          {data.assets.map((asset, idx) => {
+            const assetCardData = {
+              id: asset.id || `asset-${idx}`,
+              name: asset.name ?? asset.fileName ?? undefined, // Prioritize name, fallback to fileName, then undefined
+              url: asset.url ?? undefined,
+              type: asset.type ?? undefined,
+              description: asset.rationale ?? undefined,
+              budget: asset.budget ?? undefined, // Convert null to undefined
+              // platform and influencerHandle are not directly available on CampaignDetails.assets, ensure AssetCard handles their absence
+            };
+            return (
+              <AssetCard
+                key={assetCardData.id}
+                asset={assetCardData} // Pass the structured AssetData
+                currency={(data.budget?.currency as string) ?? 'USD'}
+                cardClassName="h-full"
+                className="p-0"
+              />
+            );
+          })}
+        </div>
       ) : (
         <span className="text-sm text-muted-foreground italic">None uploaded</span>
       )}
@@ -797,12 +888,31 @@ const CampaignReviewStudySetup: React.FC<CampaignReviewStudySetupProps> = ({ cam
       return;
     }
 
+    if (!campaignData) {
+      logger.error('Campaign data is not loaded, cannot submit study.');
+      setSubmitError('Campaign data is missing. Please refresh and try again.');
+      setIsSubmitting(false);
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitError(null);
+
+    const derivedFunnelStage = getFunnelStageFromKpi(campaignData.primaryKPI);
+    if (derivedFunnelStage === 'Unknown' && campaignData.primaryKPI) {
+      logger.warn(
+        `Could not derive funnel stage for KPI: ${campaignData.primaryKPI}. Defaulting to 'Unknown'. Review KpiFunnelStageMap.`
+      );
+      // Optionally, you could prevent submission or ask user to clarify if funnel stage is critical and unknown.
+    }
+
     try {
       const payload = {
         name: data.studyName,
         campaignId: campaignId,
+        primaryKpi: campaignData.primaryKPI || undefined,
+        secondaryKpis: campaignData.secondaryKPIs || [],
+        funnelStage: derivedFunnelStage,
       };
       logger.info('Submitting new Brand Lift study', { payload });
       const response = await fetch('/api/brand-lift/surveys', {
@@ -824,6 +934,18 @@ const CampaignReviewStudySetup: React.FC<CampaignReviewStudySetupProps> = ({ cam
       setIsSubmitting(false);
     }
   };
+
+  const handleEditSection = useCallback(
+    (step: number) => {
+      if (campaignData?.id) {
+        router.push(`/campaigns/wizard/step-${step}?id=${campaignData.id}`);
+      } else {
+        logger.warn('Attempted to edit section but campaignData.id is not available.');
+        // Optionally show a toast error
+      }
+    },
+    [router, campaignData?.id]
+  );
 
   if (isLoading) {
     return (
@@ -924,15 +1046,15 @@ const CampaignReviewStudySetup: React.FC<CampaignReviewStudySetupProps> = ({ cam
             <SummarySection
               title="Basic Information & Contacts"
               stepNumber={1}
-              onEdit={() => {}} // No-op for now
-              isComplete={true} // Assuming complete for review purposes
+              onEdit={handleEditSection}
+              isComplete={true}
             >
               <Step1Review data={campaignData} />
             </SummarySection>
             <SummarySection
               title="Objectives & Messaging"
               stepNumber={2}
-              onEdit={() => {}} // No-op for now
+              onEdit={handleEditSection}
               isComplete={true}
             >
               <Step2Review data={campaignData} />
@@ -940,7 +1062,7 @@ const CampaignReviewStudySetup: React.FC<CampaignReviewStudySetupProps> = ({ cam
             <SummarySection
               title="Audience Targeting"
               stepNumber={3}
-              onEdit={() => {}} // No-op for now
+              onEdit={handleEditSection}
               isComplete={true}
             >
               <Step3Review data={campaignData} />
@@ -948,7 +1070,7 @@ const CampaignReviewStudySetup: React.FC<CampaignReviewStudySetupProps> = ({ cam
             <SummarySection
               title="Assets & Guidelines"
               stepNumber={4}
-              onEdit={() => {}} // No-op for now
+              onEdit={handleEditSection}
               isComplete={true}
             >
               <Step4Review data={campaignData} />
