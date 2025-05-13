@@ -835,6 +835,13 @@
     },
     {
       "category": "light",
+      "id": "faSparklesLight",
+      "name": "Sparkles",
+      "faVersion": "fal fa-sparkles",
+      "path": "/icons/light/faSparklesLight.svg"
+    },
+    {
+      "category": "light",
       "id": "faSpinnerLight",
       "name": "Spinner",
       "faVersion": "fal fa-spinner",
@@ -982,6 +989,6 @@
     }
   ],
   "category": "light",
-  "iconCount": 138,
-  "updatedAt": "2025-04-03T11:56:57.509Z"
+  "iconCount": 139,
+  "updatedAt": "2025-05-13T12:30:00.000Z"
 }

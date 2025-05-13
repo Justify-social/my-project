@@ -1045,6 +1045,13 @@ export const iconRegistryData: IconRegistryData = {
     },
     {
       category: 'light',
+      id: 'faSparklesLight',
+      name: 'Sparkles',
+      faVersion: 'fal fa-sparkles',
+      path: '/icons/light/faSparklesLight.svg',
+    },
+    {
+      category: 'light',
       id: 'faSpinnerLight',
       name: 'Spinner',
       faVersion: 'fal fa-spinner',
@@ -2022,6 +2029,13 @@ export const iconRegistryData: IconRegistryData = {
       name: 'Signal',
       faVersion: 'fas fa-signal',
       path: '/icons/solid/faSignalSolid.svg',
+    },
+    {
+      category: 'solid',
+      id: 'faSparklesSolid',
+      name: 'Sparkles',
+      faVersion: 'fas fa-sparkles',
+      path: '/icons/solid/faSparklesSolid.svg',
     },
     {
       category: 'solid',

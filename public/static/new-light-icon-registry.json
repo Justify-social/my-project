@@ -6,10 +6,10 @@
   "icons": [
     {
       "category": "light",
-      "id": "faClipboardLight",
-      "name": "Clipboard",
-      "path": "/icons/light/faClipboardLight.svg",
-      "faVersion": "fal fa-clipboard"
+      "id": "faSparklesLight",
+      "name": "Sparkles",
+      "faVersion": "fal fa-sparkles",
+      "path": "/icons/light/faSparklesLight.svg"
     }
   ]
 }

@@ -835,6 +835,13 @@
     },
     {
       "category": "solid",
+      "id": "faSparklesSolid",
+      "name": "Sparkles",
+      "faVersion": "fas fa-sparkles",
+      "path": "/icons/solid/faSparklesSolid.svg"
+    },
+    {
+      "category": "solid",
       "id": "faSpinnerSolid",
       "name": "Spinner",
       "faVersion": "fas fa-spinner",
@@ -982,6 +989,6 @@
     }
   ],
   "category": "solid",
-  "iconCount": 138,
-  "updatedAt": "2025-04-03T11:59:21.689Z"
+  "iconCount": 139,
+  "updatedAt": "2025-05-13T12:30:00.000Z"
 }
