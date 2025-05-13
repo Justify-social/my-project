@@ -807,10 +807,24 @@ export const iconRegistryData: IconRegistryData = {
     },
     {
       category: 'light',
+      id: 'faListCheckLight',
+      name: 'List Check',
+      faVersion: 'fal fa-list-check',
+      path: '/icons/light/faListCheckLight.svg',
+    },
+    {
+      category: 'light',
       id: 'faListLight',
       name: 'List',
       faVersion: 'fal fa-list',
       path: '/icons/light/faListLight.svg',
+    },
+    {
+      category: 'light',
+      id: 'faListRadioLight',
+      name: 'List Radio',
+      faVersion: 'fal fa-list-radio',
+      path: '/icons/light/faListRadioLight.svg',
     },
     {
       category: 'light',
@@ -1794,10 +1808,24 @@ export const iconRegistryData: IconRegistryData = {
     },
     {
       category: 'solid',
+      id: 'faListCheckSolid',
+      name: 'List Check',
+      faVersion: 'fas fa-list-check',
+      path: '/icons/solid/faListCheckSolid.svg',
+    },
+    {
+      category: 'solid',
       id: 'faListSolid',
       name: 'List',
       faVersion: 'fas fa-list',
       path: '/icons/solid/faListSolid.svg',
+    },
+    {
+      category: 'solid',
+      id: 'faListRadioSolid',
+      name: 'List Radio',
+      faVersion: 'fas fa-list-radio',
+      path: '/icons/solid/faListRadioSolid.svg',
     },
     {
       category: 'solid',

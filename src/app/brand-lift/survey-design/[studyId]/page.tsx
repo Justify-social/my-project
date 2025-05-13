@@ -2,7 +2,9 @@
 
 import React from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import SurveyQuestionBuilder from '@/components/features/brand-lift/SurveyQuestionBuilder';
+import SurveyQuestionBuilder, {
+  SurveyQuestionBuilderRef,
+} from '@/components/features/brand-lift/SurveyQuestionBuilder';
 import logger from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon/icon';
@@ -10,12 +12,6 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { IconButtonAction } from '@/components/ui/button-icon-action';
 import { BrandLiftStudyData } from '@/types/brand-lift';
 import { Skeleton } from '@/components/ui/skeleton';
-
-// Define the interface for the ref methods
-export interface SurveyQuestionBuilderRef {
-  handleAddQuestion: () => void;
-  handleSuggestQuestions: () => void;
-}
 
 const SurveyDesignPage: React.FC = () => {
   const params = useParams();
@@ -27,8 +23,8 @@ const SurveyDesignPage: React.FC = () => {
   const [studyDetails, setStudyDetails] = React.useState<Partial<BrandLiftStudyData> | null>(null);
   const [isLoadingStudyDetails, setIsLoadingStudyDetails] = React.useState(true);
   const [fetchErrorStudyDetails, setFetchErrorStudyDetails] = React.useState<string | null>(null);
-  const [isAISuggesting, setIsAISuggesting] = React.useState(false); // Added for Draft button state
-  const [actionsDisabled, setActionsDisabled] = React.useState(true); // Added for button state
+  const [isAISuggesting, setIsAISuggesting] = React.useState(false); // Moved from SurveyQuestionBuilder for parent control
+  const [actionsDisabled, setActionsDisabled] = React.useState(true); // Initialize as true
 
   // Ref for SurveyQuestionBuilder methods
   const surveyBuilderRef = React.useRef<SurveyQuestionBuilderRef>(null);
@@ -54,6 +50,7 @@ const SurveyDesignPage: React.FC = () => {
           setFetchErrorStudyDetails(err.message);
         } finally {
           setIsLoadingStudyDetails(false);
+          setActionsDisabled(false); // Enable actions once initial load attempt is complete
         }
       };
       fetchStudyDetails();
@@ -90,8 +87,14 @@ const SurveyDesignPage: React.FC = () => {
             <Button
               variant="outline"
               onClick={() => surveyBuilderRef.current?.handleSuggestQuestions()}
-              disabled={actionsDisabled || isAISuggesting} // Use state from SurveyDesignPage if needed, or pass down from builder
-              title={actionsDisabled ? 'Loading data...' : 'Suggest questions using AI'} // Adjust title as needed
+              disabled={actionsDisabled || isAISuggesting} // Use state from SurveyDesignPage
+              title={
+                actionsDisabled && !isAISuggesting
+                  ? 'Loading data...'
+                  : isAISuggesting
+                    ? 'AI is suggesting...'
+                    : 'Suggest questions using AI'
+              } // Adjust title as needed
             >
               {isAISuggesting ? (
                 <Icon iconId="faSpinnerLight" className="animate-spin mr-2 h-4 w-4" />
@@ -102,7 +105,7 @@ const SurveyDesignPage: React.FC = () => {
             </Button>
             <Button
               onClick={() => surveyBuilderRef.current?.handleAddQuestion()}
-              disabled={actionsDisabled} // Adjust as needed
+              disabled={actionsDisabled} // Use state from SurveyDesignPage
               title={actionsDisabled ? 'Loading data...' : 'Add new question'}
             >
               <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" /> Add Question
@@ -135,7 +138,11 @@ const SurveyDesignPage: React.FC = () => {
             </a>
           )}
       </div>
-      <SurveyQuestionBuilder studyId={studyId} ref={surveyBuilderRef} /> {/* Pass ref */}
+      <SurveyQuestionBuilder
+        studyId={studyId}
+        ref={surveyBuilderRef}
+        onIsAISuggestingChange={setIsAISuggesting} // Pass setter to child
+      />
       <div className="mt-8 pt-6 border-t border-gray-200 flex justify-end">
         <Button onClick={() => router.push(`/brand-lift/survey-preview/${studyId}`)}>
           Proceed to Preview
