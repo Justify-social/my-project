@@ -45,62 +45,58 @@ function SidebarItem({
 
   return (
     <li className="w-full">
-      {' '}
-      {/* Use w-full for consistency */}
-      <Link
-        href={href}
-        onClick={onClick}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        className={cn(
-          'flex items-center py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group', // Match sidebar-ui-components style
-          active || isHovered
-            ? 'text-accent bg-accent/10 font-medium' // THEMED
-            : 'text-foreground hover:text-accent hover:bg-accent/5' // THEMED
-        )}
-        legacyBehavior
-      >
-        {iconPath ? (
-          <div className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0">
-            {' '}
-            {/* Icon container */}
-            <Image
-              src={iconPath}
-              alt={`${label} icon`}
-              className="w-5 h-5"
-              width={20}
-              height={20}
-              style={{
-                filter:
-                  active || isHovered
-                    ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)'
-                    : 'none', // Accent color filter on hover/active
-                transition: 'filter 0.15s ease-in-out',
-              }}
-              unoptimized
-            />
-          </div>
-        ) : icon ? (
-          // Fallback if icon name provided but not in registry
-          <div
-            className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0"
-            title={`Icon '${icon}' not found in registry`}
-          >
-            <span className="flex items-center justify-center w-5 h-5 text-xs bg-gray-200 dark:bg-gray-700 rounded-full">
-              {icon.charAt(0).toUpperCase()}
-            </span>
-          </div>
-        ) : (
-          // Placeholder if no icon is provided for alignment
-          <div className="w-6 h-6 mr-2 flex-shrink-0"></div>
-        )}
-
-        {/* Use text-xs for child items and text-sm for parent/standalone items */}
-        <span
-          className={`flex-grow ${isChild ? 'text-xs' : 'text-sm'} font-heading font-medium truncate ${active || isHovered ? 'text-accent' : 'text-foreground'}`}
+      <Link href={href} legacyBehavior passHref>
+        <a
+          onClick={onClick}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          className={cn(
+            'flex items-center py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group',
+            active || isHovered
+              ? 'text-accent bg-accent/10 font-medium'
+              : 'text-foreground hover:text-accent hover:bg-accent/5'
+          )}
         >
-          {label}
-        </span>
+          {iconPath ? (
+            <div className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0">
+              <Image
+                src={iconPath}
+                alt={`${label} icon`}
+                className="w-5 h-5"
+                width={20}
+                height={20}
+                style={{
+                  filter:
+                    active || isHovered
+                      ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)'
+                      : 'none', // Accent color filter on hover/active
+                  transition: 'filter 0.15s ease-in-out',
+                }}
+                unoptimized
+              />
+            </div>
+          ) : icon ? (
+            // Fallback if icon name provided but not in registry
+            (<div
+              className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0"
+              title={`Icon '${icon}' not found in registry`}
+            >
+              <span className="flex items-center justify-center w-5 h-5 text-xs bg-gray-200 dark:bg-gray-700 rounded-full">
+                {icon.charAt(0).toUpperCase()}
+              </span>
+            </div>)
+          ) : (
+            // Placeholder if no icon is provided for alignment
+            (<div className="w-6 h-6 mr-2 flex-shrink-0"></div>)
+          )}
+
+          {/* Use text-xs for child items and text-sm for parent/standalone items */}
+          <span
+            className={`flex-grow ${isChild ? 'text-xs' : 'text-sm'} font-heading font-medium truncate ${active || isHovered ? 'text-accent' : 'text-foreground'}`}
+          >
+            {label}
+          </span>
+        </a>
       </Link>
     </li>
   );
@@ -236,8 +232,8 @@ export function Sidebar({
               className="h-6 w-auto mr-2" // Keep className, w-auto might allow flexibility
               width={24} // Provide width (6 * 4px)
               height={24} // Provide height (6 * 4px)
-              // Add unoptimized if logoSrc can be external/dynamic
-              // unoptimized
+            // Add unoptimized if logoSrc can be external/dynamic
+            // unoptimized
             />
           )}
           <span className="font-medium text-foreground">{title}</span>
@@ -262,7 +258,7 @@ export function Sidebar({
               <React.Fragment key={itemKey}>
                 {item.children ? (
                   // Render parent item similar to sidebar-ui-components categories
-                  <li className="w-full">
+                  (<li className="w-full">
                     <div
                       onClick={() => toggleSection(itemKey)} // Toggle expansion on click
                       onMouseEnter={() => setHover(itemKey, true)}
@@ -303,7 +299,7 @@ export function Sidebar({
                             </span>
                           </div>
                         ) : (
-                          <div className="w-6 h-6 mr-2 flex-shrink-0"></div> // Placeholder
+                          (<div className="w-6 h-6 mr-2 flex-shrink-0"></div>) // Placeholder
                         )}
                         {/* Parent item label: text-sm */}
                         <span
@@ -339,10 +335,10 @@ export function Sidebar({
                         ))}
                       </ul>
                     </div>
-                  </li>
+                  </li>)
                 ) : (
                   // Render regular item
-                  <SidebarItem
+                  (<SidebarItem
                     href={item.href || '#'} // Provide fallback href
                     label={item.label}
                     icon={item.icon}
@@ -351,7 +347,7 @@ export function Sidebar({
                     onClick={onItemClick}
                     iconRegistry={isRegistryLoading ? {} : iconRegistry}
                     isLoadingRegistry={isRegistryLoading}
-                  />
+                  />)
                 )}
               </React.Fragment>
             );

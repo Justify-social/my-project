@@ -506,7 +506,7 @@ const BrandingPage = () => {
                   No logo found for your organisation.
                 </p>
               ) : (
-                <Skeleton className="w-[100px] h-[50px]" /> // Skeleton while org data is loading
+                (<Skeleton className="w-[100px] h-[50px]" />) // Skeleton while org data is loading
               )}
               <Button
                 type="button"

@@ -58,9 +58,9 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
         <h2 className={cn('text-lg font-semibold text-primary', titleClassName)}>{title}</h2>
         {description && (
           // Use semantic color, rely on global font config, allow override
-          <p className={cn('mt-1 text-sm text-muted-foreground', descriptionClassName)}>
+          (<p className={cn('mt-1 text-sm text-muted-foreground', descriptionClassName)}>
             {description}
-          </p>
+          </p>)
         )}
       </div>
     </div>

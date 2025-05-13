@@ -33,7 +33,7 @@ const TeamManagementPage = () => {
         <OrgProfileSkeleton />
       ) : organization ? (
         // Use a simple wrapper allowing the component to dictate its width
-        <div className="w-full">
+        (<div className="w-full">
           <OrganizationProfile
             path="/settings/team" // Clerk uses this for internal routing
             routing="path" // Required for catch-all routes
@@ -76,7 +76,7 @@ const TeamManagementPage = () => {
               },
             }}
           />
-        </div>
+        </div>)
       ) : (
         <Card className="border-divider max-w-md mx-auto">
           {' '}

@@ -115,7 +115,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
           ) : currentStep < STEPS.length ? (
             <Icon iconId="faArrowRightLight" className="h-4 w-4 mr-1.5" />
           ) : (
-            <Icon iconId="faPaperPlaneLight" className="h-4 w-4 mr-1.5" /> // Submit icon
+            (<Icon iconId="faPaperPlaneLight" className="h-4 w-4 mr-1.5" />) // Submit icon
           )}
           {currentStep < STEPS.length ? 'Next' : 'Submit'}
         </Button>

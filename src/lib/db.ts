@@ -123,11 +123,10 @@ export async function getBrandingSettings(companyId: string) {
 function isBrandingSettings(obj: unknown): obj is BrandingSettings {
   return (
     // Add more checks if needed
-    typeof obj === 'object' &&
+    (typeof obj === 'object' &&
     obj !== null &&
     'id' in obj &&
-    'companyId' in obj &&
-    'primaryColor' in obj
+    'companyId' in obj && 'primaryColor' in obj)
   );
 }
 

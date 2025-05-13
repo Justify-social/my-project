@@ -360,7 +360,7 @@ export default function InfluencerProfilePage() {
         </div>
       ) : (
         // Should not happen if error handles not found, but as fallback
-        <ErrorDisplay message={'Influencer data could not be loaded.'} />
+        (<ErrorDisplay message={'Influencer data could not be loaded.'} />)
       )}
     </div>
   );

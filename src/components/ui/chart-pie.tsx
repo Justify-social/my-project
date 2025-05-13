@@ -142,7 +142,7 @@ export const PieChart: React.FC<PieChartProps> = ({
   return (
     <div className={cn('w-full', className)}>
       {title && (
-        <h3 className="text-lg font-semibold text-foreground mb-4 text-center">{title}</h3> // Centered title
+        (<h3 className="text-lg font-semibold text-foreground mb-4 text-center">{title}</h3>) // Centered title
       )}
       <ResponsiveContainer width={width} height={height}>
         <RechartsPieChart margin={{ top: 10, right: 30, left: 30, bottom: 10 }}>
