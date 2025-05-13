@@ -34,10 +34,10 @@ export const Icon: React.FC<IconProps> = memo(
 
     // Effect to fetch SVG content
     useEffect(() => {
-      console.log(`[Icon DEBUG] useEffect for iconId: ${iconId}, iconPath: ${iconPath}`); // DEBUG LOG
+      // console.log(`[Icon DEBUG] useEffect for iconId: ${iconId}, iconPath: ${iconPath}`); // DEBUG LOG
       if (!iconPath) {
         const errorMsg = `Icon path not found for ID: ${iconId}`;
-        console.error(`[Icon DEBUG] ${errorMsg}`); // DEBUG LOG
+        // console.error(`[Icon DEBUG] ${errorMsg}`); // DEBUG LOG
         setError(errorMsg);
         setSvgContent(null); // Clear previous content if path is invalid
         return;
@@ -46,41 +46,41 @@ export const Icon: React.FC<IconProps> = memo(
       let isCancelled = false; // Flag to prevent state update on unmounted component
 
       const fetchSvg = async () => {
-        console.log(`[Icon DEBUG] fetchSvg called for path: ${iconPath}`); // DEBUG LOG
+        // console.log(`[Icon DEBUG] fetchSvg called for path: ${iconPath}`); // DEBUG LOG
         try {
           const response = await fetch(iconPath);
-          console.log(`[Icon DEBUG] fetch response status for ${iconPath}: ${response.status}`); // DEBUG LOG
+          // console.log(`[Icon DEBUG] fetch response status for ${iconPath}: ${response.status}`); // DEBUG LOG
           if (!response.ok) {
             throw new Error(`Failed to fetch SVG: ${response.status} ${response.statusText}`);
           }
           const text = await response.text();
-          console.log(
-            `[Icon DEBUG] SVG text fetched for ${iconPath} (first 100 chars):`,
-            text.substring(0, 100)
-          ); // DEBUG LOG
+          // console.log(
+          //   `[Icon DEBUG] SVG text fetched for ${iconPath} (first 100 chars):`,
+          //   text.substring(0, 100)
+          // ); // DEBUG LOG
           if (!isCancelled) {
             const sanitizedText = text
               .replace(/<style[^>]*>[\s\S]*?<\/style>/g, '')
               .replace(/<path([^>]*)fill=\"([^\"]*)\"([^>]*)>/g, '<path$1$3>')
               .replace(/<path(?![^>]*fill=)([^>]*)>/g, '<path fill="currentColor"$1>');
-            console.log(`[Icon DEBUG] SVG content sanitized, setting state for ${iconId}`); // DEBUG LOG
+            // console.log(`[Icon DEBUG] SVG content sanitized, setting state for ${iconId}`); // DEBUG LOG
             setSvgContent(sanitizedText);
             setError(null);
           }
         } catch (err) {
           if (!isCancelled) {
             const message = err instanceof Error ? err.message : 'Unknown error fetching SVG';
-            console.error(
-              `[Icon DEBUG] Error fetching/processing SVG for ${iconId} from ${iconPath}:`,
-              message
-            ); // DEBUG LOG
+            // console.error(
+            //   `[Icon DEBUG] Error fetching/processing SVG for ${iconId} from ${iconPath}:`,
+            //   message
+            // ); // DEBUG LOG
             setError(message);
             setSvgContent(null);
           }
         }
       };
 
-      console.log(`[Icon DEBUG] Resetting state and calling fetchSvg for ${iconId}`); // DEBUG LOG
+      // console.log(`[Icon DEBUG] Resetting state and calling fetchSvg for ${iconId}`); // DEBUG LOG
       setSvgContent(null);
       setError(null);
       fetchSvg();

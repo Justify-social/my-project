@@ -10,7 +10,7 @@ export default function SignInPage() {
       routing="path"
       path="/sign-in" // Note: Clerk needs the full path including the group potentially
       signUpUrl="/sign-up"
-      afterSignInUrl="/dashboard"
+      forceRedirectUrl="/dashboard"
       appearance={{
         baseTheme: undefined,
         elements: {

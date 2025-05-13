@@ -26,7 +26,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
 
   // Log the claims to the browser console for debugging
   useEffect(() => {
-    console.log('Session Claims:', JSON.stringify(sessionClaims, null, 2));
+    // console.log('Session Claims:', JSON.stringify(sessionClaims, null, 2));
   }, [sessionClaims]);
 
   // Check the flat metadata.role claim
@@ -60,14 +60,14 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
           className={`grid w-full grid-cols-1 ${gridColsClass} gap-2 h-auto bg-transparent p-0`}
         >
           {navItems.map(item => (
-            <Link href={item.href} key={item.value} passHref legacyBehavior>
-              <TabsTrigger
-                value={item.value}
-                className="w-full justify-start data-[state=active]:bg-muted data-[state=active]:shadow-sm data-[state=active]:border-accent data-[state=active]:border-b-2 rounded-none text-secondary hover:text-primary transition-colors duration-150 px-4 py-2 text-sm font-medium"
-              >
-                {item.label}
-              </TabsTrigger>
-            </Link>
+            <TabsTrigger
+              value={item.value}
+              key={item.value}
+              asChild
+              className="w-full justify-start data-[state=active]:bg-muted data-[state=active]:shadow-sm data-[state=active]:border-accent data-[state=active]:border-b-2 rounded-none text-secondary hover:text-primary transition-colors duration-150 px-4 py-2 text-sm font-medium"
+            >
+              <Link href={item.href}>{item.label}</Link>
+            </TabsTrigger>
           ))}
         </TabsList>
         <Separator className="mb-8" />
