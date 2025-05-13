@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Select,
   SelectContent,
@@ -11,15 +12,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Icon } from '@/components/ui/icon/icon'; // Corrected path
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Icon } from '@/components/ui/icon/icon';
 import logger from '@/lib/logger';
 
 // Matches the data structure returned by the corrected /api/campaigns GET endpoint
@@ -39,6 +33,7 @@ const CampaignSelector: React.FC<CampaignSelectorProps> = ({ onCampaignSelected 
   const [selectedCampaignId, setSelectedCampaignId] = useState<string>(''); // Select component value is string
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchCampaigns = async () => {
@@ -102,18 +97,20 @@ const CampaignSelector: React.FC<CampaignSelectorProps> = ({ onCampaignSelected 
 
   if (isLoading) {
     return (
-      <Card className="w-full max-w-lg mx-auto">
+      <Card className="w-full max-w-2xl mx-auto">
         <CardHeader>
           <Skeleton className="h-6 w-3/5 mb-2" />
-          <Skeleton className="h-4 w-4/5" />
         </CardHeader>
         <CardContent className="space-y-4 pt-4">
           <Skeleton className="h-10 w-full" />
-          {/* Placeholder for other potential elements like Edit/Create buttons */}
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 pt-4 items-center">
+            <Skeleton className="h-10 w-full sm:w-auto sm:flex-grow-0 min-w-[80px]" />
+            <Skeleton className="h-10 w-full sm:w-auto sm:flex-grow-0 min-w-[150px]" />
+            <div className="sm:ml-auto w-full sm:w-auto pt-2 sm:pt-0">
+              <Skeleton className="h-10 w-full min-w-[200px]" />
+            </div>
+          </div>
         </CardContent>
-        <CardFooter className="flex justify-end pt-4">
-          <Skeleton className="h-10 w-1/3" />
-        </CardFooter>
       </Card>
     );
   }
@@ -121,7 +118,7 @@ const CampaignSelector: React.FC<CampaignSelectorProps> = ({ onCampaignSelected 
   if (error && campaigns.length === 0) {
     return (
       <Alert variant="destructive">
-        <Icon iconId="faTriangleExclamationLight" className="h-4 w-4" /> {/* Example error icon */}
+        <Icon iconId="faTriangleExclamationLight" className="h-4 w-4" />
         <AlertTitle>Error Loading Campaigns</AlertTitle>
         <AlertDescription>{error}</AlertDescription>
       </Alert>
@@ -129,10 +126,9 @@ const CampaignSelector: React.FC<CampaignSelectorProps> = ({ onCampaignSelected 
   }
 
   return (
-    <Card className="w-full max-w-lg mx-auto">
+    <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>Select a Campaign</CardTitle>
-        <CardDescription>Choose a campaign to set up your Brand Lift study.</CardDescription>
+        <CardTitle>Campaign Details</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 pt-4">
         {error && campaigns.length > 0 && (
@@ -166,19 +162,40 @@ const CampaignSelector: React.FC<CampaignSelectorProps> = ({ onCampaignSelected 
             </SelectContent>
           </Select>
         )}
-        {/* TODO: Implement Edit/Create New Campaign Buttons if required by design */}
-        {/* Example structure:
-                <div className="flex space-x-2 pt-4">
-                    <Button variant="outline" size="sm" disabled={!selectedCampaignId}>Edit Selected</Button>
-                    <Button variant="outline" size="sm">+ Create New Campaign</Button>
-                </div>
-                */}
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 pt-4 items-center">
+          <Button
+            variant="outline"
+            size="default"
+            disabled={!selectedCampaignId}
+            className="w-full sm:w-auto sm:flex-grow-0"
+            onClick={() => router.push(`/campaigns/wizard/step-1?id=${selectedCampaignId}`)}
+          >
+            <Icon iconId="faPenToSquareLight" className="mr-2" />
+            Edit
+          </Button>
+          <Button
+            variant="outline"
+            size="default"
+            className="w-full sm:w-auto sm:flex-grow-0"
+            onClick={() => router.push('/campaigns/wizard/step-1')}
+          >
+            <Icon iconId="faPlusLight" className="mr-2" />
+            New Campaign
+          </Button>
+          <div className="sm:ml-auto w-full sm:w-auto pt-2 sm:pt-0">
+            <Button
+              onClick={handleSubmit}
+              disabled={!selectedCampaignId || isLoading}
+              variant="default"
+              size="default"
+              className="w-full"
+            >
+              <Icon iconId="faRocketLight" className="mr-2" />
+              Setup Brand Lift Study
+            </Button>
+          </div>
+        </div>
       </CardContent>
-      <CardFooter className="flex justify-end pt-4">
-        <Button onClick={handleSubmit} disabled={!selectedCampaignId || isLoading}>
-          Setup Brand Lift Study
-        </Button>
-      </CardFooter>
     </Card>
   );
 };

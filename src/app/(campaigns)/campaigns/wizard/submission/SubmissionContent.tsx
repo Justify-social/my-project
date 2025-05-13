@@ -120,7 +120,7 @@ export default function SubmissionContent() {
           variant="default"
           size="lg"
           className="w-full sm:w-auto shadow-lg bg-accent hover:bg-accent/90 text-primary-foreground flex-1 sm:flex-none py-3 text-base"
-          onClick={() => router.push(`/brand-lift?campaignId=${campaignId}`)}
+          onClick={() => router.push(`/brand-lift/campaign-selection?campaignId=${campaignId}`)}
           disabled={!campaignId}
         >
           <Icon iconId="faArrowTrendUpLight" className="mr-2" />

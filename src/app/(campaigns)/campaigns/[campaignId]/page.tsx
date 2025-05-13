@@ -792,10 +792,10 @@ export default function CampaignDetail() {
               disabled={!canPerformActions}
               title={!canPerformActions ? 'Select an active organization to edit' : 'Edit Campaign'}
             >
-              <>
+              <span className="inline-flex items-center">
                 <Icon iconId="faPenToSquareLight" className="mr-2 h-4 w-4 text-muted-foreground" />
                 Edit
-              </>
+              </span>
             </Button>
           </Link>
           <DuplicateCampaignButton
@@ -807,10 +807,10 @@ export default function CampaignDetail() {
             variant="outline"
             size="sm"
             buttonContent={
-              <>
+              <span className="inline-flex items-center">
                 <Icon iconId="faCopyLight" className="mr-2 h-4 w-4 text-muted-foreground" />
                 Duplicate
-              </>
+              </span>
             }
           />
           <Button
