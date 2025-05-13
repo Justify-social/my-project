@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import OpenAI from 'openai';
 import { Prisma, BrandLiftStudyStatus } from '@prisma/client';
+import https from 'https';
 
 import db from '@/lib/db';
 import { logger } from '@/lib/logger';
@@ -16,6 +17,8 @@ interface RouteContext {
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  timeout: 90 * 1000,
+  httpAgent: new https.Agent({ keepAlive: true }),
 });
 
 interface StudyContextForPrompt {
@@ -132,17 +135,42 @@ export const POST = async (
       model: AiConfig.model,
     });
 
+    // ---- START: ADDED FOR DEBUGGING ----
+    logger.info('[AI PROMPT DEBUG] System Prompt:', {
+      systemPrompt: AiConfig.questionGenSystemPrompt,
+    });
+    logger.info('[AI PROMPT DEBUG] User Prompt:', { userPrompt: userPrompt });
+    // ---- END: ADDED FOR DEBUGGING ----
+
     const completion = await openai.chat.completions.create({
       model: AiConfig.model,
       messages: [
         { role: 'system', content: AiConfig.questionGenSystemPrompt },
         { role: 'user', content: userPrompt },
       ],
-      temperature: 0.7,
-      max_tokens: 2000,
+      temperature: 1.0,
+      max_completion_tokens: 4096,
     });
 
     const suggestedYaml = completion.choices[0]?.message?.content;
+    // ---- START: ADDED FOR DEBUGGING ----
+    if (!suggestedYaml) {
+      logger.error(
+        '[AI COMPLETION DEBUG] OpenAI completion object details when content is empty:',
+        {
+          id: completion.id,
+          model: completion.model,
+          created: completion.created,
+          usage: completion.usage,
+          system_fingerprint: completion.system_fingerprint,
+          choice_0_finish_reason: completion.choices[0]?.finish_reason,
+          choice_0_logprobs: completion.choices[0]?.logprobs,
+          // Avoid logging the whole completion.choices[0].message if it's too large or sensitive,
+          // focus on why content might be missing.
+        }
+      );
+    }
+    // ---- END: ADDED FOR DEBUGGING ----
     if (!suggestedYaml) throw new Error('AI did not return any suggestions.');
 
     // Strip Markdown fences if present

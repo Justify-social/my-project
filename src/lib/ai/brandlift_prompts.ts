@@ -3,7 +3,7 @@
 import { BrandLiftStudyData } from '@/types/brand-lift'; // Assuming types are correctly defined
 
 // --- Constants and Configuration ---
-const AI_MODEL = 'gpt-4o-mini'; // Or 'gpt-4o' for higher quality but potentially slower/more expensive
+const AI_MODEL = 'o3'; // Changed from gpt-4o-mini based on user-provided model name
 
 const QUESTION_GENERATION_SYSTEM_PROMPT = `
 You are an expert survey designer specializing in Brand Lift studies. Your task is to generate relevant, engaging, and methodologically sound survey questions based on campaign context. Adhere strictly to the following guidelines:
@@ -11,10 +11,10 @@ You are an expert survey designer specializing in Brand Lift studies. Your task 
 1.  **Format:** Output *only* a YAML list of questions. Each question must have: number, text, type (SINGLE_CHOICE or MULTIPLE_CHOICE), objective, kpi_association (string, nullable), is_randomized (boolean, default false), is_mandatory (boolean, default true), and options (a list of {text: string, image_description: string (brief, culturally sensitive suggestion for image/GIF)}).
 2.  **Tone:** Conversational, social media-friendly, lowercase (except proper nouns/brands).
 3.  **Question Types:** Primarily SINGLE_CHOICE or MULTIPLE_CHOICE.
-4.  **Options:** 2-5 options per question. Options should be mutually exclusive and collectively exhaustive where appropriate. Include "none of the above" or similar if needed. Provide a brief, culturally sensitive image/GIF *description* for *each* answer option (e.g., "Smiling person using phone", "Confused emoji GIF").
+4.  **Options:** 2-5 options per question. Options should be mutually exclusive and collectively exhaustive where appropriate. Include "none of the above" or similar if needed and appropriate for the question. Provide a brief, culturally sensitive image/GIF *description* for *each* answer option (e.g., "Smiling person using phone", "Confused emoji GIF").
 5.  **Content:** Questions should measure awareness, recall, consideration, preference, intent, or message association based on the provided KPIs and campaign context.
 6.  **Relevance:** Ensure questions directly relate to the campaign goals and primary/secondary KPIs.
-7.  **Quantity:** Generate approximately 5-7 relevant questions unless specified otherwise.
+7.  **Quantity:** Generate approximately 8 relevant questions unless specified otherwise.
 8.  **YAML Structure Example (ensure this block is treated as a string within the prompt):
     \`\`\`yaml
     - number: 1
@@ -64,7 +64,11 @@ Secondary KPIs: ${study.secondaryKpis?.join(', ') || 'None'}
 `;
 
   const userPrompt = `
-Please generate approximately 5-7 survey questions in YAML format based on the following study and campaign context. The primary brand for this study is \"${brandName}\". Focus questions on measuring the specified KPIs, particularly the primary KPI: ${study.primaryKpi ?? 'N/A'}. Remember to include image/GIF descriptions for each answer option.\n\n**Study & Campaign Context:**\n${context}\n`;
+Please generate approximately 8 survey questions in YAML format based on the following study and campaign context. The primary brand for this study is "${brandName}". Focus questions on measuring the specified KPIs, particularly the primary KPI: ${study.primaryKpi ?? 'N/A'}. Remember to include image/GIF descriptions for each answer option and include a 'none of the above' or similar option where appropriate.
+
+**Study & Campaign Context:**
+${context}
+`;
   return userPrompt;
 }
 

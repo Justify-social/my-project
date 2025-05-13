@@ -116,6 +116,7 @@ const putHandler = async (
         id: questionId,
       },
       data: validation.data,
+      include: { options: { orderBy: { order: 'asc' } } },
     });
     logger.info('Survey question updated successfully', { questionId, userId: clerkUserId, orgId });
     return NextResponse.json(updatedQuestion);
