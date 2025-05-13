@@ -708,6 +708,11 @@ export const PATCH = async (request: NextRequest) => {
       return NextResponse.json({ error: 'Authentication required for PATCH' }, { status: 401 });
     }
 
+    // Ensure orgId is present for authorization
+    if (!orgId) {
+      throw new BadRequestError('Active organization context is required to update a campaign.');
+    }
+
     const { id, ...updateData } = data;
 
     // Addressing: // TODO: Check if updateData is empty after extracting id?
@@ -717,10 +722,19 @@ export const PATCH = async (request: NextRequest) => {
 
     logger.info('Campaign PATCH: Updating campaign', { userId, orgId, campaignId: id, updateData });
 
-    // Authorization: Check if user/org has permission to update this campaignId
-    const existingCampaign = await prisma.campaignWizard.findFirst({ where: { id, userId } }); // Check if campaign exists and belongs to user
-    if (!existingCampaign)
-      throw new NotFoundError('Campaign not found or not accessible for update.');
+    // Authorization: Check if campaign exists and belongs to the user's active organization
+    const existingCampaign = await prisma.campaignWizard.findFirst({
+      where: {
+        id: id,
+        orgId: orgId,
+        // Optionally, include userId if campaigns have specific owners within an org
+        // userId: internalUserId, // (ensure internalUserId is fetched if this is uncommented)
+      },
+    });
+
+    if (!existingCampaign) {
+      throw new NotFoundError('Campaign not found or you do not have permission to update it.');
+    }
 
     const campaign = await prisma.campaignWizard.update({
       where: { id },

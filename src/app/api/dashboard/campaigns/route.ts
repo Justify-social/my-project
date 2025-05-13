@@ -11,16 +11,24 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(_request: NextRequest) {
   try {
-    // Get userId using Clerk's auth() helper
-    const { userId } = await auth();
+    // Get userId and orgId using Clerk's auth() helper
+    const { userId, orgId } = await auth();
 
     if (!userId) {
       // Return a new response for unauthorized access
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Fetch campaigns using the Clerk userId
-    const campaigns = await getUpcomingCampaigns(userId);
+    if (!orgId) {
+      // Return a new response if no active organization is found
+      return NextResponse.json(
+        { success: false, error: 'Active organization not found or not selected.' },
+        { status: 400 }
+      );
+    }
+
+    // Fetch campaigns using the Clerk userId and orgId
+    const campaigns = await getUpcomingCampaigns(userId, orgId);
 
     // Return standard NextResponse
     return NextResponse.json({ success: true, data: campaigns });

@@ -1,22 +1,22 @@
 import Stripe from 'stripe';
 
 // TODO: Uncomment Stripe initialization and ensure STRIPE_SECRET_KEY is set in the build environment.
-/*
 if (!process.env.STRIPE_SECRET_KEY) {
-  console.error('Build Error: STRIPE_SECRET_KEY is not defined. Stripe functionality will be disabled.');
+  console.error(
+    'Build Error: STRIPE_SECRET_KEY is not defined. Stripe functionality will be disabled.'
+  );
   // Avoid throwing during build, let dependent modules handle null stripe object or skip logic.
   // throw new Error('STRIPE_SECRET_KEY is not defined');
 }
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-02-24.acacia',
+  apiVersion: '2025-04-30.basil',
   typescript: true,
 });
-*/
 
 // Export null or a mock object if needed by consuming modules to prevent crashes
 // For simplicity, exporting null for now. Consuming modules need null checks.
-export const stripe: Stripe | null = null;
+// export const stripe: Stripe | null = null;
 
 // TODO: Uncomment these functions or add null checks when Stripe is re-enabled.
 /*

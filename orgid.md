@@ -31,12 +31,15 @@ This document outlines the plan to refactor core entities (`CampaignWizard`, `Br
 
 ## Phase 3: API Endpoint Modifications - Read & Delete Operations
 
-**Status: Completed**
+**Status: Mostly Complete / Further Review Recommended**
 
-- **Sub-task:** Update List Campaigns - Completed
-- **Sub-task:** Get Single Campaign - Completed
-- **Sub-task:** Update Delete Campaign - Completed
-- **Sub-task:** Update Brand Lift Read/Delete Operations - Completed
+- **Sub-task:** Update List Campaigns
+  - Dashboard listing (`/api/dashboard/*`): Completed (now uses `orgId`).
+  - General campaign listing (e.g., `GET /api/campaigns` for Brand Lift): Further review recommended to ensure consistent `orgId` scoping if necessary.
+- **Sub-task:** Get Single Campaign - To Verify (ensure `orgId` based authorization)
+- **Sub-task:** Update Delete Campaign - To Verify (ensure `orgId` based authorization)
+- **Sub-task:** Update Brand Lift Read/Delete Operations - To Verify (ensure `orgId` based authorization)
+- **Note:** Authorization for general updates (`PATCH /api/campaigns`) was enhanced to use `orgId`.
 
 ---
 
@@ -54,11 +57,11 @@ This document outlines the plan to refactor core entities (`CampaignWizard`, `Br
 
 **Status: Completed** // All sub-tasks addressed
 
-1.  **Organization Context:**
+1.  **Organization Context:** UI shows active org, allows switching; API calls conditional on `orgId`.
     - **Status:** Completed
-2.  **Error Handling:**
+2.  **Error Handling:** Graceful handling of missing `orgId` for API actions.
     - **Status:** Completed
-3.  **Display Logic:**
+3.  **Display Logic:** Campaign list defaults to org-wide, with secondary user filter.
     - **Status:** Completed
 
 ---

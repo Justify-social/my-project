@@ -150,7 +150,7 @@ const Header: React.FC<HeaderProps> = ({
           {/* Render Clerk Auth Controls (passed as prop) - visible on desktop */}
           <div className="hidden md:block font-body">{authControls}</div>
 
-          {/* Mobile Menu Button - moved slightly right for balance */}
+          {/* Mobile Menu Button - Conditionally Rendered */}
           <button
             onClick={onMenuClick}
             className="md:hidden p-2 font-body"
@@ -158,13 +158,8 @@ const Header: React.FC<HeaderProps> = ({
             data-testid="mobile-menu-toggle"
           >
             {hasMenuIcon ? (
-              <Icon
-                iconId={menuIconId} // Already Light variant from variable
-                className="w-6 h-6"
-              />
+              <Icon iconId={menuIconId} className="w-6 h-6" />
             ) : (
-              // Fallback using Icon component if Font Awesome one isn't available
-              // Assuming a generic menu/bars icon ID like 'faBarsLight' is in the registry
               <Icon iconId="faBarsLight" className="w-6 h-6" />
             )}
           </button>

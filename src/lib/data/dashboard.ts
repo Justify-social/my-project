@@ -48,8 +48,11 @@ function mapStatusEnumToString(statusEnum: Status): string {
 type CampaignWithInfluencers = Prisma.CampaignWizardGetPayload<{ include: { Influencer: true } }>;
 
 // Fetch upcoming/ongoing events (campaigns) for the calendar
-export async function getUpcomingEvents(clerkUserId: string): Promise<CalendarEvent[]> {
-  logger.info(`[getUpcomingEvents] Fetching for clerkUserId: ${clerkUserId}`);
+export async function getUpcomingEvents(
+  clerkUserId: string,
+  orgId: string
+): Promise<CalendarEvent[]> {
+  logger.info(`[getUpcomingEvents] Fetching for clerkUserId: ${clerkUserId}, orgId: ${orgId}`);
   try {
     // Fetch the internal User record using the clerkUserId
     const userRecord = await prisma.user.findUnique({
@@ -61,8 +64,11 @@ export async function getUpcomingEvents(clerkUserId: string): Promise<CalendarEv
       logger.error('[getUpcomingEvents] No User record found for clerkUserId', { clerkUserId });
       return []; // Or throw an error
     }
-    const internalUserId = userRecord.id; // This is the UUID
-    logger.info('[getUpcomingEvents] Found internal User ID', { internalUserId, clerkUserId });
+    // const internalUserId = userRecord.id; // This might not be needed if primary filter is orgId
+    logger.info('[getUpcomingEvents] Found internal User ID', {
+      internalUserId: userRecord.id,
+      clerkUserId,
+    });
 
     const now = new Date();
     const startOfNow = startOfDay(now);
@@ -72,10 +78,10 @@ export async function getUpcomingEvents(clerkUserId: string): Promise<CalendarEv
     // Query based on required endDate: Must end >= now AND start <= future window end
     const campaignsWithInfluencers = await prisma.campaignWizard.findMany({
       where: {
-        userId: internalUserId, // Use the internal UUID for filtering
+        orgId: orgId, // Filter by organization ID
+        // userId: internalUserId, // Optionally, keep filtering by user ID
         endDate: { gte: startOfNow }, // Campaign must end today or later
         startDate: { lte: endOfNextFewMonths }, // Campaign must start by end of window
-        // TODO: Add user filtering (the main user filter is now done by internalUserId)
       },
       include: { Influencer: true },
       orderBy: { startDate: 'asc' },
@@ -161,8 +167,11 @@ type CampaignWithPrimaryInfluencer = Prisma.CampaignWizardGetPayload<{
 }>;
 
 // Fetch upcoming campaigns for the table
-export async function getUpcomingCampaigns(clerkUserId: string): Promise<CampaignData[]> {
-  logger.info(`[getUpcomingCampaigns] Fetching for clerkUserId: ${clerkUserId}`);
+export async function getUpcomingCampaigns(
+  clerkUserId: string,
+  orgId: string
+): Promise<CampaignData[]> {
+  logger.info(`[getUpcomingCampaigns] Fetching for clerkUserId: ${clerkUserId}, orgId: ${orgId}`);
   try {
     // Fetch the internal User record using the clerkUserId
     const userRecord = await prisma.user.findUnique({
@@ -184,8 +193,9 @@ export async function getUpcomingCampaigns(clerkUserId: string): Promise<Campaig
       `[getUpcomingCampaigns] Current time (server): ${now.toISOString()}, Querying campaigns starting before or on: ${endOfNextFewMonths.toISOString()}`
     );
 
-    const whereClause = {
-      userId: internalUserId, // Use the internal UUID for filtering
+    const whereClause: Prisma.CampaignWizardWhereInput = {
+      orgId: orgId, // Filter by organization ID
+      // userId: internalUserId, // Optionally, keep filtering by user ID if campaigns are user-specific within an org
       status: { in: [Status.DRAFT, Status.APPROVED, Status.ACTIVE] },
       startDate: { lte: endOfNextFewMonths }, // Starting within window
     };

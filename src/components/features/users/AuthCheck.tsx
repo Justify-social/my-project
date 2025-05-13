@@ -10,7 +10,7 @@ export default function AuthCheck({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
-      router.push('/signin');
+      router.push('/sign-in');
     }
   }, [isSignedIn, isLoaded, router]);
 

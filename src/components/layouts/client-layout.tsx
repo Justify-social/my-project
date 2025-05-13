@@ -234,6 +234,10 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
   // Select the correct items for the Mobile Menu based on the page
   const mobileMenuItems = isUIComponentsPage ? debugNavItems : allMainNavItemsForMenu;
 
+  const handleMenuToggle = () => {
+    setIsMobileOpen(prev => !prev);
+  };
+
   return (
     <React.Suspense fallback={<LoadingSkeleton />}>
       <ThemeProvider defaultTheme="light">
@@ -242,7 +246,7 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
             companyName="Justify"
             remainingCredits={100}
             notificationsCount={3}
-            onMenuClick={() => setIsMobileOpen(!isMobileOpen)}
+            onMenuClick={handleMenuToggle}
             authControls={<DynamicClientAuth />}
           />
 
