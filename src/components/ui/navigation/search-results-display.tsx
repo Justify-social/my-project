@@ -43,7 +43,6 @@ export function SearchResultsDisplay() {
                   'text-sm text-gray-800 hover:text-sky-700'
                 )}
                 onClick={closeSearch}
-                legacyBehavior
               >
                 <span className="font-medium">{campaign.campaignName}</span>
                 {campaign.description && (

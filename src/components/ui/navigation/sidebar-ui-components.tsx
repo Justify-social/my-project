@@ -76,27 +76,27 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
             isActive || isHovered ? `${baseIconName}Solid` : `${baseIconName}Light`;
 
           return (
-            <Link key={item.id} href={item.href} legacyBehavior passHref>
-              <a // Wrap content in an <a> tag
-                onMouseEnter={() => setHoverStates(prev => ({ ...prev, [itemKey]: true }))}
-                onMouseLeave={() => setHoverStates(prev => ({ ...prev, [itemKey]: false }))}
+            <Link
+              key={item.id}
+              href={item.href}
+              onMouseEnter={() => setHoverStates(prev => ({ ...prev, [itemKey]: true }))}
+              onMouseLeave={() => setHoverStates(prev => ({ ...prev, [itemKey]: false }))}
+              className={cn(
+                'flex items-center py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group',
+                isActive || isHovered
+                  ? 'text-accent bg-accent/10 font-medium'
+                  : 'text-foreground hover:text-accent hover:bg-accent/5'
+              )}
+            >
+              <Icon iconId={iconIdToRender} className="mr-3 h-5 w-5 flex-shrink-0" />
+              <span
                 className={cn(
-                  'flex items-center py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group',
-                  isActive || isHovered
-                    ? 'text-accent bg-accent/10 font-medium'
-                    : 'text-foreground hover:text-accent hover:bg-accent/5'
+                  'text-sm font-heading font-medium truncate',
+                  isActive || isHovered ? 'text-accent' : 'text-foreground'
                 )}
               >
-                <Icon iconId={iconIdToRender} className="mr-3 h-5 w-5 flex-shrink-0" />
-                <span
-                  className={cn(
-                    'text-sm font-heading font-medium truncate',
-                    isActive || isHovered ? 'text-accent' : 'text-foreground'
-                  )}
-                >
-                  {item.label}
-                </span>
-              </a>
+                {item.label}
+              </span>
             </Link>
           );
         })}
@@ -112,28 +112,19 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
             'flex items-center py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group',
             'text-foreground hover:text-accent hover:bg-accent/5'
           )}
-          legacyBehavior
         >
-          {/* Wrap these in an <a> tag too */}
-          <a
+          <Icon
+            iconId="brandsGithub"
+            className="mr-3 h-5 w-5 flex-shrink-0 group-hover:text-accent"
+          />
+          <span
             className={cn(
-              'flex items-center py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group',
-              'text-foreground hover:text-accent hover:bg-accent/5'
+              'text-sm font-heading font-medium truncate',
+              'text-foreground group-hover:text-accent'
             )}
           >
-            <Icon
-              iconId="brandsGithub"
-              className="mr-3 h-5 w-5 flex-shrink-0 group-hover:text-accent"
-            />
-            <span
-              className={cn(
-                'text-sm font-heading font-medium truncate',
-                'text-foreground group-hover:text-accent'
-              )}
-            >
-              View Source
-            </span>
-          </a>
+            View Source
+          </span>
         </Link>
 
         {/* Dark Mode Row - Container for the modified ThemeToggle */}
@@ -155,28 +146,19 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
             'flex items-center py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group',
             'text-foreground hover:text-accent hover:bg-accent/5'
           )}
-          legacyBehavior
         >
-          {/* Wrap these in an <a> tag too */}
-          <a
+          <Icon
+            iconId="faArrowLeftLight"
+            className="mr-3 h-5 w-5 flex-shrink-0 group-hover:text-accent"
+          />
+          <span
             className={cn(
-              'flex items-center py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group',
-              'text-foreground hover:text-accent hover:bg-accent/5'
+              'text-sm font-heading font-medium truncate',
+              'text-foreground group-hover:text-accent'
             )}
           >
-            <Icon
-              iconId="faArrowLeftLight"
-              className="mr-3 h-5 w-5 flex-shrink-0 group-hover:text-accent"
-            />
-            <span
-              className={cn(
-                'text-sm font-heading font-medium truncate',
-                'text-foreground group-hover:text-accent'
-              )}
-            >
-              Back to App
-            </span>
-          </a>
+            Back to App
+          </span>
         </Link>
       </div>
     </aside>

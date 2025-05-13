@@ -134,8 +134,8 @@ export default function ClientDashboard() {
         <h1 className="text-3xl font-bold text-primary font-heading">
           {user ? `${user.fullName || user.firstName || 'User'}'s Dashboard` : 'Dashboard'}
         </h1>
-        <Link href="/campaigns/wizard/step-1" passHref legacyBehavior>
-          <Button disabled={!isLoaded || !user}>
+        <Link href="/campaigns/wizard/step-1">
+          <Button disabled={!isLoaded || !user} asChild>
             <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" />
             New Campaign
           </Button>

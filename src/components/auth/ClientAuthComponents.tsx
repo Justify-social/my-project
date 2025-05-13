@@ -13,8 +13,8 @@ export default function ClientAuthComponents() {
       </SignedIn>
       <SignedOut>
         {/* Example Sign In Button - Adjust as needed */}
-        <Link href="/sign-in" passHref legacyBehavior>
-          <Button variant="outline" size="sm">
+        <Link href="/sign-in">
+          <Button variant="outline" size="sm" asChild>
             Sign In
           </Button>
         </Link>

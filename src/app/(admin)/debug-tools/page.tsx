@@ -32,8 +32,10 @@ const DebugToolCard: React.FC<DebugToolCardProps> = ({
     </CardHeader>
     <CardContent>
       {linkHref ? (
-        <Link href={linkHref} passHref legacyBehavior>
-          <Button variant="default">{buttonText}</Button>
+        <Link href={linkHref}>
+          <Button variant="default" asChild>
+            {buttonText}
+          </Button>
         </Link>
       ) : (
         <Button variant="default" onClick={onButtonClick} disabled={isLoading}>

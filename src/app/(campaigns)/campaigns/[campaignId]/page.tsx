@@ -784,7 +784,7 @@ export default function CampaignDetail() {
         </div>
 
         <div className="flex gap-2">
-          <Link href={`/campaigns/wizard/step-1?id=${campaignIdParam}`} passHref legacyBehavior>
+          <Link href={`/campaigns/wizard/step-1?id=${campaignIdParam}`}>
             <Button
               asChild
               variant="outline"
@@ -792,10 +792,10 @@ export default function CampaignDetail() {
               disabled={!canPerformActions}
               title={!canPerformActions ? 'Select an active organization to edit' : 'Edit Campaign'}
             >
-              <a>
+              <>
                 <Icon iconId="faPenToSquareLight" className="mr-2 h-4 w-4 text-muted-foreground" />
                 Edit
-              </a>
+              </>
             </Button>
           </Link>
           <DuplicateCampaignButton

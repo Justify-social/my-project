@@ -91,8 +91,6 @@ export default function ComponentBrowser({ components }: ComponentBrowserProps) 
                     key={comp.name}
                     href={`/debug-tools/ui-components/preview/${comp.name.toLowerCase()}`}
                     className="block border border-divider rounded-lg hover:shadow-md hover:border-Interactive transition-all duration-150 bg-background group"
-                    passHref
-                    legacyBehavior
                   >
                     <div className="p-4">
                       <div className="flex justify-between items-center mb-2">
