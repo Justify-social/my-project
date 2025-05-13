@@ -57,7 +57,7 @@ const Header: React.FC<HeaderProps> = ({
     >
       <div className="flex items-center justify-between px-4 py-3 font-body">
         {/* Left: Logo & Company Name wrapped in Link to /dashboard */}
-        <Link href="/dashboard" className="flex items-center space-x-2" legacyBehavior>
+        <Link href="/dashboard" className="flex items-center space-x-2">
           <>
             <Image
               src="/logo.png"
@@ -100,7 +100,6 @@ const Header: React.FC<HeaderProps> = ({
             <Link
               href="/account/billing"
               className="flex items-center space-x-1 cursor-pointer font-body"
-              legacyBehavior
             >
               {hasCoinsIcon ? (
                 <Icon
