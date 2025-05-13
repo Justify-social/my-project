@@ -70,6 +70,7 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import toast from 'react-hot-toast'; // Added import for react-hot-toast
+import { showSuccessToast, showErrorToast } from '@/components/ui/toast'; // Added import for SSOT toasts
 
 // --- Giphy API Key ---
 const GIPHY_API_KEY = process.env.NEXT_PUBLIC_GIPHY_API_KEY;
@@ -553,29 +554,18 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
                     return (
                       <React.Fragment key={optId}>
                         {isGif ? (
-                          <div className="p-1 self-stretch flex flex-col flex-shrink-0 w-48 group relative">
+                          <div className="p-1 self-stretch flex flex-col flex-shrink-0 w-48">
                             <GifCard
                               gifUrl={opt.imageUrl!}
                               altText={opt.text || `Option ${optIdx + 1}`}
                               optionText={opt.text || `Option ${optIdx + 1}`}
                               isSelected={optId === selectedOptionId}
-                              onClick={() => onInitiateGifSearch?.(qId, optId, opt.text)}
-                              className="flex-grow cursor-pointer"
+                              onClick={() => onSelectOption?.(qId, optId)}
+                              onSearchClick={() => onInitiateGifSearch?.(qId, optId, opt.text)}
+                              className="flex-grow"
                               disabled={actionsDisabled}
-                              disabledTitle={
-                                actionsDisabled ? actionsDisabledTitle : 'Click to change GIF'
-                              }
+                              disabledTitle={actionsDisabled ? actionsDisabledTitle : undefined}
                             />
-                            {/* Hover overlay for search icon on GIF */}
-                            <div
-                              className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer rounded-md"
-                              onClick={() => onInitiateGifSearch?.(qId, optId, opt.text)}
-                            >
-                              <Icon
-                                iconId="faMagnifyingGlassLight"
-                                className="h-6 w-6 text-white"
-                              />
-                            </div>
 
                             <div className="mt-1 flex items-center justify-between">
                               {editingOption?.optionId === optId ? (
@@ -660,7 +650,6 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
                                 )}
                                 hoverColorClass="text-destructive"
                               />
-                              {/* Old edit/search icons removed from here */}
                             </div>
                           </div>
                         ) : (
@@ -1068,13 +1057,11 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
               throw new Error(
                 (await res.json().then(e => e.error)) || 'Failed to reorder questions on server'
               );
-            setSaveStatus(prev => ({ ...prev, globalReorder: 'saved' }));
-            setTimeout(() => setSaveStatus(prev => ({ ...prev, globalReorder: null })), 2000);
+            showSuccessToast('Question order saved successfully!');
             await fetchData();
           } catch (err: any) {
             logger.error('Failed to reorder questions on server', { studyId, error: err.message });
-            setSaveStatus(prev => ({ ...prev, globalReorder: 'error' }));
-            setError('Failed to save new question order. Please refresh.');
+            showErrorToast('Failed to save new question order.');
           }
         }
       }
@@ -1384,20 +1371,6 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
                 </p>
               </CardContent>
             </Card>
-          )}
-          {saveStatus.globalReorder && (
-            <div
-              className={`fixed bottom-4 right-4 p-3 rounded-md shadow-lg text-white text-sm ${saveStatus.globalReorder === 'saving' ? 'bg-blue-500' : saveStatus.globalReorder === 'saved' ? 'bg-green-500' : 'bg-red-500'}`}
-            >
-              {saveStatus.globalReorder === 'saving' && (
-                <Icon iconId="faSpinnerLight" className="animate-spin mr-2" />
-              )}
-              {saveStatus.globalReorder === 'saved'
-                ? 'Order saved!'
-                : saveStatus.globalReorder === 'error'
-                  ? 'Order save failed!'
-                  : 'Reordering...'}
-            </div>
           )}
         </div>
 

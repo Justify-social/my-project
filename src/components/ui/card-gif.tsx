@@ -12,7 +12,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Icon } from './icon/icon';
 import { cn } from '@/lib/utils';
-import { Button } from './button'; // Added Button for selectable area
+import { Button } from './button';
 
 export interface GifCardProps {
   /** URL of the GIF */
@@ -25,6 +25,8 @@ export interface GifCardProps {
   isSelected?: boolean;
   /** Callback when the card/option is clicked */
   onClick?: () => void;
+  /** Callback when the search icon is clicked */
+  onSearchClick?: () => void;
   /** Whether to show the pause button (visual cue only for now) */
   showPauseButton?: boolean;
   /** Additional CSS classes for the Card */
@@ -41,6 +43,7 @@ export function GifCard({
   optionText,
   isSelected,
   onClick,
+  onSearchClick,
   showPauseButton = true,
   className,
   disabled,
@@ -61,30 +64,46 @@ export function GifCard({
     // For now, this just toggles the icon.
   };
 
+  const handleSearchOverlayClick = (e: React.MouseEvent) => {
+    if (disabled) return;
+    e.stopPropagation(); // Prevent card click if the overlay is clicked
+    onSearchClick?.();
+  };
+
   return (
     <Card
       className={cn(
         'overflow-hidden w-full flex flex-col',
         isSelected ? 'ring-2 ring-primary shadow-lg' : 'hover:shadow-md',
-        disabled ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer',
+        disabled ? 'opacity-70 cursor-not-allowed' : '',
         className
       )}
-      onClick={handleCardClick}
-      title={disabled ? disabledTitle : undefined}
+      title={disabled ? disabledTitle : altText}
     >
-      <CardContent className="p-0 relative aspect-square flex-grow flex items-center justify-center bg-muted overflow-hidden">
+      <CardContent className="p-0 relative aspect-square flex-grow flex items-center justify-center bg-muted overflow-hidden group">
         <img src={gifUrl} alt={altText} className="object-contain w-full h-full" />
+
+        {onSearchClick && !disabled && (
+          <div
+            className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-150 cursor-pointer rounded-none"
+            onClick={handleSearchOverlayClick}
+            title="Change GIF"
+          >
+            <Icon iconId="faMagnifyingGlassLight" className="h-7 w-7 text-white" />
+          </div>
+        )}
+
         {showPauseButton && (
           <Button
             variant="ghost"
             size="icon"
-            className="absolute top-2 right-2 bg-black/30 hover:bg-black/50 text-white h-7 w-7 p-1"
+            className="absolute top-1 right-1 bg-black/30 hover:bg-black/50 text-white h-6 w-6 p-0.5 z-10"
             onClick={handlePauseClick}
             title={isPaused ? 'Play GIF' : 'Pause GIF'}
             disabled={disabled}
             aria-label={isPaused ? 'Play GIF' : 'Pause GIF'}
           >
-            <Icon iconId={isPaused ? 'faPlayLight' : 'faPauseLight'} className="h-4 w-4" />
+            <Icon iconId={isPaused ? 'faPlayLight' : 'faPauseLight'} className="h-3 w-3" />
           </Button>
         )}
       </CardContent>
@@ -92,7 +111,7 @@ export function GifCard({
         <Button
           variant={isSelected ? 'default' : 'outline'}
           className="w-full rounded-t-none h-auto py-2.5 px-3 text-sm whitespace-normal text-center justify-center flex-grow"
-          onClick={handleCardClick} // Ensure button also triggers the main onClick
+          onClick={handleCardClick}
           disabled={disabled}
           title={disabled ? disabledTitle : optionText}
         >
