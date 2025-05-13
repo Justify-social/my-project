@@ -3,10 +3,12 @@ import { logger } from '../utils/logger';
 
 // Initialize Resend with API key
 let resend: Resend | null = null;
-if (process.env.RESEND_SECRET) {
-  resend = new Resend(process.env.RESEND_SECRET);
+if (process.env.RESEND_API_KEY) {
+  resend = new Resend(process.env.RESEND_API_KEY);
 } else {
-  console.warn('RESEND_SECRET is not set. Email functionality will not work.');
+  logger.warn(
+    '[Resend Setup] RESEND_API_KEY is not set in environment variables. Email functionality will be disabled.'
+  );
 }
 
 // Interface for team invitation email
