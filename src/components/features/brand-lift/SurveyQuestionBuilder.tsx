@@ -1101,7 +1101,17 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
               aiQ.options.map(async (aiOpt: ValidatedAiOption, optIdx: number) => {
                 let imageUrl: string | null = null;
                 if (aiOpt.image_description) {
-                  imageUrl = await fetchGifFromGiphy(aiOpt.image_description);
+                  const MAX_GIPHY_SEARCH_TERM_LENGTH = 100; // Max length for Giphy search term
+                  let searchTerm = aiOpt.image_description;
+                  if (searchTerm.length > MAX_GIPHY_SEARCH_TERM_LENGTH) {
+                    searchTerm = searchTerm.substring(0, MAX_GIPHY_SEARCH_TERM_LENGTH);
+                    logger.warn('[Giphy] Search term truncated for Giphy API call due to length.', {
+                      originalTerm: aiOpt.image_description,
+                      truncatedTerm: searchTerm,
+                      studyId: studyId, // Assuming studyId is accessible here for context
+                    });
+                  }
+                  imageUrl = await fetchGifFromGiphy(searchTerm);
                 }
                 return {
                   tempId: generateTempId(),
