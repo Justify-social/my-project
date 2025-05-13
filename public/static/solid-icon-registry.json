@@ -597,10 +597,24 @@
     },
     {
       "category": "solid",
+      "id": "faListCheckSolid",
+      "name": "List Check",
+      "faVersion": "fas fa-list-check",
+      "path": "/icons/solid/faListCheckSolid.svg"
+    },
+    {
+      "category": "solid",
       "id": "faListSolid",
       "name": "List",
       "faVersion": "fas fa-list",
       "path": "/icons/solid/faListSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faListRadioSolid",
+      "name": "List Radio",
+      "faVersion": "fas fa-list-radio",
+      "path": "/icons/solid/faListRadioSolid.svg"
     },
     {
       "category": "solid",

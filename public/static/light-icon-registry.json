@@ -597,10 +597,24 @@
     },
     {
       "category": "light",
+      "id": "faListCheckLight",
+      "name": "List Check",
+      "faVersion": "fal fa-list-check",
+      "path": "/icons/light/faListCheckLight.svg"
+    },
+    {
+      "category": "light",
       "id": "faListLight",
       "name": "List",
       "faVersion": "fal fa-list",
       "path": "/icons/light/faListLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faListRadioLight",
+      "name": "List Radio",
+      "faVersion": "fal fa-list-radio",
+      "path": "/icons/light/faListRadioLight.svg"
     },
     {
       "category": "light",
