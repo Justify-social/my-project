@@ -174,8 +174,10 @@ const SuperAdminSettingsPage = () => {
         <h2 className="text-xl font-semibold text-primary">User Management</h2>
         <Link href="/debug-tools">
           <Button className="bg-orange-500 hover:bg-orange-600 text-white" asChild>
-            <Icon iconId="faBugLight" className="mr-2 h-4 w-4" />
-            Debug
+            <span>
+              <Icon iconId="faBugLight" className="mr-2 h-4 w-4" />
+              Debug
+            </span>
           </Button>
         </Link>
       </div>

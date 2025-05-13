@@ -55,6 +55,50 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Icon } from '@/components/ui/icon/icon';
 import logger from '@/lib/logger';
 import { SurveyQuestionData, SurveyOptionData, BrandLiftStudyData } from '@/types/brand-lift';
+import { cn } from '@/lib/utils';
+import { GifCard } from '@/components/ui/card-gif'; // Import the new GifCard
+
+// --- Giphy API Key ---
+const GIPHY_API_KEY = process.env.NEXT_PUBLIC_GIPHY_API_KEY;
+
+// --- Giphy Helper Function ---
+async function fetchGifFromGiphy(searchTerm: string): Promise<string | null> {
+  if (!GIPHY_API_KEY) {
+    logger.warn('[Giphy] API key not configured. Skipping GIF fetch.');
+    return null;
+  }
+  if (!searchTerm || searchTerm.trim() === '') {
+    logger.info('[Giphy] Empty search term. Skipping GIF fetch.');
+    return null;
+  }
+
+  // Using Giphy Search endpoint. Translate might also be an option.
+  // https://developers.giphy.com/docs/api/endpoint#search
+  const url = `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(
+    searchTerm
+  )}&limit=1&offset=0&rating=g&lang=en`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      const errorData = await response.json();
+      logger.error('[Giphy] API Error:', { status: response.status, data: errorData });
+      return null;
+    }
+    const data = await response.json();
+    if (data.data && data.data.length > 0) {
+      // Using downsized version for previews, adjust if original or other sizes are needed
+      return (
+        data.data[0].images?.downsized_medium?.url || data.data[0].images?.original?.url || null
+      );
+    }
+    logger.info('[Giphy] No GIFs found for term:', { searchTerm });
+    return null;
+  } catch (error) {
+    logger.error('[Giphy] Fetch error:', { error });
+    return null;
+  }
+}
 
 // --- KPI Formatting Utilities --- START ---
 const kpiDisplayNames: Record<string, string> = {
@@ -122,7 +166,6 @@ interface SortableQuestionItemProps {
   onUpdateQuestionType: (questionIdOrTempId: string, type: SurveyQuestionType) => void;
   onUpdateQuestionOrder: (questionIdOrTempId: string, order: number) => void;
   onToggleRandomized: (questionIdOrTempId: string, checked: boolean) => void;
-  onToggleMandatory: (questionIdOrTempId: string, checked: boolean) => void;
   onUpdateKpiAssociation: (questionIdOrTempId: string, kpi: string | null) => void;
   onDeleteQuestion: (questionIdOrTempId: string) => void;
   onAddOption: (questionIdOrTempId: string) => void;
@@ -140,6 +183,8 @@ interface SortableQuestionItemProps {
   onDeleteOption: (questionIdOrTempId: string, optionIdOrTempId: string) => void;
   actionsDisabled: boolean;
   actionsDisabledTitle?: string;
+  selectedOptionId?: string | null; // To manage which option is selected for GIF cards
+  onSelectOption?: (questionId: string, optionIdOrTempId: string) => void; // Callback for when an option/GIF is selected
 }
 
 const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
@@ -150,7 +195,6 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
     onUpdateQuestionType,
     onUpdateQuestionOrder,
     onToggleRandomized,
-    onToggleMandatory,
     onUpdateKpiAssociation,
     onDeleteQuestion,
     onAddOption,
@@ -160,10 +204,14 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
     onDeleteOption,
     actionsDisabled,
     actionsDisabledTitle,
+    selectedOptionId,
+    onSelectOption,
   }) => {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
       id: question.id || question.tempId!,
     });
+    const [isExpanded, setIsExpanded] = React.useState(true); // Collapsed by default for easier DND
+
     const style = {
       transform: CSS.Transform.toString(transform),
       transition,
@@ -174,132 +222,193 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
 
     return (
       <Card ref={setNodeRef} style={style} className="mb-4 bg-white shadow-sm relative group">
-        <CardHeader className="flex flex-row items-center justify-between p-4">
-          <div className="flex items-center space-x-2">
+        <CardHeader
+          className="flex flex-row items-center justify-between p-4 cursor-pointer"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          <div className="flex items-center space-x-2 flex-grow min-w-0">
             <div
               {...attributes}
               {...listeners}
-              className="p-1 cursor-grab opacity-50 hover:opacity-100"
+              className="p-1 opacity-50 hover:opacity-100 touch-none" // Added touch-none to allow drag on touch devices if header is clickable
+              title="Drag to reorder"
+              onClick={e => e.stopPropagation()} // Prevent header click from triggering when dragging
             >
               <Icon iconId="faBarsLight" className="h-4 w-4 text-muted-foreground" />
             </div>
-            <CardTitle className="text-md">Question {index + 1}</CardTitle>
-          </div>
-          <IconButtonAction
-            iconBaseName="faTrashCan"
-            hoverColorClass="text-destructive"
-            ariaLabel="Delete question"
-            onClick={() => onDeleteQuestion(qId)}
-          />
-        </CardHeader>
-        <CardContent className="p-4 space-y-3">
-          <Textarea
-            value={question.text}
-            onChange={e => onUpdateQuestionText(qId, e.target.value)}
-            placeholder="Enter question text..."
-          />
-          <div className="grid grid-cols-2 gap-4">
-            <Select
-              value={question.questionType}
-              onValueChange={v => onUpdateQuestionType(qId, v as SurveyQuestionType)}
+            <CardTitle
+              className="text-md truncate flex-grow"
+              title={question.text || `Question ${index + 1}`}
             >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={SurveyQuestionType.SINGLE_CHOICE}>Single Choice</SelectItem>
-                <SelectItem value={SurveyQuestionType.MULTIPLE_CHOICE}>Multiple Choice</SelectItem>
-              </SelectContent>
-            </Select>
-            <Input
-              type="number"
-              value={question.order}
-              onChange={e => onUpdateQuestionOrder(qId, parseInt(e.target.value, 10) || 0)}
-              placeholder="Order"
-              className="w-20"
+              Question {index + 1}: {question.text.substring(0, 50)}
+              {question.text.length > 50 ? '...' : ''}
+            </CardTitle>
+            {/* Chevron icon for collapse/expand state, moved inside the clickable part of header */}
+            <Icon
+              iconId={isExpanded ? 'faChevronUpLight' : 'faChevronDownLight'}
+              className="h-4 w-4 text-muted-foreground ml-auto flex-shrink-0"
             />
           </div>
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <Switch
-                id={`rand-${qId}`}
-                checked={question.isRandomized ?? false}
-                onCheckedChange={c => onToggleRandomized(qId, c)}
-              />
-              <Label htmlFor={`rand-${qId}`}>Randomise Options</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Switch
-                id={`mand-${qId}`}
-                checked={question.isMandatory ?? true}
-                onCheckedChange={c => onToggleMandatory(qId, c)}
-              />
-              <Label htmlFor={`mand-${qId}`}>Mandatory</Label>
-            </div>
+          <div className="flex items-center flex-shrink-0 pl-2">
+            {' '}
+            {/* Added pl-2 for spacing */}
+            <IconButtonAction
+              iconBaseName="faTrashCan"
+              hoverColorClass="text-destructive"
+              ariaLabel="Delete question"
+              onClick={e => {
+                e.stopPropagation();
+                actionsDisabled ? undefined : onDeleteQuestion(qId);
+              }}
+              className={cn(actionsDisabled && 'opacity-50 cursor-not-allowed')}
+            />
           </div>
-          <Input
-            value={question.kpiAssociation || ''}
-            onChange={e => onUpdateKpiAssociation(qId, e.target.value || null)}
-            placeholder={`KPI Association (e.g. ${formatKpiName('BRAND_AWARENESS')})`}
-          />
-          <div>
-            <Label className="text-sm font-medium">Options:</Label>
-            <div className="space-y-2 mt-1">
-              {question.options
-                .sort((a, b) => a.order - b.order)
-                .map((opt, optIdx) => {
-                  const optId = opt.id || opt.tempId!;
-                  return (
-                    <Card key={optId} className="p-2 bg-slate-50 space-y-1">
-                      <div className="flex items-center justify-between">
-                        <Label className="text-xs">Option {optIdx + 1}</Label>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="p-1 h-auto"
-                          onClick={() => onDeleteOption(qId, optId)}
-                          disabled={actionsDisabled}
-                          title={actionsDisabled ? actionsDisabledTitle : 'Delete option'}
-                        >
-                          <Icon iconId="faXmarkLight" className="h-3 w-3" />
-                        </Button>
-                      </div>
-                      <Input
-                        value={opt.text}
-                        onChange={e => onUpdateOptionText(qId, optId, e.target.value)}
-                        placeholder="Option text"
-                      />
-                      <Input
-                        value={opt.imageUrl || ''}
-                        onChange={e => onUpdateOptionImageUrl(qId, optId, e.target.value || null)}
-                        placeholder="Image URL (optional)"
-                      />
-                      <Input
-                        type="number"
-                        value={opt.order}
-                        onChange={e =>
-                          onUpdateOptionOrder(qId, optId, parseInt(e.target.value, 10) || 0)
-                        }
-                        placeholder="Order"
-                        className="w-16 text-xs"
-                      />
-                    </Card>
-                  );
-                })}
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onAddOption(qId)}
-              className="mt-2"
+        </CardHeader>
+        {isExpanded && (
+          <CardContent className="p-4 space-y-3 border-t">
+            <Textarea
+              value={question.text}
+              onChange={e => onUpdateQuestionText(qId, e.target.value)}
+              placeholder="Enter question text..."
               disabled={actionsDisabled}
-              title={actionsDisabled ? actionsDisabledTitle : 'Add Option'}
-            >
-              <Icon iconId="faPlusLight" className="mr-1 h-3 w-3" />
-              Add Option
-            </Button>
-          </div>
-        </CardContent>
+              title={actionsDisabled ? actionsDisabledTitle : undefined}
+            />
+            <div className="grid grid-cols-2 gap-4">
+              <Select
+                value={question.questionType}
+                onValueChange={v => onUpdateQuestionType(qId, v as SurveyQuestionType)}
+                disabled={actionsDisabled}
+              >
+                <SelectTrigger title={actionsDisabled ? actionsDisabledTitle : undefined}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={SurveyQuestionType.SINGLE_CHOICE}>Single Choice</SelectItem>
+                  <SelectItem value={SurveyQuestionType.MULTIPLE_CHOICE}>
+                    Multiple Choice
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <Input
+                type="number"
+                value={question.order}
+                onChange={e => onUpdateQuestionOrder(qId, parseInt(e.target.value, 10) || 0)}
+                placeholder="Order"
+                className="w-20"
+                disabled={actionsDisabled}
+                title={actionsDisabled ? actionsDisabledTitle : undefined}
+              />
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id={`rand-${qId}`}
+                  checked={question.isRandomized ?? false}
+                  onCheckedChange={c => onToggleRandomized(qId, c)}
+                  disabled={actionsDisabled}
+                  title={actionsDisabled ? actionsDisabledTitle : undefined}
+                />
+                <Label htmlFor={`rand-${qId}`}>Randomise Options</Label>
+              </div>
+            </div>
+            <Input
+              value={question.kpiAssociation || ''}
+              onChange={e => onUpdateKpiAssociation(qId, e.target.value || null)}
+              placeholder={`KPI Association (e.g. ${formatKpiName('BRAND_AWARENESS')})`}
+              disabled={actionsDisabled}
+              title={actionsDisabled ? actionsDisabledTitle : undefined}
+            />
+            <div>
+              <Label className="text-sm font-medium">Options:</Label>
+              <div className="space-y-2 mt-1">
+                {question.options
+                  .sort((a, b) => a.order - b.order)
+                  .map((opt, optIdx) => {
+                    const optId = opt.id || opt.tempId!;
+                    // Check if the imageUrl likely points to a GIF
+                    const isGif =
+                      opt.imageUrl &&
+                      (opt.imageUrl.endsWith('.gif') || opt.imageUrl.includes('giphy.com'));
+
+                    return (
+                      <React.Fragment key={optId}>
+                        {isGif ? (
+                          <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 p-1 self-stretch flex">
+                            {' '}
+                            {/* Grid-like sizing for GIF cards */}
+                            <GifCard
+                              gifUrl={opt.imageUrl!}
+                              altText={opt.text || `Option ${optIdx + 1}`}
+                              optionText={opt.text || `Option ${optIdx + 1}`}
+                              isSelected={optId === selectedOptionId}
+                              onClick={() => onSelectOption?.(qId, optId)}
+                              className="flex-grow"
+                              disabled={actionsDisabled}
+                              disabledTitle={actionsDisabled ? actionsDisabledTitle : undefined}
+                            />
+                          </div>
+                        ) : (
+                          <Card key={optId} className="p-2 bg-slate-50 space-y-1">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-xs">Option {optIdx + 1}</Label>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="p-1 h-auto"
+                                onClick={() => onDeleteOption(qId, optId)}
+                                disabled={actionsDisabled}
+                                title={actionsDisabled ? actionsDisabledTitle : 'Delete option'}
+                              >
+                                <Icon iconId="faXmarkLight" className="h-3 w-3" />
+                              </Button>
+                            </div>
+                            <Input
+                              value={opt.text}
+                              onChange={e => onUpdateOptionText(qId, optId, e.target.value)}
+                              placeholder="Option text"
+                              disabled={actionsDisabled}
+                              title={actionsDisabled ? actionsDisabledTitle : undefined}
+                            />
+                            <Input
+                              value={opt.imageUrl || ''}
+                              onChange={e =>
+                                onUpdateOptionImageUrl(qId, optId, e.target.value || null)
+                              }
+                              placeholder="Image/GIF URL (optional)"
+                              disabled={actionsDisabled}
+                              title={actionsDisabled ? actionsDisabledTitle : undefined}
+                            />
+                            <Input
+                              type="number"
+                              value={opt.order}
+                              onChange={e =>
+                                onUpdateOptionOrder(qId, optId, parseInt(e.target.value, 10) || 0)
+                              }
+                              placeholder="Order"
+                              className="w-16 text-xs"
+                              disabled={actionsDisabled}
+                              title={actionsDisabled ? actionsDisabledTitle : undefined}
+                            />
+                          </Card>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onAddOption(qId)}
+                className="mt-2"
+                disabled={actionsDisabled}
+                title={actionsDisabled ? actionsDisabledTitle : 'Add Option'}
+              >
+                <Icon iconId="faPlusLight" className="mr-1 h-3 w-3" />
+                Add Option
+              </Button>
+            </div>
+          </CardContent>
+        )}
       </Card>
     );
   }
@@ -316,71 +425,14 @@ const SurveyQuestionBuilder: React.FC<SurveyQuestionBuilderProps> = ({ studyId }
   const [saveStatus, setSaveStatus] = useState<Record<string, 'saving' | 'saved' | 'error' | null>>(
     {}
   );
+  const [hasInitializedQuestions, setHasInitializedQuestions] = useState(false);
+  // State to track selected GIF option for each question
+  const [selectedGifOptions, setSelectedGifOptions] = useState<Record<string, string | null>>({});
 
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
-
-  const fetchData = useCallback(async () => {
-    if (!isAuthLoaded) return; // Wait for auth to load
-    if (!isSignedIn) {
-      setError('Please sign in to manage survey questions.');
-      setIsLoading(false);
-      return;
-    }
-    if (!activeOrgId) {
-      setError('An active organization is required. Please select or create one in settings.');
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-    try {
-      const [studyRes, questionsRes] = await Promise.all([
-        fetch(`/api/brand-lift/surveys/${studyId}`),
-        fetch(`/api/brand-lift/surveys/${studyId}/questions`),
-      ]);
-      if (!studyRes.ok)
-        throw new Error(
-          (await studyRes.json().then(e => e.error)) || 'Failed to fetch study details'
-        );
-      const fetchedStudyDetails = await studyRes.json();
-      if (fetchedStudyDetails.orgId !== activeOrgId) {
-        // Backend should also do this, but good client check
-        throw new ForbiddenError('You do not have permission to access this study.');
-      }
-      setStudyDetails(fetchedStudyDetails);
-
-      if (!questionsRes.ok)
-        throw new Error(
-          (await questionsRes.json().then(e => e.error)) || 'Failed to fetch questions'
-        );
-      setQuestions(
-        ((await questionsRes.json()) as SurveyQuestionData[]).sort((a, b) => a.order - b.order)
-      );
-    } catch (err: any) {
-      logger.error('Error fetching data for builder:', { studyId, error: err.message });
-      setError(err.message);
-    }
-    setIsLoading(false);
-  }, [studyId, isAuthLoaded, isSignedIn, activeOrgId]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  const actionsDisabled = !isAuthLoaded || !isSignedIn || !activeOrgId || isLoading; // Also disable if initial data is loading
-  const actionsDisabledTitle = !isAuthLoaded
-    ? 'Loading authentication...'
-    : !isSignedIn
-      ? 'Please sign in to manage questions'
-      : !activeOrgId
-        ? 'Select an active organization to manage questions'
-        : isLoading
-          ? 'Loading data...'
-          : undefined;
 
   const saveQuestion = useCallback(
     async (question: SurveyQuestionData) => {
@@ -418,7 +470,8 @@ const SurveyQuestionBuilder: React.FC<SurveyQuestionBuilderProps> = ({ studyId }
               q.id === qId || q.tempId === qId
                 ? {
                     ...savedQuestion,
-                    options: savedQuestion.options.sort(
+                    // Ensure options is an array before trying to sort, default to empty array if not present
+                    options: (savedQuestion.options || []).sort(
                       (a: SurveyOptionData, b: SurveyOptionData) => a.order - b.order
                     ),
                   }
@@ -436,6 +489,95 @@ const SurveyQuestionBuilder: React.FC<SurveyQuestionBuilderProps> = ({ studyId }
     },
     [studyId]
   );
+
+  const fetchData = useCallback(async () => {
+    if (!isAuthLoaded) return;
+    if (!isSignedIn) {
+      setError('Please sign in to manage survey questions.');
+      setIsLoading(false);
+      return;
+    }
+    if (!activeOrgId) {
+      setError('An active organization is required. Please select or create one in settings.');
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    try {
+      const [studyRes, questionsRes] = await Promise.all([
+        fetch(`/api/brand-lift/surveys/${studyId}`),
+        fetch(`/api/brand-lift/surveys/${studyId}/questions`),
+      ]);
+      if (!studyRes.ok)
+        throw new Error(
+          (await studyRes.json().then(e => e.error)) || 'Failed to fetch study details'
+        );
+      const fetchedStudyDetails = await studyRes.json();
+      // if (fetchedStudyDetails.orgId !== activeOrgId) { // OrgId check removed as per updated requirements
+      //   throw new ForbiddenError('You do not have permission to access this study.');
+      // }
+      setStudyDetails(fetchedStudyDetails);
+
+      if (!questionsRes.ok)
+        throw new Error(
+          (await questionsRes.json().then(e => e.error)) || 'Failed to fetch questions'
+        );
+      const fetchedQuestions = ((await questionsRes.json()) as SurveyQuestionData[]).sort(
+        (a, b) => a.order - b.order
+      );
+      setQuestions(fetchedQuestions);
+
+      // Initialize with 10 blank questions if fetchedQuestions is empty and not already initialized
+      if (fetchedQuestions.length === 0 && !hasInitializedQuestions) {
+        const newBlankQuestions: SurveyQuestionData[] = [];
+        for (let i = 0; i < 10; i++) {
+          newBlankQuestions.push({
+            tempId: generateTempId(),
+            id: '',
+            studyId: studyId,
+            text: `Placeholder Question ${i + 1}`,
+            questionType: SurveyQuestionType.SINGLE_CHOICE,
+            order: i,
+            isRandomized: false,
+            isMandatory: true, // All questions mandatory
+            kpiAssociation: null,
+            options: [
+              { tempId: generateTempId(), id: '', text: 'Option 1', order: 0, imageUrl: null },
+            ],
+          });
+        }
+        setQuestions(newBlankQuestions);
+        // Save these blank questions to the backend
+        for (const q of newBlankQuestions) {
+          await saveQuestion(q); // Assuming saveQuestion can handle new questions
+        }
+        setHasInitializedQuestions(true); // Mark as initialized
+      } else if (fetchedQuestions.length > 0) {
+        setHasInitializedQuestions(true); // If questions were fetched, consider it initialized
+      }
+    } catch (err: any) {
+      logger.error('Error fetching data for builder:', { studyId, error: err.message });
+      setError(err.message);
+    }
+    setIsLoading(false);
+  }, [studyId, isAuthLoaded, isSignedIn, activeOrgId, hasInitializedQuestions, saveQuestion]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const actionsDisabled = !isAuthLoaded || !isSignedIn || !activeOrgId || isLoading;
+  const actionsDisabledTitle = !isAuthLoaded
+    ? 'Loading authentication...'
+    : !isSignedIn
+      ? 'Please sign in to manage questions'
+      : !activeOrgId
+        ? 'Select an active organization to manage questions'
+        : isLoading
+          ? 'Loading data...'
+          : undefined;
 
   const updateQuestionProperty = (
     questionIdOrTempId: string,
@@ -461,8 +603,6 @@ const SurveyQuestionBuilder: React.FC<SurveyQuestionBuilderProps> = ({ studyId }
   };
   const handleToggleRandomized = (id: string, checked: boolean) =>
     updateQuestionProperty(id, { isRandomized: checked });
-  const handleToggleMandatory = (id: string, checked: boolean) =>
-    updateQuestionProperty(id, { isMandatory: checked });
   const handleUpdateKpiAssociation = (id: string, kpi: string | null) =>
     updateQuestionProperty(id, { kpiAssociation: kpi });
 
@@ -640,24 +780,36 @@ const SurveyQuestionBuilder: React.FC<SurveyQuestionBuilderProps> = ({ studyId }
         });
         throw new Error('Received invalid suggestions structure from AI.');
       }
-      const newAiQuestions: SurveyQuestionData[] = validation.data.map(
-        (aiQ: ValidatedAiQuestion, idx: number) => ({
-          tempId: generateTempId(),
-          id: '',
-          studyId: studyId,
-          text: aiQ.text,
-          questionType: aiQ.type, // type is already SurveyQuestionType from Zod schema
-          order: questions.length + idx,
-          isRandomized: aiQ.is_randomized,
-          isMandatory: aiQ.is_mandatory,
-          kpiAssociation: aiQ.kpi_association,
-          options: aiQ.options.map((aiOpt: ValidatedAiOption, optIdx: number) => ({
+      const newAiQuestions: SurveyQuestionData[] = await Promise.all(
+        validation.data.map(async (aiQ: ValidatedAiQuestion, idx: number) => {
+          const optionsWithImages: SurveyOptionData[] = await Promise.all(
+            aiQ.options.map(async (aiOpt: ValidatedAiOption, optIdx: number) => {
+              let imageUrl: string | null = null;
+              if (aiOpt.image_description) {
+                imageUrl = await fetchGifFromGiphy(aiOpt.image_description);
+              }
+              return {
+                tempId: generateTempId(),
+                id: '',
+                text: aiOpt.text,
+                imageUrl: imageUrl,
+                order: optIdx,
+              };
+            })
+          );
+
+          return {
             tempId: generateTempId(),
             id: '',
-            text: aiOpt.text,
-            imageUrl: null,
-            order: optIdx,
-          })),
+            studyId: studyId,
+            text: aiQ.text,
+            questionType: aiQ.type,
+            order: questions.length + idx,
+            isRandomized: aiQ.is_randomized,
+            isMandatory: aiQ.is_mandatory,
+            kpiAssociation: aiQ.kpi_association,
+            options: optionsWithImages,
+          };
         })
       );
       for (const q of newAiQuestions) {
@@ -674,6 +826,24 @@ const SurveyQuestionBuilder: React.FC<SurveyQuestionBuilderProps> = ({ studyId }
       setError(err.message || 'Failed to process AI suggestions.');
     }
     setIsAISuggesting(false);
+  };
+
+  // Handler for selecting a GIF option
+  const handleSelectGifOption = (questionId: string, optionIdOrTempId: string) => {
+    setSelectedGifOptions(prev => ({
+      ...prev,
+      [questionId]: optionIdOrTempId,
+    }));
+    // Here you might want to also update the actual survey response data if this selection
+    // directly translates to choosing an answer. For now, it just updates visual state.
+    // Potentially, this could also trigger a save if the selection implies an answer choice.
+    const questionToUpdate = questions.find(q => q.id === questionId || q.tempId === questionId);
+    if (questionToUpdate) {
+      // This part is conceptual: how you store the "selected answer" for the question
+      // For example, you might have a field on the question like `selectedOptionId`
+      // updateQuestionProperty(questionId, { selectedOptionId: optionIdOrTempId });
+      logger.info('Selected GIF option', { questionId, optionIdOrTempId });
+    }
   };
 
   if (!isAuthLoaded || (isLoading && questions.length === 0 && !error)) {
@@ -722,41 +892,9 @@ const SurveyQuestionBuilder: React.FC<SurveyQuestionBuilderProps> = ({ studyId }
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-      <Card className="md:col-span-1 sticky top-6">
-        <CardHeader>
-          <CardTitle>Campaign Context</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm font-medium">
-            Study: {studyDetails?.name || <Skeleton className="h-4 w-3/4" />}
-          </p>
-          <p className="text-sm">
-            Campaign: {studyDetails?.campaign?.campaignName || <Skeleton className="h-4 w-2/3" />}
-          </p>
-          <p className="text-sm">
-            Primary KPI:{' '}
-            {studyDetails?.primaryKpi ? (
-              formatKpiName(studyDetails.primaryKpi)
-            ) : (
-              <Skeleton className="h-4 w-1/2" />
-            )}
-          </p>
-          <div className="mt-4 p-2 bg-slate-50 border rounded text-xs text-muted-foreground min-h-[50px]">
-            {studyDetails?.campaign?.primaryCreativeUrl ? (
-              <img
-                src={studyDetails.campaign.primaryCreativeUrl}
-                alt="Campaign Creative"
-                className="rounded-md max-h-40 w-auto"
-              />
-            ) : (
-              'Primary campaign creative visual will be displayed here.'
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="md:col-span-2 space-y-6">
+    <>
+      {/* Survey Questions Section - now takes full width */}
+      <div className="space-y-6">
         <div className="flex flex-wrap justify-between items-center gap-2">
           <h2 className="text-xl font-semibold">Survey Questions</h2>
           <div className="flex gap-2 flex-wrap">
@@ -769,16 +907,16 @@ const SurveyQuestionBuilder: React.FC<SurveyQuestionBuilderProps> = ({ studyId }
               {isAISuggesting ? (
                 <Icon iconId="faSpinnerLight" className="animate-spin mr-2 h-4 w-4" />
               ) : (
-                <Icon iconId="faLightbulbLight" className="mr-2 h-4 w-4" />
+                <Icon iconId="faSparklesLight" className="mr-2 h-4 w-4" />
               )}
-              Suggest (AI)
+              Draft
             </Button>
             <Button
               onClick={handleAddQuestion}
               disabled={actionsDisabled}
               title={actionsDisabled ? actionsDisabledTitle : 'Add new question'}
             >
-              <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" /> Add New Question
+              <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" /> Add Question
             </Button>
           </div>
         </div>
@@ -804,7 +942,6 @@ const SurveyQuestionBuilder: React.FC<SurveyQuestionBuilderProps> = ({ studyId }
                 onUpdateQuestionType={handleUpdateQuestionType}
                 onUpdateQuestionOrder={handleUpdateQuestionOrder}
                 onToggleRandomized={handleToggleRandomized}
-                onToggleMandatory={handleToggleMandatory}
                 onUpdateKpiAssociation={handleUpdateKpiAssociation}
                 onDeleteQuestion={handleDeleteQuestionWrapper}
                 onAddOption={handleAddOptionWrapper}
@@ -814,6 +951,8 @@ const SurveyQuestionBuilder: React.FC<SurveyQuestionBuilderProps> = ({ studyId }
                 onDeleteOption={handleDeleteOptionWrapper}
                 actionsDisabled={actionsDisabled}
                 actionsDisabledTitle={actionsDisabledTitle}
+                selectedOptionId={selectedGifOptions[question.id || question.tempId!]}
+                onSelectOption={handleSelectGifOption}
               />
             ))}
           </SortableContext>
@@ -848,7 +987,7 @@ const SurveyQuestionBuilder: React.FC<SurveyQuestionBuilderProps> = ({ studyId }
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 };
 

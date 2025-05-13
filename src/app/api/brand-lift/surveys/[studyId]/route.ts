@@ -45,20 +45,48 @@ export const GET = async (
     const { studyId } = await paramsPromise;
     if (!studyId) throw new BadRequestError('Study ID is required.');
 
-    const study = await db.brandLiftStudy.findFirst({
+    const studyData = await db.brandLiftStudy.findFirst({
       where: {
         id: studyId,
         orgId: orgId,
       },
-      include: {
-        campaign: { select: { campaignName: true } },
+      select: {
+        id: true,
+        name: true,
+        submissionId: true,
+        status: true,
+        funnelStage: true,
+        primaryKpi: true,
+        secondaryKpis: true,
+        createdAt: true,
+        updatedAt: true,
+        cintProjectId: true,
+        cintTargetGroupId: true,
+        campaign: {
+          select: {
+            campaignName: true,
+            wizard: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
         _count: { select: { questions: true } },
       },
     });
-    if (!study)
+
+    if (!studyData) {
       throw new NotFoundError('Study not found or you do not have permission to view it.');
+    }
+
+    const responseData = {
+      ...studyData,
+      campaignId: studyData.campaign?.wizard?.id,
+    };
+
     logger.info('Fetched Brand Lift Study details', { studyId, userId: clerkUserId, orgId });
-    return NextResponse.json(study);
+    return NextResponse.json(responseData);
   } catch (error: any) {
     return handleApiError(error, req);
   }

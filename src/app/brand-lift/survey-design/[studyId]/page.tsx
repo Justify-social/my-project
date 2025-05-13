@@ -7,12 +7,58 @@ import logger from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon/icon';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { IconButtonAction } from '@/components/ui/button-icon-action';
+import { BrandLiftStudyData } from '@/types/brand-lift';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// Define the interface for the ref methods
+export interface SurveyQuestionBuilderRef {
+  handleAddQuestion: () => void;
+  handleSuggestQuestions: () => void;
+}
 
 const SurveyDesignPage: React.FC = () => {
   const params = useParams();
   const router = useRouter();
   const studyIdParam = params?.studyId;
   const studyId = typeof studyIdParam === 'string' ? studyIdParam : null;
+
+  // State for study details
+  const [studyDetails, setStudyDetails] = React.useState<Partial<BrandLiftStudyData> | null>(null);
+  const [isLoadingStudyDetails, setIsLoadingStudyDetails] = React.useState(true);
+  const [fetchErrorStudyDetails, setFetchErrorStudyDetails] = React.useState<string | null>(null);
+  const [isAISuggesting, setIsAISuggesting] = React.useState(false); // Added for Draft button state
+  const [actionsDisabled, setActionsDisabled] = React.useState(true); // Added for button state
+
+  // Ref for SurveyQuestionBuilder methods
+  const surveyBuilderRef = React.useRef<SurveyQuestionBuilderRef>(null);
+
+  React.useEffect(() => {
+    if (studyId) {
+      const fetchStudyDetails = async () => {
+        setIsLoadingStudyDetails(true);
+        setFetchErrorStudyDetails(null);
+        try {
+          const res = await fetch(`/api/brand-lift/surveys/${studyId}`);
+          if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.error || `Failed to fetch study details: ${res.statusText}`);
+          }
+          const data = await res.json();
+          setStudyDetails(data);
+        } catch (err: any) {
+          logger.error('Error fetching study details for SurveyDesignPage:', {
+            studyId,
+            error: err.message,
+          });
+          setFetchErrorStudyDetails(err.message);
+        } finally {
+          setIsLoadingStudyDetails(false);
+        }
+      };
+      fetchStudyDetails();
+    }
+  }, [studyId]);
 
   if (!studyId) {
     logger.error('Invalid study ID in route parameter for survey design', { param: studyIdParam });
@@ -33,14 +79,68 @@ const SurveyDesignPage: React.FC = () => {
 
   return (
     <>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Survey Design: Build &amp; Refine Questions</h1>
+      <div className="mb-6">
+        <div className="flex justify-between items-center">
+          {' '}
+          {/* Container for title and buttons */}
+          <h1 className="text-2xl font-bold">Survey Design</h1>
+          <div className="flex gap-2 flex-wrap">
+            {' '}
+            {/* Buttons moved here */}
+            <Button
+              variant="outline"
+              onClick={() => surveyBuilderRef.current?.handleSuggestQuestions()}
+              disabled={actionsDisabled || isAISuggesting} // Use state from SurveyDesignPage if needed, or pass down from builder
+              title={actionsDisabled ? 'Loading data...' : 'Suggest questions using AI'} // Adjust title as needed
+            >
+              {isAISuggesting ? (
+                <Icon iconId="faSpinnerLight" className="animate-spin mr-2 h-4 w-4" />
+              ) : (
+                <Icon iconId="faSparklesLight" className="mr-2 h-4 w-4" />
+              )}
+              Draft
+            </Button>
+            <Button
+              onClick={() => surveyBuilderRef.current?.handleAddQuestion()}
+              disabled={actionsDisabled} // Adjust as needed
+              title={actionsDisabled ? 'Loading data...' : 'Add new question'}
+            >
+              <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" /> Add Question
+            </Button>
+          </div>
+        </div>
+
+        {/* Campaign Link Section - make entire div clickable if desired, or keep <a> around icon+text */}
+        {isLoadingStudyDetails && !studyDetails && <Skeleton className="h-5 w-1/2 mt-2 mb-2" />}
+        {fetchErrorStudyDetails && (
+          <p className="text-sm text-destructive mt-1 mb-2">Error loading campaign name.</p>
+        )}
+        {!isLoadingStudyDetails &&
+          studyDetails?.campaign?.campaignName &&
+          studyDetails?.campaignId && (
+            <a // Make the whole area a link
+              href={`/campaigns/${studyDetails.campaignId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-1 mb-2 text-sm text-muted-foreground flex items-center hover:underline w-fit" // w-fit to make it only as wide as content
+              title="View Campaign Profile"
+            >
+              <span>Study for Campaign: {studyDetails.campaign.campaignName}</span>
+              <IconButtonAction
+                iconBaseName="faClipboard"
+                ariaLabel="View Campaign Profile"
+                hoverColorClass="text-accent-dark"
+                className="p-1 h-auto inline-flex text-accent hover:text-accent-dark ml-2" // Added ml-2
+              />
+            </a>
+          )}
+      </div>
+      <SurveyQuestionBuilder studyId={studyId} ref={surveyBuilderRef} /> {/* Pass ref */}
+      <div className="mt-8 pt-6 border-t border-gray-200 flex justify-end">
         <Button onClick={() => router.push(`/brand-lift/survey-preview/${studyId}`)}>
-          <Icon iconId="faEyeLight" className="mr-2 h-4 w-4" />
           Proceed to Preview
         </Button>
       </div>
-      <SurveyQuestionBuilder studyId={studyId} />
     </>
   );
 };

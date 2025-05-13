@@ -145,7 +145,17 @@ export const POST = async (
     const suggestedYaml = completion.choices[0]?.message?.content;
     if (!suggestedYaml) throw new Error('AI did not return any suggestions.');
 
-    return new NextResponse(suggestedYaml, {
+    // Strip Markdown fences if present
+    let finalYaml = suggestedYaml.trim();
+    if (finalYaml.startsWith('```yaml')) {
+      finalYaml = finalYaml.substring(7); // Remove ```yaml and potentially the first newline
+      if (finalYaml.endsWith('```')) {
+        finalYaml = finalYaml.substring(0, finalYaml.length - 3);
+      }
+    }
+    finalYaml = finalYaml.trim(); // Trim any leading/trailing whitespace again
+
+    return new NextResponse(finalYaml, {
       status: 200,
       headers: { 'Content-Type': 'application/yaml' },
     });
