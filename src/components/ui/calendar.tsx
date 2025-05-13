@@ -1,9 +1,9 @@
 /**
  * @component Calendar
  * @category organism
- * @subcategory input
- * @description Displays a calendar grid allowing users to view dates and select single or multiple dates.
- * @status 10th April
+ * @subcategory calendar
+ * @description Displays a calendar grid.
+ * @status 13th May
  */
 'use client';
 
@@ -46,18 +46,19 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
         day_selected:
           'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground',
         day_today: 'bg-accent text-accent-foreground',
-        day_outside:
-          'day-outside text-muted-foreground aria-selected:bg-accent/50 aria-selected:text-muted-foreground',
+        day_outside: 'day-outside text-muted-foreground opacity-50',
         day_disabled: 'text-muted-foreground opacity-50',
         day_range_middle: 'aria-selected:bg-accent aria-selected:text-accent-foreground',
         day_hidden: 'invisible',
         ...classNames,
       }}
       components={{
-        Chevron: ({ orientation, className: iconClassName, size, disabled, ...restProps }) => {
-          const iconId = orientation === 'left' ? 'faChevronLeftLight' : 'faChevronRightLight';
-          return <Icon iconId={iconId} className={cn('h-4 w-4', iconClassName)} {...restProps} />;
-        },
+        IconLeft: ({ ...props }) => (
+          <Icon iconId="faChevronLeftLight" className="h-4 w-4" {...props} />
+        ),
+        IconRight: ({ ...props }) => (
+          <Icon iconId="faChevronRightLight" className="h-4 w-4" {...props} />
+        ),
       }}
       {...props}
     />

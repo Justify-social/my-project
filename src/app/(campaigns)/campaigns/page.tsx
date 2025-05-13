@@ -9,7 +9,6 @@ import { useUser, useAuth } from '@clerk/nextjs';
 import { LoadingSkeleton, TableSkeleton } from '@/components/ui';
 import { Button } from '@/components/ui/button';
 import { IconButtonAction } from '@/components/ui/button-icon-action';
-import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -34,12 +33,22 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import {
+  CampaignFilters,
+  type CampaignFiltersState,
+} from '@/components/features/campaigns/CampaignFilters';
 import { Prisma } from '@prisma/client'; // Ensure Prisma namespace is imported
-import { Label } from '@/components/ui/label';
 import { logger } from '@/utils/logger';
-import { ConfirmDeleteDialog } from '@/components/ui/dialog-confirm-delete'; // Added import
-import { getCampaignStatusInfo, CampaignStatusKey } from '@/utils/statusUtils'; // Import centralized utility
-import { Checkbox } from '@/components/ui/checkbox'; // Import Checkbox
+import { ConfirmDeleteDialog } from '@/components/ui/dialog-confirm-delete';
+import { getCampaignStatusInfo, CampaignStatusKey } from '@/utils/statusUtils';
 
 // Define expected status values
 // type CampaignStatus = 'DRAFT' | 'REVIEW' | 'APPROVED' | 'ACTIVE' | 'COMPLETED' | string;
@@ -259,7 +268,6 @@ const ClientCampaignList: React.FC = () => {
   const [campaignToDelete, setCampaignToDelete] = useState<{ id: string; name: string } | null>(
     null
   );
-  const [deleteInProgress, setDeleteInProgress] = useState(false);
   const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
   const [campaignToDuplicate, setCampaignToDuplicate] = useState<{
     id: string;
@@ -270,6 +278,8 @@ const ClientCampaignList: React.FC = () => {
   const [isDuplicating, setIsDuplicating] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
   const router = useRouter();
+
+  const [isFiltersSheetOpen, setIsFiltersSheetOpen] = useState(false);
 
   // Define Toast Helper Functions Locally
   const showSuccessToast = (
@@ -378,59 +388,26 @@ const ClientCampaignList: React.FC = () => {
 
   // Get unique start and end dates from campaigns
   const uniqueDates = useMemo(() => {
-    if (!campaigns || campaigns.length === 0)
-      return {
-        startDates: [],
-        endDates: [],
-      };
-
-    // Updated helper function to safely parse dates for filters
-    const safelyFormatDateForFilter = (
-      dateValue: string | number | Date | null | undefined // Removed Record<string, never>
-    ): string | undefined => {
-      if (!dateValue) return undefined;
-      // Explicitly handle only types Date constructor accepts
-      if (
-        typeof dateValue !== 'string' &&
-        typeof dateValue !== 'number' &&
-        !(dateValue instanceof Date)
-      ) {
-        console.warn(
-          'safelyFormatDateForFilter received unexpected type:',
-          typeof dateValue,
-          dateValue
-        );
-        return undefined; // Ignore unexpected types
-      }
-      try {
-        const date = new Date(dateValue);
-        if (!isNaN(date.getTime())) {
-          return date.toISOString().split('T')[0]; // Use YYYY-MM-DD format for filtering
+    if (!campaigns?.length) return { startDates: [], endDates: [] };
+    const sDates = new Set<string>();
+    const eDates = new Set<string>();
+    campaigns.forEach(c => {
+      if (c.startDate) {
+        const datePart = c.startDate.split('T')[0];
+        if (datePart && datePart !== '') {
+          // Explicitly check for non-empty string
+          sDates.add(datePart);
         }
-        return undefined;
-      } catch (error) {
-        console.error('Error parsing date for filter:', error, dateValue);
-        return undefined;
       }
-    };
-
-    const startDatesArray = campaigns
-      .map(campaign => safelyFormatDateForFilter(campaign.startDate))
-      .filter((date): date is string => !!date);
-
-    const endDatesArray = campaigns
-      .map(campaign => safelyFormatDateForFilter(campaign.endDate))
-      .filter((date): date is string => !!date);
-
-    const startDatesSet = new Set(startDatesArray);
-    const endDatesSet = new Set(endDatesArray);
-
-    const startDates = Array.from(startDatesSet).sort();
-    const endDates = Array.from(endDatesSet).sort();
-    return {
-      startDates,
-      endDates,
-    };
+      if (c.endDate) {
+        const datePart = c.endDate.split('T')[0];
+        if (datePart && datePart !== '') {
+          // Explicitly check for non-empty string
+          eDates.add(datePart);
+        }
+      }
+    });
+    return { startDates: Array.from(sDates).sort(), endDates: Array.from(eDates).sort() };
   }, [campaigns]);
 
   // Format date for display
@@ -593,7 +570,7 @@ const ClientCampaignList: React.FC = () => {
       let data = { success: false, message: 'Unknown delete error' };
       try {
         data = await response.json();
-      } catch (jsonError) {
+      } catch (e) {
         if (!response.ok && response.status !== 404) {
           // Don't throw if 404, handle below
           throw new Error(
@@ -639,30 +616,30 @@ const ClientCampaignList: React.FC = () => {
   };
 
   // Helper to get status color and text
-  const getStatusInfo = (status: CampaignStatusKey | null | undefined) => {
-    const normalizedStatus = (status || '').toLowerCase();
-    switch (normalizedStatus) {
-      case 'draft':
-        return { class: 'bg-muted text-muted-foreground', text: 'Draft' }; // Grey
-      case 'submitted_final': // Handle SUBMITTED_FINAL from backend
-      case 'submitted': // Allow filtering by "submitted"
-        return { class: 'bg-warning text-warning-foreground', text: 'Submitted' }; // Yellow
-      case 'active':
-        return { class: 'bg-success text-success-foreground', text: 'Active' }; // Green
-      case 'approved':
-        return { class: 'bg-success text-success-foreground', text: 'Approved' }; // Green
-      case 'paused':
-        return { class: 'bg-muted text-muted-foreground', text: 'Paused' }; // Grey
-      case 'completed':
-        return { class: 'bg-accent text-accent-foreground', text: 'Completed' }; // Deep Sky Blue
-      // Removed 'review' case
-      default:
-        const defaultText = status
-          ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
-          : 'Unknown';
-        return { class: 'bg-muted text-muted-foreground', text: defaultText }; // Default to Grey
-    }
-  };
+  // const getStatusInfo = (status: CampaignStatusKey | null | undefined) => {
+  //   const normalizedStatus = (status || '').toLowerCase();
+  //   switch (normalizedStatus) {
+  //     case 'draft':
+  //       return { class: 'bg-muted text-muted-foreground', text: 'Draft' }; // Grey
+  //     case 'submitted_final': // Handle SUBMITTED_FINAL from backend
+  //     case 'submitted': // Allow filtering by "submitted"
+  //       return { class: 'bg-warning text-warning-foreground', text: 'Submitted' }; // Yellow
+  //     case 'active':
+  //       return { class: 'bg-success text-success-foreground', text: 'Active' }; // Green
+  //     case 'approved':
+  //       return { class: 'bg-success text-success-foreground', text: 'Approved' }; // Green
+  //     case 'paused':
+  //       return { class: 'bg-muted text-muted-foreground', text: 'Paused' }; // Grey
+  //     case 'completed':
+  //       return { class: 'bg-accent text-accent-foreground', text: 'Completed' }; // Deep Sky Blue
+  //     // Removed 'review' case
+  //     default:
+  //       const defaultText = status
+  //         ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
+  //         : 'Unknown';
+  //       return { class: 'bg-muted text-muted-foreground', text: defaultText }; // Default to Grey
+  //   }
+  // };
 
   // Helper to get the display name for a KPI key
   const getKpiDisplayName = (kpiKey: string): string => {
@@ -769,15 +746,49 @@ const ClientCampaignList: React.FC = () => {
   };
   // --- End Restore Local Duplicate Logic ---
 
+  // Handlers for the new CampaignFilters component
+  const handleApplyCampaignFilters = (filters: CampaignFiltersState) => {
+    setSearch(filters.search);
+    setObjectiveFilter(filters.objective);
+    setStatusFilter(filters.status);
+    setStartDateFilter(filters.startDate);
+    setEndDateFilter(filters.endDate);
+    setMyCampaignsFilter(filters.myCampaigns); // This will trigger fetchCampaigns due to dependency
+    setCurrentPage(1);
+    setIsFiltersSheetOpen(false);
+  };
+
+  const handleResetCampaignFilters = () => {
+    setSearch('');
+    setObjectiveFilter('');
+    setStatusFilter('');
+    setStartDateFilter('');
+    setEndDateFilter('');
+    setMyCampaignsFilter(false); // This will trigger fetchCampaigns due to dependency
+    setCurrentPage(1);
+    setIsFiltersSheetOpen(false);
+  };
+
+  const currentFilterValues: CampaignFiltersState = {
+    search,
+    objective: objectiveFilter,
+    status: statusFilter,
+    startDate: startDateFilter,
+    endDate: endDateFilter,
+    myCampaigns: myCampaignsFilter,
+  };
+
   // Render loading state
   if (isLoadingData && !campaigns.length && !error) {
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <LoadingSkeleton className="h-9 w-1/3" />
-          <LoadingSkeleton className="h-10 w-36" />
+          <div className="flex items-center gap-2">
+            <LoadingSkeleton className="h-10 w-24" /> {/* Filter Button Skeleton */}
+            <LoadingSkeleton className="h-10 w-36" /> {/* New Campaign Button Skeleton */}
+          </div>
         </div>
-        {/* Correct props for TableSkeleton */}
         <TableSkeleton columns={6} rows={campaignsPerPage} />
       </div>
     );
@@ -797,137 +808,46 @@ const ClientCampaignList: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
         <h1 className="text-2xl font-bold text-primary">Campaigns</h1>
-      </div>
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-        <div className="flex flex-wrap items-center gap-3 flex-grow">
-          <div className="relative w-full md:w-auto md:min-w-[250px]">
-            <Icon
-              iconId="faMagnifyingGlassLight"
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none h-4 w-4"
-            />
-            <Input
-              type="text"
-              placeholder="Search campaigns..."
-              value={search}
-              onChange={e => {
-                setSearch(e.target.value);
-                setCurrentPage(1);
-              }}
-              aria-label="Search campaigns by name"
-              className="pl-10 w-full border-divider h-10"
-            />
-          </div>
-
-          <Select
-            value={objectiveFilter}
-            onValueChange={value => {
-              setObjectiveFilter(value);
-              setCurrentPage(1);
-            }}
-          >
-            <SelectTrigger className="w-full md:w-[150px] border-divider">
-              <SelectValue placeholder="Objective" />
-            </SelectTrigger>
-            <SelectContent>
-              {KPI_OPTIONS.map(kpi => (
-                <SelectItem key={kpi.key} value={kpi.key}>
-                  {kpi.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select
-            value={statusFilter}
-            onValueChange={value => {
-              setStatusFilter(value);
-              setCurrentPage(1);
-            }}
-          >
-            <SelectTrigger className="w-full md:w-[130px] border-divider">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="approved">Approved</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="submitted">Submitted</SelectItem>
-              <SelectItem value="paused">Paused</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select
-            value={startDateFilter}
-            onValueChange={value => {
-              setStartDateFilter(value);
-              setCurrentPage(1);
-            }}
-          >
-            <SelectTrigger className="w-full md:w-[160px] border-divider">
-              <SelectValue placeholder="Start Date" />
-            </SelectTrigger>
-            <SelectContent>
-              {uniqueDates.startDates.map(date => (
-                <SelectItem key={date} value={date}>
-                  {formatDate(date)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select
-            value={endDateFilter}
-            onValueChange={value => {
-              setEndDateFilter(value);
-              setCurrentPage(1);
-            }}
-          >
-            <SelectTrigger className="w-full md:w-[160px] border-divider">
-              <SelectValue placeholder="End Date" />
-            </SelectTrigger>
-            <SelectContent>
-              {uniqueDates.endDates.map(date => (
-                <SelectItem key={date} value={date}>
-                  {formatDate(date)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <div className="flex items-center space-x-2 pt-2 md:pt-0">
-            <Checkbox
-              id="my-campaigns-filter"
-              checked={myCampaignsFilter}
-              onCheckedChange={checked => setMyCampaignsFilter(Boolean(checked))}
-              disabled={!orgId} // Disable if no org is active
-            />
-            <Label htmlFor="my-campaigns-filter" className="text-sm font-medium whitespace-nowrap">
-              Show only my campaigns
-            </Label>
-          </div>
-        </div>
-
-        <div className="flex-shrink-0 w-full md:w-auto md:ml-auto mt-4 md:mt-0">
-          <Button
-            asChild
-            className="bg-accent hover:bg-accent/90 text-white w-full md:w-auto"
-            disabled={!orgId || !isAuthLoaded}
-            title={!orgId ? 'Select an organization to create a new campaign' : 'New Campaign'}
-          >
-            <Link href="/campaigns/wizard/step-1">
-              <span className="flex items-center">
-                {' '}
-                {/* Optional: if you need flex layout for icon and text */}
-                <Icon iconId="faPlusLight" className="-ml-1 mr-2 h-5 w-5" />
-                New Campaign
-              </span>
-            </Link>
-          </Button>
+        <div className="flex items-center gap-3">
+          <Sheet open={isFiltersSheetOpen} onOpenChange={setIsFiltersSheetOpen}>
+            <SheetTrigger asChild>
+              <Button variant="outline">
+                <Icon iconId="faFilterLight" className="mr-2 h-4 w-4" />
+                Filters
+              </Button>
+            </SheetTrigger>
+            <SheetContent className="w-80 md:w-96 flex flex-col" side="right">
+              <SheetHeader className="mb-4 border-b pb-4">
+                <SheetTitle>Filter Campaigns</SheetTitle>
+                <SheetDescription>Refine the list based on your criteria.</SheetDescription>
+              </SheetHeader>
+              <CampaignFilters
+                isOpen={isFiltersSheetOpen}
+                onOpenChange={setIsFiltersSheetOpen}
+                currentFilters={currentFilterValues}
+                onApplyFilters={handleApplyCampaignFilters}
+                onResetFilters={handleResetCampaignFilters}
+                uniqueDates={uniqueDates}
+                kpiOptions={KPI_OPTIONS}
+                formatDate={formatDate}
+              />
+            </SheetContent>
+          </Sheet>
+          <Link href="/campaigns/wizard/step-1">
+            <Button
+              className="bg-accent hover:bg-accent/90 text-white"
+              disabled={!orgId || !isAuthLoaded}
+              title={!orgId ? 'Select an organization to create a new campaign' : 'New Campaign'}
+            >
+              <Icon iconId="faPlusLight" className="-ml-1 mr-2 h-5 w-5" />
+              New Campaign
+            </Button>
+          </Link>
         </div>
       </div>
+
       {error && campaigns.length === 0 && (
         <div className="bg-white p-6 text-center text-destructive">{error}</div>
       )}
@@ -1055,7 +975,7 @@ const ClientCampaignList: React.FC = () => {
                 }}
               >
                 <SelectTrigger className="w-[75px] border-divider">
-                  <SelectValue placeholder={campaignsPerPage} />
+                  <SelectValue placeholder={campaignsPerPage.toString()} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="10">10</SelectItem>
@@ -1077,7 +997,8 @@ const ClientCampaignList: React.FC = () => {
                 Previous
               </Button>
               <span className="text-sm text-gray-700">
-                Page {currentPage} of {totalPages}
+                {' '}
+                Page {currentPage} of {totalPages}{' '}
               </span>
               <Button
                 variant="outline"
@@ -1097,7 +1018,7 @@ const ClientCampaignList: React.FC = () => {
           isOpen={showDeleteModal}
           onClose={() => {
             setShowDeleteModal(false);
-            setCampaignToDelete(null); // Clear selection on close
+            setCampaignToDelete(null);
           }}
           onConfirm={executeDeleteCampaign}
           itemName={campaignToDelete?.name || 'this item'}
@@ -1113,19 +1034,8 @@ const ClientCampaignList: React.FC = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-2">
-            <Label htmlFor="duplicate-name">New Campaign Name</Label>
-            <Input
-              id="duplicate-name"
-              value={newDuplicateName}
-              onChange={e => {
-                setNewDuplicateName(e.target.value);
-                if (nameError) setNameError(null);
-              }}
-              placeholder="Enter new campaign name"
-              className={nameError ? 'border-destructive' : ''}
-            />
-            {isCheckingName && <p className="text-xs text-muted-foreground">Checking name...</p>}
-            {nameError && <p className="text-xs text-destructive">{nameError}</p>}
+            {/* <Label htmlFor="duplicate-name">New Campaign Name</Label> Replaced by direct use in CampaignFilters */}
+            {/* <Input id="duplicate-name" ... /> */}
           </div>
           <DialogFooter>
             <DialogClose asChild>
@@ -1235,29 +1145,31 @@ const ClientCampaignList: React.FC = () => {
             </div>
           );
         })}
-        <div className="flex items-center justify-between mt-4 px-2 py-3 border-t border-divider">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className="border-divider"
-          >
-            Previous
-          </Button>
-          <span className="text-sm text-gray-700">
-            Page {currentPage} of {totalPages}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages || totalPages === 0}
-            className="border-divider"
-          >
-            Next
-          </Button>
-        </div>
+        {totalPages > 0 && (
+          <div className="flex items-center justify-between mt-4 px-2 py-3 border-t border-divider">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="border-divider"
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-gray-700">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages || totalPages === 0}
+              className="border-divider"
+            >
+              Next
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

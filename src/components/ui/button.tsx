@@ -1,11 +1,9 @@
 /**
  * @component Button
- * @category atom
- * @subcategory input
- * @description An interactive element triggering an action or navigation. Can contain text and/or icons (passed as children).
- * For dedicated icon-only action buttons with hover effects (e.g., light/solid swap), use the IconButtonAction component.
- * @status 10th April
- * @see IconButtonAction
+ * @category organism
+ * @subcategory button
+ * @description Displays a button.
+ * @status 13th May
  */
 import * as React from 'react';
 import { Slot } from '@radix-ui/react-slot';
@@ -18,8 +16,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default:
-          'bg-accent text-primary-foreground hover:bg-accent/90 hover:text-accent-foreground',
+        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
         destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
         outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
         secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',

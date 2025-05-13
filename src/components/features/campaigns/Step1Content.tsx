@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDebouncedCallback } from 'use-debounce';
 import {
@@ -17,8 +17,6 @@ import {
   Step1ValidationSchema,
   Step1FormData,
   DraftCampaignData,
-  CurrencyEnum,
-  PositionEnum,
   BudgetSchema,
 } from '@/components/features/campaigns/types';
 import { Currency as PrismaCurrency, Position as PrismaPosition } from '@prisma/client';
@@ -57,6 +55,16 @@ import { v4 as uuidv4 } from 'uuid';
 import { useLocalization } from '@/hooks/useLocalization';
 import timezonesData from '@/lib/timezones.json';
 import { checkCampaignNameExists } from '@/lib/actions/campaigns';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
 // --- Define Toast Helper Functions Locally ---
 const showSuccessToast = (message: string, iconId?: string) => {
@@ -97,9 +105,6 @@ interface InfluencerEntryProps {
 
 const InfluencerEntry: React.FC<InfluencerEntryProps> = ({ index, control, errors, remove }) => {
   const { watch } = useFormContext<Step1FormData>();
-
-  const watchedPlatform = watch(`Influencer.${index}.platform`);
-  const watchedHandle = watch(`Influencer.${index}.handle`);
 
   return (
     <Card className="mb-4 border-border bg-card/50 relative overflow-hidden">
@@ -294,6 +299,78 @@ const getPlatformDisplayName = (platform: PlatformEnum): string => {
   }
 };
 
+// --- TimeZone FormField Internal Component ---
+const TimeZoneFormFieldContent: React.FC<{
+  field: any; // Adjust type as per react-hook-form FieldRenderProps if available
+  localizationLoading: boolean;
+}> = ({ field, localizationLoading }) => {
+  const [open, setOpen] = React.useState(false);
+  const selectedTimezoneLabel = timezonesData.find(tz => tz.value === field.value)?.label;
+
+  return (
+    <FormItem className="flex flex-col">
+      <FormLabel className="flex items-center">
+        Time Zone *
+        {localizationLoading && (
+          <Icon
+            iconId="faCircleNotchLight"
+            className="animate-spin h-3 w-3 ml-2 text-muted-foreground"
+          />
+        )}
+      </FormLabel>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <FormControl>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              disabled={localizationLoading}
+              className={cn('w-full justify-between', !field.value && 'text-muted-foreground')}
+            >
+              {field.value ? selectedTimezoneLabel : 'Select timezone...'}
+              <Icon iconId="faChevronDownLight" className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </FormControl>
+        </PopoverTrigger>
+        <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+          <Command>
+            <CommandInput placeholder="Search timezone..." />
+            <CommandList>
+              <CommandEmpty>No timezone found.</CommandEmpty>
+              <CommandGroup>
+                {timezonesData.map(tz => (
+                  <CommandItem
+                    key={tz.value}
+                    value={tz.value}
+                    onSelect={currentValue => {
+                      field.onChange(currentValue === field.value ? '' : currentValue);
+                      setOpen(false);
+                    }}
+                  >
+                    <Icon
+                      iconId="faCheckLight"
+                      className={cn(
+                        'mr-2 h-4 w-4',
+                        field.value === tz.value ? 'opacity-100' : 'opacity-0'
+                      )}
+                    />
+                    {tz.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+      <FormDescription>Please select the primary timezone for this campaign.</FormDescription>
+      <FormMessage />
+    </FormItem>
+  );
+};
+// --- End TimeZone FormField Internal Component ---
+
+// --- Main Component ---
 function Step1Content() {
   const {
     wizardState,
@@ -724,21 +801,28 @@ function Step1Content() {
 
   const currencySymbol = getCurrencySymbol(watchedCurrency);
 
-  if (isWizardLoading || localization.isLoading || !initialDataLoaded.current) {
+  if (isWizardLoading || !initialDataLoaded.current || localization.isLoading) {
     return <WizardSkeleton step={1} />;
   }
 
   return (
     <FormProvider {...form}>
       <Form {...form}>
-        <form onSubmit={e => e.preventDefault()} className="space-y-8 pb-[var(--footer-height)]">
-          <Card>
+        <form
+          onSubmit={form.handleSubmit(onSubmitAndNavigate)}
+          className="space-y-8"
+          id={`wizard-step-1-form`}
+        >
+          {/* Campaign Details Card */}
+          <Card className="mb-6 border border-gray-300 dark:border-gray-700 shadow-sm">
             <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
-              <CardDescription>Provide the fundamental details for your campaign.</CardDescription>
+              <CardTitle>Campaign Details</CardTitle>
+              <CardDescription>
+                Please provide the core details for your new campaign.
+              </CardDescription>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="md:col-span-2">
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+              <div className="md:col-span-1">
                 <FormField
                   control={form.control}
                   name="name"
@@ -761,7 +845,7 @@ function Step1Content() {
                   )}
                 />
               </div>
-              <div className="md:col-span-2">
+              <div className="md:col-span-1">
                 <FormField
                   control={form.control}
                   name="businessGoal"
@@ -817,14 +901,16 @@ function Step1Content() {
             </CardContent>
           </Card>
 
-          <Card>
+          {/* Schedule & Timezone Card */}
+          <Card className="mb-6 border border-gray-300 dark:border-gray-700 shadow-sm">
             <CardHeader>
               <CardTitle>Schedule & Timezone</CardTitle>
               <CardDescription>
                 Set the campaign dates and select the relevant timezone.
               </CardDescription>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+              {/* Row 1: Start Date and End Date */}
               <div className="md:col-span-1">
                 <FormField
                   control={form.control}
@@ -874,7 +960,9 @@ function Step1Content() {
                   )}
                 />
               </div>
-              <div className="md:col-span-2 flex items-center min-h-[2.25rem] pt-2">
+
+              {/* Row 2: Duration Badge and Empty Cell */}
+              <div className="md:col-span-1 flex items-center min-h-[2.25rem] pt-1">
                 {campaignDuration && (
                   <Badge variant="outline" className="font-normal">
                     <Icon iconId="faCalendarDaysLight" className="mr-1.5 h-3 w-3" />
@@ -882,51 +970,28 @@ function Step1Content() {
                   </Badge>
                 )}
               </div>
-              <div className="md:col-span-1 pt-4">
+              <div className="md:col-span-1"></div>
+
+              {/* Row 3: Time Zone */}
+              <div className="md:col-span-2 pt-2">
                 <FormField
                   control={form.control}
                   name="timeZone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center">
-                        Time Zone *
-                        {localization.isLoading && (
-                          <Icon
-                            iconId="faCircleNotchLight"
-                            className="animate-spin h-3 w-3 ml-2 text-muted-foreground"
-                          />
-                        )}
-                      </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value || ''}
-                        disabled={localization.isLoading}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select timezone..." />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {timezonesData.map((option: { value: string; label: string }) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>
-                        Please select the primary timezone for this campaign.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    return (
+                      <TimeZoneFormFieldContent
+                        field={field}
+                        localizationLoading={localization.isLoading}
+                      />
+                    );
+                  }}
                 />
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          {/* Contact Information Card */}
+          <Card className="mb-6 border border-gray-300 dark:border-gray-700 shadow-sm">
             <CardHeader>
               <CardTitle>Contact Information</CardTitle>
               <CardDescription>
@@ -1078,7 +1143,8 @@ function Step1Content() {
             </CardContent>
           </Card>
 
-          <Card>
+          {/* Budget Card */}
+          <Card className="mb-6 border border-gray-300 dark:border-gray-700 shadow-sm">
             <CardHeader>
               <CardTitle>Budget</CardTitle>
               <CardDescription>Set the budget for the campaign.</CardDescription>
@@ -1188,7 +1254,8 @@ function Step1Content() {
             </CardContent>
           </Card>
 
-          <Card>
+          {/* Influencer Selection Card */}
+          <Card className="mb-6 border border-gray-300 dark:border-gray-700 shadow-sm">
             <CardHeader>
               <CardTitle>Influencer Selection</CardTitle>
               <CardDescription>
@@ -1224,6 +1291,7 @@ function Step1Content() {
             </CardContent>
           </Card>
 
+          {/* Error Alert */}
           {Object.keys(form.formState.errors).length > 0 && (
             <Alert variant="destructive">
               <Icon iconId="faTriangleExclamationLight" className="h-4 w-4" />
