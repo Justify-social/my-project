@@ -13,11 +13,9 @@ export default function ClientAuthComponents() {
       </SignedIn>
       <SignedOut>
         {/* Example Sign In Button - Adjust as needed */}
-        <Link href="/sign-in">
-          <Button variant="outline" size="sm" asChild>
-            Sign In
-          </Button>
-        </Link>
+        <Button variant="outline" size="sm" asChild>
+          <Link href="/sign-in">Sign In</Link>
+        </Button>
       </SignedOut>
     </>
   );

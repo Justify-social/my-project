@@ -911,19 +911,21 @@ const ClientCampaignList: React.FC = () => {
         </div>
 
         <div className="flex-shrink-0 w-full md:w-auto md:ml-auto mt-4 md:mt-0">
-          <Link href="/campaigns/wizard/step-1">
-            <Button
-              asChild
-              className="bg-accent hover:bg-accent/90 text-white w-full md:w-auto"
-              disabled={!orgId || !isAuthLoaded}
-              title={!orgId ? 'Select an organization to create a new campaign' : 'New Campaign'}
-            >
-              <>
+          <Button
+            asChild
+            className="bg-accent hover:bg-accent/90 text-white w-full md:w-auto"
+            disabled={!orgId || !isAuthLoaded}
+            title={!orgId ? 'Select an organization to create a new campaign' : 'New Campaign'}
+          >
+            <Link href="/campaigns/wizard/step-1">
+              <span className="flex items-center">
+                {' '}
+                {/* Optional: if you need flex layout for icon and text */}
                 <Icon iconId="faPlusLight" className="-ml-1 mr-2 h-5 w-5" />
                 New Campaign
-              </>
-            </Button>
-          </Link>
+              </span>
+            </Link>
+          </Button>
         </div>
       </div>
       {error && campaigns.length === 0 && (

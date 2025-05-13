@@ -32,11 +32,9 @@ const DebugToolCard: React.FC<DebugToolCardProps> = ({
     </CardHeader>
     <CardContent>
       {linkHref ? (
-        <Link href={linkHref}>
-          <Button variant="default" asChild>
-            {buttonText}
-          </Button>
-        </Link>
+        <Button variant="default" asChild>
+          <Link href={linkHref}>{buttonText}</Link>
+        </Button>
       ) : (
         <Button variant="default" onClick={onButtonClick} disabled={isLoading}>
           {isLoading && <LoadingSpinner size="sm" className="mr-2" />}
