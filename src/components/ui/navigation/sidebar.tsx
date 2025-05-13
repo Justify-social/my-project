@@ -45,58 +45,57 @@ function SidebarItem({
 
   return (
     <li className="w-full">
-      <Link href={href} legacyBehavior passHref>
-        <a
-          onClick={onClick}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          className={cn(
-            'flex items-center py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group',
-            active || isHovered
-              ? 'text-accent bg-accent/10 font-medium'
-              : 'text-foreground hover:text-accent hover:bg-accent/5'
-          )}
-        >
-          {iconPath ? (
-            <div className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0">
-              <Image
-                src={iconPath}
-                alt={`${label} icon`}
-                className="w-5 h-5"
-                width={20}
-                height={20}
-                style={{
-                  filter:
-                    active || isHovered
-                      ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)'
-                      : 'none', // Accent color filter on hover/active
-                  transition: 'filter 0.15s ease-in-out',
-                }}
-                unoptimized
-              />
-            </div>
-          ) : icon ? (
-            // Fallback if icon name provided but not in registry
-            <div
-              className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0"
-              title={`Icon '${icon}' not found in registry`}
-            >
-              <span className="flex items-center justify-center w-5 h-5 text-xs bg-gray-200 dark:bg-gray-700 rounded-full">
-                {icon.charAt(0).toUpperCase()}
-              </span>
-            </div>
-          ) : (
-            // Placeholder if no icon is provided for alignment
-            <div className="w-6 h-6 mr-2 flex-shrink-0"></div>
-          )}
-
-          {/* Use text-xs for child items and text-sm for parent/standalone items */}
-          <span
-            className={`flex-grow ${isChild ? 'text-xs' : 'text-sm'} font-heading font-medium truncate ${active || isHovered ? 'text-accent' : 'text-foreground'}`}
+      <Link
+        href={href}
+        onClick={onClick}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className={cn(
+          'flex items-center py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group',
+          active || isHovered
+            ? 'text-accent bg-accent/10 font-medium'
+            : 'text-foreground hover:text-accent hover:bg-accent/5'
+        )}
+      >
+        {iconPath ? (
+          <div className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0">
+            <Image
+              src={iconPath}
+              alt={`${label} icon`}
+              className="w-5 h-5"
+              width={20}
+              height={20}
+              style={{
+                filter:
+                  active || isHovered
+                    ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)'
+                    : 'none', // Accent color filter on hover/active
+                transition: 'filter 0.15s ease-in-out',
+              }}
+              unoptimized
+            />
+          </div>
+        ) : icon ? (
+          // Fallback if icon name provided but not in registry
+          <div
+            className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0"
+            title={`Icon '${icon}' not found in registry`}
           >
-            {label}
-          </span>
-        </a>
+            <span className="flex items-center justify-center w-5 h-5 text-xs bg-gray-200 dark:bg-gray-700 rounded-full">
+              {icon.charAt(0).toUpperCase()}
+            </span>
+          </div>
+        ) : (
+          // Placeholder if no icon is provided for alignment
+          <div className="w-6 h-6 mr-2 flex-shrink-0"></div>
+        )}
+
+        {/* Use text-xs for child items and text-sm for parent/standalone items */}
+        <span
+          className={`flex-grow ${isChild ? 'text-xs' : 'text-sm'} font-heading font-medium truncate ${active || isHovered ? 'text-accent' : 'text-foreground'}`}
+        >
+          {label}
+        </span>
       </Link>
     </li>
   );

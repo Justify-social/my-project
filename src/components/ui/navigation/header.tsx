@@ -58,19 +58,17 @@ const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center justify-between px-4 py-3 font-body">
         {/* Left: Logo & Company Name wrapped in Link to /dashboard */}
         <Link href="/dashboard" className="flex items-center space-x-2">
-          <>
-            <Image
-              src="/logo.png"
-              alt="Justify Logo"
-              width={40}
-              height={40}
-              onError={e => {
-                e.currentTarget.style.display = 'none';
-                // console.warn('Logo image failed to load');
-              }}
-            />
-            <span className="font-bold text-foreground text-xl font-body">{companyName}</span>
-          </>
+          <Image
+            src="/logo.png"
+            alt="Justify Logo"
+            width={40}
+            height={40}
+            onError={e => {
+              e.currentTarget.style.display = 'none';
+              // console.warn('Logo image failed to load');
+            }}
+          />
+          <span className="font-bold text-foreground text-xl font-body">{companyName}</span>
         </Link>
 
         {/* Center: Search Bar Container (hidden on mobile) */}
