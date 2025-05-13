@@ -60,7 +60,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
           className={`grid w-full grid-cols-1 ${gridColsClass} gap-2 h-auto bg-transparent p-0`}
         >
           {navItems.map(item => (
-            <Link href={item.href} key={item.value} passHref>
+            <Link href={item.href} key={item.value} passHref legacyBehavior>
               <TabsTrigger
                 value={item.value}
                 className="w-full justify-start data-[state=active]:bg-muted data-[state=active]:shadow-sm data-[state=active]:border-accent data-[state=active]:border-b-2 rounded-none text-secondary hover:text-primary transition-colors duration-150 px-4 py-2 text-sm font-medium"

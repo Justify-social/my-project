@@ -57,19 +57,21 @@ const Header: React.FC<HeaderProps> = ({
     >
       <div className="flex items-center justify-between px-4 py-3 font-body">
         {/* Left: Logo & Company Name wrapped in Link to /dashboard */}
-        <Link href="/dashboard" className="flex items-center space-x-2">
-          <Image
-            src="/logo.png"
-            alt="Justify Logo"
-            width={40}
-            height={40}
-            onError={e => {
-              // Fallback for logo if image fails to load
-              e.currentTarget.style.display = 'none';
-              console.warn('Logo image failed to load');
-            }}
-          />
-          <span className="font-bold text-foreground text-xl font-body">{companyName}</span>
+        <Link href="/dashboard" legacyBehavior>
+          <a className="flex items-center space-x-2">
+            <Image
+              src="/logo.png"
+              alt="Justify Logo"
+              width={40}
+              height={40}
+              onError={e => {
+                // Fallback for logo if image fails to load
+                e.currentTarget.style.display = 'none';
+                // console.warn('Logo image failed to load');
+              }}
+            />
+            <span className="font-bold text-foreground text-xl font-body">{companyName}</span>
+          </a>
         </Link>
 
         {/* Center: Search Bar Container (hidden on mobile) */}
@@ -96,7 +98,7 @@ const Header: React.FC<HeaderProps> = ({
           {/* Desktop Icons */}
           <div className="hidden md:flex items-center space-x-4 font-body">
             {/* Credits */}
-            <Link href="/account/billing">
+            <Link href="/account/billing" legacyBehavior>
               <div className="flex items-center space-x-1 cursor-pointer font-body">
                 {hasCoinsIcon ? (
                   <Icon

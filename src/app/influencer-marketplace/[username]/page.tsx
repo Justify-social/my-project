@@ -253,6 +253,7 @@ export default function InfluencerProfilePage() {
   return (
     // REMOVE ConditionalLayout wrapper - it's provided by RootLayout
     // <ConditionalLayout>
+    // </ConditionalLayout>
     <div className="p-4 md:p-6 space-y-4">
       {/* Top Bar: Back Button & Actions */}
       <div className="flex justify-between items-center">
@@ -321,7 +322,6 @@ export default function InfluencerProfilePage() {
           </div>
         )}
       </div>
-
       {/* Content Area: Loading, Error, or Profile Structure */}
       {isLoading ? (
         <ProfileSkeleton />
@@ -363,6 +363,5 @@ export default function InfluencerProfilePage() {
         <ErrorDisplay message={'Influencer data could not be loaded.'} />
       )}
     </div>
-    // </ConditionalLayout>
   );
 }

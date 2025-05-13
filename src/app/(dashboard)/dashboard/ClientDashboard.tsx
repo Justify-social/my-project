@@ -134,14 +134,13 @@ export default function ClientDashboard() {
         <h1 className="text-3xl font-bold text-primary font-heading">
           {user ? `${user.fullName || user.firstName || 'User'}'s Dashboard` : 'Dashboard'}
         </h1>
-        <Link href="/campaigns/wizard/step-1" passHref>
+        <Link href="/campaigns/wizard/step-1" passHref legacyBehavior>
           <Button disabled={!isLoaded || !user}>
             <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" />
             New Campaign
           </Button>
         </Link>
       </div>
-
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Calendar Card - Header Removed */}
@@ -211,7 +210,6 @@ export default function ClientDashboard() {
           </CardContent>
         </Card>
       </div>
-
       {/* // TODO: Add other dashboard sections based on Figma (Influencers, Insights, Health Snapshot) later */}
     </div>
   );

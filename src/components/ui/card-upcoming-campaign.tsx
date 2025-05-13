@@ -196,6 +196,7 @@ export function UpcomingCampaignsTable({
                             <Link
                               href={`/campaigns/${campaign.id}`}
                               className="hover:underline text-accent"
+                              legacyBehavior
                             >
                               {campaign.title}
                             </Link>

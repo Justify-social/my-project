@@ -32,7 +32,7 @@ const DebugToolCard: React.FC<DebugToolCardProps> = ({
     </CardHeader>
     <CardContent>
       {linkHref ? (
-        <Link href={linkHref} passHref>
+        <Link href={linkHref} passHref legacyBehavior>
           <Button variant="default">{buttonText}</Button>
         </Link>
       ) : (

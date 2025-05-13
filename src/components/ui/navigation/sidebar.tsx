@@ -58,6 +58,7 @@ function SidebarItem({
             ? 'text-accent bg-accent/10 font-medium' // THEMED
             : 'text-foreground hover:text-accent hover:bg-accent/5' // THEMED
         )}
+        legacyBehavior
       >
         {iconPath ? (
           <div className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0">
@@ -242,9 +243,7 @@ export function Sidebar({
           <span className="font-medium text-foreground">{title}</span>
         </div>
       </div>
-
       {loadingError && <div className="p-4 text-xs text-red-600 bg-red-100">{loadingError}</div>}
-
       {/* Navigation items - Make this flexible and scrollable, remove bottom padding */}
       <nav className="flex-1 overflow-y-auto p-2 pb-[var(--footer-height)]">
         {isRegistryLoading && (
@@ -316,7 +315,6 @@ export function Sidebar({
                         </span>
                       </div>
                     </div>
-
                     {/* Render children conditionally based on isExpanded */}
                     <div
                       className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
@@ -360,7 +358,6 @@ export function Sidebar({
           })}
         </ul>
       </nav>
-
       {/* Settings Footer Area - Apply ONLY border-t */}
       <div className="p-2 border-t h-[var(--footer-height)] flex flex-col justify-center">
         {' '}

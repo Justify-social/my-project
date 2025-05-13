@@ -800,7 +800,6 @@ const ClientCampaignList: React.FC = () => {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-primary">Campaigns</h1>
       </div>
-
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
         <div className="flex flex-wrap items-center gap-3 flex-grow">
           <div className="relative w-full md:w-auto md:min-w-[250px]">
@@ -927,17 +926,14 @@ const ClientCampaignList: React.FC = () => {
           </Link>
         </div>
       </div>
-
       {error && campaigns.length === 0 && (
         <div className="bg-white p-6 text-center text-destructive">{error}</div>
       )}
-
       {!error && sortedCampaigns.length === 0 && !isLoadingData && (
         <div className="bg-white p-6 text-center">
           No campaigns found. Try adjusting your search criteria or create a new campaign.
         </div>
       )}
-
       {sortedCampaigns.length > 0 && (
         <>
           <div className="hidden md:block border rounded-lg border-divider overflow-hidden">
@@ -988,6 +984,7 @@ const ClientCampaignList: React.FC = () => {
                         <Link
                           href={`/campaigns/${campaign.id}`}
                           className="text-accent hover:underline"
+                          legacyBehavior
                         >
                           {campaign.campaignName}
                         </Link>
@@ -1015,7 +1012,7 @@ const ClientCampaignList: React.FC = () => {
                             onClick={() => handleViewCampaign(campaign.id.toString())}
                             className="w-8 h-8"
                           />
-                          <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`}>
+                          <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`} legacyBehavior>
                             <IconButtonAction
                               iconBaseName="faPenToSquare"
                               hoverColorClass="text-accent"
@@ -1094,7 +1091,6 @@ const ClientCampaignList: React.FC = () => {
           </div>
         </>
       )}
-
       {campaignToDelete && (
         <ConfirmDeleteDialog
           isOpen={showDeleteModal}
@@ -1106,7 +1102,6 @@ const ClientCampaignList: React.FC = () => {
           itemName={campaignToDelete?.name || 'this item'}
         />
       )}
-
       <Dialog open={isDuplicateDialogOpen} onOpenChange={setIsDuplicateDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -1165,7 +1160,6 @@ const ClientCampaignList: React.FC = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
       <div className="md:hidden space-y-4">
         {displayedCampaigns.map(campaign => {
           const statusInfo = getCampaignStatusInfo(campaign.status);
@@ -1175,7 +1169,7 @@ const ClientCampaignList: React.FC = () => {
               className="bg-white border border-divider rounded-lg p-4 shadow-sm"
             >
               <div className="flex justify-between items-start mb-3">
-                <Link href={`/campaigns/${campaign.id}`}>
+                <Link href={`/campaigns/${campaign.id}`} legacyBehavior>
                   <h3 className="font-semibold text-accent hover:underline">
                     {campaign.campaignName || 'Untitled Campaign'}
                   </h3>
@@ -1186,7 +1180,6 @@ const ClientCampaignList: React.FC = () => {
                   {statusInfo.text}
                 </span>
               </div>
-
               <div className="grid grid-cols-2 gap-4 text-sm mb-4">
                 <div>
                   <p className="text-gray-500 mb-1">Objective</p>
@@ -1207,7 +1200,6 @@ const ClientCampaignList: React.FC = () => {
                   </p>
                 </div>
               </div>
-
               <div className="flex justify-end space-x-1 border-t border-divider pt-3 mt-3">
                 <IconButtonAction
                   iconBaseName="faEye"
@@ -1216,7 +1208,7 @@ const ClientCampaignList: React.FC = () => {
                   onClick={() => handleViewCampaign(campaign.id.toString())}
                   className="w-8 h-8"
                 />
-                <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`}>
+                <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`} legacyBehavior>
                   <IconButtonAction
                     iconBaseName="faPenToSquare"
                     hoverColorClass="text-accent"

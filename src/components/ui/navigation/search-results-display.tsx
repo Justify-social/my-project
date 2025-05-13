@@ -27,13 +27,11 @@ export function SearchResultsDisplay() {
           Loading...
         </div>
       )}
-
       {!isSearching && results.length === 0 && query && (
         <div className="p-4 text-sm text-gray-500 text-center">
           No campaigns found matching "{query}".
         </div>
       )}
-
       {!isSearching && results.length > 0 && (
         <ul className="divide-y divide-gray-200">
           {results.map(campaign => (
@@ -45,6 +43,7 @@ export function SearchResultsDisplay() {
                   'text-sm text-gray-800 hover:text-sky-700'
                 )}
                 onClick={closeSearch}
+                legacyBehavior
               >
                 <span className="font-medium">{campaign.campaignName}</span>
                 {campaign.description && (

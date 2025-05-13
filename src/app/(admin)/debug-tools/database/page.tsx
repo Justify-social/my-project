@@ -353,12 +353,12 @@ export default function DatabaseHealthPage() {
         <Link
           href="/debug-tools"
           className="mt-4 md:mt-0 flex items-center text-[var(--accent-color)] hover:underline font-body"
+          legacyBehavior
         >
           <Icon iconId="faChevronRightLight" className="h-4 w-4 mr-1 rotate-180" />
           Back to Debug Tools
         </Link>
       </div>
-
       {/* Database Health Section */}
       <Card className="border-[var(--divider-color)] font-body">
         <CardHeader className="flex flex-row justify-between items-center font-body">
@@ -1012,7 +1012,6 @@ export default function DatabaseHealthPage() {
           )}
         </CardContent>
       </Card>
-
       {/* Documentation Filter Tabs */}
       <Card className="border-[var(--divider-color)] font-body">
         <CardHeader className="font-body">
@@ -1055,6 +1054,7 @@ export default function DatabaseHealthPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block p-4 border border-[var(--divider-color)] rounded-md hover:bg-[var(--background-light-color)] transition-colors font-body"
+                legacyBehavior
               >
                 <div className="flex items-start mb-2 font-body">
                   {doc.icon}
@@ -1081,7 +1081,6 @@ export default function DatabaseHealthPage() {
           </div>
         </CardContent>
       </Card>
-
       {/* Refresh Scripts Section */}
       <Card className="border-[var(--divider-color)] font-body">
         <CardHeader className="font-body">

@@ -122,12 +122,12 @@ export async function getBrandingSettings(companyId: string) {
 // Add a type guard for BrandingSettings
 function isBrandingSettings(obj: unknown): obj is BrandingSettings {
   return (
+    // Add more checks if needed
     typeof obj === 'object' &&
     obj !== null &&
     'id' in obj &&
     'companyId' in obj &&
     'primaryColor' in obj
-    // Add more checks if needed
   );
 }
 

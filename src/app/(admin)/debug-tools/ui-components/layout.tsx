@@ -22,6 +22,7 @@ export default function ComponentBrowserLayout({ children }: { children: React.R
 
   return (
     // <ThemeProvider defaultTheme="light">
+    // </ThemeProvider>
     <div className="flex flex-col min-h-screen">
       {/* <header className="border-b bg-background">
         <div className="container flex items-center justify-between h-14">
@@ -34,9 +35,7 @@ export default function ComponentBrowserLayout({ children }: { children: React.R
           </div>
         </div>
       </header> */}
-
       <main className="flex-1 pb-12">{children}</main>
     </div>
-    // </ThemeProvider>
   );
 }

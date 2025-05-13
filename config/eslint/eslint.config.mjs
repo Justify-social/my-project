@@ -13,6 +13,33 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
+  // Dedicated global ignores object
+  {
+    ignores: [
+      'node_modules/**',
+      '.next/**',
+      'build/**',
+      'dist/**',
+      'vercel-mcp-server/dist/**',
+      'public/**', // Be careful, this ignores all of public. If you have JS/TS in public you want linted, adjust.
+      'scripts-backup-*/**',
+      'src/components/ui/LoadingSpinner.tsx', // Specific file ignore example
+      '**/*.bak',
+      '**/*.backup',
+      '**/*.old',
+      '**/*.tmp',
+      '.backup/**',
+      'logs/**',
+      'coverage/**',
+      'archives/**',
+      // 'src/app/(campaigns)/campaigns/wizard/step-*/**', // Example of more specific src ignore
+      'config/**',
+      'graphiti-env/**',
+      'src/lib/generated/**',
+      'graphiti_src/**',
+      // Add other top-level ignores here if needed
+    ],
+  },
   // Keep TypeScript recommended
   {
     ...compat.extends('plugin:@typescript-eslint/recommended')[0],
@@ -27,31 +54,9 @@ const eslintConfig = [
       ...nextjs.configs['core-web-vitals'].rules,
     },
   },
-  // Add custom overrides
+  // Add custom overrides (rules only now, ignores moved)
   {
-    ignores: [
-      'node_modules/**',
-      '.next/**',
-      'build/**',
-      'dist/**',
-      'vercel-mcp-server/dist/**',
-      'public/**',
-      'scripts-backup-*/**',
-      'src/components/ui/LoadingSpinner.tsx',
-      '**/*.bak',
-      '**/*.backup',
-      '**/*.old',
-      '**/*.tmp',
-      '.backup/**',
-      'logs/**',
-      'coverage/**',
-      'archives/**',
-      'src/app/(campaigns)/campaigns/wizard/step-*/**',
-      'config/**',
-      'graphiti-env/**',
-      'src/lib/generated/**',
-      'graphiti_src/**',
-    ],
+    // Ignores was here, now moved to its own global config object
     rules: {
       '@typescript-eslint/no-unused-vars': [
         'warn',

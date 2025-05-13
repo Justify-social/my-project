@@ -172,14 +172,13 @@ const SuperAdminSettingsPage = () => {
       {/* Header Section with Title and Debug Button */}
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold text-primary">User Management</h2>
-        <Link href="/debug-tools" passHref>
+        <Link href="/debug-tools" passHref legacyBehavior>
           <Button className="bg-orange-500 hover:bg-orange-600 text-white">
             <Icon iconId="faBugLight" className="mr-2 h-4 w-4" />
             Debug
           </Button>
         </Link>
       </div>
-
       {isLoadingData ? (
         <div className="flex justify-center items-center h-40">
           <LoadingSpinner />
@@ -277,7 +276,6 @@ const SuperAdminSettingsPage = () => {
           </CardContent>
         </Card>
       )}
-
       {/* Suspend Confirmation Modal */}
       <Dialog open={showSuspendConfirm} onOpenChange={setShowSuspendConfirm}>
         <DialogContent>

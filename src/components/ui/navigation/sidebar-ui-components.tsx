@@ -87,6 +87,7 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
                   ? 'text-accent bg-accent/10 font-medium'
                   : 'text-foreground hover:text-accent hover:bg-accent/5'
               )}
+              legacyBehavior
             >
               <Icon iconId={iconIdToRender} className="mr-3 h-5 w-5 flex-shrink-0" />
               <span
@@ -101,7 +102,6 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
           );
         })}
       </nav>
-
       {/* Footer Area */}
       <div className="p-2 mt-auto border-t space-y-0.5">
         {/* View Source Link - Apply standard styling */}
@@ -113,6 +113,7 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
             'flex items-center py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group',
             'text-foreground hover:text-accent hover:bg-accent/5'
           )}
+          legacyBehavior
         >
           {/* Use consistent icon rendering - assuming brandsGithub exists */}
           <Icon
@@ -148,6 +149,7 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
             'flex items-center py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group',
             'text-foreground hover:text-accent hover:bg-accent/5'
           )}
+          legacyBehavior
         >
           {/* Use consistent icon rendering */}
           {/* Assume faArrowLeftLight exists, switch to Solid on hover */}

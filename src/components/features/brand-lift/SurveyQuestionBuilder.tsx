@@ -75,8 +75,8 @@ const formatKpiName = (kpiKey: string | null | undefined): string => {
   // Normalizes keys like BRAND_AWARENESS or brand_awareness to brandAwareness
   const normalizedKey = kpiKey.toLowerCase().replace(/_([a-z])/g, (_, char) => char.toUpperCase());
   return (
-    kpiDisplayNames[normalizedKey] || // Check against map first
-    // Fallback formatting if not in map
+    // Check against map first
+    kpiDisplayNames[normalizedKey] || // Fallback formatting if not in map
     kpiKey
       .replace(/_/g, ' ')
       .split(' ')

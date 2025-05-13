@@ -85,7 +85,6 @@ export function MetricsDashboard({
           )}
         </div>
       )}
-
       {/* Metrics grid */}
       {Array.isArray(metrics) && metrics.length > 0 ? (
         <div className={cn('grid gap-4', getGridClass())}>
@@ -96,7 +95,6 @@ export function MetricsDashboard({
       ) : (
         <p className="text-sm text-muted-foreground">No metrics to display.</p> // Handle empty state
       )}
-
       {/* Additional content */}
       {children && <div className="mt-6">{children}</div>}
     </div>

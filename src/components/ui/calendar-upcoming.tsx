@@ -230,7 +230,6 @@ export function CalendarUpcoming({
         >
           {dayNumber}
         </span>
-
         {/* Event List with Tooltips */}
         <div className="mt-1 space-y-0.5 overflow-y-auto flex-grow text-[11px]">
           <TooltipProvider delayDuration={150}>
