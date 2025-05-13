@@ -116,7 +116,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({
         {icon && (
           // Optional: Consider consistent styling for icon container if reused
           // <div className="p-2 bg-primary/10 rounded-full">
-          (<Icon iconId={icon} className="h-4 w-4 text-muted-foreground" />) // Adjusted styling
+          <Icon iconId={icon} className="h-4 w-4 text-muted-foreground" /> // Adjusted styling
           // </div>
         )}
       </CardHeader>

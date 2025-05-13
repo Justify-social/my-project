@@ -205,7 +205,7 @@ export default function ClientDashboard() {
               </div>
             ) : (
               // UpcomingCampaignsTable will render its own empty state if campaigns array is empty
-              (<UpcomingCampaignsTable campaigns={campaigns} onRowClick={handleCampaignClick} />)
+              <UpcomingCampaignsTable campaigns={campaigns} onRowClick={handleCampaignClick} />
             )}
           </CardContent>
         </Card>

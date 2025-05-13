@@ -76,12 +76,13 @@ const formatKpiName = (kpiKey: string | null | undefined): string => {
   const normalizedKey = kpiKey.toLowerCase().replace(/_([a-z])/g, (_, char) => char.toUpperCase());
   return (
     // Check against map first
-    (// Fallback formatting if not in map
-    kpiDisplayNames[normalizedKey] || kpiKey
+    // Fallback formatting if not in map
+    kpiDisplayNames[normalizedKey] ||
+    kpiKey
       .replace(/_/g, ' ')
       .split(' ')
       .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-      .join(' '))
+      .join(' ')
   );
 };
 // --- KPI Formatting Utilities --- END ---

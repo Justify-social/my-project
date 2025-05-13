@@ -77,17 +77,17 @@ function SidebarItem({
             </div>
           ) : icon ? (
             // Fallback if icon name provided but not in registry
-            (<div
+            <div
               className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0"
               title={`Icon '${icon}' not found in registry`}
             >
               <span className="flex items-center justify-center w-5 h-5 text-xs bg-gray-200 dark:bg-gray-700 rounded-full">
                 {icon.charAt(0).toUpperCase()}
               </span>
-            </div>)
+            </div>
           ) : (
             // Placeholder if no icon is provided for alignment
-            (<div className="w-6 h-6 mr-2 flex-shrink-0"></div>)
+            <div className="w-6 h-6 mr-2 flex-shrink-0"></div>
           )}
 
           {/* Use text-xs for child items and text-sm for parent/standalone items */}
@@ -232,8 +232,8 @@ export function Sidebar({
               className="h-6 w-auto mr-2" // Keep className, w-auto might allow flexibility
               width={24} // Provide width (6 * 4px)
               height={24} // Provide height (6 * 4px)
-            // Add unoptimized if logoSrc can be external/dynamic
-            // unoptimized
+              // Add unoptimized if logoSrc can be external/dynamic
+              // unoptimized
             />
           )}
           <span className="font-medium text-foreground">{title}</span>
@@ -258,7 +258,7 @@ export function Sidebar({
               <React.Fragment key={itemKey}>
                 {item.children ? (
                   // Render parent item similar to sidebar-ui-components categories
-                  (<li className="w-full">
+                  <li className="w-full">
                     <div
                       onClick={() => toggleSection(itemKey)} // Toggle expansion on click
                       onMouseEnter={() => setHover(itemKey, true)}
@@ -299,7 +299,7 @@ export function Sidebar({
                             </span>
                           </div>
                         ) : (
-                          (<div className="w-6 h-6 mr-2 flex-shrink-0"></div>) // Placeholder
+                          <div className="w-6 h-6 mr-2 flex-shrink-0"></div> // Placeholder
                         )}
                         {/* Parent item label: text-sm */}
                         <span
@@ -335,10 +335,10 @@ export function Sidebar({
                         ))}
                       </ul>
                     </div>
-                  </li>)
+                  </li>
                 ) : (
                   // Render regular item
-                  (<SidebarItem
+                  <SidebarItem
                     href={item.href || '#'} // Provide fallback href
                     label={item.label}
                     icon={item.icon}
@@ -347,7 +347,7 @@ export function Sidebar({
                     onClick={onItemClick}
                     iconRegistry={isRegistryLoading ? {} : iconRegistry}
                     isLoadingRegistry={isRegistryLoading}
-                  />)
+                  />
                 )}
               </React.Fragment>
             );

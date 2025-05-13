@@ -78,10 +78,10 @@ export function MetricsDashboard({
       {(title || description) && (
         <div className="space-y-1">
           {title && (
-            (<h2 className="text-2xl font-bold tracking-tight text-foreground">{title}</h2>) // Use theme color
+            <h2 className="text-2xl font-bold tracking-tight text-foreground">{title}</h2> // Use theme color
           )}
           {description && (
-            (<p className="text-muted-foreground">{description}</p>) // Use theme color
+            <p className="text-muted-foreground">{description}</p> // Use theme color
           )}
         </div>
       )}
@@ -93,7 +93,7 @@ export function MetricsDashboard({
           ))}
         </div>
       ) : (
-        (<p className="text-sm text-muted-foreground">No metrics to display.</p>) // Handle empty state
+        <p className="text-sm text-muted-foreground">No metrics to display.</p> // Handle empty state
       )}
       {/* Additional content */}
       {children && <div className="mt-6">{children}</div>}

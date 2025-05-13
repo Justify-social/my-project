@@ -97,7 +97,10 @@ const Header: React.FC<HeaderProps> = ({
           {/* Desktop Icons */}
           <div className="hidden md:flex items-center space-x-4 font-body">
             {/* Credits */}
-            <Link href="/account/billing" className="flex items-center space-x-1 cursor-pointer font-body">
+            <Link
+              href="/account/billing"
+              className="flex items-center space-x-1 cursor-pointer font-body"
+            >
               {hasCoinsIcon ? (
                 <Icon
                   iconId="faCoinsSolid" // Use Solid ID directly
@@ -108,7 +111,8 @@ const Header: React.FC<HeaderProps> = ({
                 <div
                   className="w-6 h-6 bg-muted rounded-full flex items-center justify-center text-xs"
                   title="Coins icon not found"
-                >$
+                >
+                  $
                 </div>
               )}
             </Link>
@@ -124,11 +128,12 @@ const Header: React.FC<HeaderProps> = ({
                 />
               ) : (
                 // Fallback if icon doesn't exist
-                (<div
+                <div
                   className="w-6 h-6 bg-muted rounded-full flex items-center justify-center text-xs"
                   title="Notifications icon not found"
-                >N
-                </div>)
+                >
+                  N
+                </div>
               )}
 
               {notificationsCount > 0 && (

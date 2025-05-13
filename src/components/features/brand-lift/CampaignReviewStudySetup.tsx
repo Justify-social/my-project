@@ -50,11 +50,14 @@ const kpiDisplayNames: Record<string, string> = {
 const formatKpiName = (kpiKey: string | null | undefined): string => {
   if (!kpiKey) return 'N/A';
   const normalizedKey = kpiKey.toLowerCase().replace(/_([a-z])/g, (_, char) => char.toUpperCase());
-  return (kpiDisplayNames[normalizedKey] || kpiKey
-    .replace(/_/g, ' ')
-    .split(' ')
-    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-    .join(' '));
+  return (
+    kpiDisplayNames[normalizedKey] ||
+    kpiKey
+      .replace(/_/g, ' ')
+      .split(' ')
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(' ')
+  );
 };
 // --- KPI Formatting Utilities --- END ---
 

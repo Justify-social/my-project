@@ -41,7 +41,7 @@ const MarketplaceList: React.FC<MarketplaceListProps> = ({
         )}
       >
         {Array.from({ length: skeletonCount }).map((_, index) => (
-          (<LoadingSkeleton key={index} variant="card" height={150} />) // Use card variant
+          <LoadingSkeleton key={index} variant="card" height={150} /> // Use card variant
         ))}
       </div>
     );
