@@ -11,6 +11,8 @@ import { BadRequestError, ForbiddenError, NotFoundError, UnauthenticatedError } 
 import { AiConfig, createQuestionGenerationPrompt } from '@/lib/ai/brandlift_prompts';
 import { BrandLiftStudyData } from '@/types/brand-lift';
 
+export const maxDuration = 60; // Set max duration to 60 seconds for Vercel Hobby (with Fluid Compute)
+
 interface RouteContext {
   params: { studyId: string };
 }

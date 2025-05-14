@@ -71,6 +71,7 @@ import {
 } from '@/components/ui/dialog';
 import toast from 'react-hot-toast'; // Added import for react-hot-toast
 import { showSuccessToast, showErrorToast } from '@/components/ui/toast'; // Added import for SSOT toasts
+import { Progress } from '@/components/ui/progress'; // Assuming Progress component exists
 
 // --- Giphy API Key ---
 const GIPHY_API_KEY = process.env.NEXT_PUBLIC_GIPHY_API_KEY;
@@ -266,9 +267,7 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
     const [editingOption, setEditingOption] = useState<{
       optionId: string;
       currentText: string;
-    } | null>(null); // For GIF text editing
-    const [isEditingQuestionText, setIsEditingQuestionText] = React.useState(false); // New state for inline editing
-    const [currentQuestionText, setCurrentQuestionText] = React.useState(question.text); // New state for temp question text
+    } | null>(null);
 
     const style = {
       transform: CSS.Transform.toString(transform),
@@ -376,12 +375,14 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
         </CardHeader>
         {isExpanded && (
           <CardContent className="p-4 space-y-3 border-t">
-            {isEditingQuestionText ? (
+            {editingOption ? (
               <div className="space-y-2">
                 <Textarea
-                  value={currentQuestionText}
-                  onChange={e => setCurrentQuestionText(e.target.value)}
-                  placeholder="Enter question text..."
+                  value={editingOption.currentText}
+                  onChange={e =>
+                    setEditingOption({ ...editingOption, currentText: e.target.value })
+                  }
+                  placeholder="Enter option text..."
                   disabled={actionsDisabled}
                   title={actionsDisabled ? actionsDisabledTitle : undefined}
                   autoFocus
@@ -392,8 +393,7 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      setIsEditingQuestionText(false);
-                      setCurrentQuestionText(question.text); // Reset on cancel
+                      setEditingOption(null);
                     }}
                     disabled={actionsDisabled}
                   >
@@ -402,10 +402,12 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
                   <Button
                     size="sm"
                     onClick={() => {
-                      onUpdateQuestionText(qId, currentQuestionText);
-                      setIsEditingQuestionText(false);
+                      if (editingOption.currentText.trim() !== '') {
+                        onUpdateOptionText(qId, editingOption.optionId, editingOption.currentText);
+                        setEditingOption(null);
+                      }
                     }}
-                    disabled={actionsDisabled || currentQuestionText.trim() === ''}
+                    disabled={actionsDisabled || editingOption.currentText.trim() === ''}
                   >
                     Save
                   </Button>
@@ -416,14 +418,13 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
                 className="p-2 rounded-md border border-transparent hover:border-input min-h-[60px] cursor-text break-words whitespace-pre-wrap"
                 onClick={() => {
                   if (!actionsDisabled) {
-                    setCurrentQuestionText(question.text); // Ensure current text is loaded before editing
-                    setIsEditingQuestionText(true);
+                    setEditingOption({ optionId: qId, currentText: question.text });
                   }
                 }}
-                title={actionsDisabled ? actionsDisabledTitle : 'Click to edit question text'}
+                title={actionsDisabled ? actionsDisabledTitle : 'Click to edit option text'}
               >
                 {question.text || (
-                  <span className="text-muted-foreground italic">Enter question text...</span>
+                  <span className="text-muted-foreground italic">Enter option text...</span>
                 )}
               </div>
             )}
@@ -555,101 +556,104 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
                       <React.Fragment key={optId}>
                         {isGif ? (
                           <div className="p-1 self-stretch flex flex-col flex-shrink-0 w-48">
-                            <GifCard
-                              gifUrl={opt.imageUrl!}
-                              altText={opt.text || `Option ${optIdx + 1}`}
-                              optionText={opt.text || `Option ${optIdx + 1}`}
-                              isSelected={optId === selectedOptionId}
-                              onClick={() => onSelectOption?.(qId, optId)}
-                              onSearchClick={() => onInitiateGifSearch?.(qId, optId, opt.text)}
-                              className="flex-grow"
-                              disabled={actionsDisabled}
-                              disabledTitle={actionsDisabled ? actionsDisabledTitle : undefined}
-                            />
+                            <div className="relative group flex-grow">
+                              <GifCard
+                                gifUrl={opt.imageUrl!}
+                                altText={opt.text || `Option ${optIdx + 1}`}
+                                optionText={opt.text || `Option ${optIdx + 1}`}
+                                isSelected={optId === selectedOptionId}
+                                onClick={() => !actionsDisabled && onSelectOption?.(qId, optId)}
+                                onSearchClick={() =>
+                                  !actionsDisabled && onInitiateGifSearch?.(qId, optId, opt.text)
+                                }
+                                className="flex-grow"
+                                disabled={actionsDisabled}
+                                disabledTitle={actionsDisabled ? actionsDisabledTitle : undefined}
+                              />
+                            </div>
 
-                            <div className="mt-1 flex items-center justify-between">
+                            <div className="mt-1 space-y-1">
                               {editingOption?.optionId === optId ? (
-                                <div className="w-full space-y-1">
+                                <>
                                   <Input
                                     value={editingOption.currentText}
                                     onChange={e =>
-                                      setEditingOption(prev => ({
-                                        ...prev!,
+                                      setEditingOption({
+                                        ...editingOption,
                                         currentText: e.target.value,
-                                      }))
+                                      })
                                     }
-                                    placeholder="Option text"
-                                    className="text-xs h-7"
-                                    disabled={actionsDisabled}
+                                    className="text-xs h-7 w-full"
                                     autoFocus
+                                    disabled={actionsDisabled}
                                   />
-                                  <div className="flex space-x-1">
+                                  <div className="flex items-center justify-end space-x-1">
                                     <Button
+                                      variant="outline"
                                       size="sm"
-                                      onClick={() => {
-                                        onUpdateOptionText(
-                                          qId,
-                                          editingOption.optionId,
-                                          editingOption.currentText
-                                        );
-                                        setEditingOption(null);
-                                      }}
-                                      disabled={
-                                        actionsDisabled || editingOption.currentText.trim() === ''
-                                      }
-                                      className="text-xs h-6 px-1.5 py-0.5 flex-grow"
-                                    >
-                                      Save
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
+                                      className="text-xs h-6 px-1.5 py-0.5"
                                       onClick={() => setEditingOption(null)}
                                       disabled={actionsDisabled}
-                                      className="text-xs h-6 px-1.5 py-0.5 flex-grow"
                                     >
                                       Cancel
                                     </Button>
+                                    <IconButtonAction
+                                      iconBaseName="faFloppyDisk"
+                                      ariaLabel="Save text"
+                                      onClick={() => {
+                                        if (
+                                          !actionsDisabled &&
+                                          editingOption.currentText.trim() !== ''
+                                        ) {
+                                          onUpdateOptionText(qId, optId, editingOption.currentText);
+                                          setEditingOption(null);
+                                        }
+                                      }}
+                                      className={cn(
+                                        'h-6 w-6 p-1',
+                                        (actionsDisabled ||
+                                          editingOption.currentText.trim() === '') &&
+                                          'opacity-50 cursor-not-allowed'
+                                      )}
+                                      hoverColorClass="hover:text-primary"
+                                    />
+                                  </div>
+                                </>
+                              ) : (
+                                <div className="flex items-center justify-between">
+                                  <span
+                                    className="text-xs truncate flex-grow mr-1"
+                                    title={opt.text}
+                                  >
+                                    {opt.text || 'Untitled Option'}
+                                  </span>
+                                  <div className="flex items-center flex-shrink-0">
+                                    <IconButtonAction
+                                      iconBaseName="faPenToSquare"
+                                      ariaLabel="Edit option text"
+                                      onClick={() =>
+                                        !actionsDisabled &&
+                                        setEditingOption({ optionId: optId, currentText: opt.text })
+                                      }
+                                      className={cn(
+                                        'h-6 w-6 p-1',
+                                        actionsDisabled && 'opacity-50 cursor-not-allowed'
+                                      )}
+                                      hoverColorClass="hover:text-primary"
+                                    />
+                                    <IconButtonAction
+                                      iconBaseName="faTrashCan"
+                                      ariaLabel="Delete option"
+                                      onClick={() => !actionsDisabled && onDeleteOption(qId, optId)}
+                                      className={cn(
+                                        'h-6 w-6 p-1',
+                                        actionsDisabled && 'opacity-50 cursor-not-allowed'
+                                      )}
+                                      hoverColorClass="text-destructive"
+                                    />
                                   </div>
                                 </div>
-                              ) : (
-                                <div
-                                  className="flex items-center space-x-1 text-xs truncate flex-grow mr-1 group/text relative p-1 cursor-pointer hover:bg-slate-100 rounded"
-                                  title={opt.text || `Option ${optIdx + 1}`}
-                                  onClick={
-                                    actionsDisabled
-                                      ? undefined
-                                      : () =>
-                                          setEditingOption({
-                                            optionId: optId,
-                                            currentText: opt.text,
-                                          })
-                                  }
-                                >
-                                  <span className="truncate">
-                                    {opt.text || `Option ${optIdx + 1}`}
-                                  </span>
-                                  {!actionsDisabled && (
-                                    <Icon
-                                      iconId="faPenToSquareLight"
-                                      className="h-3 w-3 text-muted-foreground opacity-0 group-hover/text:opacity-100 transition-opacity"
-                                    />
-                                  )}
-                                </div>
                               )}
-                              {/* Delete button for the option itself */}
-                              <IconButtonAction
-                                iconBaseName="faTrashCan"
-                                ariaLabel="Delete option"
-                                onClick={
-                                  actionsDisabled ? undefined : () => onDeleteOption(qId, optId)
-                                }
-                                className={cn(
-                                  'h-6 w-6 p-0.5 flex-shrink-0',
-                                  actionsDisabled && 'opacity-50 cursor-not-allowed'
-                                )}
-                                hoverColorClass="text-destructive"
-                              />
                             </div>
                           </div>
                         ) : (
@@ -725,6 +729,18 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
 );
 SortableQuestionItem.displayName = 'SortableQuestionItem';
 
+// Define progress steps configuration outside the component for stability
+interface ProgressStep {
+  id: number;
+  text: string;
+}
+const PROGRESS_STEPS_CONFIG: ProgressStep[] = [
+  { id: 1, text: 'Analysing campaign context...' },
+  { id: 2, text: 'Drafting survey questions...' },
+  { id: 3, text: 'Sourcing GIF ideas...' },
+  { id: 4, text: 'Finalising suggestions...' },
+];
+
 const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestionBuilderProps>(
   ({ studyId, onIsAISuggestingChange }, ref) => {
     const { orgId: activeOrgId, isLoaded: isAuthLoaded, isSignedIn } = useAuth();
@@ -749,6 +765,13 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
       error?: string;
     } | null>(null);
     const [gifSearchInput, setGifSearchInput] = useState(''); // Separate state for modal input
+
+    // New states for progress modal
+    const [currentProgressStepIdx, setCurrentProgressStepIdx] = useState(0);
+    const [progressPercentage, setProgressPercentage] = useState(0);
+    const [completedSteps, setCompletedSteps] = useState<boolean[]>(
+      new Array(PROGRESS_STEPS_CONFIG.length).fill(false)
+    );
 
     const sensors = useSensors(
       useSensor(PointerSensor),
@@ -1076,12 +1099,30 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
         const response = await fetch(`/api/brand-lift/surveys/${studyId}/suggest-questions`, {
           method: 'POST',
         });
-        if (!response.ok)
-          throw new Error(
-            (await response.json().then(e => e.error)) || 'Failed to get AI suggestions'
-          );
+
+        if (!response.ok) {
+          let errorMsg = `Error fetching AI suggestions: ${response.status} ${response.statusText}`;
+          try {
+            const errorData = await response.json();
+            errorMsg = errorData.error || errorData.message || errorMsg;
+          } catch (e) {
+            try {
+              const textError = await response.text();
+              if (textError && !textError.toLowerCase().includes('<html')) {
+                errorMsg = textError.substring(0, 200);
+              } else if (response.status === 504) {
+                errorMsg =
+                  'The request to generate questions timed out. This can happen with complex requests. Please try again shortly or contact support if persistent.';
+              }
+            } catch (textE) {
+              /* fallback to statusText */
+            }
+          }
+          throw new Error(errorMsg);
+        }
+
         const yamlText = await response.text();
-        yamlSuggestionsForErrorLog = yamlText;
+        yamlSuggestionsForErrorLog = yamlText; // For logging in case of parsing error
         const parsed = yaml.load(yamlText) as any[];
         const validation = aiSuggestedQuestionsSchema.safeParse(parsed);
 
@@ -1101,17 +1142,22 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
               aiQ.options.map(async (aiOpt: ValidatedAiOption, optIdx: number) => {
                 let imageUrl: string | null = null;
                 if (aiOpt.image_description) {
-                  const MAX_GIPHY_SEARCH_TERM_LENGTH = 100; // Max length for Giphy search term
-                  let searchTerm = aiOpt.image_description;
+                  const MAX_GIPHY_SEARCH_TERM_LENGTH = 100;
+                  let searchTerm = aiOpt.image_description.trim(); // Add trim()
                   if (searchTerm.length > MAX_GIPHY_SEARCH_TERM_LENGTH) {
                     searchTerm = searchTerm.substring(0, MAX_GIPHY_SEARCH_TERM_LENGTH);
+                    // Ensure studyId is accessible in this scope for logging, if not, remove it or pass it down
+                    // For now, assuming studyId is available from the outer scope of actualHandleSuggestQuestions
                     logger.warn('[Giphy] Search term truncated for Giphy API call due to length.', {
                       originalTerm: aiOpt.image_description,
                       truncatedTerm: searchTerm,
-                      studyId: studyId, // Assuming studyId is accessible here for context
+                      studyId: studyId,
                     });
                   }
-                  imageUrl = await fetchGifFromGiphy(searchTerm);
+                  // Only search if the (potentially truncated) term is not empty
+                  if (searchTerm) {
+                    imageUrl = await fetchGifFromGiphy(searchTerm);
+                  }
                 }
                 return {
                   tempId: generateTempId(),
@@ -1211,12 +1257,14 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
         logger.error('AI Suggestion processing error:', {
           studyId,
           error: err.message,
-          rawResponse: yamlSuggestionsForErrorLog,
+          rawResponse: yamlSuggestionsForErrorLog, // Log the YAML if parsing failed after this
         });
         setError(err.message || 'Failed to process AI suggestions.');
+        showErrorToast(err.message || 'Failed to process AI suggestions.');
+      } finally {
+        setIsAISuggestingInternal(false);
+        onIsAISuggestingChange?.(false);
       }
-      setIsAISuggestingInternal(false);
-      onIsAISuggestingChange?.(false);
     };
 
     useImperativeHandle(ref, () => ({
@@ -1276,6 +1324,36 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
         }));
       }
     };
+
+    // useEffect to manage simulated progress for the modal
+    useEffect(() => {
+      let timers: NodeJS.Timeout[] = [];
+      if (isAISuggestingInternal) {
+        setCurrentProgressStepIdx(0);
+        setProgressPercentage(0);
+        setCompletedSteps(new Array(PROGRESS_STEPS_CONFIG.length).fill(false));
+
+        const totalDuration = 55000;
+        const stepDuration = totalDuration / PROGRESS_STEPS_CONFIG.length;
+
+        PROGRESS_STEPS_CONFIG.forEach((step: ProgressStep, index: number) => {
+          const timer = setTimeout(() => {
+            setCompletedSteps(prev => prev.map((s, i) => (i < index ? true : s)));
+            setCurrentProgressStepIdx(index);
+            setProgressPercentage(((index + 1) / PROGRESS_STEPS_CONFIG.length) * 100);
+            if (index === PROGRESS_STEPS_CONFIG.length - 1) {
+              setCompletedSteps(prev => prev.map(() => true));
+            }
+          }, index * stepDuration);
+          timers.push(timer);
+        });
+      } else {
+        timers.forEach(clearTimeout);
+      }
+      return () => {
+        timers.forEach(clearTimeout);
+      };
+    }, [isAISuggestingInternal]);
 
     if (!isAuthLoaded || (isLoading && questions.length === 0 && !error)) {
       return (
@@ -1467,6 +1545,67 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
             </DialogContent>
           </Dialog>
         )}
+
+        {/* Progress Modal */}
+        <Dialog
+          open={isAISuggestingInternal}
+          onOpenChange={open => {
+            if (!open) {
+              setIsAISuggestingInternal(false);
+              onIsAISuggestingChange?.(false);
+            }
+          }}
+        >
+          <DialogContent
+            className="sm:max-w-md"
+            onPointerDownOutside={e => e.preventDefault()}
+            onInteractOutside={e => e.preventDefault()}
+          >
+            <DialogHeader>
+              <DialogTitle className="text-lg font-semibold">
+                Crafting Your Brand Lift Study
+              </DialogTitle>
+              <DialogDescription className="text-sm text-muted-foreground">
+                Justify is working its magic. Please wait a moment.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 py-4">
+              {PROGRESS_STEPS_CONFIG.map((step: ProgressStep, index: number) => (
+                <div key={step.id} className="flex items-center space-x-3">
+                  {completedSteps[index] ? (
+                    <Icon
+                      iconId="faCircleCheckLight"
+                      className="h-5 w-5 text-green-500 flex-shrink-0"
+                    />
+                  ) : currentProgressStepIdx === index ? (
+                    <Icon
+                      iconId="faCircleNotchLight"
+                      className="h-5 w-5 text-primary animate-spin flex-shrink-0"
+                    />
+                  ) : (
+                    <Icon
+                      iconId="faCircleLight"
+                      className="h-5 w-5 text-muted-foreground/30 flex-shrink-0"
+                    />
+                  )}
+                  <span
+                    className={cn(
+                      'text-sm',
+                      completedSteps[index]
+                        ? 'text-muted-foreground line-through italic'
+                        : currentProgressStepIdx === index
+                          ? 'text-primary font-medium'
+                          : 'text-muted-foreground/80'
+                    )}
+                  >
+                    {step.text}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <Progress value={progressPercentage} className="w-full h-2 mt-2 mb-1" />
+          </DialogContent>
+        </Dialog>
       </>
     );
   }
