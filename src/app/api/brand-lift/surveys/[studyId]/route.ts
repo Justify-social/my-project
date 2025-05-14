@@ -330,15 +330,23 @@ export async function DELETE(
       throw new BadRequestError('Study ID is required for deletion.');
     }
 
+    logger.info('Attempting to delete BrandLiftStudy', { studyId, userId: clerkUserId, orgId });
+
     const studyToDelete = await db.brandLiftStudy.findUnique({
       where: { id: studyId },
-      select: { orgId: true, name: true, status: true },
+      select: { orgId: true, name: true, status: true }, // Select fields for verification and logging
     });
 
     if (!studyToDelete) {
+      logger.warn('BrandLiftStudy not found for deletion attempt', {
+        studyId,
+        userId: clerkUserId,
+        orgId,
+      });
       throw new NotFoundError('Study not found.');
     }
 
+    // Authorization: Check if the study belongs to the user's active organization.
     if (studyToDelete.orgId === null) {
       logger.warn(
         `User ${clerkUserId} in org ${orgId} attempted to delete legacy brand lift study ${studyId} (null orgId). Action denied.`
@@ -353,12 +361,177 @@ export async function DELETE(
       throw new ForbiddenError('You do not have permission to delete this study.');
     }
 
+    // Business logic: Prevent deletion of studies in certain statuses if needed
+    if (
+      studyToDelete.status === BrandLiftStudyStatus.COLLECTING ||
+      studyToDelete.status === BrandLiftStudyStatus.COMPLETED
+    ) {
+      logger.warn('Attempt to delete an active/collecting/completed BrandLiftStudy denied', {
+        studyId,
+        studyStatus: studyToDelete.status,
+        userId: clerkUserId,
+        orgId,
+      });
+      throw new BadRequestError(
+        `Cannot delete study "${studyToDelete.name}" because it is ${studyToDelete.status.toLowerCase()}. Consider archiving.`
+      );
+    }
+
+    // Prisma will handle cascade deletes if configured in schema.prisma.
+    // Otherwise, explicit deletions of related entities in a transaction are needed here.
     await db.brandLiftStudy.delete({
       where: { id: studyId },
     });
 
-    logger.info('Brand Lift Study deleted successfully', { studyId, userId: clerkUserId, orgId });
-    return NextResponse.json({ message: 'Study deleted successfully' }, { status: 200 });
+    logger.info('BrandLiftStudy deleted successfully', { studyId, userId: clerkUserId, orgId });
+    return NextResponse.json(
+      { success: true, message: `Study "${studyToDelete.name}" deleted successfully.` },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    return handleApiError(error, req);
+  }
+}
+
+// POST handler for DUPLICATING a study
+const duplicateStudyBodySchema = z.object({
+  newName: z.string().min(1, { message: 'New study name is required' }),
+});
+
+export async function POST(
+  req: NextRequest,
+  { params: paramsPromise }: { params: Promise<{ studyId: string }> } // studyId here is the ID of the study to duplicate
+) {
+  try {
+    const { userId: clerkUserId, orgId } = await auth();
+    if (!clerkUserId) {
+      throw new UnauthenticatedError('Authentication required.');
+    }
+    if (!orgId) {
+      throw new BadRequestError(
+        'Active organization context is required to duplicate a brand lift study.'
+      );
+    }
+
+    const { studyId: originalStudyId } = await paramsPromise;
+    if (!originalStudyId) {
+      throw new BadRequestError('Original Study ID is required for duplication.');
+    }
+
+    const body = await req.json();
+    const validation = duplicateStudyBodySchema.safeParse(body);
+    if (!validation.success) {
+      logger.warn('Invalid duplicate study request body', {
+        originalStudyId,
+        errors: validation.error.flatten().fieldErrors,
+        userId: clerkUserId,
+        orgId,
+      });
+      throw validation.error;
+    }
+
+    const { newName } = validation.data;
+
+    logger.info('Attempting to duplicate BrandLiftStudy via nested create', {
+      originalStudyId,
+      newName,
+      userId: clerkUserId,
+      orgId,
+    });
+
+    const originalStudy = await db.brandLiftStudy.findUnique({
+      where: {
+        id: originalStudyId,
+        orgId: orgId,
+      },
+      include: {
+        questions: {
+          orderBy: { order: 'asc' },
+          include: {
+            options: {
+              orderBy: { order: 'asc' },
+            },
+          },
+        },
+      },
+    });
+
+    if (!originalStudy) {
+      logger.warn('Original BrandLiftStudy not found or access denied for duplication', {
+        originalStudyId,
+        userId: clerkUserId,
+        orgId,
+      });
+      throw new NotFoundError(
+        'Original study not found or you do not have permission to duplicate it.'
+      );
+    }
+
+    // Prepare data for nested create
+    const questionsData = originalStudy.questions.map(q => ({
+      text: q.text,
+      questionType: q.questionType,
+      order: q.order,
+      isRandomized: q.isRandomized ?? false,
+      isMandatory: q.isMandatory ?? true,
+      kpiAssociation: q.kpiAssociation,
+      options: {
+        create: q.options.map(opt => ({
+          text: opt.text,
+          imageUrl: opt.imageUrl ?? null,
+          order: opt.order,
+        })),
+      },
+    }));
+
+    const newStudyData = await db.$transaction(async prismaTx => {
+      const newStudy = await prismaTx.brandLiftStudy.create({
+        data: {
+          name: newName,
+          submissionId: originalStudy.submissionId,
+          funnelStage: originalStudy.funnelStage,
+          primaryKpi: originalStudy.primaryKpi,
+          secondaryKpis: originalStudy.secondaryKpis,
+          status: BrandLiftStudyStatus.DRAFT,
+          orgId: originalStudy.orgId,
+          questions: {
+            create: questionsData, // Use the prepared nested data
+          },
+        },
+      });
+
+      return {
+        id: newStudy.id,
+        name: newStudy.name,
+        orgId: newStudy.orgId,
+        status: newStudy.status,
+      };
+    });
+
+    if (!newStudyData || !newStudyData.id) {
+      throw new Error('Failed to create duplicated study within transaction.');
+    }
+
+    const duplicatedStudyWithDetails = await db.brandLiftStudy.findUnique({
+      where: { id: newStudyData.id },
+      include: {
+        questions: { include: { options: true } },
+        campaign: { select: { campaignName: true } },
+      },
+    });
+
+    if (!duplicatedStudyWithDetails) {
+      throw new Error('Failed to retrieve duplicated study details after transaction.');
+    }
+
+    logger.info('BrandLiftStudy duplicated successfully', {
+      originalStudyId,
+      newStudyId: duplicatedStudyWithDetails.id,
+      newName,
+      userId: clerkUserId,
+      orgId,
+    });
+    return NextResponse.json({ success: true, data: duplicatedStudyWithDetails }, { status: 201 });
   } catch (error: any) {
     return handleApiError(error, req);
   }

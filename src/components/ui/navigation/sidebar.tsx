@@ -247,7 +247,11 @@ export function Sidebar({
         <ul className="list-none space-y-0.5">
           {items.map((item, index) => {
             const itemKey = item.label + index; // Create a key for hover state and expansion
-            const isActiveParent = hasActiveChild(item);
+
+            // Enhanced logic: parent is active if its own href is active OR if it has an active child.
+            const isParentDirectlyActive = item.href ? isActive(item.href) : false;
+            const isActiveParent = isParentDirectlyActive || hasActiveChild(item);
+
             const isHoveredParent = hoverStates[itemKey] || false;
             const isExpanded = expandedSections[itemKey] || false; // Check if section is expanded
             const parentIconName = item.icon; // ONLY use explicitly provided icon for parents

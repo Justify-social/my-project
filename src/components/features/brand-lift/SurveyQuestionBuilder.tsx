@@ -555,14 +555,17 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
                     return (
                       <React.Fragment key={optId}>
                         {isGif ? (
-                          <div className="p-1 self-stretch flex flex-col flex-shrink-0 w-48">
-                            <div className="relative group flex-grow">
+                          <div className="p-1 self-stretch flex flex-col flex-shrink-0 w-48 group relative">
+                            <div className="relative flex-grow">
                               <GifCard
                                 gifUrl={opt.imageUrl!}
                                 altText={opt.text || `Option ${optIdx + 1}`}
                                 optionText={opt.text || `Option ${optIdx + 1}`}
                                 isSelected={optId === selectedOptionId}
-                                onClick={() => !actionsDisabled && onSelectOption?.(qId, optId)}
+                                onClick={() => {
+                                  if (actionsDisabled) return;
+                                  onSelectOption?.(qId, optId);
+                                }}
                                 onSearchClick={() =>
                                   !actionsDisabled && onInitiateGifSearch?.(qId, optId, opt.text)
                                 }
@@ -572,9 +575,9 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
                               />
                             </div>
 
-                            <div className="mt-1 space-y-1">
+                            <div className="mt-1">
                               {editingOption?.optionId === optId ? (
-                                <>
+                                <div className="space-y-1">
                                   <Input
                                     value={editingOption.currentText}
                                     onChange={e =>
@@ -586,6 +589,7 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
                                     className="text-xs h-7 w-full"
                                     autoFocus
                                     disabled={actionsDisabled}
+                                    placeholder="Option text"
                                   />
                                   <div className="flex items-center justify-end space-x-1">
                                     <Button
@@ -601,57 +605,58 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
                                       iconBaseName="faFloppyDisk"
                                       ariaLabel="Save text"
                                       onClick={() => {
-                                        if (
-                                          !actionsDisabled &&
-                                          editingOption.currentText.trim() !== ''
-                                        ) {
-                                          onUpdateOptionText(qId, optId, editingOption.currentText);
-                                          setEditingOption(null);
+                                        if (!actionsDisabled) {
+                                          if (
+                                            opt.imageUrl ||
+                                            editingOption.currentText.trim() !== ''
+                                          ) {
+                                            onUpdateOptionText(
+                                              qId,
+                                              optId,
+                                              editingOption.currentText
+                                            );
+                                            setEditingOption(null);
+                                          } else {
+                                            // This case should ideally be prevented by the disabled state of the button
+                                          }
                                         }
                                       }}
                                       className={cn(
                                         'h-6 w-6 p-1',
                                         (actionsDisabled ||
-                                          editingOption.currentText.trim() === '') &&
+                                          (editingOption.currentText.trim() === '' &&
+                                            !opt.imageUrl)) &&
                                           'opacity-50 cursor-not-allowed'
                                       )}
                                       hoverColorClass="hover:text-primary"
                                     />
                                   </div>
-                                </>
+                                </div>
                               ) : (
-                                <div className="flex items-center justify-between">
-                                  <span
-                                    className="text-xs truncate flex-grow mr-1"
-                                    title={opt.text}
-                                  >
-                                    {opt.text || 'Untitled Option'}
-                                  </span>
-                                  <div className="flex items-center flex-shrink-0">
-                                    <IconButtonAction
-                                      iconBaseName="faPenToSquare"
-                                      ariaLabel="Edit option text"
-                                      onClick={() =>
-                                        !actionsDisabled &&
-                                        setEditingOption({ optionId: optId, currentText: opt.text })
-                                      }
-                                      className={cn(
-                                        'h-6 w-6 p-1',
-                                        actionsDisabled && 'opacity-50 cursor-not-allowed'
-                                      )}
-                                      hoverColorClass="hover:text-primary"
-                                    />
-                                    <IconButtonAction
-                                      iconBaseName="faTrashCan"
-                                      ariaLabel="Delete option"
-                                      onClick={() => !actionsDisabled && onDeleteOption(qId, optId)}
-                                      className={cn(
-                                        'h-6 w-6 p-1',
-                                        actionsDisabled && 'opacity-50 cursor-not-allowed'
-                                      )}
-                                      hoverColorClass="text-destructive"
-                                    />
-                                  </div>
+                                <div className="flex items-center justify-end space-x-1 pt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                                  <IconButtonAction
+                                    iconBaseName="faPenToSquare"
+                                    ariaLabel="Edit option text"
+                                    onClick={() =>
+                                      !actionsDisabled &&
+                                      setEditingOption({ optionId: optId, currentText: opt.text })
+                                    }
+                                    className={cn(
+                                      'h-6 w-6 p-1',
+                                      actionsDisabled && 'opacity-50 cursor-not-allowed'
+                                    )}
+                                    hoverColorClass="hover:text-primary"
+                                  />
+                                  <IconButtonAction
+                                    iconBaseName="faTrashCan"
+                                    ariaLabel="Delete option"
+                                    onClick={() => !actionsDisabled && onDeleteOption(qId, optId)}
+                                    className={cn(
+                                      'h-6 w-6 p-1',
+                                      actionsDisabled && 'opacity-50 cursor-not-allowed'
+                                    )}
+                                    hoverColorClass="text-destructive"
+                                  />
                                 </div>
                               )}
                             </div>

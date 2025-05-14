@@ -219,7 +219,8 @@ export async function GET(req: NextRequest) {
         userId: clerkUserId, // Log clerkUserId
         count: studies.length,
       });
-      return NextResponse.json(studies);
+      // Wrap the response in the expected { success: true, data: ... } structure
+      return NextResponse.json({ success: true, data: studies });
     },
     error => handleApiError(error, req)
   ); // Pass req to error handler
