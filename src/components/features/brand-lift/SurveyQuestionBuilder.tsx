@@ -16,12 +16,17 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
+  rectSortingStrategy,
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import yaml from 'js-yaml';
 import { z } from 'zod';
-import { SurveyQuestionType, BrandLiftStudyStatus } from '@/types/brand-lift'; // Import from local types
+import {
+  SurveyQuestionType,
+  BrandLiftStudyStatus,
+  SurveyOptionData as TypeSurveyOptionData, // Alias to avoid conflict if SortableOptionItem also uses SurveyOptionData
+} from '@/types/brand-lift'; // Import from local types
 import { useAuth } from '@clerk/nextjs'; // Import useAuth
 import { ForbiddenError, NotFoundError, UnauthenticatedError, BadRequestError } from '@/lib/errors'; // Added import for custom errors
 
@@ -51,7 +56,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Icon } from '@/components/ui/icon/icon';
 import logger from '@/lib/logger';
-import { SurveyQuestionData, SurveyOptionData, BrandLiftStudyData } from '@/types/brand-lift';
+import { SurveyQuestionData, BrandLiftStudyData } from '@/types/brand-lift';
 import { cn } from '@/lib/utils';
 import { GifCard } from '@/components/ui/card-gif'; // Import the new GifCard
 import { Badge } from '@/components/ui/badge';
@@ -208,29 +213,23 @@ interface SortableQuestionItemProps {
   index: number;
   onUpdateQuestionText: (questionIdOrTempId: string, text: string) => void;
   onUpdateQuestionType: (questionIdOrTempId: string, type: SurveyQuestionType) => void;
-  onUpdateQuestionOrder: (questionIdOrTempId: string, order: number) => void;
   onToggleRandomized: (questionIdOrTempId: string, checked: boolean) => void;
   onToggleMandatory: (questionIdOrTempId: string, checked: boolean) => void;
   onUpdateKpiAssociation: (questionIdOrTempId: string, kpi: string | null) => void;
   onDeleteQuestion: (questionIdOrTempId: string) => void;
   onAddOption: (questionIdOrTempId: string) => void;
-  onUpdateOptionText: (questionIdOrTempId: string, optionIdOrTempId: string, text: string) => void;
-  onUpdateOptionImageUrl: (
-    questionIdOrTempId: string,
-    optionIdOrTempId: string,
-    imageUrl: string | null
-  ) => void;
-  onUpdateOptionOrder: (
-    questionIdOrTempId: string,
-    optionIdOrTempId: string,
-    order: number
-  ) => void;
-  onDeleteOption: (questionIdOrTempId: string, optionIdOrTempId: string) => void;
   actionsDisabled: boolean;
   actionsDisabledTitle?: string;
-  selectedOptionId?: string | null; // To manage which option is selected for GIF cards
-  onSelectOption?: (questionId: string, optionIdOrTempId: string) => void; // Callback for when an option/GIF is selected
-  onInitiateGifSearch?: (questionId: string, optionId: string, currentText?: string) => void; // New prop
+  selectedGifOptions: Record<string, string | null>;
+  onSelectOption: (questionId: string, optionIdOrTempId: string) => void;
+  onInitiateGifSearch: (questionId: string, optionId: string, currentText?: string) => void;
+  editingOptionGL: { questionId: string; optionId: string; currentText: string } | null;
+  setEditingOptionGL: (
+    editing: { questionId: string; optionId: string; currentText: string } | null
+  ) => void;
+  onUpdateOptionText: (questionIdOrTempId: string, optionIdOrTempId: string, text: string) => void;
+  onDeleteOptionForQuestion: (questionIdOrTempId: string, optionIdOrTempId: string) => void;
+  onDragEndOptions: (event: DragEndEvent, questionIdOrTempId: string) => void;
 }
 
 const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
@@ -239,30 +238,32 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
     index,
     onUpdateQuestionText,
     onUpdateQuestionType,
-    onUpdateQuestionOrder,
     onToggleRandomized,
     onToggleMandatory,
     onUpdateKpiAssociation,
     onDeleteQuestion,
     onAddOption,
-    onUpdateOptionText,
-    onUpdateOptionImageUrl,
-    onUpdateOptionOrder,
-    onDeleteOption,
     actionsDisabled,
     actionsDisabledTitle,
-    selectedOptionId,
+    selectedGifOptions,
     onSelectOption,
     onInitiateGifSearch,
+    editingOptionGL,
+    setEditingOptionGL,
+    onUpdateOptionText,
+    onDeleteOptionForQuestion,
+    onDragEndOptions,
   }) => {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
       id: question.id || question.tempId!,
     });
     const [isExpanded, setIsExpanded] = React.useState(true);
-    const [editingOption, setEditingOption] = useState<{
-      optionId: string;
-      currentText: string;
-    } | null>(null);
+    const qId = question.id || question.tempId!;
+
+    const optionSensors = useSensors(
+      useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+      useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    );
 
     const style = {
       transform: CSS.Transform.toString(transform),
@@ -270,7 +271,6 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
       opacity: isDragging ? 0.5 : 1,
       zIndex: isDragging ? 10 : 'auto',
     };
-    const qId = question.id || question.tempId!;
     const currentKpiTooltip =
       question.kpiAssociation &&
       kpiTooltips[question.kpiAssociation.toUpperCase().replace(/\s+/g, '_')]
@@ -285,7 +285,7 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
         : 'faTagLight'; // Fallback icon
 
     return (
-      <Card ref={setNodeRef} style={style} className="mb-4 bg-white shadow-sm relative group">
+      <Card ref={setNodeRef} style={style} className="mb-4 bg-white shadow-sm relative">
         <CardHeader
           className="flex flex-row items-center justify-between p-4 cursor-pointer"
           onClick={() => setIsExpanded(!isExpanded)}
@@ -294,13 +294,13 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
             <div
               {...attributes}
               {...listeners}
-              className="opacity-50 hover:opacity-100 touch-none cursor-grab flex items-center justify-center" // Removed p-1, added flex for self-centering
+              className="opacity-50 hover:opacity-100 touch-none cursor-grab flex items-center justify-center"
               title={
                 question.questionType === SurveyQuestionType.MULTIPLE_CHOICE
                   ? 'Drag to reorder (Multiple Choice)'
                   : 'Drag to reorder (Single Choice)'
               }
-              onClick={e => e.stopPropagation()} // Prevent header click from triggering when dragging
+              onClick={e => e.stopPropagation()}
             >
               <Icon
                 iconId={
@@ -308,7 +308,7 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
                     ? 'faListCheckLight'
                     : 'faListRadioLight'
                 }
-                className="h-4 w-4 text-muted-foreground" // Removed mr-2 and flex-shrink-0 as it's the primary icon here
+                className="h-4 w-4 text-muted-foreground"
                 aria-label={
                   question.questionType === SurveyQuestionType.MULTIPLE_CHOICE
                     ? 'Multiple Choice Question'
@@ -317,26 +317,22 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
               />
             </div>
             <CardTitle
-              className="text-md truncate flex-grow ml-2" // Added ml-2 for spacing from new drag-icon
+              className="text-md truncate flex-grow ml-2"
               title={question.text || `Question ${index + 1}`}
             >
               Question {index + 1}: {question.text.substring(0, 50)}
               {question.text.length > 50 ? '...' : ''}
             </CardTitle>
-            {/* KPI Badge - MOVED HERE */}
             {question.kpiAssociation && (
               <div className="ml-2 flex-shrink-0">
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Badge
-                        variant="outline" // Use outline for structure
-                        className="cursor-default bg-accent text-white hover:bg-accent focus:bg-accent border-accent" // Changed text-accent-foreground to text-white
+                        variant="outline"
+                        className="cursor-default bg-accent text-white hover:bg-accent focus:bg-accent border-accent"
                       >
-                        <Icon
-                          iconId={kpiIconToRender} // Use the new mapped icon ID
-                          className="h-3 w-3 mr-1.5"
-                        />
+                        <Icon iconId={kpiIconToRender} className="h-3 w-3 mr-1.5" />
                         {formatKpiName(question.kpiAssociation)}
                       </Badge>
                     </TooltipTrigger>
@@ -347,7 +343,6 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
                 </TooltipProvider>
               </div>
             )}
-            {/* Chevron icon for collapse/expand state, moved inside the clickable part of header */}
             <Icon
               iconId={isExpanded ? 'faChevronUpLight' : 'faChevronDownLight'}
               className="h-4 w-4 text-muted-foreground ml-auto flex-shrink-0"
@@ -355,7 +350,6 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
           </div>
           <div className="flex items-center flex-shrink-0 pl-2">
             {' '}
-            {/* Added pl-2 for spacing */}
             <IconButtonAction
               iconBaseName="faTrashCan"
               hoverColorClass="text-destructive"
@@ -370,12 +364,12 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
         </CardHeader>
         {isExpanded && (
           <CardContent className="p-4 space-y-3 border-t">
-            {editingOption ? (
+            {editingOptionGL ? (
               <div className="space-y-2">
                 <Textarea
-                  value={editingOption.currentText}
+                  value={editingOptionGL.currentText}
                   onChange={e =>
-                    setEditingOption({ ...editingOption, currentText: e.target.value })
+                    setEditingOptionGL({ ...editingOptionGL, currentText: e.target.value })
                   }
                   placeholder="Enter option text..."
                   disabled={actionsDisabled}
@@ -388,7 +382,7 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      setEditingOption(null);
+                      setEditingOptionGL(null);
                     }}
                     disabled={actionsDisabled}
                   >
@@ -397,12 +391,16 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
                   <Button
                     size="sm"
                     onClick={() => {
-                      if (editingOption.currentText.trim() !== '') {
-                        onUpdateOptionText(qId, editingOption.optionId, editingOption.currentText);
-                        setEditingOption(null);
+                      if (editingOptionGL.currentText.trim() !== '') {
+                        onUpdateOptionText(
+                          qId,
+                          editingOptionGL.optionId,
+                          editingOptionGL.currentText
+                        );
+                        setEditingOptionGL(null);
                       }
                     }}
-                    disabled={actionsDisabled || editingOption.currentText.trim() === ''}
+                    disabled={actionsDisabled || editingOptionGL.currentText.trim() === ''}
                   >
                     Save
                   </Button>
@@ -413,20 +411,22 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
                 className="p-2 rounded-md border border-transparent hover:border-input min-h-[60px] cursor-text break-words whitespace-pre-wrap"
                 onClick={() => {
                   if (!actionsDisabled) {
-                    setEditingOption({ optionId: qId, currentText: question.text });
+                    setEditingOptionGL({
+                      questionId: qId,
+                      optionId: qId,
+                      currentText: question.text,
+                    });
                   }
                 }}
-                title={actionsDisabled ? actionsDisabledTitle : 'Click to edit option text'}
+                title={actionsDisabled ? actionsDisabledTitle : 'Click to edit question text'}
               >
                 {question.text || (
-                  <span className="text-muted-foreground italic">Enter option text...</span>
+                  <span className="text-muted-foreground italic">Enter question text...</span>
                 )}
               </div>
             )}
-            {/* START: Grouped Toggles Section - Revised Columns */}
             <div className="p-3 border rounded-md bg-slate-100/80">
               <div className="flex flex-row gap-4 md:gap-6">
-                {/* Column 1: Choice Types */}
                 <div className="flex-1 flex flex-col space-y-3 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
                   <div className="flex items-center space-x-2">
                     <Switch
@@ -462,7 +462,6 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
                   </div>
                 </div>
 
-                {/* Column 2: Option Settings */}
                 <div className="flex-1 flex flex-col space-y-3 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
                   <div className="flex items-center space-x-2">
                     <Switch
@@ -491,18 +490,15 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
                 </div>
               </div>
             </div>
-            {/* END: Grouped Toggles Section */}
-
-            {/* START: Associate KPI Section */}
             <div className="mt-2">
               <Label htmlFor={`kpi-assoc-${qId}`} className="text-sm font-medium mr-2">
                 Associated KPI:
               </Label>
               <Select
-                value={question.kpiAssociation || '_NO_KPI_'} // Line changed
+                value={question.kpiAssociation || '_NO_KPI_'}
                 onValueChange={value =>
                   onUpdateKpiAssociation(qId, value === '_NO_KPI_' ? null : value)
-                } // Line changed
+                }
                 disabled={actionsDisabled}
               >
                 <SelectTrigger
@@ -517,10 +513,8 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
                 <SelectContent>
                   <SelectItem value="_NO_KPI_" className="text-xs italic">
                     No KPI associated
-                  </SelectItem>{' '}
-                  {/* Line changed */}
+                  </SelectItem>
                   {Object.entries(kpiAssociationToIconIdMap).map(([kpiKey, iconId]) => (
-                    // kpiKey is e.g., AD_RECALL. We need its display name.
                     <SelectItem key={kpiKey} value={kpiKey} className="text-xs">
                       <div className="flex items-center">
                         <Icon iconId={iconId} className="h-3 w-3 mr-2 text-muted-foreground" />
@@ -531,184 +525,85 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
                 </SelectContent>
               </Select>
             </div>
-            {/* END: Associate KPI Section */}
 
             <div>
               <Label className="text-sm font-medium">Options:</Label>
-              <div className="flex flex-row overflow-x-auto space-x-2 mt-1 pb-2">
-                {' '}
-                {/* Added pb-2 for scrollbar clearance */}
-                {question.options
-                  .sort((a, b) => a.order - b.order)
-                  .map((opt, optIdx) => {
-                    const optId = opt.id || opt.tempId!;
-                    // Check if the imageUrl likely points to a GIF
-                    const isGif =
-                      opt.imageUrl &&
-                      (opt.imageUrl.endsWith('.gif') || opt.imageUrl.includes('giphy.com'));
-
-                    return (
-                      <React.Fragment key={optId}>
-                        {isGif ? (
-                          <div className="p-1 self-stretch flex flex-col flex-shrink-0 w-48 group relative">
-                            <div className="relative flex-grow">
-                              <GifCard
-                                gifUrl={opt.imageUrl!}
-                                altText={opt.text || `Option ${optIdx + 1}`}
-                                optionText={opt.text || `Option ${optIdx + 1}`}
-                                isSelected={optId === selectedOptionId}
-                                onClick={() => {
-                                  if (actionsDisabled) return;
-                                  onSelectOption?.(qId, optId);
-                                }}
-                                onSearchClick={() =>
-                                  !actionsDisabled && onInitiateGifSearch?.(qId, optId, opt.text)
-                                }
-                                className="flex-grow"
-                                disabled={actionsDisabled}
-                                disabledTitle={actionsDisabled ? actionsDisabledTitle : undefined}
-                              />
-                            </div>
-
-                            <div className="mt-1">
-                              {editingOption?.optionId === optId ? (
-                                <div className="space-y-1">
-                                  <Input
-                                    value={editingOption.currentText}
-                                    onChange={e =>
-                                      setEditingOption({
-                                        ...editingOption,
-                                        currentText: e.target.value,
-                                      })
-                                    }
-                                    className="text-xs h-7 w-full"
-                                    autoFocus
-                                    disabled={actionsDisabled}
-                                    placeholder="Option text"
-                                  />
-                                  <div className="flex items-center justify-end space-x-1">
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="text-xs h-6 px-1.5 py-0.5"
-                                      onClick={() => setEditingOption(null)}
-                                      disabled={actionsDisabled}
-                                    >
-                                      Cancel
-                                    </Button>
-                                    <IconButtonAction
-                                      iconBaseName="faFloppyDisk"
-                                      ariaLabel="Save text"
-                                      onClick={() => {
-                                        if (!actionsDisabled) {
-                                          if (
-                                            opt.imageUrl ||
-                                            editingOption.currentText.trim() !== ''
-                                          ) {
-                                            onUpdateOptionText(
-                                              qId,
-                                              optId,
-                                              editingOption.currentText
-                                            );
-                                            setEditingOption(null);
-                                          } else {
-                                            // This case should ideally be prevented by the disabled state of the button
-                                          }
-                                        }
-                                      }}
-                                      className={cn(
-                                        'h-6 w-6 p-1',
-                                        (actionsDisabled ||
-                                          (editingOption.currentText.trim() === '' &&
-                                            !opt.imageUrl)) &&
-                                          'opacity-50 cursor-not-allowed'
-                                      )}
-                                      hoverColorClass="hover:text-primary"
-                                    />
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className="flex items-center justify-end space-x-1 pt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-                                  <IconButtonAction
-                                    iconBaseName="faPenToSquare"
-                                    ariaLabel="Edit option text"
-                                    onClick={() =>
-                                      !actionsDisabled &&
-                                      setEditingOption({ optionId: optId, currentText: opt.text })
-                                    }
-                                    className={cn(
-                                      'h-6 w-6 p-1',
-                                      actionsDisabled && 'opacity-50 cursor-not-allowed'
-                                    )}
-                                    hoverColorClass="hover:text-primary"
-                                  />
-                                  <IconButtonAction
-                                    iconBaseName="faTrashCan"
-                                    ariaLabel="Delete option"
-                                    onClick={() => !actionsDisabled && onDeleteOption(qId, optId)}
-                                    className={cn(
-                                      'h-6 w-6 p-1',
-                                      actionsDisabled && 'opacity-50 cursor-not-allowed'
-                                    )}
-                                    hoverColorClass="text-destructive"
-                                  />
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        ) : (
-                          <Card
-                            key={optId}
-                            className="p-2 bg-slate-50 space-y-1 flex-shrink-0 w-64"
-                          >
-                            {' '}
-                            {/* Added flex-shrink-0 and example width */}
-                            <div className="flex items-center justify-between">
-                              <Label className="text-xs">Option {optIdx + 1}</Label>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="p-1 h-auto"
-                                onClick={() => onDeleteOption(qId, optId)}
-                                disabled={actionsDisabled}
-                                title={actionsDisabled ? actionsDisabledTitle : 'Delete option'}
-                              >
-                                <Icon iconId="faXmarkLight" className="h-3 w-3" />
-                              </Button>
-                            </div>
-                            <Input
-                              value={opt.text}
-                              onChange={e => onUpdateOptionText(qId, optId, e.target.value)}
-                              placeholder="Option text"
-                              disabled={actionsDisabled}
-                              title={actionsDisabled ? actionsDisabledTitle : undefined}
-                            />
-                            <Input
-                              value={opt.imageUrl || ''}
-                              onChange={e =>
-                                onUpdateOptionImageUrl(qId, optId, e.target.value || null)
-                              }
-                              placeholder="Image/GIF URL (optional)"
-                              disabled={actionsDisabled}
-                              title={actionsDisabled ? actionsDisabledTitle : undefined}
-                            />
-                            <Input
-                              type="number"
-                              value={opt.order}
-                              onChange={e =>
-                                onUpdateOptionOrder(qId, optId, parseInt(e.target.value, 10) || 0)
-                              }
-                              placeholder="Order"
-                              className="w-16 text-xs"
-                              disabled={actionsDisabled}
-                              title={actionsDisabled ? actionsDisabledTitle : undefined}
-                            />
-                          </Card>
-                        )}
-                      </React.Fragment>
-                    );
-                  })}
-              </div>
+              <DndContext
+                sensors={optionSensors}
+                collisionDetection={closestCenter}
+                onDragEnd={event => onDragEndOptions(event, qId)}
+              >
+                <SortableContext
+                  items={question.options.map(opt => opt.id || opt.tempId!)}
+                  strategy={rectSortingStrategy}
+                >
+                  <div className="flex flex-row overflow-x-auto space-x-2 mt-1 pb-2 items-stretch">
+                    {question.options.map(opt => (
+                      <SortableOptionItem
+                        key={opt.id || opt.tempId!}
+                        option={opt}
+                        questionId={qId}
+                        actionsDisabled={actionsDisabled}
+                        actionsDisabledTitle={actionsDisabledTitle}
+                        isEditingThisText={
+                          editingOptionGL?.questionId === qId &&
+                          editingOptionGL?.optionId === (opt.id || opt.tempId!)
+                        }
+                        currentEditText={
+                          editingOptionGL?.questionId === qId &&
+                          editingOptionGL?.optionId === (opt.id || opt.tempId!)
+                            ? editingOptionGL.currentText
+                            : opt.text
+                        }
+                        setEditingThisText={() =>
+                          setEditingOptionGL({
+                            questionId: qId,
+                            optionId: opt.id || opt.tempId!,
+                            currentText: opt.text,
+                          })
+                        }
+                        updateCurrentEditText={newText => {
+                          if (
+                            editingOptionGL &&
+                            editingOptionGL.questionId === qId &&
+                            editingOptionGL.optionId === (opt.id || opt.tempId!)
+                          ) {
+                            setEditingOptionGL({ ...editingOptionGL, currentText: newText });
+                          }
+                        }}
+                        saveEditingThisText={() => {
+                          if (editingOptionGL) {
+                            onUpdateOptionText(
+                              qId,
+                              editingOptionGL.optionId,
+                              editingOptionGL.currentText
+                            );
+                            setEditingOptionGL(null);
+                          }
+                        }}
+                        cancelEditingThisText={() => setEditingOptionGL(null)}
+                        optionSaveDisabled={
+                          actionsDisabled ||
+                          (editingOptionGL?.questionId === qId &&
+                            editingOptionGL?.optionId === (opt.id || opt.tempId!) &&
+                            editingOptionGL?.currentText?.trim() === '' &&
+                            !opt.imageUrl)
+                        }
+                        selectedOptionId={
+                          selectedGifOptions[qId] === (opt.id || opt.tempId!)
+                            ? opt.id || opt.tempId!
+                            : undefined
+                        }
+                        onSelectOption={onSelectOption}
+                        onInitiateGifSearch={onInitiateGifSearch}
+                        onDeleteThisOption={() =>
+                          onDeleteOptionForQuestion(qId, opt.id || opt.tempId!)
+                        }
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
               <Button
                 variant="outline"
                 size="sm"
@@ -729,6 +624,120 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
 );
 SortableQuestionItem.displayName = 'SortableQuestionItem';
 
+// Define SortableOptionItem component here (or import if it becomes too large)
+interface SortableOptionItemProps {
+  option: TypeSurveyOptionData;
+  questionId: string;
+  actionsDisabled: boolean;
+  actionsDisabledTitle?: string;
+  isEditingThisText: boolean;
+  currentEditText: string;
+  setEditingThisText: () => void;
+  updateCurrentEditText: (newText: string) => void;
+  saveEditingThisText: () => void;
+  cancelEditingThisText: () => void;
+  optionSaveDisabled: boolean;
+  selectedOptionId?: string;
+  onSelectOption: (questionId: string, optionIdOrTempId: string) => void;
+  onInitiateGifSearch: (questionId: string, optionId: string, currentText?: string) => void;
+  onDeleteThisOption: () => void;
+}
+
+const SortableOptionItem: React.FC<SortableOptionItemProps> = ({
+  option,
+  questionId,
+  actionsDisabled,
+  actionsDisabledTitle,
+  isEditingThisText,
+  currentEditText,
+  setEditingThisText,
+  updateCurrentEditText,
+  saveEditingThisText,
+  cancelEditingThisText,
+  optionSaveDisabled,
+  selectedOptionId,
+  onSelectOption,
+  onInitiateGifSearch,
+  onDeleteThisOption,
+}) => {
+  const optId = option.id || option.tempId!;
+  const {
+    attributes,
+    listeners,
+    setNodeRef: setSortableOptionNodeRef,
+    transform: optionTransform,
+    transition: optionTransition,
+    isDragging: isOptionDragging,
+  } = useSortable({
+    id: optId,
+  });
+
+  const optionStyle = {
+    transform: CSS.Transform.toString(optionTransform),
+    transition: optionTransition,
+    opacity: isOptionDragging ? 0.7 : 1,
+    zIndex: isOptionDragging ? 20 : 'auto',
+  };
+
+  return (
+    <div
+      ref={setSortableOptionNodeRef}
+      style={optionStyle}
+      {...attributes}
+      className="flex flex-col space-y-1 p-1 self-stretch flex-shrink-0 w-48"
+    >
+      <div {...listeners} className="cursor-grab">
+        <GifCard
+          gifUrl={option.imageUrl}
+          altText={option.text}
+          optionText={option.text}
+          isSelected={optId === selectedOptionId}
+          onClick={(e?: React.MouseEvent) => {
+            e?.stopPropagation();
+            if (actionsDisabled || isEditingThisText) return;
+            setEditingThisText();
+          }}
+          onSearchClick={(e?: React.MouseEvent) => {
+            e?.stopPropagation();
+            if (!actionsDisabled) onInitiateGifSearch(questionId, optId, option.text);
+          }}
+          className="flex-grow min-h-[200px]"
+          disabled={actionsDisabled}
+          disabledTitle={actionsDisabled ? actionsDisabledTitle : undefined}
+          isEditingText={isEditingThisText}
+          editingTextValue={currentEditText}
+          onEditingTextChange={updateCurrentEditText}
+          onSaveText={saveEditingThisText}
+          onCancelText={cancelEditingThisText}
+          editTextSaveDisabled={optionSaveDisabled}
+        />
+      </div>
+
+      {/* Edit Icon and Delete Icon - only if NOT editing text inline (via GifCard) */}
+      {!isEditingThisText && (
+        <div className="flex items-center justify-start space-x-1 pt-1 ">
+          <IconButtonAction
+            iconBaseName="faPenToSquare"
+            ariaLabel="Edit option text"
+            onClick={() => !actionsDisabled && setEditingThisText()}
+            className={cn('h-7 w-7 p-1', actionsDisabled && 'opacity-50 cursor-not-allowed')}
+            hoverColorClass="text-primary"
+          />
+          <IconButtonAction
+            iconBaseName="faTrashCan"
+            ariaLabel="Delete option"
+            onClick={() => !actionsDisabled && onDeleteThisOption()}
+            className={cn('h-7 w-7 p-1', actionsDisabled && 'opacity-50 cursor-not-allowed')}
+            hoverColorClass="text-destructive"
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
+SortableOptionItem.displayName = 'SortableOptionItem';
+
 // Define progress steps configuration outside the component for stability
 interface ProgressStep {
   id: number;
@@ -748,7 +757,7 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [studyDetails, setStudyDetails] = useState<Partial<BrandLiftStudyData> | null>(null);
-    const [isAISuggestingInternal, setIsAISuggestingInternal] = useState(false);
+    const [isAISuggesting, setIsAISuggesting] = useState(false);
     const [saveStatus, setSaveStatus] = useState<
       Record<string, 'saving' | 'saved' | 'error' | null>
     >({});
@@ -764,7 +773,7 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
 
     // New states for progress modal
     const [currentProgressStepIdx, setCurrentProgressStepIdx] = useState(0);
-    const [progressPercentage, setProgressPercentage] = useState(0);
+    const [progress, setProgress] = useState(0);
     const [completedSteps, setCompletedSteps] = useState<boolean[]>(
       new Array(PROGRESS_STEPS_CONFIG.length).fill(false)
     );
@@ -774,10 +783,17 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
       useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
     );
 
+    const [editingOptionGL, setEditingOptionGL] = useState<{
+      questionId: string;
+      optionId: string;
+      currentText: string;
+    } | null>(null);
+
     const saveQuestion = useCallback(
-      async (question: SurveyQuestionData) => {
+      async (question: SurveyQuestionData, options?: { showToast?: boolean }) => {
         const qId = question.id || question.tempId!;
         setSaveStatus(prev => ({ ...prev, [qId]: 'saving' }));
+        const shouldShowToast = options?.showToast ?? true;
 
         try {
           let response;
@@ -832,10 +848,10 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
                   return {
                     ...savedQuestionFromServer, // Take most properties from the server's response
                     options: (savedQuestionFromServer.options || [])
-                      .map((serverOpt: SurveyOptionData) => {
+                      .map((serverOpt: TypeSurveyOptionData) => {
                         // Find the corresponding option from the client-side version sent to the server
                         const clientOpt = clientSideVersionOfQuestion.options.find(
-                          (co: SurveyOptionData) =>
+                          (co: TypeSurveyOptionData) =>
                             (co.id && co.id === serverOpt.id) ||
                             (co.tempId && co.tempId === serverOpt.tempId)
                         );
@@ -851,7 +867,9 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
                         }
                         return serverOpt; // Otherwise, use the server's option data
                       })
-                      .sort((a: SurveyOptionData, b: SurveyOptionData) => a.order - b.order),
+                      .sort(
+                        (a: TypeSurveyOptionData, b: TypeSurveyOptionData) => a.order - b.order
+                      ),
                   };
                 }
                 return q;
@@ -859,7 +877,9 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
               .sort((a, b) => a.order - b.order)
           );
           setSaveStatus(prev => ({ ...prev, [qId]: 'saved' }));
-          showSuccessToast('Question saved successfully!');
+          if (shouldShowToast) {
+            showSuccessToast('Question saved successfully!');
+          }
         } catch (err: any) {
           logger.error('Save Question Error:', { qId, error: err.message, questionData: question });
           setSaveStatus(prev => ({ ...prev, [qId]: 'error' }));
@@ -1015,7 +1035,7 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
           if (q.id === questionIdOrTempId || q.tempId === questionIdOrTempId) {
             const newOrder =
               q.options.length > 0 ? Math.max(...q.options.map(o => o.order)) + 1 : 0;
-            const newOptionData: SurveyOptionData = {
+            const newOptionData: TypeSurveyOptionData = {
               tempId: generateTempId(),
               id: '',
               text: newOptionText,
@@ -1042,7 +1062,7 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
     const updateOptionProperty = (
       questionIdOrTempId: string,
       optionIdOrTempId: string,
-      data: Partial<SurveyOptionData>
+      data: Partial<TypeSurveyOptionData>
     ) => {
       console.log('[GIF_SELECT] updateOptionProperty called', {
         questionIdOrTempId,
@@ -1142,182 +1162,400 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
     };
 
     const actualHandleSuggestQuestions = async () => {
-      let yamlSuggestionsForErrorLog: string | null = null;
-      setIsAISuggestingInternal(true);
-      onIsAISuggestingChange?.(true);
-      setError(null);
+      if (!studyId) {
+        logger.error('[SurveyQuestionBuilder] Study ID is missing for AI suggestions.');
+        showErrorToast('Cannot suggest questions: Study ID is missing.');
+        return;
+      }
+      if (isAISuggesting) return; // Prevent multiple simultaneous requests
+
+      logger.info('[SurveyQuestionBuilder] Initiating AI question suggestions...', { studyId });
+      setIsAISuggesting(true);
+      if (onIsAISuggestingChange) onIsAISuggestingChange(true);
+      setProgress(0); // Initial progress
+      let suggestedYaml: string | null = null; // Declare here for broader scope
+
       try {
+        setProgress(25);
         const response = await fetch(`/api/brand-lift/surveys/${studyId}/suggest-questions`, {
           method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          // body: JSON.stringify({ existingQuestions: questions.map(q => q.text) }) // Example if sending existing
         });
+        setProgress(50);
 
         if (!response.ok) {
-          let errorMsg = `Error fetching AI suggestions: ${response.status} ${response.statusText}`;
-          try {
-            const errorData = await response.json();
-            errorMsg = errorData.error || errorData.message || errorMsg;
-          } catch (e) {
-            try {
-              const textError = await response.text();
-              if (textError && !textError.toLowerCase().includes('<html')) {
-                errorMsg = textError.substring(0, 200);
-              } else if (response.status === 504) {
-                errorMsg =
-                  'The request to generate questions timed out. This can happen with complex requests. Please try again shortly or contact support if persistent.';
-              }
-            } catch (textE) {
-              /* fallback to statusText */
-            }
-          }
-          throw new Error(errorMsg);
-        }
-
-        const yamlText = await response.text();
-        yamlSuggestionsForErrorLog = yamlText;
-        const parsed = yaml.load(yamlText) as any[];
-        const validation = aiSuggestedQuestionsSchema.safeParse(parsed);
-
-        if (!validation.success) {
-          logger.error('AI suggestions failed Zod validation', {
-            errors: validation.error.flatten(),
-            raw: yamlText,
+          const errorData = await response.json();
+          const errorMessage =
+            errorData?.error || `AI suggestions failed: ${response.statusText || 'Unknown error'}`;
+          logger.error('[SurveyQuestionBuilder] AI Suggestion API Error', {
+            status: response.status,
+            errorData,
           });
-          throw new Error('Received invalid suggestions structure from AI.');
+          showErrorToast(errorMessage);
+          throw new Error(errorMessage);
         }
 
-        let currentOrder = questions.length;
-        const processedAiQuestions: SurveyQuestionData[] = await Promise.all(
-          validation.data.map(async (aiQ: ValidatedAiQuestion) => {
-            const optionsWithImages: SurveyOptionData[] = await Promise.all(
-              aiQ.options.map(async (aiOpt: ValidatedAiOption, optIdx: number) => {
-                let imageUrl: string | null = null;
-                if (aiOpt.image_description) {
-                  const MAX_GIPHY_SEARCH_TERM_LENGTH = 100;
-                  let searchTerm = aiOpt.image_description.trim();
-                  if (searchTerm.length > MAX_GIPHY_SEARCH_TERM_LENGTH) {
-                    searchTerm = searchTerm.substring(0, MAX_GIPHY_SEARCH_TERM_LENGTH);
-                    logger.warn('[Giphy] Search term truncated for Giphy API call due to length.', {
-                      originalTerm: aiOpt.image_description,
-                      truncatedTerm: searchTerm,
-                      studyId: studyId,
-                    });
-                  }
-                  if (searchTerm) {
-                    // const gifUrls = await fetchGifFromGiphy(searchTerm); // OLD, REMOVE
-                    // For AI suggestions, we still need a way to fetch GIFs.
-                    // This internal fetch might need to be exposed or passed to AI service.
-                    // For now, this will break if AI suggests images, as fetchGifFromGiphy is removed from this file.
-                    // TEMPORARY: set to null, AI GIF fetching needs to be refactored with the new modal or a shared service.
-                    imageUrl = null;
-                    // TODO: Refactor AI question suggestion to use a Giphy service or integrate with the new modal's fetcher if appropriate.
-                    // One option: aiQuestionSchema could return just image_description, and UI could offer to search for it.
-                  }
+        suggestedYaml = await response.text(); // Assign to the higher-scoped variable
+        setProgress(70);
+
+        if (!suggestedYaml) {
+          logger.warn('[SurveyQuestionBuilder] AI returned empty YAML response.');
+          showErrorToast('AI returned no suggestions. Please try again.');
+          return;
+        }
+
+        // --- Parse and Validate YAML ---
+        let parsedQuestions;
+        try {
+          parsedQuestions = yaml.load(suggestedYaml);
+        } catch (yamlError: any) {
+          logger.error('[SurveyQuestionBuilder] YAML Parsing Error', {
+            message: yamlError.message,
+            yaml: suggestedYaml.substring(0, 500), // Log a snippet
+          });
+          showErrorToast('Error parsing AI suggestions. Please check format or try again.');
+          return;
+        }
+
+        const validationResult = aiSuggestedQuestionsSchema.safeParse(parsedQuestions);
+
+        if (!validationResult.success) {
+          logger.error('[SurveyQuestionBuilder] AI Response Zod Validation Error', {
+            errors: validationResult.error.flatten(),
+            data: parsedQuestions,
+          });
+          showErrorToast('AI suggestions have an invalid format. Please try again.');
+          return;
+        }
+
+        const validatedQuestions: ValidatedAiQuestion[] = validationResult.data;
+        setProgress(85);
+
+        if (!validatedQuestions || validatedQuestions.length === 0) {
+          showSuccessToast('AI did not find any new relevant questions to suggest.');
+          // Even if AI suggests nothing, we might still want to add demographic questions.
+          // So, don't return here. Proceed to check for demographic questions.
+        }
+
+        const newQuestions: SurveyQuestionData[] = [];
+        let questionOrder = questions.length; // Start ordering from the end of existing questions
+
+        if (validatedQuestions) {
+          // Ensure validatedQuestions is not null/undefined before iterating
+          for (const aiQuestion of validatedQuestions) {
+            const questionId = generateTempId(); // Use tempId for new questions
+            const options: TypeSurveyOptionData[] = [];
+            let optionOrder = 0;
+
+            for (const aiOption of aiQuestion.options) {
+              let imageDescriptionForGiphy = aiOption.image_description || aiOption.text; // Default to option text if no description
+
+              // Custom image_description logic for specific questions
+              const questionTextLower = aiQuestion.text.toLowerCase();
+              const optionTextLower = aiOption.text.toLowerCase().trim();
+
+              if (questionTextLower.includes('what is your gender?')) {
+                if (optionTextLower === 'male') {
+                  imageDescriptionForGiphy =
+                    'A fun, stylized, and respectful male symbol or a diverse group of male-presenting individuals celebrating.';
+                } else if (optionTextLower === 'female') {
+                  imageDescriptionForGiphy =
+                    'A fun, stylized, and respectful female symbol or a diverse group of female-presenting individuals celebrating.';
+                } else if (optionTextLower === 'other') {
+                  imageDescriptionForGiphy =
+                    'An abstract, colorful, and inclusive swirl of colors representing diversity and fluidity.';
+                } else if (optionTextLower === 'prefer not to say') {
+                  imageDescriptionForGiphy =
+                    'A friendly, thoughtful emoji or a comfortable, private space.';
                 }
-                return {
-                  tempId: generateTempId(),
-                  id: '',
-                  text: aiOpt.text,
-                  imageUrl: imageUrl, // Will be null for now due to above TODO
-                  order: optIdx,
-                };
-              })
-            );
+              } else if (questionTextLower.includes('which age group do you belong to?')) {
+                if (
+                  optionTextLower.includes('under 18') ||
+                  optionTextLower.includes('<18') ||
+                  optionTextLower.includes('17 or younger')
+                ) {
+                  imageDescriptionForGiphy =
+                    'Playful and bright scene with youthful energy, like colorful building blocks or animation.';
+                } else if (optionTextLower === '18-24') {
+                  imageDescriptionForGiphy =
+                    'Dynamic and trendy abstract animation with vibrant colors.';
+                } else if (optionTextLower === '25-34') {
+                  imageDescriptionForGiphy =
+                    'Upbeat scene of diverse young adults collaborating or having fun, using technology.';
+                } else if (optionTextLower === '35-44') {
+                  imageDescriptionForGiphy =
+                    'Balanced and creative visual, perhaps a satisfying geometric pattern in motion.';
+                } else if (optionTextLower === '45-54') {
+                  imageDescriptionForGiphy =
+                    'Confident and engaging abstract visual with a sophisticated color palette.';
+                } else if (optionTextLower === '55-64') {
+                  imageDescriptionForGiphy =
+                    'Active and joyful scene, perhaps people enjoying hobbies or nature.';
+                } else if (
+                  optionTextLower.includes('65+') ||
+                  optionTextLower.includes('65 or older')
+                ) {
+                  imageDescriptionForGiphy =
+                    'Elegant and calm animation, like a blooming flower or a serene landscape.';
+                } else if (optionTextLower === 'prefer not to say') {
+                  imageDescriptionForGiphy =
+                    'A discreet and neutral image like a closed book or a simple pattern.';
+                }
+              }
+
+              let imageUrl: string | null = null;
+              if (imageDescriptionForGiphy) {
+                try {
+                  const gifs = await fetchGifFromGiphy(imageDescriptionForGiphy);
+                  if (gifs.length > 0) {
+                    imageUrl = gifs[0]; // Take the first GIF
+                  }
+                } catch (gifError) {
+                  logger.error('[SurveyQuestionBuilder] Error fetching GIF for option', {
+                    optionText: aiOption.text,
+                    description: imageDescriptionForGiphy,
+                    error: gifError,
+                  });
+                }
+              }
+
+              options.push({
+                tempId: generateTempId(),
+                id: '', // Will be set by backend
+                text: aiOption.text,
+                imageUrl: imageUrl,
+                order: optionOrder++,
+                questionId: questionId,
+              });
+            }
+
             const questionToAdd: SurveyQuestionData = {
-              tempId: generateTempId(),
+              tempId: questionId, // Use the same tempId generated for linking options
               id: '',
               studyId: studyId,
-              text: aiQ.text,
-              questionType: aiQ.type,
-              order: currentOrder++,
-              isRandomized: aiQ.is_randomized,
-              isMandatory: aiQ.is_mandatory, // AI questions can define their own mandatory status
-              kpiAssociation: aiQ.kpi_association,
-              options: optionsWithImages,
+              text: aiQuestion.text,
+              questionType: aiQuestion.type,
+              order: questionOrder++,
+              isRandomized: aiQuestion.is_randomized,
+              isMandatory: aiQuestion.is_mandatory,
+              kpiAssociation: aiQuestion.kpi_association,
+              options: options,
             };
-            return questionToAdd;
-          })
+            newQuestions.push(questionToAdd);
+          }
+        }
+
+        // --- Add standard demographic questions if not already present and within limit ---
+        const standardGenderQuestionText = 'What is your gender?';
+        const standardAgeQuestionText = 'Which age group do you belong to?';
+
+        const allCurrentQuestions = [...questions, ...newQuestions];
+
+        const hasGenderQuestion = allCurrentQuestions.some(
+          q => q.text.toLowerCase().trim() === standardGenderQuestionText.toLowerCase()
+        );
+        const hasAgeQuestion = allCurrentQuestions.some(
+          q => q.text.toLowerCase().trim() === standardAgeQuestionText.toLowerCase()
         );
 
-        // Define standard demographic questions
-        const genderQuestion: SurveyQuestionData = {
-          tempId: generateTempId(),
-          id: '',
-          studyId: studyId,
-          text: 'What is your gender?',
-          questionType: SurveyQuestionType.SINGLE_CHOICE,
-          order: currentOrder++,
-          isRandomized: false,
-          isMandatory: true,
-          kpiAssociation: null,
-          options: [
-            { tempId: generateTempId(), id: '', text: 'Male', order: 0, imageUrl: null },
-            { tempId: generateTempId(), id: '', text: 'Female', order: 1, imageUrl: null },
-            { tempId: generateTempId(), id: '', text: 'Other', order: 2, imageUrl: null },
+        // Add Gender Question if missing and space allows
+        if (!hasGenderQuestion && questions.length + newQuestions.length < 10) {
+          const genderQuestionTempId = generateTempId();
+          const genderOptions: TypeSurveyOptionData[] = [
             {
               tempId: generateTempId(),
               id: '',
+              questionId: genderQuestionTempId,
+              text: 'Male',
+              order: 0,
+              imageUrl: null,
+            },
+            {
+              tempId: generateTempId(),
+              id: '',
+              questionId: genderQuestionTempId,
+              text: 'Female',
+              order: 1,
+              imageUrl: null,
+            },
+            {
+              tempId: generateTempId(),
+              id: '',
+              questionId: genderQuestionTempId,
+              text: 'Other',
+              order: 2,
+              imageUrl: null,
+            },
+            {
+              tempId: generateTempId(),
+              id: '',
+              questionId: genderQuestionTempId,
               text: 'Prefer not to say',
               order: 3,
               imageUrl: null,
             },
-          ],
-        };
+          ];
+          const genderQuestionToAdd: SurveyQuestionData = {
+            tempId: genderQuestionTempId,
+            id: '',
+            studyId: studyId,
+            text: standardGenderQuestionText,
+            questionType: SurveyQuestionType.SINGLE_CHOICE,
+            order: questionOrder++,
+            isRandomized: false,
+            isMandatory: true,
+            kpiAssociation: null,
+            options: genderOptions,
+          };
+          newQuestions.push(genderQuestionToAdd);
+        }
 
-        const ageQuestion: SurveyQuestionData = {
-          tempId: generateTempId(),
-          id: '',
-          studyId: studyId,
-          text: 'Which age group do you belong to?',
-          questionType: SurveyQuestionType.SINGLE_CHOICE,
-          order: currentOrder++,
-          isRandomized: false,
-          isMandatory: true,
-          kpiAssociation: null,
-          options: [
-            { tempId: generateTempId(), id: '', text: '18-24', order: 0, imageUrl: null },
-            { tempId: generateTempId(), id: '', text: '25-34', order: 1, imageUrl: null },
-            { tempId: generateTempId(), id: '', text: '35-44', order: 2, imageUrl: null },
-            { tempId: generateTempId(), id: '', text: '45-54', order: 3, imageUrl: null },
-            { tempId: generateTempId(), id: '', text: '55-64', order: 4, imageUrl: null },
-            { tempId: generateTempId(), id: '', text: '65+', order: 5, imageUrl: null },
+        // Add Age Question if missing and space allows
+        // Re-check combined length as gender might have been added
+        if (!hasAgeQuestion && questions.length + newQuestions.length < 10) {
+          const ageQuestionTempId = generateTempId();
+          const ageOptions: TypeSurveyOptionData[] = [
             {
               tempId: generateTempId(),
               id: '',
-              text: 'Prefer not to say',
+              questionId: ageQuestionTempId,
+              text: 'Under 18',
+              order: 0,
+              imageUrl: null,
+            },
+            {
+              tempId: generateTempId(),
+              id: '',
+              questionId: ageQuestionTempId,
+              text: '18-24',
+              order: 1,
+              imageUrl: null,
+            },
+            {
+              tempId: generateTempId(),
+              id: '',
+              questionId: ageQuestionTempId,
+              text: '25-34',
+              order: 2,
+              imageUrl: null,
+            },
+            {
+              tempId: generateTempId(),
+              id: '',
+              questionId: ageQuestionTempId,
+              text: '35-44',
+              order: 3,
+              imageUrl: null,
+            },
+            {
+              tempId: generateTempId(),
+              id: '',
+              questionId: ageQuestionTempId,
+              text: '45-54',
+              order: 4,
+              imageUrl: null,
+            },
+            {
+              tempId: generateTempId(),
+              id: '',
+              questionId: ageQuestionTempId,
+              text: '55-64',
+              order: 5,
+              imageUrl: null,
+            },
+            {
+              tempId: generateTempId(),
+              id: '',
+              questionId: ageQuestionTempId,
+              text: '65+',
               order: 6,
               imageUrl: null,
             },
-          ],
-        };
-
-        const allNewQuestions = [...processedAiQuestions, genderQuestion, ageQuestion];
-
-        // Save all new questions (AI + demographic)
-        // Ensure we don't exceed the max of 10 questions IN TOTAL (existing + new)
-        if (questions.length + allNewQuestions.length > 10) {
-          toast.error('Adding these suggestions would exceed the 10 question limit.');
-          // Optionally, allow user to select which AI questions to add, or truncate.
-          // For now, we just prevent adding if it exceeds.
-        } else {
-          for (const q of allNewQuestions) {
-            await saveQuestion(q); // This updates local state via setQuestions in its success path
-          }
-          await fetchData(); // Refetch to ensure orders and IDs are fully synced, though saveQuestion updates local state
-          logger.info('AI suggestions and demographic questions processed and added.', {
-            count: allNewQuestions.length,
-          });
+            {
+              tempId: generateTempId(),
+              id: '',
+              questionId: ageQuestionTempId,
+              text: 'Prefer not to say',
+              order: 7,
+              imageUrl: null,
+            },
+          ];
+          const ageQuestionToAdd: SurveyQuestionData = {
+            tempId: ageQuestionTempId,
+            id: '',
+            studyId: studyId,
+            text: standardAgeQuestionText,
+            questionType: SurveyQuestionType.SINGLE_CHOICE,
+            order: questionOrder++,
+            isRandomized: false,
+            isMandatory: true,
+            kpiAssociation: null,
+            options: ageOptions,
+          };
+          newQuestions.push(ageQuestionToAdd);
         }
+
+        // Save all new questions (AI suggested + standard demographic if added)
+        if (newQuestions.length === 0) {
+          // Possible if AI gave no suggestions and demographic Qs already existed or limit reached
+          showSuccessToast('No new questions to add.');
+        } else if (questions.length + newQuestions.length > 10) {
+          // This condition might be hit if demographic questions pushed it over, even if AI questions alone were within limit.
+          // Or if initial questions + AI questions already hit limit before demographic checks.
+          // A more granular check for each demographic question was done above, so this is a final safeguard.
+          showErrorToast(
+            'Cannot add all suggested/standard questions as it would exceed the 10 question limit. Some may not have been added.'
+          );
+          // At this point, newQuestions might contain more than can be added.
+          // For simplicity, we'll try to save what fits if it was purely AI questions.
+          // If demographic questions were added, the checks above should have prevented overflow.
+          // This path indicates a complex overflow. We might need to trim newQuestions or be more sophisticated.
+          // For now, let's log and perhaps save only up to the limit.
+          logger.warn(
+            '[SurveyQuestionBuilder] Exceeded 10 question limit after processing all suggestions.',
+            {
+              initialCount: questions.length,
+              newCount: newQuestions.length,
+              totalAttempted: questions.length + newQuestions.length,
+            }
+          );
+          // Attempt to save only what fits, prioritizing AI questions first if an overflow happens here.
+          const questionsToSave = newQuestions.slice(0, Math.max(0, 10 - questions.length));
+          for (const q of questionsToSave) {
+            await saveQuestion(q, { showToast: false });
+          }
+          if (questionsToSave.length < newQuestions.length) {
+            showErrorToast(
+              `Some questions could not be added due to the 10 question limit. ${questionsToSave.length} questions were added.`
+            );
+          } else if (questionsToSave.length > 0) {
+            showSuccessToast(`Successfully added ${questionsToSave.length} question(s).`);
+          }
+        } else {
+          for (const q of newQuestions) {
+            await saveQuestion(q, { showToast: false });
+          }
+          logger.info('AI suggestions and standard demographic questions processed and added.', {
+            count: newQuestions.length,
+          });
+          showSuccessToast(`Successfully added ${newQuestions.length} question(s).`);
+        }
+        await fetchData(); // Refetch to get all questions with proper IDs and order from DB.
+        setProgress(100);
+        // The main success toast is now more conditional above.
+        // showSuccessToast(`Successfully added ${newQuestions.length} AI suggested question(s).`); // This was the old toast.
       } catch (err: any) {
-        logger.error('AI Suggestion processing error:', {
+        logger.error('[SurveyQuestionBuilder] Error during AI question suggestion:', {
           studyId,
           error: err.message,
-          rawResponse: yamlSuggestionsForErrorLog, // Log the YAML if parsing failed after this
+          rawResponse: suggestedYaml, // Log the YAML if available
         });
-        setError(err.message || 'Failed to process AI suggestions.');
-        showErrorToast(err.message || 'Failed to process AI suggestions.');
+        setError(err.message || 'Failed to process AI suggestions.'); // Ensure setError is available and used correctly
       } finally {
-        setIsAISuggestingInternal(false);
-        onIsAISuggestingChange?.(false);
+        setIsAISuggesting(false);
+        if (onIsAISuggestingChange) onIsAISuggestingChange(false);
+        setProgress(0); // Reset progress
       }
     };
 
@@ -1350,9 +1588,9 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
     // useEffect to manage simulated progress for the modal
     useEffect(() => {
       const timers: NodeJS.Timeout[] = [];
-      if (isAISuggestingInternal) {
+      if (isAISuggesting) {
         setCurrentProgressStepIdx(0);
-        setProgressPercentage(0);
+        setProgress(0);
         setCompletedSteps(new Array(PROGRESS_STEPS_CONFIG.length).fill(false));
 
         const totalDuration = 55000;
@@ -1362,7 +1600,7 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
           const timer = setTimeout(() => {
             setCompletedSteps(prev => prev.map((s, i) => (i < index ? true : s)));
             setCurrentProgressStepIdx(index);
-            setProgressPercentage(((index + 1) / PROGRESS_STEPS_CONFIG.length) * 100);
+            setProgress(((index + 1) / PROGRESS_STEPS_CONFIG.length) * 100);
             if (index === PROGRESS_STEPS_CONFIG.length - 1) {
               setCompletedSteps(prev => prev.map(() => true));
             }
@@ -1375,7 +1613,35 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
       return () => {
         timers.forEach(clearTimeout);
       };
-    }, [isAISuggestingInternal]);
+    }, [isAISuggesting]);
+
+    const handleDragEndOptions = useCallback(
+      (event: DragEndEvent, questionIdOrTempId: string) => {
+        const { active, over } = event;
+        if (over && active.id !== over.id) {
+          setQuestions(prevQuestions =>
+            prevQuestions.map(q => {
+              if (q.id === questionIdOrTempId || q.tempId === questionIdOrTempId) {
+                const oldIndex = q.options.findIndex(opt => (opt.id || opt.tempId!) === active.id);
+                const newIndex = q.options.findIndex(opt => (opt.id || opt.tempId!) === over.id);
+                if (oldIndex !== -1 && newIndex !== -1) {
+                  const reorderedOptions = arrayMove(q.options, oldIndex, newIndex);
+                  const finalOptions = reorderedOptions.map((opt, index) => ({
+                    ...opt,
+                    order: index,
+                  }));
+                  const updatedQuestion = { ...q, options: finalOptions };
+                  setTimeout(() => saveQuestion(updatedQuestion, { showToast: true }), 50);
+                  return updatedQuestion;
+                }
+              }
+              return q;
+            })
+          );
+        }
+      },
+      [questions, setQuestions, saveQuestion]
+    );
 
     if (!isAuthLoaded || (isLoading && questions.length === 0 && !error)) {
       return (
@@ -1448,21 +1714,21 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
                   index={index}
                   onUpdateQuestionText={handleUpdateQuestionText}
                   onUpdateQuestionType={handleUpdateQuestionType}
-                  onUpdateQuestionOrder={handleUpdateQuestionOrder}
                   onToggleRandomized={handleToggleRandomized}
                   onToggleMandatory={handleToggleMandatory}
                   onUpdateKpiAssociation={handleUpdateKpiAssociation}
                   onDeleteQuestion={handleDeleteQuestionWrapper}
                   onAddOption={handleAddOptionWrapper}
-                  onUpdateOptionText={handleUpdateOptionText}
-                  onUpdateOptionImageUrl={handleUpdateOptionImageUrl}
-                  onUpdateOptionOrder={handleUpdateOptionOrder}
-                  onDeleteOption={handleDeleteOptionWrapper}
                   actionsDisabled={actionsDisabled}
                   actionsDisabledTitle={actionsDisabledTitle}
-                  selectedOptionId={selectedGifOptions[question.id || question.tempId!]}
+                  selectedGifOptions={selectedGifOptions}
                   onSelectOption={handleSelectGifOption}
                   onInitiateGifSearch={handleInitiateGifSearch}
+                  editingOptionGL={editingOptionGL}
+                  setEditingOptionGL={setEditingOptionGL}
+                  onUpdateOptionText={handleUpdateOptionText}
+                  onDeleteOptionForQuestion={handleDeleteOptionWrapper}
+                  onDragEndOptions={handleDragEndOptions}
                 />
               ))}
             </SortableContext>
@@ -1506,10 +1772,10 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
 
         {/* Progress Modal */}
         <Dialog
-          open={isAISuggestingInternal}
+          open={isAISuggesting}
           onOpenChange={open => {
             if (!open) {
-              setIsAISuggestingInternal(false);
+              setIsAISuggesting(false);
               onIsAISuggestingChange?.(false);
             }
           }}
@@ -1561,7 +1827,7 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
                 </div>
               ))}
             </div>
-            <Progress value={progressPercentage} className="w-full h-2 mt-2 mb-1" />
+            <Progress value={progress} className="w-full h-2 mt-2 mb-1" />
           </DialogContent>
         </Dialog>
       </>
