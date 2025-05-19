@@ -114,24 +114,6 @@ console.error:
 
 Line 117: console.error('Error getting validated data:', error);
 
-src/lib/middleware/cursor-ai/graphiti-check-enforcer.ts
-console.log:
-
-Line 29: console.log(\[GraphitiEnforcer] Expired session removed: ${sessionId}`);`
-Line 83: console.log('[GraphitiEnforcer] Bypass header detected with valid secret');
-Line 122: console.log(\[GraphitiTelemetry] ${record.action} | ${record.sessionId} | ${record.success}`);`
-Line 164: console.log(\[GraphitiEnforcer] Graphiti check detected for session ${sessionId}`);`
-Line 218: console.log(\n \[GraphitiEnforcer] Task completed, resetting check state for session ${sessionId}`\n    );`
-
-console.warn:
-
-Line 179: console.warn(\n \[GraphitiEnforcer] Blocking request - missing Graphiti check for session ${sessionId}`\n    );`
-
-console.error:
-
-Line 56: console.error('[GraphitiEnforcer] Error extracting task info:', error);
-Line 95: console.error('[GraphitiEnforcer] Error checking for Graphiti in request:', error);
-
 src/lib/prisma.ts
 console.log:
 
@@ -461,11 +443,6 @@ console.warn:
 
 Line 467: console.warn(\Final direct check failed, proceeding with 410: ${\_e}`);`
 Line 532: console.warn(\Failed to fetch ${url}:`, error);`
-
-src/app/api/internal/graphiti-telemetry/route.ts
-console.warn:
-
-Line 24: console.warn(\n '[Graphiti Telemetry] Received empty or invalid payload for telemetry',\n {\n payload: body,\n }\n );
 
 src/app/(campaigns)/campaigns/page.tsx
 console.warn:

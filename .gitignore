@@ -58,10 +58,6 @@ src/**/__tests__/**/*.test.jsx
 .cache/
 # Ignore vercel-mcp-server directory
 /vercel-mcp-server/
-/graphiti/
 
 # Ignore build artifacts and large generated files
 BUILD/
-
-# Ignore Graphiti source submodule/directory
-graphiti_src/

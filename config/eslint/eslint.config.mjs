@@ -34,18 +34,18 @@ const eslintConfig = [
       'archives/**',
       // 'src/app/(campaigns)/campaigns/wizard/step-*/**', // Example of more specific src ignore
       'config/**',
-      'graphiti-env/**',
       'src/lib/generated/**',
-      'graphiti_src/**',
       // Add other top-level ignores here if needed
     ],
   },
   // Keep TypeScript recommended
   {
+    files: ['**/*.ts', '**/*.tsx', '**/*.mts', '**/*.cts'],
     ...compat.extends('plugin:@typescript-eslint/recommended')[0],
   },
   // Add Next.js configuration
   {
+    files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx'],
     plugins: {
       '@next/next': nextjs,
     },
@@ -56,7 +56,7 @@ const eslintConfig = [
   },
   // Add custom overrides (rules only now, ignores moved)
   {
-    // Ignores was here, now moved to its own global config object
+    files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx', '**/*.mjs', '**/*.cjs'],
     rules: {
       '@typescript-eslint/no-unused-vars': [
         'warn',
@@ -87,12 +87,14 @@ const eslintConfig = [
     },
   },
   {
+    files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx'],
     plugins: {
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
+      // Add react-refresh rules if they exist, e.g., reactRefresh.configs.recommended.rules
     },
   },
 ];

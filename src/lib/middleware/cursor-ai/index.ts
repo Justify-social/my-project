@@ -4,5 +4,4 @@
  * Exports all middlewares for CursorAI functionality.
  */
 
-// Export the main enforcer and the telemetry getter
-export { graphitiCheckEnforcer, getGraphitiTelemetry } from './graphiti-check-enforcer';
+// Related exports removed as the feature is being deleted.

@@ -332,29 +332,72 @@ export const algoliaFrontendConfig = {
   indexName: indexName,
 };
 
-// Placeholder for BrandLiftStudy transformer
+/**
+ * Utility function to index multiple objects to an Algolia index in a single batch operation.
+ * @param objects Array of objects to index
+ * @param indexName Name of the Algolia index to target
+ */
+export async function indexObjects<T extends { objectID: string }>(
+  objects: T[],
+  indexName: string
+): Promise<void> {
+  if (!adminClient) {
+    logger.error('[Algolia] Admin client not initialized for batch indexing.');
+    throw new Error('Algolia admin client not configured.');
+  }
+
+  if (!objects || objects.length === 0) {
+    logger.info(`[Algolia] No objects provided to index for '${indexName}'`);
+    return;
+  }
+
+  try {
+    logger.info(`[Algolia] Batch indexing ${objects.length} objects to '${indexName}'...`);
+    const response = await adminClient.saveObjects({
+      indexName,
+      objects: objects as unknown as Array<Record<string, unknown>>,
+    });
+
+    if (Array.isArray(response) && response.length > 0 && response[0].taskID) {
+      await adminClient.waitForTask({ indexName, taskID: response[0].taskID });
+    } else if (!Array.isArray(response) && (response as any).taskID) {
+      await adminClient.waitForTask({ indexName, taskID: (response as any).taskID });
+    }
+
+    logger.info(
+      `[Algolia] Successfully indexed ${objects.length} objects to index '${indexName}'.`
+    );
+  } catch (error) {
+    logger.error('[Algolia] Error during batch indexing', { indexName, error });
+    throw error;
+  }
+}
+
 export function transformBrandLiftStudyToAlgoliaRecord(
   study: PrismaBrandLiftStudy & {
     campaign?: { campaignName?: string | null; wizard?: { orgId?: string | null } | null } | null;
   },
   orgId: string // Explicitly pass orgId resolved by the caller
 ): BrandLiftStudyAlgoliaRecord {
-  // TODO: Implement transformation logic
-  // const frontendReady = EnumTransformers.transformObjectFromBackend(study) as any;
-  return {
+  // Transform the study data to the Algolia record format
+  const record: BrandLiftStudyAlgoliaRecord = {
     objectID: study.id,
     id: study.id,
-    orgId: orgId,
-    name: study.name || 'Unknown Study',
-    studyStatus: String(study.status).toUpperCase(),
-    funnelStage: study.funnelStage,
-    primaryKpi: study.primaryKpi,
-    secondaryKpis: study.secondaryKpis || [],
+    orgId: orgId, // Use the explicitly passed orgId
+    name: study.name || 'Untitled Study',
+    studyStatus: study.status ? String(study.status) : 'DRAFT',
+    funnelStage: study.funnelStage || undefined,
+    primaryKpi: study.primaryKpi || undefined,
+    secondaryKpis: (study.secondaryKpis as string[]) || [],
     campaignSubmissionId: study.submissionId,
-    campaignName: study.campaign?.campaignName ?? undefined, // Handle null by converting to undefined
-    createdAt: study.createdAt?.toISOString() || new Date().toISOString(),
-    updatedAt: study.updatedAt?.toISOString() || new Date().toISOString(),
+    campaignName: study.campaign?.campaignName || undefined,
+    createdAt:
+      study.createdAt instanceof Date ? study.createdAt.toISOString() : new Date().toISOString(),
+    updatedAt:
+      study.updatedAt instanceof Date ? study.updatedAt.toISOString() : new Date().toISOString(),
   };
+
+  return record;
 }
 
 // Placeholder for addOrUpdateBrandLiftStudyInAlgolia

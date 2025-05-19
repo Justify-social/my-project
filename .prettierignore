@@ -7,7 +7,6 @@ out
 build
 
 # Ignore virtual environments
-graphiti-env
 .venv
 venv
 env

@@ -250,6 +250,23 @@ export const PUT = async (
       });
     }
 
+    // Index the updated study in Algolia
+    try {
+      logger.info(`[Algolia] Indexing updated BrandLiftStudy ${studyId}`);
+      await addOrUpdateBrandLiftStudyInAlgolia(finalUpdatedStudy);
+      logger.info(`[Algolia] Successfully indexed updated BrandLiftStudy ${studyId}.`);
+    } catch (algoliaError: any) {
+      logger.error(
+        `[Algolia] Failed to index updated BrandLiftStudy ${studyId}. DB update was successful.`,
+        {
+          studyId: studyId,
+          errorName: algoliaError.name,
+          errorMessage: algoliaError.message,
+        }
+      );
+      // Non-critical error for the main PUT operation
+    }
+
     if (
       updateData.status === BrandLiftStudyStatus.PENDING_APPROVAL &&
       existingStudy.status !== BrandLiftStudyStatus.PENDING_APPROVAL
@@ -287,25 +304,6 @@ export const PUT = async (
           error: emailError.message,
           orgId,
         });
-      }
-    }
-
-    if (finalUpdatedStudy) {
-      try {
-        logger.info(`[Algolia] Updating BrandLiftStudy ${finalUpdatedStudy.id} in Algolia.`);
-        await addOrUpdateBrandLiftStudyInAlgolia(finalUpdatedStudy);
-        logger.info(
-          `[Algolia] Successfully updated BrandLiftStudy ${finalUpdatedStudy.id} in Algolia.`
-        );
-      } catch (algoliaError: any) {
-        logger.error(
-          `[Algolia] Failed to update BrandLiftStudy ${finalUpdatedStudy.id} in Algolia. DB update was successful.`,
-          {
-            studyId: finalUpdatedStudy.id,
-            errorName: algoliaError.name,
-            errorMessage: algoliaError.message,
-          }
-        );
       }
     }
 

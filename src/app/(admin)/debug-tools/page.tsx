@@ -79,12 +79,6 @@ export default function DebugToolsPage() {
           linkHref="/debug-tools/database"
           buttonText="View Database Health"
         />
-        <DebugToolCard
-          title="Graphiti Monitoring"
-          description="Monitor knowledge graph usage and integration health."
-          linkHref="http://localhost:7474/browser/"
-          buttonText="View Graphiti Dashboard"
-        />
       </div>
 
       {/* Campaign Verification Tool Section */}
