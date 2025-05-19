@@ -979,7 +979,7 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
     const handleAddOptionWrapper = (questionIdOrTempId: string) => {
       let questionToUpdate: SurveyQuestionData | undefined;
       let newOptionTempId: string | undefined;
-      let newOptionText: string = 'New Option'; // Default text
+      const newOptionText: string = 'New Option'; // Default text
 
       setQuestions(prev =>
         prev.map(q => {
@@ -1332,7 +1332,7 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
 
     // useEffect to manage simulated progress for the modal
     useEffect(() => {
-      let timers: NodeJS.Timeout[] = [];
+      const timers: NodeJS.Timeout[] = [];
       if (isAISuggestingInternal) {
         setCurrentProgressStepIdx(0);
         setProgressPercentage(0);

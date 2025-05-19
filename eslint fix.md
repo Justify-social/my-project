@@ -125,3 +125,27 @@ plugins: {
 Subsequent execution of `npm run build` completed successfully without any "Could not find plugin" errors from ESLint. The build now only shows linting warnings (e.g., for `no-unused-vars`, `no-explicit-any`, `exhaustive-deps`), indicating that the plugins are correctly loaded and their rules are being applied as configured.
 
 The root cause for the series of "plugin not found" errors was confirmed to be the scoping of plugins within ESLint's flat configuration (`eslint.config.mjs`). Plugins need to be explicitly available (e.g., declared in a `plugins` object) within the configuration block where their rules are directly referenced or customized.
+
+## Proactive Enhancements for Full Robustness (Date: 2025-05-20)
+
+To ensure all rules defined in the main "custom overrides" block of `eslint.config.mjs` would not trigger similar "plugin not found" errors, the following additional plugins were proactively declared:
+
+1.  **Imported `eslint-plugin-react` and `eslint-plugin-jsx-a11y`**:
+
+    ```javascript
+    import reactPlugin from 'eslint-plugin-react';
+    import jsxA11yPlugin from 'eslint-plugin-jsx-a11y';
+    ```
+
+2.  **Added to the `plugins` object in the "custom overrides" block**:
+    ```javascript
+    // In the "custom overrides" block
+    plugins: {
+      '@typescript-eslint': tsEslintPlugin,
+      'react-hooks': reactHooks,
+      'react': reactPlugin, // Proactively added
+      'jsx-a11y': jsxA11yPlugin, // Proactively added
+    },
+    ```
+
+Subsequent execution of `npm run lint` confirmed that these changes were successful, and ESLint completed with 0 errors (only warnings related to code style, not configuration). This makes the ESLint tooling setup perfectly robust against this class of plugin resolution errors for the customized rules.
