@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server'; // Import NextResponse
 // Define routes that should bypass the protection check (public routes)
 const isPublicRoute = createRouteMatcher([
   '/api/webhooks/(.*)', // Corrected pattern for all webhook routes
+  '/api/uploadthing(.*)', // Make UploadThing API route public to its own handler
   '/sign-in(.*)',
   '/sign-up(.*)', // Sign up routes
   // Add other public routes like '/pricing', '/about' here if needed

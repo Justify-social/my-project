@@ -123,7 +123,7 @@ export default function SubmissionContent() {
           onClick={() => router.push(`/brand-lift/campaign-selection?campaignId=${campaignId}`)}
           disabled={!campaignId}
         >
-          <Icon iconId="faArrowTrendUpLight" className="mr-2" />
+          <Icon iconId="faChartLineLight" className="mr-2" />
           Start Brand Lift
         </Button>
 
@@ -133,7 +133,7 @@ export default function SubmissionContent() {
           className="w-full sm:w-auto bg-background/80 flex-1 sm:flex-none py-3 text-base"
           onClick={() => router.push('/campaigns')}
         >
-          <Icon iconId="faListLight" className="mr-2" />
+          <Icon iconId="faClipboardLight" className="mr-2" />
           View Campaigns
         </Button>
         <Button
@@ -142,7 +142,7 @@ export default function SubmissionContent() {
           className="w-full sm:w-auto flex-1 sm:flex-none py-3 text-base"
           onClick={() => router.push('/dashboard')}
         >
-          <Icon iconId="faChartLineLight" className="mr-2" />
+          <Icon iconId="faHouseLight" className="mr-2" />
           Go to Dashboard
         </Button>
       </div>
