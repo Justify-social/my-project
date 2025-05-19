@@ -27,8 +27,6 @@ export interface GifCardProps {
   onClick?: () => void;
   /** Callback when the search icon is clicked */
   onSearchClick?: () => void;
-  /** Whether to show the pause button (visual cue only for now) */
-  showPauseButton?: boolean;
   /** Additional CSS classes for the Card */
   className?: string;
   /** Is the card/actions disabled */
@@ -44,7 +42,6 @@ export function GifCard({
   isSelected,
   onClick,
   onSearchClick,
-  showPauseButton = true,
   className,
   disabled,
   disabledTitle,
@@ -91,20 +88,6 @@ export function GifCard({
           >
             <Icon iconId="faMagnifyingGlassLight" className="h-7 w-7 text-white" />
           </div>
-        )}
-
-        {showPauseButton && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-1 right-1 bg-black/30 hover:bg-black/50 text-white h-6 w-6 p-0.5 z-10"
-            onClick={handlePauseClick}
-            title={isPaused ? 'Play GIF' : 'Pause GIF'}
-            disabled={disabled}
-            aria-label={isPaused ? 'Play GIF' : 'Pause GIF'}
-          >
-            <Icon iconId={isPaused ? 'faPlayLight' : 'faPauseLight'} className="h-3 w-3" />
-          </Button>
         )}
       </CardContent>
       <CardFooter className="p-0">

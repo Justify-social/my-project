@@ -10,6 +10,14 @@ import { tryCatch } from '@/lib/middleware/api';
 import { BadRequestError, ForbiddenError, NotFoundError, UnauthenticatedError } from '@/lib/errors';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
+// Zod schema for updating a SurveyOption
+const surveyOptionUpdateSchema = z.object({
+  id: z.string().min(1), // ID of the option to update
+  text: z.string().min(1).optional(),
+  imageUrl: z.string().url().nullable().optional(),
+  order: z.number().int().optional(),
+});
+
 // Zod schema for updating a SurveyQuestion
 const updateQuestionSchema = z
   .object({
@@ -19,6 +27,7 @@ const updateQuestionSchema = z
     isRandomized: z.boolean().optional(),
     isMandatory: z.boolean().optional(),
     kpiAssociation: z.string().optional().nullable(),
+    options: z.array(surveyOptionUpdateSchema).optional(), // Added options array
   })
   .partial()
   .refine(data => Object.keys(data).length > 0, {
@@ -107,19 +116,52 @@ const putHandler = async (
       errors: validation.error.flatten().fieldErrors,
       userId: clerkUserId,
     });
-    throw validation.error;
+    throw new BadRequestError(
+      'Invalid request body: ' + JSON.stringify(validation.error.flatten().fieldErrors)
+    );
   }
 
+  // Separate question data from options data
+  const { options: optionsData, ...questionData } = validation.data;
+
   try {
-    const updatedQuestion = await db.surveyQuestion.update({
-      where: {
-        id: questionId,
-      },
-      data: validation.data,
-      include: { options: { orderBy: { order: 'asc' } } },
+    const result = await db.$transaction(async tx => {
+      const updatedQuestionData = questionData;
+
+      // Only update question if there's actual question data
+      if (Object.keys(updatedQuestionData).length > 0) {
+        await tx.surveyQuestion.update({
+          where: { id: questionId },
+          data: updatedQuestionData,
+        });
+      }
+
+      if (optionsData && optionsData.length > 0) {
+        for (const opt of optionsData) {
+          const { id: optionId, ...optionUpdateData } = opt;
+          if (Object.keys(optionUpdateData).length > 0) {
+            // Only update if there are fields to update
+            await tx.surveyOption.update({
+              where: { id: optionId, questionId: questionId }, // Ensure option belongs to question
+              data: optionUpdateData,
+            });
+          }
+        }
+      }
+
+      // Fetch the fully updated question with its options
+      return tx.surveyQuestion.findUniqueOrThrow({
+        where: { id: questionId },
+        include: { options: { orderBy: { order: 'asc' } } },
+      });
     });
-    logger.info('Survey question updated successfully', { questionId, userId: clerkUserId, orgId });
-    return NextResponse.json(updatedQuestion);
+
+    logger.info('Survey question and its options updated successfully', {
+      questionId,
+      userId: clerkUserId,
+      orgId,
+    });
+    return NextResponse.json(result);
   } catch (error) {
     if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
       logger.warn('Attempted to update non-existent question record', {

@@ -21,10 +21,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import yaml from 'js-yaml';
 import { z } from 'zod';
-import {
-  SurveyQuestionType,
-  BrandLiftStudyStatus as PrismaBrandLiftStudyStatusEnum,
-} from '@prisma/client';
+import { SurveyQuestionType, BrandLiftStudyStatus } from '@/types/brand-lift'; // Import from local types
 import { useAuth } from '@clerk/nextjs'; // Import useAuth
 import { ForbiddenError, NotFoundError, UnauthenticatedError, BadRequestError } from '@/lib/errors'; // Added import for custom errors
 
@@ -66,52 +63,50 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogClose,
 } from '@/components/ui/dialog';
 import toast from 'react-hot-toast'; // Added import for react-hot-toast
 import { showSuccessToast, showErrorToast } from '@/components/ui/toast'; // Added import for SSOT toasts
 import { Progress } from '@/components/ui/progress'; // Assuming Progress component exists
+import { GifSearchModal } from '@/components/ui/gif-search-modal'; // Import the new modal
 
 // --- Giphy API Key ---
 const GIPHY_API_KEY = process.env.NEXT_PUBLIC_GIPHY_API_KEY;
 
 // --- Giphy Helper Function ---
-async function fetchGifFromGiphy(searchTerm: string): Promise<string | null> {
+async function fetchGifFromGiphy(searchTerm: string): Promise<string[]> {
   if (!GIPHY_API_KEY) {
     logger.warn('[Giphy] API key not configured. Skipping GIF fetch.');
-    return null;
+    return [];
   }
   if (!searchTerm || searchTerm.trim() === '') {
     logger.info('[Giphy] Empty search term. Skipping GIF fetch.');
-    return null;
+    return [];
   }
 
-  // Using Giphy Search endpoint. Translate might also be an option.
-  // https://developers.giphy.com/docs/api/endpoint#search
+  const limit = 12;
   const url = `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(
     searchTerm
-  )}&limit=1&offset=0&rating=g&lang=en`;
+  )}&limit=${limit}&offset=0&rating=g&lang=en`;
 
   try {
     const response = await fetch(url);
     if (!response.ok) {
       const errorData = await response.json();
       logger.error('[Giphy] API Error:', { status: response.status, data: errorData });
-      return null;
+      return [];
     }
     const data = await response.json();
-    if (data.data && data.data.length > 0) {
-      // Using downsized version for previews, adjust if original or other sizes are needed
-      return (
-        data.data[0].images?.downsized_medium?.url || data.data[0].images?.original?.url || null
-      );
+    if (data.data && Array.isArray(data.data) && data.data.length > 0) {
+      return data.data
+        .map((gif: any) => gif.images?.downsized_medium?.url || gif.images?.original?.url)
+        .filter((url: string | undefined): url is string => typeof url === 'string');
     }
     logger.info('[Giphy] No GIFs found for term:', { searchTerm });
-    return null;
+    return [];
   } catch (error) {
     logger.error('[Giphy] Fetch error:', { error });
-    return null;
+    return [];
   }
 }
 
@@ -182,7 +177,7 @@ const aiOptionSchema = z.object({
 const aiQuestionSchema = z.object({
   number: z.number().optional(),
   text: z.string(),
-  type: z.nativeEnum(SurveyQuestionType), // Use direct SurveyQuestionType from Prisma
+  type: z.nativeEnum(SurveyQuestionType), // Should now use the imported enum correctly
   objective: z.string().optional().nullable(),
   kpi_association: z.string().optional().nullable(),
   is_randomized: z.boolean().optional().default(false),
@@ -758,18 +753,14 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
       Record<string, 'saving' | 'saved' | 'error' | null>
     >({});
     const [hasInitializedQuestions, setHasInitializedQuestions] = useState(false);
-    // State to track selected GIF option for each question
     const [selectedGifOptions, setSelectedGifOptions] = useState<Record<string, string | null>>({});
-    // State for GIF Search Modal
-    const [gifSearchModalState, setGifSearchModalState] = useState<{
+
+    const [gifSearchModalTriggerState, setGifSearchModalTriggerState] = useState<{
+      isOpen: boolean;
       questionId: string;
       optionId: string;
-      currentSearchTerm: string;
-      searchResults: string[];
-      isLoading: boolean;
-      error?: string;
+      currentSearchTerm?: string;
     } | null>(null);
-    const [gifSearchInput, setGifSearchInput] = useState(''); // Separate state for modal input
 
     // New states for progress modal
     const [currentProgressStepIdx, setCurrentProgressStepIdx] = useState(0);
@@ -787,6 +778,7 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
       async (question: SurveyQuestionData) => {
         const qId = question.id || question.tempId!;
         setSaveStatus(prev => ({ ...prev, [qId]: 'saving' }));
+
         try {
           let response;
           const payload = {
@@ -794,47 +786,84 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
             options: question.options.map(o => ({
               ...o,
               tempId: undefined,
-              id: o.id.startsWith('temp_') ? undefined : o.id,
+              id: o.id && o.id.startsWith('temp_') ? undefined : o.id,
             })),
           };
-          if (question.id) {
+
+          console.log('[SaveQuestion] Payload being sent:', JSON.parse(JSON.stringify(payload)));
+
+          if (question.id && !question.id.startsWith('temp_')) {
             response = await fetch(`/api/brand-lift/questions/${question.id}`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(payload),
             });
           } else {
+            const { id, ...createPayload } = payload;
             response = await fetch(`/api/brand-lift/surveys/${studyId}/questions`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(payload),
+              body: JSON.stringify(createPayload),
             });
           }
-          if (!response.ok)
+
+          if (!response.ok) {
+            const errorData = await response
+              .json()
+              .catch(() => ({ error: 'Failed to save and parse error response' }));
             throw new Error(
-              (await response.json().then(e => e.error)) || 'Failed to save question'
+              errorData.error || `Failed to save question (status ${response.status})`
             );
-          const savedQuestion = await response.json();
-          setQuestions(prev =>
-            prev
-              .map(q =>
-                q.id === qId || q.tempId === qId
-                  ? {
-                      ...savedQuestion,
-                      options: (savedQuestion.options || []).sort(
-                        (a: SurveyOptionData, b: SurveyOptionData) => a.order - b.order
-                      ),
-                    }
-                  : q
-              )
+          }
+
+          const savedQuestionFromServer = await response.json();
+          console.log(
+            '[SaveQuestion] Received from server:',
+            JSON.parse(JSON.stringify(savedQuestionFromServer))
+          );
+
+          setQuestions(prevQuestions =>
+            prevQuestions
+              .map(q => {
+                if (q.id === qId || q.tempId === qId) {
+                  // If this is the question that was saved...
+                  const clientSideVersionOfQuestion = question; // The version we sent to the server
+
+                  return {
+                    ...savedQuestionFromServer, // Take most properties from the server's response
+                    options: (savedQuestionFromServer.options || [])
+                      .map((serverOpt: SurveyOptionData) => {
+                        // Find the corresponding option from the client-side version sent to the server
+                        const clientOpt = clientSideVersionOfQuestion.options.find(
+                          (co: SurveyOptionData) =>
+                            (co.id && co.id === serverOpt.id) ||
+                            (co.tempId && co.tempId === serverOpt.tempId)
+                        );
+                        if (
+                          clientOpt &&
+                          clientOpt.imageUrl &&
+                          clientOpt.imageUrl !== serverOpt.imageUrl
+                        ) {
+                          // If client had an imageUrl and it's different from server's echoed one,
+                          // trust the client's intended imageUrl for this specific update.
+                          // This is particularly for the GIF update scenario.
+                          return { ...serverOpt, imageUrl: clientOpt.imageUrl };
+                        }
+                        return serverOpt; // Otherwise, use the server's option data
+                      })
+                      .sort((a: SurveyOptionData, b: SurveyOptionData) => a.order - b.order),
+                  };
+                }
+                return q;
+              })
               .sort((a, b) => a.order - b.order)
           );
           setSaveStatus(prev => ({ ...prev, [qId]: 'saved' }));
-          setTimeout(() => setSaveStatus(prev => ({ ...prev, [qId]: null })), 2000);
+          showSuccessToast('Question saved successfully!');
         } catch (err: any) {
-          logger.error('Save Question Error:', { qId, error: err.message });
+          logger.error('Save Question Error:', { qId, error: err.message, questionData: question });
           setSaveStatus(prev => ({ ...prev, [qId]: 'error' }));
-          setError(`Failed to save question ${question.text.substring(0, 20)}...`);
+          showErrorToast(err.message || 'Failed to save question.');
         }
       },
       [studyId]
@@ -1015,30 +1044,47 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
       optionIdOrTempId: string,
       data: Partial<SurveyOptionData>
     ) => {
+      console.log('[GIF_SELECT] updateOptionProperty called', {
+        questionIdOrTempId,
+        optionIdOrTempId,
+        data,
+      });
       let questionToUpdate: SurveyQuestionData | undefined;
-      setQuestions(prev =>
-        prev.map(q => {
+      setQuestions(prevQuestions => {
+        const newQuestions = prevQuestions.map(q => {
           if (q.id === questionIdOrTempId || q.tempId === questionIdOrTempId) {
+            const updatedOptions = q.options.map(opt =>
+              opt.id === optionIdOrTempId || opt.tempId === optionIdOrTempId
+                ? { ...opt, ...data }
+                : opt
+            );
             questionToUpdate = {
               ...q,
-              options: q.options.map(opt =>
-                opt.id === optionIdOrTempId || opt.tempId === optionIdOrTempId
-                  ? { ...opt, ...data }
-                  : opt
-              ),
+              options: updatedOptions,
             };
             return questionToUpdate;
           }
           return q;
-        })
-      );
-      if (questionToUpdate) saveQuestion(questionToUpdate);
+        });
+        // Ensure a new array reference is returned if no changes occurred,
+        // though `map` typically does this. This is for extra certainty.
+        return Object.is(newQuestions, prevQuestions) ? [...newQuestions] : newQuestions;
+      });
+
+      if (questionToUpdate) {
+        // Clone questionToUpdate to ensure saveQuestion receives a distinct object
+        // if there are any concerns about its modification or shared references,
+        // though current logic seems to handle it by spreading in saveQuestion.
+        saveQuestion({ ...questionToUpdate });
+      }
     };
 
     const handleUpdateOptionText = (qId: string, oId: string, text: string) =>
       updateOptionProperty(qId, oId, { text });
-    const handleUpdateOptionImageUrl = (qId: string, oId: string, imageUrl: string | null) =>
+    const handleUpdateOptionImageUrl = (qId: string, oId: string, imageUrl: string | null) => {
+      console.log('[GIF_SELECT] handleUpdateOptionImageUrl called', { qId, oId, imageUrl });
       updateOptionProperty(qId, oId, { imageUrl });
+    };
     const handleUpdateOptionOrder = (qId: string, oId: string, order: number) =>
       updateOptionProperty(qId, oId, { order });
 
@@ -1127,7 +1173,7 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
         }
 
         const yamlText = await response.text();
-        yamlSuggestionsForErrorLog = yamlText; // For logging in case of parsing error
+        yamlSuggestionsForErrorLog = yamlText;
         const parsed = yaml.load(yamlText) as any[];
         const validation = aiSuggestedQuestionsSchema.safeParse(parsed);
 
@@ -1139,7 +1185,6 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
           throw new Error('Received invalid suggestions structure from AI.');
         }
 
-        // Process AI-suggested questions first
         let currentOrder = questions.length;
         const processedAiQuestions: SurveyQuestionData[] = await Promise.all(
           validation.data.map(async (aiQ: ValidatedAiQuestion) => {
@@ -1148,27 +1193,31 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
                 let imageUrl: string | null = null;
                 if (aiOpt.image_description) {
                   const MAX_GIPHY_SEARCH_TERM_LENGTH = 100;
-                  let searchTerm = aiOpt.image_description.trim(); // Add trim()
+                  let searchTerm = aiOpt.image_description.trim();
                   if (searchTerm.length > MAX_GIPHY_SEARCH_TERM_LENGTH) {
                     searchTerm = searchTerm.substring(0, MAX_GIPHY_SEARCH_TERM_LENGTH);
-                    // Ensure studyId is accessible in this scope for logging, if not, remove it or pass it down
-                    // For now, assuming studyId is available from the outer scope of actualHandleSuggestQuestions
                     logger.warn('[Giphy] Search term truncated for Giphy API call due to length.', {
                       originalTerm: aiOpt.image_description,
                       truncatedTerm: searchTerm,
                       studyId: studyId,
                     });
                   }
-                  // Only search if the (potentially truncated) term is not empty
                   if (searchTerm) {
-                    imageUrl = await fetchGifFromGiphy(searchTerm);
+                    // const gifUrls = await fetchGifFromGiphy(searchTerm); // OLD, REMOVE
+                    // For AI suggestions, we still need a way to fetch GIFs.
+                    // This internal fetch might need to be exposed or passed to AI service.
+                    // For now, this will break if AI suggests images, as fetchGifFromGiphy is removed from this file.
+                    // TEMPORARY: set to null, AI GIF fetching needs to be refactored with the new modal or a shared service.
+                    imageUrl = null;
+                    // TODO: Refactor AI question suggestion to use a Giphy service or integrate with the new modal's fetcher if appropriate.
+                    // One option: aiQuestionSchema could return just image_description, and UI could offer to search for it.
                   }
                 }
                 return {
                   tempId: generateTempId(),
                   id: '',
                   text: aiOpt.text,
-                  imageUrl: imageUrl,
+                  imageUrl: imageUrl, // Will be null for now due to above TODO
                   order: optIdx,
                 };
               })
@@ -1277,57 +1326,25 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
       handleSuggestQuestions: actualHandleSuggestQuestions,
     }));
 
-    // Handler for selecting a GIF option
     const handleSelectGifOption = (questionId: string, optionIdOrTempId: string) => {
       setSelectedGifOptions(prev => ({
         ...prev,
         [questionId]: optionIdOrTempId,
       }));
-      logger.info('Selected GIF option', { questionId, optionIdOrTempId });
+      // console.log('Selected GIF option', { questionId, optionIdOrTempId });
     };
 
-    // Add the new handler for initiating GIF search modal
     const handleInitiateGifSearch = (
       questionId: string,
       optionId: string,
       currentText: string = ''
     ) => {
-      setGifSearchModalState({
+      setGifSearchModalTriggerState({
+        isOpen: true,
         questionId,
         optionId,
-        currentSearchTerm: currentText, // Keep original term for context if needed
-        searchResults: [],
-        isLoading: false,
-        error: undefined,
+        currentSearchTerm: currentText,
       });
-      setGifSearchInput(currentText); // Initialize input with current option text or description
-    };
-
-    const executeGifSearch = async () => {
-      // Removed searchTerm param, will use gifSearchInput
-      if (!gifSearchModalState || !gifSearchInput.trim()) return;
-      setGifSearchModalState(prev => ({
-        ...prev!,
-        isLoading: true,
-        error: undefined,
-        searchResults: [],
-      }));
-      try {
-        const gifUrl = await fetchGifFromGiphy(gifSearchInput);
-        setGifSearchModalState(prev => ({
-          ...prev!,
-          isLoading: false,
-          searchResults: gifUrl ? [gifUrl] : [],
-          error: gifUrl ? undefined : 'No GIF found for that term.',
-        }));
-      } catch (e: any) {
-        logger.error('Giphy Search Execution Error:', e);
-        setGifSearchModalState(prev => ({
-          ...prev!,
-          isLoading: false,
-          error: e.message || 'Failed to search GIFs.',
-        }));
-      }
     };
 
     // useEffect to manage simulated progress for the modal
@@ -1467,88 +1484,24 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
           )}
         </div>
 
-        {/* GIF Search Modal */}
-        {gifSearchModalState && (
-          <Dialog
-            open={!!gifSearchModalState}
-            onOpenChange={isOpen => !isOpen && setGifSearchModalState(null)}
-          >
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Search for a GIF</DialogTitle>
-                <DialogDescription>
-                  Enter a term to search for a GIF. The first result will be shown.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="gif-search-term" className="text-right">
-                    Search
-                  </Label>
-                  <Input
-                    id="gif-search-term"
-                    value={gifSearchInput}
-                    onChange={e => setGifSearchInput(e.target.value)}
-                    onKeyPress={e => e.key === 'Enter' && executeGifSearch()} // Allow Enter to search
-                    className="col-span-3"
-                    placeholder="e.g., happy cat, thumbs up"
-                  />
-                </div>
-                {gifSearchModalState.isLoading && (
-                  <div className="flex justify-center items-center p-4">
-                    <Icon iconId="faSpinnerLight" className="animate-spin h-8 w-8 text-primary" />
-                  </div>
-                )}
-                {gifSearchModalState.error && (
-                  <Alert variant="destructive">
-                    <Icon iconId="faTriangleExclamationLight" className="h-4 w-4" />
-                    <AlertTitle>Search Error</AlertTitle>
-                    <AlertDescription>{gifSearchModalState.error}</AlertDescription>
-                  </Alert>
-                )}
-                {gifSearchModalState.searchResults.length > 0 && (
-                  <div className="mt-2 flex flex-col items-center">
-                    <p className="text-sm text-muted-foreground mb-2">Result (click to use):</p>
-                    {gifSearchModalState.searchResults.map((url, idx) => (
-                      <img
-                        key={idx}
-                        src={url}
-                        alt={`Search result ${idx + 1}`}
-                        className="max-w-full h-auto rounded-md cursor-pointer border hover:border-primary"
-                        onClick={() => {
-                          handleUpdateOptionImageUrl(
-                            gifSearchModalState.questionId,
-                            gifSearchModalState.optionId,
-                            url
-                          );
-                          setGifSearchModalState(null);
-                        }}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button type="button" variant="outline">
-                    Cancel
-                  </Button>
-                </DialogClose>
-                <Button
-                  type="button"
-                  onClick={executeGifSearch}
-                  disabled={gifSearchModalState.isLoading || !gifSearchInput.trim()}
-                >
-                  {gifSearchModalState.isLoading ? (
-                    <Icon iconId="faSpinnerLight" className="animate-spin mr-2 h-4 w-4" />
-                  ) : (
-                    <Icon iconId="faMagnifyingGlassLight" className="mr-2 h-4 w-4" />
-                  )}
-                  Search
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+        {/* New GIF Search Modal Integration */}
+        {gifSearchModalTriggerState?.isOpen && GIPHY_API_KEY && (
+          <GifSearchModal
+            isOpen={gifSearchModalTriggerState.isOpen}
+            onClose={() => setGifSearchModalTriggerState(null)}
+            onGifSelected={gifUrl => {
+              if (gifSearchModalTriggerState) {
+                handleUpdateOptionImageUrl(
+                  gifSearchModalTriggerState.questionId,
+                  gifSearchModalTriggerState.optionId,
+                  gifUrl
+                );
+              }
+              setGifSearchModalTriggerState(null);
+            }}
+            initialSearchTerm={gifSearchModalTriggerState.currentSearchTerm || ''}
+            giphyApiKey={GIPHY_API_KEY}
+          />
         )}
 
         {/* Progress Modal */}

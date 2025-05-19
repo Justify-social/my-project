@@ -5,6 +5,14 @@ import {
   SurveyOverallApprovalStatus,
 } from '@prisma/client'; // Import enums from Prisma client
 
+// Re-export the enums so they can be imported from this file
+export {
+  BrandLiftStudyStatus,
+  SurveyQuestionType,
+  SurveyApprovalCommentStatus,
+  SurveyOverallApprovalStatus,
+};
+
 export interface BrandLiftStudyData {
   id: string; // ULID
   name: string;
