@@ -240,5 +240,8 @@
     "ignorePatterns": [
       ".next/"
     ]
+  },
+  "overrides": {
+    "effect": "^3.15.0"
   }
 }

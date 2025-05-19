@@ -10,14 +10,20 @@ import { logger } from '@/utils/logger';
  * @returns Promise<boolean> - True if the name exists, false otherwise.
  * @throws Error if the API call fails or returns an unexpected format.
  */
-export async function checkCampaignNameExists(name: string): Promise<boolean> {
+export async function checkCampaignNameExists(
+  name: string,
+  campaignIdToExclude?: string
+): Promise<boolean> {
   if (!name || name.trim().length === 0) {
     return false; // Don't check empty names
   }
 
   try {
     // Revert to relative URL, assuming client-side execution
-    const apiUrl = `/api/campaigns/check-name?name=${encodeURIComponent(name)}`;
+    let apiUrl = `/api/campaigns/check-name?name=${encodeURIComponent(name)}`;
+    if (campaignIdToExclude) {
+      apiUrl += `&excludeId=${encodeURIComponent(campaignIdToExclude)}`;
+    }
     logger.info(`[checkCampaignNameExists] Checking URL: ${apiUrl}`);
 
     // We rely on the browser (or Server Action context) to send auth cookies.

@@ -378,6 +378,7 @@ function Step1Content() {
     isLoading: isWizardLoading,
     saveProgress,
     stepsConfig,
+    campaignId,
   } = useWizard();
   const router = useRouter();
   const initialDataLoaded = useRef(false);
@@ -483,28 +484,41 @@ function Step1Content() {
       });
 
       const initialData: Step1FormData = {
-        name: wizardState.name || '',
-        businessGoal: wizardState.businessGoal ?? null,
-        brand: wizardState.brand || '',
-        website: wizardState.website ?? null,
-        startDate: wizardState.startDate || null,
-        endDate: wizardState.endDate || null,
+        name: typeof wizardState.name === 'string' ? wizardState.name : '',
+        businessGoal:
+          typeof wizardState.businessGoal === 'string' ? wizardState.businessGoal : null,
+        brand: typeof wizardState.brand === 'string' ? wizardState.brand : '',
+        website: typeof wizardState.website === 'string' ? wizardState.website : null,
+        startDate: typeof wizardState.startDate === 'string' ? wizardState.startDate : null,
+        endDate: typeof wizardState.endDate === 'string' ? wizardState.endDate : null,
         timeZone: finalTimezone,
-        primaryContact: wizardState.primaryContact ?? {
-          firstName: '',
-          surname: '',
-          email: '',
-          position: PrismaPosition.Director,
-        },
-        secondaryContact: wizardState.secondaryContact ?? null,
-        additionalContacts: wizardState.additionalContacts ?? [],
-        budget: {
-          currency: finalCurrency,
-          total: parseFloat(wizardState.budget?.total?.toString() || '0') || 0,
-          socialMedia: parseFloat(wizardState.budget?.socialMedia?.toString() || '0') || 0,
-        },
+        primaryContact:
+          wizardState.primaryContact && Object.keys(wizardState.primaryContact).length > 0
+            ? wizardState.primaryContact
+            : { firstName: '', surname: '', email: '', position: PrismaPosition.Director },
+        secondaryContact:
+          wizardState.secondaryContact &&
+          typeof wizardState.secondaryContact === 'object' &&
+          Object.keys(wizardState.secondaryContact).length > 0
+            ? wizardState.secondaryContact
+            : null,
+        additionalContacts: Array.isArray(wizardState.additionalContacts)
+          ? wizardState.additionalContacts
+          : [],
+        budget:
+          wizardState.budget &&
+          typeof wizardState.budget === 'object' &&
+          Object.keys(wizardState.budget).length > 0
+            ? {
+                currency: wizardState.budget.currency || finalCurrency,
+                total: parseFloat(wizardState.budget.total?.toString() || '0') || 0,
+                socialMedia: parseFloat(wizardState.budget.socialMedia?.toString() || '0') || 0,
+              }
+            : { currency: finalCurrency, total: 0, socialMedia: 0 },
         Influencer:
-          wizardState.Influencer && wizardState.Influencer.length > 0
+          wizardState.Influencer &&
+          Array.isArray(wizardState.Influencer) &&
+          wizardState.Influencer.length > 0
             ? wizardState.Influencer
             : [{ id: uuidv4(), platform: PlatformEnum.Instagram, handle: '' }],
       };
@@ -574,7 +588,7 @@ function Step1Content() {
       // For now, we rely on setError below to override or Zod to clear if it becomes valid.
 
       try {
-        const nameExists = await checkCampaignNameExists(currentName);
+        const nameExists = await checkCampaignNameExists(currentName, campaignId || undefined);
         if (nameExists) {
           const msg = 'A campaign with this name already exists. Please choose a different name.';
           form.setError('name', {
@@ -623,15 +637,24 @@ function Step1Content() {
     logger.info('[Step 1] Form data is valid.');
 
     try {
-      const payload = await preparePayload(formData, 2);
-      logger.info('[Step 1] Payload prepared for save.');
+      // Prepare payload for the CURRENT step (Step 1)
+      const payload = await preparePayload(formData, 1);
+      logger.info('[Step 1] Payload prepared for save before navigating.');
 
-      updateWizardState(payload);
-      const saveSuccess = await saveProgress(payload);
+      // It's generally better to let saveProgress handle the wizardState update upon successful API response.
+      // updateWizardState(payload); // Consider if this immediate update is needed or if saveProgress handles it.
+      const savedCampaignId = await saveProgress(payload);
 
-      if (saveSuccess) {
+      if (savedCampaignId) {
         logger.info('[Step 1] Save successful, navigating to Step 2');
-        router.push(`/campaigns/wizard/step-2?id=${wizardState?.campaignId || saveSuccess}`);
+        // Use the campaignId from the context, which should be updated by saveProgress if it was a new campaign
+        // or use the returned savedCampaignId which confirms the ID used for the save.
+        const navigationId = wizardState?.id || savedCampaignId;
+        if (navigationId) {
+          router.push(`/campaigns/wizard/step-2?id=${navigationId}`);
+        } else {
+          showErrorToast('Could not determine campaign ID for navigation after save.');
+        }
       } else {
         logger.error('[Step 1] Save failed after validation.');
       }
@@ -654,7 +677,7 @@ function Step1Content() {
     if (currentName && currentName.trim().length > 0) {
       setIsNameChecking(true); // Show visual cue if any tied to this
       try {
-        const nameExists = await checkCampaignNameExists(currentName);
+        const nameExists = await checkCampaignNameExists(currentName, campaignId || undefined);
         if (nameExists) {
           const msg =
             'A campaign with this name already exists. Please update the name before saving.';

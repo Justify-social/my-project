@@ -43,8 +43,11 @@ export async function GET(request: NextRequest) {
   // 3. Validate the name parameter
   const { searchParams } = new URL(request.url);
   const name = searchParams.get('name');
+  const excludeId = searchParams.get('excludeId'); // Get optional excludeId
 
-  logger.info(`[API Check Name] Checking for name: "${name}" for user: ${internalUserId}`);
+  logger.info(
+    `[API Check Name] Checking for name: "${name}" for user: ${internalUserId}${excludeId ? ', excluding ID: ' + excludeId : ''}`
+  );
 
   const validationResult = nameSchema.safeParse(name);
   if (!validationResult.success) {
@@ -57,14 +60,20 @@ export async function GET(request: NextRequest) {
 
   // 4. Perform the unique check scoped to the user
   try {
-    const count = await db.campaignWizard.count({
-      where: {
-        userId: internalUserId, // Filter by the correct internal user ID
-        name: {
-          equals: validationResult.data,
-          mode: 'insensitive',
-        },
+    const whereClause: any = {
+      userId: internalUserId, // Filter by the correct internal user ID
+      name: {
+        equals: validationResult.data,
+        mode: 'insensitive',
       },
+    };
+
+    if (excludeId) {
+      whereClause.id = { not: excludeId };
+    }
+
+    const count = await db.campaignWizard.count({
+      where: whereClause,
     });
 
     const exists = count > 0;
