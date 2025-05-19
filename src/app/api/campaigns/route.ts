@@ -11,6 +11,8 @@ import {
   // Feature, // Unused
   Status,
   CampaignWizardSubmission,
+  CampaignWizard,
+  User as PrismaUser,
 } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { dbLogger, DbOperation } from '@/lib/data-mapping/db-logger';
@@ -18,7 +20,6 @@ import { v4 as uuidv4 } from 'uuid';
 // import { withValidation, tryCatch } from '@/lib/middleware/api'; // tryCatch unused, withValidation used later
 import { withValidation } from '@/lib/middleware/api';
 import {
-  // DraftCampaignDataSchema, // Unused
   ContactSchema,
   BudgetSchema,
   InfluencerSchema,
@@ -28,7 +29,11 @@ import {
   DraftAssetSchema,
   LocationSchema,
   DemographicsSchema,
+  DraftCampaignDataBaseSchema,
 } from '@/components/features/campaigns/types';
+// Need to import the *base* object schema for extending
+// Assuming DraftCampaignDataBaseSchema is the correct export from types.ts for the base object
+// import { DraftCampaignDataBaseSchema } from '@/components/features/campaigns/types';
 // import { formatCampaignDataForResponse } from '@/utils/api-response-formatter'; // Unused
 // import { handleDbError, validateRequest } from '@/lib/middleware/api'; // Unused
 import { getAuth, clerkClient } from '@clerk/nextjs/server';
@@ -38,6 +43,7 @@ import { BadRequestError, ForbiddenError, UnauthenticatedError, NotFoundError } 
 import { auth } from '@clerk/nextjs/server'; // Assuming Clerk setup
 import { tryCatch } from '@/lib/middleware/api/util-middleware'; // Corrected path and function name
 import { addOrUpdateCampaignInAlgolia } from '@/lib/algolia'; // Import Algolia utility
+import { EnumTransformers } from '@/utils/enum-transformers';
 
 // Define interface for influencer data from request body (used in POST)
 interface ApiInfluencer {
@@ -206,95 +212,43 @@ const campaignFlexibleSchema = z.object({
 });
 */
 
-// Define a specific schema for the POST API endpoint validation
-const CampaignPostApiSchema = z
-  .object({
-    id: z.string().optional(),
-    createdAt: z
-      .string()
-      .datetime({ offset: true, message: 'Invalid ISO date string' })
-      .nullable()
-      .optional(), // Expect string
-    updatedAt: z
-      .string()
-      .datetime({ offset: true, message: 'Invalid ISO date string' })
-      .nullable()
-      .optional(), // Expect string
-    currentStep: z.number().default(1),
-    isComplete: z.boolean().default(false),
-    status: StatusEnum.default('DRAFT'),
-    name: z.string().min(1, { message: 'Campaign name is required' }),
-    businessGoal: z.string().nullable().optional(),
-    brand: z.string().min(1, { message: 'Brand name is required' }),
-    website: z.string().url({ message: 'Invalid website URL' }).nullable().optional(),
-    // Use z.string().datetime() for API date string handling
-    startDate: z
-      .string()
-      .datetime({ offset: true, message: 'Invalid ISO date string' })
-      .nullable()
-      .optional(), // Expect string
-    endDate: z
-      .string()
-      .datetime({ offset: true, message: 'Invalid ISO date string' })
-      .nullable()
-      .optional(), // Expect string
-    timeZone: z.string().nullable().optional(),
-    primaryContact: ContactSchema.nullable().optional(),
-    secondaryContact: z.preprocess(val => {
-      const contact = val as Partial<z.infer<typeof ContactSchema>> | null;
-      if (
-        contact &&
-        typeof contact === 'object' &&
-        !contact.firstName &&
-        !contact.surname &&
-        !contact.email
-      ) {
-        return null;
-      }
-      return val;
-    }, ContactSchema.nullable().optional()),
-    additionalContacts: z.array(ContactSchema).default([]),
-    budget: BudgetSchema.nullable().optional(),
-    Influencer: z
-      .array(
-        InfluencerSchema.extend({
-          // Ensure Influencer schema expects string dates here too
-          createdAt: z
-            .string()
-            .datetime({ offset: true, message: 'Invalid ISO date string' })
-            .nullable()
-            .optional(),
-          updatedAt: z
-            .string()
-            .datetime({ offset: true, message: 'Invalid ISO date string' })
-            .nullable()
-            .optional(),
-        })
-      )
-      .optional(),
-    step1Complete: z.boolean().default(false),
-    primaryKPI: KPIEnum.nullable().optional(),
-    secondaryKPIs: z.array(KPIEnum).nullable().optional(),
-    messaging: z.object({}).passthrough().nullable().optional(),
-    expectedOutcomes: z.object({}).passthrough().nullable().optional(),
-    features: z.array(FeatureEnum).nullable().optional(),
-    step2Complete: z.boolean().default(false),
-    demographics: DemographicsSchema.nullable().optional(),
-    locations: z.array(LocationSchema).nullable().optional(),
-    targeting: z.object({}).passthrough().nullable().optional(),
-    competitors: z.array(z.string()).nullable().optional(),
-    step3Complete: z.boolean().default(false),
-    assets: z.array(DraftAssetSchema).default([]),
-    guidelines: z.string().nullable().optional(),
-    requirements: z
-      .array(z.object({ description: z.string(), mandatory: z.boolean() }))
-      .default([]),
-    notes: z.string().nullable().optional(),
-    step4Complete: z.boolean().default(false),
-    userId: z.string().nullable().optional(),
-  })
-  .passthrough()
-  // Re-apply refinements needed for API validation (budget, dates)
+// Use DraftCampaignDataBaseSchema for extension
+const CampaignCreationRequestSchema = DraftCampaignDataBaseSchema.extend({
+  // Fields defined here will override or add to DraftCampaignDataBaseSchema for this specific API schema
+  // Ensure that any fields from DraftCampaignDataBaseSchema that are string representations of dates
+  // are correctly handled if the API expects actual Date objects or specific string formats.
+  // For example, if DraftCampaignDataBaseSchema.startDate is already a Zod date string, this override might be okay.
+  createdAt: z
+    .string()
+    .datetime({ offset: true, message: 'Invalid ISO date string' })
+    .nullable()
+    .optional(),
+  updatedAt: z
+    .string()
+    .datetime({ offset: true, message: 'Invalid ISO date string' })
+    .nullable()
+    .optional(),
+  Influencer: z
+    .array(
+      InfluencerSchema.extend({
+        createdAt: z
+          .string()
+          .datetime({ offset: true, message: 'Invalid ISO date string' })
+          .nullable()
+          .optional(),
+        updatedAt: z
+          .string()
+          .datetime({ offset: true, message: 'Invalid ISO date string' })
+          .nullable()
+          .optional(),
+      })
+    )
+    .optional(),
+  // Ensure other fields from DraftCampaignDataBaseSchema are suitable for API creation,
+  // or override them here if necessary.
+})
+  .passthrough() // Keep passthrough if needed
+  // Re-apply API-specific refinements. These should operate on the extended schema.
   .refine(
     data => {
       if (data.budget?.socialMedia != null && data.budget?.total != null) {
@@ -310,19 +264,19 @@ const CampaignPostApiSchema = z
   .refine(
     data => {
       try {
-        // Ensure dates are valid ISO strings before comparison
         if (
           data.startDate &&
           data.endDate &&
+          typeof data.startDate === 'string' &&
+          typeof data.endDate === 'string' &&
           z.string().datetime({ offset: true }).safeParse(data.startDate).success &&
           z.string().datetime({ offset: true }).safeParse(data.endDate).success
         ) {
-          // Compare Date objects created from strings
           return new Date(data.endDate) >= new Date(data.startDate);
         }
       } catch {
         return false;
-      } // Prefix unused variable
+      }
       return true;
     },
     {
@@ -459,72 +413,38 @@ export const GET = async (req: NextRequest) => {
 // Inlining POST handler with validation and error handling
 export const POST = async (request: NextRequest) => {
   try {
-    // --- Start: Inlined withValidation logic ---
-    if (!request.body) {
-      return NextResponse.json(
-        { success: false, error: 'Request body is required' },
-        { status: 400 }
-      );
-    }
-    const clone = request.clone();
-    const body = await clone.json();
-    const validationResult = CampaignPostApiSchema.safeParse(body);
-
-    if (!validationResult.success) {
-      logger.warn('Campaign POST: Validation failed', { errors: validationResult.error.format() });
-      return NextResponse.json(
-        { success: false, error: 'Validation failed', details: validationResult.error.format() },
-        { status: 400 }
-      );
-    }
-    const data = validationResult.data; // This is the validated data
-    logger.info('Campaign POST: Validated request body', { data });
-    // --- End: Inlined withValidation logic ---
-
-    // --- Start: Original postCampaignsHandler logic ---
-    const { userId: clerkUserId, orgId } = await auth(); // Renamed to clerkUserId for clarity
-    logger.info('Campaign POST: Auth details', { clerkUserId, orgId });
-
+    const { userId: clerkUserId, orgId } = await auth();
     if (!clerkUserId) {
-      return NextResponse.json({ error: 'Authentication required for POST' }, { status: 401 });
+      throw new UnauthenticatedError('User must be authenticated to create a campaign.');
     }
-
-    // Enforce organization context for campaign creation
     if (!orgId) {
-      throw new BadRequestError('An active organization context is required to create a campaign.');
+      throw new BadRequestError('Active organization context is required to create a campaign.');
     }
 
-    // Fetch the internal User record using the clerkUserId
     const userRecord = await prisma.user.findUnique({
       where: { clerkId: clerkUserId },
-      select: { id: true }, // We only need the internal UUID (id)
+      select: { id: true },
     });
-
     if (!userRecord) {
       logger.error('Campaign POST: No User record found for clerkUserId', { clerkUserId });
-      throw new NotFoundError('User record not found. Cannot create campaign.');
+      throw new UnauthenticatedError('User record not found. Cannot create campaign.');
     }
-    const internalUserId = userRecord.id; // This is the UUID
-    logger.info('Campaign POST: Found internal User ID', { internalUserId, clerkUserId });
+    const internalUserId = userRecord.id;
 
-    logger.info('Campaign POST: Creating campaign', {
-      internalUserId,
-      orgId,
-      campaignName: data.name,
+    const body = await request.json();
+    const validationResult = CampaignCreationRequestSchema.safeParse(body);
+
+    if (!validationResult.success) {
+      logger.warn('Campaign POST: Validation failed', {
+        errors: validationResult.error.flatten(),
+      });
+      throw new BadRequestError('Invalid campaign data provided.');
+    }
+
+    const transformedData = EnumTransformers.transformObjectToBackend(validationResult.data);
+    logger.info('Campaign POST: Validation successful, data transformed', {
+      transformedDataName: transformedData.name,
     });
-
-    // Import the EnumTransformers utility
-    const { EnumTransformers } = await import('@/utils/enum-transformers');
-    const transformedData = EnumTransformers.transformObjectToBackend(data);
-    logger.info('Campaign POST: Transformed data for backend', { transformedData });
-
-    const budgetData = transformedData.budget || { total: 0, currency: 'USD', socialMedia: 0 };
-    const primaryContactJson = transformedData.primaryContact
-      ? JSON.stringify(transformedData.primaryContact)
-      : Prisma.JsonNull;
-    const secondaryContactJson = transformedData.secondaryContact
-      ? JSON.stringify(transformedData.secondaryContact)
-      : Prisma.JsonNull;
 
     const dbData = {
       id: uuidv4(),
@@ -550,19 +470,18 @@ export const POST = async (request: NextRequest) => {
       competitors: transformedData.competitors || [],
       assets: transformedData.assets || [],
       status: Status.DRAFT,
-      step1Complete: true,
+      step1Complete: true, // Default assumption for new campaigns from this endpoint
       step2Complete: false,
       step3Complete: false,
       step4Complete: false,
       isComplete: false,
       currentStep: 1,
       updatedAt: new Date(),
-      userId: internalUserId, // Keep track of the creator user
-      orgId: orgId, // Save the organization ID
+      userId: internalUserId,
+      orgId: orgId,
     };
-    logger.info('Campaign POST: Data prepared for DB create', { dbData });
 
-    const campaign = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const campaignOuter = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const newCampaign = await tx.campaignWizard.create({
         data: dbData as Prisma.CampaignWizardCreateInput,
       });
@@ -573,7 +492,7 @@ export const POST = async (request: NextRequest) => {
         transformedData.Influencer.length > 0
       ) {
         const validInfluencers = transformedData.Influencer.filter(
-          (inf: ApiInfluencer): inf is NonNullable<typeof inf> =>
+          (inf: any): inf is NonNullable<typeof inf> =>
             !!inf &&
             typeof inf === 'object' &&
             typeof inf.platform === 'string' &&
@@ -597,69 +516,51 @@ export const POST = async (request: NextRequest) => {
       return newCampaign;
     });
 
-    dbLogger.info(DbOperation.CREATE, 'Campaign created successfully', { campaignId: campaign.id });
-
-    const campaignWithInfluencers = await prisma.campaignWizard.findUnique({
-      where: { id: campaign.id },
-      include: { Influencer: true },
+    dbLogger.info(DbOperation.CREATE, 'Campaign created successfully in DB', {
+      campaignId: campaignOuter.id,
     });
 
-    // const transformedCampaign = // This line seems to be missing its assignment or was commented out
-    //   EnumTransformers.transformObjectFromBackend(campaignWithInfluencers);
-
-    // Index the newly created campaign in Algolia
-    if (campaignWithInfluencers) {
+    // Index in Algolia after successful DB creation
+    if (campaignOuter) {
       try {
-        // The campaignWithInfluencers object fetched from DB will now include orgId
-        await addOrUpdateCampaignInAlgolia(campaignWithInfluencers);
-        logger.info('Campaign POST: Successfully indexed new campaign in Algolia', {
-          campaignId: campaign.id,
-        });
-      } catch (algoliaError) {
-        logger.error('Campaign POST: Failed to index new campaign in Algolia', {
-          campaignId: campaign.id,
-          error: algoliaError,
-        });
-        // Decide if this should be a critical error that fails the request,
-        // or just logged. For now, logging and continuing.
+        logger.info(`[Algolia] Indexing newly created campaign ${campaignOuter.id}`);
+        await addOrUpdateCampaignInAlgolia(campaignOuter);
+        logger.info(`[Algolia] Successfully indexed campaign ${campaignOuter.id}.`);
+      } catch (algoliaError: any) {
+        logger.error(
+          `[Algolia] Failed to index campaign ${campaignOuter.id} after creation. DB operation was successful.`,
+          {
+            campaignId: campaignOuter.id,
+            errorName: algoliaError.name,
+            errorMessage: algoliaError.message,
+          }
+        );
+        // Non-critical error for the main POST operation
       }
     } else {
-      logger.warn('Campaign POST: campaignWithInfluencers was null, skipping Algolia indexing.', {
-        campaignId: campaign.id,
-      });
-    }
-
-    return NextResponse.json({
-      success: true,
-      // data: transformedCampaign,
-      data: campaignWithInfluencers, // This will now include orgId
-      message: 'Campaign created successfully',
-    });
-    // --- End: Original postCampaignsHandler logic ---
-  } catch (error: any) {
-    // --- Start: Inlined tryCatch logic ---
-    logger.error('Campaign POST: Error occurred', { error: error.message, stack: error.stack });
-
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-      // Inferring P2002 on CampaignWizard is likely due to name unique constraint (userId, name)
-      // For more precision, you could check error.meta.target if it reliably shows the constraint fields.
-      // Example: if (error.meta && Array.isArray(error.meta.target) && error.meta.target.includes('name'))
-      logger.warn('Campaign POST: Prisma P2002 (Unique Constraint Violation) detected.', {
-        target: error.meta?.target,
-      });
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'A campaign with this name already exists. Please update the name.',
-          errorCode: 'NAME_ALREADY_EXISTS',
-        },
-        { status: 409 } // 409 Conflict
+      logger.warn(
+        '[Algolia] campaignOuter was not available after DB transaction. Skipping Algolia indexing for new campaign.'
       );
     }
 
-    // Using handleApiError directly, passing the original request
+    // Fetch the final campaign with influencers for the response
+    const campaignWithInfluencers = await prisma.campaignWizard.findUnique({
+      where: { id: campaignOuter.id },
+      include: { Influencer: true },
+    });
+
+    const responseData = EnumTransformers.transformObjectFromBackend(campaignWithInfluencers);
+
+    return NextResponse.json(
+      { success: true, data: responseData, message: 'Campaign created successfully.' },
+      { status: 201 }
+    );
+  } catch (error: any) {
+    logger.error('Campaign POST: Error occurred', {
+      errorName: error.name,
+      errorMessage: error.message,
+    });
     return handleApiError(error, request);
-    // --- End: Inlined tryCatch logic ---
   }
 };
 

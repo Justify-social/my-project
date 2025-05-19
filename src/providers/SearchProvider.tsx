@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import { useAuth } from '@clerk/nextjs'; // Import useAuth
 // Revert to standard type import
 import { SearchContextProps, SearchProviderProps } from './SearchProvider.types';
 import { searchAlgoliaCampaigns, CampaignSearchResult } from '@/lib/algolia';
@@ -9,6 +10,7 @@ import { searchAlgoliaCampaigns, CampaignSearchResult } from '@/lib/algolia';
 const SearchContext = createContext<SearchContextProps | undefined>(undefined);
 
 export const SearchProvider: React.FC<SearchProviderProps> = ({ children }) => {
+  const { orgId } = useAuth(); // Get orgId from Clerk
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<CampaignSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -45,7 +47,9 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({ children }) => {
       setIsSearching(true);
       console.time(`Search Execution: ${searchQuery}`); // Start timer
       try {
-        const searchResults = await searchAlgoliaCampaigns(searchQuery);
+        // Pass orgId to searchAlgoliaCampaigns
+        // searchAlgoliaCampaigns handles orgId being potentially null/undefined
+        const searchResults = await searchAlgoliaCampaigns(searchQuery, orgId ?? undefined);
 
         // Only update if this is still the latest request
         if (!abortController.signal.aborted) {
@@ -63,7 +67,7 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({ children }) => {
         console.timeEnd(`Search Execution: ${searchQuery}`); // End timer
       }
     },
-    [] // EDITED: Changed dependencies to [] for a stable function reference
+    [orgId] // Add orgId to dependencies of useCallback
   );
 
   const clearSearch = useCallback(() => {

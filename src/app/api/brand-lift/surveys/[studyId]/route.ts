@@ -10,6 +10,7 @@ import { NotificationService } from '@/lib/notificationService';
 import { BASE_URL } from '@/config/constants';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { CintApiService } from '@/lib/cint';
+import { addOrUpdateBrandLiftStudyInAlgolia, deleteBrandLiftStudyFromAlgolia } from '@/lib/algolia';
 
 const updateStudySchema = z
   .object({
@@ -130,7 +131,9 @@ export const PUT = async (
         status: true,
         name: true,
         orgId: true,
-        campaign: { select: { userId: true, campaignName: true } },
+        campaign: {
+          select: { userId: true, campaignName: true, wizard: { select: { orgId: true } } },
+        },
       },
     });
     if (!existingStudy) throw new NotFoundError('Study not found.');
@@ -213,25 +216,22 @@ export const PUT = async (
           orgId,
         });
 
-        const dataToUpdate: Prisma.BrandLiftStudyUpdateInput = {
+        const dataToUpdateForCintLaunch: Prisma.BrandLiftStudyUpdateInput = {
           status: BrandLiftStudyStatus.COLLECTING,
           cintProjectId: cintProject.id,
           cintTargetGroupId: cintTargetGroup.id,
         };
-        if (updateData.name) dataToUpdate.name = updateData.name;
-        if (updateData.funnelStage) dataToUpdate.funnelStage = updateData.funnelStage;
-        if (updateData.primaryKpi) dataToUpdate.primaryKpi = updateData.primaryKpi;
-        if (updateData.secondaryKpis) dataToUpdate.secondaryKpis = updateData.secondaryKpis;
+        if (updateData.name) dataToUpdateForCintLaunch.name = updateData.name;
+        if (updateData.funnelStage) dataToUpdateForCintLaunch.funnelStage = updateData.funnelStage;
+        if (updateData.primaryKpi) dataToUpdateForCintLaunch.primaryKpi = updateData.primaryKpi;
+        if (updateData.secondaryKpis)
+          dataToUpdateForCintLaunch.secondaryKpis = updateData.secondaryKpis;
 
         finalUpdatedStudy = await db.brandLiftStudy.update({
           where: { id: studyId },
-          data: dataToUpdate,
-          select: {
-            id: true,
-            name: true,
-            status: true,
-            orgId: true,
-            campaign: { select: { userId: true, campaignName: true } },
+          data: dataToUpdateForCintLaunch,
+          include: {
+            campaign: { select: { campaignName: true, wizard: { select: { orgId: true } } } },
           },
         });
       } catch (cintLaunchError: any) {
@@ -244,12 +244,8 @@ export const PUT = async (
       finalUpdatedStudy = await db.brandLiftStudy.update({
         where: { id: studyId },
         data: updateData,
-        select: {
-          id: true,
-          name: true,
-          status: true,
-          orgId: true,
-          campaign: { select: { userId: true, campaignName: true } },
+        include: {
+          campaign: { select: { campaignName: true, wizard: { select: { orgId: true } } } },
         },
       });
     }
@@ -294,7 +290,26 @@ export const PUT = async (
       }
     }
 
-    logger.info('Brand Lift Study updated successfully', {
+    if (finalUpdatedStudy) {
+      try {
+        logger.info(`[Algolia] Updating BrandLiftStudy ${finalUpdatedStudy.id} in Algolia.`);
+        await addOrUpdateBrandLiftStudyInAlgolia(finalUpdatedStudy);
+        logger.info(
+          `[Algolia] Successfully updated BrandLiftStudy ${finalUpdatedStudy.id} in Algolia.`
+        );
+      } catch (algoliaError: any) {
+        logger.error(
+          `[Algolia] Failed to update BrandLiftStudy ${finalUpdatedStudy.id} in Algolia. DB update was successful.`,
+          {
+            studyId: finalUpdatedStudy.id,
+            errorName: algoliaError.name,
+            errorMessage: algoliaError.message,
+          }
+        );
+      }
+    }
+
+    logger.info('Brand Lift Study updated successfully in DB', {
       studyId,
       userId: clerkUserId,
       orgId,
@@ -309,7 +324,6 @@ export const PUT = async (
   }
 };
 
-// DELETE handler
 export async function DELETE(
   req: NextRequest,
   { params: paramsPromise }: { params: Promise<{ studyId: string }> }
@@ -330,11 +344,15 @@ export async function DELETE(
       throw new BadRequestError('Study ID is required for deletion.');
     }
 
-    logger.info('Attempting to delete BrandLiftStudy', { studyId, userId: clerkUserId, orgId });
+    logger.info('Attempting to delete BrandLiftStudy from DB', {
+      studyId,
+      userId: clerkUserId,
+      orgId,
+    });
 
     const studyToDelete = await db.brandLiftStudy.findUnique({
       where: { id: studyId },
-      select: { orgId: true, name: true, status: true }, // Select fields for verification and logging
+      select: { orgId: true, name: true, status: true },
     });
 
     if (!studyToDelete) {
@@ -346,22 +364,13 @@ export async function DELETE(
       throw new NotFoundError('Study not found.');
     }
 
-    // Authorization: Check if the study belongs to the user's active organization.
-    if (studyToDelete.orgId === null) {
-      logger.warn(
-        `User ${clerkUserId} in org ${orgId} attempted to delete legacy brand lift study ${studyId} (null orgId). Action denied.`
-      );
-      throw new ForbiddenError(
-        'This study is not associated with an organization and cannot be deleted.'
-      );
-    } else if (studyToDelete.orgId !== orgId) {
+    if (studyToDelete.orgId !== orgId) {
       logger.warn(
         `User ${clerkUserId} in org ${orgId} attempted to delete brand lift study ${studyId} belonging to org ${studyToDelete.orgId}. Action denied.`
       );
       throw new ForbiddenError('You do not have permission to delete this study.');
     }
 
-    // Business logic: Prevent deletion of studies in certain statuses if needed
     if (
       studyToDelete.status === BrandLiftStudyStatus.COLLECTING ||
       studyToDelete.status === BrandLiftStudyStatus.COMPLETED
@@ -377,13 +386,31 @@ export async function DELETE(
       );
     }
 
-    // Prisma will handle cascade deletes if configured in schema.prisma.
-    // Otherwise, explicit deletions of related entities in a transaction are needed here.
     await db.brandLiftStudy.delete({
       where: { id: studyId },
     });
 
-    logger.info('BrandLiftStudy deleted successfully', { studyId, userId: clerkUserId, orgId });
+    logger.info('BrandLiftStudy deleted successfully from DB', {
+      studyId,
+      userId: clerkUserId,
+      orgId,
+    });
+
+    try {
+      logger.info(`[Algolia] Deleting BrandLiftStudy ${studyId} from Algolia.`);
+      await deleteBrandLiftStudyFromAlgolia(studyId);
+      logger.info(`[Algolia] Successfully deleted BrandLiftStudy ${studyId} from Algolia.`);
+    } catch (algoliaError: any) {
+      logger.error(
+        `[Algolia] Failed to delete BrandLiftStudy ${studyId} from Algolia. DB deletion was successful.`,
+        {
+          studyId: studyId,
+          errorName: algoliaError.name,
+          errorMessage: algoliaError.message,
+        }
+      );
+    }
+
     return NextResponse.json(
       { success: true, message: `Study "${studyToDelete.name}" deleted successfully.` },
       { status: 200 }
@@ -393,14 +420,13 @@ export async function DELETE(
   }
 }
 
-// POST handler for DUPLICATING a study
 const duplicateStudyBodySchema = z.object({
   newName: z.string().min(1, { message: 'New study name is required' }),
 });
 
 export async function POST(
   req: NextRequest,
-  { params: paramsPromise }: { params: Promise<{ studyId: string }> } // studyId here is the ID of the study to duplicate
+  { params: paramsPromise }: { params: Promise<{ studyId: string }> }
 ) {
   try {
     const { userId: clerkUserId, orgId } = await auth();
@@ -467,7 +493,6 @@ export async function POST(
       );
     }
 
-    // Prepare data for nested create
     const questionsData = originalStudy.questions.map(q => ({
       text: q.text,
       questionType: q.questionType,
@@ -495,7 +520,7 @@ export async function POST(
           status: BrandLiftStudyStatus.DRAFT,
           orgId: originalStudy.orgId,
           questions: {
-            create: questionsData, // Use the prepared nested data
+            create: questionsData,
           },
         },
       });

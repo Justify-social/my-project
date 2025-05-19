@@ -120,7 +120,7 @@ export const LocationSchema = z
 //---------------------------------------------------------------------------
 
 /** Base schema definition for the Campaign Wizard's draft state. */
-const DraftCampaignDataBaseSchema = z
+export const DraftCampaignDataBaseSchema = z
   .object({
     /** Unique identifier for the draft campaign (UUID). */
     id: z.string().optional(),

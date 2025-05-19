@@ -320,9 +320,7 @@ export async function PATCH(
           console.log('Deleted existing influencers for campaign:', campaignId);
           const influencerCreateData = influencerData
             .filter(
-              (
-                inf: unknown
-              ): inf is ApiInfluencer => // Runtime type guard
+              (inf: unknown): inf is ApiInfluencer =>
                 inf != null && typeof inf === 'object' && 'handle' in inf && 'platform' in inf
             )
             .map((inf: ApiInfluencer) => ({
@@ -332,7 +330,6 @@ export async function PATCH(
                   : `inf-${Date.now()}-${Math.round(Math.random() * 1000)}`,
               platform: EnumTransformers.platformToBackend(inf.platform as string),
               handle: inf.handle as string,
-              platformId: inf.platformId || '',
               campaignId: campaignId,
               updatedAt: new Date(),
             }));

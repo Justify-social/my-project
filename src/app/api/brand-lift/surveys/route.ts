@@ -20,6 +20,7 @@ import {
   BrandLiftStudyStatus as PrismaBrandLiftStudyStatus,
   SubmissionStatus,
 } from '@prisma/client';
+import { addOrUpdateBrandLiftStudyInAlgolia } from '@/lib/algolia'; // Import Algolia utility
 // import { hasPermission } from '@/lib/auth/permissions'; // Commented out - path needs verification
 
 // Schema for creating a BrandLiftStudy
@@ -144,12 +145,48 @@ export async function POST(req: NextRequest) {
           status: PrismaBrandLiftStudyStatus.DRAFT,
           orgId: orgId, // Store the active orgId for ownership
         },
+        // Include relations needed by Algolia transformer, if any, beyond direct fields
+        // For example, if campaignName is needed from the related CampaignWizardSubmission
+        include: {
+          campaign: {
+            // CampaignWizardSubmission
+            select: {
+              campaignName: true,
+              wizard: {
+                // CampaignWizard (though orgId is already on BrandLiftStudy)
+                select: {
+                  orgId: true, // Ensure this path is available if transformer relies on it
+                },
+              },
+            },
+          },
+        },
       });
-      logger.info('BrandLiftStudy created successfully', {
-        userId: clerkUserId, // Log clerkUserId for context
+      logger.info('BrandLiftStudy created successfully in DB', {
+        userId: clerkUserId,
         studyId: newStudy.id,
         orgId: newStudy.orgId,
       });
+
+      // Index in Algolia
+      if (newStudy) {
+        try {
+          logger.info(`[Algolia] Indexing newly created BrandLiftStudy ${newStudy.id}`);
+          await addOrUpdateBrandLiftStudyInAlgolia(newStudy);
+          logger.info(`[Algolia] Successfully indexed BrandLiftStudy ${newStudy.id}.`);
+        } catch (algoliaError: any) {
+          logger.error(
+            `[Algolia] Failed to index BrandLiftStudy ${newStudy.id} after creation. DB operation was successful.`,
+            {
+              studyId: newStudy.id,
+              errorName: algoliaError.name,
+              errorMessage: algoliaError.message,
+            }
+          );
+          // Non-critical error for the main POST operation
+        }
+      }
+
       return NextResponse.json(newStudy, { status: 201 });
     },
     error => handleApiError(error, req)
