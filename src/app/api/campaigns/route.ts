@@ -522,21 +522,30 @@ export const POST = async (request: NextRequest) => {
 
     // Index in Algolia after successful DB creation
     if (campaignOuter) {
-      try {
-        logger.info(`[Algolia] Indexing newly created campaign ${campaignOuter.id}`);
-        await addOrUpdateCampaignInAlgolia(campaignOuter);
-        logger.info(`[Algolia] Successfully indexed campaign ${campaignOuter.id}.`);
-      } catch (algoliaError: any) {
-        logger.error(
-          `[Algolia] Failed to index campaign ${campaignOuter.id} after creation. DB operation was successful.`,
-          {
-            campaignId: campaignOuter.id,
-            errorName: algoliaError.name,
-            errorMessage: algoliaError.message,
-          }
-        );
-        // Non-critical error for the main POST operation
-      }
+      const algoliaIndexStartTime = Date.now(); // For timing the background task
+      // Fire and forget Algolia indexing
+      addOrUpdateCampaignInAlgolia(campaignOuter)
+        .then(() => {
+          logger.info(
+            `[Algolia] Background indexing for new campaign ${campaignOuter.id} completed in ${Date.now() - algoliaIndexStartTime}ms`
+          );
+          logger.info(
+            `[Algolia] Successfully indexed new campaign ${campaignOuter.id} (background).`
+          );
+        })
+        .catch((algoliaError: any) => {
+          logger.error(
+            `[Algolia] Background indexing for new campaign ${campaignOuter.id} failed. DB operation was successful.`,
+            {
+              campaignId: campaignOuter.id,
+              errorName: algoliaError.name,
+              errorMessage: algoliaError.message,
+            }
+          );
+        });
+      logger.info(
+        `[Algolia] Indexing for new campaign ${campaignOuter.id} dispatched to background. Main handler continues.`
+      );
     } else {
       logger.warn(
         '[Algolia] campaignOuter was not available after DB transaction. Skipping Algolia indexing for new campaign.'

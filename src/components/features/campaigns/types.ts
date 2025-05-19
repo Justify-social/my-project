@@ -332,6 +332,13 @@ export const DraftCampaignDataSchema = DraftCampaignDataBaseSchema
       if (!data.name || data.name.trim().length === 0) {
         return true;
       }
+      // If we are validating data that already has an ID (i.e., an existing draft being loaded),
+      // skip the remote name existence check for this particular schema parsing path.
+      // The name duplication check is more relevant when creating a new campaign
+      // or when explicitly validating a name change in a form.
+      if (data.id) {
+        return true;
+      }
       try {
         const exists = await checkCampaignNameExists(data.name);
         return !exists; // Return true if name does NOT exist (passes validation)

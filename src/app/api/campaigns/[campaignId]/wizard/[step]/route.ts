@@ -31,6 +31,11 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ campaignId: string; step: string }> }
 ) {
+  const handlerStartTime = Date.now();
+  logger.info(
+    `[WIZARD_PATCH_PERF] Handler started for step ${params ? (await params).step : 'unknown'} campaign ${params ? (await params).campaignId : 'unknown'}`
+  );
+
   // Apply tryCatch logic internally
   try {
     // Await params resolution at the beginning
@@ -38,6 +43,7 @@ export async function PATCH(
     const campaignId = resolvedParams.campaignId;
     const step = parseInt(resolvedParams.step, 10);
     const { userId: clerkUserId, orgId } = await auth(); // Fetch Clerk user and org IDs
+    logger.info(`[WIZARD_PATCH_PERF] Auth check completed in ${Date.now() - handlerStartTime}ms`);
 
     if (!clerkUserId) {
       throw new UnauthenticatedError('Authentication required to update campaign wizard.');
@@ -72,10 +78,13 @@ export async function PATCH(
 
     console.log(`PATCH /api/campaigns/${campaignId}/wizard/${step}`);
 
+    const dbConnectStartTime = Date.now();
     // Connect to database
     await connectToDatabase();
+    logger.info(`[WIZARD_PATCH_PERF] Database connected in ${Date.now() - dbConnectStartTime}ms`);
 
     // Fetch current campaign state
+    const fetchCampaignStartTime = Date.now();
     const currentCampaign = await prisma.campaignWizard.findUnique({
       where: { id: campaignId },
       select: {
@@ -88,6 +97,9 @@ export async function PATCH(
         currentStep: true,
       },
     });
+    logger.info(
+      `[WIZARD_PATCH_PERF] Fetched current campaign in ${Date.now() - fetchCampaignStartTime}ms`
+    );
 
     if (!currentCampaign) {
       // return NextResponse.json({ error: 'Campaign not found for update' }, { status: 404 });
@@ -109,6 +121,7 @@ export async function PATCH(
       throw new ForbiddenError('You do not have permission to update this campaign.');
     }
 
+    const validationStartTime = Date.now();
     // Parse request body
     console.log(`Received Step ${step} body:`, JSON.stringify(body, null, 2));
 
@@ -155,6 +168,9 @@ export async function PATCH(
         { status: 400 }
       );
     }
+    logger.info(
+      `[WIZARD_PATCH_PERF] Validation completed in ${Date.now() - validationStartTime}ms`
+    );
     // Assign potentially 'any' type data
     dataToSave = validationResult.data;
 
@@ -280,6 +296,7 @@ export async function PATCH(
 
     let updatedCampaign;
     try {
+      const prismaUpdateStartTime = Date.now();
       updatedCampaign = await prisma.campaignWizard.update({
         where: { id: campaignId },
         data: transformedDataForDb,
@@ -287,6 +304,9 @@ export async function PATCH(
           Influencer: true,
         },
       });
+      logger.info(
+        `[WIZARD_PATCH_PERF] Prisma campaign update completed in ${Date.now() - prismaUpdateStartTime}ms`
+      );
       // Log result IMMEDIATELY AFTER successful DB update
       console.log(
         `[DB Update - Step ${step}] Prisma update successful. Result:`,
@@ -315,6 +335,7 @@ export async function PATCH(
     if (step === 1 && influencerData != null && Array.isArray(influencerData)) {
       console.log('Updating influencers for wizard campaign (Step 1):', campaignId);
       try {
+        const influencerTxStartTime = Date.now();
         await prisma.$transaction(async tx => {
           await tx.influencer.deleteMany({ where: { campaignId } });
           console.log('Deleted existing influencers for campaign:', campaignId);
@@ -344,11 +365,18 @@ export async function PATCH(
           }
         });
         console.log('Influencer transaction successful.');
+        logger.info(
+          `[WIZARD_PATCH_PERF] Influencer transaction completed in ${Date.now() - influencerTxStartTime}ms`
+        );
         // Refetch into a temporary variable to get updated influencers
+        const refetchCampaignStartTime = Date.now();
         const refetchedCampaign = await prisma.campaignWizard.findUnique({
           where: { id: campaignId },
           include: { Influencer: true },
         });
+        logger.info(
+          `[WIZARD_PATCH_PERF] Refetch after influencer TX completed in ${Date.now() - refetchCampaignStartTime}ms`
+        );
         // If refetch was successful, use it for the response
         if (refetchedCampaign) {
           campaignDataForResponse = refetchedCampaign;
@@ -389,20 +417,33 @@ export async function PATCH(
 
     // Index the updated campaign in Algolia
     if (campaignDataForResponse) {
-      try {
-        // Ensure campaignDataForResponse is not null and is the complete wizard object
-        await addOrUpdateCampaignInAlgolia(campaignDataForResponse as any); // Cast to any if type mismatch with CampaignWizard
-        logger.info(`PATCH Step ${step}: Successfully indexed updated campaign in Algolia`, {
-          campaignId,
+      const algoliaIndexStartTime = Date.now();
+      // Fire and forget Algolia indexing for faster API response
+      addOrUpdateCampaignInAlgolia(campaignDataForResponse as any)
+        .then(() => {
+          logger.info(
+            `[WIZARD_PATCH_PERF] Algolia indexing completed in background in ${Date.now() - algoliaIndexStartTime}ms`
+          );
+          logger.info(
+            `PATCH Step ${step}: Successfully indexed updated campaign in Algolia (background)`,
+            {
+              campaignId,
+            }
+          );
+        })
+        .catch(algoliaError => {
+          logger.error(
+            `PATCH Step ${step}: Failed to index updated campaign in Algolia (background)`,
+            {
+              campaignId,
+              error: algoliaError,
+            }
+          );
         });
-      } catch (algoliaError) {
-        logger.error(`PATCH Step ${step}: Failed to index updated campaign in Algolia`, {
-          campaignId,
-          error: algoliaError,
-        });
-        // Decide if this should be a critical error that fails the request,
-        // or just logged. For now, logging and continuing.
-      }
+      // Log immediate dispatch, not completion
+      logger.info(
+        `[WIZARD_PATCH_PERF] Algolia indexing dispatched to background. Main handler continues.`
+      );
     } else {
       logger.warn(
         `PATCH Step ${step}: campaignDataForResponse was null, skipping Algolia indexing.`,
@@ -410,6 +451,7 @@ export async function PATCH(
       );
     }
 
+    logger.info(`[WIZARD_PATCH_PERF] Handler finished in ${Date.now() - handlerStartTime}ms`);
     return NextResponse.json({
       success: true,
       // data: transformedCampaignForFrontend, // Send the raw data from DB
