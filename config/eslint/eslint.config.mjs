@@ -4,6 +4,7 @@ import { FlatCompat } from '@eslint/eslintrc';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import nextjs from '@next/eslint-plugin-next';
+import tsEslintPlugin from '@typescript-eslint/eslint-plugin';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -57,6 +58,10 @@ const eslintConfig = [
   // Add custom overrides (rules only now, ignores moved)
   {
     files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx', '**/*.mjs', '**/*.cjs'],
+    plugins: {
+      '@typescript-eslint': tsEslintPlugin,
+      'react-hooks': reactHooks,
+    },
     rules: {
       '@typescript-eslint/no-unused-vars': [
         'warn',
