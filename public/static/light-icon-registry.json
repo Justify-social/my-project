@@ -86,6 +86,20 @@
     },
     {
       "category": "light",
+      "id": "faBatteryFullLight",
+      "name": "Battery Full Light",
+      "faVersion": "fal fa-battery-full",
+      "path": "/icons/light/faBatteryFullLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faBatteryThreeQuartersLight",
+      "name": "Battery Three Quarters Light",
+      "faVersion": "fal fa-battery-three-quarters",
+      "path": "/icons/light/faBatteryThreeQuartersLight.svg"
+    },
+    {
+      "category": "light",
       "id": "faBellLight",
       "name": "Bell",
       "faVersion": "fal fa-bell",
@@ -251,6 +265,20 @@
       "name": "Circle Notch",
       "faVersion": "fal fa-circle-notch",
       "path": "/icons/light/faCircleNotchLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faCirclePauseLight",
+      "name": "Circle Pause Light",
+      "faVersion": "fal fa-circle-pause",
+      "path": "/icons/light/faCirclePauseLight.svg"
+    },
+    {
+      "category": "light",
+      "id": "faCirclePlayLight",
+      "name": "Circle Play Light",
+      "faVersion": "fal fa-circle-play",
+      "path": "/icons/light/faCirclePlayLight.svg"
     },
     {
       "category": "light",
@@ -437,7 +465,7 @@
     {
       "category": "light",
       "id": "faEyeSlashLight",
-      "name": "Eye Slash",
+      "name": "Eye Slash Light",
       "faVersion": "fal fa-eye-slash",
       "path": "/icons/light/faEyeSlashLight.svg"
     },
@@ -576,6 +604,13 @@
     },
     {
       "category": "light",
+      "id": "faImageSlashLight",
+      "name": "Image Slash Light",
+      "faVersion": "fal fa-image-slash",
+      "path": "/icons/light/faImageSlashLight.svg"
+    },
+    {
+      "category": "light",
       "id": "faInfoLight",
       "name": "Info",
       "faVersion": "fal fa-info",
@@ -671,6 +706,13 @@
       "name": "Moon",
       "path": "/icons/light/faMoonLight.svg",
       "faVersion": "fal fa-moon"
+    },
+    {
+      "category": "light",
+      "id": "faMusicLight",
+      "name": "Music Light",
+      "faVersion": "fal fa-music",
+      "path": "/icons/light/faMusicLight.svg"
     },
     {
       "category": "light",
@@ -842,6 +884,13 @@
     },
     {
       "category": "light",
+      "id": "faSignalBarsLight",
+      "name": "Signal Bars Light",
+      "faVersion": "fal fa-signal-bars",
+      "path": "/icons/light/faSignalBarsLight.svg"
+    },
+    {
+      "category": "light",
       "id": "faSignalLight",
       "name": "Signal",
       "faVersion": "fal fa-signal",
@@ -996,6 +1045,13 @@
     },
     {
       "category": "light",
+      "id": "faWifiLight",
+      "name": "Wifi Light",
+      "faVersion": "fal fa-wifi",
+      "path": "/icons/light/faWifiLight.svg"
+    },
+    {
+      "category": "light",
       "id": "faXmarkLight",
       "name": "Xmark",
       "path": "/icons/light/faXmarkLight.svg",
@@ -1003,6 +1059,6 @@
     }
   ],
   "category": "light",
-  "iconCount": 139,
-  "updatedAt": "2025-05-13T12:30:00.000Z"
+  "iconCount": 149,
+  "updatedAt": "2024-05-23T10:41:45.123Z"
 }
