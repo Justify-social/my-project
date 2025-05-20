@@ -35,16 +35,15 @@ const SurveyQuestionPreviewList: React.FC<SurveyQuestionPreviewListProps> = ({ q
                     key={opt.id || `opt-prev-${opt.tempId}`}
                     className="flex items-center space-x-2 p-2 border rounded bg-gray-50 dark:bg-gray-700"
                   >
-                    {/* Basic display of option, could be enhanced with radio/checkbox visuals */}
-                    {/* <input type={question.questionType === 'MULTIPLE_CHOICE' ? 'checkbox' : 'radio'} disabled className="form-radio"/> */}
-                    <span className="text-sm">{opt.text}</span>
+                    {/* Image/GIF first, then text */}
                     {opt.imageUrl && (
                       <img
                         src={opt.imageUrl}
                         alt={opt.text}
-                        className="ml-2 h-10 w-10 object-contain inline-block rounded"
+                        className="mr-2 h-10 w-10 object-contain inline-block rounded"
                       />
                     )}
+                    <span className="text-sm">{opt.text}</span>
                   </div>
                 ))}
             </div>

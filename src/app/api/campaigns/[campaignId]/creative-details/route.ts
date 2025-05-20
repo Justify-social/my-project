@@ -24,15 +24,26 @@ const paramsSchema = z.object({
 // This uses Prisma's actual CreativeAsset type now
 const selectPrimaryCreativeAsset = (assets: CreativeAsset[]): CreativeAsset | null => {
   if (!assets || assets.length === 0) return null;
-  const primary = assets.find(a => a.isPrimaryForBrandLiftPreview);
-  if (primary) return primary;
-  const videoWithMux = assets.find(a => a.type === CreativeAssetType.video && a.muxPlaybackId);
-  if (videoWithMux) return videoWithMux;
-  const image = assets.find(a => a.type === CreativeAssetType.image);
-  if (image) return image;
-  const anyVideo = assets.find(a => a.type === CreativeAssetType.video);
-  if (anyVideo) return anyVideo;
-  return assets[0];
+
+  const primary = assets.find(a => {
+    const asset = a as any; // Cast to any once
+    return asset.isPrimaryForBrandLiftPreview;
+  });
+  if (primary) return primary as CreativeAsset;
+
+  const videoWithMux = assets.find(a => {
+    const asset = a as any; // Cast to any once
+    return asset.type === CreativeAssetType.video && asset.muxPlaybackId;
+  });
+  if (videoWithMux) return videoWithMux as CreativeAsset;
+
+  const image = assets.find(a => (a as any).type === CreativeAssetType.image);
+  if (image) return image as CreativeAsset;
+
+  const anyVideo = assets.find(a => (a as any).type === CreativeAssetType.video);
+  if (anyVideo) return anyVideo as CreativeAsset;
+
+  return assets.length > 0 ? (assets[0] as CreativeAsset) : null;
 };
 
 export async function GET(request: NextRequest, { params }: { params: { campaignId: string } }) {
@@ -42,7 +53,20 @@ export async function GET(request: NextRequest, { params }: { params: { campaign
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const validation = paramsSchema.safeParse(params);
+    // Fetch your internal User record using the clerkId
+    const internalUser = await prisma.user.findUnique({
+      where: { clerkId: clerkUserId },
+      select: { id: true }, // Select only the internal UUID
+    });
+
+    if (!internalUser) {
+      logger.error(`[API /creative-details] No internal user found for clerkId: ${clerkUserId}`);
+      return NextResponse.json({ error: 'User not found in system' }, { status: 404 });
+    }
+    const internalUserId = internalUser.id; // This is your internal DB User ID (UUID)
+
+    // Explicitly pass the expected structure to Zod
+    const validation = paramsSchema.safeParse({ campaignId: params.campaignId });
     if (!validation.success) {
       return NextResponse.json(
         { error: 'Invalid campaignId format', details: validation.error.format() },
@@ -61,12 +85,10 @@ export async function GET(request: NextRequest, { params }: { params: { campaign
     const campaignSubmission = await prisma.campaignWizardSubmission.findUnique({
       where: { id: submissionId },
       include: {
-        creativeAssets: true, // Should include all scalar fields of CreativeAsset by default
+        creativeAssets: true,
         user: true,
         wizard: true,
         primaryContact: true,
-        // No explicit select for creativeAssets, relying on Prisma to include all fields
-        // including muxPlaybackId and isPrimaryForBrandLiftPreview if client is up-to-date.
       },
     });
 
@@ -74,14 +96,22 @@ export async function GET(request: NextRequest, { params }: { params: { campaign
       return NextResponse.json({ error: 'Campaign submission not found' }, { status: 404 });
     }
 
-    if (campaignSubmission.userId !== clerkUserId) {
+    // *** IMPORTANT: Compare internal user IDs ***
+    if (campaignSubmission.userId !== internalUserId) {
+      logger.warn(
+        `[API /creative-details] Authorization failed. clerkUserId: ${clerkUserId}, internalUserId: ${internalUserId}, submissionOwnerUserId: ${campaignSubmission.userId}`
+      );
       return NextResponse.json(
         { error: 'Forbidden: You do not own this campaign' },
         { status: 403 }
       );
     }
 
-    const primaryAsset = selectPrimaryCreativeAsset(campaignSubmission.creativeAssets || []);
+    // Explicitly cast creativeAssets to ensure full type information
+    const typedCreativeAssets = (campaignSubmission.creativeAssets || []) as CreativeAsset[];
+
+    const primaryAsset = selectPrimaryCreativeAsset(typedCreativeAssets); // Use the typed array
+
     if (!primaryAsset) {
       return NextResponse.json(
         { error: 'No suitable creative asset found for preview' },
@@ -129,24 +159,27 @@ export async function GET(request: NextRequest, { params }: { params: { campaign
     };
 
     const mediaData: CreativeMediaData = {
-      type: primaryAsset.type, // Relying on CreativeAssetType being compatible with 'image' | 'video'
-      altText: primaryAsset.description || primaryAsset.name,
-      imageUrl: primaryAsset.type === CreativeAssetType.image ? primaryAsset.url : null,
+      type: (primaryAsset as any).type,
+      altText: (primaryAsset as any).description || (primaryAsset as any).name,
+      imageUrl:
+        (primaryAsset as any).type === CreativeAssetType.image ? (primaryAsset as any).url : null,
       muxPlaybackId:
-        primaryAsset.type === CreativeAssetType.video ? primaryAsset.muxPlaybackId : null,
-      dimensions: primaryAsset.dimensions,
-      duration: primaryAsset.duration,
+        (primaryAsset as any).type === CreativeAssetType.video
+          ? (primaryAsset as any).muxPlaybackId
+          : null,
+      dimensions: (primaryAsset as any).dimensions,
+      duration: (primaryAsset as any).duration,
     };
 
     const creativeData: CreativeDataProps = {
       profile: profileData,
       caption:
         campaignSubmission.wizard?.businessGoal ||
-        primaryAsset.description ||
+        (primaryAsset as any).description ||
         campaignSubmission.mainMessage ||
         'Creative details for the campaign.',
       media: mediaData,
-      campaignAssetId: primaryAsset.id.toString(),
+      campaignAssetId: (primaryAsset as any).id.toString(),
     };
 
     return NextResponse.json(creativeData);
