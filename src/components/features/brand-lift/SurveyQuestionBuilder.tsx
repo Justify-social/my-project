@@ -227,6 +227,8 @@ interface SortableQuestionItemProps {
   setEditingOptionGL: (
     editing: { questionId: string; optionId: string; currentText: string } | null
   ) => void;
+  editingQuestionDetail: { questionId: string; currentText: string } | null;
+  setEditingQuestionDetail: (editing: { questionId: string; currentText: string } | null) => void;
   onUpdateOptionText: (questionIdOrTempId: string, optionIdOrTempId: string, text: string) => void;
   onDeleteOptionForQuestion: (questionIdOrTempId: string, optionIdOrTempId: string) => void;
   onDragEndOptions: (event: DragEndEvent, questionIdOrTempId: string) => void;
@@ -250,6 +252,8 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
     onInitiateGifSearch,
     editingOptionGL,
     setEditingOptionGL,
+    editingQuestionDetail,
+    setEditingQuestionDetail,
     onUpdateOptionText,
     onDeleteOptionForQuestion,
     onDragEndOptions,
@@ -364,25 +368,37 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
         </CardHeader>
         {isExpanded && (
           <CardContent className="p-4 space-y-3 border-t">
-            {editingOptionGL ? (
+            {editingQuestionDetail && editingQuestionDetail.questionId === qId ? (
               <div className="space-y-2">
                 <Textarea
-                  value={editingOptionGL.currentText}
+                  value={editingQuestionDetail.currentText}
                   onChange={e =>
-                    setEditingOptionGL({ ...editingOptionGL, currentText: e.target.value })
+                    setEditingQuestionDetail({ questionId: qId, currentText: e.target.value })
                   }
-                  placeholder="Enter option text..."
+                  placeholder="Enter question text..."
                   disabled={actionsDisabled}
                   title={actionsDisabled ? actionsDisabledTitle : undefined}
                   autoFocus
                   rows={3}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      if (editingQuestionDetail.currentText.trim() !== '') {
+                        onUpdateQuestionText(qId, editingQuestionDetail.currentText);
+                        setEditingQuestionDetail(null);
+                      }
+                    }
+                    if (e.key === 'Escape') {
+                      setEditingQuestionDetail(null);
+                    }
+                  }}
                 />
                 <div className="flex justify-end space-x-2">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      setEditingOptionGL(null);
+                      setEditingQuestionDetail(null);
                     }}
                     disabled={actionsDisabled}
                   >
@@ -391,18 +407,14 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
                   <Button
                     size="sm"
                     onClick={() => {
-                      if (editingOptionGL.currentText.trim() !== '') {
-                        onUpdateOptionText(
-                          qId,
-                          editingOptionGL.optionId,
-                          editingOptionGL.currentText
-                        );
-                        setEditingOptionGL(null);
+                      if (editingQuestionDetail.currentText.trim() !== '') {
+                        onUpdateQuestionText(qId, editingQuestionDetail.currentText);
+                        setEditingQuestionDetail(null);
                       }
                     }}
-                    disabled={actionsDisabled || editingOptionGL.currentText.trim() === ''}
+                    disabled={actionsDisabled || editingQuestionDetail.currentText.trim() === ''}
                   >
-                    Save
+                    Save Question Text
                   </Button>
                 </div>
               </div>
@@ -411,9 +423,9 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
                 className="p-2 rounded-md border border-transparent hover:border-input min-h-[60px] cursor-text break-words whitespace-pre-wrap"
                 onClick={() => {
                   if (!actionsDisabled) {
-                    setEditingOptionGL({
+                    setEditingOptionGL(null);
+                    setEditingQuestionDetail({
                       questionId: qId,
-                      optionId: qId,
                       currentText: question.text,
                     });
                   }
@@ -555,13 +567,16 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
                             ? editingOptionGL.currentText
                             : opt.text
                         }
-                        setEditingThisText={() =>
-                          setEditingOptionGL({
-                            questionId: qId,
-                            optionId: opt.id || opt.tempId!,
-                            currentText: opt.text,
-                          })
-                        }
+                        setEditingThisText={() => {
+                          if (!actionsDisabled) {
+                            setEditingQuestionDetail(null);
+                            setEditingOptionGL({
+                              questionId: qId,
+                              optionId: opt.id || opt.tempId!,
+                              currentText: opt.text,
+                            });
+                          }
+                        }}
                         updateCurrentEditText={newText => {
                           if (
                             editingOptionGL &&
@@ -673,8 +688,8 @@ const SortableOptionItem: React.FC<SortableOptionItemProps> = ({
   });
 
   const optionStyle = {
-    transform: CSS.Transform.toString(optionTransform),
-    transition: optionTransition,
+    transform: isOptionDragging ? CSS.Transform.toString(optionTransform) : 'none',
+    transition: isOptionDragging ? optionTransition : 'none',
     opacity: isOptionDragging ? 0.7 : 1,
     zIndex: isOptionDragging ? 20 : 'auto',
   };
@@ -786,6 +801,12 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
     const [editingOptionGL, setEditingOptionGL] = useState<{
       questionId: string;
       optionId: string;
+      currentText: string;
+    } | null>(null);
+
+    // New state for editing main question text
+    const [editingQuestionDetail, setEditingQuestionDetail] = useState<{
+      questionId: string;
       currentText: string;
     } | null>(null);
 
@@ -1726,6 +1747,8 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
                   onInitiateGifSearch={handleInitiateGifSearch}
                   editingOptionGL={editingOptionGL}
                   setEditingOptionGL={setEditingOptionGL}
+                  editingQuestionDetail={editingQuestionDetail}
+                  setEditingQuestionDetail={setEditingQuestionDetail}
                   onUpdateOptionText={handleUpdateOptionText}
                   onDeleteOptionForQuestion={handleDeleteOptionWrapper}
                   onDragEndOptions={handleDragEndOptions}

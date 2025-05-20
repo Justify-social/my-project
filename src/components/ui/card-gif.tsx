@@ -137,11 +137,15 @@ export function GifCard({
               rows={2}
               disabled={disabled}
               onKeyDown={e => {
+                if (e.key === ' ') {
+                  e.stopPropagation(); // Prevent spacebar from bubbling to DND listeners
+                }
                 if (e.key === 'Enter' && !e.shiftKey && !editTextSaveDisabled) {
                   e.preventDefault();
                   onSaveText?.();
                 }
                 if (e.key === 'Escape') {
+                  e.stopPropagation(); // Also good to stop propagation for Escape if it causes issues
                   onCancelText?.();
                 }
               }}
