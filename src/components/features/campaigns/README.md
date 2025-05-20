@@ -36,9 +36,10 @@ The Campaign Wizard guides users through the process of creating a new marketing
 - `slider-age-range.tsx`: Reusable age range slider.
 - `selector-gender.tsx`: Reusable gender checkbox group.
 - `selector-language.tsx`: Reusable language selector (Command-based).
-- `file-uploader.tsx`: Reusable file uploader with UploadThing integration.
+- `video-file-uploader.tsx`: Reusable video uploader with Mux integration.
 - `card-influencer.tsx`: Reusable card for displaying individual influencer details.
 - `autosave-indicator.tsx`: Displays autosave status.
+- `card-asset-step-4.tsx`: Card for displaying and interacting with assets in Step 4.
 
 ## Further Development
 
@@ -47,3 +48,14 @@ The Campaign Wizard guides users through the process of creating a new marketing
 - Refine error handling and user feedback.
 - Conduct thorough testing (E2E, integration).
 - Review and enhance JSDoc comments for all components.
+
+### UI Components (`@/components/ui`)
+
+Many specific UI elements for the wizard steps are composed from primitive UI components (e.g., `Input`, `Button`, `Card`) found in the main `@/components/ui` directory. Key reusable UI components directly related to or heavily used by the wizard include:
+
+- `progress-bar-wizard.tsx`: The step indicator at the top.
+- `video-file-uploader.tsx`: Handles video uploads via Mux.
+- `card-asset-step-4.tsx`: Card for displaying and interacting with assets in Step 4.
+- `selector-*`: Various command-based selectors (e.g., `selector-currency.tsx`, `selector-platform.tsx`).
+
+### State Management (`WizardContext.tsx`)

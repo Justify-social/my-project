@@ -196,7 +196,16 @@ export async function getUpcomingCampaigns(
     const whereClause: Prisma.CampaignWizardWhereInput = {
       orgId: orgId, // Filter by organization ID
       // userId: internalUserId, // Optionally, keep filtering by user ID if campaigns are user-specific within an org
-      status: { in: [Status.DRAFT, Status.APPROVED, Status.ACTIVE] },
+      status: {
+        in: [
+          Status.DRAFT,
+          Status.APPROVED,
+          Status.ACTIVE,
+          Status.SUBMITTED,
+          Status.PAUSED,
+          Status.COMPLETED,
+        ],
+      },
       startDate: { lte: endOfNextFewMonths }, // Starting within window
     };
     logger.info('[getUpcomingCampaigns] Prisma whereClause:', whereClause);

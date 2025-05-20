@@ -12,7 +12,6 @@ import {
   verifyInsightIQApi,
   verifyStripeApiServerSide,
   verifyCintExchangeApiServerSide,
-  verifyUploadthingApiServerSide,
   verifyDatabaseConnectionServerSide,
   verifyGeolocationApi,
   verifyExchangeRatesApi,
@@ -43,7 +42,6 @@ const ALL_API_VERIFIERS = [
   { name: 'mux', func: verifyMuxApiServerSide, category: 'Video' },
   { name: 'resend', func: verifyResendApi, category: 'Email' },
   { name: 'stripe', func: verifyStripeApiServerSide, category: 'Payments' },
-  { name: 'uploadthing', func: verifyUploadthingApiServerSide, category: 'File Storage' },
 ];
 
 export async function POST(request: NextRequest) {

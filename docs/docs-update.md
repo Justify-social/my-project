@@ -143,7 +143,8 @@ _(Definition of Done: For AI-involved tasks, 'Done' means content/structure gene
 - [x] `/docs/architecture/system-overview.md` created (placeholder structure with diagram prompt, needs content, 2025-05-09).
 - [x] `/docs/architecture/directory-structure.md` recreated (based on previous version, reviewed and updated 2025-05-09).
 - [x] `/docs/architecture/core-libraries.md` created (placeholder structure, needs content for `src/lib`, `services`, `utils`, `hooks`, 2025-05-09).
-- [x] `/docs/architecture/external-integrations.md` created (placeholder structure for Clerk, Stripe, Cint, InsightIQ roles, needs content, 2025-05-09).
+- [x] `/docs/architecture/external-integrations.md` populated with confirmed details for Clerk, Stripe, Cint, InsightIQ, Mux (for video), Resend (2025-05-09, Updated YYYY-MM-DD for Mux).
+- [x] `/docs/architecture/prisma-schema-overview.md` updated to reflect recent `CampaignWizard` and `BrandLiftStudy` changes (2025-05-09).
 - [x] Ensure all files have correct freshness indicators (All files updated/created 2025-05-09).
       **Assignee:** AI Assistant (content generation), Architect/Tech Lead (review & content for placeholders)
       **Status:** ✅ Done (Pending Review & Content for placeholders)
@@ -282,7 +283,7 @@ _(Definition of Done: For AI-involved tasks, 'Done' means content/structure gene
 
 - [x] `/docs/architecture/system-overview.md` populated with accurate diagram and component explanations (2025-05-09).
 - [x] `/docs/architecture/core-libraries.md` populated with details on `src/lib`, `services`, `utils`, `hooks`, `config` (2025-05-09).
-- [x] `/docs/architecture/external-integrations.md` populated with confirmed details for Clerk, Stripe, Cint, InsightIQ, UploadThing, Resend (2025-05-09).
+- [x] `/docs/architecture/external-integrations.md` populated with confirmed details for Clerk, Stripe, Cint, InsightIQ, Mux (for video), Resend (2025-05-09).
       **Assignee:** Architect / Tech Lead / AI Assistant
       **Status:** ✅ Done (Pending Review)
 

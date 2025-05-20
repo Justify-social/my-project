@@ -1,15 +1,5 @@
 import { logger } from '@/utils/logger';
 
-// Log the value read from the environment immediately
-const uploadthingSecretFromEnv = process.env.UPLOADTHING_SECRET;
-logger.info(
-  `[Server Config] Reading UPLOADTHING_SECRET: ${uploadthingSecretFromEnv ? 'Found (length: ' + uploadthingSecretFromEnv.length + ')' : 'Not Found'}`
-);
-const uploadthingTokenFromEnv = process.env.UPLOADTHING_TOKEN; // Read the token
-logger.info(
-  `[Server Config] Reading UPLOADTHING_TOKEN: ${uploadthingTokenFromEnv ? 'Found (length: ' + uploadthingTokenFromEnv.length + ')' : 'Not Found'}`
-); // Log the token
-
 // Determine InsightIQ Base URL based on environment
 const getInsightIQBaseUrl = () => {
   let baseUrl;
@@ -50,10 +40,6 @@ export const serverConfig = {
     clientSecret: process.env.CINT_CLIENT_SECRET,
     accountId: process.env.CINT_ACCOUNT_ID,
   },
-  uploadthing: {
-    secret: uploadthingSecretFromEnv, // Keep secret for potential other uses
-    token: uploadthingTokenFromEnv, // Add the token field
-  },
   database: {
     url: process.env.POSTGRES_DATABASE_URL || process.env.DATABASE_URL, // Prioritize specific one if needed
   },
@@ -68,6 +54,7 @@ export const serverConfig = {
   mux: {
     tokenId: process.env.MUX_TOKEN_ID,
     tokenSecret: process.env.MUX_TOKEN_SECRET,
+    webhookSecret: process.env.MUX_WEBHOOK_SIGNING_SECRET, // Added for webhook verification
   },
   // *** Add SendGrid Config ***
   sendgrid: {
@@ -86,13 +73,13 @@ logger.info('[Server Config] Loaded server configuration', {
   cintClientIdSet: !!serverConfig.cint.clientId, // Check Cint Client ID
   cintClientSecretSet: !!serverConfig.cint.clientSecret, // Check Cint Client Secret
   cintAccountIdSet: !!serverConfig.cint.accountId, // Check Cint Account ID
-  uploadthingSecretSet: !!serverConfig.uploadthing.secret, // Check Uploadthing Secret
-  uploadthingTokenSet: !!serverConfig.uploadthing.token, // Check Uploadthing Token
   dbUrlSet: !!serverConfig.database.url, // Check DB URL
   algoliaAppIdSet: !!serverConfig.algolia.appId,
   algoliaApiKeySet: !!serverConfig.algolia.apiKey, // Log the search key
   algoliaAdminKeySet: !!serverConfig.algolia.adminApiKey, // Log admin key presence
   muxTokenIdSet: !!serverConfig.mux.tokenId, // Check Mux Token ID
+  muxTokenSecretSet: !!serverConfig.mux.tokenSecret, // Check Mux Token Secret
+  muxWebhookSecretSet: !!serverConfig.mux.webhookSecret, // Check Mux Webhook Secret
   sendgridApiKeySet: !!serverConfig.sendgrid.apiKey, // Check SendGrid API Key
   // Add checks for other critical keys
 });

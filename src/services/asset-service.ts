@@ -19,6 +19,14 @@ export async function deleteAssetFromStorage(url: string): Promise<boolean> {
   const correlationId = generateCorrelationId('cleanup');
   console.log(`[${correlationId}] Deleting asset from storage:`, url);
 
+  // TODO: Implement Mux asset deletion strategy if this function is still needed.
+  // The old UploadThing delete endpoint is no longer available.
+  console.error(
+    `[${correlationId}] deleteAssetFromStorage: UploadThing endpoint /api/uploadthing/delete is deprecated. Mux deletion not yet implemented here.`
+  );
+  return false;
+
+  /* REMOVED UPLOADTHING DELETE CALL
   try {
     const response = await fetch('/api/uploadthing/delete', {
       method: 'DELETE',
@@ -62,6 +70,7 @@ export async function deleteAssetFromStorage(url: string): Promise<boolean> {
     console.error(`[${correlationId}] Error deleting asset from storage:`, error);
     return false;
   }
+  */
 }
 
 /**

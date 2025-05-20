@@ -17,7 +17,7 @@ import {
 import { toast } from 'react-hot-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form } from '@/components/ui/form';
-import { FileUploader, UploadThingResult } from '@/components/ui/file-uploader';
+import { VideoFileUploader, VideoUploadResult } from '@/components/ui/video-file-uploader';
 import { ProgressBarWizard } from '@/components/ui/progress-bar-wizard';
 import { IconButtonAction } from '@/components/ui/button-icon-action';
 import AssetCardStep4 from '@/components/ui/card-asset-step-4';
@@ -71,34 +71,23 @@ function Step4Content() {
     );
   }, [wizard.wizardState?.Influencer]);
 
-  // Updated callback for the new FileUploader
-  const handleAssetUploadComplete = useCallback(
-    (results: UploadThingResult[]) => {
-      // Map UploadThingResult to DraftAssetSchema format
-      const assetsToAdd: z.infer<typeof DraftAssetSchema>[] = results.map(res => {
-        let assetType: z.infer<typeof CreativeAssetTypeEnum> | undefined = undefined;
-        if (res.type?.startsWith('image/')) {
-          assetType = 'image';
-        } else if (res.type?.startsWith('video/')) {
-          assetType = 'video';
-        }
-        // TODO: Consider handling other types or logging a warning for unmapped types
-
-        return {
-          // Generate a temporary client-side ID or use res.key if unique enough
-          id: `temp-${res.key || Date.now()}`,
-          // url: res.ufsUrl, // TODO: Update UploadThingResult type and use ufsUrl
-          url: res.url, // Reverting to url due to type issue, acknowledge deprecation
-          name: res.name,
-          fileName: res.name,
-          fileSize: res.size,
-          type: assetType,
-          temp: true, // Mark as temporary until full form save
-        };
-      });
-      appendAsset(assetsToAdd);
-      // Log form state after append
-      console.log('Form state after appending assets:', form.getValues('assets'));
+  // New callback for the VideoFileUploader
+  const handleVideoUploadComplete = useCallback(
+    (result: VideoUploadResult) => {
+      const newVideoAsset: DraftAsset = {
+        id: `temp-mux-${result.internalAssetId}`,
+        internalAssetId: result.internalAssetId,
+        name: result.fileName,
+        fileName: result.fileName,
+        type: 'video',
+        muxAssetId: result.muxAssetId,
+        muxProcessingStatus: 'MUX_PROCESSING',
+        url: undefined,
+        userId: result.userId,
+      };
+      appendAsset(newVideoAsset);
+      console.info('Form state after appending video asset:', form.getValues('assets'));
+      toast.success(`Video "${result.fileName}" is processing with Mux.`);
     },
     [appendAsset, form]
   );
@@ -260,19 +249,31 @@ function Step4Content() {
           <Card>
             <CardHeader>
               <CardTitle>Creative Assets</CardTitle>
-              <CardDescription>Upload your videos or images.</CardDescription>
+              <CardDescription>Upload your video assets.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <FileUploader
-                name="assets" // RHF field name (for validation trigger)
-                control={form.control}
-                endpoint="campaignAssetUploader" // Your UploadThing endpoint name
-                label="Upload Campaign Assets"
-                onUploadComplete={handleAssetUploadComplete}
-                onUploadError={handleUploadError}
-                accept={{ 'image/*': [], 'video/*': [] }} // Example accept prop
-                sizeLimitText="up to 100MB each"
-              />
+              {/* VideoFileUploader is now the primary/only uploader here */}
+              <div className="mt-0 pt-0">
+                {wizard.wizardState?.id ? (
+                  <VideoFileUploader
+                    name="assets"
+                    control={form.control}
+                    label={undefined}
+                    campaignWizardId={wizard.wizardState.id}
+                    onUploadComplete={handleVideoUploadComplete}
+                    onUploadError={handleUploadError}
+                    accept={{ 'video/*': ['.mp4', '.mov'] }}
+                    maxSizeMB={1024}
+                    sizeLimitText="up to 1GB for videos"
+                  />
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Video uploader requires an active campaign draft. Please ensure the campaign
+                    wizard is initialized.
+                  </p>
+                )}
+              </div>
+
               {/* Display uploaded assets using AssetCardStep4 */}
               <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {assetFields.map((field, index) => {

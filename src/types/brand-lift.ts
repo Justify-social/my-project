@@ -158,7 +158,7 @@ export interface CreativeProfileData {
 export interface CreativeMediaData {
   type: 'image' | 'video'; // Source: CreativeAsset.type
   altText?: string; // Source: CreativeAsset.description or CreativeAsset.name
-  imageUrl?: string | null; // Source: CreativeAsset.url (when type is 'image') (UploadThing URL)
+  imageUrl?: string | null; // Source: CreativeAsset.url (for images) or a Mux image URL (e.g., thumbnail).
   muxPlaybackId?: string | null; // Source: CreativeAsset.muxPlaybackId
   dimensions?: string | null; // Source: CreativeAsset.dimensions
   duration?: number | null; // Source: CreativeAsset.duration (seconds)
@@ -176,4 +176,14 @@ export interface CreativeDataProps {
   media: CreativeMediaData;
   // sound?: CreativeSoundData; // Sound info will be static in frontend for MVP
   campaignAssetId?: string; // Source: CreativeAsset.id (useful for Mux metadata or internal tracking)
+}
+
+export interface BrandLiftCreative {
+  id: string; // CreativeAsset ID from our database
+  name: string;
+  type: 'image' | 'video';
+  previewUrl?: string | null; // For images: CreativeAsset.url. For Mux videos: Mux thumbnail URL or stream URL.
+  imageUrl?: string | null; // Source: CreativeAsset.url (for images) or Mux thumbnail URL.
+  muxPlaybackId?: string | null; // For Mux videos
+  duration?: number | null; // For videos
 }

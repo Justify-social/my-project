@@ -73,14 +73,21 @@ const getCurrencySymbol = (currencyCode: string = 'USD') => {
 interface AssetData {
   id?: number | string;
   name?: string;
-  url?: string;
-  type?: string;
+  url?: string; // Will be populated by Mux webhook for videos once ready
+  type?: string; // 'image', 'video'
   influencerHandle?: string; // Kept for potential display, though not directly edited here
   description?: string; // Used for display
   budget?: number | string;
   rationale?: string; // Added based on usage
   associatedInfluencerIds?: string[]; // Added based on usage
-  // Add other potential fields from the actual data structure if known
+
+  // Mux-specific fields for frontend state
+  internalAssetId?: number;
+  muxAssetId?: string;
+  muxPlaybackId?: string;
+  muxProcessingStatus?: string; // e.g., 'AWAITING_UPLOAD', 'MUX_PROCESSING', 'READY', 'ERROR'
+  fileName?: string; // Already present in DraftAssetSchema, good to have here
+  fileSize?: number; // Already present in DraftAssetSchema
 }
 
 // Updated AssetCardProps with specific types
@@ -120,7 +127,8 @@ export function AssetCardStep4({
   // Uses updated AssetCardProps
   if (!asset) return null;
 
-  const { name, url, type, influencerHandle, description } = asset;
+  const { name, url, type, influencerHandle, description, muxProcessingStatus, muxPlaybackId } =
+    asset;
 
   const isVideoAsset = type?.includes('video');
   const isImageAsset = type?.includes('image');
@@ -149,13 +157,39 @@ export function AssetCardStep4({
         cardClassName
       )}
     >
-      <AssetPreview
-        url={url}
-        fileName={name}
-        type={type}
-        mediaTypeIconId={mediaTypeIconId}
-        mediaTypeLabel={mediaTypeLabel}
-      />
+      {isVideoAsset && muxProcessingStatus && muxProcessingStatus !== 'READY' && (
+        <div className="aspect-video bg-muted flex flex-col items-center justify-center p-4">
+          <Icon iconId="faCircleNotchLight" className="h-8 w-8 text-primary animate-spin mb-2" />
+          <p className="text-xs text-muted-foreground">
+            {muxProcessingStatus === 'MUX_PROCESSING' || muxProcessingStatus === 'AWAITING_UPLOAD'
+              ? 'Video is processing...'
+              : muxProcessingStatus === 'ERROR' || muxProcessingStatus === 'ERROR_NO_PLAYBACK_ID'
+                ? 'Video processing error'
+                : `Status: ${muxProcessingStatus}`}
+          </p>
+        </div>
+      )}
+      {(!isVideoAsset || (isVideoAsset && muxProcessingStatus === 'READY' && muxPlaybackId)) && (
+        <AssetPreview
+          url={isVideoAsset && muxPlaybackId ? `https://stream.mux.com/${muxPlaybackId}.m3u8` : url}
+          fileName={name}
+          type={type}
+          mediaTypeIconId={mediaTypeIconId}
+          mediaTypeLabel={mediaTypeLabel}
+          // Consider passing muxPlaybackId directly if AssetPreview can use MuxPlayer
+          // muxPlaybackId={muxPlaybackId}
+        />
+      )}
+      {/* Fallback for video assets without a definitive status yet, or if AssetPreview handles initial state */}
+      {isVideoAsset && !muxProcessingStatus && (
+        <AssetPreview
+          url={url}
+          fileName={name}
+          type={type}
+          mediaTypeIconId={mediaTypeIconId}
+          mediaTypeLabel={mediaTypeLabel}
+        />
+      )}
 
       <CardHeader className="flex-row items-center justify-between gap-2 pb-2 pt-3 px-3">
         <div className="flex items-center border border-input rounded-sm flex-1 min-w-0 group relative bg-transparent hover:bg-muted/50 focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-1">

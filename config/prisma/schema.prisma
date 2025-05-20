@@ -55,6 +55,8 @@ model CampaignWizard {
   submissionId     Int?            @unique // Foreign key to CampaignWizardSubmission
   submission       CampaignWizardSubmission? @relation("WizardToSubmission", fields: [submissionId], references: [id])
 
+  creativeAssets   CreativeAsset[] @relation("CampaignWizardToCreativeAssets") // New relation for assets created during draft
+
   @@index([status, createdAt])
   @@index([orgId]) // Added index for orgId
 }
@@ -204,27 +206,38 @@ model CreativeAsset {
   id           Int                      @id @default(autoincrement())
   name         String
   description  String?
-  url          String
+  url          String?                  // Making this optional as Mux might not use it
   type         CreativeAssetType
   fileSize     Int?
-  dimensions   String?
+  dimensions   String?                  // Mux provides aspect_ratio, can be stored here or a new field
   duration     Int?
   format       String?
   
-  muxPlaybackId String?                  @unique
+  muxAssetId    String?                  @unique // Mux's internal ID for the asset
+  muxPlaybackId String?                  @unique // Mux's ID for playback
+  muxProcessingStatus String?            // e.g., "PENDING_UPLOAD", "MUX_PROCESSING", "READY", "ERROR"
+
+  userId       String? // Stores the User.id (UUID) of the uploader
+  user         User?   @relation(fields: [userId], references: [id])
 
   // Flag to identify the primary creative for this Brand Lift preview context
   isPrimaryForBrandLiftPreview Boolean @default(false)
 
-  submissionId Int
-  submission   CampaignWizardSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  submissionId    Int? // Now Nullable, will be linked upon final submission
+  submission      CampaignWizardSubmission? @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  campaignWizardId String? // New field to link to CampaignWizard draft
+  campaignWizard   CampaignWizard? @relation("CampaignWizardToCreativeAssets", fields: [campaignWizardId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([submissionId])
+  @@index([campaignWizardId]) // New index
+  @@index([muxAssetId]) 
   @@index([muxPlaybackId])
-  @@index([isPrimaryForBrandLiftPreview]) // Added index for the new flag
+  @@index([isPrimaryForBrandLiftPreview])
+  @@index([userId]) // Added index for the new userId field
 }
 
 model CreativeRequirement {
@@ -258,6 +271,8 @@ model User {
   // --- DB-1: Stripe Integration Fields ---
   stripeCustomerId String? @unique @map("stripe_customer_id")
   // --- END DB-1 ---
+
+  creativeAssets CreativeAsset[] // Relation back to CreativeAsset
 }
 
 model NotificationPrefs {

@@ -13,6 +13,7 @@ import { Icon } from '@/components/ui/icon/icon';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
+import MuxPlayer from '@mux/mux-player-react';
 
 /**
  * Formats currency values for display
@@ -102,6 +103,8 @@ interface AssetPreviewProps extends React.HTMLAttributes<HTMLDivElement> {
   mediaTypeIconId?: string;
   mediaTypeLabel?: string;
   className?: string;
+  muxPlaybackId?: string;
+  muxProcessingStatus?: string;
 }
 
 export const AssetPreview = ({
@@ -111,108 +114,104 @@ export const AssetPreview = ({
   mediaTypeIconId,
   mediaTypeLabel,
   className,
+  muxPlaybackId,
+  muxProcessingStatus,
   ...props
 }: AssetPreviewProps) => {
   const isVideo = type === 'video' || (typeof type === 'string' && type.includes('video'));
   const isImage = type === 'image' || (typeof type === 'string' && type.includes('image'));
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isHovering, setIsHovering] = useState(false);
 
-  // Toggle play/pause when the button is clicked or video area is clicked
   const togglePlayPause = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!videoRef.current) return;
+    if (videoRef.current.readyState < videoRef.current.HAVE_METADATA) return;
 
-    if (isPlaying) {
-      videoRef.current.pause();
-      setIsPlaying(false);
+    if (videoRef.current.paused || videoRef.current.ended) {
+      videoRef.current.play().catch(error => console.warn('Play was prevented:', error));
     } else {
-      videoRef.current.play().catch(error => {
-        console.warn('Play was prevented:', error);
-      });
-      setIsPlaying(true);
+      videoRef.current.pause();
     }
   };
 
-  // Update play state based on video events
   useEffect(() => {
-    if (isVideo && videoRef.current) {
-      const video = videoRef.current;
-
+    const currentVideoRef = videoRef.current;
+    if (isVideo && currentVideoRef && !muxPlaybackId) {
       const handlePlay = () => setIsPlaying(true);
       const handlePause = () => setIsPlaying(false);
+      const handleEnded = () => setIsPlaying(false);
 
-      video.addEventListener('play', handlePlay);
-      video.addEventListener('pause', handlePause);
+      currentVideoRef.addEventListener('play', handlePlay);
+      currentVideoRef.addEventListener('playing', handlePlay);
+      currentVideoRef.addEventListener('pause', handlePause);
+      currentVideoRef.addEventListener('ended', handleEnded);
+
+      setIsPlaying(!currentVideoRef.paused && !currentVideoRef.ended);
 
       return () => {
-        video.removeEventListener('play', handlePlay);
-        video.removeEventListener('pause', handlePause);
+        currentVideoRef.removeEventListener('play', handlePlay);
+        currentVideoRef.removeEventListener('playing', handlePlay);
+        currentVideoRef.removeEventListener('pause', handlePause);
+        currentVideoRef.removeEventListener('ended', handleEnded);
       };
     }
-  }, [isVideo]);
+  }, [isVideo, muxPlaybackId, url]);
 
-  // Effect to handle video autoplay and looping
   useEffect(() => {
-    if (isVideo && videoRef.current) {
-      const video = videoRef.current;
-
-      // Auto-play the video when component mounts
+    const currentVideoRef = videoRef.current;
+    if (isVideo && currentVideoRef && url && !muxPlaybackId) {
       const playVideo = () => {
-        video.play().catch(error => {
-          console.warn('Auto-play was prevented:', error);
+        currentVideoRef.play().catch(error => {
+          console.warn('Auto-play was prevented for HTML5 video:', error);
           setIsPlaying(false);
         });
-        setIsPlaying(true);
       };
 
-      // Handle video looping - restart after 5 seconds or when ended
-      const handleTimeUpdate = () => {
-        if (video.currentTime >= 5) {
-          video.currentTime = 0;
-          if (isPlaying) {
-            video.play().catch(err => {
-              console.error('Error replaying video:', err);
-              setIsPlaying(false);
-            });
-          }
-        }
-      };
+      if (currentVideoRef.readyState >= currentVideoRef.HAVE_ENOUGH_DATA) {
+        playVideo();
+      } else {
+        currentVideoRef.addEventListener('canplaythrough', playVideo, { once: true });
+      }
 
-      const handleEnded = () => {
-        video.currentTime = 0;
-        if (isPlaying) {
-          video.play().catch(err => {
-            console.error('Error replaying video:', err);
-            setIsPlaying(false);
-          });
-        }
-      };
-
-      // Add event listeners
-      video.addEventListener('loadedmetadata', playVideo);
-      video.addEventListener('timeupdate', handleTimeUpdate);
-      video.addEventListener('ended', handleEnded);
-
-      // Remove event listeners on cleanup
       return () => {
-        video.removeEventListener('loadedmetadata', playVideo);
-        video.removeEventListener('timeupdate', handleTimeUpdate);
-        video.removeEventListener('ended', handleEnded);
+        currentVideoRef.removeEventListener('canplaythrough', playVideo);
       };
     }
-  }, [isVideo, url, isPlaying]);
+  }, [isVideo, url, muxPlaybackId]);
 
-  return (
-    <div
-      className={cn('relative overflow-hidden bg-muted/50 w-full aspect-square p-3', className)}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
-      {...props}
-    >
-      {/* Image preview - add rounded corners inside padding */}
-      {isImage && url && (
+  if (isVideo && muxPlaybackId && muxProcessingStatus === 'READY') {
+    return (
+      <div
+        className={cn('relative overflow-hidden bg-black w-full aspect-square', className)}
+        {...props}
+      >
+        <MuxPlayer
+          playbackId={muxPlaybackId}
+          streamType="on-demand"
+          style={{ height: '100%', width: '100%' }}
+          title={fileName}
+          autoPlay="muted"
+        />
+        {mediaTypeIconId && (
+          <Badge
+            variant="secondary"
+            className="absolute bottom-1 left-1 z-10 px-1.5 py-0.5 rounded-md text-xs inline-flex items-center"
+            title={mediaTypeLabel}
+          >
+            <Icon iconId={mediaTypeIconId} className="h-3 w-3" />
+          </Badge>
+        )}
+      </div>
+    );
+  } else if (isImage && url) {
+    return (
+      <div
+        className={cn('relative overflow-hidden bg-muted/50 w-full aspect-square p-3', className)}
+        {...props}
+      >
         <Image
           src={url}
           alt={fileName ?? 'Asset preview'}
@@ -221,56 +220,119 @@ export const AssetPreview = ({
           height={300}
           unoptimized
         />
+        {mediaTypeIconId && (
+          <Badge
+            variant="secondary"
+            className="absolute bottom-1 left-1 z-10 px-1.5 py-0.5 rounded-md text-xs inline-flex items-center"
+            title={mediaTypeLabel}
+          >
+            <Icon iconId={mediaTypeIconId} className="h-3 w-3" />
+          </Badge>
+        )}
+      </div>
+    );
+  } else if (isVideo && url && !muxPlaybackId) {
+    return (
+      <div
+        className={cn('relative overflow-hidden bg-muted/50 w-full aspect-square p-3', className)}
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
+        onClick={togglePlayPause}
+        {...props}
+      >
+        <video
+          ref={videoRef}
+          src={url}
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 rounded-md"
+          muted
+          playsInline
+          loop
+          preload="metadata"
+        />
+        {(isHovering || !isPlaying) && (
+          <div className="absolute inset-0 bg-black/30 flex items-center justify-center transition-opacity duration-200 opacity-0 group-hover:opacity-100">
+            <button
+              type="button"
+              onClick={togglePlayPause}
+              className="w-10 h-10 bg-black/50 rounded-full flex items-center justify-center hover:bg-black/70 transition-colors z-10"
+              aria-label={isPlaying ? 'Pause video' : 'Play video'}
+            >
+              <Icon
+                iconId={isPlaying ? 'faPauseSolid' : 'faPlaySolid'}
+                className="h-4 w-4 text-white"
+              />
+            </button>
+          </div>
+        )}
+        {mediaTypeIconId && (
+          <Badge
+            variant="secondary"
+            className="absolute bottom-1 left-1 z-10 px-1.5 py-0.5 rounded-md text-xs inline-flex items-center"
+            title={mediaTypeLabel}
+          >
+            <Icon iconId={mediaTypeIconId} className="h-3 w-3" />
+          </Badge>
+        )}
+      </div>
+    );
+  } else if (isVideo && (!muxPlaybackId || muxProcessingStatus !== 'READY')) {
+    return (
+      <div
+        className={cn(
+          'relative overflow-hidden bg-muted/50 w-full aspect-square p-3 flex flex-col items-center justify-center',
+          className
+        )}
+        {...props}
+      >
+        <Icon
+          iconId={
+            mediaTypeIconId ||
+            (muxProcessingStatus === 'ERROR' || muxProcessingStatus === 'ERROR_NO_PLAYBACK_ID'
+              ? 'faCircleXmarkLight'
+              : 'faCircleNotchLight')
+          }
+          className={`h-10 w-10 text-muted-foreground ${(muxProcessingStatus === 'MUX_PROCESSING' || muxProcessingStatus === 'AWAITING_UPLOAD') && !muxPlaybackId ? 'animate-spin' : ''}`}
+        />
+        <p className="text-xs text-muted-foreground mt-2">
+          {muxProcessingStatus === 'MUX_PROCESSING' || muxProcessingStatus === 'AWAITING_UPLOAD'
+            ? 'Processing...'
+            : muxProcessingStatus === 'ERROR' || muxProcessingStatus === 'ERROR_NO_PLAYBACK_ID'
+              ? 'Error'
+              : 'Video unavailable'}
+        </p>
+        {mediaTypeIconId && (
+          <Badge
+            variant="secondary"
+            className="absolute bottom-1 left-1 z-10 px-1.5 py-0.5 rounded-md text-xs inline-flex items-center"
+            title={mediaTypeLabel}
+          >
+            <Icon iconId={mediaTypeIconId} className="h-3 w-3" />
+          </Badge>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        'relative overflow-hidden bg-muted/50 w-full aspect-square p-3 flex flex-col items-center justify-center',
+        className
       )}
-
-      {/* Video preview with play/pause button */}
-      {isVideo && (
-        <div
-          className="relative w-full h-full overflow-hidden cursor-pointer group"
-          onClick={togglePlayPause}
-        >
-          <video
-            ref={videoRef}
-            src={url}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-            muted
-            playsInline
-            loop
-            preload="metadata"
-          />
-
-          {/* Play/Pause button overlay */}
-          {(isHovering || !isPlaying) && (
-            <div className="absolute inset-0 bg-black/50 flex items-center justify-center transition-opacity duration-200 opacity-0 group-hover:opacity-100">
-              <button
-                type="button"
-                onClick={togglePlayPause}
-                className="w-10 h-10 bg-black/60 rounded-full flex items-center justify-center hover:bg-black/80 transition-colors duration-200 z-10"
-                aria-label={isPlaying ? 'Pause video' : 'Play video'}
-              >
-                <Icon
-                  iconId={isPlaying ? 'faPauseSolid' : 'faPlaySolid'}
-                  className="h-4 w-4 text-white"
-                />
-              </button>
-            </div>
-          )}
-        </div>
+      {...props}
+    >
+      <Icon
+        iconId={mediaTypeIconId || 'faFileCircleQuestionLight'}
+        className="h-10 w-10 text-muted-foreground/50 mb-1"
+      />
+      {mediaTypeLabel && <p className="text-xs text-muted-foreground">{mediaTypeLabel}</p>}
+      {fileName && (
+        <p className="text-xs text-muted-foreground truncate max-w-full px-1">{fileName}</p>
       )}
-
-      {/* Fallback for unsupported file types */}
-      {!isImage && !isVideo && (
-        <div className="flex items-center justify-center h-full w-full p-4 bg-muted">
-          <Icon iconId="faFileCircleQuestionLight" className="h-10 w-10 text-muted-foreground/50" />
-        </div>
-      )}
-
-      {/* NEW: File Type Badge Overlay */}
-      {mediaTypeIconId && (
+      {mediaTypeIconId && !mediaTypeLabel && (
         <Badge
           variant="secondary"
           className="absolute bottom-1 left-1 z-10 px-1.5 py-0.5 rounded-md text-xs inline-flex items-center"
-          title={mediaTypeLabel}
         >
           <Icon iconId={mediaTypeIconId} className="h-3 w-3" />
         </Badge>

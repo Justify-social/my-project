@@ -77,10 +77,10 @@ export const InfluencerSchema = z.object({
 /** Schema for draft Asset object (used within DraftCampaignData assets array). */
 export const DraftAssetSchema = z
   .object({
-    id: z.string().optional(),
+    id: z.string().optional(), // Client-side temporary ID or key
     name: z.string().optional(),
     type: CreativeAssetTypeEnum.optional(),
-    url: z.string().url().optional(),
+    url: z.string().url().optional(), // Changed from .optional().nullable()
     fileName: z.string().optional(),
     fileSize: z.number().optional(),
     description: z.string().optional(),
@@ -88,6 +88,15 @@ export const DraftAssetSchema = z
     rationale: z.string().optional(),
     budget: z.number().positive({ message: 'Budget must be positive' }).optional(),
     associatedInfluencerIds: z.array(z.string()).optional(),
+
+    // Mux-specific fields
+    internalAssetId: z.number().optional(), // Our DB CreativeAsset ID
+    muxAssetId: z.string().optional(), // Mux Asset ID
+    muxPlaybackId: z.string().optional(), // Mux Playback ID (once ready)
+    muxProcessingStatus: z.string().optional(), // e.g., 'AWAITING_UPLOAD', 'MUX_PROCESSING', 'READY', 'ERROR'
+
+    // User linkage
+    userId: z.string().optional(), // Internal User ID (UUID) of the uploader
   })
   .passthrough(); // Use passthrough instead of strict
 
@@ -123,7 +132,7 @@ export const LocationSchema = z
 export const DraftCampaignDataBaseSchema = z
   .object({
     /** Unique identifier for the draft campaign (UUID). */
-    id: z.string().optional(),
+    id: z.string().optional(), // This is the CampaignWizard UUID
     /** Timestamp of creation. */
     createdAt: z.string().datetime().nullable().optional().or(z.date()).optional(),
     /** Timestamp of last update. */
@@ -256,6 +265,9 @@ export const DraftCampaignDataBaseSchema = z
     // --- Relations / Other ---
     /** ID of the user who owns the campaign draft. */
     userId: z.string().nullable().optional(),
+
+    // Add submissionId if it's part of the wizard's state
+    submissionId: z.number().int().nullable().optional(), // Foreign key to CampaignWizardSubmission, now also nullable
 
     // --- Frontend Flow State (Not Persisted in CampaignWizard model) ---
     /** IDs of influencers selected in the marketplace during the wizard flow. */

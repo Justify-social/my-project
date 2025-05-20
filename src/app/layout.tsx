@@ -3,9 +3,9 @@ import { Inter } from 'next/font/google';
 // import { UserProvider } from '@auth0/nextjs-auth0/client';
 import ConditionalLayout from '@/components/layouts/conditional-layout'; // Import the new wrapper
 import './globals.css';
-import { NextSSRPlugin } from '@uploadthing/react/next-ssr-plugin';
-import { extractRouterConfig } from 'uploadthing/server';
-import { ourFileRouter } from '@/app/api/uploadthing/core';
+// import { NextSSRPlugin } from '@uploadthing/react/next-ssr-plugin'; // REMOVE
+// import { extractRouterConfig } from 'uploadthing/server'; // REMOVE
+// import { ourFileRouter } from '@/app/api/uploadthing/core'; // REMOVE - ourFileRouter is deleted
 import { Suspense } from 'react';
 // import { connection } from 'next/server'; // Removed deprecated import
 // Import IconContextProvider for consistent icon behavior
@@ -41,11 +41,13 @@ export const metadata = {
   },
 };
 
-// SSR component for UploadThing
+// SSR component for UploadThing - REMOVE FUNCTION
+/*
 async function UTSSR() {
   // await connection(); // Removed usage of deprecated connection
   return <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />;
 }
+*/
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -59,9 +61,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <LocalizationProvider>
             <SidebarProvider>
               <SearchProvider>
+                {/* REMOVE UTSSR USAGE 
                 <Suspense>
                   <UTSSR />
                 </Suspense>
+                */}
                 {/* Use ConditionalLayout to wrap children */}
                 <ConditionalLayout>{children}</ConditionalLayout>
                 {/* Replace Shadcn Toaster with react-hot-toast HotToaster and apply SSOT configurations */}

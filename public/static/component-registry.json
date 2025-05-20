@@ -188,9 +188,9 @@
     },
     {
       "category": "organism",
-      "description": "Comprehensive, reusable file uploader component integrated with RHF and UploadThing.\nUses Shadcn UI components and provides progress/status feedback.",
+      "description": "Comprehensive, reusable file uploader component integrated with RHF.\nUses Shadcn UI components and provides progress/status feedback.",
       "status": "10th April",
-      "name": "FileUploader",
+      "name": "File Uploader",
       "filePath": "src/components/ui/file-uploader.tsx"
     },
     {
@@ -631,9 +631,9 @@
       },
       {
         "category": "organism",
-        "description": "Comprehensive, reusable file uploader component integrated with RHF and UploadThing.\nUses Shadcn UI components and provides progress/status feedback.",
+        "description": "Comprehensive, reusable file uploader component integrated with RHF.\nUses Shadcn UI components and provides progress/status feedback.",
         "status": "10th April",
-        "name": "FileUploader",
+        "name": "File Uploader",
         "filePath": "src/components/ui/file-uploader.tsx"
       },
       {
@@ -1283,13 +1283,6 @@
       "status": "10th April",
       "name": "DropdownMenu",
       "filePath": "src/components/ui/dropdown-menu.tsx"
-    },
-    "fileuploader": {
-      "category": "organism",
-      "description": "Comprehensive, reusable file uploader component integrated with RHF and UploadThing.\nUses Shadcn UI components and provides progress/status feedback.",
-      "status": "10th April",
-      "name": "FileUploader",
-      "filePath": "src/components/ui/file-uploader.tsx"
     },
     "form": {
       "category": "organism",

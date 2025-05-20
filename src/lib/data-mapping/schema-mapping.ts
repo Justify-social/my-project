@@ -1,4 +1,5 @@
 import { KPI, Feature, Platform, Currency, Prisma, CreativeAssetType } from '@prisma/client';
+import { CreativeAssetTypeEnum } from '@/components/features/campaigns/types'; // Import for DraftAsset like structure
 
 /**
  * Type definitions for form data from each step of the wizard
@@ -56,17 +57,36 @@ interface AudienceFormData {
 }
 
 // Step 4: Creative Assets
+// This should align with the structure of DraftAsset from types.ts
+interface AssetInFormData {
+  id?: string; // Client-side temporary ID or key
+  name?: string;
+  type?: CreativeAssetType; // Use Prisma enum directly if validated, or string if from raw form
+  url?: string;
+  fileName?: string;
+  fileSize?: number;
+  description?: string;
+  // temp?: boolean; // Not needed for DB create
+  // rationale?: string; // Not directly on CreativeAsset model
+  // budget?: number; // Not directly on CreativeAsset model
+  // associatedInfluencerIds?: string[]; // Not directly on CreativeAsset model
+
+  // Mux-specific fields
+  internalAssetId?: number;
+  muxAssetId?: string;
+  muxPlaybackId?: string;
+  muxProcessingStatus?: string;
+
+  // User linkage
+  userId?: string; // Internal User ID (UUID) of the uploader
+
+  // Fields from original basic AssetsFormData if still relevant elsewhere
+  format?: string;
+  dimensions?: string;
+  duration?: number;
+}
 interface AssetsFormData {
-  creativeAssets?: {
-    type: CreativeAssetType;
-    name?: string;
-    description?: string;
-    url?: string;
-    fileSize?: number;
-    format?: string;
-    dimensions?: string;
-    duration?: number;
-  }[];
+  creativeAssets?: AssetInFormData[];
   creativeRequirements?: { description: string; mandatory?: boolean }[];
 }
 
@@ -273,31 +293,68 @@ export function mapAudienceToSchema(data: AudienceFormData): MapAudienceReturn {
 
 // Map Step 4 form data to CreativeAsset and CreativeRequirement tables
 export function mapAssetsToSchema(data: AssetsFormData): {
-  creativeAssets: Prisma.CreativeAssetCreateWithoutSubmissionInput[];
+  creativeAssets: Prisma.CreativeAssetUncheckedCreateInput[];
   creativeRequirements: Prisma.CreativeRequirementCreateWithoutSubmissionInput[];
 } {
   const creativeAssets = (data?.creativeAssets ?? [])
-    .map((asset): Prisma.CreativeAssetCreateWithoutSubmissionInput | null => {
-      if (!asset.type || !(asset.type in CreativeAssetType)) {
-        console.warn(`Invalid or missing asset type: ${asset.type}, skipping asset.`);
+    .map((assetFromForm): Prisma.CreativeAssetUncheckedCreateInput | null => {
+      if (
+        !assetFromForm.type ||
+        !Object.values(CreativeAssetType).includes(assetFromForm.type as CreativeAssetType)
+      ) {
+        console.warn(`Invalid or missing asset type: ${assetFromForm.type}, skipping asset.`);
         return null;
       }
-      if (!asset.url) {
-        console.warn(`Asset URL missing for ${asset.name || 'Untitled Asset'}, skipping asset.`);
-        return null;
-      }
-      return {
-        name: asset.name || 'Untitled Asset',
-        description: asset.description || '',
-        url: asset.url,
-        type: asset.type,
-        fileSize: Number(asset.fileSize) || 0,
-        format: asset.format || 'unknown',
-        dimensions: asset.dimensions,
-        duration: asset.duration ? Number(asset.duration) : null,
+
+      // Initialize with all potentially used fields from CreativeAssetUncheckedCreateInput as undefined or default.
+      // Name and type are mandatory.
+      const createInput: Prisma.CreativeAssetUncheckedCreateInput = {
+        name: assetFromForm.name || 'Untitled Asset',
+        type: assetFromForm.type as CreativeAssetType,
+        description: undefined,
+        url: undefined,
+        fileSize: undefined,
+        dimensions: undefined,
+        duration: undefined,
+        format: undefined,
+        muxAssetId: undefined,
+        muxPlaybackId: undefined,
+        muxProcessingStatus: undefined,
+        userId: undefined,
+        campaignWizardId: undefined, // Optional: Will be set by caller if needed for drafts
+        submissionId: undefined, // Optional: Will be set by caller for final submission
+        isPrimaryForBrandLiftPreview: false, // Default as per schema/previous logic
+        // Add any other non-optional fields from CreativeAssetUncheckedCreateInput with defaults if necessary
       };
+
+      // Conditionally assign values from assetFromForm if they exist
+      if (assetFromForm.description != null) createInput.description = assetFromForm.description;
+      if (assetFromForm.url != null) createInput.url = assetFromForm.url;
+      if (assetFromForm.fileSize != null) createInput.fileSize = Number(assetFromForm.fileSize);
+      if (assetFromForm.dimensions != null) createInput.dimensions = assetFromForm.dimensions;
+      if (assetFromForm.duration != null) createInput.duration = Number(assetFromForm.duration);
+      if (assetFromForm.format != null) createInput.format = assetFromForm.format;
+
+      if (assetFromForm.muxAssetId != null) createInput.muxAssetId = assetFromForm.muxAssetId;
+      if (assetFromForm.muxPlaybackId != null)
+        createInput.muxPlaybackId = assetFromForm.muxPlaybackId;
+      if (assetFromForm.muxProcessingStatus != null)
+        createInput.muxProcessingStatus = assetFromForm.muxProcessingStatus;
+
+      if (assetFromForm.userId != null) createInput.userId = assetFromForm.userId;
+
+      // Clean up any keys that remained undefined to avoid sending them to Prisma,
+      // unless Prisma handles undefined keys by omitting them (which it usually does).
+      // For safety, this explicit delete is fine but might be verbose if Prisma handles it.
+      // (Object.keys(createInput) as Array<keyof typeof createInput>).forEach(key => {
+      //   if (createInput[key] === undefined) {
+      //     delete createInput[key];
+      //   }
+      // });
+
+      return createInput;
     })
-    .filter((a): a is Prisma.CreativeAssetCreateWithoutSubmissionInput => a !== null);
+    .filter((a): a is Prisma.CreativeAssetUncheckedCreateInput => a !== null);
 
   const creativeRequirements = (data?.creativeRequirements ?? []).map(
     (req): Prisma.CreativeRequirementCreateWithoutSubmissionInput => ({
@@ -511,10 +568,10 @@ export function buildCampaignUpdateTransaction(
       });
 
       // Create new assets
-      for (const asset of creativeAssets) {
+      for (const assetUncheckedInput of creativeAssets) {
         await tx.creativeAsset.create({
           data: {
-            ...asset,
+            ...assetUncheckedInput,
             submissionId: campaignId,
           },
         });

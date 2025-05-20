@@ -1,5 +1,13 @@
 import { z } from 'zod';
-import { Prisma, Status } from '@prisma/client';
+import {
+  Prisma,
+  Status,
+  Position,
+  Currency,
+  Platform,
+  KPI,
+  SubmissionStatus,
+} from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 import { EnumTransformers } from '@/utils/enum-transformers';
 import { connectToDatabase, prisma } from '@/lib/db';
@@ -302,34 +310,240 @@ export async function PATCH(
         data: transformedDataForDb,
         include: {
           Influencer: true,
+          submission: true,
         },
       });
       logger.info(
         `[WIZARD_PATCH_PERF] Prisma campaign update completed in ${Date.now() - prismaUpdateStartTime}ms`
       );
-      // Log result IMMEDIATELY AFTER successful DB update
       console.log(
         `[DB Update - Step ${step}] Prisma update successful. Result:`,
         JSON.stringify(updatedCampaign, null, 2)
       );
     } catch (dbError: unknown) {
-      // Catch and log specific Prisma errors
       console.error(`[DB Update - Step ${step}] Prisma update FAILED:`, dbError);
-      // Return a specific error response
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Database update failed.',
-          details: dbError instanceof Error ? dbError.message : String(dbError),
-        },
-        { status: 500 }
-      );
+      let detailedMessage = 'Database update failed.';
+      if (dbError instanceof Error) {
+        detailedMessage += ` Cause: ${dbError.message}`;
+      }
+      throw new BadRequestError(detailedMessage);
     }
+
+    // --- CampaignWizardSubmission Creation/Update Logic ---
+    let finalSubmissionId = updatedCampaign.submissionId;
+    let submissionWasCreatedOrUpdated = false;
+    let campaignDataForResponse = updatedCampaign; // Initialize with the campaign data we just updated/fetched
+
+    // Create CampaignWizardSubmission if Step 3 is being completed and no submission exists yet
+    if (step === 3 && transformedDataForDb.step3Complete && !finalSubmissionId) {
+      logger.info(
+        `[WIZARD_PATCH_PERF] Step 3 complete for CW ${campaignId}, submissionId is null. Creating CampaignWizardSubmission.`
+      );
+      const wizardDataForSubmission = await prisma.campaignWizard.findUnique({
+        // Re-fetch to ensure all data is current for submission
+        where: { id: campaignId },
+        include: { Influencer: true },
+      });
+
+      if (!wizardDataForSubmission)
+        throw new NotFoundError('CampaignWizard not found for submission creation.');
+
+      try {
+        const submissionResultId = await prisma.$transaction(async tx => {
+          let pcRecordId: number;
+          if (
+            wizardDataForSubmission.primaryContact &&
+            typeof wizardDataForSubmission.primaryContact === 'object'
+          ) {
+            const pcData = wizardDataForSubmission.primaryContact as any;
+            if (pcData.firstName && pcData.surname && pcData.email) {
+              const createdPC = await tx.primaryContact.create({
+                data: {
+                  firstName: pcData.firstName,
+                  surname: pcData.surname,
+                  email: pcData.email,
+                  position: pcData.position
+                    ? EnumTransformers.positionToBackend(pcData.position)
+                    : Position.Associate,
+                },
+              });
+              pcRecordId = createdPC.id;
+            } else {
+              throw new BadRequestError('Primary contact details incomplete.');
+            }
+          } else {
+            throw new BadRequestError('Primary contact missing.');
+          }
+
+          let scRecordId: number | null = null;
+          if (
+            wizardDataForSubmission.secondaryContact &&
+            typeof wizardDataForSubmission.secondaryContact === 'object' &&
+            Object.keys(wizardDataForSubmission.secondaryContact).length > 0
+          ) {
+            const scData = wizardDataForSubmission.secondaryContact as any;
+            if (scData.firstName && scData.surname && scData.email) {
+              const createdSC = await tx.secondaryContact.create({
+                data: {
+                  firstName: scData.firstName,
+                  surname: scData.surname,
+                  email: scData.email,
+                  position: scData.position
+                    ? EnumTransformers.positionToBackend(scData.position)
+                    : Position.Associate,
+                },
+              });
+              scRecordId = createdSC.id;
+            }
+          }
+
+          // CRITICAL TODO: Review and complete this mapping with actual data from wizardDataForSubmission
+          const submissionCreateData: Prisma.CampaignWizardSubmissionCreateInput = {
+            campaignName: wizardDataForSubmission.name || 'Untitled Campaign',
+            description: wizardDataForSubmission.businessGoal || 'N/A',
+            startDate: wizardDataForSubmission.startDate || new Date(),
+            endDate: wizardDataForSubmission.endDate || new Date(),
+            timeZone: wizardDataForSubmission.timeZone || 'UTC',
+            contacts: JSON.stringify({
+              p: wizardDataForSubmission.primaryContact,
+              s: wizardDataForSubmission.secondaryContact,
+            }),
+            currency: (wizardDataForSubmission.budget as any)?.currency
+              ? EnumTransformers.currencyToBackend((wizardDataForSubmission.budget as any).currency)
+              : Currency.USD,
+            totalBudget: (wizardDataForSubmission.budget as any)?.total || 0,
+            socialMediaBudget: (wizardDataForSubmission.budget as any)?.socialMedia || 0,
+            platform: wizardDataForSubmission.targetPlatforms?.[0]
+              ? EnumTransformers.platformToBackend(wizardDataForSubmission.targetPlatforms[0])
+              : Platform.INSTAGRAM,
+            influencerHandle: wizardDataForSubmission.Influencer?.[0]?.handle || 'N/A',
+            primaryContact: { connect: { id: pcRecordId } },
+            ...(scRecordId && { secondaryContact: { connect: { id: scRecordId } } }),
+            mainMessage: (wizardDataForSubmission.messaging as any)?.mainMessage || 'N/A',
+            hashtags: JSON.stringify((wizardDataForSubmission.messaging as any)?.hashtags || []),
+            memorability: (wizardDataForSubmission.expectedOutcomes as any)?.memorability || 'N/A',
+            keyBenefits: JSON.stringify(
+              (wizardDataForSubmission.messaging as any)?.keyBenefits || []
+            ),
+            expectedAchievements:
+              (wizardDataForSubmission.expectedOutcomes as any)?.brandPerception || 'N/A', // Placeholder, review mapping
+            purchaseIntent:
+              (wizardDataForSubmission.expectedOutcomes as any)?.purchaseIntent || 'N/A',
+            brandPerception:
+              (wizardDataForSubmission.expectedOutcomes as any)?.brandPerception || 'N/A',
+            primaryKPI: wizardDataForSubmission.primaryKPI
+              ? EnumTransformers.kpiToBackend(wizardDataForSubmission.primaryKPI)
+              : KPI.BRAND_AWARENESS,
+            secondaryKPIs:
+              wizardDataForSubmission.secondaryKPIs?.map(kpi =>
+                EnumTransformers.kpiToBackend(kpi as string)
+              ) || [],
+            features:
+              wizardDataForSubmission.features?.map(f =>
+                EnumTransformers.featureToBackend(f as string)
+              ) || [],
+            user: { connect: { id: internalUserId } },
+            submissionStatus: SubmissionStatus.draft,
+          };
+
+          const newSubmission = await tx.campaignWizardSubmission.create({
+            data: submissionCreateData,
+          });
+          await tx.campaignWizard.update({
+            where: { id: campaignId },
+            data: { submissionId: newSubmission.id, currentStep: 4 },
+          });
+          return newSubmission.id;
+        });
+        finalSubmissionId = submissionResultId;
+        submissionWasCreatedOrUpdated = true;
+        logger.info(
+          `[WIZARD_PATCH_PERF] CampaignWizardSubmission ${finalSubmissionId} created for CW ${campaignId}.`
+        );
+      } catch (error) {
+        logger.error(
+          `[WIZARD_PATCH_PERF] Failed to create CampaignWizardSubmission for CW ${campaignId}:`
+        );
+        if (error instanceof Error) {
+          logger.error('Error details:', {
+            errorName: error.name,
+            errorMessage: error.message,
+            stack: error.stack,
+          });
+        } else {
+          logger.error('Raw error details:', { errorDetails: error });
+        }
+        throw new Error(
+          `Failed to create campaign submission: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+    }
+    // Finalize CampaignWizardSubmission status if wizard is being submitted in Step 5
+    else if (step === 5) {
+      const wizardIsBeingSubmitted =
+        mappedData.status &&
+        (mappedData.status === Status.SUBMITTED ||
+          mappedData.status === Status.APPROVED ||
+          mappedData.status === Status.COMPLETED);
+      if (wizardIsBeingSubmitted && finalSubmissionId) {
+        const submissionIdForUpdate = finalSubmissionId;
+        logger.info(
+          `Wizard ${campaignId} submitted. Updating CWS ${submissionIdForUpdate} status and linking assets.`
+        );
+        try {
+          await prisma.$transaction(async tx => {
+            // Update CampaignWizardSubmission status
+            await tx.campaignWizardSubmission.update({
+              where: { id: submissionIdForUpdate },
+              data: { submissionStatus: SubmissionStatus.submitted },
+            });
+
+            // Link CreativeAssets from CampaignWizard to the CampaignWizardSubmission
+            const updatedAssets = await tx.creativeAsset.updateMany({
+              where: {
+                campaignWizardId: campaignId,
+                // @ts-ignore // Assuming Prisma handles `null` correctly for an optional Int field filter
+                submissionId: null,
+              },
+              data: {
+                submissionId: submissionIdForUpdate,
+              },
+            });
+            logger.info(
+              `Linked ${updatedAssets.count} assets to submission ${submissionIdForUpdate}.`
+            );
+          });
+          submissionWasCreatedOrUpdated = true;
+        } catch (error: unknown) {
+          const logMessage = `Failed to update status or link assets for CWS ${submissionIdForUpdate}:`;
+          if (error instanceof Error) {
+            logger.error(logMessage, {
+              errorName: error.name,
+              errorMessage: error.message,
+              stack: error.stack,
+            });
+          } else {
+            logger.error(logMessage, { errorDetails: error });
+          }
+        }
+      } else if (wizardIsBeingSubmitted && !finalSubmissionId) {
+        logger.error(`Wizard ${campaignId} submitted, but no submissionId linked.`);
+      }
+    }
+
+    // If submission was created/updated, refetch campaignDataForResponse to include all latest data + relations
+    if (submissionWasCreatedOrUpdated) {
+      const refetchedCampaign = await prisma.campaignWizard.findUnique({
+        where: { id: campaignId },
+        include: { Influencer: true, submission: true }, // Ensure submission is included
+      });
+      if (refetchedCampaign) campaignDataForResponse = refetchedCampaign;
+    }
+    // --- End CampaignWizardSubmission Logic ---
 
     // --- Influencer Handling (only if DB update succeeded) ---
     const influencerData = body.Influencer;
     // Use the result from the main update as the default
-    let campaignDataForResponse = updatedCampaign;
     let messageSuffix = '';
 
     if (step === 1 && influencerData != null && Array.isArray(influencerData)) {
@@ -372,7 +586,10 @@ export async function PATCH(
         const refetchCampaignStartTime = Date.now();
         const refetchedCampaign = await prisma.campaignWizard.findUnique({
           where: { id: campaignId },
-          include: { Influencer: true },
+          include: {
+            Influencer: true,
+            submission: true, // Ensure submission is included here as well
+          },
         });
         logger.info(
           `[WIZARD_PATCH_PERF] Refetch after influencer TX completed in ${Date.now() - refetchCampaignStartTime}ms`
@@ -395,6 +612,20 @@ export async function PATCH(
         // if (infError instanceof Error) { console.error(infError.message); }
         // Keep campaignDataForResponse as the original updatedCampaign
         messageSuffix = ' (influencer update error)';
+      }
+    }
+    // If submission was just created, refetch campaignDataForResponse to include the new submissionId and updated currentStep
+    if (submissionWasCreatedOrUpdated) {
+      const refetchedCampaignWithSubmission = await prisma.campaignWizard.findUnique({
+        where: { id: campaignId },
+        include: { Influencer: true, submission: true },
+      });
+      if (refetchedCampaignWithSubmission) {
+        campaignDataForResponse = refetchedCampaignWithSubmission;
+        messageSuffix += ' and submission initialized';
+      } else {
+        logger.error(`Failed to refetch CampaignWizard ${campaignId} after submission creation.`);
+        // campaignDataForResponse remains as is, but submissionId might be stale if only in finalSubmissionId var
       }
     }
     // --- End Influencer Handling ---
@@ -451,13 +682,19 @@ export async function PATCH(
       );
     }
 
-    logger.info(`[WIZARD_PATCH_PERF] Handler finished in ${Date.now() - handlerStartTime}ms`);
-    return NextResponse.json({
+    const responsePayload = {
       success: true,
-      // data: transformedCampaignForFrontend, // Send the raw data from DB
-      data: campaignDataForResponse, // Send the raw data from DB
+      data: campaignDataForResponse
+        ? {
+            ...EnumTransformers.transformObjectFromBackend(campaignDataForResponse),
+            submissionId: finalSubmissionId,
+          }
+        : null,
       message: `Step ${step} updated${messageSuffix}`,
-    });
+    };
+
+    logger.info(`[WIZARD_PATCH_PERF] Handler finished in ${Date.now() - handlerStartTime}ms`);
+    return NextResponse.json(responsePayload);
   } catch (error: unknown) {
     // Type the error as unknown for better safety
     const unknownError = error as unknown;
@@ -523,6 +760,7 @@ export async function GET(
       where: { id: campaignId },
       include: {
         Influencer: true,
+        submission: true, // Eager load the related CampaignWizardSubmission
       },
     });
 
@@ -532,9 +770,16 @@ export async function GET(
 
     const transformedCampaign = EnumTransformers.transformObjectFromBackend(campaign);
 
+    // Ensure submissionId is at the top level if it came via the relation
+    const responseData = {
+      ...transformedCampaign,
+      submissionId: campaign.submissionId, // Explicitly ensure it's there from the direct field
+      // The transformedCampaign.submission object will also be present if it exists
+    };
+
     return NextResponse.json({
       success: true,
-      data: transformedCampaign,
+      data: responseData,
     });
   } catch (error) {
     // Log the error from the outer tryCatch

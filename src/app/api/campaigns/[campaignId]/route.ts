@@ -315,6 +315,83 @@ export async function GET(
     console.log(
       '[API GET /api/campaigns/[campaignId]] Normalizing data for frontend schema compatibility...'
     );
+
+    // --- START ASSET ENRICHMENT ---
+    const enrichedAssets = [];
+    if ('assets' in campaign && Array.isArray(campaign.assets)) {
+      for (const assetDraft of campaign.assets as any[]) {
+        if (assetDraft && typeof assetDraft === 'object' && assetDraft.internalAssetId) {
+          const creativeAssetRecord = await prisma.creativeAsset.findUnique({
+            where: { id: assetDraft.internalAssetId },
+          });
+
+          if (creativeAssetRecord) {
+            enrichedAssets.push({
+              // Start with CampaignWizard.assets data
+              id: String(assetDraft.id ?? creativeAssetRecord.id), // Prefer CW id (tempId), fallback to CA id
+              name: String(assetDraft.name ?? creativeAssetRecord.name ?? ''),
+              type: String(assetDraft.type ?? creativeAssetRecord.type ?? 'image'),
+              fileName: String(assetDraft.fileName ?? creativeAssetRecord.name ?? ''), // Use CA name as fallback for filename
+              description: String(assetDraft.description ?? creativeAssetRecord.description ?? ''),
+              rationale: String(assetDraft.rationale ?? ''),
+              budget: assetDraft.budget !== undefined ? Number(assetDraft.budget) : undefined,
+              associatedInfluencerIds: Array.isArray(assetDraft.associatedInfluencerIds)
+                ? assetDraft.associatedInfluencerIds.map(String)
+                : [],
+              internalAssetId: creativeAssetRecord.id, // This is the CreativeAsset ID
+              temp: Boolean(assetDraft.temp ?? false),
+
+              // Overwrite with fresh data from CreativeAsset table
+              url: creativeAssetRecord.url ?? '', // Fresh URL
+              fileSize: creativeAssetRecord.fileSize ?? 0, // Fresh fileSize
+              muxAssetId: creativeAssetRecord.muxAssetId ?? undefined,
+              muxPlaybackId: creativeAssetRecord.muxPlaybackId ?? undefined,
+              muxProcessingStatus: creativeAssetRecord.muxProcessingStatus ?? undefined,
+              // Ensure all fields expected by DraftAssetSchema are present
+              userId: creativeAssetRecord.userId ?? undefined, // User who uploaded via CreativeAsset
+            });
+          } else {
+            // If no matching CreativeAsset, keep the draft asset as is (might be an image or non-mux asset)
+            enrichedAssets.push({
+              id: String(assetDraft.id ?? ''),
+              name: String(assetDraft.name ?? ''),
+              type: String(assetDraft.type ?? 'image'),
+              url: String(assetDraft.url ?? ''),
+              fileName: String(assetDraft.fileName ?? ''),
+              fileSize: Number(assetDraft.fileSize ?? 0),
+              description: String(assetDraft.description ?? ''),
+              temp: Boolean(assetDraft.temp ?? false),
+              rationale: String(assetDraft.rationale ?? ''),
+              budget: assetDraft.budget !== undefined ? Number(assetDraft.budget) : undefined,
+              associatedInfluencerIds: Array.isArray(assetDraft.associatedInfluencerIds)
+                ? assetDraft.associatedInfluencerIds.map(String)
+                : [],
+              internalAssetId: assetDraft.internalAssetId,
+              muxProcessingStatus: assetDraft.muxProcessingStatus, // Keep stale status if no CA record
+            });
+          }
+        } else if (assetDraft && typeof assetDraft === 'object') {
+          // Asset from CW.assets without internalAssetId (e.g. direct image link before Mux)
+          enrichedAssets.push({
+            id: String(assetDraft.id ?? ''),
+            name: String(assetDraft.name ?? ''),
+            type: String(assetDraft.type ?? 'image'),
+            url: String(assetDraft.url ?? ''),
+            fileName: String(assetDraft.fileName ?? ''),
+            fileSize: Number(assetDraft.fileSize ?? 0),
+            description: String(assetDraft.description ?? ''),
+            temp: Boolean(assetDraft.temp ?? false),
+            rationale: String(assetDraft.rationale ?? ''),
+            budget: assetDraft.budget !== undefined ? Number(assetDraft.budget) : undefined,
+            associatedInfluencerIds: Array.isArray(assetDraft.associatedInfluencerIds)
+              ? assetDraft.associatedInfluencerIds.map(String)
+              : [],
+          });
+        }
+      }
+    }
+    // --- END ASSET ENRICHMENT ---
+
     const normalizedCampaign = {
       ...campaign,
       locations:
@@ -360,46 +437,10 @@ export async function GET(
         'additionalContacts' in campaign && Array.isArray(campaign.additionalContacts)
           ? campaign.additionalContacts
           : [],
-      assets:
-        'assets' in campaign && Array.isArray(campaign.assets)
-          ? campaign.assets.map((asset_item: any) => {
-              // asset_item to avoid conflict with 'assets' key
-              if (asset_item && typeof asset_item === 'object') {
-                return {
-                  id: String(asset_item.id ?? ''),
-                  name: String(asset_item.name ?? ''),
-                  type: String(asset_item.type ?? 'image'),
-                  url: String(asset_item.url ?? ''),
-                  fileName: String(asset_item.fileName ?? ''),
-                  fileSize: Number(asset_item.fileSize ?? 0),
-                  description: String(asset_item.description ?? ''),
-                  temp: Boolean(asset_item.temp ?? false),
-                  rationale: String(asset_item.rationale ?? ''),
-                  budget: asset_item.budget !== undefined ? Number(asset_item.budget) : undefined,
-                  associatedInfluencerIds: Array.isArray(asset_item.associatedInfluencerIds)
-                    ? asset_item.associatedInfluencerIds.map(String)
-                    : [],
-                };
-              }
-              return {
-                id: '',
-                name: '',
-                type: 'image',
-                url: '',
-                fileName: '',
-                fileSize: 0,
-                description: '',
-                temp: false,
-                rationale: '',
-                budget: undefined,
-                associatedInfluencerIds: [],
-              };
-            })
-          : [],
+      assets: enrichedAssets, // Use the enriched assets
       Influencer:
         'Influencer' in campaign && Array.isArray(campaign.Influencer)
           ? campaign.Influencer.map((influencer_item: any) => ({
-              // influencer_item to avoid conflict
               id: String(influencer_item.id ?? ''),
               platform: String(influencer_item.platform ?? 'INSTAGRAM'),
               handle: String(influencer_item.handle ?? ''),

@@ -20,7 +20,6 @@ import {
   getInsightIQAudience,
 } from '@/lib/insightiqService';
 import { Resend } from 'resend';
-import { UTApi } from 'uploadthing/server';
 
 // Import types from the new shared file
 import type { ApiVerificationResult, ApiErrorInfo } from './api-verification-types';
@@ -1222,96 +1221,6 @@ export async function verifyCintExchangeApiServerSide(): Promise<ApiVerification
 }
 
 /**
- * SERVER-SIDE Verify the Uploadthing API
- * Attempts a simple authenticated call (listFiles with limit 0) using the API token.
- */
-export async function verifyUploadthingApiServerSide(): Promise<ApiVerificationResult> {
-  const apiName = 'Uploadthing API';
-  // Endpoint is conceptual now, as we use the SDK method
-  const endpoint = 'utapi.listFiles({ limit: 0 })';
-
-  const token = process.env.UPLOADTHING_TOKEN; // Directly access env var
-
-  if (!token) {
-    return {
-      success: false,
-      apiName,
-      endpoint,
-      error: {
-        type: ApiErrorType.AUTHENTICATION_ERROR,
-        message: 'Missing Uploadthing API token (UPLOADTHING_TOKEN) in environment variables.',
-        details: 'Please set UPLOADTHING_TOKEN in your .env file.',
-        isRetryable: false,
-      },
-    };
-  }
-
-  const startTime = Date.now();
-  try {
-    logger.info(`[Server Verify] Testing ${apiName} using listFiles`);
-
-    // Instantiate UTApi - it should read token from env
-    const utapi = new UTApi();
-
-    // Perform a minimal read operation
-    const listResult = await utapi.listFiles({ limit: 0 });
-    const latency = Date.now() - startTime;
-
-    // If listFiles succeeds without throwing, the token is valid
-    logger.info(`[Server Verify] ${apiName} verification successful`, { latency });
-    return {
-      success: true,
-      apiName,
-      endpoint,
-      latency,
-      data: {
-        status: 'Authenticated & Connected',
-        // listResult might contain info like total count if needed, but status is enough
-      },
-    };
-  } catch (error: unknown) {
-    const latency = Date.now() - startTime;
-    let errorType = ApiErrorType.UNKNOWN_ERROR;
-    let message = 'An unknown error occurred while verifying Uploadthing.';
-    let details: unknown = error;
-    let isRetryable = true;
-
-    // Basic error mapping for potential UTApi errors
-    if (error instanceof Error) {
-      message = error.message;
-      // Check for common error patterns (adjust based on actual errors seen)
-      if (message.includes('Unauthorized') || message.includes('401')) {
-        errorType = ApiErrorType.AUTHENTICATION_ERROR;
-        isRetryable = false;
-      } else if (message.includes('fetch') || message.includes('Network')) {
-        errorType = ApiErrorType.NETWORK_ERROR;
-      } else if (message.includes('timeout')) {
-        errorType = ApiErrorType.TIMEOUT_ERROR;
-      } else if (message.includes('rate limit')) {
-        errorType = ApiErrorType.RATE_LIMIT_ERROR;
-      } // Add specific UploadThing error types if known (e.g., from error.name or error.code)
-
-      details = { errorMessage: message, stack: error.stack, name: error.name };
-    }
-
-    logger.error(`[Server Verify] ${apiName} verification failed:`, message);
-
-    return {
-      success: false,
-      apiName,
-      endpoint,
-      latency: latency > 0 ? latency : undefined,
-      error: {
-        type: errorType,
-        message: message,
-        details: details,
-        isRetryable: isRetryable,
-      },
-    };
-  }
-}
-
-/**
  * SERVER-SIDE Verify the Algolia Search API
  * Attempts to connect and potentially perform a basic index status check.
  */
@@ -1639,7 +1548,6 @@ export default {
   verifyInsightIQApi,
   verifyStripeApiServerSide,
   verifyCintExchangeApiServerSide,
-  verifyUploadthingApiServerSide,
   verifyGeolocationApi,
   verifyExchangeRatesApi,
   verifyGiphyApi,

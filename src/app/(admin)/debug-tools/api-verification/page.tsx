@@ -47,8 +47,6 @@ const ApiVerificationPage: React.FC = () => {
     cint: 'Market research platform that connects to consumer panels for surveys and audience insights. Essential for campaign targeting and market validation.',
     stripe:
       'Payment processing platform for subscription and one-time payments. Powers the billing system for premium features.',
-    uploadthing:
-      'File upload service for handling media uploads. Used for storing and managing user-generated content.',
     database:
       'Database connection using Postgres. Stores all application data including user profiles, campaigns, and analytics.',
     algolia:

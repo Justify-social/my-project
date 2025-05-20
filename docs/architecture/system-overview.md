@@ -34,8 +34,7 @@ graph TD
         C -->|Stripe SDK| F(Stripe Payments);
         C -->|Cint API| G(Cint Survey Panels);
         C -->|InsightIQ API| H(InsightIQ Influencer Data);
-        C -->|UploadThing SDK| K(UploadThing File Storage);
-        C -->|Resend SDK?| L(Resend Email Service);
+        C -->|Resend API| L(Resend Email Service);
         C -.->|Async Tasks?| I[Queue / Cron Jobs?];
         I -.-> C
         I -.-> D
@@ -50,7 +49,6 @@ graph TD
         F
         G
         H
-        K
         L
     end
 
@@ -62,7 +60,6 @@ graph TD
     style F fill:#f9f,stroke:#333,stroke-width:2px
     style G fill:#f9f,stroke:#333,stroke-width:2px
     style H fill:#f9f,stroke:#333,stroke-width:2px
-    style K fill:#f9f,stroke:#333,stroke-width:2px
     style L fill:#f9f,stroke:#333,stroke-width:2px
 ```
 
@@ -86,7 +83,7 @@ _(**Note:** This diagram provides a conceptual overview based on available infor
 
 - **Description**: The core backend logic running as serverless functions on Vercel.
 - **Responsibilities**: Executes API Route handlers (`src/app/api/...`), performs Server-Side Rendering (SSR) or generates static pages for Server Components, interacts with the database and external services, enforces business logic.
-- **Key Interactions**: Responds to API calls from the Client Browser; uses Prisma ORM to interact with the PostgreSQL Database; uses SDKs/APIs to communicate with Clerk, Stripe, Cint, InsightIQ, UploadThing, Resend; potentially enqueues background tasks.
+- **Key Interactions**: Responds to API calls from the Client Browser; uses Prisma ORM to interact with the PostgreSQL Database; uses SDKs/APIs to communicate with Clerk, Stripe, Cint, InsightIQ, Resend; potentially enqueues background tasks.
 
 ### 3.4. PostgreSQL Database (Primary Data Store)
 
@@ -118,19 +115,13 @@ _(**Note:** This diagram provides a conceptual overview based on available infor
 - **Responsibilities**: Provides search capabilities and detailed data on influencers across various platforms.
 - **Key Interactions**: Backend interacts with InsightIQ API (`src/lib/insightiqService.ts`) to search for influencers and fetch detailed profile/audience data. This data populates the Influencer Marketplace and may be cached/summarized in the `MarketplaceInfluencer` table.
 
-### 3.9. UploadThing (File Storage Service)
-
-- **Description**: External SaaS provider for handling file uploads.
-- **Responsibilities**: Manages uploads (e.g., creative assets), storage, and secure access to stored files.
-- **Key Interactions**: Frontend likely uses UploadThing React components/hooks for direct uploads. Backend uses UploadThing SDK/API for managing files or handling webhooks/callbacks.
-
-### 3.10. Resend (Email Service)
+### 3.9. Resend (Email Service)
 
 - **Description**: External SaaS provider for transactional email delivery.
 - **Responsibilities**: Sends emails for events like user invites, notifications, password resets.
 - **Key Interactions**: Backend interacts with Resend API (`src/lib/email/`) to trigger email sends.
 
-### 3.11. Queue / Cron Jobs (Supporting Infrastructure - _Conceptual_)
+### 3.10. Queue / Cron Jobs (Supporting Infrastructure - _Conceptual_)
 
 - **Description**: Mechanism for handling background tasks or scheduled operations (e.g., Vercel Cron Jobs, external queue service).
 - **Responsibilities**: Processing long-running tasks asynchronously (report generation, data sync), running scheduled cleanups or notifications.

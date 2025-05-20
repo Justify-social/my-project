@@ -4,21 +4,23 @@ import { NextResponse } from 'next/server'; // Import NextResponse
 
 // Define routes that should bypass the protection check (public routes)
 const isPublicRoute = createRouteMatcher([
-  '/api/webhooks/(.*)', // Corrected pattern for all webhook routes
-  '/api/uploadthing(.*)', // Make UploadThing API route public to its own handler
-  '/sign-in(.*)',
-  '/sign-up(.*)', // Sign up routes
-  // Add other public routes like '/pricing', '/about' here if needed
+  '/', // Homepage
+  '/sign-in(.*)', // Clerk sign-in routes
+  '/sign-up(.*)', // Clerk sign-up routes
+  '/api/webhooks/(.*)', // Allow all webhooks
+  '/api/health(.*)', // Health check API
+  '/api/asset-proxy(.*)', // Asset proxy (if still needed for other assets, though it was UT specific)
+  '/api/debug/verify-api(.*)', // Public debug API for verification
+  // Add other public API routes or static asset paths if needed
 ]);
 
 // Define ALL routes that should be protected
-// (Can be simplified if relying on Clerk's default behavior below)
-// const isProtectedRoute = createRouteMatcher([
-//     '/dashboard(.*)',
-//     '/settings(.*)',
-//     '/admin(.*)',
-//     '/api/(.*)', // Protect ALL API routes initially, except public ones above
-// ]);
+const isProtectedRoute = createRouteMatcher([
+  '/(dashboard|campaigns|brand-lift|settings|account)(.*)', // All routes under these paths
+  '/influencer-marketplace(.*)',
+  '/admin(.*)', // Admin tools
+  // Add other specific protected routes here if not covered by patterns
+]);
 
 // Explicitly configure public/protected routes within clerkMiddleware
 export default clerkMiddleware(async (auth, req) => {
@@ -56,15 +58,9 @@ export const config = {
   // The matcher ensures the middleware runs on relevant paths,
   // excluding static files and specific framework paths.
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - Specific file extensions (svg, png, jpg, etc.)
-     * It WILL run on API routes now because we removed the `(?!api)` exclusion
-     * The logic inside clerkMiddleware handles public/protected status for APIs.
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    // Skip Next.js internals and static files
+    '/((?!.+\\.[\\w]+$|_next).*)',
+    '/',
+    '/(api|trpc)(.*)',
   ],
 };
