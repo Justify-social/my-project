@@ -1,8 +1,7 @@
 import React from 'react';
 import { CreativeDataProps } from '@/types/brand-lift';
-// Import TikTokScreenContent and InstagramScreenContent once created
-// import TikTokScreenContent from './tiktok/TikTokScreenContent';
-// import InstagramScreenContent from './instagram/InstagramScreenContent';
+import { TikTokScreenContent } from './tiktok/TikTokScreenContent';
+import { InstagramScreenContent } from './instagram/InstagramScreenContent';
 import { Icon } from '@/components/ui/icon/icon'; // For status bar icons
 
 export interface PlatformScreenWrapperProps {
@@ -43,39 +42,11 @@ const PlatformScreenWrapper: React.FC<PlatformScreenWrapperProps> = ({
       <div className="pt-7 h-full">
         {' '}
         {/* Padding for the status bar */}
-        {platform === 'tiktok' && (
-          // <TikTokScreenContent creativeData={creativeData} />
-          <div className="w-full h-full flex flex-col items-center justify-center text-white p-2">
-            <p className="text-sm font-semibold">TikTok Preview Placeholder</p>
-            <p className="text-xs mt-1">Caption: {creativeData.caption?.substring(0, 50)}...</p>
-            {creativeData.media.type === 'video' && creativeData.media.muxPlaybackId && (
-              <p className="text-xs mt-1">(Mux Video ID: {creativeData.media.muxPlaybackId})</p>
-            )}
-            {creativeData.media.type === 'image' && creativeData.media.imageUrl && (
-              <img
-                src={creativeData.media.imageUrl}
-                alt={creativeData.media.altText || 'Creative Preview'}
-                className="mt-2 w-32 h-48 object-contain border border-gray-600"
-              />
-            )}
-          </div>
+        {platform === 'tiktok' && creativeData && (
+          <TikTokScreenContent creativeData={creativeData} />
         )}
-        {platform === 'instagram' && (
-          // <InstagramScreenContent creativeData={creativeData} />
-          <div className="w-full h-full flex flex-col items-center justify-center text-white p-2">
-            <p className="text-sm font-semibold">Instagram Preview Placeholder</p>
-            <p className="text-xs mt-1">Caption: {creativeData.caption?.substring(0, 50)}...</p>
-            {creativeData.media.type === 'video' && creativeData.media.muxPlaybackId && (
-              <p className="text-xs mt-1">(Mux Video ID: {creativeData.media.muxPlaybackId})</p>
-            )}
-            {creativeData.media.type === 'image' && creativeData.media.imageUrl && (
-              <img
-                src={creativeData.media.imageUrl}
-                alt={creativeData.media.altText || 'Creative Preview'}
-                className="mt-2 w-32 h-32 object-contain border border-gray-600"
-              />
-            )}
-          </div>
+        {platform === 'instagram' && creativeData && (
+          <InstagramScreenContent creativeData={creativeData} />
         )}
       </div>
     </div>

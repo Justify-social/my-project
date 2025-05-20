@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+// import Link from 'next/link'; // Removed unused Link
 import { toast } from 'react-hot-toast';
 import CampaignSelector from '@/components/features/brand-lift/CampaignSelector';
 import logger from '@/lib/logger';
@@ -33,6 +33,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 // Define the expected data structure for a brand lift study item
 interface BrandLiftStudyListItem {
@@ -92,9 +93,9 @@ const CampaignSelectionPage: React.FC = () => {
       } else {
         throw new Error(result.error || 'Invalid data format received for brand lift studies.');
       }
-    } catch (err: any) {
-      logger.error('Error fetching brand lift studies:', { error: err.message });
-      setError(err.message);
+    } catch (err: unknown) {
+      logger.error('Error fetching brand lift studies:', { error: err });
+      setError(err instanceof Error ? err.message : 'An error occurred');
       setStudies([]);
     } finally {
       setIsLoading(false);
@@ -156,9 +157,9 @@ const CampaignSelectionPage: React.FC = () => {
       }
       toast.success(`Study "${studyToDelete.name}" deleted successfully.`);
       fetchBrandLiftStudies(); // Refetch studies
-    } catch (error: any) {
-      logger.error('Failed to delete study:', { studyId: studyToDelete.id, error: error.message });
-      toast.error(error.message || 'Could not delete study.');
+    } catch (error: unknown) {
+      logger.error('Failed to delete study:', { studyId: studyToDelete.id, error: error });
+      toast.error(error instanceof Error ? error.message : 'Could not delete study.');
     }
     // setShowDeleteStudyModal(false); // ConfirmDeleteDialog handles its own closing via onClose prop
     // setStudyToDelete(null);
@@ -196,12 +197,12 @@ const CampaignSelectionPage: React.FC = () => {
       toast.success(`Study "${studyToDuplicate.name}" duplicated as "${duplicatedStudy.name}".`);
       setIsDuplicateStudyDialogOpen(false);
       fetchBrandLiftStudies(); // Refresh list
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error duplicating study:', {
         studyId: studyToDuplicate.id,
-        error: error.message,
+        error: error,
       });
-      toast.error(error.message || 'Could not duplicate study.');
+      toast.error(error instanceof Error ? error.message : 'Could not duplicate study.');
     } finally {
       setIsDuplicatingStudy(false);
     }

@@ -8,12 +8,13 @@ import {
   SurveyOption,
 } from '@prisma/client';
 import { stringify } from 'csv-stringify/sync'; // For CSV generation
+import { z } from 'zod';
+import { BrandLiftStudy } from '@prisma/client';
 
 import db from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { handleApiError } from '@/lib/apiErrorHandler';
 import { BadRequestError, NotFoundError, UnauthenticatedError, ForbiddenError } from '@/lib/errors';
-import { CintApiService } from '@/lib/cint'; // For fetching live Cint progress -- This import seems incorrect for this export file, consider removing if not used.
 
 // Helper to verify study access and if it's in a state suitable for export (e.g., COMPLETED)
 async function verifyStudyForExport(studyId: string, clerkUserId: string) {
@@ -231,7 +232,7 @@ export const GET = async (
         'Content-Disposition': `attachment; filename="${safeFilename}.csv"`,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return handleApiError(error, req);
   }
 };

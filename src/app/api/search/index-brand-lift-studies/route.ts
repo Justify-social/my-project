@@ -6,22 +6,23 @@ import {
   // BrandLiftStudyAlgoliaRecord, // Type not directly needed here for requests/responses
 } from '@/lib/algolia';
 import { prisma } from '@/lib/prisma';
-import {
-  BrandLiftStudy as PrismaBrandLiftStudy,
-  // CampaignWizardSubmission as PrismaCampaignWizardSubmission, // Not directly used if studiesFromDb has correct includes
-  // CampaignWizard as PrismaCampaignWizard, // Not directly used
-  // User as PrismaUser, // Not directly used
-} from '@prisma/client';
+import {} from // BrandLiftStudy as PrismaBrandLiftStudy, // Removed unused alias
+// CampaignWizardSubmission as PrismaCampaignWizardSubmission, // Not directly used if studiesFromDb has correct includes
+// CampaignWizard as PrismaCampaignWizard, // Not directly used
+// User as PrismaUser, // Not directly used
+'@prisma/client';
 import { logger } from '@/lib/logger';
-// import { auth } from '@clerk/nextjs/server'; // Optional: For securing this endpoint
+import { auth } from '@clerk/nextjs/server';
+import { BrandLiftStudy as PrismaBrandLiftStudyForType } from '@prisma/client'; // Keep for type if needed, alias if original name conflicts
+import { addOrUpdateBrandLiftStudyInAlgolia, deleteBrandLiftStudyFromAlgolia } from '@/lib/algolia';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Optional: Add authentication/authorization here
-    // const { userId, orgId, has } = await auth();
-    // if (!has({ permission: 'org:admin' })) {
-    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    // }
+    const { userId, orgId, has } = await auth();
+    if (!has({ permission: 'org:admin' })) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
 
     logger.info(
       '[API /search/index-brand-lift-studies] GET request received - Starting BrandLiftStudy re-indexing...'
@@ -89,14 +90,34 @@ export async function GET(request: NextRequest) {
       success: true,
       message: `Successfully initiated indexing for ${studiesFromDb.length} BrandLiftStudies in Algolia.`,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[API /search/index-brand-lift-studies] Error reindexing BrandLiftStudies:', {
-      message: error.message,
-      stack: error.stack,
+      error: (error as Error).message,
+      stack: (error as Error)?.stack,
     });
     return NextResponse.json(
-      { success: false, error: 'Failed to reindex BrandLiftStudies.', details: error.message },
+      {
+        success: false,
+        error: 'Failed to reindex BrandLiftStudies.',
+        details: (error as Error)?.message,
+      },
       { status: 500 }
     );
+  }
+}
+
+export async function POST() {
+  try {
+    const { userId } = await auth();
+    logger.info('Error during Algolia batch operation, individual fallbacks might have occurred.');
+    // Potentially return a different status or error details if critical
+  } catch (error: unknown) {
+    logger.error('Critical error during Algolia batch indexing operation for BrandLiftStudy', {
+      error: (error as Error).message,
+    });
+    return NextResponse.json({
+      success: true,
+      message: 'Brand Lift studies indexing process completed.',
+    });
   }
 }

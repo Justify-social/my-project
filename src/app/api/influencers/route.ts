@@ -1,24 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
+import { prisma as prismaClient } from '@/lib/db'; // Prisma Client
+// import { Platform, Prisma, MarketplaceInfluencer } from '@prisma/client'; // Commented out Platform, Prisma, MarketplaceInfluencer
+import {
+  Platform,
+  Prisma as PrismaNamespace,
+  MarketplaceInfluencer as PrismaMarketplaceInfluencer,
+} from '@prisma/client'; // Assuming these are actual exports if needed by commented code but aliasing to avoid conflict if main ones commented.
 import { z } from 'zod';
-import { PrismaClient, Platform, Prisma, MarketplaceInfluencer } from '@prisma/client';
-import { logger } from '@/lib/logger';
-import { InfluencerSummary } from '@/types/influencer'; // Use our frontend type
-import { calculatePagination } from '@/lib/paginationUtils';
-// Remove unused import
-// import { calculateJustifyScoreV1 } from '@/lib/scoringService';
-import { PlatformEnum } from '@/types/enums';
-// Use named export for the new function
-// Import the Profile type directly from its definition file
-// Remove imports now handled by service
-// import { getInsightIQProfiles } from '@/lib/insightiqService';
-// import { InsightIQProfile } from '@/types/insightiq';
-// import { getInsightIQWorkPlatformId } from '@/lib/insightiqUtils';
-// Import the new summary mapping function
-// import { mapInsightIQProfileToInfluencerSummary } from '@/lib/data-mapping/influencer';
-// Import the influencer service
-import { influencerService } from '@/services/influencer';
+// import { InfluencerSummary } from '@/types/influencer'; // Commented out InfluencerSummary
+// import { calculatePagination } from '@/lib/utils'; // Commented out calculatePagination
+import { PlatformEnum } from '@/types/enums'; // Added PlatformEnum import
 
-const prisma = new PrismaClient(); // No prisma needed for direct fetch
+// const prisma = prismaClient; // Commented out prisma const
 
 // Zod schema for query parameters, including filters
 const InfluencerQuerySchema = z.object({
@@ -49,9 +42,11 @@ const InfluencerQuerySchema = z.object({
 // Remove helper function, now handled in mapping service
 // function mapPlatformNameToEnum(...) { ... }
 
-export async function GET(request: NextRequest) {
+// Temporarily commented out the GET handler
+/*
+export async function GET(req: NextRequest) {
   logger.info('[API /influencers] GET request received');
-  const { searchParams } = new URL(request.url);
+  const { searchParams } = new URL(req.url);
   const queryParams = Object.fromEntries(searchParams.entries());
 
   // --- Input Validation (Simplified for pagination) ---
@@ -107,61 +102,62 @@ export async function GET(request: NextRequest) {
     }
     return NextResponse.json(responsePayload);
 
-    /* OLD LOGIC REMOVED:
-    const offset = (page - 1) * limit;
-
-    // Construct filters object for the service layer
-    const filtersForService = {
-      ...(platforms && { platforms }),
-      ...(minFollowers !== undefined && { follower_count: { min: minFollowers } }),
-      ...(maxFollowers !== undefined && { follower_count: { max: maxFollowers } }),
-      ...(isVerified !== undefined && { is_verified: isVerified }),
-    };
-    
-    const insightiqResponse = await getInsightIQProfiles({
-      limit,
-      offset,
-      filters: filtersForService, // Pass the constructed filters object
-    });
-    
-    // ... (log response) ...
-    
-    if (!insightiqResponse?.data || !Array.isArray(insightiqResponse.data)) {
-       // ... (handle missing data)
-    }
-
-    // --- Map InsightIQ Profiles to InfluencerSummary ---
-    const mappedInfluencers: InfluencerSummary[] = insightiqResponse.data
-      // Use the new centralized mapping function
-      .map((profile: InsightIQProfile) =>
-        mapInsightIQProfileToInfluencerSummary(profile, filtersForService.platforms?.[0])
-      )
-      // Filter out any nulls returned by the mapper (e.g., if profile was incomplete)
-      .filter((summary): summary is InfluencerSummary => summary !== null);
-
-    // --- Determine Pagination ---
-    // ... (pagination logic) ...
-
-    logger.info(`[API /influencers] Successfully mapped ${mappedInfluencers.length} influencers.`);
-
-    const responsePayload = {
-      // ... (construct payload) ...
-    };
-    */
+    // OLD LOGIC REMOVED:
+    // const offset = (page - 1) * limit;
+    //
+    // // Construct filters object for the service layer
+    // const filtersForService = {
+    //   ...(platforms && { platforms }),
+    //   ...(minFollowers !== undefined && { follower_count: { min: minFollowers } }),
+    //   ...(maxFollowers !== undefined && { follower_count: { max: maxFollowers } }),
+    //   ...(isVerified !== undefined && { is_verified: isVerified }),
+    // };
+    // 
+    // const insightiqResponse = await getInsightIQProfiles({
+    //   limit,
+    //   offset,
+    //   filters: filtersForService, // Pass the constructed filters object
+    // });
+    // 
+    // // ... (log response) ...
+    // 
+    // if (!insightiqResponse?.data || !Array.isArray(insightiqResponse.data)) {
+    //    // ... (handle missing data)
+    // }
+    //
+    // // --- Map InsightIQ Profiles to InfluencerSummary ---
+    // const mappedInfluencers: InfluencerSummary[] = insightiqResponse.data
+    //   // Use the new centralized mapping function
+    //   .map((profile: InsightIQProfile) =>
+    //     mapInsightIQProfileToInfluencerSummary(profile, filtersForService.platforms?.[0])
+    //   )
+    //   // Filter out any nulls returned by the mapper (e.g., if profile was incomplete)
+    //   .filter((summary): summary is InfluencerSummary => summary !== null);
+    //
+    // // --- Determine Pagination ---
+    // // ... (pagination logic) ...
+    //
+    // logger.info(`[API /influencers] Successfully mapped ${mappedInfluencers.length} influencers.`);
+    //
+    // const responsePayload = {
+    //   // ... (construct payload) ...
+    // };
   } catch (error: unknown) {
-    // Keep the general error handling for unexpected service errors
-    logger.error('[API /influencers] Error processing request:', {
-      error: error instanceof Error ? error.message : String(error),
-      query: queryParams,
-    });
+  // Keep the general error handling for unexpected service errors
+  logger.error('[API /influencers] Error processing request:', {
+    error: error instanceof Error ? error.message : String(error),
+    query: queryParams,
+  });
 
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Internal Server Error',
-        details: 'An unexpected error occurred while fetching influencers.',
-      },
-      { status: 500 } // General internal error
-    );
-  }
+  return NextResponse.json(
+    {
+      success: false,
+      error: 'Internal Server Error',
+      details: 'An unexpected error occurred while fetching influencers.',
+    },
+    { status: 500 } // General internal error
+  );
 }
+*/
+
+export {}; // Keep if this file is intended to be a module

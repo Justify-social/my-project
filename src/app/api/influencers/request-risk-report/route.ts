@@ -96,11 +96,11 @@ export async function POST(request: NextRequest) {
 
     // Return 202 Accepted to indicate the async job started
     return NextResponse.json({ success: true, jobId: jobId }, { status: 202 });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+    // Check if the error object has a status code, default to 500 if not
+    const status = (error as any).response?.status || (error as any).status || 500;
     logger.error('[API /request-risk-report] Unexpected error:', error);
-    return NextResponse.json(
-      { success: false, error: error.message || 'Internal Server Error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: errorMessage }, { status: status });
   }
 }

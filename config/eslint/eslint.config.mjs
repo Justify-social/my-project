@@ -63,7 +63,7 @@ const eslintConfig = [
     plugins: {
       '@typescript-eslint': tsEslintPlugin,
       'react-hooks': reactHooks,
-      'react': reactPlugin,
+      react: reactPlugin,
       'jsx-a11y': jsxA11yPlugin,
     },
     rules: {

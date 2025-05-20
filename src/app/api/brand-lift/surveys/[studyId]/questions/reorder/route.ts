@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@clerk/nextjs/server';
-import { Prisma, BrandLiftStudyStatus } from '@prisma/client';
+import { BrandLiftStudyStatus } from '@prisma/client';
 
 import db from '@/lib/db';
 import { logger } from '@/lib/logger';
@@ -123,8 +123,8 @@ export const PATCH = async (
       count: updates.length,
     });
     return NextResponse.json({ message: 'Questions reordered successfully' }, { status: 200 });
-  } catch (error: any) {
-    // logger.error('Error in PATCH reorder questions:', { studyId, error: error.message, stack: error.stack }); // Redundant if handleApiError logs
+  } catch (error: unknown) {
+    logger.error('Error in reorderQuestions handler:', { error });
     return handleApiError(error, req);
   }
 };

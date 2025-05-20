@@ -3,7 +3,8 @@ import { auth } from '@clerk/nextjs/server';
 import { logger } from '@/lib/logger';
 import { handleApiError } from '@/lib/apiErrorHandler';
 import { getAllCampaignsForOrg } from '@/lib/data/campaigns'; // Updated import
-import { UnauthenticatedError, BadRequestError } from '@/lib/errors'; // Added BadRequestError
+import { UnauthenticatedError, ForbiddenError, NotFoundError } from '@/lib/errors'; // Removed BadRequestError
+import { CampaignWizard, Prisma } from '@prisma/client';
 
 export async function GET(req: NextRequest) {
   try {
@@ -33,9 +34,15 @@ export async function GET(req: NextRequest) {
 
     const campaigns = await getAllCampaignsForOrg(orgId, filterByCreator ? clerkUserId : undefined);
 
+    logger.info('Successfully fetched campaigns for list', {
+      userId: clerkUserId,
+      count: campaigns.length,
+    });
     return NextResponse.json({ success: true, data: campaigns });
-  } catch (error: any) {
-    logger.error('Error in /api/list-campaigns:', { error: error.message });
+  } catch (error: unknown) {
+    logger.error('Error in /api/list-campaigns:', {
+      error: error instanceof Error ? error.message : error,
+    });
     return handleApiError(error, req);
   }
 }

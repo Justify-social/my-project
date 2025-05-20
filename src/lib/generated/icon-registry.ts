@@ -296,6 +296,20 @@ export const iconRegistryData: IconRegistryData = {
     },
     {
       category: 'light',
+      id: 'faBatteryFullLight',
+      name: 'Battery Full Light',
+      faVersion: 'fal fa-battery-full',
+      path: '/icons/light/faBatteryFullLight.svg',
+    },
+    {
+      category: 'light',
+      id: 'faBatteryThreeQuartersLight',
+      name: 'Battery Three Quarters Light',
+      faVersion: 'fal fa-battery-three-quarters',
+      path: '/icons/light/faBatteryThreeQuartersLight.svg',
+    },
+    {
+      category: 'light',
       id: 'faBellLight',
       name: 'Bell',
       faVersion: 'fal fa-bell',
@@ -461,6 +475,20 @@ export const iconRegistryData: IconRegistryData = {
       name: 'Circle Notch',
       faVersion: 'fal fa-circle-notch',
       path: '/icons/light/faCircleNotchLight.svg',
+    },
+    {
+      category: 'light',
+      id: 'faCirclePauseLight',
+      name: 'Circle Pause Light',
+      faVersion: 'fal fa-circle-pause',
+      path: '/icons/light/faCirclePauseLight.svg',
+    },
+    {
+      category: 'light',
+      id: 'faCirclePlayLight',
+      name: 'Circle Play Light',
+      faVersion: 'fal fa-circle-play',
+      path: '/icons/light/faCirclePlayLight.svg',
     },
     {
       category: 'light',
@@ -647,7 +675,7 @@ export const iconRegistryData: IconRegistryData = {
     {
       category: 'light',
       id: 'faEyeSlashLight',
-      name: 'Eye Slash',
+      name: 'Eye Slash Light',
       faVersion: 'fal fa-eye-slash',
       path: '/icons/light/faEyeSlashLight.svg',
     },
@@ -786,6 +814,13 @@ export const iconRegistryData: IconRegistryData = {
     },
     {
       category: 'light',
+      id: 'faImageSlashLight',
+      name: 'Image Slash Light',
+      faVersion: 'fal fa-image-slash',
+      path: '/icons/light/faImageSlashLight.svg',
+    },
+    {
+      category: 'light',
       id: 'faInfoLight',
       name: 'Info',
       faVersion: 'fal fa-info',
@@ -881,6 +916,13 @@ export const iconRegistryData: IconRegistryData = {
       name: 'Moon',
       path: '/icons/light/faMoonLight.svg',
       faVersion: 'fal fa-moon',
+    },
+    {
+      category: 'light',
+      id: 'faMusicLight',
+      name: 'Music Light',
+      faVersion: 'fal fa-music',
+      path: '/icons/light/faMusicLight.svg',
     },
     {
       category: 'light',
@@ -1052,6 +1094,13 @@ export const iconRegistryData: IconRegistryData = {
     },
     {
       category: 'light',
+      id: 'faSignalBarsLight',
+      name: 'Signal Bars Light',
+      faVersion: 'fal fa-signal-bars',
+      path: '/icons/light/faSignalBarsLight.svg',
+    },
+    {
+      category: 'light',
       id: 'faSignalLight',
       name: 'Signal',
       faVersion: 'fal fa-signal',
@@ -1206,6 +1255,13 @@ export const iconRegistryData: IconRegistryData = {
     },
     {
       category: 'light',
+      id: 'faWifiLight',
+      name: 'Wifi Light',
+      faVersion: 'fal fa-wifi',
+      path: '/icons/light/faWifiLight.svg',
+    },
+    {
+      category: 'light',
       id: 'faXmarkLight',
       name: 'Xmark',
       path: '/icons/light/faXmarkLight.svg',
@@ -1294,6 +1350,20 @@ export const iconRegistryData: IconRegistryData = {
       name: 'Bars',
       faVersion: 'fas fa-bars',
       path: '/icons/solid/faBarsSolid.svg',
+    },
+    {
+      category: 'solid',
+      id: 'faBatteryFullSolid',
+      name: 'Battery Full Solid',
+      faVersion: 'fas fa-battery-full',
+      path: '/icons/solid/faBatteryFullSolid.svg',
+    },
+    {
+      category: 'solid',
+      id: 'faBatteryThreeQuartersSolid',
+      name: 'Battery Three Quarters Solid',
+      faVersion: 'fas fa-battery-three-quarters',
+      path: '/icons/solid/faBatteryThreeQuartersSolid.svg',
     },
     {
       category: 'solid',
@@ -1458,6 +1528,20 @@ export const iconRegistryData: IconRegistryData = {
     },
     {
       category: 'solid',
+      id: 'faCirclePauseSolid',
+      name: 'Circle Pause Solid',
+      faVersion: 'fas fa-circle-pause',
+      path: '/icons/solid/faCirclePauseSolid.svg',
+    },
+    {
+      category: 'solid',
+      id: 'faCirclePlaySolid',
+      name: 'Circle Play Solid',
+      faVersion: 'fas fa-circle-play',
+      path: '/icons/solid/faCirclePlaySolid.svg',
+    },
+    {
+      category: 'solid',
       id: 'faCircleQuestionSolid',
       name: 'Circle Question',
       path: '/icons/solid/faCircleQuestionSolid.svg',
@@ -1486,6 +1570,13 @@ export const iconRegistryData: IconRegistryData = {
     },
     {
       category: 'solid',
+      id: 'faClipboardSolid',
+      name: 'Clipboard',
+      path: '/icons/solid/faClipboardSolid.svg',
+      faVersion: 'fas fa-clipboard',
+    },
+    {
+      category: 'solid',
       id: 'faClockRotateLeftSolid',
       name: 'Clock Rotate Left',
       path: '/icons/solid/faClockRotateLeftSolid.svg',
@@ -1497,13 +1588,6 @@ export const iconRegistryData: IconRegistryData = {
       name: 'Clock',
       faVersion: 'fas fa-clock',
       path: '/icons/solid/faClockSolid.svg',
-    },
-    {
-      category: 'solid',
-      id: 'faClipboardSolid',
-      name: 'Clipboard',
-      path: '/icons/solid/faClipboardSolid.svg',
-      faVersion: 'fas fa-clipboard',
     },
     {
       category: 'solid',
@@ -1570,17 +1654,17 @@ export const iconRegistryData: IconRegistryData = {
     },
     {
       category: 'solid',
-      id: 'faDiamonds4Solid',
-      name: 'Diamonds 4',
-      faVersion: 'fas fa-diamonds-4',
-      path: '/icons/solid/faDiamonds4Solid.svg',
-    },
-    {
-      category: 'solid',
       id: 'faDiamondSolid',
       name: 'Diamond',
       faVersion: 'fas fa-diamond',
       path: '/icons/solid/faDiamondSolid.svg',
+    },
+    {
+      category: 'solid',
+      id: 'faDiamonds4Solid',
+      name: 'Diamonds 4',
+      faVersion: 'fas fa-diamonds-4',
+      path: '/icons/solid/faDiamonds4Solid.svg',
     },
     {
       category: 'solid',
@@ -1641,7 +1725,7 @@ export const iconRegistryData: IconRegistryData = {
     {
       category: 'solid',
       id: 'faEyeSlashSolid',
-      name: 'Eye Slash',
+      name: 'Eye Slash Solid',
       faVersion: 'fas fa-eye-slash',
       path: '/icons/solid/faEyeSlashSolid.svg',
     },
@@ -1780,6 +1864,13 @@ export const iconRegistryData: IconRegistryData = {
     },
     {
       category: 'solid',
+      id: 'faImageSlashSolid',
+      name: 'Image Slash Solid',
+      faVersion: 'fas fa-image-slash',
+      path: '/icons/solid/faImageSlashSolid.svg',
+    },
+    {
+      category: 'solid',
       id: 'faImageSolid',
       name: 'Image',
       faVersion: 'fas fa-image',
@@ -1815,17 +1906,17 @@ export const iconRegistryData: IconRegistryData = {
     },
     {
       category: 'solid',
-      id: 'faListSolid',
-      name: 'List',
-      faVersion: 'fas fa-list',
-      path: '/icons/solid/faListSolid.svg',
-    },
-    {
-      category: 'solid',
       id: 'faListRadioSolid',
       name: 'List Radio',
       faVersion: 'fas fa-list-radio',
       path: '/icons/solid/faListRadioSolid.svg',
+    },
+    {
+      category: 'solid',
+      id: 'faListSolid',
+      name: 'List',
+      faVersion: 'fas fa-list',
+      path: '/icons/solid/faListSolid.svg',
     },
     {
       category: 'solid',
@@ -1882,6 +1973,13 @@ export const iconRegistryData: IconRegistryData = {
       name: 'Moon',
       path: '/icons/solid/faMoonSolid.svg',
       faVersion: 'fas fa-moon',
+    },
+    {
+      category: 'solid',
+      id: 'faMusicSolid',
+      name: 'Music Solid',
+      faVersion: 'fas fa-music',
+      path: '/icons/solid/faMusicSolid.svg',
     },
     {
       category: 'solid',
@@ -2053,6 +2151,13 @@ export const iconRegistryData: IconRegistryData = {
     },
     {
       category: 'solid',
+      id: 'faSignalBarsSolid',
+      name: 'Signal Bars Solid',
+      faVersion: 'fas fa-signal-bars',
+      path: '/icons/solid/faSignalBarsSolid.svg',
+    },
+    {
+      category: 'solid',
       id: 'faSignalSolid',
       name: 'Signal',
       faVersion: 'fas fa-signal',
@@ -2204,6 +2309,13 @@ export const iconRegistryData: IconRegistryData = {
       name: 'Warning',
       faVersion: 'fas fa-warning',
       path: '/icons/solid/faWarningSolid.svg',
+    },
+    {
+      category: 'solid',
+      id: 'faWifiSolid',
+      name: 'Wifi Solid',
+      faVersion: 'fas fa-wifi',
+      path: '/icons/solid/faWifiSolid.svg',
     },
     {
       category: 'solid',

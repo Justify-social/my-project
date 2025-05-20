@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
     );
 
     return NextResponse.json({ success: true, exists: exists });
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('[API Check Name] Error during database check:', error);
     return NextResponse.json(
       { success: false, error: 'Database error checking campaign name.' },

@@ -1,10 +1,10 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { z } from 'zod';
 import prisma from '@/lib/db';
-import { getAuth, clerkClient, auth } from '@clerk/nextjs/server';
 import logger from '@/lib/logger';
 import { handleApiError } from '@/lib/apiErrorHandler';
 import { UnauthenticatedError, ForbiddenError, BadRequestError, NotFoundError } from '@/lib/errors';
+import { auth } from '@clerk/nextjs/server';
 
 // Define BrandLiftStudyStatus locally if not imported, or import from Prisma
 const BrandLiftStudyStatus = {
@@ -127,7 +127,7 @@ async function deleteOptionHandler(
     }
     logger.info('SurveyOption deleted', { optionId, questionId, studyId, userId: clerkUserId }); // Changed
     return new NextResponse(null, { status: 204 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return handleApiError(error, request);
   }
 }
@@ -199,7 +199,7 @@ export const PUT = async (
     });
     logger.info('SurveyOption updated', { optionId, questionId, studyId, userId: clerkUserId }); // Changed
     return NextResponse.json(optionToReturn, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return handleApiError(error, request);
   }
 };

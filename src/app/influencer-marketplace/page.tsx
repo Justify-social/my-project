@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 // import { useWizard } from '@/components/features/campaigns/WizardContext'; // REMOVE Wizard Context
 import { influencerService } from '@/services/influencer';
 import { InfluencerSummary } from '@/types/influencer';
@@ -26,12 +26,10 @@ import {
   Sheet,
   SheetContent,
   SheetTrigger,
-  SheetClose,
   SheetHeader,
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet';
-import { Input } from '@/components/ui/input';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,6 +49,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Label } from '@/components/ui/label';
 
 // Define the shape of filters state - Aligned with current BE capabilities
 export interface FiltersState {

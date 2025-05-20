@@ -11,6 +11,7 @@ import { BASE_URL } from '@/config/constants';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { CintApiService } from '@/lib/cint';
 import { addOrUpdateBrandLiftStudyInAlgolia, deleteBrandLiftStudyFromAlgolia } from '@/lib/algolia';
+import { BrandLiftStudyData } from '@/types/brand-lift';
 
 const updateStudySchema = z
   .object({
@@ -88,7 +89,7 @@ export const GET = async (
 
     logger.info('Fetched Brand Lift Study details', { studyId, userId: clerkUserId, orgId });
     return NextResponse.json(responseData);
-  } catch (error: any) {
+  } catch (error: unknown) {
     return handleApiError(error, req);
   }
 };
@@ -197,7 +198,7 @@ export const PUT = async (
 
         const cintTargetGroup = await cintService.createCintTargetGroup(
           cintProject.id,
-          fullStudyForCint as any,
+          fullStudyForCint as unknown as BrandLiftStudyData,
           surveyLiveUrl,
           CINT_PROJECT_MANAGER_ID,
           CINT_BUSINESS_UNIT_ID
@@ -234,10 +235,14 @@ export const PUT = async (
             campaign: { select: { campaignName: true, wizard: { select: { orgId: true } } } },
           },
         });
-      } catch (cintLaunchError: any) {
-        logger.error('Cint launch failed', { studyId, error: cintLaunchError.message, orgId });
+      } catch (cintLaunchError: unknown) {
+        logger.error('Cint launch failed', {
+          studyId,
+          error: (cintLaunchError as Error).message,
+          orgId,
+        });
         throw new Error(
-          `Cint launch failed: ${cintLaunchError.message}. Study status not changed to COLLECTING.`
+          `Cint launch failed: ${(cintLaunchError as Error).message}. Study status not changed to COLLECTING.`
         );
       }
     } else {
@@ -255,13 +260,13 @@ export const PUT = async (
       logger.info(`[Algolia] Indexing updated BrandLiftStudy ${studyId}`);
       await addOrUpdateBrandLiftStudyInAlgolia(finalUpdatedStudy);
       logger.info(`[Algolia] Successfully indexed updated BrandLiftStudy ${studyId}.`);
-    } catch (algoliaError: any) {
+    } catch (algoliaError: unknown) {
       logger.error(
         `[Algolia] Failed to index updated BrandLiftStudy ${studyId}. DB update was successful.`,
         {
           studyId: studyId,
-          errorName: algoliaError.name,
-          errorMessage: algoliaError.message,
+          errorName: (algoliaError as Error).name,
+          errorMessage: (algoliaError as Error).message,
         }
       );
       // Non-critical error for the main PUT operation
@@ -298,10 +303,10 @@ export const PUT = async (
             }
           );
         }
-      } catch (emailError: any) {
+      } catch (emailError: unknown) {
         logger.error('Failed to send "Study Submitted for Review" email', {
           studyId,
-          error: emailError.message,
+          error: (emailError as Error).message,
           orgId,
         });
       }
@@ -314,7 +319,7 @@ export const PUT = async (
       newStatus: finalUpdatedStudy.status,
     });
     return NextResponse.json(finalUpdatedStudy);
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
       throw new NotFoundError('Study not found for update.');
     }
@@ -398,13 +403,13 @@ export async function DELETE(
       logger.info(`[Algolia] Deleting BrandLiftStudy ${studyId} from Algolia.`);
       await deleteBrandLiftStudyFromAlgolia(studyId);
       logger.info(`[Algolia] Successfully deleted BrandLiftStudy ${studyId} from Algolia.`);
-    } catch (algoliaError: any) {
+    } catch (algoliaError: unknown) {
       logger.error(
         `[Algolia] Failed to delete BrandLiftStudy ${studyId} from Algolia. DB deletion was successful.`,
         {
           studyId: studyId,
-          errorName: algoliaError.name,
-          errorMessage: algoliaError.message,
+          errorName: (algoliaError as Error).name,
+          errorMessage: (algoliaError as Error).message,
         }
       );
     }
@@ -413,7 +418,7 @@ export async function DELETE(
       { success: true, message: `Study "${studyToDelete.name}" deleted successfully.` },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     return handleApiError(error, req);
   }
 }
@@ -555,7 +560,7 @@ export async function POST(
       orgId,
     });
     return NextResponse.json({ success: true, data: duplicatedStudyWithDetails }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return handleApiError(error, req);
   }
 }

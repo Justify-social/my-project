@@ -3,10 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import {
   loadStripe,
+  Appearance,
   StripeElementsOptions,
-  StripeError,
   SetupIntentResult,
-  PaymentIntentResult,
   SetupIntent,
 } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -136,9 +135,9 @@ export default function StripeElementWrapper() {
             throw new Error('Client secret not found in response.');
           }
           setClientSecret(data.clientSecret);
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error('Error fetching client secret:', error);
-          setErrorMessage(error.message || 'Failed to initialize payment.');
+          setErrorMessage((error as Error).message || 'Failed to initialize payment.');
         } finally {
           setLoadingClientSecret(false);
         }

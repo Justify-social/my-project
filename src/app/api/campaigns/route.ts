@@ -12,7 +12,7 @@ import {
   Status,
   CampaignWizardSubmission,
   CampaignWizard,
-  User as PrismaUser,
+  // PrismaUser, // Removed PrismaUser
 } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { dbLogger, DbOperation } from '@/lib/data-mapping/db-logger';
@@ -36,7 +36,6 @@ import {
 // import { DraftCampaignDataBaseSchema } from '@/components/features/campaigns/types';
 // import { formatCampaignDataForResponse } from '@/utils/api-response-formatter'; // Unused
 // import { handleDbError, validateRequest } from '@/lib/middleware/api'; // Unused
-import { getAuth, clerkClient } from '@clerk/nextjs/server';
 import logger from '@/lib/logger'; // Import shared logger
 import { handleApiError } from '@/lib/apiErrorHandler'; // Import shared error handler
 import { BadRequestError, ForbiddenError, UnauthenticatedError, NotFoundError } from '@/lib/errors'; // Import custom errors
@@ -286,24 +285,10 @@ const CampaignCreationRequestSchema = DraftCampaignDataBaseSchema.extend({
   );
 
 // Schema for validating expected query parameters for this specific endpoint usage
-const queryParamsSchema = z.object({
-  // user_accessible is conceptually required for security, default to true if not specified for this context
-  user_accessible: z
-    .string()
-    .optional()
-    .refine(val => val === undefined || val === 'true', {
-      message: "user_accessible must be 'true' or omitted for this context",
-    })
-    .default('true'),
-  // status=completed is required for the campaign selection UI in Brand Lift
-  status: z
-    .string()
-    .optional()
-    .refine(val => val === undefined || val === 'completed', {
-      message: "status must be 'completed' or omitted for this context",
-    })
-    .default('completed'),
-});
+// const queryParamsSchema = z.object({ // Commented out unused schema
+//   user_accessible: z
+// ... existing code ...
+// });
 
 // Schema for query params for listing campaigns, specifically for Brand Lift use case
 const listCampaignsQuerySchema = z.object({
@@ -319,7 +304,7 @@ type SelectedCampaignData = Pick<
 
 export const GET = async (req: NextRequest) => {
   try {
-    const { userId, orgId } = await auth();
+    const { userId, orgId: _orgId } = await auth(); // Prefixed orgId with _ as it's unused
 
     if (!userId) {
       // Throw consistent error
@@ -401,8 +386,8 @@ export const GET = async (req: NextRequest) => {
       count: campaigns.length,
     });
     return NextResponse.json({ success: true, data: responseData });
-  } catch (error: any) {
-    logger.error('Error fetching campaigns', { error: error.message });
+  } catch (error: unknown) {
+    logger.error('Error fetching campaigns', { error: (error as Error).message });
     return handleApiError(error, req);
   }
 };
@@ -492,13 +477,16 @@ export const POST = async (request: NextRequest) => {
         transformedData.Influencer.length > 0
       ) {
         const validInfluencers = transformedData.Influencer.filter(
-          (inf: any): inf is NonNullable<typeof inf> =>
-            !!inf &&
-            typeof inf === 'object' &&
-            typeof inf.platform === 'string' &&
-            !!inf.platform &&
-            typeof inf.handle === 'string' &&
-            !!inf.handle
+          (inf: unknown): inf is ApiInfluencer => {
+            if (!inf || typeof inf !== 'object') return false;
+            const influencer = inf as ApiInfluencer;
+            return (
+              typeof influencer.platform === 'string' &&
+              !!influencer.platform &&
+              typeof influencer.handle === 'string' &&
+              !!influencer.handle
+            );
+          }
         );
 
         for (const influencer of validInfluencers) {
@@ -533,13 +521,13 @@ export const POST = async (request: NextRequest) => {
             `[Algolia] Successfully indexed new campaign ${campaignOuter.id} (background).`
           );
         })
-        .catch((algoliaError: any) => {
+        .catch((algoliaError: unknown) => {
           logger.error(
             `[Algolia] Background indexing for new campaign ${campaignOuter.id} failed. DB operation was successful.`,
             {
               campaignId: campaignOuter.id,
-              errorName: algoliaError.name,
-              errorMessage: algoliaError.message,
+              errorName: (algoliaError as Error).name,
+              errorMessage: (algoliaError as Error).message,
             }
           );
         });
@@ -564,10 +552,10 @@ export const POST = async (request: NextRequest) => {
       { success: true, data: responseData, message: 'Campaign created successfully.' },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Campaign POST: Error occurred', {
-      errorName: error.name,
-      errorMessage: error.message,
+      errorName: (error as Error).name,
+      errorMessage: (error as Error).message,
     });
     return handleApiError(error, request);
   }
@@ -687,9 +675,12 @@ export const PATCH = async (request: NextRequest) => {
       message: 'Campaign updated successfully',
     });
     // --- End: Original patchCampaignHandler logic ---
-  } catch (error: any) {
+  } catch (error: unknown) {
     // --- Start: Inlined tryCatch logic ---
-    logger.error('Campaign PATCH: Error occurred', { error: error.message, stack: error.stack });
+    logger.error('Campaign PATCH: Error occurred', {
+      error: (error as Error).message,
+      stack: (error as Error).stack,
+    });
     // Using handleApiError directly, passing the original request
     return handleApiError(error, request);
     // --- End: Inlined tryCatch logic ---

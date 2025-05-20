@@ -3,9 +3,9 @@ import Stripe from 'stripe';
 import { NextResponse } from 'next/server';
 // import { stripe } from '@/lib/stripe'; // Comment out unused import
 import { prisma } from '@/lib/prisma';
-import { Analytics as _Analytics } from '@/lib/analytics/analytics';
+// import { Analytics as _Analytics } from '@/lib/analytics/analytics'; // _Analytics is unused by active code
 // import { subscriptionCreated } from '@/lib/stripe/webhook-handlers';
-import { ReadableStream } from 'stream/web';
+// import { ReadableStream } from 'stream/web'; // Removed unused ReadableStream
 // Placeholder for a monitoring/logging service client
 // import { logger, monitor } from '@/lib/monitoring';
 
@@ -65,9 +65,12 @@ export async function POST(request: Request) {
     }
 
     event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
-  } catch (err: any) {
-    console.error(`Webhook signature verification failed: ${err.message}`);
-    return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
+  } catch (err: unknown) {
+    console.error(`Webhook signature verification failed: ${(err as Error).message}`);
+    return NextResponse.json(
+      { error: `Webhook Error: ${(err as Error).message}` },
+      { status: 400 }
+    );
   }
 
   // --- Idempotency Check ---
@@ -105,7 +108,7 @@ export async function POST(request: Request) {
   // monitor.increment(`stripe.webhook.received.${event.type}`);
 
   // --- Handle specific Checkout events ---
-  let processingError: any = null;
+  let processingError: Error | null = null;
   try {
     switch (event.type) {
       // --- BE-5-Checkout ---
@@ -131,7 +134,7 @@ export async function POST(request: Request) {
           const setupIntent = await stripe.setupIntents.retrieve(session.setup_intent as string, {
             expand: ['payment_method'],
           });
-          const paymentMethodId = setupIntent.payment_method as Stripe.PaymentMethod | null;
+          const _paymentMethodId = setupIntent.payment_method as Stripe.PaymentMethod | null;
 
           await prisma.user.update({
             where: { clerkId: userId }, // Assuming you query users by Clerk ID
@@ -164,7 +167,7 @@ export async function POST(request: Request) {
         } else if (session.mode === 'payment' && session.payment_intent) {
           // If using one-time payment mode, update based on the payment
           // You might store payment intent ID or update an order status
-          const paymentIntent = await stripe.paymentIntents.retrieve(
+          const _paymentIntent = await stripe.paymentIntents.retrieve(
             session.payment_intent as string
           );
           await prisma.user.update({
@@ -204,9 +207,9 @@ export async function POST(request: Request) {
       default:
         console.log(`Unhandled verified event type: ${event.type}`);
     }
-  } catch (handlerError: any) {
+  } catch (handlerError: unknown) {
     console.error(`Error handling event ${event.id} (type: ${event.type}):`, handlerError);
-    processingError = handlerError; // Store error to update StripeEvent status
+    processingError = handlerError as Error; // Store error to update StripeEvent status, cast to Error
   }
   // --- END BE-5 & BE-6 Implementation ---
 

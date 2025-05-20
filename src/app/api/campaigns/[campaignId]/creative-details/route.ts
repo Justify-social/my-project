@@ -1,15 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db';
-import {
-  CampaignWizardSubmission,
-  CreativeAsset,
-  CampaignWizard,
-  PrimaryContact,
-  User,
-  Platform,
-  CreativeAssetType,
-} from '@prisma/client';
+import { CreativeAsset, CreativeAssetType } from '@prisma/client';
 import { CreativeDataProps, CreativeProfileData, CreativeMediaData } from '@/types/brand-lift';
 import { handleApiError } from '@/lib/apiErrorHandler';
 import { getAuth } from '@clerk/nextjs/server';
@@ -26,32 +18,43 @@ const selectPrimaryCreativeAsset = (assets: CreativeAsset[]): CreativeAsset | nu
   if (!assets || assets.length === 0) return null;
 
   const primary = assets.find(a => {
-    const asset = a as any; // Cast to any once
+    const asset: any = a; // Cast to any once
     return asset.isPrimaryForBrandLiftPreview;
   });
   if (primary) return primary as CreativeAsset;
 
   const videoWithMux = assets.find(a => {
-    const asset = a as any; // Cast to any once
+    const asset: any = a; // Cast to any once
     return asset.type === CreativeAssetType.video && asset.muxPlaybackId;
   });
   if (videoWithMux) return videoWithMux as CreativeAsset;
 
-  const image = assets.find(a => (a as any).type === CreativeAssetType.image);
+  const image = assets.find(a => {
+    const asset: any = a; // Cast to any once
+    return asset.type === CreativeAssetType.image;
+  });
   if (image) return image as CreativeAsset;
 
-  const anyVideo = assets.find(a => (a as any).type === CreativeAssetType.video);
+  const anyVideo = assets.find(a => {
+    const asset: any = a; // Cast to any once
+    return asset.type === CreativeAssetType.video;
+  });
   if (anyVideo) return anyVideo as CreativeAsset;
 
   return assets.length > 0 ? (assets[0] as CreativeAsset) : null;
 };
 
-export async function GET(request: NextRequest, { params }: { params: { campaignId: string } }) {
+export async function GET(
+  request: NextRequest,
+  { params: paramsPromise }: { params: Promise<{ campaignId: string }> }
+) {
   try {
     const { userId: clerkUserId } = getAuth(request);
     if (!clerkUserId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const params = await paramsPromise; // Await the params
 
     // Fetch your internal User record using the clerkId
     const internalUser = await prisma.user.findUnique({
@@ -110,7 +113,7 @@ export async function GET(request: NextRequest, { params }: { params: { campaign
     // Explicitly cast creativeAssets to ensure full type information
     const typedCreativeAssets = (campaignSubmission.creativeAssets || []) as CreativeAsset[];
 
-    const primaryAsset = selectPrimaryCreativeAsset(typedCreativeAssets); // Use the typed array
+    const primaryAsset = selectPrimaryCreativeAsset(typedCreativeAssets);
 
     if (!primaryAsset) {
       return NextResponse.json(
@@ -120,6 +123,9 @@ export async function GET(request: NextRequest, { params }: { params: { campaign
     }
 
     let influencerProfileImageUrl: string | null = null;
+    // Cast primaryAsset to any for property access if TypeScript is still struggling
+    const primaryAssetAsAny: any = primaryAsset;
+
     if (campaignSubmission.influencerHandle && campaignSubmission.platform) {
       try {
         const influencerProfile = await insightIQService.fetchDetailedProfile(
@@ -159,36 +165,32 @@ export async function GET(request: NextRequest, { params }: { params: { campaign
     };
 
     const mediaData: CreativeMediaData = {
-      type: (primaryAsset as any).type,
-      altText: (primaryAsset as any).description || (primaryAsset as any).name,
-      imageUrl:
-        (primaryAsset as any).type === CreativeAssetType.image ? (primaryAsset as any).url : null,
+      type: primaryAssetAsAny.type,
+      altText: primaryAssetAsAny.description || primaryAssetAsAny.name,
+      imageUrl: primaryAssetAsAny.type === CreativeAssetType.image ? primaryAssetAsAny.url : null,
       muxPlaybackId:
-        (primaryAsset as any).type === CreativeAssetType.video
-          ? (primaryAsset as any).muxPlaybackId
-          : null,
-      dimensions: (primaryAsset as any).dimensions,
-      duration: (primaryAsset as any).duration,
+        primaryAssetAsAny.type === CreativeAssetType.video ? primaryAssetAsAny.muxPlaybackId : null,
+      dimensions: primaryAssetAsAny.dimensions,
+      duration: primaryAssetAsAny.duration,
     };
 
     const creativeData: CreativeDataProps = {
       profile: profileData,
       caption:
         campaignSubmission.wizard?.businessGoal ||
-        (primaryAsset as any).description ||
+        primaryAssetAsAny.description ||
         campaignSubmission.mainMessage ||
         'Creative details for the campaign.',
       media: mediaData,
-      campaignAssetId: (primaryAsset as any).id.toString(),
+      campaignAssetId: primaryAssetAsAny.id.toString(),
     };
 
-    return NextResponse.json(creativeData);
-  } catch (error) {
-    const err = error instanceof Error ? error : new Error(String(error));
-    return handleApiError({
-      error: err,
-      message: 'Failed to fetch campaign creative details',
-      request,
+    logger.info('Fetched creative details successfully', {
+      campaignId: submissionId,
+      userId: clerkUserId,
     });
+    return NextResponse.json(creativeData);
+  } catch (error: unknown) {
+    return handleApiError(error, request);
   }
 }

@@ -2,13 +2,46 @@ import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { logger } from '@/utils/logger';
-import { Resend } from 'resend'; // Import Resend SDK
+// import { Resend } from 'resend'; // Commented out: Resend SDK not directly used for webhook consumption logic
 import { Webhook } from 'svix'; // Import Svix Webhook class
 
 const RESEND_WEBHOOK_SECRET = process.env.RESEND_WEBHOOK_SECRET;
 // No need to instantiate Resend client here unless the SDK's Webhook class is static
 // or you use a global instance for other purposes.
 // For webhook verification, usually you use a method from the imported Resend object/class directly.
+
+function handleErrorResponse(error: unknown, type: string, res: typeof NextResponse) {
+  let errorData: any = 'Unknown error'; // Default error data
+  let statusCode = 500;
+
+  if (error instanceof Error) {
+    logger.error(`Resend webhook error (${type})`, {
+      errorName: error.name,
+      errorMessage: error.message,
+    });
+    errorData = error.message;
+    if ((error as any).code === 'ENOTFOUND' || (error as any).code === 'ECONNREFUSED') {
+      statusCode = 503; // Service Unavailable for network errors
+    }
+  } else if (typeof error === 'object' && error !== null) {
+    // For Zod-like errors or other structured errors
+    if ('errors' in error) {
+      errorData = (error as { errors: any }).errors;
+      statusCode = 400; // Bad Request for validation errors
+    } else if ('message' in error) {
+      errorData = (error as { message: any }).message;
+    } else {
+      errorData = error; // Fallback to the error object itself if no message/errors field
+    }
+    logger.error(`Resend webhook structured error (${type})`, { errorData });
+  } else {
+    // For primitive errors or unknown types
+    errorData = String(error);
+    logger.error(`Resend webhook primitive error (${type})`, { errorData });
+  }
+
+  return res.json({ error: errorData, type }, { status: statusCode });
+}
 
 export async function POST(request: Request) {
   logger.info('[Webhook Resend] Received request');
@@ -143,9 +176,12 @@ export async function POST(request: Request) {
 
     // --- 3. Acknowledge Receipt ---
     return NextResponse.json({ received: true });
-  } catch (error: any) {
-    logger.error('[Webhook Resend] Error processing webhook payload (after verification):', error);
-    // Return 500 but don't leak error details
-    return NextResponse.json({ error: 'Webhook processing error' }, { status: 500 });
+  } catch (error: unknown) {
+    logger.error('Error processing Resend webhook event', {
+      errorName: (error as Error).name,
+      errorMessage: (error as Error).message,
+    });
+    // Return a generic error response; specific errors handled by handleErrorResponse if called before this catch
+    return handleErrorResponse(error, 'Resend webhook event', NextResponse);
   }
 }

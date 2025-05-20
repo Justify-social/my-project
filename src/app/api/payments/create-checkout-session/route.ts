@@ -46,9 +46,9 @@ async function getOrCreateStripeCustomerId(justifyUserId: string): Promise<strin
           );
           // Fall through to create a new customer
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         // Specifically handle "resource_missing" which means customer doesn't exist in Stripe
-        if (error.code === 'resource_missing') {
+        if ((error as { code?: string })?.code === 'resource_missing') {
           logger.warn(
             'Stripe Customer ID found in DB but does not exist in Stripe. Will create a new one.',
             { clerkId: justifyUserId, stripeCustomerId: user.stripeCustomerId }
@@ -61,7 +61,7 @@ async function getOrCreateStripeCustomerId(justifyUserId: string): Promise<strin
             {
               clerkId: justifyUserId,
               stripeCustomerId: user.stripeCustomerId,
-              error: error.message,
+              error: (error as Error)?.message,
             }
           );
           // Fall through might be risky depending on error, consider specific handling
@@ -97,10 +97,10 @@ async function getOrCreateStripeCustomerId(justifyUserId: string): Promise<strin
     });
 
     return customer.id;
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error in getOrCreateStripeCustomerId', {
       clerkId: justifyUserId,
-      error: error.message,
+      error: (error as Error)?.message,
     });
     return undefined;
   }
@@ -202,8 +202,8 @@ export async function POST(request: Request) {
 
     // Return the Session ID to the frontend
     return NextResponse.json({ sessionId: session.id });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating Stripe Checkout session:', error);
-    return NextResponse.json({ error: `Internal Server Error: ${error.message}` }, { status: 500 });
+    return NextResponse.json({ error: (error as Error)?.message }, { status: 500 });
   }
 }

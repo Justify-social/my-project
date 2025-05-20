@@ -4,7 +4,8 @@ import prisma from '@/lib/db'; // Actual Prisma client
 import { auth } from '@clerk/nextjs/server'; // Added auth, removed getAuth, clerkClient if unused
 import logger from '@/lib/logger';
 import { handleApiError } from '@/lib/apiErrorHandler';
-import { UnauthenticatedError, ForbiddenError, BadRequestError, NotFoundError } from '@/lib/errors';
+import { UnauthenticatedError, NotFoundError } from '@/lib/errors';
+import { BrandLiftStudy, SurveyQuestion, SurveyOption } from '@prisma/client'; // Removed BrandLiftStudyStatus_API
 
 // TODO: SSOT - Enums should be defined in and imported from src/types/brand-lift.ts
 // Defining locally for now
@@ -81,7 +82,7 @@ export const POST = async (
       userId,
     });
     return NextResponse.json(newOption, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return handleApiError(error, request);
   }
 };

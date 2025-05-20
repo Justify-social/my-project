@@ -100,18 +100,14 @@ export async function POST(req: Request) {
     );
   }
 
+  const data: unknown = evt.data;
   const eventType = evt.type;
-  logger.info(`[Clerk Webhook] Processing verified event type: ${eventType}`);
+  logger.info('Clerk webhook received', { eventType, data });
 
   // Safely get the relevant ID for logging
   let relevantIdForLog = '(unknown_event_structure)';
-  if (
-    evt.data &&
-    typeof evt.data === 'object' &&
-    'id' in evt.data &&
-    typeof evt.data.id === 'string'
-  ) {
-    relevantIdForLog = evt.data.id;
+  if (data && typeof data === 'object' && 'id' in data && typeof data.id === 'string') {
+    relevantIdForLog = data.id;
   } else if (
     eventType === 'organizationMembership.created' ||
     eventType === 'organizationMembership.updated' ||
@@ -119,23 +115,23 @@ export async function POST(req: Request) {
   ) {
     // Handle events where ID might be nested differently, e.g., membership events
     if (
-      evt.data &&
-      typeof evt.data === 'object' &&
-      'public_user_data' in evt.data &&
-      typeof evt.data.public_user_data === 'object' &&
-      evt.data.public_user_data &&
-      'user_id' in evt.data.public_user_data
+      data &&
+      typeof data === 'object' &&
+      'public_user_data' in data &&
+      typeof data.public_user_data === 'object' &&
+      data.public_user_data &&
+      'user_id' in data.public_user_data
     ) {
-      relevantIdForLog = `membership_user:${evt.data.public_user_data.user_id}`;
+      relevantIdForLog = `membership_user:${data.public_user_data.user_id}`;
     } else if (
-      evt.data &&
-      typeof evt.data === 'object' &&
-      'organization' in evt.data &&
-      typeof evt.data.organization === 'object' &&
-      evt.data.organization &&
-      'id' in evt.data.organization
+      data &&
+      typeof data === 'object' &&
+      'organization' in data &&
+      typeof data.organization === 'object' &&
+      data.organization &&
+      'id' in data.organization
     ) {
-      relevantIdForLog = `membership_org:${evt.data.organization.id}`;
+      relevantIdForLog = `membership_org:${data.organization.id}`;
     }
   } // Add more checks for other event types if needed
 
@@ -229,18 +225,25 @@ export async function POST(req: Request) {
       default:
         logger.info(`Unhandled verified Clerk event type: ${eventType}`);
     }
+    logger.info('Clerk webhook event processed successfully', { eventType, relevantIdForLog });
     return NextResponse.json(
       { success: true, message: 'Webhook processed successfully' },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (err: unknown) {
     logger.error(
       `Error handling Clerk webhook event type ${eventType} for ID ${relevantIdForLog}:`,
-      error
+      {
+        errorName: (err as Error).name,
+        errorMessage: (err as Error).message,
+        // stack: (err as Error).stack, // Optional: log stack
+      }
     );
+    // Return 200 to Clerk to prevent retries for this specific event processing error,
+    // but log it as an error on our side.
     return NextResponse.json(
-      { success: false, error: 'Webhook handler error: ' + error.message },
-      { status: 500 }
+      { success: false, error: 'Error processing event: ' + (err as Error).message },
+      { status: 200 }
     );
   }
   // --- End Event Handling ---

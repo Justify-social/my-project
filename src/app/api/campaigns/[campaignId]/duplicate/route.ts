@@ -124,48 +124,53 @@ export async function POST(
 
     // Step 3: Prepare data based on ACTUAL schema
     const {
-      id: oldId,
-      createdAt: oldCreatedAt,
-      updatedAt: oldUpdatedAt,
-      userId: oldUserId,
-      status: oldStatus,
-      currentStep: oldCurrentStep,
-      step1Complete: oldStep1Complete,
-      step2Complete: oldStep2Complete,
-      step3Complete: oldStep3Complete,
-      step4Complete: oldStep4Complete,
-      isComplete: oldIsComplete,
-      ...dataToCopy
+      id: _oldId,
+      createdAt: _oldCreatedAt,
+      updatedAt: _oldUpdatedAt,
+      userId: _oldUserId,
+      orgId: _originalOrgId,
+      status: _oldStatus,
+      currentStep: _oldCurrentStep,
+      step1Complete: _oldStep1Complete,
+      step2Complete: _oldStep2Complete,
+      step3Complete: _oldStep3Complete,
+      step4Complete: _oldStep4Complete,
+      isComplete: _oldIsComplete,
+      submissionId: _oldSubmissionId,
+      ...restOfOriginalCampaignWizard
     } = originalCampaign;
 
-    // Construct based on Prisma.CampaignWizardCreateInput
+    // Ensure new campaign is in DRAFT state and not linked to old submission
     const newCampaignData: Omit<
       Prisma.CampaignWizardCreateInput,
       'id' | 'user' | 'createdAt' | 'updatedAt'
     > = {
       name: newName,
-      businessGoal: dataToCopy.businessGoal,
-      brand: dataToCopy.brand,
-      website: dataToCopy.website,
-      startDate: dataToCopy.startDate,
-      endDate: dataToCopy.endDate,
-      timeZone: dataToCopy.timeZone,
-      primaryContact: dataToCopy.primaryContact ?? Prisma.JsonNull,
-      secondaryContact: dataToCopy.secondaryContact ?? Prisma.JsonNull,
-      additionalContacts: dataToCopy.additionalContacts ?? Prisma.JsonNull,
-      budget: dataToCopy.budget ?? Prisma.JsonNull,
-      primaryKPI: dataToCopy.primaryKPI,
-      secondaryKPIs: dataToCopy.secondaryKPIs ?? [],
-      messaging: dataToCopy.messaging ?? Prisma.JsonNull,
-      expectedOutcomes: dataToCopy.expectedOutcomes ?? Prisma.JsonNull,
-      features: dataToCopy.features ?? [],
-      demographics: dataToCopy.demographics ?? Prisma.JsonNull,
+      businessGoal: restOfOriginalCampaignWizard.businessGoal,
+      brand: restOfOriginalCampaignWizard.brand,
+      website: restOfOriginalCampaignWizard.website,
+      startDate: restOfOriginalCampaignWizard.startDate,
+      endDate: restOfOriginalCampaignWizard.endDate,
+      timeZone: restOfOriginalCampaignWizard.timeZone,
+      primaryContact: restOfOriginalCampaignWizard.primaryContact ?? Prisma.JsonNull,
+      secondaryContact: restOfOriginalCampaignWizard.secondaryContact ?? Prisma.JsonNull,
+      additionalContacts: restOfOriginalCampaignWizard.additionalContacts ?? Prisma.JsonNull,
+      budget: restOfOriginalCampaignWizard.budget ?? Prisma.JsonNull,
+      primaryKPI: restOfOriginalCampaignWizard.primaryKPI,
+      secondaryKPIs: restOfOriginalCampaignWizard.secondaryKPIs ?? [],
+      messaging: restOfOriginalCampaignWizard.messaging ?? Prisma.JsonNull,
+      expectedOutcomes: restOfOriginalCampaignWizard.expectedOutcomes ?? Prisma.JsonNull,
+      features: restOfOriginalCampaignWizard.features ?? [],
+      demographics: restOfOriginalCampaignWizard.demographics ?? Prisma.JsonNull,
       locations:
-        (dataToCopy.locations as Prisma.InputJsonValue[]) ?? ([] as Prisma.InputJsonValue[]),
-      targeting: dataToCopy.targeting ?? Prisma.JsonNull,
-      competitors: dataToCopy.competitors ?? [],
-      assets: (dataToCopy.assets as Prisma.InputJsonValue[]) ?? ([] as Prisma.InputJsonValue[]),
-      targetPlatforms: dataToCopy.targetPlatforms ?? [],
+        (restOfOriginalCampaignWizard.locations as Prisma.InputJsonValue[]) ??
+        ([] as Prisma.InputJsonValue[]),
+      targeting: restOfOriginalCampaignWizard.targeting ?? Prisma.JsonNull,
+      competitors: restOfOriginalCampaignWizard.competitors ?? [],
+      assets:
+        (restOfOriginalCampaignWizard.assets as Prisma.InputJsonValue[]) ??
+        ([] as Prisma.InputJsonValue[]),
+      targetPlatforms: restOfOriginalCampaignWizard.targetPlatforms ?? [],
       status: 'DRAFT',
       currentStep: 1,
       step1Complete: true,

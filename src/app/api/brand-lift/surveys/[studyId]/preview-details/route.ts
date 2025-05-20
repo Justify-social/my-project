@@ -4,19 +4,41 @@ import { prisma } from '@/lib/db';
 import { handleApiError } from '@/lib/apiErrorHandler';
 import { getAuth } from '@clerk/nextjs/server';
 import { BrandLiftStudyData } from '@/types/brand-lift'; // Ensure this type includes questions and campaignId
+import logger from '@/lib/logger';
 
 const paramsSchema = z.object({
   studyId: z.string(), // BrandLiftStudy.id is a CUID (string)
 });
 
-export async function GET(request: NextRequest, { params }: { params: { studyId: string } }) {
+export async function GET(
+  request: NextRequest,
+  { params: paramsPromise }: { params: Promise<{ studyId: string }> }
+) {
+  // Log the incoming params object
+  const params = await paramsPromise; // Await the params
+  console.log('[API /preview-details] Received params:', params);
+  logger.info('[API /preview-details] Received params:', { studyId: params.studyId });
+
   try {
     const { userId: clerkUserId } = getAuth(request);
     if (!clerkUserId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const validation = paramsSchema.safeParse(params);
+    // Fetch your internal User record using the clerkId
+    const internalUser = await prisma.user.findUnique({
+      where: { clerkId: clerkUserId },
+      select: { id: true }, // Select only the internal UUID
+    });
+
+    if (!internalUser) {
+      logger.error(`[API /preview-details] No internal user found for clerkId: ${clerkUserId}`);
+      return NextResponse.json({ error: 'User not found in system' }, { status: 404 });
+    }
+    const internalUserId = internalUser.id; // This is your internal DB User ID (UUID)
+
+    // Explicitly pass the expected structure to Zod
+    const validation = paramsSchema.safeParse({ studyId: params.studyId });
     if (!validation.success) {
       return NextResponse.json(
         { error: 'Invalid studyId format', details: validation.error.format() },
@@ -51,7 +73,11 @@ export async function GET(request: NextRequest, { params }: { params: { studyId:
       return NextResponse.json({ error: 'Brand Lift Study not found' }, { status: 404 });
     }
 
-    if (studyDetailsFromDb.campaign?.userId !== clerkUserId) {
+    // *** IMPORTANT: Compare internal user IDs ***
+    if (studyDetailsFromDb.campaign?.userId !== internalUserId) {
+      logger.warn(
+        `[API /preview-details] Authorization failed. clerkUserId: ${clerkUserId}, internalUserId: ${internalUserId}, studyCampaignOwnerUserId: ${studyDetailsFromDb.campaign?.userId}`
+      );
       return NextResponse.json(
         { error: 'Forbidden: You do not have access to this study' },
         { status: 403 }

@@ -42,12 +42,12 @@ const SurveyDesignPage: React.FC = () => {
           }
           const data = await res.json();
           setStudyDetails(data);
-        } catch (err: any) {
+        } catch (err: unknown) {
           logger.error('Error fetching study details for SurveyDesignPage:', {
             studyId,
-            error: err.message,
+            error: (err as Error).message,
           });
-          setFetchErrorStudyDetails(err.message);
+          setFetchErrorStudyDetails((err as Error).message);
         } finally {
           setIsLoadingStudyDetails(false);
           setActionsDisabled(false); // Enable actions once initial load attempt is complete

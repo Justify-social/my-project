@@ -312,7 +312,7 @@ export async function PATCH(
         `[DB Update - Step ${step}] Prisma update successful. Result:`,
         JSON.stringify(updatedCampaign, null, 2)
       );
-    } catch (dbError) {
+    } catch (dbError: unknown) {
       // Catch and log specific Prisma errors
       console.error(`[DB Update - Step ${step}] Prisma update FAILED:`, dbError);
       // Return a specific error response
@@ -458,7 +458,7 @@ export async function PATCH(
       data: campaignDataForResponse, // Send the raw data from DB
       message: `Step ${step} updated${messageSuffix}`,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     // Type the error as unknown for better safety
     const unknownError = error as unknown;
 

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import OpenAI from 'openai';
-import { Prisma, BrandLiftStudyStatus } from '@prisma/client';
+import { BrandLiftStudyStatus } from '@prisma/client';
 import https from 'https';
+import { z } from 'zod';
 
 import db from '@/lib/db';
 import { logger } from '@/lib/logger';
@@ -12,10 +13,6 @@ import { AiConfig, createQuestionGenerationPrompt } from '@/lib/ai/brandlift_pro
 import { BrandLiftStudyData } from '@/types/brand-lift';
 
 export const maxDuration = 60; // Set max duration to 60 seconds for Vercel Hobby (with Fluid Compute)
-
-interface RouteContext {
-  params: { studyId: string };
-}
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -189,7 +186,7 @@ export const POST = async (
       status: 200,
       headers: { 'Content-Type': 'application/yaml' },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return handleApiError(error, req);
   }
 };

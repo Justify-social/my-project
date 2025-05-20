@@ -3,9 +3,7 @@
 // import { prisma } from '@/lib/prisma'; // Unused
 
 // Define type for route context parameters
-interface RouteContext {
-  params: { campaignId: string };
-}
+// RouteContext interface definition removed
 
 // POST, GET, DELETE handlers previously here were removed due to build errors.
 // See TODO at the top of the file.
@@ -23,18 +21,13 @@ import {
   CreativeAssetType as PrismaCreativeAssetType,
   SubmissionStatus as PrismaSubmissionStatus,
   Status as PrismaCampaignStatus,
+  CampaignWizard,
 } from '@prisma/client';
 
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { handleApiError } from '@/lib/apiErrorHandler';
-import {
-  UnauthenticatedError,
-  ForbiddenError,
-  NotFoundError,
-  BadRequestError,
-  DatabaseError,
-} from '@/lib/errors';
+import { UnauthenticatedError, ForbiddenError, NotFoundError, BadRequestError } from '@/lib/errors';
 import { tryCatch } from '@/lib/middleware/api/util-middleware';
 import { addOrUpdateCampaignInAlgolia } from '@/lib/algolia'; // Import Algolia utility
 

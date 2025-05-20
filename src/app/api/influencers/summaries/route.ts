@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
+import { auth } from '@clerk/nextjs/server';
+// import { InfluencerSummary } from '@/types/influencer'; // Commented: Unused due to GET handler being commented
+import { logger } from '@/lib/logger';
+import { handleApiError } from '@/lib/apiErrorHandler';
+import { UnauthenticatedError, BadRequestError } from '@/lib/errors';
+// import { PlatformBackend } from '@/types/platforms'; // Commented: Unused type
 import { z } from 'zod';
 // Keep logger import
-import { logger } from '@/lib/logger';
-import { InfluencerSummary } from '@/types/influencer'; // Use our frontend type
-// Remove unused score/enum imports
 // import { calculateJustifyScoreV1 } from '@/lib/scoringService';
 // import { PlatformEnum } from '@/types/enums';
-import { Platform as PlatformBackend } from '@prisma/client';
 // Import the service
 import { influencerService } from '@/services/influencer';
 
@@ -87,3 +90,5 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     );
   }
 }
+
+export {}; // If this is the only active code

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { prisma } from '@/lib/db';
+import prisma from '@/lib/db';
 import { handleApiError } from '@/lib/apiErrorHandler';
-import { getAuth } from '@clerk/nextjs/server';
-import { BrandLiftStudyStatus, SurveyOverallApprovalStatus, User } from '@prisma/client';
-import { NotificationService, UserDetails, StudyDetails } from '@/lib/notificationService'; // Import service and types
+import { auth } from '@clerk/nextjs/server';
+import { BrandLiftStudyStatus, SurveyOverallApprovalStatus } from '@prisma/client';
+import { NotificationService, UserDetails, StudyDetails } from '@/lib/notificationService';
 import logger from '@/lib/logger';
 
 const paramsSchema = z.object({
@@ -16,13 +16,17 @@ const paramsSchema = z.object({
 
 const APP_BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
-export async function POST(request: NextRequest, { params }: { params: { studyId: string } }) {
+export async function POST(
+  request: NextRequest,
+  { params: paramsPromise }: { params: Promise<{ studyId: string }> }
+) {
   try {
-    const { userId: clerkUserId } = getAuth(request);
+    const { userId: clerkUserId } = await auth();
     if (!clerkUserId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const params = await paramsPromise; // Await the params
     const paramValidation = paramsSchema.safeParse(params);
     if (!paramValidation.success) {
       return NextResponse.json(

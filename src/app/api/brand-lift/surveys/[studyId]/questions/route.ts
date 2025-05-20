@@ -7,7 +7,6 @@ import { prisma as db } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { handleApiError } from '@/lib/apiErrorHandler';
 import { BadRequestError, ForbiddenError, NotFoundError, UnauthenticatedError } from '@/lib/errors';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 // Zod schema for SurveyOption creation (nested within question creation)
 const createOptionSchema = z.object({
@@ -137,9 +136,8 @@ export const POST = async (
       orgId,
     });
     return NextResponse.json(newQuestion, { status: 201 });
-  } catch (error: any) {
-    // Use the shared error handler
-    return handleApiError(error);
+  } catch (error: unknown) {
+    return handleApiError(error, req);
   }
 };
 
@@ -188,7 +186,7 @@ export const GET = async (
       orgId,
     });
     return NextResponse.json(questions);
-  } catch (error: any) {
-    return handleApiError(error);
+  } catch (error: unknown) {
+    return handleApiError(error, req);
   }
 };

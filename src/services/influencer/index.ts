@@ -4,7 +4,12 @@
 import { InfluencerSummary, InfluencerProfileData, AudienceDemographics } from '@/types/influencer';
 import { PlatformEnum } from '@/types/enums';
 import { logger } from '@/utils/logger';
-import { Platform as PlatformBackend, Prisma, PrismaClient } from '@prisma/client';
+import {
+  Platform as PlatformBackend,
+  Prisma,
+  PrismaClient,
+  Platform as PrismaPlatform,
+} from '@prisma/client';
 // TODO: Add InsightIQ enrichment if needed for summaries
 // Import needed service and mapping functions
 import {
@@ -591,27 +596,41 @@ const apiService: IInfluencerService = {
       `[influencerService] Fetching & Mapping profile for handle: ${handle}, platform: ${platform}`
     );
 
-    // --- Original Production/Staging Logic ---
     try {
       const platformEnum = findPlatformEnumByValue(platform);
       if (!platformEnum) {
-        logger.error(`[getAndMapProfileByHandleAndPlatform] Invalid platform string: ${platform}`);
-        return null;
-      }
-      const platformId = getInsightIQWorkPlatformId(platformEnum);
-      if (!platformId) {
         logger.error(
-          `[getAndMapProfileByHandleAndPlatform] Could not map platform enum ${platformEnum} to InsightIQ ID`
+          `[getAndMapProfileByHandleAndPlatform] Invalid platform string: ${platform} for handle ${handle}`
         );
         return null;
       }
 
-      // Always attempt to fetch from the configured endpoint
-      const detailedProfile = await fetchDetailedProfile(handle, platformId);
+      // Convert PlatformEnum (frontend/general) to PrismaPlatform (DB enum)
+      let prismaPlatform: PrismaPlatform;
+      switch (platformEnum) {
+        case PlatformEnum.Instagram:
+          prismaPlatform = PrismaPlatform.INSTAGRAM;
+          break;
+        case PlatformEnum.TikTok:
+          prismaPlatform = PrismaPlatform.TIKTOK;
+          break;
+        case PlatformEnum.YouTube:
+          prismaPlatform = PrismaPlatform.YOUTUBE;
+          break;
+        // Add other platform mappings as necessary
+        default:
+          logger.error(
+            `[getAndMapProfileByHandleAndPlatform] Unsupported PlatformEnum: ${platformEnum} for handle ${handle}`
+          );
+          return null;
+      }
+
+      // Now call fetchDetailedProfile with the correct PrismaPlatform type
+      const detailedProfile = await fetchDetailedProfile(handle, prismaPlatform);
 
       if (!detailedProfile) {
         logger.warn(
-          `[getAndMapProfileByHandleAndPlatform] Profile not found via fetchDetailedProfile for ${handle} on ${platformId}`
+          `[getAndMapProfileByHandleAndPlatform] Profile not found via fetchDetailedProfile for ${handle} on ${prismaPlatform}`
         );
         return null;
       }
@@ -648,7 +667,6 @@ const apiService: IInfluencerService = {
       );
       return null;
     }
-    // --- End Original Logic ---
   },
 
   // Deprecated implementation

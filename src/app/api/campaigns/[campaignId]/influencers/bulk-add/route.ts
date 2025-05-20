@@ -1,21 +1,21 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { prisma } from '@/lib/prisma';
-import { Platform, Prisma } from '@prisma/client';
-import { v4 as uuidv4 } from 'uuid';
+// import { prisma } from '@/lib/prisma'; // Commented out as unused in active code
+// import { Platform, Prisma } from '@prisma/client'; // Commented out as unused in active code
+// import { v4 as uuidv4 } from 'uuid'; // Commented out as unused in active code
 
 // Define the schema for an individual influencer in the request
-const influencerInputSchema = z.object({
-  handle: z.string().min(1, { message: 'Influencer handle is required' }),
-  platform: z.nativeEnum(Platform, { errorMap: () => ({ message: 'Invalid platform provided' }) }),
-});
+// const influencerInputSchema = z.object({ // Commented out
+//   handle: z.string().min(1, { message: 'Influencer handle is required' }),
+//   platform: z.nativeEnum(Platform, { errorMap: () => ({ message: 'Invalid platform provided' }) }),
+// });
 
 // Define the schema for the bulk add request body
-const bulkAddInfluencerSchema = z.object({
-  influencers: z
-    .array(influencerInputSchema)
-    .min(1, { message: 'Influencer list cannot be empty' }),
-});
+// const bulkAddInfluencerSchema = z.object({ // Commented out
+//   influencers: z
+//     .array(influencerInputSchema)
+//     .min(1, { message: 'Influencer list cannot be empty' }),
+// });
 
 // Use the exact signature pattern from the working route
 export async function POST(

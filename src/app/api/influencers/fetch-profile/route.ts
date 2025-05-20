@@ -38,16 +38,17 @@ export async function GET(request: NextRequest) {
         { status: 404 }
       );
     }
-  } catch (error: any) {
-    const message = error instanceof Error ? error.message : 'Unknown internal error';
+  } catch (error: unknown) {
+    // Log specific error message if available, otherwise generic message
+    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
     logger.error(
       `[API /influencers/fetch-profile] Error processing profile for handle ${handle}:`,
-      message,
+      errorMessage,
       error
     );
-    const statusCode = error.statusCode || 500;
+    const statusCode = (error as any).statusCode || 500;
     return NextResponse.json(
-      { success: false, error: 'Failed to process influencer profile', details: message },
+      { success: false, error: 'Failed to process influencer profile', details: errorMessage },
       { status: statusCode }
     );
   }

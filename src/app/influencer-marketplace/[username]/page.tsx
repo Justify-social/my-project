@@ -2,11 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation'; // Hooks for App Router
-import { influencerService } from '@/services/influencer';
 import { InfluencerProfileData } from '@/types/influencer';
-import ConditionalLayout from '@/components/layouts/conditional-layout'; // Assuming layout component
-import { Button } from '@/components/ui/button';
-import { logger } from '@/utils/logger';
+import { logger } from '@/lib/logger';
 import { Skeleton } from '@/components/ui/skeleton'; // Use actual Skeleton
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'; // Use actual Alert
 import { Icon } from '@/components/ui/icon/icon'; // Assuming Icon component exists
@@ -44,6 +41,8 @@ import {
 // } from '@/components/ui/select';
 import { toast } from 'react-hot-toast';
 import { ButtonAddToCampaign } from '@/components/ui/button-add-to-campaign'; // Import new component
+import { Button } from '@/components/ui/button'; // Added Button import
+// import { ProfilePageLayout } from '@/components/layouts/ProfilePageLayout';
 
 // Helper function to get enum key from value (case-insensitive)
 function getPlatformEnumFromString(value: string | null): PlatformEnum | null {
@@ -188,7 +187,10 @@ export default function InfluencerProfilePage() {
         }
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Network or fetch error';
-        logger.error(`[ProfilePage] Fetch profile error for handle ${fetchHandle}:`, err);
+        logger.error(`[ProfilePage] Fetch profile error for handle ${fetchHandle}:`, {
+          error: message,
+          originalError: err,
+        });
         setError(`Failed to load profile: ${message}`);
       } finally {
         setIsLoading(false);
@@ -239,9 +241,12 @@ export default function InfluencerProfilePage() {
 
       toast.success('Sample report ready. Opening...', { id: generatingToastId });
       window.open(sampleReportUrl, '_blank');
-    } catch (error) {
+    } catch (error: unknown) {
       // Catch potential errors from setTimeout or window.open, though unlikely
-      logger.error('[ProfilePage] Error during simulated report generation:', error);
+      logger.error('[ProfilePage] Error during simulated report generation:', {
+        error: (error as Error).message,
+        originalError: error,
+      });
       toast.error('An unexpected error occurred while preparing the sample report.', {
         id: generatingToastId,
       });
@@ -251,9 +256,7 @@ export default function InfluencerProfilePage() {
   };
 
   return (
-    // REMOVE ConditionalLayout wrapper - it's provided by RootLayout
-    // <ConditionalLayout>
-    // </ConditionalLayout>
+    // <ProfilePageLayout>
     <div className="p-4 md:p-6 space-y-4">
       {/* Top Bar: Back Button & Actions */}
       <div className="flex justify-between items-center">
@@ -363,5 +366,6 @@ export default function InfluencerProfilePage() {
         <ErrorDisplay message={'Influencer data could not be loaded.'} />
       )}
     </div>
+    // </ProfilePageLayout>
   );
 }

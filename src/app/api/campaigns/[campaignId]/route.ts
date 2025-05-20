@@ -156,7 +156,7 @@ const campaignUpdateSchema = z.object({
   name: z.string().optional(),
   // Other fields
   contacts: z.string().optional(),
-  additionalContacts: z.array(z.record(z.string(), z.any())).optional(),
+  additionalContacts: z.array(z.record(z.string(), z.unknown())).optional(),
   primaryContact: z
     .object({
       firstName: z.string(),
@@ -189,7 +189,7 @@ const campaignUpdateSchema = z.object({
     .optional(),
   // For backward compatibility
   submissionStatus: z.enum(['draft', 'submitted']).optional(),
-  influencers: z.array(z.any()).optional(),
+  influencers: z.array(z.unknown()).optional(),
 });
 
 export async function GET(
@@ -429,7 +429,7 @@ export async function GET(
       success: true,
       data: formattedCampaign,
     });
-  } catch (internalError) {
+  } catch (internalError: unknown) {
     // Catch any errors within the main logic block
     console.error('[API GET /api/campaigns/[campaignId]] Internal error caught:', internalError);
     // Return a generic 500 error response
@@ -542,14 +542,13 @@ export async function DELETE(
       logger.info(`[Algolia] Attempting to delete campaign ${campaignId} from Algolia index.`);
       await deleteCampaignFromAlgolia(campaignId);
       logger.info(`[Algolia] Successfully deleted campaign ${campaignId} from Algolia index.`);
-    } catch (algoliaError: any) {
+    } catch (algoliaError: unknown) {
       logger.error(
         `[Algolia] Failed to delete campaign ${campaignId} from Algolia. DB deletion was successful.`,
         {
           campaignId: campaignId,
-          errorName: algoliaError.name,
-          errorMessage: algoliaError.message,
-          // algoliaErrorStack: algoliaError.stack // Be cautious with logging full stacks
+          errorName: (algoliaError as Error).name,
+          errorMessage: (algoliaError as Error).message,
         }
       );
       // Non-critical error for the overall success of the DELETE operation
@@ -559,11 +558,13 @@ export async function DELETE(
       { success: true, message: `Campaign "${campaignWizardToDelete.name}" deleted successfully.` },
       { status: 200 }
     );
-  } catch (error: any) {
-    logger.error(`DELETE /api/campaigns/${campaignId} - General error: ${error.message}`, {
-      errorName: error.name,
-      // stack: error.stack // Be cautious with logging full stacks
-    });
+  } catch (error: unknown) {
+    logger.error(
+      `DELETE /api/campaigns/${campaignId} - General error: ${(error as Error).message}`,
+      {
+        errorName: (error as Error).name,
+      }
+    );
     return NextResponse.json(
       {
         error: 'Internal server error',
@@ -588,9 +589,12 @@ export async function PUT(
     );
     const numericId = parseInt(campaignId, 10);
     const isNumeric = !isNaN(numericId);
-
-    // Parse the request body and assert type
-    const body = (await request.json()) as z.infer<typeof campaignUpdateSchema>;
+    let body;
+    try {
+      body = await request.json();
+    } catch (e: unknown) {
+      return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+    }
     // Validate the body (type assertion doesn't replace runtime validation)
     const validationResult = campaignUpdateSchema.safeParse(body);
     if (!validationResult.success) {
@@ -648,7 +652,7 @@ export async function PUT(
 
     console.log(`[API PUT /api/campaigns/[campaignId]] Campaign updated: ${campaignId}`);
     return NextResponse.json({ success: true, data: updatedCampaign }, { status: 200 });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`[API PUT /api/campaigns/[campaignId]] Error:`, error);
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Unknown error' },

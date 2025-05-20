@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
-import { useAuth } from '@clerk/nextjs';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { useAuth, useUser } from '@clerk/nextjs';
 import {
-  Prisma,
   BrandLiftStudyStatus,
   SurveyOverallApprovalStatus,
   SurveyApprovalCommentStatus,
 } from '@prisma/client';
+import { useParams, useRouter } from 'next/navigation';
 
 // Shadcn UI Imports
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'; //
 import { Badge } from '@/components/ui/badge'; // Used by StatusTag
 import { ScrollArea } from '@/components/ui/scroll-area'; // For long lists of questions/comments
 import { Separator } from '@/components/ui/separator';
+import { toast } from 'react-hot-toast';
 
 import logger from '@/lib/logger';
 import {
@@ -35,16 +36,12 @@ import {
   SurveyApprovalCommentData,
   SurveyApprovalStatusData,
 } from '@/types/brand-lift';
-import CommentThread, { CommentData as DisplayCommentData, CommentAuthor } from './CommentThread'; // Use DisplayCommentData alias
+import CommentThread, { CommentData as DisplayCommentData } from './CommentThread'; // Use DisplayCommentData alias
 import StatusTag from './StatusTag';
+import { cn } from '@/lib/utils';
 
 interface ApprovalWorkflowProps {
   studyId: string;
-}
-
-// Helper to determine if a string is a valid SurveyOverallApprovalStatus
-function isValidOverallStatus(status: any): status is SurveyOverallApprovalStatus {
-  return Object.values(SurveyOverallApprovalStatus).includes(status as SurveyOverallApprovalStatus);
 }
 
 const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({ studyId }) => {
@@ -110,9 +107,12 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({ studyId }) => {
             .catch(() => 'Failed to fetch approval status')
         );
       }
-    } catch (err: any) {
-      logger.error('Error fetching data for approval workflow:', { studyId, error: err.message });
-      setError(err.message || 'Failed to load approval data.');
+    } catch (error: unknown) {
+      logger.error('Error fetching data for approval workflow:', {
+        studyId,
+        error: (error as Error)?.message,
+      });
+      setError((error as Error)?.message || 'Failed to load approval data.');
     } finally {
       setIsLoading(false);
     }
@@ -156,9 +156,14 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({ studyId }) => {
             .catch(() => 'Failed to add comment')
         );
       fetchData(); // Refetch all data to ensure consistency
-    } catch (err: any) {
-      logger.error('Error adding comment:', { studyId, questionId, error: err.message });
-      setError(err.message || 'Could not post comment.');
+      logger.info('[ApprovalWorkflow] Comment added successfully');
+    } catch (error: unknown) {
+      logger.error('[ApprovalWorkflow] Error adding comment:', {
+        studyId,
+        questionId,
+        error: (error as Error)?.message,
+      });
+      setError((error as Error)?.message || 'Could not post comment.');
     } finally {
       setActionLoading(prev => ({ ...prev, [actionKey]: false }));
     }
@@ -197,9 +202,14 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({ studyId }) => {
         setStudyData(prev => (prev ? { ...prev, status: data.studyStatus } : null));
       }
       fetchData(); // Refetch for full consistency
-    } catch (err: any) {
-      logger.error('Error updating approval status:', { studyId, newStatus, error: err.message });
-      setError(err.message || 'Could not update status.');
+      logger.info('[ApprovalWorkflow] Study approval status updated successfully');
+    } catch (error: unknown) {
+      logger.error('[ApprovalWorkflow] Error updating approval status:', {
+        studyId,
+        newStatus,
+        error: (error as Error)?.message,
+      });
+      setError((error as Error)?.message || 'Could not update status.');
     } finally {
       setActionLoading(prev => ({ ...prev, [actionKey]: false }));
     }
@@ -232,9 +242,12 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({ studyId }) => {
       logger.info(`Study ${studyId} status updated to COLLECTING.`);
       // TODO: Show success toast: "Study submitted for data collection!"
       // No navigation needed from here as per current MVP flow, page might show new status.
-    } catch (err: any) {
-      logger.error('Error submitting study for data collection:', { studyId, error: err.message });
-      setError(err.message || 'Failed to submit for data collection.');
+    } catch (error: unknown) {
+      logger.error('Error submitting study for data collection:', {
+        studyId,
+        error: (error as Error)?.message,
+      });
+      setError((error as Error)?.message || 'Failed to submit for data collection.');
     } finally {
       setActionLoading(prev => ({ ...prev, [actionKey]: false }));
     }

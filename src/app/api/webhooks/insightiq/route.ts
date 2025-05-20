@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 // import { PrismaClient, Platform, Prisma } from '@prisma/client'; // Keep commented until DB logic is refactored
-import crypto from 'crypto';
-import { logger } from '@/utils/logger';
+// import crypto from 'crypto'; // crypto is unused
+import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 // import { makeInsightIQRequest } from '@/lib/insightiqService'; // Keep commented until service functions are implemented
 
 // const prisma = new PrismaClient(); // Keep commented until DB logic is refactored
@@ -56,12 +57,16 @@ export async function POST(request: NextRequest) {
       '[Webhook /api/webhooks/insightiq] Payload processing NOT IMPLEMENTED (Pending InsightIQ Docs)'
     );
 
-    // Acknowledge receipt immediately (within 5s timeout)
-    return NextResponse.json({ success: true, message: 'Webhook received' }, { status: 200 });
+    // For now, always return a 200 OK to acknowledge receipt, even if processing fails.
+    // Specific error handling and retries should be managed based on InsightIQ's webhook behavior.
+    return NextResponse.json({ message: 'Webhook received' }, { status: 200 });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error processing webhook';
-    logger.error(`[API /webhooks/insightiq] Error processing webhook: ${message}`, error);
-    return NextResponse.json({ success: false, error: message }, { status: 500 });
+    logger.error('Error processing InsightIQ webhook:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      errorObject: error,
+    });
+    // Still return 200 to acknowledge receipt to InsightIQ, preventing retries for server-side errors.
+    return NextResponse.json({ message: 'Webhook received' }, { status: 200 });
   }
 }
 

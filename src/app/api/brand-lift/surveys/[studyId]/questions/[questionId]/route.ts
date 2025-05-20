@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { z } from 'zod';
-import { prisma } from '@/lib/db';
+import prisma from '@/lib/db';
+import logger from '@/lib/logger';
 import { handleApiError } from '@/lib/apiErrorHandler';
 import { tryCatch } from '@/lib/middleware/api/util-middleware';
-import { withValidation } from '@/lib/middleware/api/util-middleware';
-import { SubmissionStatus } from '@prisma/client';
-
-import { logger } from '@/lib/logger';
+import {
+  BrandLiftStudyStatus,
+  SurveyQuestionType,
+  SurveyQuestion as PrismaSurveyQuestion,
+} from '@prisma/client';
 import {
   UnauthenticatedError,
   ForbiddenError,
   NotFoundError,
-  BadRequestError,
-  DatabaseError,
   ZodValidationError,
 } from '@/lib/errors';
 

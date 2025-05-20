@@ -37,6 +37,8 @@ import { Badge } from '@/components/ui/badge';
 import { IconButtonAction } from '@/components/ui/button-icon-action';
 import logger from '@/lib/logger';
 import Image from 'next/image';
+import { Textarea } from '@/components/ui/textarea';
+import { AccordionTrigger } from '@/components/ui/accordion';
 
 // Assuming these types might be needed from a shared location or defined here
 // For DraftCampaignData structure - based on wizard context Step5Content
@@ -865,9 +867,12 @@ const CampaignReviewStudySetup: React.FC<CampaignReviewStudySetupProps> = ({ cam
         const data: CampaignDetails = await response.json();
         setCampaignData(data);
         setValue('studyName', `${data.name ?? 'Campaign'} - Brand Lift Study`);
-      } catch (err: any) {
-        logger.error('Error fetching campaign details:', { campaignId, error: err.message });
-        setFetchError(err.message || 'An unexpected error occurred.');
+      } catch (error: unknown) {
+        logger.error('Error fetching campaign details:', {
+          campaignId,
+          error: (error as Error).message,
+        });
+        setFetchError((error as Error).message || 'An unexpected error occurred.');
       }
       setIsLoading(false);
     };
@@ -927,9 +932,9 @@ const CampaignReviewStudySetup: React.FC<CampaignReviewStudySetupProps> = ({ cam
       const newStudy = await response.json();
       logger.info('Brand Lift study created successfully', { newStudyId: newStudy.id });
       router.push(`/brand-lift/survey-design/${newStudy.id}`);
-    } catch (err: any) {
-      logger.error('Error creating Brand Lift study:', { error: err.message });
-      setSubmitError(err.message || 'An unexpected error occurred.');
+    } catch (error: unknown) {
+      logger.error('Error creating Brand Lift study:', { error: (error as Error).message });
+      setSubmitError((error as Error).message || 'An unexpected error occurred.');
     } finally {
       setIsSubmitting(false);
     }

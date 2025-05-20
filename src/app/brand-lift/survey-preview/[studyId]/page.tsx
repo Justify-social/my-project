@@ -73,9 +73,12 @@ const SurveyPreviewPage = () => {
         );
         setCreativeDetails(null);
       }
-    } catch (err: any) {
-      logger.error('Error fetching survey preview page data:', { studyId, error: err.message });
-      setError(err.message);
+    } catch (err: unknown) {
+      logger.error('Error fetching survey preview page data:', {
+        studyId,
+        error: (err as Error)?.message,
+      });
+      setError((err as Error)?.message);
       setStudyDetails(null);
       setCreativeDetails(null);
     } finally {
@@ -112,9 +115,12 @@ const SurveyPreviewPage = () => {
       const result = await response.json();
       showSuccessToast(result.message || 'Study submitted for review successfully!');
       router.push(`/brand-lift/approval/${studyId}`);
-    } catch (err: any) {
-      logger.error('Error submitting study for review:', { studyId, error: err.message });
-      showErrorToast(err.message || 'Failed to submit study for review.');
+    } catch (err: unknown) {
+      logger.error('Error submitting study for review:', {
+        studyId,
+        error: (err as Error)?.message,
+      });
+      showErrorToast((err as Error)?.message || 'Failed to submit study for review.');
     } finally {
       setIsSubmittingReview(false);
     }

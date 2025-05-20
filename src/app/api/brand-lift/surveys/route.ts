@@ -11,15 +11,10 @@ import {
   ForbiddenError,
   NotFoundError,
   BadRequestError,
-  DatabaseError,
   ZodValidationError,
 } from '@/lib/errors'; // Ensure all used errors are imported
 import { prisma } from '@/lib/db';
-import { BrandLiftStudyData } from '@/types/brand-lift'; // Removed BrandLiftStudyStatus
-import {
-  BrandLiftStudyStatus as PrismaBrandLiftStudyStatus,
-  SubmissionStatus,
-} from '@prisma/client';
+import { BrandLiftStudyStatus as PrismaBrandLiftStudyStatus } from '@prisma/client';
 import { addOrUpdateBrandLiftStudyInAlgolia } from '@/lib/algolia'; // Import Algolia utility
 // import { hasPermission } from '@/lib/auth/permissions'; // Commented out - path needs verification
 
@@ -174,13 +169,13 @@ export async function POST(req: NextRequest) {
           logger.info(`[Algolia] Indexing newly created BrandLiftStudy ${newStudy.id}`);
           await addOrUpdateBrandLiftStudyInAlgolia(newStudy);
           logger.info(`[Algolia] Successfully indexed BrandLiftStudy ${newStudy.id}.`);
-        } catch (algoliaError: any) {
+        } catch (algoliaError: unknown) {
           logger.error(
             `[Algolia] Failed to index BrandLiftStudy ${newStudy.id} after creation. DB operation was successful.`,
             {
               studyId: newStudy.id,
-              errorName: algoliaError.name,
-              errorMessage: algoliaError.message,
+              errorName: (algoliaError as Error).name,
+              errorMessage: (algoliaError as Error).message,
             }
           );
           // Non-critical error for the main POST operation

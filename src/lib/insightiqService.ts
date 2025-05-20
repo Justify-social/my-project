@@ -667,13 +667,11 @@ export async function fetchDetailedProfile(
 ): Promise<InsightIQProfileWithAnalytics | null> {
   const platformEnum = mapPrismaPlatformToEnum(platform);
   if (!platformEnum) {
-    // mapPrismaPlatformToEnum now logs and returns null for unmapped platforms
     return null;
   }
 
   const workPlatformId = getInsightIQWorkPlatformId(platformEnum);
   if (!workPlatformId) {
-    // This log might be redundant if mapPrismaPlatformToEnum already logged, but good for clarity
     logger.error(
       `[InsightIQService] Could not get InsightIQ work_platform_id for PlatformEnum: ${platformEnum} (derived from Prisma Platform: ${platform}) for handle: ${handle}`
     );
@@ -681,31 +679,83 @@ export async function fetchDetailedProfile(
   }
 
   logger.info(
-    `[InsightIQService] Fetching detailed profile for handle: ${handle}, (Prisma Platform: ${platform} -> InsightIQ work_platform_id: ${workPlatformId})`
+    `[InsightIQService] Fetching detailed profile via /analytics for handle: ${handle}, Platform: ${platformEnum} (InsightIQ ID: ${workPlatformId})`
   );
 
-  const profileData = await callAnalyticsEndpoint(handle, workPlatformId);
+  const endpoint = '/v1/social/creators/profiles/analytics';
+  const requestBody = {
+    identifier: handle,
+    work_platform_id: workPlatformId,
+  };
 
-  if (!profileData) {
-    logger.warn(
-      `[InsightIQService] callAnalyticsEndpoint returned null for ${handle} using work_platform_id ${workPlatformId}`
+  try {
+    // Use makeInsightIQRequest to call the /analytics endpoint
+    const analyticsResponse = await makeInsightIQRequest<CreatorProfileAnalyticsResponse>(
+      endpoint,
+      {
+        method: 'POST',
+        body: JSON.stringify(requestBody),
+      }
     );
-    return null;
-  }
 
-  const returnedHandle = profileData.platform_username?.toLowerCase();
-  const requestedHandleLower = handle.toLowerCase();
-  if (returnedHandle && returnedHandle !== requestedHandleLower) {
-    const isSandbox = serverConfig.insightiq.baseUrl?.includes('sandbox');
-    const mismatchMessage = `CRITICAL MISMATCH: Requested handle ${requestedHandleLower} but /analytics returned ${returnedHandle}`;
-    if (isSandbox) {
-      logger.warn(`[Sandbox Mode] ${mismatchMessage}. Proceeding with received data.`);
-    } else {
-      logger.error(`[Non-Sandbox Mode] ${mismatchMessage}. Returning null.`);
+    if (!analyticsResponse || !analyticsResponse.profile) {
+      logger.warn(
+        `[InsightIQService] /analytics endpoint returned no profile data for handle: ${handle}, platformId: ${workPlatformId}`,
+        { response: analyticsResponse }
+      );
+      // Fallback to mock data ONLY if in SANDBOX and analytics fails
+      if (serverConfig.insightiq.baseUrl?.includes('sandbox')) {
+        logger.warn(
+          `[InsightIQService] Sandbox mode: Falling back to mock profile data for ${handle} due to analytics failure.`
+        );
+        return mockInsightIQProfile; // Ensure mockInsightIQProfile is correctly typed as InsightIQProfileWithAnalytics
+      }
       return null;
     }
+
+    // Log the raw profile data from the analytics response
+    logger.debug(
+      `[InsightIQService] Raw profile from /analytics for ${handle}:`,
+      analyticsResponse.profile
+    );
+
+    // Validate that the returned profile matches the requested handle (case-insensitive)
+    const returnedHandle = analyticsResponse.profile.platform_username?.toLowerCase();
+    const requestedHandleLower = handle.toLowerCase();
+
+    if (returnedHandle && returnedHandle !== requestedHandleLower) {
+      const isSandbox = serverConfig.insightiq.baseUrl?.includes('sandbox');
+      const mismatchMessage = `CRITICAL MISMATCH: Requested handle ${requestedHandleLower} but /analytics returned ${returnedHandle}`;
+      if (isSandbox) {
+        logger.warn(`[Sandbox Mode] ${mismatchMessage}. Proceeding with received data.`);
+      }
+      // Non-sandbox: if strict matching is required, you might return null or throw an error.
+      // For now, we'll proceed with the returned data even on mismatch if not in sandbox, but log it critically.
+      // However, the prompt indicates this as a critical mismatch that should cause a return null if not sandbox.
+      // Let's adhere to that logic for production-like environments.
+      if (!isSandbox) {
+        logger.error(
+          `[Non-Sandbox Mode] ${mismatchMessage}. Returning null as data integrity is compromised.`
+        );
+        return null;
+      }
+    }
+
+    return analyticsResponse.profile as InsightIQProfileWithAnalytics;
+  } catch (error: any) {
+    logger.error(
+      `[InsightIQService] Error calling /analytics for handle ${handle}, platformId ${workPlatformId}:`,
+      error
+    );
+    // Fallback to mock data ONLY if in SANDBOX and analytics fails
+    if (serverConfig.insightiq.baseUrl?.includes('sandbox')) {
+      logger.warn(
+        `[InsightIQService] Sandbox mode: Falling back to mock profile data for ${handle} due to analytics call error.`
+      );
+      return mockInsightIQProfile;
+    }
+    return null;
   }
-  return profileData;
 }
 
 // Helper function to map Prisma Platform to PlatformEnum
@@ -727,29 +777,6 @@ const mapPrismaPlatformToEnum = (prismaPlatform: Platform): PlatformEnum | null 
       return null;
   }
 };
-
-async function callAnalyticsEndpoint(
-  handle: string,
-  platformId: string | null
-): Promise<InsightIQProfileWithAnalytics | null> {
-  if (!platformId) return null; // Guard against null platformId from getInsightIQWorkPlatformId
-  logger.info(
-    `[InsightIQService] Mock: Calling POST /analytics for handle '${handle}' and platformId '${platformId}'`
-  );
-  // Simplified mock for brevity, assuming full mock logic is in the actual file
-  if (
-    handle === 'test_influencer_tiktok' &&
-    platformId === getInsightIQWorkPlatformId(PlatformEnum.TikTok)
-  ) {
-    return { image_url: 'https://static.generated.photos/vue-static/home/feed/male.png' } as any;
-  } else if (
-    handle === 'test_influencer_ig' &&
-    platformId === getInsightIQWorkPlatformId(PlatformEnum.Instagram)
-  ) {
-    return { image_url: 'https://static.generated.photos/vue-static/home/feed/female.png' } as any;
-  }
-  return null;
-}
 
 // TODO: Add other required functions based on analysis of InsightIQ usage and InsightIQ spec
 // e.g., getInsightIQContents(accountId), etc.
