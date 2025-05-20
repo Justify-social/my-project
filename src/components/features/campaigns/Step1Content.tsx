@@ -66,6 +66,10 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 
+console.log('[DEBUG] PrismaCurrency.GBP:', PrismaCurrency.GBP);
+console.log('[DEBUG] PrismaCurrency.USD:', PrismaCurrency.USD);
+console.log('[DEBUG] typeof PrismaCurrency.GBP:', typeof PrismaCurrency.GBP);
+
 // --- Define Toast Helper Functions Locally ---
 const showSuccessToast = (message: string, iconId?: string) => {
   const finalIconId = iconId || 'faFloppyDiskLight';
@@ -444,6 +448,12 @@ function Step1Content() {
       let timezoneToUse: string | null = null;
       let currencyToUse: PrismaCurrency | null = null;
 
+      // Log the state of localization.currency right before it's used to determine currencyToUse
+      logger.info(
+        '[Initial Value Calc Effect] Value of localization.currency for new campaign decision:',
+        { localizedCurrency: localization.currency }
+      );
+
       const savedTimezone = wizardState.timeZone;
       if (isExistingCampaign && savedTimezone) {
         timezoneToUse = savedTimezone;
@@ -466,12 +476,16 @@ function Step1Content() {
       } else if (!isExistingCampaign && localization.currency) {
         currencyToUse = localization.currency as PrismaCurrency;
         logger.info(
-          `[Initial Value Calc Effect] New campaign: Using localized currency: ${currencyToUse}`
+          `[Initial Value Calc Effect] New campaign: Assigning currencyToUse from localization.currency: ${currencyToUse}`
         );
       } else if (isExistingCampaign && !savedWizardCurrency && localization.currency) {
         currencyToUse = localization.currency as PrismaCurrency;
         logger.info(
           `[Initial Value Calc Effect] Existing campaign (no saved currency): Using localized currency: ${currencyToUse}`
+        );
+      } else if (!isExistingCampaign && !localization.currency) {
+        logger.warn(
+          '[Initial Value Calc Effect] New campaign: localization.currency is falsy, currencyToUse remains null.'
         );
       }
 
@@ -514,7 +528,11 @@ function Step1Content() {
                 total: parseFloat(wizardState.budget.total?.toString() || '0') || 0,
                 socialMedia: parseFloat(wizardState.budget.socialMedia?.toString() || '0') || 0,
               }
-            : { currency: finalCurrency, total: 0, socialMedia: 0 },
+            : {
+                currency: currencyToUse || PrismaCurrency.USD,
+                total: 0,
+                socialMedia: 0,
+              },
         Influencer:
           wizardState.Influencer &&
           Array.isArray(wizardState.Influencer) &&
@@ -522,6 +540,12 @@ function Step1Content() {
             ? wizardState.Influencer
             : [{ id: uuidv4(), platform: PlatformEnum.Instagram, handle: '' }],
       };
+
+      // Reverted log message to reflect the logic being tested now
+      logger.info(
+        '[Initial Value Calc Effect] Constructed initialData (Using currencyToUse Logic):',
+        initialData
+      );
 
       setInitialFormState(initialData);
     }
@@ -544,13 +568,48 @@ function Step1Content() {
 
     if (initialFormState && !initialDataLoaded.current && !localization.isLoading) {
       logger.info(
-        '[Form Reset Effect] Conditions met. Applying calculated initial values to form:',
-        initialFormState
+        '[Form Reset Effect] initialFormState BEFORE form.reset (deep copy):',
+        JSON.parse(JSON.stringify(initialFormState)) // Deep copy for logging
       );
-      form.reset(initialFormState);
+      logger.info(
+        `[Form Reset Effect] initialFormState.budget.currency BEFORE form.reset: ${initialFormState.budget?.currency}`
+      );
+
+      form.reset(initialFormState); // Reset with the (potentially USD-budgeted) initial state first
+
+      // *** NEW SURGICAL INTERVENTION FOR NEW CAMPAIGNS ***
+      const isExistingCampaign = !!wizardState?.id;
+      if (!isExistingCampaign && localization.currency) {
+        logger.info(
+          `[Form Reset Effect] NEW CAMPAIGN: Forcing budget.currency to localized value: ${localization.currency}`
+        );
+        form.setValue('budget.currency', localization.currency, {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
+        // If we force currency, it might be good to ensure amounts are also reset if they are part of this initialization logic
+        if (initialFormState.budget?.total === 0 && initialFormState.budget?.socialMedia === 0) {
+          // This check ensures we only reset amounts if they were meant to be zeroed for a new campaign with localized currency
+          // form.setValue('budget.total', 0, { shouldValidate: true, shouldDirty: true });
+          // form.setValue('budget.socialMedia', 0, { shouldValidate: true, shouldDirty: true });
+        }
+      }
+      // *** END NEW SURGICAL INTERVENTION ***
+
+      const formValuesAfterResetAndIntervention = form.getValues();
+      logger.info(
+        '[Form Reset Effect] Form values AFTER form.reset AND INTERVENTION (deep copy):',
+        JSON.parse(JSON.stringify(formValuesAfterResetAndIntervention))
+      );
+      logger.info(
+        `[Form Reset Effect] form.getValues('budget.currency') AFTER form.reset AND INTERVENTION: ${form.getValues(
+          'budget.currency'
+        )}`
+      );
+
       initialDataLoaded.current = true;
     }
-  }, [initialFormState, form.reset, form, localization.isLoading]);
+  }, [initialFormState, form, localization.isLoading, localization.currency, wizardState?.id]);
 
   const {
     fields: influencerFields,
