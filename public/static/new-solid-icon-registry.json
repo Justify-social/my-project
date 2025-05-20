@@ -10,6 +10,69 @@
       "name": "Sparkles",
       "faVersion": "fas fa-sparkles",
       "path": "/icons/solid/faSparklesSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faSignalBarsSolid",
+      "name": "Signal Bars Solid",
+      "faVersion": "fas fa-signal-bars",
+      "path": "/icons/solid/faSignalBarsSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faBatteryFullSolid",
+      "name": "Battery Full Solid",
+      "faVersion": "fas fa-battery-full",
+      "path": "/icons/solid/faBatteryFullSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faBatteryThreeQuartersSolid",
+      "name": "Battery Three Quarters Solid",
+      "faVersion": "fas fa-battery-three-quarters",
+      "path": "/icons/solid/faBatteryThreeQuartersSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faImageSlashSolid",
+      "name": "Image Slash Solid",
+      "faVersion": "fas fa-image-slash",
+      "path": "/icons/solid/faImageSlashSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faCirclePlaySolid",
+      "name": "Circle Play Solid",
+      "faVersion": "fas fa-circle-play",
+      "path": "/icons/solid/faCirclePlaySolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faCirclePauseSolid",
+      "name": "Circle Pause Solid",
+      "faVersion": "fas fa-circle-pause",
+      "path": "/icons/solid/faCirclePauseSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faMusicSolid",
+      "name": "Music Solid",
+      "faVersion": "fas fa-music",
+      "path": "/icons/solid/faMusicSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faEyeSlashSolid",
+      "name": "Eye Slash Solid",
+      "faVersion": "fas fa-eye-slash",
+      "path": "/icons/solid/faEyeSlashSolid.svg"
+    },
+    {
+      "category": "solid",
+      "id": "faWifiSolid",
+      "name": "Wifi Solid",
+      "faVersion": "fas fa-wifi",
+      "path": "/icons/solid/faWifiSolid.svg"
     }
   ]
 }

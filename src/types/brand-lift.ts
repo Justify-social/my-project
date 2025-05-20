@@ -146,3 +146,34 @@ export type SurveyQuestionWithOptionInput = Omit<
 > & {
   options: Array<Omit<SurveyOptionData, 'id' | 'createdAt' | 'updatedAt' | 'questionId'>>;
 };
+
+// --- Types for Campaign Creative Preview ---
+
+export interface CreativeProfileData {
+  name: string; // Source: CampaignWizardSubmission.influencerHandle
+  username: string; // Source: CampaignWizardSubmission.influencerHandle
+  profilePictureUrl?: string | null; // Source: Fetched from InsightIQ API using influencerHandle
+}
+
+export interface CreativeMediaData {
+  type: 'image' | 'video'; // Source: CreativeAsset.type
+  altText?: string; // Source: CreativeAsset.description or CreativeAsset.name
+  imageUrl?: string | null; // Source: CreativeAsset.url (when type is 'image') (UploadThing URL)
+  muxPlaybackId?: string | null; // Source: CreativeAsset.muxPlaybackId
+  dimensions?: string | null; // Source: CreativeAsset.dimensions
+  duration?: number | null; // Source: CreativeAsset.duration (seconds)
+}
+
+// CreativeSoundData is removed as sound info will be static in frontend for MVP
+// export interface CreativeSoundData {
+//   songName?: string;
+//   artistName?: string;
+// }
+
+export interface CreativeDataProps {
+  profile: CreativeProfileData;
+  caption: string; // Source: CampaignWizardSubmission.businessGoal
+  media: CreativeMediaData;
+  // sound?: CreativeSoundData; // Sound info will be static in frontend for MVP
+  campaignAssetId?: string; // Source: CreativeAsset.id (useful for Mux metadata or internal tracking)
+}
