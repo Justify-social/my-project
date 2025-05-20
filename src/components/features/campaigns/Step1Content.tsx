@@ -448,41 +448,20 @@ function Step1Content() {
       let timezoneToUse: string | null = null;
       let currencyToUse: PrismaCurrency | null = null;
 
-      // Log the state of localization.currency right before it's used to determine currencyToUse
-      logger.info(
-        '[Initial Value Calc Effect] Value of localization.currency for new campaign decision:',
-        { localizedCurrency: localization.currency }
-      );
-
       const savedTimezone = wizardState.timeZone;
       if (isExistingCampaign && savedTimezone) {
         timezoneToUse = savedTimezone;
-        logger.info(
-          `[Initial Value Calc Effect] Existing campaign: Using saved timezone: ${timezoneToUse}`
-        );
       } else {
         timezoneToUse = localization.timezone;
-        logger.info(
-          `[Initial Value Calc Effect] ${isExistingCampaign ? 'Existing campaign (no saved TZ)' : 'New campaign'}: Using localized timezone: ${timezoneToUse}`
-        );
       }
 
       const savedWizardCurrency = wizardState.budget?.currency;
       if (isExistingCampaign && savedWizardCurrency) {
         currencyToUse = savedWizardCurrency;
-        logger.info(
-          `[Initial Value Calc Effect] Existing campaign: Using saved currency: ${currencyToUse}`
-        );
       } else if (!isExistingCampaign && localization.currency) {
         currencyToUse = localization.currency as PrismaCurrency;
-        logger.info(
-          `[Initial Value Calc Effect] New campaign: Assigning currencyToUse from localization.currency: ${currencyToUse}`
-        );
       } else if (isExistingCampaign && !savedWizardCurrency && localization.currency) {
         currencyToUse = localization.currency as PrismaCurrency;
-        logger.info(
-          `[Initial Value Calc Effect] Existing campaign (no saved currency): Using localized currency: ${currencyToUse}`
-        );
       } else if (!isExistingCampaign && !localization.currency) {
         logger.warn(
           '[Initial Value Calc Effect] New campaign: localization.currency is falsy, currencyToUse remains null.'
@@ -491,11 +470,6 @@ function Step1Content() {
 
       const finalTimezone = timezoneToUse || 'UTC';
       const finalCurrency = currencyToUse || PrismaCurrency.USD;
-
-      logger.info('[Initial Value Calc Effect] Determined final initial values:', {
-        finalTimezone,
-        finalCurrency,
-      });
 
       const initialData: Step1FormData = {
         name: typeof wizardState.name === 'string' ? wizardState.name : '',
@@ -541,12 +515,6 @@ function Step1Content() {
             : [{ id: uuidv4(), platform: PlatformEnum.Instagram, handle: '' }],
       };
 
-      // Reverted log message to reflect the logic being tested now
-      logger.info(
-        '[Initial Value Calc Effect] Constructed initialData (Using currencyToUse Logic):',
-        initialData
-      );
-
       setInitialFormState(initialData);
     }
   }, [
@@ -567,22 +535,11 @@ function Step1Content() {
     });
 
     if (initialFormState && !initialDataLoaded.current && !localization.isLoading) {
-      logger.info(
-        '[Form Reset Effect] initialFormState BEFORE form.reset (deep copy):',
-        JSON.parse(JSON.stringify(initialFormState)) // Deep copy for logging
-      );
-      logger.info(
-        `[Form Reset Effect] initialFormState.budget.currency BEFORE form.reset: ${initialFormState.budget?.currency}`
-      );
-
       form.reset(initialFormState); // Reset with the (potentially USD-budgeted) initial state first
 
       // *** NEW SURGICAL INTERVENTION FOR NEW CAMPAIGNS ***
       const isExistingCampaign = !!wizardState?.id;
       if (!isExistingCampaign && localization.currency) {
-        logger.info(
-          `[Form Reset Effect] NEW CAMPAIGN: Forcing budget.currency to localized value: ${localization.currency}`
-        );
         form.setValue('budget.currency', localization.currency, {
           shouldValidate: true,
           shouldDirty: true,
@@ -597,16 +554,6 @@ function Step1Content() {
       // *** END NEW SURGICAL INTERVENTION ***
 
       const formValuesAfterResetAndIntervention = form.getValues();
-      logger.info(
-        '[Form Reset Effect] Form values AFTER form.reset AND INTERVENTION (deep copy):',
-        JSON.parse(JSON.stringify(formValuesAfterResetAndIntervention))
-      );
-      logger.info(
-        `[Form Reset Effect] form.getValues('budget.currency') AFTER form.reset AND INTERVENTION: ${form.getValues(
-          'budget.currency'
-        )}`
-      );
-
       initialDataLoaded.current = true;
     }
   }, [initialFormState, form, localization.isLoading, localization.currency, wizardState?.id]);
