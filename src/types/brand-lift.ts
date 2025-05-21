@@ -159,7 +159,11 @@ export interface CreativeMediaData {
   type: 'image' | 'video'; // Source: CreativeAsset.type
   altText?: string; // Source: CreativeAsset.description or CreativeAsset.name
   imageUrl?: string | null; // Source: CreativeAsset.url (for images) or a Mux image URL (e.g., thumbnail).
+  url?: string | null; // Source: CreativeAsset.url - direct stream URL
   muxPlaybackId?: string | null; // Source: CreativeAsset.muxPlaybackId
+  muxAssetId?: string | null; // Source: CreativeAsset.muxAssetId
+  muxProcessingStatus?: string | null; // Source: CreativeAsset.muxProcessingStatus
+  name?: string | null; // For asset name/title
   dimensions?: string | null; // Source: CreativeAsset.dimensions
   duration?: number | null; // Source: CreativeAsset.duration (seconds)
 }
@@ -187,3 +191,15 @@ export interface BrandLiftCreative {
   muxPlaybackId?: string | null; // For Mux videos
   duration?: number | null; // For videos
 }
+
+// Declare the MuxPlayerElement type to avoid TypeScript errors
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      'mux-player': any;
+    }
+  }
+}
+
+// Use any type for MuxPlayerElement to avoid complex type errors
+export type MuxPlayerElement = any;

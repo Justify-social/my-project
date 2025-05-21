@@ -43,18 +43,29 @@ const SurveyPreviewPage = () => {
       setStudyDetails(fetchedStudyDetails);
       logger.info('[SurveyPreviewPage] Fetched study details:', { details: fetchedStudyDetails });
 
+      // Debug log
+      console.debug('[Survey Preview] Study details campaign ID:', fetchedStudyDetails.campaignId);
+
       if (fetchedStudyDetails.campaignId) {
         const creativeApiUrl = `/api/campaigns/${fetchedStudyDetails.campaignId}/creative-details`;
         logger.info('[SurveyPreviewPage] Fetching creative details from:', { url: creativeApiUrl });
+        console.debug('[Survey Preview] Fetching creative details from:', creativeApiUrl);
+
         const creativeRes = await fetch(creativeApiUrl);
         logger.info('[SurveyPreviewPage] Creative details API response status:', {
           status: creativeRes.status,
         });
+
         if (!creativeRes.ok) {
           const creativeErrorData = await creativeRes
             .json()
             .catch(() => ({ error: 'Failed to parse creative error JSON' }));
           logger.warn('[SurveyPreviewPage] Failed to fetch creative details:', {
+            campaignId: fetchedStudyDetails.campaignId,
+            status: creativeRes.status,
+            errorData: creativeErrorData,
+          });
+          console.error('[Survey Preview] Failed to fetch creative details:', {
             campaignId: fetchedStudyDetails.campaignId,
             status: creativeRes.status,
             errorData: creativeErrorData,
@@ -65,11 +76,23 @@ const SurveyPreviewPage = () => {
           logger.info('[SurveyPreviewPage] Successfully fetched creative details:', {
             details: fetchedCreativeDetails,
           });
+
+          // Add detailed debugging for Mux data
+          console.debug('[Survey Preview] Creative Media Details:', {
+            mediaType: fetchedCreativeDetails.media.type,
+            muxPlaybackId: fetchedCreativeDetails.media.muxPlaybackId,
+            muxProcessingStatus: fetchedCreativeDetails.media.muxProcessingStatus,
+            campaignAssetId: fetchedCreativeDetails.campaignAssetId,
+          });
+
           setCreativeDetails(fetchedCreativeDetails);
         }
       } else {
         logger.warn(
           '[SurveyPreviewPage] No campaignId found in study details to fetch creative assets.'
+        );
+        console.warn(
+          '[Survey Preview] No campaignId found in study details to fetch creative assets.'
         );
         setCreativeDetails(null);
       }
@@ -78,6 +101,7 @@ const SurveyPreviewPage = () => {
         studyId,
         error: (err as Error)?.message,
       });
+      console.error('[Survey Preview] Error fetching data:', (err as Error)?.message);
       setError((err as Error)?.message);
       setStudyDetails(null);
       setCreativeDetails(null);

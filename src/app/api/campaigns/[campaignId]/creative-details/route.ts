@@ -15,19 +15,53 @@ const paramsSchema = z.object({
 // Type guard for the selected CreativeAsset to ensure fields exist
 // This uses Prisma's actual CreativeAsset type now
 const selectPrimaryCreativeAsset = (assets: CreativeAsset[]): CreativeAsset | null => {
-  if (!assets || assets.length === 0) return null;
+  if (!assets || assets.length === 0) {
+    logger.warn('[API /creative-details] No assets found in submission');
+    return null;
+  }
+
+  // Log all assets for debugging
+  logger.info('[API /creative-details] Available assets:', {
+    count: assets.length,
+    assetDetails: assets.map(a => ({
+      id: a.id,
+      type: a.type,
+      muxPlaybackId: a.muxPlaybackId,
+      muxAssetId: a.muxAssetId,
+      muxProcessingStatus: a.muxProcessingStatus,
+      isPrimary: a.isPrimaryForBrandLiftPreview,
+    })),
+  });
 
   const primary = assets.find(a => {
     const asset: any = a; // Cast to any once
     return asset.isPrimaryForBrandLiftPreview;
   });
-  if (primary) return primary as CreativeAsset;
+  if (primary) {
+    logger.info(
+      '[API /creative-details] Selected primary asset flagged with isPrimaryForBrandLiftPreview',
+      {
+        id: primary.id,
+        type: primary.type,
+        muxPlaybackId: primary.muxPlaybackId,
+        muxProcessingStatus: primary.muxProcessingStatus,
+      }
+    );
+    return primary as CreativeAsset;
+  }
 
   const videoWithMux = assets.find(a => {
     const asset: any = a; // Cast to any once
     return asset.type === CreativeAssetType.video && asset.muxPlaybackId;
   });
-  if (videoWithMux) return videoWithMux as CreativeAsset;
+  if (videoWithMux) {
+    logger.info('[API /creative-details] Selected video with Mux playback ID', {
+      id: videoWithMux.id,
+      muxPlaybackId: videoWithMux.muxPlaybackId,
+      muxProcessingStatus: videoWithMux.muxProcessingStatus,
+    });
+    return videoWithMux as CreativeAsset;
+  }
 
   const image = assets.find(a => {
     const asset: any = a; // Cast to any once
@@ -116,6 +150,10 @@ export async function GET(
     const primaryAsset = selectPrimaryCreativeAsset(typedCreativeAssets);
 
     if (!primaryAsset) {
+      logger.warn('[API /creative-details] No primary asset found for campaign', {
+        submissionId,
+        assetCount: typedCreativeAssets.length,
+      });
       return NextResponse.json(
         { error: 'No suitable creative asset found for preview' },
         { status: 404 }
@@ -164,15 +202,98 @@ export async function GET(
       profilePictureUrl: influencerProfileImageUrl,
     };
 
+    // Extract Mux playback ID from URL if it's not already set but URL contains it
+    if (
+      primaryAssetAsAny.type === CreativeAssetType.video &&
+      !primaryAssetAsAny.muxPlaybackId &&
+      primaryAssetAsAny.url &&
+      primaryAssetAsAny.url.includes('stream.mux.com/')
+    ) {
+      // Extract the playback ID from the URL (format: https://stream.mux.com/PLAYBACK_ID.m3u8)
+      const urlParts = primaryAssetAsAny.url.split('stream.mux.com/');
+      if (urlParts.length === 2) {
+        const playbackId = urlParts[1].replace('.m3u8', '');
+        if (playbackId) {
+          logger.info('[API /creative-details] Extracted Mux playback ID from URL', {
+            extractedId: playbackId,
+            assetId: primaryAssetAsAny.id,
+          });
+
+          // Update the asset with the extracted playback ID for future requests
+          try {
+            await prisma.creativeAsset.update({
+              where: { id: primaryAssetAsAny.id },
+              data: {
+                muxPlaybackId: playbackId,
+                muxProcessingStatus: 'READY',
+              },
+            });
+
+            // Update in-memory reference for current request
+            primaryAssetAsAny.muxPlaybackId = playbackId;
+            primaryAssetAsAny.muxProcessingStatus = 'READY';
+
+            logger.info('[API /creative-details] Updated asset with extracted Mux playback ID', {
+              assetId: primaryAssetAsAny.id,
+              playbackId,
+            });
+          } catch (updateError) {
+            logger.error('[API /creative-details] Failed to update asset with extracted Mux ID', {
+              error: updateError,
+              assetId: primaryAssetAsAny.id,
+            });
+            // Continue with the request even if update fails
+          }
+        }
+      }
+    }
+
+    // Log detailed information about the primary asset
+    logger.info('[API /creative-details] Primary asset details:', {
+      id: primaryAssetAsAny.id,
+      type: primaryAssetAsAny.type,
+      name: primaryAssetAsAny.name,
+      muxPlaybackId: primaryAssetAsAny.muxPlaybackId,
+      muxAssetId: primaryAssetAsAny.muxAssetId,
+      muxProcessingStatus: primaryAssetAsAny.muxProcessingStatus,
+      url: primaryAssetAsAny.url,
+      dimensions: primaryAssetAsAny.dimensions,
+      duration: primaryAssetAsAny.duration,
+    });
+
     const mediaData: CreativeMediaData = {
       type: primaryAssetAsAny.type,
       altText: primaryAssetAsAny.description || primaryAssetAsAny.name,
       imageUrl: primaryAssetAsAny.type === CreativeAssetType.image ? primaryAssetAsAny.url : null,
+      url: primaryAssetAsAny.url || null,
       muxPlaybackId:
         primaryAssetAsAny.type === CreativeAssetType.video ? primaryAssetAsAny.muxPlaybackId : null,
+      muxAssetId: primaryAssetAsAny.muxAssetId,
+      muxProcessingStatus: primaryAssetAsAny.muxProcessingStatus,
       dimensions: primaryAssetAsAny.dimensions,
       duration: primaryAssetAsAny.duration,
     };
+
+    // If we still don't have a muxPlaybackId but have a video URL with mux.com,
+    // extract it directly for the response
+    if (
+      mediaData.type === 'video' &&
+      !mediaData.muxPlaybackId &&
+      primaryAssetAsAny.url &&
+      primaryAssetAsAny.url.includes('stream.mux.com/')
+    ) {
+      const urlParts = primaryAssetAsAny.url.split('stream.mux.com/');
+      if (urlParts.length === 2) {
+        const playbackId = urlParts[1].replace('.m3u8', '');
+        if (playbackId) {
+          mediaData.muxPlaybackId = playbackId;
+          mediaData.muxProcessingStatus = 'READY';
+          logger.info('[API /creative-details] Set muxPlaybackId directly in response', {
+            playbackId,
+          });
+        }
+      }
+    }
 
     const creativeData: CreativeDataProps = {
       profile: profileData,
@@ -188,6 +309,12 @@ export async function GET(
     logger.info('Fetched creative details successfully', {
       campaignId: submissionId,
       userId: clerkUserId,
+      mediaDetails: {
+        type: mediaData.type,
+        muxPlaybackId: mediaData.muxPlaybackId,
+        muxProcessingStatus: mediaData.muxProcessingStatus,
+        muxAssetId: mediaData.muxAssetId,
+      },
     });
     return NextResponse.json(creativeData);
   } catch (error: unknown) {
