@@ -49,30 +49,33 @@ export const ContactSchema = z
 /** Schema for Budget object (used within DraftCampaignData). Handles string input cleanup. */
 export const BudgetSchema = z
   .object({
-    currency: CurrencyEnum.nullable().optional(), // Make currency optional here if it can be
+    currency: CurrencyEnum.nullable().optional(),
     total: z.number().nullable().optional(),
     socialMedia: z.number().nullable().optional(),
   })
-  .nullable(); // Allow the whole budget object to be null
+  .nullable()
+  .default(null); // Ensure a default if not provided, even if null
 
 /** Schema for Influencer object (used in DraftCampaignData). */
-export const InfluencerSchema = z.object({
-  id: z.string().optional(),
-  platform: z.nativeEnum(PlatformEnum), // USE NATIVE ENUM
-  handle: z.string().min(1, { message: 'Influencer handle is required' }),
-  platformId: z.string().nullable().optional(),
-  campaignId: z.string().optional(),
-  createdAt: z
-    .string()
-    .datetime({ offset: true, message: 'Invalid ISO date string' })
-    .nullable()
-    .optional(),
-  updatedAt: z
-    .string()
-    .datetime({ offset: true, message: 'Invalid ISO date string' })
-    .nullable()
-    .optional(),
-});
+export const InfluencerSchema = z
+  .object({
+    id: z.string().optional(),
+    platform: z.nativeEnum(PlatformEnum),
+    handle: z.string().min(1, { message: 'Influencer handle is required' }),
+    platformId: z.string().nullable().optional(),
+    campaignId: z.string().optional(),
+    createdAt: z
+      .string()
+      .datetime({ offset: true, message: 'Invalid ISO date string' })
+      .nullable()
+      .optional(),
+    updatedAt: z
+      .string()
+      .datetime({ offset: true, message: 'Invalid ISO date string' })
+      .nullable()
+      .optional(),
+  })
+  .passthrough(); // Added passthrough for safety, review if needed
 
 /** Schema for draft Asset object (used within DraftCampaignData assets array). */
 export const DraftAssetSchema = z
@@ -187,11 +190,11 @@ export const DraftCampaignDataBaseSchema = z
       ContactSchema.nullable().optional() // Uses base schema
     ),
     /** Additional contacts (if applicable). */
-    additionalContacts: z.array(ContactSchema).default([]), // Uses base schema
+    additionalContacts: z.array(ContactSchema).default([]).nullable().optional(), // Allow null/undefined, default to [] if omitted during parse
     /** Budget details for the campaign. */
-    budget: BudgetSchema.nullable().optional(), // Uses base schema
+    budget: BudgetSchema, // Already defaults to null
     /** List of influencers associated with the campaign (Key changed to match API). */
-    Influencer: z.array(InfluencerSchema).optional(), // Uses base schema
+    Influencer: z.array(InfluencerSchema).default([]).nullable().optional(),
     /** Flag indicating Step 1 completion. */
     step1Complete: z.boolean().default(false),
 
@@ -199,7 +202,7 @@ export const DraftCampaignDataBaseSchema = z
     /** Primary Key Performance Indicator (KPI) for the campaign. */
     primaryKPI: KPIEnum.nullable().optional(),
     /** Secondary KPIs for the campaign. */
-    secondaryKPIs: z.array(KPIEnum).nullable().optional(),
+    secondaryKPIs: z.array(KPIEnum).default([]).nullable().optional(),
     /** Messaging details (structure assumed, verify with Step 2 form). */
     messaging: z
       .object({
@@ -222,7 +225,7 @@ export const DraftCampaignDataBaseSchema = z
       .nullable()
       .optional(),
     /** Selected features for the campaign (e.g., Brand Lift). */
-    features: z.array(FeatureEnum).nullable().optional(),
+    features: z.array(FeatureEnum).default([]).nullable().optional(),
     /** Flag indicating Step 2 completion. */
     step2Complete: z.boolean().default(false),
 
@@ -230,7 +233,7 @@ export const DraftCampaignDataBaseSchema = z
     /** Audience demographic details (using refined schema). */
     demographics: DemographicsSchema.nullable().optional(),
     /** Audience location details. */
-    locations: z.array(LocationSchema).nullable().optional(),
+    locations: z.array(LocationSchema).default([]).nullable().optional(),
     /** Audience targeting criteria (Define known array fields). */
     targeting: z
       .object({
@@ -242,21 +245,23 @@ export const DraftCampaignDataBaseSchema = z
       .nullable()
       .optional(),
     /** List of competitor brands/handles. */
-    competitors: z.array(z.string()).nullable().optional(),
+    competitors: z.array(z.string()).default([]).nullable().optional(),
     /** Target platforms for the campaign (e.g., Instagram, TikTok). Added for Marketplace filtering. */
-    targetPlatforms: z.array(z.nativeEnum(PlatformEnum)).optional(), // USE NATIVE ENUM
+    targetPlatforms: z.array(z.nativeEnum(PlatformEnum)).default([]).nullable().optional(),
     /** Flag indicating Step 3 completion. */
     step3Complete: z.boolean().default(false),
 
     // --- Step 4 Data ---
     /** List of creative assets uploaded for the campaign. */
-    assets: z.array(DraftAssetSchema).default([]),
+    assets: z.array(DraftAssetSchema).default([]).nullable().optional(),
     /** Creative guidelines or instructions. */
     guidelines: z.string().nullable().optional(),
     /** Specific creative requirements (structure assumed, verify with Step 4 form). */
     requirements: z
       .array(z.object({ description: z.string(), mandatory: z.boolean() }))
-      .default([]),
+      .default([])
+      .nullable()
+      .optional(),
     /** Additional notes for Step 4. */
     notes: z.string().nullable().optional(),
     /** Flag indicating Step 4 completion. */
@@ -286,7 +291,9 @@ export const DraftCampaignDataSchema = DraftCampaignDataBaseSchema
         // Ensure dates are valid ISO strings before comparison
         if (
           data.startDate &&
+          typeof data.startDate === 'string' &&
           data.endDate &&
+          typeof data.endDate === 'string' &&
           z.string().datetime({ offset: true }).safeParse(data.startDate).success &&
           z.string().datetime({ offset: true }).safeParse(data.endDate).success
         ) {
@@ -295,8 +302,8 @@ export const DraftCampaignDataSchema = DraftCampaignDataBaseSchema
         }
       } catch {
         return false;
-      } // Handle potential errors - Prefixed unused 'e'
-      return true; // Allow validation if one or both dates are missing/invalid
+      }
+      return true; // Allow validation if one or both dates are missing/invalid or not strings
     },
     {
       message: 'End date must be on or after start date',
@@ -306,10 +313,17 @@ export const DraftCampaignDataSchema = DraftCampaignDataBaseSchema
   // Refine budget
   .refine(
     data => {
-      const budget = data.budget; // Assign to a const for potentially better type narrowing
-      // Explicitly check if budget itself exists, and then if its properties are numbers
-      if (budget && typeof budget.socialMedia === 'number' && typeof budget.total === 'number') {
-        // At this point, TypeScript *must* know they are numbers
+      const budget = data.budget;
+      // Explicitly check if budget itself exists, is an object, and then if its properties are numbers
+      if (
+        budget &&
+        typeof budget === 'object' &&
+        budget !== null &&
+        'socialMedia' in budget &&
+        typeof budget.socialMedia === 'number' &&
+        'total' in budget &&
+        typeof budget.total === 'number'
+      ) {
         return budget.socialMedia <= budget.total;
       }
       return true;
@@ -321,7 +335,18 @@ export const DraftCampaignDataSchema = DraftCampaignDataBaseSchema
   )
   .refine(
     data => {
-      if (data.demographics) {
+      if (
+        data.demographics &&
+        typeof data.demographics === 'object' &&
+        data.demographics !== null &&
+        // Add 'in' checks for each age property before accessing
+        'age18_24' in data.demographics &&
+        'age25_34' in data.demographics &&
+        'age35_44' in data.demographics &&
+        'age45_54' in data.demographics &&
+        'age55_64' in data.demographics &&
+        'age65plus' in data.demographics
+      ) {
         const sum =
           (data.demographics.age18_24 || 0) +
           (data.demographics.age25_34 || 0) +
@@ -341,7 +366,7 @@ export const DraftCampaignDataSchema = DraftCampaignDataBaseSchema
   // ADD ASYNC NAME VALIDATION (Reverted approach without ctx)
   .refine(
     async data => {
-      if (!data.name || data.name.trim().length === 0) {
+      if (!data.name || typeof data.name !== 'string' || data.name.trim().length === 0) {
         return true;
       }
       // If we are validating data that already has an ID (i.e., an existing draft being loaded),
@@ -352,7 +377,7 @@ export const DraftCampaignDataSchema = DraftCampaignDataBaseSchema
         return true;
       }
       try {
-        const exists = await checkCampaignNameExists(data.name);
+        const exists = await checkCampaignNameExists(data.name); // data.name is now confirmed string
         return !exists; // Return true if name does NOT exist (passes validation)
       } catch (error) {
         // If check fails, treat as validation failure
@@ -496,7 +521,10 @@ export const SubmissionPayloadSchema = z
     data => {
       // Add cross-field validation specific to submission if needed
       // Example: budget validation (already present in Draft schema, but good practice to re-validate)
-      return data.socialMediaBudget <= data.totalBudget;
+      if (typeof data.socialMediaBudget === 'number' && typeof data.totalBudget === 'number') {
+        return data.socialMediaBudget <= data.totalBudget;
+      }
+      return true; // Or false if these fields are mandatory for this check
     },
     {
       message: 'Social media budget cannot exceed total budget',
@@ -608,28 +636,30 @@ export type Step3FormData = z.infer<typeof Step3ValidationSchema>;
 
 // --- Step 4 ---
 /** BASE schema for Step 4: Assets & Guidelines - Only field definitions */
-export const Step4BaseSchema = z.object({
-  assets: DraftCampaignDataBaseSchema.shape.assets,
-  guidelines: DraftCampaignDataBaseSchema.shape.guidelines,
-  requirements: DraftCampaignDataBaseSchema.shape.requirements,
-  notes: DraftCampaignDataBaseSchema.shape.notes,
-  step4Complete: DraftCampaignDataBaseSchema.shape.step4Complete,
+export const Step4BaseSchema = DraftCampaignDataBaseSchema.pick({
+  guidelines: true,
+  requirements: true,
+  notes: true,
+  step4Complete: true,
 });
+
 /** FULL Validation schema for Step 4: Assets & Guidelines (Used in UI) */
 export const Step4ValidationSchema = Step4BaseSchema.extend({
+  assets: z.array(DraftAssetSchema).default([]),
   guidelines: z.string().optional(),
-  assets: DraftAssetSchema.array()
-    .optional()
-    .refine(
-      assets =>
-        !assets ||
-        assets.every(asset => !asset.url || z.string().url().safeParse(asset.url).success),
-      {
-        message: 'Invalid URL format in one of the assets',
-        path: [0, 'url'],
-      }
-    ),
-});
+  requirements: z.array(z.object({ description: z.string(), mandatory: z.boolean() })).default([]),
+  notes: z.string().optional(),
+  step4Complete: z.boolean().refine(val => val === true, { message: 'Step 4 must be completed' }),
+}).refine(
+  data => {
+    return true;
+  },
+  {
+    // message: "At least one asset is required to complete this step.",
+    // path: ["assets"], // Path for error message
+  }
+);
+
 /** TypeScript type for Step 4 form data. */
 export type Step4FormData = z.infer<typeof Step4ValidationSchema>;
 

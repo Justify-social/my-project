@@ -262,7 +262,12 @@ export async function PATCH(
         JSON.stringify(mappedData, null, 2)
       );
     } else if (step === 4) {
-      if (dataToSave.assets !== undefined) mappedData.assets = dataToSave.assets ?? [];
+      // IMPORTANT: Do NOT save dataToSave.assets (client-side optimistic/potentially stale assets)
+      // into CampaignWizard.assets (Json[] field).
+      // The CreativeAsset table is the SSOT for Mux assets.
+      // We only save other step-specific fields here if any (e.g., targetPlatforms).
+      if (dataToSave.targetPlatforms !== undefined)
+        mappedData.targetPlatforms = dataToSave.targetPlatforms ?? [];
       if (dataToSave.step4Complete !== undefined)
         mappedData.step4Complete = dataToSave.step4Complete;
     } else if (step === 5) {
@@ -311,6 +316,7 @@ export async function PATCH(
         include: {
           Influencer: true,
           submission: true,
+          creativeAssets: true,
         },
       });
       logger.info(
@@ -342,7 +348,10 @@ export async function PATCH(
       const wizardDataForSubmission = await prisma.campaignWizard.findUnique({
         // Re-fetch to ensure all data is current for submission
         where: { id: campaignId },
-        include: { Influencer: true },
+        include: {
+          Influencer: true,
+          creativeAssets: true,
+        },
       });
 
       if (!wizardDataForSubmission)
@@ -535,7 +544,11 @@ export async function PATCH(
     if (submissionWasCreatedOrUpdated) {
       const refetchedCampaign = await prisma.campaignWizard.findUnique({
         where: { id: campaignId },
-        include: { Influencer: true, submission: true }, // Ensure submission is included
+        include: {
+          Influencer: true,
+          submission: true,
+          creativeAssets: true,
+        },
       });
       if (refetchedCampaign) campaignDataForResponse = refetchedCampaign;
     }
@@ -589,6 +602,7 @@ export async function PATCH(
           include: {
             Influencer: true,
             submission: true, // Ensure submission is included here as well
+            creativeAssets: true,
           },
         });
         logger.info(
@@ -618,7 +632,11 @@ export async function PATCH(
     if (submissionWasCreatedOrUpdated) {
       const refetchedCampaignWithSubmission = await prisma.campaignWizard.findUnique({
         where: { id: campaignId },
-        include: { Influencer: true, submission: true },
+        include: {
+          Influencer: true,
+          submission: true,
+          creativeAssets: true,
+        },
       });
       if (refetchedCampaignWithSubmission) {
         campaignDataForResponse = refetchedCampaignWithSubmission;
@@ -646,8 +664,50 @@ export async function PATCH(
     // const transformedCampaignForFrontend =
     //   EnumTransformers.transformObjectFromBackend(campaignDataForResponse);
 
+    // Define mappedResponseAssets here to ensure it's in scope for responsePayload
+    let mappedResponseAssetsForPATCH: any[] = [];
+
     // Index the updated campaign in Algolia
     if (campaignDataForResponse) {
+      // BEGIN SSOT ASSET MAPPING FOR RESPONSE
+      if (
+        campaignDataForResponse.creativeAssets &&
+        Array.isArray(campaignDataForResponse.creativeAssets)
+      ) {
+        logger.info('[WIZARD PATCH API] Mapping creativeAssets for response.');
+        mappedResponseAssetsForPATCH = campaignDataForResponse.creativeAssets.map((ca: any) => ({
+          id: String(ca.id),
+          internalAssetId: ca.id,
+          name: String(ca.name ?? ''),
+          fileName: String(ca.fileName ?? ca.name ?? ''),
+          type: String(ca.type ?? 'video'),
+          description: String(ca.description ?? ''),
+          url: ca.url ?? undefined,
+          fileSize: ca.fileSize ?? undefined,
+          muxAssetId: ca.muxAssetId ?? undefined,
+          muxPlaybackId: ca.muxPlaybackId ?? undefined,
+          muxProcessingStatus: ca.muxProcessingStatus ?? undefined,
+          duration: ca.duration ?? undefined,
+          userId: ca.userId ?? undefined,
+          createdAt: ca.createdAt?.toISOString() ?? undefined,
+          updatedAt: ca.updatedAt?.toISOString() ?? undefined,
+          isPrimaryForBrandLiftPreview: ca.isPrimaryForBrandLiftPreview ?? false,
+          // Fields not on CreativeAsset model, to be handled by frontend state if needed
+          rationale: '',
+          budget: undefined,
+          associatedInfluencerIds: [],
+        }));
+      } else {
+        logger.info(
+          '[WIZARD PATCH API] No creativeAssets found on campaignDataForResponse to map for response. campaignDataForResponse.assets (Json[]) will be used if it exists, or empty.'
+        );
+        mappedResponseAssetsForPATCH =
+          campaignDataForResponse.assets && Array.isArray(campaignDataForResponse.assets)
+            ? campaignDataForResponse.assets
+            : [];
+      }
+      // END SSOT ASSET MAPPING FOR RESPONSE
+
       const algoliaIndexStartTime = Date.now();
       // Fire and forget Algolia indexing for faster API response
       addOrUpdateCampaignInAlgolia(campaignDataForResponse as any)
@@ -688,6 +748,7 @@ export async function PATCH(
         ? {
             ...EnumTransformers.transformObjectFromBackend(campaignDataForResponse),
             submissionId: finalSubmissionId,
+            assets: mappedResponseAssetsForPATCH, // Use the correctly scoped and mapped assets
           }
         : null,
       message: `Step ${step} updated${messageSuffix}`,
@@ -761,6 +822,7 @@ export async function GET(
       include: {
         Influencer: true,
         submission: true, // Eager load the related CampaignWizardSubmission
+        creativeAssets: true, // ***** Ensure creativeAssets is fetched for GET too *****
       },
     });
 
@@ -770,11 +832,44 @@ export async function GET(
 
     const transformedCampaign = EnumTransformers.transformObjectFromBackend(campaign);
 
+    // SSOT Asset Mapping for GET response
+    let responseAssetsForGET = [];
+    if (campaign.creativeAssets && Array.isArray(campaign.creativeAssets)) {
+      logger.info('[WIZARD GET API] Mapping creativeAssets for response.');
+      responseAssetsForGET = campaign.creativeAssets.map((ca: any) => ({
+        id: String(ca.id),
+        internalAssetId: ca.id,
+        name: String(ca.name ?? ''),
+        fileName: String(ca.fileName ?? ca.name ?? ''),
+        type: String(ca.type ?? 'video'),
+        description: String(ca.description ?? ''),
+        url: ca.url ?? undefined,
+        fileSize: ca.fileSize ?? undefined,
+        muxAssetId: ca.muxAssetId ?? undefined,
+        muxPlaybackId: ca.muxPlaybackId ?? undefined,
+        muxProcessingStatus: ca.muxProcessingStatus ?? undefined,
+        duration: ca.duration ?? undefined,
+        userId: ca.userId ?? undefined,
+        createdAt: ca.createdAt?.toISOString() ?? undefined,
+        updatedAt: ca.updatedAt?.toISOString() ?? undefined,
+        isPrimaryForBrandLiftPreview: ca.isPrimaryForBrandLiftPreview ?? false,
+        rationale: '',
+        budget: undefined,
+        associatedInfluencerIds: [],
+      }));
+    } else {
+      logger.info(
+        '[WIZARD GET API] No creativeAssets found on campaign to map for response. Using campaign.assets (Json[]) if available.'
+      );
+      responseAssetsForGET =
+        campaign.assets && Array.isArray(campaign.assets) ? campaign.assets : [];
+    }
+
     // Ensure submissionId is at the top level if it came via the relation
     const responseData = {
       ...transformedCampaign,
-      submissionId: campaign.submissionId, // Explicitly ensure it's there from the direct field
-      // The transformedCampaign.submission object will also be present if it exists
+      assets: responseAssetsForGET, // ***** USE THE NEWLY MAPPED ASSETS for GET response *****
+      submissionId: campaign.submissionId, // Explicitly ensure direct field is present, even if relation is also transformed
     };
 
     return NextResponse.json({

@@ -124,8 +124,30 @@ export function AssetCardStep4({
 }: AssetCardProps) {
   const [popoverOpen, setPopoverOpen] = React.useState(false);
 
+  // Log all props received by AssetCardStep4
+  console.log(`[AssetCardStep4 assetIndex: ${assetIndex}] Rendering. All props:`, {
+    assetIndex,
+    asset,
+    control,
+    getValues,
+    saveProgress,
+    availableInfluencers,
+    currency,
+    className,
+    cardClassName,
+  });
+  // Specifically log crucial asset fields for Mux status
+  console.log(
+    `[AssetCardStep4 assetIndex: ${assetIndex}] Mux Status: ${asset?.muxProcessingStatus}, URL: ${asset?.url}, PlaybackID: ${asset?.muxPlaybackId}, Name: ${asset?.name}, ID: ${asset?.id}, InternalAssetID: ${asset?.internalAssetId}`
+  );
+
   // Uses updated AssetCardProps
-  if (!asset) return null;
+  if (!asset) {
+    console.warn(
+      `[AssetCardStep4 assetIndex: ${assetIndex}] Asset prop is null or undefined. Not rendering card.`
+    );
+    return null;
+  }
 
   const { name, url, type, influencerHandle, description, muxProcessingStatus, muxPlaybackId } =
     asset;

@@ -229,7 +229,10 @@ export async function GET(
       console.log('Using UUID format for campaign ID:', campaignId);
       campaign = await prisma.campaignWizard.findUnique({
         where: { id: campaignId },
-        include: { Influencer: true },
+        include: {
+          Influencer: true,
+          creativeAssets: true,
+        },
       });
       console.log(
         '[API GET /api/campaigns/[campaignId]] CampaignWizard query complete.',
@@ -316,81 +319,63 @@ export async function GET(
       '[API GET /api/campaigns/[campaignId]] Normalizing data for frontend schema compatibility...'
     );
 
-    // --- START ASSET ENRICHMENT ---
-    const enrichedAssets = [];
-    if ('assets' in campaign && Array.isArray(campaign.assets)) {
-      for (const assetDraft of campaign.assets as any[]) {
-        if (assetDraft && typeof assetDraft === 'object' && assetDraft.internalAssetId) {
-          const creativeAssetRecord = await prisma.creativeAsset.findUnique({
-            where: { id: assetDraft.internalAssetId },
-          });
+    // --- START ASSET ENRICHMENT / MAPPING ---
+    let responseAssets = [];
 
-          if (creativeAssetRecord) {
-            enrichedAssets.push({
-              // Start with CampaignWizard.assets data
-              id: String(assetDraft.id ?? creativeAssetRecord.id), // Prefer CW id (tempId), fallback to CA id
-              name: String(assetDraft.name ?? creativeAssetRecord.name ?? ''),
-              type: String(assetDraft.type ?? creativeAssetRecord.type ?? 'image'),
-              fileName: String(assetDraft.fileName ?? creativeAssetRecord.name ?? ''), // Use CA name as fallback for filename
-              description: String(assetDraft.description ?? creativeAssetRecord.description ?? ''),
-              rationale: String(assetDraft.rationale ?? ''),
-              budget: assetDraft.budget !== undefined ? Number(assetDraft.budget) : undefined,
-              associatedInfluencerIds: Array.isArray(assetDraft.associatedInfluencerIds)
-                ? assetDraft.associatedInfluencerIds.map(String)
-                : [],
-              internalAssetId: creativeAssetRecord.id, // This is the CreativeAsset ID
-              temp: Boolean(assetDraft.temp ?? false),
-
-              // Overwrite with fresh data from CreativeAsset table
-              url: creativeAssetRecord.url ?? '', // Fresh URL
-              fileSize: creativeAssetRecord.fileSize ?? 0, // Fresh fileSize
-              muxAssetId: creativeAssetRecord.muxAssetId ?? undefined,
-              muxPlaybackId: creativeAssetRecord.muxPlaybackId ?? undefined,
-              muxProcessingStatus: creativeAssetRecord.muxProcessingStatus ?? undefined,
-              // Ensure all fields expected by DraftAssetSchema are present
-              userId: creativeAssetRecord.userId ?? undefined, // User who uploaded via CreativeAsset
-            });
-          } else {
-            // If no matching CreativeAsset, keep the draft asset as is (might be an image or non-mux asset)
-            enrichedAssets.push({
-              id: String(assetDraft.id ?? ''),
-              name: String(assetDraft.name ?? ''),
-              type: String(assetDraft.type ?? 'image'),
-              url: String(assetDraft.url ?? ''),
-              fileName: String(assetDraft.fileName ?? ''),
-              fileSize: Number(assetDraft.fileSize ?? 0),
-              description: String(assetDraft.description ?? ''),
-              temp: Boolean(assetDraft.temp ?? false),
-              rationale: String(assetDraft.rationale ?? ''),
-              budget: assetDraft.budget !== undefined ? Number(assetDraft.budget) : undefined,
-              associatedInfluencerIds: Array.isArray(assetDraft.associatedInfluencerIds)
-                ? assetDraft.associatedInfluencerIds.map(String)
-                : [],
-              internalAssetId: assetDraft.internalAssetId,
-              muxProcessingStatus: assetDraft.muxProcessingStatus, // Keep stale status if no CA record
-            });
-          }
-        } else if (assetDraft && typeof assetDraft === 'object') {
-          // Asset from CW.assets without internalAssetId (e.g. direct image link before Mux)
-          enrichedAssets.push({
-            id: String(assetDraft.id ?? ''),
-            name: String(assetDraft.name ?? ''),
-            type: String(assetDraft.type ?? 'image'),
-            url: String(assetDraft.url ?? ''),
-            fileName: String(assetDraft.fileName ?? ''),
-            fileSize: Number(assetDraft.fileSize ?? 0),
-            description: String(assetDraft.description ?? ''),
-            temp: Boolean(assetDraft.temp ?? false),
-            rationale: String(assetDraft.rationale ?? ''),
-            budget: assetDraft.budget !== undefined ? Number(assetDraft.budget) : undefined,
-            associatedInfluencerIds: Array.isArray(assetDraft.associatedInfluencerIds)
-              ? assetDraft.associatedInfluencerIds.map(String)
-              : [],
-          });
-        }
-      }
+    if (campaign && campaign.creativeAssets && Array.isArray(campaign.creativeAssets)) {
+      console.log(
+        '[API GET /api/campaigns/[campaignId]] Processing campaign.creativeAssets relation.'
+      );
+      responseAssets = campaign.creativeAssets.map((ca: any) => ({
+        id: String(ca.id),
+        internalAssetId: ca.id,
+        name: String(ca.name ?? ''),
+        fileName: String(ca.name ?? ''),
+        type: String(ca.type ?? 'video'),
+        description: String(ca.description ?? ''),
+        rationale: '',
+        budget: undefined,
+        associatedInfluencerIds: [],
+        url: ca.url ?? undefined,
+        fileSize: ca.fileSize ?? undefined,
+        muxAssetId: ca.muxAssetId ?? undefined,
+        muxPlaybackId: ca.muxPlaybackId ?? undefined,
+        muxProcessingStatus: ca.muxProcessingStatus ?? undefined,
+        userId: ca.userId ?? undefined,
+        createdAt: ca.createdAt?.toISOString() ?? undefined,
+        updatedAt: ca.updatedAt?.toISOString() ?? undefined,
+        isPrimaryForBrandLiftPreview: ca.isPrimaryForBrandLiftPreview ?? false,
+      }));
+      console.log(
+        `[API GET /api/campaigns/[campaignId]] Mapped ${responseAssets.length} assets from creativeAssets relation.`
+      );
+    } else if (campaign && 'assets' in campaign && Array.isArray(campaign.assets)) {
+      console.log(
+        '[API GET /api/campaigns/[campaignId]] Falling back to campaign.assets (Json[]) processing.'
+      );
+      responseAssets = campaign.assets.map((assetDraft: any) => {
+        return {
+          id: String(assetDraft.id ?? assetDraft.internalAssetId ?? Date.now()),
+          name: String(assetDraft.name ?? ''),
+          type: String(assetDraft.type ?? 'image'),
+          url: String(assetDraft.url ?? ''),
+          fileName: String(assetDraft.fileName ?? assetDraft.name ?? ''),
+          fileSize: Number(assetDraft.fileSize ?? 0),
+          description: String(assetDraft.description ?? ''),
+          rationale: String(assetDraft.rationale ?? ''),
+          budget: assetDraft.budget !== undefined ? Number(assetDraft.budget) : undefined,
+          associatedInfluencerIds: Array.isArray(assetDraft.associatedInfluencerIds)
+            ? assetDraft.associatedInfluencerIds.map(String)
+            : [],
+          internalAssetId: assetDraft.internalAssetId,
+          muxProcessingStatus: assetDraft.muxProcessingStatus,
+        };
+      });
+      console.log(
+        `[API GET /api/campaigns/[campaignId]] Mapped ${responseAssets.length} assets from Json[] field.`
+      );
     }
-    // --- END ASSET ENRICHMENT ---
+    // --- END ASSET ENRICHMENT / MAPPING ---
 
     const normalizedCampaign = {
       ...campaign,
@@ -437,7 +422,7 @@ export async function GET(
         'additionalContacts' in campaign && Array.isArray(campaign.additionalContacts)
           ? campaign.additionalContacts
           : [],
-      assets: enrichedAssets, // Use the enriched assets
+      assets: responseAssets,
       Influencer:
         'Influencer' in campaign && Array.isArray(campaign.Influencer)
           ? campaign.Influencer.map((influencer_item: any) => ({

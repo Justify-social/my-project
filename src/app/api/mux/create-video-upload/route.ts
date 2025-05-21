@@ -63,7 +63,8 @@ export async function POST(req: NextRequest) {
         name: fileName,
         type: CreativeAssetType.video, // Ensure this matches your enum value
         campaignWizardId: campaignWizardId as string, // NEW
-        muxAssetId: muxUploadData.muxAssetId, // This is Mux's asset ID for the upcoming asset
+        muxUploadId: muxUploadData.muxUploadId, // ***** STORE THE MUX UPLOAD ID *****
+        muxAssetId: muxUploadData.muxAssetId, // This is Mux's asset ID if returned by createDirectUploadUrl (can be null initially)
         muxProcessingStatus: initialProcessingStatus,
         description: description || null,
         userId: internalUserId, // Link to the internal User ID (UUID)

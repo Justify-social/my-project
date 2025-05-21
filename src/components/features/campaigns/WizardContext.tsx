@@ -267,6 +267,17 @@ export function WizardProvider({ children }: { children: ReactNode }) {
 
       if (normalizedData?.success && normalizedData?.data) {
         logger.debug('WizardContext: Raw data received:', normalizedData.data);
+        // DEBUG LOG - Check if assets exist before logging
+        if (normalizedData.data.hasOwnProperty('assets')) {
+          console.log(
+            '[WizardContext loadCampaignData] API Response data.assets:',
+            JSON.parse(JSON.stringify((normalizedData.data as any).assets))
+          );
+        } else {
+          console.log(
+            '[WizardContext loadCampaignData] API Response data does not have an assets property.'
+          );
+        }
         const rawData = normalizedData.data as any; // Cast to any to check for status property
 
         // Check if the campaign is already submitted by looking at the raw status
@@ -482,6 +493,17 @@ export function WizardProvider({ children }: { children: ReactNode }) {
           logger.info('Progress saved successfully');
           if (result.data && typeof result.data === 'object') {
             const returnedData = result.data as Partial<DraftCampaignData>;
+            // DEBUG LOG - Check if assets exist before logging
+            if (returnedData.hasOwnProperty('assets')) {
+              console.log(
+                '[WizardContext saveProgress] API Response data.assets:',
+                JSON.parse(JSON.stringify(returnedData.assets))
+              );
+            } else {
+              console.log(
+                '[WizardContext saveProgress] API Response data does not have an assets property.'
+              );
+            }
             setWizardState(prevState => ({
               ...(prevState ?? defaultWizardState),
               ...returnedData,

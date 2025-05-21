@@ -213,9 +213,10 @@ model CreativeAsset {
   duration     Int?
   format       String?
   
-  muxAssetId    String?                  @unique // Mux's internal ID for the asset
-  muxPlaybackId String?                  @unique // Mux's ID for playback
-  muxProcessingStatus String?            // e.g., "PENDING_UPLOAD", "MUX_PROCESSING", "READY", "ERROR"
+  muxUploadId   String?                  @unique // Mux's direct upload ID (from create direct upload)
+  muxAssetId    String?                  @unique // Mux's internal ID for the asset (from video.upload.asset_created or video.asset.created)
+  muxPlaybackId String?                  @unique // Mux's ID for playback (from video.asset.ready)
+  muxProcessingStatus String?            // e.g., "PENDING_UPLOAD", "AWAITING_UPLOAD", "MUX_PROCESSING", "READY", "ERROR"
 
   userId       String? // Stores the User.id (UUID) of the uploader
   user         User?   @relation(fields: [userId], references: [id])

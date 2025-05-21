@@ -51,52 +51,113 @@ export async function POST(req: NextRequest) {
     switch (event.type) {
       case 'video.asset.created':
         try {
-          logger.info(`[API /webhooks/mux] video.asset.created: Asset ID ${event.data.id}`);
-          const assetCreated = event.data as Mux.Video.Asset;
-          await prisma.creativeAsset.updateMany({
-            where: { muxAssetId: assetCreated.id },
-            data: { muxProcessingStatus: 'MUX_PROCESSING' },
-          });
+          const muxAssetId = event.data.id;
+          logger.info(`[API /webhooks/mux] video.asset.created: Mux Asset ID ${muxAssetId}`);
+          // This event confirms the asset exists on Mux. Update status if we have a matching muxAssetId.
+          // This might be the first time we learn the muxAssetId if video.upload.asset_created was missed or if create-video-upload didn't get it.
+          // However, our primary linking mechanism is now via video.upload.asset_created.
+          const existingAsset = await prisma.creativeAsset.findUnique({ where: { muxAssetId } });
+          if (existingAsset) {
+            await prisma.creativeAsset.update({
+              where: { muxAssetId: muxAssetId },
+              data: { muxProcessingStatus: 'MUX_PROCESSING' }, // Or a more specific status if available from this event
+            });
+            logger.info(
+              `[API /webhooks/mux] CreativeAsset status updated to MUX_PROCESSING for muxAssetId: ${muxAssetId} via video.asset.created.`
+            );
+          } else {
+            // This could happen if video.upload.asset_created hasn't fired yet to populate muxAssetId from a muxUploadId match.
+            // Or if /api/mux/create-video-upload didn't successfully store an initial reference linked to this muxAssetId.
+            logger.warn(
+              `[API /webhooks/mux] video.asset.created: CreativeAsset not found by muxAssetId ${muxAssetId}. Waiting for video.upload.asset_created to link it, or create-video-upload needs to store muxAssetId if available there.`
+            );
+          }
         } catch (e: any) {
           logger.error(
-            `[API /webhooks/mux] DB error in video.asset.created for asset ${event.data.id}:`,
+            `[API /webhooks/mux] DB error in video.asset.created for Mux Asset ID ${event.data.id}:`,
             e.message
           );
-          // Decide if you want to throw or just log, affecting the overall webhook response
         }
         break;
 
       case 'video.asset.ready':
         try {
-          logger.info(`[API /webhooks/mux] video.asset.ready: Asset ID ${event.data.id}`);
+          logger.info(
+            `[API /webhooks/mux] video.asset.ready: Asset ID ${event.data.id}, Upload ID: ${event.data.upload_id}`
+          );
           const assetReady = event.data as Mux.Video.Asset;
+          const muxAssetId = assetReady.id;
+          const muxUploadId = assetReady.upload_id; // Get the upload_id from the event
+
           const publicPlaybackId = assetReady.playback_ids?.find(
             pid => pid.policy === 'public'
           )?.id;
 
           if (!publicPlaybackId) {
-            logger.error(
-              `[API /webhooks/mux] No public playback ID found for asset ${assetReady.id}`
-            );
-            await prisma.creativeAsset.updateMany({
-              where: { muxAssetId: assetReady.id },
+            logger.error(`[API /webhooks/mux] No public playback ID found for asset ${muxAssetId}`);
+            // Try to update by muxAssetId, then by muxUploadId if available and assetId failed
+            let errorUpdateResult = await prisma.creativeAsset.updateMany({
+              where: { muxAssetId: muxAssetId },
               data: { muxProcessingStatus: 'ERROR_NO_PLAYBACK_ID' },
             });
+            if (errorUpdateResult.count === 0 && muxUploadId) {
+              logger.info(
+                `[API /webhooks/mux] video.asset.ready: Could not find asset by muxAssetId ${muxAssetId} to mark as ERROR_NO_PLAYBACK_ID. Trying by muxUploadId ${muxUploadId}`
+              );
+              errorUpdateResult = await prisma.creativeAsset.updateMany({
+                where: { muxUploadId: muxUploadId },
+                data: { muxProcessingStatus: 'ERROR_NO_PLAYBACK_ID' },
+              });
+            }
+            logger.info(
+              `[API /webhooks/mux] video.asset.ready: Marked asset (muxAssetId: ${muxAssetId}, muxUploadId: ${muxUploadId}) as ERROR_NO_PLAYBACK_ID. Count: ${errorUpdateResult.count}`
+            );
             break;
           }
 
-          await prisma.creativeAsset.updateMany({
-            where: { muxAssetId: assetReady.id },
-            data: {
-              muxPlaybackId: publicPlaybackId,
-              duration: assetReady.duration ? Math.round(assetReady.duration) : null,
-              muxProcessingStatus: 'READY',
-              url: `https://stream.mux.com/${publicPlaybackId}.m3u8`, // Set the URL to Mux stream
-            },
+          const updateData = {
+            muxPlaybackId: publicPlaybackId,
+            duration: assetReady.duration ? Math.round(assetReady.duration) : null,
+            muxProcessingStatus: 'READY' as const, // Ensure it's a literal type
+            url: `https://stream.mux.com/${publicPlaybackId}.m3u8`,
+            muxAssetId: muxAssetId, // Ensure muxAssetId is also set/confirmed here
+          };
+
+          // First, try to update using muxAssetId
+          let updateResult = await prisma.creativeAsset.updateMany({
+            where: { muxAssetId: muxAssetId },
+            data: updateData,
           });
-          logger.info(
-            `[API /webhooks/mux] CreativeAsset updated for Mux Asset ID: ${assetReady.id}`
-          );
+
+          if (updateResult.count > 0) {
+            logger.info(
+              `[API /webhooks/mux] video.asset.ready: Successfully updated CreativeAsset(s) (found by muxAssetId: ${muxAssetId}) to READY. Count: ${updateResult.count}`
+            );
+          } else if (muxUploadId) {
+            // If no records were updated by muxAssetId, and we have a muxUploadId from the event, try updating by muxUploadId
+            logger.warn(
+              `[API /webhooks/mux] video.asset.ready: No CreativeAsset found by muxAssetId ${muxAssetId}. Attempting update via muxUploadId: ${muxUploadId}`
+            );
+            updateResult = await prisma.creativeAsset.updateMany({
+              where: { muxUploadId: muxUploadId }, // Fallback to muxUploadId
+              data: updateData, // updateData now includes muxAssetId to ensure it's set
+            });
+
+            if (updateResult.count > 0) {
+              logger.info(
+                `[API /webhooks/mux] video.asset.ready: Successfully updated CreativeAsset(s) (found by muxUploadId: ${muxUploadId}) to READY and linked muxAssetId ${muxAssetId}. Count: ${updateResult.count}`
+              );
+            } else {
+              logger.error(
+                `[API /webhooks/mux] video.asset.ready: CRITICAL - No CreativeAsset found by muxAssetId (${muxAssetId}) OR by muxUploadId (${muxUploadId}) to update to READY. Asset may be orphaned.`
+              );
+            }
+          } else {
+            // muxUploadId was not available on the event, and muxAssetId didn't match
+            logger.error(
+              `[API /webhooks/mux] video.asset.ready: CRITICAL - No CreativeAsset found by muxAssetId (${muxAssetId}) and no muxUploadId available in webhook event to attempt fallback. Asset may be orphaned.`
+            );
+          }
         } catch (e: any) {
           logger.error(
             `[API /webhooks/mux] DB error in video.asset.ready for asset ${event.data.id}:`,
@@ -111,7 +172,7 @@ export async function POST(req: NextRequest) {
             `[API /webhooks/mux] video.asset.errored: Asset ID ${event.data.id}. Errors: ${JSON.stringify(event.data.errors)}`
           );
           const assetErroredId = event.data.id;
-          await prisma.creativeAsset.updateMany({
+          await prisma.creativeAsset.update({
             where: { muxAssetId: assetErroredId },
             data: { muxProcessingStatus: 'ERROR' },
           });
@@ -125,21 +186,66 @@ export async function POST(req: NextRequest) {
 
       case 'video.upload.asset_created':
         try {
+          const muxEventData = event.data as any; // Cast to any to avoid TS complaints, then check props
+          const upload_id_from_mux = muxEventData?.id as string | undefined;
+          const asset_id_from_mux = muxEventData?.asset_id as string | undefined;
+
           logger.info(
-            `[API /webhooks/mux] video.upload.asset_created: Upload ID ${event.data.object?.id} linked to Asset ID ${event.data.asset_id}`
+            `[API /webhooks/mux] video.upload.asset_created: Received Mux Upload ID ${upload_id_from_mux}, Mux Asset ID ${asset_id_from_mux}`
           );
-          // This event is useful if you initially only have an upload_id and need to link it to the asset_id.
-          // Our current flow in create-video-upload gets muxAssetId upfront if possible,
-          // but this handler can be a fallback or secondary update.
-          if (event.data.asset_id) {
-            await prisma.creativeAsset.updateMany({
-              where: { muxAssetId: event.data.asset_id }, // Or search by a stored muxUploadId if you add that field
-              data: { muxProcessingStatus: 'MUX_PROCESSING' }, // Asset exists, processing
+
+          if (upload_id_from_mux && asset_id_from_mux) {
+            const assetRecord = await prisma.creativeAsset.findUnique({
+              where: { muxUploadId: upload_id_from_mux },
             });
+
+            if (assetRecord) {
+              await prisma.creativeAsset.update({
+                where: { id: assetRecord.id },
+                data: {
+                  muxAssetId: asset_id_from_mux,
+                  muxProcessingStatus: 'MUX_PROCESSING',
+                },
+              });
+              logger.info(
+                `[API /webhooks/mux] CreativeAsset DB ID ${assetRecord.id} updated: set muxAssetId to ${asset_id_from_mux} and status to MUX_PROCESSING (found via muxUploadId ${upload_id_from_mux}).`
+              );
+            } else {
+              logger.warn(
+                `[API /webhooks/mux] video.upload.asset_created: No CreativeAsset found with muxUploadId ${upload_id_from_mux}. Checking if asset exists by muxAssetId ${asset_id_from_mux} (in case of race condition).`
+              );
+              const assetByMuxId = await prisma.creativeAsset.findUnique({
+                where: { muxAssetId: asset_id_from_mux },
+              });
+              if (assetByMuxId && !(assetByMuxId as any).muxUploadId) {
+                // Cast to any for muxUploadId check if TS still complains
+                await prisma.creativeAsset.update({
+                  where: { id: assetByMuxId.id },
+                  data: { muxUploadId: upload_id_from_mux, muxProcessingStatus: 'MUX_PROCESSING' },
+                });
+                logger.info(
+                  `[API /webhooks/mux] CreativeAsset DB ID ${assetByMuxId.id} (found by muxAssetId) updated with muxUploadId ${upload_id_from_mux}.`
+                );
+              } else if (assetByMuxId) {
+                logger.info(
+                  `[API /webhooks/mux] CreativeAsset DB ID ${assetByMuxId.id} (found by muxAssetId) already processed or has muxUploadId.`
+                );
+              } else {
+                logger.error(
+                  `[API /webhooks/mux] video.upload.asset_created: Critical - No CreativeAsset found for uploadId ${upload_id_from_mux} NOR for muxAssetId ${asset_id_from_mux}. Asset may be orphaned.`
+                );
+              }
+            }
+          } else {
+            logger.warn(
+              '[API /webhooks/mux] video.upload.asset_created: Missing upload_id or asset_id in webhook payload.',
+              { data: muxEventData } // Log the data we received
+            );
           }
         } catch (e: any) {
+          const muxEventDataForError = event.data as any; // Use this for logging
           logger.error(
-            `[API /webhooks/mux] DB error in video.upload.asset_created for asset ${event.data.asset_id}:`,
+            `[API /webhooks/mux] DB error in video.upload.asset_created. Upload ID: ${muxEventDataForError?.id}, Asset ID: ${muxEventDataForError?.asset_id}:`,
             e.message
           );
         }
