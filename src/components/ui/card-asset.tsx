@@ -193,7 +193,10 @@ export const AssetPreview = ({
           streamType="on-demand"
           style={{ height: '100%', width: '100%' }}
           title={fileName}
-          autoPlay="muted"
+          autoPlay="any"
+          muted={true}
+          loop={true}
+          preload="auto"
         />
         {mediaTypeIconId && (
           <Badge

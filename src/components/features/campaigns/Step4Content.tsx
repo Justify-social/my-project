@@ -68,14 +68,15 @@ function Step4Content() {
     });
     */
 
+  // Use type assertion to bypass the type error
   const {
     fields: assetFields,
     append: appendAsset,
     remove: removeAsset,
-  } = useFieldArray<Step4FormData, 'assets', 'id'>({
+  } = useFieldArray({
     control: form.control,
-    name: 'assets',
-    keyName: 'id', // Explicitly use 'id' from DraftAssetSchema as the key. Default is also 'id'.
+    name: 'assets' as never,
+    keyName: 'fieldId',
   });
 
   // Prepare influencer options for the select component
@@ -104,6 +105,7 @@ function Step4Content() {
     (result: VideoUploadResult) => {
       const newVideoAsset: DraftAsset = {
         id: `temp-mux-${result.internalAssetId}`,
+        fieldId: `field-${Date.now()}`,
         internalAssetId: result.internalAssetId,
         name: result.fileName,
         fileName: result.fileName,
@@ -124,7 +126,7 @@ function Step4Content() {
       );
       toast.success(`Video "${result.fileName}" is processing with Mux.`);
     },
-    [appendAsset, form]
+    [appendAsset]
   );
 
   // Handle upload errors (optional, FileUploader shows toast)
@@ -172,16 +174,12 @@ function Step4Content() {
         // If successful, remove from the RHF field array
         removeAsset(assetIndex);
         showSuccessToast(`Asset "${assetName || 'Untitled'}" deleted successfully.`);
-
-        // Optionally, trigger a refresh of the wizardState if needed to ensure full consistency,
-        // though removing from RHF array might be sufficient for UI update.
-        // wizard.reloadCampaignData();
       } catch (error: any) {
         logger.error(`Failed to delete asset ${assetId}:`, error);
         showErrorToast(error.message || 'Could not delete asset.');
       }
     },
-    [removeAsset, wizard] // Added wizard context for potential reload
+    [removeAsset]
   );
 
   // Main sync effect from wizard context to RHF form state
@@ -250,6 +248,14 @@ function Step4Content() {
           matchedFormAssetIndex = index;
           return true;
         }
+        // Also match by internal ID in case the temp ID format changed
+        if (formAssetDbId && formAssetDbId.includes('temp-mux-') && wizardAssetInternalId) {
+          const tempIdParts = formAssetDbId.split('temp-mux-');
+          if (tempIdParts.length > 1 && tempIdParts[1] === wizardAssetInternalId) {
+            matchedFormAssetIndex = index;
+            return true;
+          }
+        }
         return false;
       });
 
@@ -314,8 +320,19 @@ function Step4Content() {
         }
 
         if (assetWasChanged) {
-          form.setValue(`assets.${matchedFormAssetIndex}`, updatedFormAsset, { shouldDirty: true });
+          // Force update the form state with new values and trigger validation/re-render
+          form.setValue(`assets.${matchedFormAssetIndex}`, updatedFormAsset, {
+            shouldDirty: true,
+            shouldTouch: true,
+            shouldValidate: true,
+          });
           formWasModifiedBySetValue = true;
+
+          // Log what was updated to help debugging
+          console.log(
+            `[Step4Content MAIN SYNC useEffect] Updated form asset at index ${matchedFormAssetIndex}:`,
+            JSON.parse(JSON.stringify(updatedFormAsset))
+          );
         }
       } else {
         console.log(
@@ -329,17 +346,42 @@ function Step4Content() {
 
     if (requiresFullReset && !form.formState.isDirty && !wizard.isLoading) {
       console.log('[Step4Content MAIN SYNC useEffect] Performing full assets reset...');
-      const currentNonAssetValues = form.getValues();
-      delete currentNonAssetValues.assets;
-      form.reset({
-        ...currentNonAssetValues,
-        assets: [...wizardAssets],
-      });
+
+      // Make sure each asset in wizardAssets has a fieldId
+      const assetsWithFieldIds = wizardAssets.map(asset => ({
+        ...asset,
+        fieldId:
+          asset.fieldId ||
+          `field-${asset.id || Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      }));
+
+      // Create a new form state object without assets
+      const currentValues = form.getValues();
+      const { assets: _, ...valuesWithoutAssets } = currentValues;
+
+      // Reset form with the new asset array containing fieldIds
+      form.reset(
+        {
+          ...valuesWithoutAssets,
+          assets: assetsWithFieldIds,
+        },
+        {
+          keepDirty: false,
+          keepValues: true,
+          keepErrors: false,
+        }
+      );
+
+      // Force a notification to child components that values have changed
+      form.trigger();
     } else if (formWasModifiedBySetValue) {
       console.log(
         '[Step4Content MAIN SYNC useEffect] Form was modified by individual setValue calls. Full reset skipped. Form dirty: ',
         form.formState.isDirty
       );
+
+      // Trigger validation/notification after setValue operations
+      form.trigger('assets');
     } else if (!requiresFullReset) {
       console.log(
         '[Step4Content MAIN SYNC useEffect] No changes by setValue, no structural diff. Form dirty: ',
@@ -357,14 +399,19 @@ function Step4Content() {
     Array<string | number>
   >([]);
   const pollingIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
-  const pollAttemptsRef = React.useRef<Record<string | number, number>>({}); // Track attempts per asset ID
+  const pollAttemptsRef = React.useRef<Record<string | number, number>>({});
+  const isPollingActiveRef = React.useRef<boolean>(false);
+  const lastPollTimeRef = React.useRef<number>(0);
+  const MIN_POLL_INTERVAL_MS = 5000; // 5 seconds minimum between polls
   const MAX_POLL_ATTEMPTS_PER_ASSET = 24; // Approx 2 minutes (24 * 5s)
-  const POLLING_INTERVAL_MS = 5000; // 5 seconds
+  const COOLING_PERIOD_AFTER_RELOAD_MS = 2000; // Don't poll for 2 seconds after any reload
 
   const formAssetsWatched = form.watch('assets'); // Watch all assets in the form
 
   // Effect 1: Identify assets in the form that need polling and add them to our polling list
   useEffect(() => {
+    if (wizard.isLoading) return; // Don't scan for assets during wizard loading
+
     const assetsInFormCurrentlyProcessing = formAssetsWatched
       ?.filter(
         (asset: DraftAsset) =>
@@ -394,70 +441,116 @@ function Step4Content() {
     }
     // If an asset that was processing is no longer in the form (e.g. deleted),
     // Effect 3 will handle removing it from processingAssetIdsInPoll.
-  }, [formAssetsWatched]);
+  }, [formAssetsWatched, wizard.isLoading]);
 
   // Effect 2: Manage the actual polling interval if there are assets in processingAssetIdsInPoll
   useEffect(() => {
-    if (processingAssetIdsInPoll.length > 0 && !wizard.isLoading) {
-      if (pollingIntervalRef.current) return; // Poller already running
-
-      console.log(
-        `[Step4Content Polling Effect2] ${processingAssetIdsInPoll.length} assets in poll list. Starting/Restarting poll for IDs:`,
-        processingAssetIdsInPoll
-      );
-
-      pollingIntervalRef.current = setInterval(() => {
-        // Check attempts for each ID before reloading
-        let shouldReload = false;
-        processingAssetIdsInPoll.forEach(id => {
-          pollAttemptsRef.current[id] = (pollAttemptsRef.current[id] || 0) + 1;
-          if (pollAttemptsRef.current[id] <= MAX_POLL_ATTEMPTS_PER_ASSET) {
-            shouldReload = true;
-          } else {
-            console.warn(
-              `[Step4Content Polling Effect2] Max poll attempts reached for asset ID ${id}. Will not trigger reload for this asset anymore via this poll cycle.`
-            );
-          }
-        });
-
-        if (shouldReload) {
-          const activePollAttempts = processingAssetIdsInPoll.map(
-            id => pollAttemptsRef.current[id]
-          );
-          console.log(
-            `[Step4Content Polling Effect2] Polling. Attempts for IDs ${processingAssetIdsInPoll.join(', ')}: ${activePollAttempts.join(', ')}. Reloading campaign data.`
-          );
-          wizard.reloadCampaignData();
-        } else if (processingAssetIdsInPoll.length > 0) {
-          console.log(
-            '[Step4Content Polling Effect2] All assets in poll list have reached max attempts. Stopping interval.'
-          );
-          if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
-          pollingIntervalRef.current = null;
-          // Do not clear processingAssetIdsInPoll here; Effect 3 will do it based on actual status.
-        }
-      }, POLLING_INTERVAL_MS);
-    } else if (processingAssetIdsInPoll.length === 0 && pollingIntervalRef.current) {
-      console.log('[Step4Content Polling Effect2] No assets left to poll. Clearing interval.');
+    // Clear any existing interval first
+    if (pollingIntervalRef.current) {
       clearInterval(pollingIntervalRef.current);
       pollingIntervalRef.current = null;
-      pollAttemptsRef.current = {}; // Reset all attempts
     }
 
+    // Don't start polling if no assets to poll or wizard is loading
+    if (processingAssetIdsInPoll.length === 0 || wizard.isLoading) {
+      return;
+    }
+
+    console.log(
+      `[Step4Content Polling Effect2] ${processingAssetIdsInPoll.length} assets in poll list. Starting/Restarting poll for IDs:`,
+      processingAssetIdsInPoll
+    );
+
+    // Function that actually performs the polling
+    const executePoll = () => {
+      // Skip this poll if the previous one hasn't completed yet
+      if (isPollingActiveRef.current) {
+        console.log('[Step4Content Polling] Skipping poll as previous request still in progress');
+        return;
+      }
+
+      // Skip if we're in a cooling period
+      const now = Date.now();
+      if (now - lastPollTimeRef.current < MIN_POLL_INTERVAL_MS) {
+        console.log('[Step4Content Polling] Skipping poll due to minimum interval enforcement');
+        return;
+      }
+
+      // Skip if wizard is loading data
+      if (wizard.isLoading) {
+        console.log('[Step4Content Polling] Skipping poll as wizard is already loading');
+        return;
+      }
+
+      // Check attempts for each ID before reloading
+      let shouldReload = false;
+      processingAssetIdsInPoll.forEach(id => {
+        pollAttemptsRef.current[id] = (pollAttemptsRef.current[id] || 0) + 1;
+        if (pollAttemptsRef.current[id] <= MAX_POLL_ATTEMPTS_PER_ASSET) {
+          shouldReload = true;
+        } else {
+          console.warn(
+            `[Step4Content Polling Effect2] Max poll attempts reached for asset ID ${id}. Will not trigger reload for this asset anymore.`
+          );
+        }
+      });
+
+      if (!shouldReload) {
+        // All assets have reached their max poll attempts, so stop polling
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current);
+          pollingIntervalRef.current = null;
+        }
+        return;
+      }
+
+      // Update the last poll time
+      lastPollTimeRef.current = now;
+
+      // Mark polling as active before making the request
+      isPollingActiveRef.current = true;
+
+      // Log the polling attempts
+      const activePollAttempts = processingAssetIdsInPoll.map(id => pollAttemptsRef.current[id]);
+      console.log(
+        `[Step4Content Polling Effect2] Polling. Attempts for IDs ${processingAssetIdsInPoll.join(', ')}: ${activePollAttempts.join(', ')}. Reloading campaign data.`
+      );
+
+      // Call the reload function - this is a non-blocking call to prevent react hook issues
+      try {
+        wizard.reloadCampaignData();
+      } catch (error) {
+        console.error('[Step4Content Polling] Error reloading campaign data:', error);
+      }
+
+      // Always set polling back to inactive after a delay
+      setTimeout(() => {
+        isPollingActiveRef.current = false;
+      }, COOLING_PERIOD_AFTER_RELOAD_MS);
+    };
+
+    // Set up the polling interval
+    pollingIntervalRef.current = setInterval(executePoll, MIN_POLL_INTERVAL_MS + 1000); // Add 1s buffer
+
+    // Run the poll immediately for the first time
+    if (!isPollingActiveRef.current && processingAssetIdsInPoll.length > 0) {
+      executePoll();
+    }
+
+    // Cleanup: clear interval when component unmounts or deps change
     return () => {
       if (pollingIntervalRef.current) {
         clearInterval(pollingIntervalRef.current);
         pollingIntervalRef.current = null;
       }
     };
-  }, [processingAssetIdsInPoll, wizard.reloadCampaignData, wizard.isLoading]);
+  }, [processingAssetIdsInPoll, wizard.isLoading, wizard.reloadCampaignData]);
 
-  // Effect 3: Check RHF FORM state after wizardState.assets might have changed (due to poll or other saves)
-  // and remove assets from polling list if they are now in a terminal state in the FORM.
+  // Effect 3: Check RHF FORM state for assets that are done processing and remove from poll list
   useEffect(() => {
     if (processingAssetIdsInPoll.length === 0) return;
 
-    // This effect runs when formAssetsWatched changes. The main sync useEffect would have updated the form based on new wizardState.
+    // This effect runs when formAssetsWatched changes or after a campaign data reload
     console.log(
       '[Step4Content Polling Effect3] Form assets updated. Checking statuses for polled IDs:',
       processingAssetIdsInPoll
@@ -473,16 +566,26 @@ function Step4Content() {
           formAsset.muxProcessingStatus === 'READY' ||
           formAsset.muxProcessingStatus === 'ERROR' ||
           formAsset.muxProcessingStatus === 'ERROR_NO_PLAYBACK_ID';
+
         console.log(
           `[Step4Content Polling Effect3] Status for asset internalId ${idToPoll} in FORM: ${formAsset.muxProcessingStatus}. Needs polling: ${!isTerminal}. Attempts: ${pollAttemptsRef.current[idToPoll]}`
         );
+
+        if (isTerminal) {
+          console.log(
+            `[Step4Content Polling Effect3] Asset ${idToPoll} has reached terminal state: ${formAsset.muxProcessingStatus}`
+          );
+          return false; // Don't poll for assets in terminal state
+        }
+
         if (pollAttemptsRef.current[idToPoll] > MAX_POLL_ATTEMPTS_PER_ASSET) {
           console.warn(
             `[Step4Content Polling Effect3] Asset internalId ${idToPoll} reached max poll attempts. Removing from active polling.`
           );
           return false; // Stop polling this one due to max attempts
         }
-        return !isTerminal;
+
+        return true; // Keep polling
       } else {
         // Asset is no longer in the form (e.g., deleted by user), stop polling for it.
         console.log(
@@ -499,8 +602,17 @@ function Step4Content() {
         stillNeedsPolling
       );
       setProcessingAssetIdsInPoll(stillNeedsPolling);
+
+      // If all processing is done, clean up
+      if (stillNeedsPolling.length === 0 && pollingIntervalRef.current) {
+        console.log(
+          '[Step4Content Polling Effect3] All assets processed. Stopping polling interval.'
+        );
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
     }
-  }, [formAssetsWatched, processingAssetIdsInPoll]);
+  }, [formAssetsWatched, processingAssetIdsInPoll, wizard.wizardState]);
   // -- END POLLING LOGIC --
 
   // Navigation Handlers
@@ -698,31 +810,25 @@ function Step4Content() {
               {/* Display uploaded assets using AssetCardStep4 */}
               <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {assetFields.map((field, index) => {
-                  // Use field and index from useFieldArray
-                  // Log field data during map
+                  // Cast the field to DraftAsset explicitly
+                  const asset = field as unknown as DraftAsset;
+
                   console.log(
-                    `[Step4Content render] Rendering AssetCardStep4 for index: ${index}, field data (RHF field array item):`,
-                    JSON.parse(JSON.stringify(field))
+                    `[Step4Content render] Rendering AssetCardStep4 for index: ${index}, field data:`,
+                    JSON.parse(JSON.stringify(asset))
                   );
+
                   return (
-                    <div key={field.id} className="relative group">
-                      {/* Render the new Step 4 card component, passing asset data directly */}
+                    <div key={field.fieldId} className="relative group">
+                      {/* Render the Step 4 card component with proper casting */}
                       <AssetCardStep4
                         assetIndex={index}
-                        asset={field as DraftAsset} // Pass the field data as the asset prop
+                        asset={asset}
                         control={form.control}
-                        getValues={form.getValues} // Pass getValues from form
-                        saveProgress={wizard.saveProgress} // Re-added saveProgress prop
+                        getValues={form.getValues}
+                        saveProgress={wizard.saveProgress}
                         availableInfluencers={influencerOptions}
-                        currency={
-                          wizard.wizardState &&
-                          wizard.wizardState.budget &&
-                          typeof wizard.wizardState.budget === 'object' &&
-                          'currency' in wizard.wizardState.budget &&
-                          typeof wizard.wizardState.budget.currency === 'string'
-                            ? wizard.wizardState.budget.currency
-                            : 'USD'
-                        } // Even more robust safe access
+                        currency={wizard.wizardState?.budget?.currency || 'USD'}
                       />
                       {/* Keep remove button functionality */}
                       <div className="absolute top-1 right-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -731,14 +837,7 @@ function Step4Content() {
                           hoverColorClass="text-destructive"
                           ariaLabel={`Remove asset ${index + 1}`}
                           onClick={() => {
-                            const assetToDelete = assetFields[index] as unknown as DraftAsset; // Cast to DraftAsset
-                            // Use assetToDelete.internalAssetId which should be the integer DB ID
-                            // Or use assetToDelete.id if that's the consistent unique key for frontend field array items
-                            handleDeleteAsset(
-                              assetToDelete.internalAssetId ?? assetToDelete.id,
-                              index,
-                              assetToDelete.name
-                            );
+                            handleDeleteAsset(asset.internalAssetId ?? asset.id, index, asset.name);
                           }}
                           className="bg-background/70 hover:bg-background/90 rounded-full p-1 h-6 w-6"
                         />

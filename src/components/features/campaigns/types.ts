@@ -81,6 +81,7 @@ export const InfluencerSchema = z
 export const DraftAssetSchema = z
   .object({
     id: z.string().optional(), // Client-side temporary ID or key
+    fieldId: z.string().optional(), // Add fieldId for useFieldArray key handling
     name: z.string().optional(),
     type: CreativeAssetTypeEnum.optional(),
     url: z.string().url().optional(), // Changed from .optional().nullable()
@@ -102,8 +103,18 @@ export const DraftAssetSchema = z
     userId: z.string().optional(), // Internal User ID (UUID) of the uploader
 
     // New fields
-    createdAt: z.string().datetime({ offset: true }).nullable().optional().or(z.date().nullable().optional()),
-    updatedAt: z.string().datetime({ offset: true }).nullable().optional().or(z.date().nullable().optional()),
+    createdAt: z
+      .string()
+      .datetime({ offset: true })
+      .nullable()
+      .optional()
+      .or(z.date().nullable().optional()),
+    updatedAt: z
+      .string()
+      .datetime({ offset: true })
+      .nullable()
+      .optional()
+      .or(z.date().nullable().optional()),
     isPrimaryForBrandLiftPreview: z.boolean().nullable().optional(),
   })
   .passthrough(); // Use passthrough instead of strict

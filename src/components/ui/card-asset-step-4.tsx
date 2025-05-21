@@ -27,7 +27,7 @@ import {
 } from '@/components/ui/command';
 import { Input } from '@/components/ui/input';
 import { toast } from 'react-hot-toast';
-import { Control, UseFormGetValues } from 'react-hook-form';
+import { Control, UseFormGetValues, useWatch } from 'react-hook-form';
 import { Step4FormData, DraftCampaignData } from '@/components/features/campaigns/types';
 
 // Define InfluencerOption type used in props and internally
@@ -124,6 +124,16 @@ export function AssetCardStep4({
 }: AssetCardProps) {
   const [popoverOpen, setPopoverOpen] = React.useState(false);
 
+  // Watch for changes in this specific asset in the form
+  const watchedAsset = useWatch({
+    control,
+    name: `assets.${assetIndex}`,
+    defaultValue: asset as any, // Use type assertion to bypass strict typing
+  });
+
+  // Merge the original asset with any updates from the form
+  const currentAsset = { ...asset, ...watchedAsset };
+
   // Log all props received by AssetCardStep4
   console.log(`[AssetCardStep4 assetIndex: ${assetIndex}] Rendering. All props:`, {
     assetIndex,
@@ -138,19 +148,26 @@ export function AssetCardStep4({
   });
   // Specifically log crucial asset fields for Mux status
   console.log(
-    `[AssetCardStep4 assetIndex: ${assetIndex}] Mux Status: ${asset?.muxProcessingStatus}, URL: ${asset?.url}, PlaybackID: ${asset?.muxPlaybackId}, Name: ${asset?.name}, ID: ${asset?.id}, InternalAssetID: ${asset?.internalAssetId}`
+    `[AssetCardStep4 assetIndex: ${assetIndex}] Mux Status: ${currentAsset?.muxProcessingStatus}, URL: ${currentAsset?.url}, PlaybackID: ${currentAsset?.muxPlaybackId}, Name: ${currentAsset?.name}, ID: ${currentAsset?.id}, InternalAssetID: ${currentAsset?.internalAssetId}`
   );
 
   // Uses updated AssetCardProps
-  if (!asset) {
+  if (!currentAsset) {
     console.warn(
       `[AssetCardStep4 assetIndex: ${assetIndex}] Asset prop is null or undefined. Not rendering card.`
     );
     return null;
   }
 
-  const { name, url, type, influencerHandle, description, muxProcessingStatus, muxPlaybackId } =
-    asset;
+  const {
+    name,
+    url,
+    type,
+    influencerHandle,
+    description,
+    muxProcessingStatus = currentAsset.muxProcessingStatus,
+    muxPlaybackId = currentAsset.muxPlaybackId,
+  } = currentAsset;
 
   const isVideoAsset = type?.includes('video');
   const isImageAsset = type?.includes('image');
@@ -163,7 +180,7 @@ export function AssetCardStep4({
 
   // Log props and watched data
   console.log(`AssetCardStep4[${assetIndex}] - Props:`, { assetIndex, availableInfluencers });
-  console.log(`AssetCardStep4[${assetIndex}] - Watched Data:`, asset);
+  console.log(`AssetCardStep4[${assetIndex}] - Watched Data:`, currentAsset);
 
   // Ensure field names are defined correctly in scope - ADJUSTED
   const nameFieldName: `assets.${number}.name` = `assets.${assetIndex}.name`;
@@ -198,8 +215,8 @@ export function AssetCardStep4({
           type={type}
           mediaTypeIconId={mediaTypeIconId}
           mediaTypeLabel={mediaTypeLabel}
-          // Consider passing muxPlaybackId directly if AssetPreview can use MuxPlayer
-          // muxPlaybackId={muxPlaybackId}
+          muxPlaybackId={muxPlaybackId}
+          muxProcessingStatus={muxProcessingStatus}
         />
       )}
       {/* Fallback for video assets without a definitive status yet, or if AssetPreview handles initial state */}
