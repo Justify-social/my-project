@@ -100,6 +100,11 @@ export const DraftAssetSchema = z
 
     // User linkage
     userId: z.string().optional(), // Internal User ID (UUID) of the uploader
+
+    // New fields
+    createdAt: z.string().datetime({ offset: true }).nullable().optional().or(z.date().nullable().optional()),
+    updatedAt: z.string().datetime({ offset: true }).nullable().optional().or(z.date().nullable().optional()),
+    isPrimaryForBrandLiftPreview: z.boolean().nullable().optional(),
   })
   .passthrough(); // Use passthrough instead of strict
 
