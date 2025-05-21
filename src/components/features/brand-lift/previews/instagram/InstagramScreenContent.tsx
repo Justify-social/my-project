@@ -1,40 +1,77 @@
-import React from 'react';
-import { CreativeDataProps } from '@/types/brand-lift';
+import React, { useRef, useEffect } from 'react';
 import MuxPlayer from '@mux/mux-player-react';
+import { CreativeDataProps, MuxPlayerElement } from '@/types/brand-lift';
 import { Icon } from '@/components/ui/icon/icon';
 import { InstagramPostHeader } from './InstagramPostHeader';
 import { InstagramActionButtons } from './InstagramActionButtons';
 import { InstagramPostInfo } from './InstagramPostInfo';
-// TODO: Import atomic sub-components once created, e.g.:
-// import InstagramPostHeader from './InstagramPostHeader';
-// import InstagramActionButtons from './InstagramActionButtons';
-// import InstagramPostInfo from './InstagramPostInfo';
 
 export interface InstagramScreenContentProps {
   creativeData: CreativeDataProps;
+  // videoReady?: boolean; // Temporarily remove
 }
 
-const InstagramScreenContent: React.FC<InstagramScreenContentProps> = ({ creativeData }) => {
+const InstagramScreenContent: React.FC<InstagramScreenContentProps> = ({
+  creativeData,
+  // videoReady = false // Temporarily remove
+}) => {
   const { profile, caption, media } = creativeData;
+  const playerRef = useRef<any>(null);
+
+  // Try to autoplay the video when videoReady changes
+  useEffect(() => {
+    // if (videoReady && playerRef.current) { // Temporarily remove condition
+    if (playerRef.current) {
+      // Simplified condition
+      try {
+        const timer = setTimeout(() => {
+          if (playerRef.current) {
+            playerRef.current.play().catch((e: Error) => {
+              console.warn('Instagram Mux player autoplay failed:', e.message);
+            });
+          }
+        }, 500);
+
+        return () => clearTimeout(timer);
+      } catch (e: unknown) {
+        console.warn('Error with Instagram Mux player:', e);
+      }
+    }
+    // }, [videoReady]); // Temporarily remove dependency
+  }, []); // Simplified dependency array
 
   const mockEngagement = {
-    likes: '1,234 likes',
-    commentsCount: '15', // Just the number for "View all X comments"
+    likes: '157.5K',
+    commentsCount: '3.2K',
+    timeAgo: '1 DAY AGO',
   };
 
   return (
     <div className="w-full h-full bg-white dark:bg-black text-black dark:text-white flex flex-col relative overflow-y-auto no-scrollbar select-none">
       <InstagramPostHeader profile={profile} />
 
-      {/* 2. Main Media Area */}
+      {/* Main Media Area */}
       <div className="flex-grow bg-gray-200 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
-        {media.type === 'video' && media.muxPlaybackId ? (
+        {media.type === 'video' && media.muxPlaybackId && media.muxProcessingStatus === 'READY' ? (
           <MuxPlayer
-            playbackId={media.muxPlaybackId}
+            ref={playerRef}
+            playbackId={media.muxPlaybackId || ''}
             autoPlay="muted"
             loop
+            muted
+            preload="auto"
             className="w-full h-full object-contain" // object-contain common for IG posts/reels
             playsInline
+            streamType="on-demand"
+            defaultHiddenCaptions
+            thumbnailTime={1}
+            primaryColor="#00BFFF"
+            secondaryColor="#FFFFFF"
+            metadata={{
+              video_title: media.name || 'Instagram Post',
+              player_name: 'Instagram Preview Player',
+              player_init_time: Date.now(),
+            }}
           />
         ) : media.type === 'image' && media.imageUrl ? (
           <img
@@ -52,24 +89,6 @@ const InstagramScreenContent: React.FC<InstagramScreenContentProps> = ({ creativ
 
       <InstagramActionButtons />
       <InstagramPostInfo profile={profile} caption={caption} engagement={mockEngagement} />
-
-      {/* 4. Info Section */}
-      <div className="p-3 pt-1 text-sm flex-shrink-0">
-        {mockEngagement.likes && (
-          <p className="font-semibold text-xs mb-1">{mockEngagement.likes}</p>
-        )}
-        <p className="mt-0">
-          <span className="font-semibold">{profile.username || profile.name}</span>{' '}
-          <span className="whitespace-pre-wrap break-words">{caption}</span>
-        </p>
-        {mockEngagement.commentsCount && (
-          <p className="text-gray-500 dark:text-gray-400 mt-1 text-xs hover:underline cursor-pointer">
-            View all {mockEngagement.commentsCount} comments
-          </p>
-        )}
-        <p className="text-gray-400 dark:text-gray-500 mt-1 text-[10px] uppercase">1 DAY AGO</p>{' '}
-        {/* Static timestamp for mockup */}
-      </div>
     </div>
   );
 };

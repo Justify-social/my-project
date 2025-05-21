@@ -47,6 +47,9 @@ export async function POST(
       return NextResponse.json({ error: 'Submitter user record not found' }, { status: 404 });
     }
 
+    // Store the internal user ID for authorization check
+    const internalUserId = submitterUser.id;
+
     const study = await prisma.brandLiftStudy.findUnique({
       where: { id: studyId },
       include: {
@@ -58,8 +61,11 @@ export async function POST(
       return NextResponse.json({ error: 'Brand Lift Study not found' }, { status: 404 });
     }
 
-    // Authorization: Check if the user is associated with the campaign of this study
-    if (study.campaign?.userId !== clerkUserId) {
+    // Authorization: Check if the user's internal ID matches the campaign's userId
+    if (study.campaign?.userId !== internalUserId) {
+      logger.warn(
+        `[API /request-review] Authorization failed. clerkUserId: ${clerkUserId}, internalUserId: ${internalUserId}, studyCampaignOwnerUserId: ${study.campaign?.userId}`
+      );
       return NextResponse.json(
         { error: 'Forbidden: You do not have access to this study' },
         { status: 403 }

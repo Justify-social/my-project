@@ -354,6 +354,11 @@ interface AssetData {
   influencerHandle?: string;
   description?: string;
   budget?: number | string;
+  muxPlaybackId?: string;
+  muxProcessingStatus?: string;
+  fieldId?: string;
+  muxAssetId?: string;
+  rationale?: string;
 }
 
 // Ensure this interface is defined
@@ -378,6 +383,7 @@ export function AssetCard({
   cardClassName,
   ...props
 }: AssetCardProps) {
+  console.log('[AssetCard STEP 5 RENDER] Full props:', { asset, currency, defaultPlatform }); // Added for Step 5 debugging
   // Uses updated AssetCardProps
   if (!asset) return null;
 
@@ -389,6 +395,8 @@ export function AssetCard({
     influencerHandle,
     description,
     budget,
+    muxPlaybackId,
+    muxProcessingStatus,
   } = asset;
 
   const platformIconId = getPlatformIconId(platform);
@@ -413,11 +421,13 @@ export function AssetCard({
       {...props}
     >
       <AssetPreview
-        url={url}
+        url={isVideoAsset && muxPlaybackId ? `https://stream.mux.com/${muxPlaybackId}.m3u8` : url}
         fileName={name}
         type={type}
         mediaTypeIconId={mediaTypeIconId}
         mediaTypeLabel={mediaTypeLabel}
+        muxPlaybackId={muxPlaybackId}
+        muxProcessingStatus={muxProcessingStatus}
       />
 
       {/* Content Area with padding and flex-grow */}
@@ -443,6 +453,22 @@ export function AssetCard({
               </Badge>
             )}
           </div>
+
+          {/* Diagnostic Section for Influencer and Budget */}
+          <div className="my-2 p-2 border border-red-500 bg-red-50">
+            <p className="text-xs text-red-700 font-bold">[DIAGNOSTIC INFO]</p>
+            {influencerHandle ? (
+              <p className="text-xs text-red-600">Influencer: {influencerHandle}</p>
+            ) : (
+              <p className="text-xs text-red-400">Influencer: Not provided to card</p>
+            )}
+            {(budget !== undefined && budget !== null) ? (
+              <p className="text-xs text-red-600">Asset Budget: {formatCurrency(budget, currency)}</p>
+            ) : (
+              <p className="text-xs text-red-400">Asset Budget: Not provided to card</p>
+            )}
+          </div>
+          {/* End Diagnostic Section */}
 
           {/* Influencer Handle */}
           {influencerHandle && (

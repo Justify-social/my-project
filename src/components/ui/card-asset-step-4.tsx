@@ -134,6 +134,11 @@ export function AssetCardStep4({
   // Merge the original asset with any updates from the form
   const currentAsset = { ...asset, ...watchedAsset };
 
+  // Ensure current asset has a fieldId
+  if (!currentAsset.fieldId) {
+    currentAsset.fieldId = `field-${currentAsset.id || Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+  }
+
   // Log all props received by AssetCardStep4
   console.log(`[AssetCardStep4 assetIndex: ${assetIndex}] Rendering. All props:`, {
     assetIndex,
@@ -148,7 +153,7 @@ export function AssetCardStep4({
   });
   // Specifically log crucial asset fields for Mux status
   console.log(
-    `[AssetCardStep4 assetIndex: ${assetIndex}] Mux Status: ${currentAsset?.muxProcessingStatus}, URL: ${currentAsset?.url}, PlaybackID: ${currentAsset?.muxPlaybackId}, Name: ${currentAsset?.name}, ID: ${currentAsset?.id}, InternalAssetID: ${currentAsset?.internalAssetId}`
+    `[AssetCardStep4 assetIndex: ${assetIndex}] Mux Status: ${currentAsset?.muxProcessingStatus}, URL: ${currentAsset?.url}, PlaybackID: ${currentAsset?.muxPlaybackId}, Name: ${currentAsset?.name}, ID: ${currentAsset?.id}, InternalAssetID: ${currentAsset?.internalAssetId}, fieldId: ${currentAsset?.fieldId}`
   );
 
   // Uses updated AssetCardProps
@@ -255,7 +260,24 @@ export function AssetCardStep4({
             onClick={async () => {
               console.log('Save icon clicked');
               const currentData = getValues();
-              const payload = { ...currentData, currentStep: 4 };
+
+              // Ensure all assets have a fieldId and required fields are properly formatted
+              const assetsWithFieldIds = currentData.assets.map(asset => ({
+                ...asset,
+                fieldId: asset.fieldId || `field-${asset.id || Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+                // Ensure these fields are explicitly included for saving
+                rationale: asset.rationale || '',
+                budget: typeof asset.budget === 'number' ? asset.budget : 0,
+                associatedInfluencerIds: Array.isArray(asset.associatedInfluencerIds) ? asset.associatedInfluencerIds : []
+              }));
+
+              console.log(`[Save icon] Prepared assets for save, including rationale, budget:`, assetsWithFieldIds);
+
+              const payload = {
+                ...currentData,
+                assets: assetsWithFieldIds,
+                currentStep: 4
+              };
               await saveProgress(payload);
               toast.success('Step 4 progress saved.');
             }}

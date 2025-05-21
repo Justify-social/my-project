@@ -28,6 +28,11 @@ import { logger } from '@/lib/logger'; // Added logger import
 // Infer the DraftAsset type
 type DraftAsset = z.infer<typeof DraftAssetSchema>;
 
+// Define a custom interface that extends Step4FormData for better type support with useFieldArray
+interface CustomStep4FormData extends Omit<Step4FormData, 'assets'> {
+  assets: DraftAsset[];
+}
+
 // --- Main Step 4 Component ---
 function Step4Content() {
   const router = useRouter();
@@ -39,7 +44,10 @@ function Step4Content() {
     defaultValues: {
       assets:
         wizard.wizardState?.assets && Array.isArray(wizard.wizardState.assets)
-          ? wizard.wizardState.assets
+          ? wizard.wizardState.assets.map(asset => ({
+            ...asset,
+            fieldId: asset.fieldId || `field-${asset.id || Date.now()}-${Math.random().toString(36).substring(2, 9)}`
+          }))
           : ([] as DraftAsset[]), // Explicitly type empty array if providing one
       step4Complete:
         wizard.wizardState && typeof wizard.wizardState.step4Complete === 'boolean'
@@ -60,15 +68,8 @@ function Step4Content() {
     },
   });
 
-  // Remove useFieldArray for requirements as it's deprecated
-  /*
-    const { fields: requirementFields, append: appendRequirement, remove: removeRequirement } = useFieldArray({
-        control: form.control,
-        name: "requirements",
-    });
-    */
-
-  // Use type assertion to bypass the type error
+  // Use type assertion to bypass the TypeScript error 
+  // This approach has been used in the codebase before and works
   const {
     fields: assetFields,
     append: appendAsset,
@@ -103,9 +104,10 @@ function Step4Content() {
   // New callback for the VideoFileUploader
   const handleVideoUploadComplete = useCallback(
     (result: VideoUploadResult) => {
+      const fieldId = `field-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
       const newVideoAsset: DraftAsset = {
         id: `temp-mux-${result.internalAssetId}`,
-        fieldId: `field-${Date.now()}`,
+        fieldId, // Add explicit fieldId for useFieldArray
         internalAssetId: result.internalAssetId,
         name: result.fileName,
         fileName: result.fileName,
@@ -182,7 +184,7 @@ function Step4Content() {
     [removeAsset]
   );
 
-  // Main sync effect from wizard context to RHF form state
+  // Main sync effect from wizard context to RHF form state - fix dependency array
   useEffect(() => {
     console.log(
       '[Step4Content MAIN SYNC useEffect] Running. wizard.isLoading:',
@@ -213,6 +215,21 @@ function Step4Content() {
       '[Step4Content MAIN SYNC useEffect] FormAssets from RHF before sync:',
       JSON.parse(JSON.stringify(formAssets))
     );
+
+    // IMPORTANT: Prevent infinite loop by checking if assets have meaningfully changed
+    if (wizardAssets.length === formAssets.length && formAssets.length > 0) {
+      // Check if any asset is missing fieldId, only then update
+      const needsFieldIdUpdate = formAssets.some(asset => !asset.fieldId);
+      const processingStatusChanged = formAssets.some((asset, index) => {
+        const wizardAsset = wizardAssets[index];
+        return wizardAsset && asset.muxProcessingStatus !== wizardAsset.muxProcessingStatus;
+      });
+
+      if (!needsFieldIdUpdate && !processingStatusChanged && !wizard.isLoading) {
+        console.log('[Step4Content MAIN SYNC useEffect] Assets already synced, skipping update');
+        return;
+      }
+    }
 
     let formWasModifiedBySetValue = false;
     // Initialize requiresFullReset based on initial array length comparison or if wizardAssets has items and formAssets is empty
@@ -319,6 +336,12 @@ function Step4Content() {
           assetWasChanged = true;
         }
 
+        // Ensure we have a fieldId
+        if (!updatedFormAsset.fieldId) {
+          updatedFormAsset.fieldId = `field-${updatedFormAsset.id || Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+          assetWasChanged = true;
+        }
+
         if (assetWasChanged) {
           // Force update the form state with new values and trigger validation/re-render
           form.setValue(`assets.${matchedFormAssetIndex}`, updatedFormAsset, {
@@ -355,22 +378,21 @@ function Step4Content() {
           `field-${asset.id || Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       }));
 
-      // Create a new form state object without assets
-      const currentValues = form.getValues();
-      const { assets: _, ...valuesWithoutAssets } = currentValues;
+      // Fix: Create a new form state object with all the needed fields
+      const formValues = {
+        step4Complete: form.getValues('step4Complete') || false,
+        guidelines: form.getValues('guidelines') || '',
+        requirements: form.getValues('requirements') || [],
+        notes: form.getValues('notes') || '',
+        assets: assetsWithFieldIds,
+      };
 
       // Reset form with the new asset array containing fieldIds
-      form.reset(
-        {
-          ...valuesWithoutAssets,
-          assets: assetsWithFieldIds,
-        },
-        {
-          keepDirty: false,
-          keepValues: true,
-          keepErrors: false,
-        }
-      );
+      form.reset(formValues, {
+        keepDirty: false,
+        keepValues: false,
+        keepErrors: false,
+      });
 
       // Force a notification to child components that values have changed
       form.trigger();
@@ -392,7 +414,7 @@ function Step4Content() {
         '[Step4Content MAIN SYNC useEffect] Full asset reset deemed necessary but form is dirty. New assets from context may not appear, and existing form edits are preserved over context structural changes.'
       );
     }
-  }, [wizard.wizardState, wizard.campaignId, wizard.isLoading, form]);
+  }, [wizard.wizardState, wizard.campaignId, wizard.isLoading]);
 
   // ++ ROBUST POLLING LOGIC FOR PROCESSING ASSETS ++
   const [processingAssetIdsInPoll, setProcessingAssetIdsInPoll] = React.useState<
@@ -408,22 +430,24 @@ function Step4Content() {
 
   const formAssetsWatched = form.watch('assets'); // Watch all assets in the form
 
-  // Effect 1: Identify assets in the form that need polling and add them to our polling list
+  // Fix: Optimize dependency array to prevent unnecessary polling
   useEffect(() => {
     if (wizard.isLoading) return; // Don't scan for assets during wizard loading
 
-    const assetsInFormCurrentlyProcessing = formAssetsWatched
+    // Only check asset statuses, not the entire objects
+    const processingAssetIds = formAssetsWatched
       ?.filter(
         (asset: DraftAsset) =>
           asset.muxProcessingStatus === 'MUX_PROCESSING' ||
-          asset.muxProcessingStatus === 'PENDING_UPLOAD'
+          asset.muxProcessingStatus === 'PENDING_UPLOAD' ||
+          asset.muxProcessingStatus === 'AWAITING_UPLOAD'
       )
       .map((asset: DraftAsset) => asset.internalAssetId) // Use internalAssetId (DB ID)
       .filter(id => id !== undefined) as Array<string | number>;
 
-    if (assetsInFormCurrentlyProcessing && assetsInFormCurrentlyProcessing.length > 0) {
+    if (processingAssetIds && processingAssetIds.length > 0) {
       setProcessingAssetIdsInPoll(prevPollIds => {
-        const newIdsToPoll = assetsInFormCurrentlyProcessing.filter(
+        const newIdsToPoll = processingAssetIds.filter(
           id => !prevPollIds.includes(id)
         );
         if (newIdsToPoll.length > 0) {
@@ -544,7 +568,7 @@ function Step4Content() {
         pollingIntervalRef.current = null;
       }
     };
-  }, [processingAssetIdsInPoll, wizard.isLoading, wizard.reloadCampaignData]);
+  }, [processingAssetIdsInPoll.length, wizard.isLoading, wizard.reloadCampaignData]);
 
   // Effect 3: Check RHF FORM state for assets that are done processing and remove from poll list
   useEffect(() => {
@@ -612,7 +636,7 @@ function Step4Content() {
         pollingIntervalRef.current = null;
       }
     }
-  }, [formAssetsWatched, processingAssetIdsInPoll, wizard.wizardState]);
+  }, [formAssetsWatched, processingAssetIdsInPoll]);
   // -- END POLLING LOGIC --
 
   // Navigation Handlers
@@ -636,20 +660,53 @@ function Step4Content() {
   const onSubmitAndNavigate = async () => {
     const isValid = await form.trigger();
     if (!isValid) {
-      // Use helper
-      showErrorToast('Please fix the errors before proceeding.');
+      // Check if it's failing due to missing assets
+      if (form.getValues().assets.length === 0) {
+        showErrorToast('Please upload at least one asset before proceeding.');
+      } else {
+        // Check if the asset rationale or budget are missing
+        const assets = form.getValues().assets;
+        const anyMissingRationale = assets.some(asset => !asset.rationale);
+        const anyMissingBudget = assets.some(asset => !asset.budget);
+        const anyMissingFieldId = assets.some(asset => !asset.fieldId);
+
+        if (anyMissingRationale) {
+          showErrorToast('Please provide a rationale for all assets.');
+        } else if (anyMissingBudget) {
+          showErrorToast('Please provide a budget for all assets.');
+        } else if (anyMissingFieldId) {
+          // This shouldn't happen with our fixes, but handle it just in case
+          console.error('Missing fieldId detected');
+          showErrorToast('There was an error with asset data. Please try saving again.');
+        } else {
+          showErrorToast('Please fix all form errors before proceeding.');
+        }
+      }
       return;
     }
     const data = form.getValues();
+
+    // Ensure all assets have fieldId and required fields are properly formatted
+    const assetsWithFieldIds = data.assets.map(asset => ({
+      ...asset,
+      fieldId: asset.fieldId || `field-${asset.id || Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      // Ensure these fields are explicitly included for saving
+      rationale: asset.rationale || '',
+      budget: typeof asset.budget === 'number' ? asset.budget : 0,
+      associatedInfluencerIds: Array.isArray(asset.associatedInfluencerIds) ? asset.associatedInfluencerIds : []
+    }));
+
+    // Log the prepared assets data for debugging
+    console.log('[Step 4] Prepared assets for onSubmitAndNavigate:', assetsWithFieldIds);
+
     const payload: Partial<DraftCampaignData> = {
-      assets: data.assets,
-      guidelines: data.guidelines,
-      requirements: data.requirements,
-      notes: data.notes,
+      assets: assetsWithFieldIds,
+      guidelines: data.guidelines || null,
+      requirements: data.requirements || [],
+      notes: data.notes || null,
       step4Complete: true,
       currentStep: 4,
     };
-    // wizard.updateWizardState(payload); // Commented out immediate state update
 
     // Log the payload being sent when clicking Next
     console.log(
@@ -660,7 +717,18 @@ function Step4Content() {
     const saved = await wizard.saveProgress(payload); // Save Step 4 data first
     if (saved) {
       // Only navigate AFTER successful save
-      form.reset(data, { keepValues: true, keepDirty: false });
+      form.reset(
+        {
+          ...data,
+          assets: assetsWithFieldIds
+        },
+        {
+          keepValues: false,
+          keepDirty: false,
+          keepErrors: false,
+        }
+      );
+
       if (wizard.campaignId) {
         router.push(`/campaigns/wizard/step-5?id=${wizard.campaignId}`); // Navigate to Step 5
       } else {
@@ -676,24 +744,65 @@ function Step4Content() {
   // NEW: Handler for the manual Save button
   const handleSave = async (): Promise<boolean> => {
     console.log('[Step 4] Attempting Manual Save...');
-    // Explicitly trigger validation for manual save
+
+    const data = form.getValues();
+
+    // Only validate if there are assets
+    if (data.assets.length === 0) {
+      showErrorToast('Please upload at least one asset before saving.');
+      return false;
+    }
+
+    // Check if required fields for each asset are filled in
+    const assets = data.assets;
+    const anyMissingRationale = assets.some(asset => !asset.rationale);
+    const anyMissingBudget = assets.some(asset => !asset.budget);
+    const anyMissingFieldId = assets.some(asset => !asset.fieldId);
+
+    if (anyMissingRationale) {
+      showErrorToast('Please provide a rationale for all assets.');
+      return false;
+    }
+
+    if (anyMissingBudget) {
+      showErrorToast('Please provide a budget for all assets.');
+      return false;
+    }
+
+    if (anyMissingFieldId) {
+      console.warn('[Step 4] Some assets missing fieldId, will add them during save');
+    }
+
+    // Now run full validation
     const isValid = await form.trigger();
     if (!isValid) {
       console.warn('[Step 4] Validation failed for manual save.');
-      // Use helper
-      showErrorToast('Please fix the errors before saving.');
+      showErrorToast('Please fix all form errors before saving.');
       return false;
     }
-    const data = form.getValues();
+
     console.log('[Step 4] Form data is valid for manual save.');
+
+    // Ensure all assets have fieldId
+    const assetsWithFieldIds = data.assets.map(asset => ({
+      ...asset,
+      fieldId: asset.fieldId || `field-${asset.id || Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      // Ensure these fields are explicitly included for saving
+      rationale: asset.rationale || '',
+      budget: typeof asset.budget === 'number' ? asset.budget : 0,
+      associatedInfluencerIds: Array.isArray(asset.associatedInfluencerIds) ? asset.associatedInfluencerIds : []
+    }));
+
+    // Log the prepared assets data for debugging
+    console.log('[Step 4] Prepared assets for save:', assetsWithFieldIds);
 
     // Prepare payload, keeping currentStep as 4
     const payload: Partial<DraftCampaignData> = {
-      assets: data.assets,
-      guidelines: data.guidelines,
-      requirements: data.requirements,
-      notes: data.notes,
-      step4Complete: form.formState.isValid, // Use current validation state
+      assets: assetsWithFieldIds,
+      guidelines: data.guidelines || null,
+      requirements: data.requirements || [],
+      notes: data.notes || null,
+      step4Complete: form.formState.isValid,
       currentStep: 4,
     };
 
@@ -705,10 +814,20 @@ function Step4Content() {
 
       if (saveSuccess) {
         console.log('[Step 4] Manual save successful!');
+        // Reset form to clear dirty state but maintain values
+        form.reset(
+          {
+            ...data,
+            assets: assetsWithFieldIds
+          },
+          {
+            keepValues: false,
+            keepDirty: false,
+            keepErrors: false,
+          }
+        );
         // Use helper (default icon)
         showSuccessToast('Progress saved!');
-        // Optionally reset dirty state
-        // form.reset(data, { keepValues: true, keepDirty: false, keepErrors: true });
         return true;
       } else {
         console.error('[Step 4] Manual save failed.');
@@ -736,7 +855,7 @@ function Step4Content() {
     console.warn(
       '[Step4Content] Wizard state is null during render. Displaying minimal UI or loader.'
     );
-    // Optionally return a loader or a message, but ensure ProgressBarWizard still gets some props
+    // Display only the ProgressBarWizard without the loading text
     return (
       <div className="space-y-8">
         <ProgressBarWizard
@@ -748,9 +867,8 @@ function Step4Content() {
           isNextDisabled={true} // Disable if no state
           isNextLoading={wizard.isLoading}
           onSave={handleSave}
-          // getCurrentFormData may not be available if form is not initialized
+        // getCurrentFormData may not be available if form is not initialized
         />
-        <p className="text-center text-muted-foreground">Loading campaign data...</p>
       </div>
     );
   }
@@ -786,8 +904,8 @@ function Step4Content() {
               {/* VideoFileUploader is now the primary/only uploader here */}
               <div className="mt-0 pt-0">
                 {wizard.wizardState &&
-                typeof wizard.wizardState.id === 'string' &&
-                wizard.wizardState.id ? (
+                  typeof wizard.wizardState.id === 'string' &&
+                  wizard.wizardState.id ? (
                   <VideoFileUploader
                     name="assets"
                     control={form.control}

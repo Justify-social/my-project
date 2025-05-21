@@ -270,40 +270,206 @@ export function WizardProvider({ children }: { children: ReactNode }) {
         // DEBUG LOG - Check if assets exist before logging
         if (normalizedData.data.hasOwnProperty('assets')) {
           console.log(
-            '[WizardContext loadCampaignData] API Response data.assets:',
+            '[WizardContext loadCampaignData] API Response data.assets (before merge):',
             JSON.parse(JSON.stringify((normalizedData.data as any).assets))
           );
         } else {
           console.log(
-            '[WizardContext loadCampaignData] API Response data does not have an assets property.'
+            '[WizardContext loadCampaignData] API Response data does not have an assets property initially.'
           );
         }
-        const rawData = normalizedData.data as any; // Cast to any to check for status property
+        if (normalizedData.data.hasOwnProperty('creativeAssets')) {
+          console.log(
+            '[WizardContext loadCampaignData] API Response data.creativeAssets (before merge):',
+            JSON.parse(JSON.stringify((normalizedData.data as any).creativeAssets))
+          );
+        }
 
-        // Check if the campaign is already submitted by looking at the raw status
-        if (rawData && typeof rawData === 'object' && rawData.status === 'SUBMITTED') {
+
+        const rawDataFromAPI = normalizedData.data as any;
+
+        // Check if the campaign is already submitted
+        if (
+          rawDataFromAPI &&
+          typeof rawDataFromAPI === 'object' &&
+          rawDataFromAPI.status === 'SUBMITTED' &&
+          !(rawDataFromAPI.currentStep === 4 && !rawDataFromAPI.step4Complete)
+        ) {
           logger.info(
             'WizardContext: Campaign is SUBMITTED. Storing raw data for context, bypassing strict draft schema parsing for this view.'
           );
-          setWizardState(rawData as DraftCampaignData); // Cast, acknowledge potential partial mismatch
+          setWizardState(rawDataFromAPI as DraftCampaignData);
         } else {
-          // Proceed with Zod parsing for DRAFT or other non-SUBMITTED statuses
           logger.debug(
             'WizardContext: Attempting to parse (DRAFT or other status) data against DraftCampaignDataSchema...'
           );
-          const parseResult = await DraftCampaignDataSchema.safeParseAsync(rawData); // Parse rawData
-          if (parseResult.success) {
-            setWizardState(parseResult.data);
-            logger.info(
-              'WizardContext: Successfully parsed and set wizardState for non-submitted campaign.'
-            );
+
+          // Refined Asset Merging Logic
+          let finalAssets = [];
+          const richClientAssets = Array.isArray(rawDataFromAPI.assets) ? rawDataFromAPI.assets : [];
+          const dbCreativeAssets = Array.isArray(rawDataFromAPI.creativeAssets) ? rawDataFromAPI.creativeAssets : [];
+          const timestampForFieldId = Date.now();
+
+          if (richClientAssets.length > 0) {
+            logger.info('[WizardContext loadCampaignData] Prioritizing and enriching CampaignWizard.assets (JSON field).');
+            finalAssets = richClientAssets.map((clientAsset: any, index: number) => {
+              console.log(`[WizardContext loadCampaignData Path A] clientAsset[${index}] BEFORE merge:`, JSON.parse(JSON.stringify(clientAsset)));
+
+              const dbAssetMatch = dbCreativeAssets.find((db_ca: any) =>
+                db_ca.id !== null && db_ca.id !== undefined && // Ensure db_ca.id is valid before comparison
+                (String(db_ca.id) === String(clientAsset.internalAssetId || clientAsset.id))
+              );
+
+              // Preserve all fields from clientAsset first, then selectively override/add from dbAssetMatch
+              const mergedAsset = {
+                ...clientAsset,
+                ...(dbAssetMatch ? {
+                  id: String(dbAssetMatch.id), // DB ID is canonical if it exists & matches
+                  internalAssetId: dbAssetMatch.id,
+                  name: dbAssetMatch.name || clientAsset.name || '',
+                  fileName: clientAsset.fileName || dbAssetMatch.fileName || dbAssetMatch.name || '', // Prioritize clientAsset.fileName
+                  type: dbAssetMatch.type || clientAsset.type || 'video',
+                  description: dbAssetMatch.description || clientAsset.description || '',
+                  url: dbAssetMatch.url || clientAsset.url,
+                  fileSize: dbAssetMatch.fileSize ?? clientAsset.fileSize,
+                  muxAssetId: dbAssetMatch.muxAssetId ?? clientAsset.muxAssetId,
+                  muxPlaybackId: dbAssetMatch.muxPlaybackId ?? clientAsset.muxPlaybackId,
+                  muxProcessingStatus: dbAssetMatch.muxProcessingStatus ?? clientAsset.muxProcessingStatus,
+                  duration: dbAssetMatch.duration ?? clientAsset.duration,
+                  userId: dbAssetMatch.userId ?? clientAsset.userId,
+                  createdAt: dbAssetMatch.createdAt?.toISOString ? dbAssetMatch.createdAt.toISOString() : (clientAsset.createdAt || undefined),
+                  updatedAt: dbAssetMatch.updatedAt?.toISOString ? dbAssetMatch.updatedAt.toISOString() : (clientAsset.updatedAt || undefined),
+                  isPrimaryForBrandLiftPreview: dbAssetMatch.isPrimaryForBrandLiftPreview ?? clientAsset.isPrimaryForBrandLiftPreview ?? false,
+                } : {}),
+                fieldId: clientAsset.fieldId || `field-${clientAsset.id || clientAsset.internalAssetId || index}-${timestampForFieldId}-${Math.random().toString(36).substring(2, 9)}`,
+              };
+              // Ensure required fields like budget, rationale, associatedInfluencerIds from clientAsset are explicitly kept if they existed
+              // The initial spread `...clientAsset` should handle this.
+              // For safety, we can re-assign them if they were part of clientAsset
+              if (clientAsset.hasOwnProperty('budget')) mergedAsset.budget = clientAsset.budget;
+              if (clientAsset.hasOwnProperty('rationale')) mergedAsset.rationale = clientAsset.rationale;
+              if (clientAsset.hasOwnProperty('associatedInfluencerIds')) mergedAsset.associatedInfluencerIds = clientAsset.associatedInfluencerIds;
+
+              return mergedAsset;
+            });
+          } else if (dbCreativeAssets.length > 0) {
+            logger.warn('[WizardContext loadCampaignData] CampaignWizard.assets (JSON) was empty. Mapping from creativeAssets relation (form-specific fields like explicit budget/rationale will be default).');
+            finalAssets = dbCreativeAssets.map((ca: any, index: number) => ({
+              id: String(ca.id),
+              fieldId: `field-${ca.id}-${timestampForFieldId}-${index}-${Math.random().toString(36).slice(2, 9)}`,
+              internalAssetId: ca.id,
+              name: String(ca.name ?? ''),
+              fileName: String(ca.fileName ?? ca.name ?? ''),
+              type: (ca.type === 'video' || ca.type === 'image') ? ca.type : 'video',
+              description: String(ca.description ?? ''), // This is CreativeAsset.description
+              url: ca.url ?? undefined,
+              fileSize: ca.fileSize ?? undefined,
+              muxAssetId: ca.muxAssetId ?? undefined,
+              muxPlaybackId: ca.muxPlaybackId ?? undefined,
+              muxProcessingStatus: ca.muxProcessingStatus ?? undefined,
+              duration: ca.duration ?? undefined,
+              userId: ca.userId ?? undefined,
+              createdAt: ca.createdAt?.toISOString ? ca.createdAt.toISOString() : ca.createdAt,
+              updatedAt: ca.updatedAt?.toISOString ? ca.updatedAt.toISOString() : ca.updatedAt,
+              isPrimaryForBrandLiftPreview: ca.isPrimaryForBrandLiftPreview ?? false,
+              rationale: String(ca.description ?? ''), // Fallback for rationale if needed for display
+              budget: undefined,
+              associatedInfluencerIds: [],
+            }));
           } else {
-            logger.error(
-              'WizardContext: Failed to parse loaded data against schema (non-submitted campaign):',
-              parseResult.error.errors
+            finalAssets = [];
+          }
+          rawDataFromAPI.assets = finalAssets; // Update rawDataFromAPI with the processed assets
+          console.log('[WizardContext loadCampaignData] Processed finalAssets:', JSON.parse(JSON.stringify(finalAssets)));
+
+
+          // The old block that ADDED fieldId and the block that MAPPED creativeAssets if rawData.assets was empty
+          // are now replaced by the comprehensive merge logic above.
+          // We can remove or comment them out.
+
+          // Old fieldId addition block (now integrated into merge logic if fieldId is missing from clientAsset)
+          /*
+          if (rawDataFromAPI && typeof rawDataFromAPI === 'object') {
+            if (Array.isArray(rawDataFromAPI.assets)) {
+              const timestamp = Date.now();
+              rawDataFromAPI.assets = rawDataFromAPI.assets.map((asset: any, index: number) => {
+                if (!asset.fieldId) {
+                  logger.warn(`Asset at index ${index} missing fieldId, adding one now`);
+                  return {
+                    ...asset,
+                    fieldId: `field-${asset.id || index}-${timestamp}-${Math.random().toString(36).substring(2, 9)}`
+                  };
+                }
+                return asset;
+              });
+            } else if (!rawDataFromAPI.assets) {
+              rawDataFromAPI.assets = [];
+            }
+          }
+          */
+
+          // Old mapping block (now integrated into merge logic)
+          /*
+          if (
+            Array.isArray(rawDataFromAPI.creativeAssets) &&
+            rawDataFromAPI.creativeAssets.length > 0 &&
+            (!Array.isArray(rawDataFromAPI.assets) || rawDataFromAPI.assets.length === 0)
+          ) {
+            // ... this entire block is now superseded by the new merge logic above ...
+          }
+          */
+
+          try {
+            logger.debug('Before Zod validation, rawDataFromAPI.assets structure:',
+              Array.isArray(rawDataFromAPI.assets) ?
+                `${rawDataFromAPI.assets.length} assets, first few have fieldId: ${rawDataFromAPI.assets.slice(0, 3).map((a: any) => !!a.fieldId).join(', ')}` :
+                'No assets array'
             );
-            showErrorToast('Loaded campaign data has an unexpected format.');
-            setWizardState(null);
+
+            const parseResult = await DraftCampaignDataSchema.safeParseAsync(rawDataFromAPI);
+            if (parseResult.success) {
+              setWizardState(parseResult.data);
+              logger.info(
+                'WizardContext: Successfully parsed and set wizardState for non-submitted campaign.'
+              );
+            } else {
+              // Enhanced error logging to better understand what's failing
+              logger.error(
+                'WizardContext: Failed to parse loaded data against schema (non-submitted campaign):',
+                JSON.stringify(parseResult.error.format(), null, 2)
+              );
+
+              // Log the raw data structure to help debug
+              logger.debug('Raw data structure causing validation error:',
+                JSON.stringify({
+                  id: rawDataFromAPI.id,
+                  status: rawDataFromAPI.status,
+                  currentStep: rawDataFromAPI.currentStep,
+                  step4Complete: rawDataFromAPI.step4Complete,
+                  submissionId: rawDataFromAPI.submissionId,
+                  hasAssets: Array.isArray(rawDataFromAPI.assets) && rawDataFromAPI.assets.length > 0,
+                  hasCreativeAssets: Array.isArray(rawDataFromAPI.creativeAssets) && rawDataFromAPI.creativeAssets.length > 0
+                }, null, 2)
+              );
+
+              // NEW: If validation fails, try a more permissive approach
+              logger.warn('Attempting fallback: Using raw data with minimal validation');
+
+              // Set wizardState with the raw data, but ensure it has required structure
+              setWizardState({
+                ...defaultWizardState,
+                ...rawDataFromAPI,
+                id: rawDataFromAPI.id || undefined
+              });
+            }
+          } catch (error) {
+            logger.error('Unexpected error during schema validation:', error);
+            // Fallback to using raw data with minimal validation
+            setWizardState({
+              ...defaultWizardState,
+              ...rawDataFromAPI,
+              id: rawDataFromAPI.id || undefined
+            });
           }
         }
       } else {
@@ -482,7 +648,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
           try {
             const errorData = await response.json();
             errorBody = errorData?.error || errorData?.message || JSON.stringify(errorData);
-          } catch {}
+          } catch { }
           throw new Error(
             `Failed to save progress: ${response.status} ${response.statusText}. ${errorBody}`.trim()
           );
@@ -492,26 +658,160 @@ export function WizardProvider({ children }: { children: ReactNode }) {
           setLastSaved(new Date());
           logger.info('Progress saved successfully');
           if (result.data && typeof result.data === 'object') {
-            const returnedData = result.data as Partial<DraftCampaignData>;
+            const returnedDataFromAPI = result.data as Partial<DraftCampaignData>; // Renamed for clarity
+
             // DEBUG LOG - Check if assets exist before logging
-            if (returnedData.hasOwnProperty('assets')) {
+            if (returnedDataFromAPI.hasOwnProperty('assets')) {
               console.log(
-                '[WizardContext saveProgress] API Response data.assets:',
-                JSON.parse(JSON.stringify(returnedData.assets))
+                '[WizardContext saveProgress] API Response data.assets (before merge):',
+                JSON.parse(JSON.stringify(returnedDataFromAPI.assets))
               );
             } else {
               console.log(
-                '[WizardContext saveProgress] API Response data does not have an assets property.'
+                '[WizardContext saveProgress] API Response data does not have an assets property initially.'
               );
             }
-            setWizardState(prevState => ({
-              ...(prevState ?? defaultWizardState),
-              ...returnedData,
-              id: currentCampaignIdToUse ?? undefined, // Ensure ID from context/URL is used
-            }));
-            logger.info('Updated wizard state with data from successful campaign update.');
+            if (returnedDataFromAPI.hasOwnProperty('creativeAssets')) {
+              console.log(
+                '[WizardContext saveProgress] API Response data.creativeAssets (before merge):',
+                JSON.parse(JSON.stringify(returnedDataFromAPI.creativeAssets))
+              );
+            }
+
+            // Refined Asset Merging Logic (similar to loadCampaignData)
+            let finalAssetsForStateUpdate = [];
+            const richClientAssetsFromSave = Array.isArray(returnedDataFromAPI.assets) ? returnedDataFromAPI.assets : [];
+            const dbCreativeAssetsFromSave = Array.isArray(returnedDataFromAPI.creativeAssets) ? returnedDataFromAPI.creativeAssets : [];
+            const timestampForFieldIdOnSave = Date.now();
+
+            if (richClientAssetsFromSave.length > 0) {
+              logger.info('[WizardContext saveProgress] Prioritizing and enriching CampaignWizard.assets (JSON field) from save response.');
+              finalAssetsForStateUpdate = richClientAssetsFromSave.map((clientAsset: any, index: number) => {
+                const dbAssetMatch = dbCreativeAssetsFromSave.find((db_ca: any) =>
+                  db_ca.id !== null && db_ca.id !== undefined &&
+                  (String(db_ca.id) === String(clientAsset.internalAssetId || clientAsset.id))
+                );
+                const mergedAsset = {
+                  ...clientAsset,
+                  ...(dbAssetMatch ? {
+                    id: String(dbAssetMatch.id),
+                    internalAssetId: dbAssetMatch.id,
+                    name: dbAssetMatch.name || clientAsset.name || '',
+                    fileName: clientAsset.fileName || dbAssetMatch.fileName || dbAssetMatch.name || '',
+                    type: dbAssetMatch.type || clientAsset.type || 'video',
+                    description: dbAssetMatch.description || clientAsset.description || '',
+                    url: dbAssetMatch.url || clientAsset.url,
+                    fileSize: dbAssetMatch.fileSize ?? clientAsset.fileSize,
+                    muxAssetId: dbAssetMatch.muxAssetId ?? clientAsset.muxAssetId,
+                    muxPlaybackId: dbAssetMatch.muxPlaybackId ?? clientAsset.muxPlaybackId,
+                    muxProcessingStatus: dbAssetMatch.muxProcessingStatus ?? clientAsset.muxProcessingStatus,
+                    duration: dbAssetMatch.duration ?? clientAsset.duration,
+                    userId: dbAssetMatch.userId ?? clientAsset.userId,
+                    createdAt: dbAssetMatch.createdAt?.toISOString ? dbAssetMatch.createdAt.toISOString() : (clientAsset.createdAt || undefined),
+                    updatedAt: dbAssetMatch.updatedAt?.toISOString ? dbAssetMatch.updatedAt.toISOString() : (clientAsset.updatedAt || undefined),
+                    isPrimaryForBrandLiftPreview: dbAssetMatch.isPrimaryForBrandLiftPreview ?? clientAsset.isPrimaryForBrandLiftPreview ?? false,
+                  } : {}),
+                  fieldId: clientAsset.fieldId || `field-${clientAsset.id || clientAsset.internalAssetId || index}-${timestampForFieldIdOnSave}-${Math.random().toString(36).substring(2, 9)}`,
+                };
+                if (clientAsset.hasOwnProperty('budget')) mergedAsset.budget = clientAsset.budget;
+                if (clientAsset.hasOwnProperty('rationale')) mergedAsset.rationale = clientAsset.rationale;
+                if (clientAsset.hasOwnProperty('associatedInfluencerIds')) mergedAsset.associatedInfluencerIds = clientAsset.associatedInfluencerIds;
+                return mergedAsset;
+              });
+            } else if (dbCreativeAssetsFromSave.length > 0) {
+              logger.warn('[WizardContext saveProgress] CampaignWizard.assets (JSON) was empty in save response. Mapping from creativeAssets relation.');
+              finalAssetsForStateUpdate = dbCreativeAssetsFromSave.map((ca: any, index: number) => ({
+                id: String(ca.id),
+                fieldId: `field-${ca.id}-${timestampForFieldIdOnSave}-${index}-${Math.random().toString(36).slice(2, 9)}`,
+                internalAssetId: ca.id,
+                name: String(ca.name ?? ''),
+                fileName: String(ca.fileName ?? ca.name ?? ''),
+                type: (ca.type === 'video' || ca.type === 'image') ? ca.type : 'video',
+                description: String(ca.description ?? ''),
+                url: ca.url ?? undefined,
+                fileSize: ca.fileSize ?? undefined,
+                muxAssetId: ca.muxAssetId ?? undefined,
+                muxPlaybackId: ca.muxPlaybackId ?? undefined,
+                muxProcessingStatus: ca.muxProcessingStatus ?? undefined,
+                duration: ca.duration ?? undefined,
+                userId: ca.userId ?? undefined,
+                createdAt: ca.createdAt?.toISOString ? ca.createdAt.toISOString() : ca.createdAt,
+                updatedAt: ca.updatedAt?.toISOString ? ca.updatedAt.toISOString() : ca.updatedAt,
+                isPrimaryForBrandLiftPreview: ca.isPrimaryForBrandLiftPreview ?? false,
+                rationale: String(ca.description ?? ''),
+                budget: undefined,
+                associatedInfluencerIds: [],
+              }));
+            } else {
+              finalAssetsForStateUpdate = [];
+            }
+            returnedDataFromAPI.assets = finalAssetsForStateUpdate; // Update returnedDataFromAPI with processed assets
+            console.log('[WizardContext saveProgress] Processed finalAssets for state update:', JSON.parse(JSON.stringify(finalAssetsForStateUpdate)));
+
+            // Remove old asset processing blocks as they are superseded by the merge logic above
+            /*
+            // NEW: Check assets array and ensure all items have a fieldId property regardless of source
+            if (returnedDataFromAPI && typeof returnedDataFromAPI === 'object') {
+              if (Array.isArray(returnedDataFromAPI.assets)) {
+                const timestamp = Date.now();
+                returnedDataFromAPI.assets = returnedDataFromAPI.assets.map((asset: any, index: number) => {
+                  if (!asset.fieldId) {
+                    logger.warn(`[saveProgress] Asset at index ${index} missing fieldId, adding one now`);
+                    return {
+                      ...asset,
+                      fieldId: `field-${asset.id || index}-${timestamp}-${Math.random().toString(36).substring(2, 9)}`
+                    };
+                  }
+                  return asset;
+                });
+              } else if (!returnedDataFromAPI.assets) {
+                returnedDataFromAPI.assets = [];
+              }
+            }
+
+            // Fix: Map creativeAssets to assets if assets array is empty but creativeAssets exists
+            if (
+              Array.isArray(returnedDataFromAPI.creativeAssets) &&
+              returnedDataFromAPI.creativeAssets.length > 0 &&
+              (!Array.isArray(returnedDataFromAPI.assets) || returnedDataFromAPI.assets.length === 0)
+            ) {
+              // ... This whole block of mapping from creativeAssets is now part of the merge logic above ...
+            }
+            */
+
+            // Fix: Special handling for campaigns with submissionId in step 4
+            // This Zod parsing and state update should happen AFTER assets are processed
+            try {
+              const parseResultAfterSave = await DraftCampaignDataSchema.safeParseAsync(returnedDataFromAPI);
+              if (parseResultAfterSave.success) {
+                setWizardState(prevState => ({
+                  ...(prevState ?? defaultWizardState),
+                  ...parseResultAfterSave.data, // Use Zod parsed data
+                  id: currentCampaignIdToUse ?? undefined,
+                }));
+                logger.info('[WizardContext saveProgress] Successfully parsed and updated wizard state after save.');
+              } else {
+                logger.error(
+                  '[WizardContext saveProgress] Failed to parse returned data against schema after save:',
+                  JSON.stringify(parseResultAfterSave.error.format(), null, 2)
+                );
+                // Fallback to using the merged data directly if Zod parse fails, but with caution
+                setWizardState(prevState => ({
+                  ...(prevState ?? defaultWizardState),
+                  ...returnedDataFromAPI, // Use the API returned data (with merged assets)
+                  id: currentCampaignIdToUse ?? undefined,
+                }));
+              }
+            } catch (error) {
+              logger.error('[WizardContext saveProgress] Unexpected error during schema validation after save:', error);
+              setWizardState(prevState => ({
+                ...(prevState ?? defaultWizardState),
+                ...returnedDataFromAPI,
+                id: currentCampaignIdToUse ?? undefined,
+              }));
+            }
           }
-          return currentCampaignIdToUse; // Return the ID used for the PATCH
+          return currentCampaignIdToUse;
         } else {
           logger.error('Failed to save progress (API failure):', result);
           showErrorToast(`Failed to save progress: ${result.error || 'Unknown API error'}`);

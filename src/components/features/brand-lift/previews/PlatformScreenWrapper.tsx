@@ -63,9 +63,7 @@ const PlatformScreenWrapper: React.FC<PlatformScreenWrapperProps> = ({
         {platform === 'tiktok' && (
           <TikTokScreenContent creativeData={creativeData} videoReady={videoReady} />
         )}
-        {platform === 'instagram' && (
-          <InstagramScreenContent creativeData={creativeData} videoReady={videoReady} />
-        )}
+        {platform === 'instagram' && <InstagramScreenContent creativeData={creativeData} />}
         {platform !== 'tiktok' && platform !== 'instagram' && (
           <div className="h-full text-white text-sm flex flex-col items-center justify-center">
             <Icon iconId="faFilmSlashLight" className="h-12 w-12 text-gray-500 mb-3" />

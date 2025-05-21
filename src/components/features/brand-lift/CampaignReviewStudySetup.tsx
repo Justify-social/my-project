@@ -277,7 +277,9 @@ interface CampaignDetails {
     uploadedAt?: string | null;
     rationale?: string | null;
     budget?: number | null;
-    // associatedInfluencerIds?: string[] | null;
+    muxPlaybackId?: string | undefined;
+    muxProcessingStatus?: string | undefined;
+    muxAssetId?: string | undefined;
   }> | null;
   // campaignStatus?: string | null; // Or StatusEnum from types
   // step1Complete?: boolean;
@@ -806,17 +808,19 @@ const Step4Review: React.FC<{ data: CampaignDetails }> = ({ data }) => (
           {data.assets.map((asset, idx) => {
             const assetCardData = {
               id: asset.id || `asset-${idx}`,
-              name: asset.name ?? asset.fileName ?? undefined, // Prioritize name, fallback to fileName, then undefined
+              name: asset.name ?? asset.fileName ?? undefined,
               url: asset.url ?? undefined,
               type: asset.type ?? undefined,
               description: asset.rationale ?? undefined,
-              budget: asset.budget ?? undefined, // Convert null to undefined
-              // platform and influencerHandle are not directly available on CampaignDetails.assets, ensure AssetCard handles their absence
+              budget: asset.budget ?? undefined,
+              muxPlaybackId: asset.muxPlaybackId ?? undefined,
+              muxProcessingStatus: asset.muxProcessingStatus ?? undefined,
+              muxAssetId: asset.muxAssetId ?? undefined,
             };
             return (
               <AssetCard
                 key={assetCardData.id}
-                asset={assetCardData} // Pass the structured AssetData
+                asset={assetCardData}
                 currency={(data.budget?.currency as string) ?? 'USD'}
                 cardClassName="h-full"
                 className="p-0"

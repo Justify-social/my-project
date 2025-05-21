@@ -536,40 +536,80 @@ const Step3Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => {
 
 const Step4Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
   <div className="space-y-4">
-    {/* Remove deprecated fields */}
-    {/* <DataItem label="Brand Guidelines Summary" value={data.guidelines} /> */}
-    {/* <DataItem label="Mandatory Requirements">
-            {data.requirements && data.requirements.length > 0 ? (
-                <ul className="list-disc pl-5 space-y-1 text-sm">
-                    {data.requirements.map((req, idx) => (
-                        <li key={idx}>{req.description} {req.mandatory ? "(Mandatory)" : "(Optional)"}</li>
-                    ))}
-                </ul>
-            ) : <span className="text-muted-foreground italic">None</span>}
-        </DataItem> */}
     <DataItem label="Uploaded Assets">
       {data.assets && data.assets.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pt-2">
           {data.assets.map((asset, idx) => {
-            // Map the asset data for AssetCard
+            console.log(`[Step5Review] Processing asset for card:`, JSON.parse(JSON.stringify(asset)));
+            console.log(`[Step5Review] Asset budget from wizardState.assets: ${asset.budget}, type: ${typeof asset.budget}`);
+            console.log(`[Step5Review] wizardState.Influencer:`, JSON.parse(JSON.stringify(data.Influencer)));
+            console.log(`[Step5Review] asset.associatedInfluencerIds:`, JSON.parse(JSON.stringify(asset.associatedInfluencerIds)));
+
+            // Get associated influencer handles for this asset
+            let associatedInfluencerHandles: string[] = [];
+            if (Array.isArray(asset.associatedInfluencerIds) && asset.associatedInfluencerIds.length > 0 && Array.isArray(data.Influencer)) {
+              associatedInfluencerHandles = data.Influencer.filter(inf =>
+                inf && typeof inf.id === 'string' && (asset.associatedInfluencerIds as string[]).includes(inf.id)
+              ).map(inf => inf.handle);
+            }
+            console.log(`[Step5Review] Matched influencer handles:`, associatedInfluencerHandles);
+
+            // Map the asset data for AssetCard with all needed fields for video playback and display
             const assetCardData = {
-              id: asset.id || idx, // Use asset ID or index as key
+              id: asset.id || idx,
               name: asset.name || asset.fileName || `Asset ${idx + 1}`,
               url: asset.url,
               type: asset.type,
-              description: asset.rationale, // Map rationale to description for display
-              budget: asset.budget,
-              // associatedInfluencerIds are not directly displayed by AssetCard
-              // but could be added if AssetCard is extended
+              // Use description field if rationale is not available (since we store rationale in description)
+              description: asset.rationale || asset.description || '',
+              budget: typeof asset.budget === 'number' ? asset.budget : undefined, // More explicit handling
+              muxPlaybackId: asset.muxPlaybackId,
+              muxProcessingStatus: asset.muxProcessingStatus || "READY",
+              muxAssetId: asset.muxAssetId,
+              fileName: asset.fileName,
+              // Pass first associated influencer as handle (the card only shows one)
+              influencerHandle: associatedInfluencerHandles.length > 0 ? associatedInfluencerHandles[0] : '',
+              // Include missing fields
+              rationale: asset.rationale || asset.description || '',
             };
+            console.log(`[Step5Review] assetCardData being passed to AssetCard:`, JSON.parse(JSON.stringify(assetCardData)));
+
             return (
-              <AssetCard
-                key={assetCardData.id}
-                asset={assetCardData}
-                currency={data.budget?.currency ?? 'USD'}
-                cardClassName="h-full" // Ensure cards fill height in grid
-                className="p-0" // Adjust padding if needed
-              />
+              <div key={assetCardData.id} className="flex flex-col h-full">
+                <AssetCard
+                  asset={assetCardData}
+                  currency={data.budget?.currency ?? 'USD'}
+                  cardClassName="h-full"
+                  className="p-0"
+                />
+
+                {/* Add additional details below the card if not shown in the AssetCard */}
+                {(associatedInfluencerHandles.length > 1 || asset.rationale) && (
+                  <div className="mt-2 p-3 border rounded-md bg-muted/10">
+                    {/* Show all associated influencers if more than one */}
+                    {associatedInfluencerHandles.length > 1 && (
+                      <div className="mb-2">
+                        <p className="text-xs font-medium text-muted-foreground">Associated Influencers:</p>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {associatedInfluencerHandles.map((handle: string, i: number) => (
+                            <Badge key={i} variant="secondary" className="text-xs">
+                              {handle}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Show rationale again for emphasis */}
+                    {asset.rationale && (
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground">Why this content:</p>
+                        <p className="text-xs text-foreground mt-1">{asset.rationale}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>
@@ -577,7 +617,6 @@ const Step4Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
         <span className="text-muted-foreground italic">None uploaded</span>
       )}
     </DataItem>
-    {/* <DataItem label="Additional Notes" value={data.notes} /> */}
   </div>
 );
 

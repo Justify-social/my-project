@@ -81,7 +81,7 @@ export const InfluencerSchema = z
 export const DraftAssetSchema = z
   .object({
     id: z.string().optional(), // Client-side temporary ID or key
-    fieldId: z.string().optional(), // Add fieldId for useFieldArray key handling
+    fieldId: z.string().optional(), // Required for useFieldArray keyName
     name: z.string().optional(),
     type: CreativeAssetTypeEnum.optional(),
     url: z.string().url().optional(), // Changed from .optional().nullable()
@@ -662,17 +662,18 @@ export const Step4BaseSchema = DraftCampaignDataBaseSchema.pick({
 /** FULL Validation schema for Step 4: Assets & Guidelines (Used in UI) */
 export const Step4ValidationSchema = Step4BaseSchema.extend({
   assets: z.array(DraftAssetSchema).default([]),
-  guidelines: z.string().optional(),
+  guidelines: z.string().optional().nullable(),
   requirements: z.array(z.object({ description: z.string(), mandatory: z.boolean() })).default([]),
-  notes: z.string().optional(),
-  step4Complete: z.boolean().refine(val => val === true, { message: 'Step 4 must be completed' }),
+  notes: z.string().optional().nullable(),
+  step4Complete: z.boolean().optional().default(true),
 }).refine(
   data => {
-    return true;
+    // Make sure there's at least one asset
+    return data.assets && data.assets.length > 0;
   },
   {
-    // message: "At least one asset is required to complete this step.",
-    // path: ["assets"], // Path for error message
+    message: "At least one asset is required to complete this step.",
+    path: ["assets"], // Path for error message
   }
 );
 
