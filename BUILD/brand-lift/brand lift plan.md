@@ -716,13 +716,21 @@ To maintain SSOT and clarity, feature-specific UI logic is encapsulated within c
 ### New Epic: BL-MVP-EPIC_DEBUG: Debug & Internal Tools
 *Focus: Create internal tools to help with debugging, support, and manual processes for the MVP.*
 
-#### [NEW - MVP SUPPORT] Ticket BL-MVP-DEBUG-01: Implement Mux Asset Checker
+#### [COMPLETED - Pending Mux Dashboard URL refinement and thorough testing] Ticket BL-MVP-DEBUG-01: Implement Mux Asset Checker
 -   **Type:** Feature (Debug Tool)
 -   **Description:** Create a debug tool page for Super Admins to list all Creative Assets that have Mux IDs, view their status, and link to Mux streams/dashboard.
 -   **API:** `GET /api/debug/mux-assets` created. **[COMPLETED]**
 -   **UI:** Page `src/app/(admin)/debug-tools/mux-assets/page.tsx` created and linked from main debug tools page. **[COMPLETED - Pending Mux Dashboard URL refinement and thorough testing]**
 -   **Acceptance Criteria:** Super Admins can view a list of Mux assets, see their processing status, and access direct stream links and links to the Mux dashboard (URL might require manual ID input by user for Mux dashboard for now).
 -   **Dependencies:** Clerk, Prisma, Mux account details (for dashboard link structure).
+
+#### [NEW - MVP SUPPORT] Ticket BL-MVP-DEBUG-02: Implement Campaign Wizard Checker
+-   **Type:** Feature (Debug Tool)
+-   **Description:** Create a debug tool page for Super Admins to list all Campaign Wizards, view their status, and link to the user-facing campaign view.
+-   **API:** `GET /api/debug/campaign-wizards` created. **[COMPLETED]**
+-   **UI:** Page `src/app/(admin)/debug-tools/campaign-wizards/page.tsx` created and linked from main debug tools page. The old "Verify Campaign Data" input section on the main debug tools page has been removed. **[COMPLETED - Pending thorough testing]**
+-   **Acceptance Criteria:** Super Admins can view a list of all campaign wizards with key details and link to them.
+-   **Dependencies:** Clerk, Prisma.
 
 ---
 

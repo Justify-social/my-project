@@ -47,7 +47,7 @@ const DebugToolCard: React.FC<DebugToolCardProps> = ({
 // -------------------------------------
 
 export default function DebugToolsPage() {
-  const [campaignId, setCampaignId] = useState<string>('');
+  // const [campaignId, setCampaignId] = useState<string>(''); // Removed, as Verify Campaign Data section is removed
 
   return (
     <div className="container mx-auto p-6 space-y-8 max-w-6xl">
@@ -85,9 +85,16 @@ export default function DebugToolsPage() {
           linkHref="/debug-tools/mux-assets"
           buttonText="Check Mux Assets"
         />
+        <DebugToolCard
+          title="Campaign Wizard Checker"
+          description="View all created campaign wizards."
+          linkHref="/debug-tools/campaign-wizards" // Link to the new page
+          buttonText="Check Campaign Wizards"
+        />
       </div>
 
-      {/* Campaign Verification Tool Section */}
+      {/* Campaign Verification Tool Section - REMOVED */}
+      {/* 
       <Card id="campaign-verify" className="border-divider">
         <CardHeader>
           <CardTitle className="text-xl">Verify Campaign Data</CardTitle>
@@ -103,8 +110,6 @@ export default function DebugToolsPage() {
               className="flex-grow"
             />
           </div>
-
-          {/* Go to Step Buttons */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[1, 2, 3, 4].map(step => (
               <Button key={step} variant="secondary" disabled={!campaignId}>
@@ -114,80 +119,9 @@ export default function DebugToolsPage() {
           </div>
         </CardContent>
       </Card>
-
-      {/* Campaign Results Display - Commented out as 'results' state is removed */}
-      {/*
-      {results && (
-        <Card className="border-divider">
-          <CardHeader>
-            <CardTitle className="text-xl">Campaign Data for: <span className="font-mono text-base">{results.id}</span></CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="border-input bg-muted/30">
-                <CardHeader><CardTitle className="text-base">Basic Information</CardTitle></CardHeader>
-                <CardContent>
-                  <Table className="text-sm">
-                    <TableBody>
-                      <TableRow><TableCell className="font-medium text-secondary w-1/3">ID</TableCell><TableCell className="font-mono">{results.id}</TableCell></TableRow>
-                      <TableRow><TableCell className="font-medium text-secondary">Name</TableCell><TableCell>{results.campaignName}</TableCell></TableRow>
-                      <TableRow><TableCell className="font-medium text-secondary">Description</TableCell><TableCell>{results.description}</TableCell></TableRow>
-                      <TableRow><TableCell className="font-medium text-secondary">Start Date</TableCell><TableCell>{results.startDate ? new Date(results.startDate).toLocaleDateString() : 'N/A'}</TableCell></TableRow>
-                      <TableRow><TableCell className="font-medium text-secondary">End Date</TableCell><TableCell>{results.endDate ? new Date(results.endDate).toLocaleDateString() : 'N/A'}</TableCell></TableRow>
-                      <TableRow><TableCell className="font-medium text-secondary">Time Zone</TableCell><TableCell>{results.timeZone}</TableCell></TableRow>
-                      <TableRow><TableCell className="font-medium text-secondary">Status</TableCell><TableCell><Badge variant="outline">{results.status}</Badge></TableCell></TableRow>
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-              <Card className="border-input bg-muted/30">
-                <CardHeader><CardTitle className="text-base">Financial Information</CardTitle></CardHeader>
-                <CardContent>
-                  <Table className="text-sm">
-                    <TableBody>
-                      <TableRow><TableCell className="font-medium text-secondary w-1/3">Currency</TableCell><TableCell>{results.currency}</TableCell></TableRow>
-                      <TableRow><TableCell className="font-medium text-secondary">Total Budget</TableCell><TableCell>{results.totalBudget}</TableCell></TableRow>
-                      <TableRow><TableCell className="font-medium text-secondary">Social Media Budget</TableCell><TableCell>{results.socialMediaBudget}</TableCell></TableRow>
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </div>
-            <Card className="border-input bg-muted/30">
-              <CardHeader><CardTitle className="text-base">Contacts</CardTitle></CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <h4 className="font-semibold mb-1">Primary</h4>
-                  {results.primaryContact ? (
-                    <div>
-                      <p>{results.primaryContact.firstName} {results.primaryContact.surname}</p>
-                      <p className="text-muted-foreground text-xs">{results.primaryContact.email}</p>
-                      <p className="text-muted-foreground text-xs">{results.primaryContact.position}</p>
-                    </div>
-                  ) : <p className="text-destructive text-xs italic">Missing</p>}
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-1">Secondary</h4>
-                  {results.secondaryContact ? (
-                    <div>
-                      <p>{results.secondaryContact.firstName} {results.secondaryContact.surname}</p>
-                      <p className="text-muted-foreground text-xs">{results.secondaryContact.email}</p>
-                      <p className="text-muted-foreground text-xs">{results.secondaryContact.position}</p>
-                    </div>
-                  ) : <p className="text-muted-foreground text-xs italic">None</p>}
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="border-input bg-muted/30">
-              <CardHeader><CardTitle className="text-base">Raw Campaign Data</CardTitle></CardHeader>
-              <CardContent className="bg-background text-accent-foreground p-3 rounded overflow-auto max-h-96">
-                <pre className="text-xs">{JSON.stringify(results, null, 2)}</pre>
-              </CardContent>
-            </Card>
-          </CardContent>
-        </Card>
-      )}
       */}
+
+      {/* Campaign Results Display - Also REMOVED */}
     </div>
   );
 }

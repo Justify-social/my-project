@@ -189,7 +189,8 @@ const MuxAssetCheckerPage: React.FC = () => {
                                                 {asset.muxAssetId && (
                                                     <Button asChild variant="outline" size="sm" className="ml-2">
                                                         <a href={`https://dashboard.mux.com/organizations/YOUR_MUX_ORG_ID/environments/YOUR_MUX_ENV_ID/assets/${asset.muxAssetId}`} target="_blank" rel="noopener noreferrer" title="View in Mux Dashboard (replace ORG/ENV ID in URL)">
-                                                            <Icon iconId="faLinkLight" className="mr-2 h-3.5 w-3.5" /> Mux DB
+                                                            <Icon iconId="faShareLight" className="mr-2 h-3.5 w-3.5" />
+                                                            Mux DB
                                                         </a>
                                                     </Button>
                                                 )}
