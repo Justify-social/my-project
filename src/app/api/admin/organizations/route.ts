@@ -5,32 +5,32 @@ import { handleApiError } from '@/lib/apiErrorHandler';
 import { UnauthenticatedError, ForbiddenError } from '@/lib/errors';
 import { Organization } from '@clerk/backend';
 
-// Helper to check if the user is a Super Admin (can be moved to a shared utils if used elsewhere)
-async function isSuperAdmin(clerkUserId: string): Promise<boolean> {
-    try {
-        const user = await clerkClient.users.getUser(clerkUserId);
-        return user.publicMetadata?.role === 'super_admin';
-    } catch (error) {
-        logger.error('Error fetching user details from Clerk for Super Admin check', { clerkUserId, error });
-        return false;
-    }
-}
-
 export const GET = async (req: NextRequest) => {
     try {
-        const { userId: clerkUserId } = await auth();
+        const { userId: clerkUserId, sessionClaims } = await auth();
         if (!clerkUserId) {
             throw new UnauthenticatedError('Authentication required.');
         }
 
-        const isAdmin = await isSuperAdmin(clerkUserId);
-        if (!isAdmin) {
+        if (sessionClaims?.['metadata.role'] !== 'super_admin') {
+            logger.warn(
+                'Non-Super Admin attempted to access /api/admin/organizations',
+                { clerkUserId, metadataRole: sessionClaims?.['metadata.role'] }
+            );
             throw new ForbiddenError('Access restricted to Super Admins.');
         }
 
-        const organizationListResult = await clerkClient.organizations.getOrganizationList();
+        const client = await clerkClient();
+        const paginatedOrganizations = await client.organizations.getOrganizationList();
 
-        const organizations = organizationListResult.map((org: Organization) => ({
+        const organizationList = paginatedOrganizations.data || paginatedOrganizations;
+
+        if (!Array.isArray(organizationList)) {
+            logger.error('Unexpected response structure from getOrganizationList', { paginatedOrganizations });
+            throw new Error('Failed to retrieve organization list in expected format.');
+        }
+
+        const organizations = organizationList.map((org: Organization) => ({
             id: org.id,
             name: org.name,
             slug: org.slug,
