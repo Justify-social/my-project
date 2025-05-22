@@ -85,10 +85,10 @@ export const GET = async (
     // Prepare campaign details for the response, ensuring UUID is available for linking
     const campaignDetails = studyData.campaign
       ? {
-        campaignName: studyData.campaign.campaignName,
-        uuid: studyData.campaign.wizard?.id, // This is the CampaignWizard.id (Campaign UUID)
-        // We are not including the nested wizard object in the final campaign object
-      }
+          campaignName: studyData.campaign.campaignName,
+          uuid: studyData.campaign.wizard?.id, // This is the CampaignWizard.id (Campaign UUID)
+          // We are not including the nested wizard object in the final campaign object
+        }
       : undefined;
 
     const responseData: BrandLiftStudyData = {
@@ -209,10 +209,13 @@ export const PUT = async (
       updateData.status === BrandLiftStudyStatus.COLLECTING &&
       existingStudy.status !== BrandLiftStudyStatus.COLLECTING
     ) {
-      logger.info(`Study ${studyId} status changing to COLLECTING. Cint launch logic deferred for MVP.`, {
-        userId: clerkUserId,
-        orgId,
-      });
+      logger.info(
+        `Study ${studyId} status changing to COLLECTING. Cint launch logic deferred for MVP.`,
+        {
+          userId: clerkUserId,
+          orgId,
+        }
+      );
       // try {
       //   const fullStudyForCint = await db.brandLiftStudy.findUnique({
       //     where: { id: studyId },
@@ -290,8 +293,9 @@ export const PUT = async (
           campaign: { select: { campaignName: true, wizard: { select: { orgId: true } } } },
         },
       });
-      logger.info('BrandLiftStudy status updated to COLLECTING (Cint launch deferred for MVP)', { studyId });
-
+      logger.info('BrandLiftStudy status updated to COLLECTING (Cint launch deferred for MVP)', {
+        studyId,
+      });
     } else {
       finalUpdatedStudy = await db.brandLiftStudy.update({
         where: { id: studyId },

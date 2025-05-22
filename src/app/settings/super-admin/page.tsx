@@ -95,7 +95,9 @@ const SuperAdminSettingsPage = () => {
         try {
           const response = await fetch('/api/admin/organizations');
           if (!response.ok) {
-            throw new Error(`API Error fetching organisations: ${response.status} ${response.statusText}`);
+            throw new Error(
+              `API Error fetching organisations: ${response.status} ${response.statusText}`
+            );
           }
           const data = await response.json();
           setOrganizations(data || []);
@@ -108,7 +110,6 @@ const SuperAdminSettingsPage = () => {
       };
 
       fetchOrganizations();
-
     } else if (isAuthLoaded && !isSuperAdmin) {
       setIsLoadingOrgs(false);
     }
@@ -147,9 +148,7 @@ const SuperAdminSettingsPage = () => {
         </div>
       ) : (
         <Card>
-          <CardHeader>
-            {/* Search for organisations can be added here later */}
-          </CardHeader>
+          <CardHeader>{/* Search for organisations can be added here later */}</CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
@@ -164,7 +163,10 @@ const SuperAdminSettingsPage = () => {
                 {organizations.map(org => (
                   <TableRow key={org.id} className="hover:bg-muted/50">
                     <TableCell>
-                      <Link href={`/settings/super-admin/organisation/${org.id}`} className="font-medium text-primary hover:underline">
+                      <Link
+                        href={`/settings/super-admin/organisation/${org.id}`}
+                        className="font-medium text-primary hover:underline"
+                      >
                         {org.name}
                       </Link>
                     </TableCell>

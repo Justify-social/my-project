@@ -40,7 +40,9 @@ async function verifyStudyForApprovalInteraction(
   userOrgId: string | null | undefined
 ): Promise<EnrichedStudyState> {
   if (!userOrgId) {
-    throw new ForbiddenError('User organization context is required to interact with study approval status.');
+    throw new ForbiddenError(
+      'User organization context is required to interact with study approval status.'
+    );
   }
 
   const study = await db.brandLiftStudy.findFirst({
@@ -233,10 +235,10 @@ export const PUT = async (req: NextRequest) => {
     });
     const requesterDetails: UserDetails | null = requesterDetailsFull
       ? {
-        id: requesterDetailsFull.id,
-        email: requesterDetailsFull.email,
-        name: requesterDetailsFull.name ?? undefined,
-      }
+          id: requesterDetailsFull.id,
+          email: requesterDetailsFull.email,
+          name: requesterDetailsFull.name ?? undefined,
+        }
       : null;
 
     const studyDetailsForEmail: EmailStudyDetails = {

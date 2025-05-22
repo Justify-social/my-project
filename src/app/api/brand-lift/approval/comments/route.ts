@@ -34,7 +34,11 @@ const getCommentsQuerySchema = z.object({
 const notificationServiceInstance = new NotificationService();
 
 // Helper to verify study access for commenting/viewing comments
-async function verifyStudyAccessForComments(studyId: string, clerkUserId: string, userOrgId: string | null | undefined) {
+async function verifyStudyAccessForComments(
+  studyId: string,
+  clerkUserId: string,
+  userOrgId: string | null | undefined
+) {
   if (!userOrgId) {
     throw new ForbiddenError('User organization context is required to access study comments.');
   }
@@ -212,7 +216,11 @@ export const GET = async (req: NextRequest) => {
     const { studyId, questionId } = validation.data;
 
     // Verify study access first.
-    const verifiedStudy = await verifyStudyAccessForComments(studyId, clerkUserId, userOrgIdFromSession);
+    const verifiedStudy = await verifyStudyAccessForComments(
+      studyId,
+      clerkUserId,
+      userOrgIdFromSession
+    );
 
     // Construct where clause for comments
     const whereClause: Prisma.SurveyApprovalCommentWhereInput = {

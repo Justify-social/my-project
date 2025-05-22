@@ -738,21 +738,21 @@ To maintain SSOT and clarity, feature-specific UI logic is encapsulated within c
 ### Epic: BL-MVP-EPIC_SA: Super Admin Enhancements
 *Focus: Provide essential tools for the Justify Success Manager and enhance the Super Admin dashboard for better oversight. This includes a drill-down view: Super Admin -> List of Organisations -> Organisation Details (Users, Campaigns, Studies).*
 
-#### [COMPLETED - Functionality for API and UI to list organisations is implemented. User Management table removed. UI Polish/Testing Pending. Linter/environment issues for clerkClient calls to be monitored by user.] Ticket BL-MVP-SA-01: Super Admin - List All Organisations
+#### [COMPLETED - Functionality for API and UI to list organisations is implemented. User Management table removed. UI Polish/Testing Pending. Linter warnings (unused vars, any types) to be addressed during general cleanup.] Ticket BL-MVP-SA-01: Super Admin - List All Organisations
 -   **Type:** Feature (UI & API)
 -   **Description:** Display a list of all organisations in the Super Admin section. The main Super Admin page will list organisations, and the existing direct "User Management" table has been removed.
 -   **API:** New endpoint `GET /api/admin/organisations` created that fetches all `Organisation` records from Clerk, restricted to Super Admins. **[COMPLETED]**
--   **UI:** Update `src/app/settings/super-admin/page.tsx` to fetch and display these organisations. Each organisation row should be clickable, linking to `/settings/super-admin/organisation/[orgId]`. **[COMPLETED - Functionality implemented]**
+-   **UI:** Update `src/app/settings/super-admin/page.tsx` to fetch and display these organisations. Each organisation row should be clickable, linking to `/settings/super-admin/organisation/[orgId]`. **[COMPLETED - Functionality implemented, old User Management table removed.]**
 -   **Dependencies:** Clerk SDK, Table/List UI components.
 
-#### [IN PROGRESS - APIs for Users, Campaign Wizards, & Studies created. Org Detail Page UI displays Users. Next: Integrate Wizard & Study data display.] Ticket BL-MVP-SA-02: Super Admin - View Organisation Details (Users, Campaigns, Studies)
+#### [COMPLETED - Core APIs and UI page structure with User, Campaign Wizard, and Brand Lift Study tables implemented. Pending full UI polish & testing. Linter warnings (unused vars, any types) to be addressed during general cleanup.] Ticket BL-MVP-SA-02: Super Admin - View Organisation Details (Users, Campaigns, Studies)
 -   **Type:** Feature (UI & API)
--   **Description:** When an organisation is clicked (from SA-01), navigate to a new dynamic route page (e.g., `/settings/super-admin/organisation/[orgId]`) that displays: List of users for that organisation, Campaign Wizards created by users in that org, and Brand Lift Studies linked to campaigns from that org.
+-   **Description:** When an organisation is clicked (from SA-01), navigate to a new dynamic route page (`/settings/super-admin/organisation/[orgId]`) that displays: List of users for that organisation, Campaign Wizards created by users in that org, and Brand Lift Studies linked to campaigns from that org.
 -   **APIs:** 
     - `GET /api/admin/organisations/[orgId]/users` **[COMPLETED]** 
     - `GET /api/admin/organisations/[orgId]/campaign-wizards` **[COMPLETED]**
     - `GET /api/admin/organisations/[orgId]/brand-lift-studies` **[COMPLETED]**.
--   **UI:** New page component `src/app/settings/super-admin/organisation/[orgId]/page.tsx` created. It currently fetches and displays users for the organisation. **[PENDING: UI integration for Campaign Wizards and Brand Lift Studies sections. Then full UI Polish/Testing.]**
+-   **UI:** New page component `src/app/settings/super-admin/organisation/[orgId]/page.tsx` created. It fetches and displays users, campaign wizards, and brand lift studies for the organisation. **[COMPLETED - Functionality for displaying all three data types implemented. Pending full UI Polish/Testing.]**
 -   **Dependencies:** SA-01, Prisma, Clerk.
 
 #### [COMPLETED - API created. UI integration (button) planned for SA-02 UI.] Ticket BL-MVP-SA-03: Super Admin - Brand Lift Study JSON Export

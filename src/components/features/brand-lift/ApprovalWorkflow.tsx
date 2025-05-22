@@ -239,10 +239,11 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({ studyId }) => {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || 'Failed to update study status.');
       }
-      logger.info(`Study ${studyId} successfully submitted for processing (status set to COLLECTING).`);
+      logger.info(
+        `Study ${studyId} successfully submitted for processing (status set to COLLECTING).`
+      );
       showSuccessToast('Study submitted! Our team will process the report.');
       router.push(`/brand-lift/study-submitted/${studyId}`);
-
     } catch (error: unknown) {
       logger.error('Error submitting study for data collection:', {
         studyId,
@@ -359,7 +360,8 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({ studyId }) => {
                     <Icon iconId="faSpinnerLight" className="animate-spin" />
                   ) : (
                     <Icon iconId="faCheckSolid" className="mr-2" />
-                  )}{/* Space */}
+                  )}
+                  {/* Space */}
                   Approve
                 </Button>
                 <Button
@@ -374,7 +376,8 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({ studyId }) => {
                     <Icon iconId="faSpinnerLight" className="animate-spin" />
                   ) : (
                     <Icon iconId="faPenToSquareLight" className="mr-2" />
-                  )}{/* Space */}
+                  )}
+                  {/* Space */}
                   Revise
                 </Button>
               </div>
