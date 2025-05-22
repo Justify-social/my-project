@@ -713,7 +713,20 @@ To maintain SSOT and clarity, feature-specific UI logic is encapsulated within c
 
 ---
 
-### New Epic: BL-MVP-EPIC_SA: Super Admin Enhancements
+### New Epic: BL-MVP-EPIC_DEBUG: Debug & Internal Tools
+*Focus: Create internal tools to help with debugging, support, and manual processes for the MVP.*
+
+#### [NEW - MVP SUPPORT] Ticket BL-MVP-DEBUG-01: Implement Mux Asset Checker
+-   **Type:** Feature (Debug Tool)
+-   **Description:** Create a debug tool page for Super Admins to list all Creative Assets that have Mux IDs, view their status, and link to Mux streams/dashboard.
+-   **API:** `GET /api/debug/mux-assets` created. **[COMPLETED]**
+-   **UI:** Page `src/app/(admin)/debug-tools/mux-assets/page.tsx` created and linked from main debug tools page. **[COMPLETED - Pending Mux Dashboard URL refinement and thorough testing]**
+-   **Acceptance Criteria:** Super Admins can view a list of Mux assets, see their processing status, and access direct stream links and links to the Mux dashboard (URL might require manual ID input by user for Mux dashboard for now).
+-   **Dependencies:** Clerk, Prisma, Mux account details (for dashboard link structure).
+
+---
+
+### Epic: BL-MVP-EPIC_SA: Super Admin Enhancements
 *Focus: Provide essential tools for the Justify Success Manager and enhance the Super Admin dashboard for better oversight. This includes a drill-down view: Super Admin -> List of Organisations -> Organisation Details (Users, Campaigns, Studies).*
 
 #### [API COMPLETED - UI PARTIALLY IMPLEMENTED, BLOCKED BY 403 (Super Admin role check failing). Linter issue with clerkClient usage to be resolved by user environment checks.] Ticket BL-MVP-SA-01: Super Admin - List All Organisations

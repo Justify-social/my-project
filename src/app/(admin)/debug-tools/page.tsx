@@ -79,6 +79,12 @@ export default function DebugToolsPage() {
           linkHref="/debug-tools/database"
           buttonText="View Database Health"
         />
+        <DebugToolCard
+          title="Mux Asset Checker"
+          description="View and verify Mux video assets."
+          linkHref="/debug-tools/mux-assets"
+          buttonText="Check Mux Assets"
+        />
       </div>
 
       {/* Campaign Verification Tool Section */}

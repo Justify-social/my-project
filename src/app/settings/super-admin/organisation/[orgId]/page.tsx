@@ -311,7 +311,7 @@ const OrganisationDetailPage: React.FC = () => {
                                                 size="sm"
                                                 onClick={() => window.open(`/api/brand-lift/surveys/${study.id}/export-structure`, '_blank')}
                                             >
-                                                <Icon iconId="faFileCodeLight" className="mr-2 h-3.5 w-3.5" />
+                                                <Icon iconId="faDownloadLight" className="mr-2 h-3.5 w-3.5" />
                                                 Export JSON
                                             </Button>
                                         </TableCell>
