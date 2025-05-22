@@ -76,11 +76,12 @@ async function verifyOptionAccess(optionId: string, clerkUserId: string) {
 }
 
 // PUT handler - Restoring context parameter
-export async function PUT(req: NextRequest, { optionId }: { optionId: string }) {
+export async function PUT(req: NextRequest, context: any) {
   try {
     const { userId: clerkUserId } = await auth(); // Changed
     if (!clerkUserId) throw new UnauthenticatedError('Authentication required.'); // Changed
 
+    const optionId = context.params.optionId; // Access via context.params
     if (!optionId) throw new BadRequestError('Option ID is required from path.');
 
     await verifyOptionAccess(optionId, clerkUserId);
@@ -127,11 +128,12 @@ export async function PUT(req: NextRequest, { optionId }: { optionId: string }) 
 }
 
 // DELETE handler - Restoring context parameter
-export async function DELETE(req: NextRequest, { optionId }: { optionId: string }) {
+export async function DELETE(req: NextRequest, context: any) {
   try {
     const { userId: clerkUserId } = await auth(); // Changed
     if (!clerkUserId) throw new UnauthenticatedError('Authentication required.'); // Changed
 
+    const optionId = context.params.optionId; // Access via context.params
     if (!optionId) throw new BadRequestError('Option ID is required from path.');
 
     await verifyOptionAccess(optionId, clerkUserId);

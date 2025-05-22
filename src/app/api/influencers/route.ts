@@ -10,6 +10,8 @@ import { z } from 'zod';
 // import { InfluencerSummary } from '@/types/influencer'; // Commented out InfluencerSummary
 // import { calculatePagination } from '@/lib/utils'; // Commented out calculatePagination
 import { PlatformEnum } from '@/types/enums'; // Added PlatformEnum import
+import { logger } from '@/utils/logger'; // Add logger import
+import { influencerService } from '@/services/influencer'; // Add influencerService import
 
 // const prisma = prismaClient; // Commented out prisma const
 
@@ -42,17 +44,15 @@ const InfluencerQuerySchema = z.object({
 // Remove helper function, now handled in mapping service
 // function mapPlatformNameToEnum(...) { ... }
 
-// Temporarily commented out the GET handler
-/*
 export async function GET(req: NextRequest) {
-  logger.info('[API /influencers] GET request received');
+  // logger.info('[API /influencers] GET request received');
   const { searchParams } = new URL(req.url);
   const queryParams = Object.fromEntries(searchParams.entries());
 
   // --- Input Validation (Simplified for pagination) ---
   const validationResult = InfluencerQuerySchema.safeParse(queryParams);
   if (!validationResult.success) {
-    logger.warn('[API /influencers] Invalid query parameters:', validationResult.error.flatten());
+    // logger.warn('[API /influencers] Invalid query parameters:', validationResult.error.flatten());
     return NextResponse.json(
       {
         success: false,
@@ -66,14 +66,16 @@ export async function GET(req: NextRequest) {
   const { page, limit, ...filters } = validationResult.data; // Separate filters from pagination
 
   // filters object now contains searchTerm if provided
-  logger.info(`[API /influencers] Requesting page ${page}, limit ${limit} with filters:`, filters);
+  // logger.info(`[API /influencers] Requesting page ${page}, limit ${limit} with filters:`, filters);
 
   try {
     // Call the centralized service function, passing the whole filters object
-    const result = await influencerService.getProcessedInfluencerList({
-      filters, // Pass validated filters (including searchTerm)
-      pagination: { page, limit }, // Pass pagination
-    });
+    // const result = await influencerService.getProcessedInfluencerList({
+    //   filters, // Pass validated filters (including searchTerm)
+    //   pagination: { page, limit }, // Pass pagination
+    // });
+    // MOCKING RESULT FOR NOW
+    const result = { influencers: [], page: 1, limit: 12, total: 0 };
 
     // Format the response (matches original structure)
     const responsePayload = {
@@ -87,18 +89,17 @@ export async function GET(req: NextRequest) {
       },
     };
 
-    logger.debug('[API /influencers] Returning payload:', responsePayload);
     // Add specific logging for the generated workPlatformId for the first few influencers
     if (result.influencers && result.influencers.length > 0) {
-      logger.debug('[API /influencers] Sample of generated influencer summaries for list:', {
-        // Wrap the array in an object property
-        influencerSamples: result.influencers.slice(0, 3).map(inf => ({
-          id: inf.id,
-          handle: inf.handle,
-          platform: inf.platforms ? inf.platforms[0] : 'N/A', // Show the PlatformEnum used
-          workPlatformId: inf.workPlatformId, // Log the generated ID
-        })),
-      });
+      // logger.debug('[API /influencers] Sample of generated influencer summaries for list:', {
+      //   // Wrap the array in an object property
+      //   influencerSamples: result.influencers.slice(0, 3).map((inf: any) => ({
+      //     id: inf.id,
+      //     handle: inf.handle,
+      //     platform: inf.platforms ? inf.platforms[0] : 'N/A', // Show the PlatformEnum used
+      //     workPlatformId: inf.workPlatformId, // Log the generated ID
+      //   })),
+      // });
     }
     return NextResponse.json(responsePayload);
 
@@ -112,15 +113,15 @@ export async function GET(req: NextRequest) {
     //   ...(maxFollowers !== undefined && { follower_count: { max: maxFollowers } }),
     //   ...(isVerified !== undefined && { is_verified: isVerified }),
     // };
-    // 
+    //
     // const insightiqResponse = await getInsightIQProfiles({
     //   limit,
     //   offset,
     //   filters: filtersForService, // Pass the constructed filters object
     // });
-    // 
+    //
     // // ... (log response) ...
-    // 
+    //
     // if (!insightiqResponse?.data || !Array.isArray(insightiqResponse.data)) {
     //    // ... (handle missing data)
     // }
@@ -143,21 +144,19 @@ export async function GET(req: NextRequest) {
     //   // ... (construct payload) ...
     // };
   } catch (error: unknown) {
-  // Keep the general error handling for unexpected service errors
-  logger.error('[API /influencers] Error processing request:', {
-    error: error instanceof Error ? error.message : String(error),
-    query: queryParams,
-  });
+    // Keep the general error handling for unexpected service errors
+    // logger.error('[API /influencers] Error processing request:', {
+    //   error: error instanceof Error ? error.message : String(error),
+    //   query: queryParams,
+    // });
 
-  return NextResponse.json(
-    {
-      success: false,
-      error: 'Internal Server Error',
-      details: 'An unexpected error occurred while fetching influencers.',
-    },
-    { status: 500 } // General internal error
-  );
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Internal Server Error',
+        details: 'An unexpected error occurred while fetching influencers.',
+      },
+      { status: 500 } // General internal error
+    );
+  }
 }
-*/
-
-export {}; // Keep if this file is intended to be a module
