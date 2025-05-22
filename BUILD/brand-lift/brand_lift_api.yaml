@@ -1,0 +1,562 @@
+openapi: 3.0.3
+info:
+  title: Brand Lift API
+  version: v1-mvp-prep1
+  description: Initial OpenAPI specification for the Brand Lift feature. Schemas are placeholders and will be detailed based on src/types/brand-lift.ts (Ticket BL-MVP-P0-01).
+
+servers:
+  - url: /api/brand-lift
+    description: API root for Brand Lift features
+
+components:
+  schemas:
+    # Placeholder Schemas - to be detailed in BL-MVP-P0-01
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+
+    # Survey Schemas
+    BrandLiftStudyBase: # For POST/PUT requests
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the Brand Lift study.
+          example: "Q1 CPG Campaign Study"
+        campaignId:
+          type: string 
+          description: ID of the associated campaign from CampaignWizardSubmission.
+        funnelStage:
+          type: string
+          description: Funnel stage (e.g., Top Funnel, Mid Funnel, Bottom Funnel).
+          example: "Top Funnel"
+        primaryKpi:
+          type: string
+          description: Primary KPI for the study.
+          example: "Brand Awareness"
+        secondaryKpis:
+          type: array
+          items:
+            type: string
+          description: Optional list of secondary KPIs.
+          example: ["Ad Recall", "Consideration"]
+
+    BrandLiftStudy: # For GET responses
+      allOf:
+        - $ref: '#/components/schemas/BrandLiftStudyBase'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: ulid 
+              description: Unique identifier for the Brand Lift study.
+              readOnly: true
+            status:
+              type: string
+              description: Current status of the study (e.g., DRAFT, PENDING_APPROVAL, APPROVED).
+              readOnly: true
+              example: "DRAFT"
+            createdAt:
+              type: string
+              format: date-time
+              readOnly: true
+            updatedAt:
+              type: string
+              format: date-time
+              readOnly: true
+            campaign:
+              $ref: '#/components/schemas/CampaignCreativeContext'
+              description: "Contextual information from the linked campaign, including primary creative details."
+
+    # Question Schemas
+    SurveyQuestionBase:
+      type: object
+      properties:
+        text:
+          type: string
+          description: The question text.
+        questionType:
+          type: string
+          enum: [SINGLE_CHOICE, MULTIPLE_CHOICE]
+        order:
+          type: integer
+          description: Order of the question in the survey.
+        isRandomized:
+          type: boolean
+          default: false
+        isMandatory:
+          type: boolean
+          default: true
+        kpiAssociation:
+          type: string
+          nullable: true
+        options: 
+          type: array
+          items:
+            $ref: '#/components/schemas/SurveyOptionBase'
+
+    SurveyQuestion:
+      allOf:
+        - $ref: '#/components/schemas/SurveyQuestionBase'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: ulid
+              readOnly: true
+            surveyId:
+              type: string
+              format: ulid
+              readOnly: true
+            options: 
+              type: array
+              items:
+                $ref: '#/components/schemas/SurveyOption'
+
+    # Option Schemas
+    SurveyOptionBase:
+      type: object
+      properties:
+        text:
+          type: string
+        imageUrl:
+          type: string
+          format: url
+          nullable: true
+        order:
+          type: integer
+
+    SurveyOption:
+      allOf:
+        - $ref: '#/components/schemas/SurveyOptionBase'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: ulid
+              readOnly: true
+
+    # Approval Schemas
+    SurveyApprovalCommentBase:
+      type: object
+      properties:
+        questionId:
+          type: string
+          format: ulid
+          nullable: true
+        text:
+          type: string
+
+    SurveyApprovalComment:
+      allOf:
+        - $ref: '#/components/schemas/SurveyApprovalCommentBase'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: ulid
+              readOnly: true
+            authorId:
+              type: string 
+              readOnly: true
+            status:
+              type: string
+              enum: [OPEN, RESOLVED] 
+              readOnly: true
+            createdAt:
+              type: string
+              format: date-time
+              readOnly: true
+
+    SurveyApprovalStatusUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [PENDING_REVIEW, CHANGES_REQUESTED, APPROVED, SIGNED_OFF]
+        requestedSignOff:
+          type: boolean
+          nullable: true
+
+    SurveyApprovalStatus:
+      allOf:
+        - $ref: '#/components/schemas/SurveyApprovalStatusUpdate'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: ulid
+              readOnly: true
+            signedOffBy:
+              type: string 
+              nullable: true
+              readOnly: true
+            signedOffAt:
+              type: string
+              format: date-time
+              nullable: true
+              readOnly: true
+            updatedAt:
+              type: string
+              format: date-time
+              readOnly: true
+
+    # +++ NEW SCHEMA FOR CAMPAIGN CREATIVE CONTEXT +++
+    CampaignCreativeContext:
+      type: object
+      description: "Provides context about the primary creative of the linked campaign."
+      properties:
+        primaryCreativeUrl:
+          type: string
+          format: url
+          nullable: true
+          description: "URL of the primary creative asset from the campaign (e.g., an image or video thumbnail)."
+          example: "https://example.com/creative.jpg"
+        primaryCreativeType:
+          type: string
+          nullable: true
+          description: "Type of the primary creative asset (e.g., IMAGE, VIDEO_THUMBNAIL)."
+          example: "IMAGE"
+    # +++ END NEW SCHEMA +++
+
+  securitySchemes:
+    ClerkAuth: 
+      type: http
+      scheme: bearer
+      description: Authentication handled by Clerk middleware. JWT passed as Bearer token.
+
+security:
+  - ClerkAuth: []
+
+paths:
+  /surveys:
+    post:
+      summary: Create a new BrandLiftStudy
+      tags: [Surveys]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BrandLiftStudyBase'
+      responses:
+        '201':
+          description: BrandLiftStudy created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandLiftStudy'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    get:
+      summary: List BrandLiftStudies
+      tags: [Surveys]
+      parameters:
+        - name: campaignId
+          in: query
+          required: false
+          description: Filter studies by campaign ID.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of BrandLiftStudies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BrandLiftStudy'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /surveys/{studyId}:
+    parameters:
+      - name: studyId
+        in: path
+        required: true
+        description: ID of the BrandLiftStudy.
+        schema:
+          type: string
+    get:
+      summary: Get a specific BrandLiftStudy
+      tags: [Surveys]
+      responses:
+        '200':
+          description: Details of the BrandLiftStudy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandLiftStudy'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      summary: Update a BrandLiftStudy
+      tags: [Surveys]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BrandLiftStudyBase'
+      responses:
+        '200':
+          description: BrandLiftStudy updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandLiftStudy'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /surveys/{studyId}/questions:
+    parameters:
+      - name: studyId
+        in: path
+        required: true
+        description: ID of the BrandLiftStudy for which to manage questions.
+        schema:
+          type: string
+    post:
+      summary: Create a new SurveyQuestion for a study
+      tags: [Questions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SurveyQuestionBase'
+      responses:
+        '201':
+          description: SurveyQuestion created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyQuestion'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Study not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get:
+      summary: List SurveyQuestions for a study
+      tags: [Questions]
+      responses:
+        '200':
+          description: A list of SurveyQuestions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SurveyQuestion'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Study not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /surveys/{studyId}/questions/{questionId}:
+    parameters:
+      - name: studyId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: questionId
+        in: path
+        required: true
+        schema:
+          type: string
+    put:
+      summary: Update a SurveyQuestion
+      tags: [Questions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SurveyQuestionBase'
+      responses:
+        '200':
+          description: SurveyQuestion updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyQuestion'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Delete a SurveyQuestion
+      tags: [Questions]
+      responses:
+        '204':
+          description: SurveyQuestion deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  
+  /approval/comments:
+    post:
+      summary: Add a SurveyApprovalComment
+      tags: [Approval]
+      parameters: 
+        - name: surveyId
+          in: query 
+          required: true
+          description: ID of the survey to comment on.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SurveyApprovalCommentBase'
+      responses:
+        '201':
+          description: Comment added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyApprovalComment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    get:
+      summary: Get comments for a survey
+      tags: [Approval]
+      parameters:
+        - name: surveyId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: questionId
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of comments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SurveyApprovalComment'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /approval/comments/{commentId}:
+    parameters:
+      - name: commentId
+        in: path
+        required: true
+        schema:
+          type: string
+    put: 
+      summary: Update a SurveyApprovalComment (e.g., status)
+      tags: [Approval]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [RESOLVED]
+      responses:
+        '200':
+          description: Comment updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyApprovalComment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /approval/status: 
+    put: 
+      summary: Update SurveyApprovalStatus for a survey
+      tags: [Approval]
+      parameters:
+        - name: surveyId
+          in: query 
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SurveyApprovalStatusUpdate'
+      responses:
+        '200':
+          description: Approval status updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyApprovalStatus'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+# Common Responses
+responses:
+  BadRequest:
+    description: Bad Request - The request could not be understood by the server due to malformed syntax.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+  Unauthorized:
+    description: Unauthorized - Authentication is required and has failed or has not yet been provided.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+  NotFound:
+    description: Not Found - The server has not found anything matching the Request-URI.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error' 
