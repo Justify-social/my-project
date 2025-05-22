@@ -653,6 +653,7 @@ export type Step3FormData = z.infer<typeof Step3ValidationSchema>;
 // --- Step 4 ---
 /** BASE schema for Step 4: Assets & Guidelines - Only field definitions */
 export const Step4BaseSchema = DraftCampaignDataBaseSchema.pick({
+  assets: true,
   guidelines: true,
   requirements: true,
   notes: true,

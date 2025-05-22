@@ -253,42 +253,6 @@ export const AssetCardStep4 = React.memo(function AssetCardStep4({
               </FormItem>
             )}
           />
-          <Icon
-            iconId="faFloppyDiskLight"
-            className="h-4 w-4 text-muted-foreground/60 mr-1 cursor-pointer hover:text-muted-foreground"
-            title="Save name change (saves entire step)"
-            onClick={async () => {
-              console.log('Save icon clicked');
-              const currentData = getValues();
-
-              // Ensure all assets have a fieldId and required fields are properly formatted
-              const assetsWithFieldIds = currentData.assets.map(asset => ({
-                ...asset,
-                fieldId:
-                  asset.fieldId ||
-                  `field-${asset.id || Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-                // Ensure these fields are explicitly included for saving
-                rationale: asset.rationale || '',
-                budget: typeof asset.budget === 'number' ? asset.budget : null,
-                associatedInfluencerIds: Array.isArray(asset.associatedInfluencerIds)
-                  ? asset.associatedInfluencerIds
-                  : [],
-              }));
-
-              console.log(
-                `[Save icon] Prepared assets for save, including rationale, budget:`,
-                assetsWithFieldIds
-              );
-
-              const payload = {
-                ...currentData,
-                assets: assetsWithFieldIds,
-                currentStep: 4,
-              };
-              await saveProgress(payload);
-              toast.success('Step 4 progress saved.');
-            }}
-          />
         </div>
         <FormMessage className="text-xs px-1 w-full" />
       </CardHeader>
@@ -301,10 +265,6 @@ export const AssetCardStep4 = React.memo(function AssetCardStep4({
               {influencerHandle}
             </span>
           </div>
-        )}
-
-        {description && (
-          <p className="mb-2 text-muted-foreground line-clamp-2 text-xs flex-grow">{description}</p>
         )}
 
         {/* Influencer Association - Using Shadcn Combobox pattern */}

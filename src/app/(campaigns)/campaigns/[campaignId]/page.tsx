@@ -505,17 +505,17 @@ export default function CampaignDetail() {
           },
           secondaryContact: data.secondaryContact
             ? {
-              name: `${data.secondaryContact.firstName || ''} ${data.secondaryContact.surname || ''}`.trim(),
-              email: data.secondaryContact?.email || 'N/A',
-              position: data.secondaryContact?.position || 'N/A',
-            }
+                name: `${data.secondaryContact.firstName || ''} ${data.secondaryContact.surname || ''}`.trim(),
+                email: data.secondaryContact?.email || 'N/A',
+                position: data.secondaryContact?.position || 'N/A',
+              }
             : undefined,
           influencers:
             data.Influencer && Array.isArray(data.Influencer)
               ? data.Influencer.map((inf: ApiInfluencer) => ({
-                handle: inf.handle || 'N/A',
-                platform: inf.platform || 'N/A',
-              }))
+                  handle: inf.handle || 'N/A',
+                  platform: inf.platform || 'N/A',
+                }))
               : [],
           primaryKPI: data.primaryKPI || 'Not Set',
           secondaryKPIs:
@@ -538,9 +538,9 @@ export default function CampaignDetail() {
             languages:
               data.demographics?.languages && Array.isArray(data.demographics.languages)
                 ? data.demographics.languages.map((langCode: string) => {
-                  const langObj = TOP_LANGUAGES_MAP.find(l => l.value === langCode.toLowerCase());
-                  return langObj ? langObj.label : langCode;
-                })
+                    const langObj = TOP_LANGUAGES_MAP.find(l => l.value === langCode.toLowerCase());
+                    return langObj ? langObj.label : langCode;
+                  })
                 : [],
             interests:
               data.targeting?.interests && Array.isArray(data.targeting.interests)
@@ -560,10 +560,10 @@ export default function CampaignDetail() {
               data.guidelines ||
               'Not Set',
             requirements: (data.assetsDetails?.requirements &&
-              Array.isArray(data.assetsDetails.requirements)
+            Array.isArray(data.assetsDetails.requirements)
               ? data.assetsDetails.requirements
               : data.assetDetails?.requirementsList &&
-                Array.isArray(data.assetDetails.requirementsList)
+                  Array.isArray(data.assetDetails.requirementsList)
                 ? data.assetDetails.requirementsList
                 : data.requirements && Array.isArray(data.requirements)
                   ? data.requirements
@@ -573,7 +573,7 @@ export default function CampaignDetail() {
               mandatory: req?.mandatory || false,
             })),
             uploaded: (data.assetsDetails?.uploadedFiles &&
-              Array.isArray(data.assetsDetails.uploadedFiles)
+            Array.isArray(data.assetsDetails.uploadedFiles)
               ? data.assetsDetails.uploadedFiles
               : data.assetDetails?.files && Array.isArray(data.assetDetails.files)
                 ? data.assetDetails.files
@@ -600,35 +600,35 @@ export default function CampaignDetail() {
           contacts: [
             ...(data.primaryContact
               ? [
-                {
-                  name:
-                    `${data.primaryContact.firstName || ''} ${data.primaryContact.surname || ''}`.trim() ||
-                    'N/A',
-                  email: data.primaryContact.email || 'N/A',
-                  position: data.primaryContact.position || 'N/A',
-                  isPrimary: true,
-                },
-              ]
+                  {
+                    name:
+                      `${data.primaryContact.firstName || ''} ${data.primaryContact.surname || ''}`.trim() ||
+                      'N/A',
+                    email: data.primaryContact.email || 'N/A',
+                    position: data.primaryContact.position || 'N/A',
+                    isPrimary: true,
+                  },
+                ]
               : []),
             ...(data.secondaryContact
               ? [
-                {
-                  name:
-                    `${data.secondaryContact.firstName || ''} ${data.secondaryContact.surname || ''}`.trim() ||
-                    'N/A',
-                  email: data.secondaryContact.email || 'N/A',
-                  position: data.secondaryContact.position || 'N/A',
-                  isPrimary: false,
-                },
-              ]
+                  {
+                    name:
+                      `${data.secondaryContact.firstName || ''} ${data.secondaryContact.surname || ''}`.trim() ||
+                      'N/A',
+                    email: data.secondaryContact.email || 'N/A',
+                    position: data.secondaryContact.position || 'N/A',
+                    isPrimary: false,
+                  },
+                ]
               : []),
             ...(data.additionalContacts && Array.isArray(data.additionalContacts)
               ? data.additionalContacts.map((contact: ApiContact) => ({
-                name: `${contact.firstName || ''} ${contact.surname || ''}`.trim() || 'N/A',
-                email: contact.email || 'N/A',
-                position: contact.position || 'N/A',
-                isPrimary: false,
-              }))
+                  name: `${contact.firstName || ''} ${contact.surname || ''}`.trim() || 'N/A',
+                  email: contact.email || 'N/A',
+                  position: contact.position || 'N/A',
+                  isPrimary: false,
+                }))
               : []),
           ],
         };
@@ -1094,8 +1094,8 @@ export default function CampaignDetail() {
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground mb-3">Age Ranges</h3>
                 {campaignData.audience.ageRanges &&
-                  typeof campaignData.audience.ageRanges === 'object' &&
-                  Object.keys(campaignData.audience.ageRanges).length > 0 ? (
+                typeof campaignData.audience.ageRanges === 'object' &&
+                Object.keys(campaignData.audience.ageRanges).length > 0 ? (
                   <div className="mt-2 flex flex-wrap gap-2 justify-start items-center">
                     {AGE_BRACKETS.map(bracket => {
                       const percentage =

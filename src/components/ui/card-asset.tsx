@@ -118,6 +118,9 @@ export const AssetPreview = ({
   muxProcessingStatus,
   ...props
 }: AssetPreviewProps) => {
+  console.log(
+    `[AssetPreview RENDER] PlaybackID: ${muxPlaybackId}, Status: ${muxProcessingStatus}, Type: ${type}, FileName: ${fileName}`
+  );
   const isVideo = type === 'video' || (typeof type === 'string' && type.includes('video'));
   const isImage = type === 'image' || (typeof type === 'string' && type.includes('image'));
 
@@ -452,24 +455,6 @@ export function AssetCard({
               </Badge>
             )}
           </div>
-
-          {/* Diagnostic Section for Influencer and Budget */}
-          <div className="my-2 p-2 border border-red-500 bg-red-50">
-            <p className="text-xs text-red-700 font-bold">[DIAGNOSTIC INFO]</p>
-            {influencerHandle ? (
-              <p className="text-xs text-red-600">Influencer: {influencerHandle}</p>
-            ) : (
-              <p className="text-xs text-red-400">Influencer: Not provided to card</p>
-            )}
-            {budget !== undefined && budget !== null ? (
-              <p className="text-xs text-red-600">
-                Asset Budget: {formatCurrency(budget, currency)}
-              </p>
-            ) : (
-              <p className="text-xs text-red-400">Asset Budget: Not provided to card</p>
-            )}
-          </div>
-          {/* End Diagnostic Section */}
 
           {/* Influencer Handle */}
           {influencerHandle && (

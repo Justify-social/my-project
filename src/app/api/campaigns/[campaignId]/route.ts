@@ -319,23 +319,93 @@ export async function GET(
       '[API GET /api/campaigns/[campaignId]] Normalizing data for frontend schema compatibility...'
     );
 
-    // --- START ASSET ENRICHMENT / MAPPING ---
+    // --- START ASSET ENRICHMENT / MAPPING (REVISED) ---
     let responseAssets = [];
+    const wizardJsonAssets =
+      campaign.assets && Array.isArray(campaign.assets) ? campaign.assets : [];
+    const dbCreativeAssets =
+      campaign.creativeAssets && Array.isArray(campaign.creativeAssets)
+        ? campaign.creativeAssets
+        : [];
 
-    if (campaign && campaign.creativeAssets && Array.isArray(campaign.creativeAssets)) {
-      console.log(
-        '[API GET /api/campaigns/[campaignId]] Processing campaign.creativeAssets relation.'
+    if (wizardJsonAssets.length > 0) {
+      logger.info(
+        '[API GET /api/campaigns/[campaignId]] Prioritizing CampaignWizard.assets (JSON) and merging with CreativeAsset data.'
       );
-      responseAssets = campaign.creativeAssets.map((ca: any) => ({
+      responseAssets = wizardJsonAssets.map((jsonAsset: any) => {
+        const dbAssetMatch = dbCreativeAssets.find(
+          (db_ca: any) =>
+            db_ca.id !== null &&
+            db_ca.id !== undefined &&
+            String(db_ca.id) === String(jsonAsset.internalAssetId || jsonAsset.id)
+        );
+
+        const mergedAsset = {
+          ...jsonAsset, // Start with everything from the CampaignWizard.assets JSON item
+          ...(dbAssetMatch
+            ? {
+                // Override/augment with fields from the CreativeAsset table record
+                id: String(dbAssetMatch.id), // Canonical DB ID for CreativeAsset
+                internalAssetId: dbAssetMatch.id, // Ensure this points to CreativeAsset ID
+                name: jsonAsset.name || dbAssetMatch.name || '', // Prefer JSON name (Step 4 edit), then DB name
+                fileName: jsonAsset.fileName || dbAssetMatch.fileName || dbAssetMatch.name || '', // Prefer JSON fileName
+                type: dbAssetMatch.type || jsonAsset.type || 'video',
+                description:
+                  dbAssetMatch.description || jsonAsset.rationale || jsonAsset.description || '',
+                rationale: jsonAsset.rationale || dbAssetMatch.description || '', // Ensure rationale is populated
+                url: dbAssetMatch.url || jsonAsset.url, // Prefer Mux URL from CreativeAsset when ready
+                fileSize: dbAssetMatch.fileSize ?? jsonAsset.fileSize,
+                muxAssetId: dbAssetMatch.muxAssetId ?? jsonAsset.muxAssetId,
+                muxPlaybackId: dbAssetMatch.muxPlaybackId ?? jsonAsset.muxPlaybackId,
+                muxProcessingStatus:
+                  dbAssetMatch.muxProcessingStatus ?? jsonAsset.muxProcessingStatus,
+                duration: dbAssetMatch.duration ?? jsonAsset.duration,
+                userId: dbAssetMatch.userId ?? jsonAsset.userId,
+                createdAt:
+                  dbAssetMatch.createdAt?.toISOString() ??
+                  jsonAsset.createdAt?.toISOString() ??
+                  undefined,
+                updatedAt:
+                  dbAssetMatch.updatedAt?.toISOString() ??
+                  jsonAsset.updatedAt?.toISOString() ??
+                  undefined,
+                isPrimaryForBrandLiftPreview:
+                  dbAssetMatch.isPrimaryForBrandLiftPreview ??
+                  jsonAsset.isPrimaryForBrandLiftPreview ??
+                  false,
+              }
+            : {
+                // If no dbAssetMatch, ensure essential Mux fields from jsonAsset are still there
+                muxAssetId: jsonAsset.muxAssetId,
+                muxPlaybackId: jsonAsset.muxPlaybackId,
+                muxProcessingStatus: jsonAsset.muxProcessingStatus,
+                url: jsonAsset.url,
+              }),
+          // Ensure fields edited in Step 4 (budget, rationale, associatedInfluencerIds) are from jsonAsset
+          budget: jsonAsset.budget, // This can be number, null, or undefined from the JSON
+          associatedInfluencerIds: Array.isArray(jsonAsset.associatedInfluencerIds)
+            ? jsonAsset.associatedInfluencerIds
+            : [],
+          fieldId:
+            jsonAsset.fieldId ||
+            `field-get-${jsonAsset.id || jsonAsset.internalAssetId || Date.now()}`, // Ensure fieldId for client
+        };
+        return mergedAsset;
+      });
+    } else if (dbCreativeAssets.length > 0) {
+      logger.warn(
+        '[API GET /api/campaigns/[campaignId]] CampaignWizard.assets (JSON) was empty. Mapping from creativeAssets relation (Step 4 specific fields like budget/rationale will be default/empty).'
+      );
+      responseAssets = dbCreativeAssets.map((ca: any) => ({
         id: String(ca.id),
         internalAssetId: ca.id,
         name: String(ca.name ?? ''),
-        fileName: String(ca.name ?? ''),
+        fileName: String(ca.fileName ?? ca.name ?? ''),
         type: String(ca.type ?? 'video'),
-        description: String(ca.description ?? ''),
-        rationale: '',
-        budget: undefined,
-        associatedInfluencerIds: [],
+        description: String(ca.description ?? ''), // This is CreativeAsset.description (saved rationale)
+        rationale: String(ca.description ?? ''), // Use description as fallback for rationale
+        budget: undefined, // No budget field on CreativeAsset table
+        associatedInfluencerIds: [], // No direct field on CreativeAsset for this
         url: ca.url ?? undefined,
         fileSize: ca.fileSize ?? undefined,
         muxAssetId: ca.muxAssetId ?? undefined,
@@ -345,37 +415,16 @@ export async function GET(
         createdAt: ca.createdAt?.toISOString() ?? undefined,
         updatedAt: ca.updatedAt?.toISOString() ?? undefined,
         isPrimaryForBrandLiftPreview: ca.isPrimaryForBrandLiftPreview ?? false,
+        fieldId: `field-get-${ca.id || Date.now()}`,
       }));
-      console.log(
-        `[API GET /api/campaigns/[campaignId]] Mapped ${responseAssets.length} assets from creativeAssets relation.`
-      );
-    } else if (campaign && 'assets' in campaign && Array.isArray(campaign.assets)) {
-      console.log(
-        '[API GET /api/campaigns/[campaignId]] Falling back to campaign.assets (Json[]) processing.'
-      );
-      responseAssets = campaign.assets.map((assetDraft: any) => {
-        return {
-          id: String(assetDraft.id ?? assetDraft.internalAssetId ?? Date.now()),
-          name: String(assetDraft.name ?? ''),
-          type: String(assetDraft.type ?? 'image'),
-          url: String(assetDraft.url ?? ''),
-          fileName: String(assetDraft.fileName ?? assetDraft.name ?? ''),
-          fileSize: Number(assetDraft.fileSize ?? 0),
-          description: String(assetDraft.description ?? ''),
-          rationale: String(assetDraft.rationale ?? ''),
-          budget: assetDraft.budget !== undefined ? Number(assetDraft.budget) : undefined,
-          associatedInfluencerIds: Array.isArray(assetDraft.associatedInfluencerIds)
-            ? assetDraft.associatedInfluencerIds.map(String)
-            : [],
-          internalAssetId: assetDraft.internalAssetId,
-          muxProcessingStatus: assetDraft.muxProcessingStatus,
-        };
-      });
-      console.log(
-        `[API GET /api/campaigns/[campaignId]] Mapped ${responseAssets.length} assets from Json[] field.`
-      );
+    } else {
+      // Both are empty
+      responseAssets = [];
     }
-    // --- END ASSET ENRICHMENT / MAPPING ---
+    logger.info(
+      `[API GET /api/campaigns/[campaignId]] Mapped ${responseAssets.length} final assets for response.`
+    );
+    // --- END ASSET ENRICHMENT / MAPPING (REVISED) ---
 
     const normalizedCampaign = {
       ...campaign,

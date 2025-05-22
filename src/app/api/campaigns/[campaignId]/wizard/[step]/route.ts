@@ -272,44 +272,73 @@ export async function PATCH(
       // Additionally, update CreativeAsset records with form field data
       if (dataToSave.assets && Array.isArray(dataToSave.assets)) {
         // Process each asset to update its corresponding CreativeAsset record
-        const updatePromises = dataToSave.assets.map(async (asset: {
-          id?: string | number;
-          rationale?: string;
-          budget?: number;
-          associatedInfluencerIds?: string[];
-        }) => {
-          if (!asset.id) {
-            console.warn(`[PATCH Step 4] Asset missing ID, cannot update:`, asset);
-            return;
-          }
+        const updatePromises = dataToSave.assets.map(
+          async (asset: {
+            id?: string | number; // Should match CreativeAsset.id or internalAssetId from client
+            name?: string; // Add name field
+            type?: string; // To know if it's image/video if needed for CreativeAsset
+            internalAssetId?: number; // Client might send this
+            rationale?: string;
+            budget?: number | null; // Allow null
+            associatedInfluencerIds?: string[];
+            // Add other relevant fields from DraftAsset if they are part of dataToSave.assets
+            // and might be needed to update CreativeAsset or for context here
+          }) => {
+            const assetIdToUpdate =
+              asset.internalAssetId ||
+              (typeof asset.id === 'number'
+                ? asset.id
+                : asset.id
+                  ? parseInt(asset.id, 10)
+                  : undefined);
 
-          console.log(`[PATCH Step 4] Updating CreativeAsset ${asset.id} with form data:`, {
-            rationale: asset.rationale,
-            budget: asset.budget,
-            associatedInfluencerIds: asset.associatedInfluencerIds
-          });
+            if (!assetIdToUpdate) {
+              console.warn(
+                `[PATCH Step 4] Asset missing a valid ID (id or internalAssetId) for DB update, cannot update CreativeAsset:`,
+                asset
+              );
+              return; // Skip if no valid ID to update CreativeAsset
+            }
 
-          try {
-            // Update the description field to store the rationale since CreativeAsset has no rationale field
-            await prisma.creativeAsset.update({
-              where: {
-                id: typeof asset.id === 'number' ? asset.id : parseInt(asset.id, 10),
-              },
-              data: {
-                description: asset.rationale || null,
-                // Store other important data from the form in the assets json field of CampaignWizard
+            console.log(
+              `[PATCH Step 4] Updating CreativeAsset ${assetIdToUpdate} with form data:`,
+              {
+                name: asset.name,
+                rationale: asset.rationale,
+                budget: asset.budget, // Budget is not saved on CreativeAsset, but logged here
+                associatedInfluencerIds: asset.associatedInfluencerIds,
               }
-            });
-          } catch (error) {
-            console.error(`[PATCH Step 4] Error updating CreativeAsset ${asset.id}:`, error);
+            );
+
+            try {
+              await prisma.creativeAsset.update({
+                where: {
+                  id: assetIdToUpdate,
+                },
+                data: {
+                  name: asset.name || undefined,
+                  description: asset.rationale || null,
+                },
+              });
+            } catch (error) {
+              console.error(
+                `[PATCH Step 4] Error updating CreativeAsset ${assetIdToUpdate}:`,
+                error
+              );
+            }
           }
-        });
+        );
 
         try {
           await Promise.all(updatePromises);
           console.log(`[PATCH Step 4] Updated all CreativeAsset records with form data`);
 
           // Also store the complete assets array in the CampaignWizard.assets JSON field for reference
+          // Log what is about to be saved to CampaignWizard.assets
+          console.log(
+            '[API PATCH Step 4] dataToSave.assets BEFORE assigning to mappedData.assets:',
+            JSON.stringify(dataToSave.assets, null, 2)
+          );
           mappedData.assets = dataToSave.assets;
         } catch (error) {
           console.error(`[PATCH Step 4] Error updating CreativeAsset records:`, error);
@@ -644,10 +673,10 @@ export async function PATCH(
       success: true,
       data: campaignDataForResponse
         ? {
-          ...EnumTransformers.transformObjectFromBackend(campaignDataForResponse),
-          submissionId: finalSubmissionId,
-          assets: mappedResponseAssetsForPATCH, // Use the correctly scoped and mapped assets
-        }
+            ...EnumTransformers.transformObjectFromBackend(campaignDataForResponse),
+            submissionId: finalSubmissionId,
+            assets: mappedResponseAssetsForPATCH, // Use the correctly scoped and mapped assets
+          }
         : null,
       message: `Step ${step} updated${messageSuffix}`,
     };

@@ -540,16 +540,34 @@ const Step4Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
       {data.assets && data.assets.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pt-2">
           {data.assets.map((asset, idx) => {
-            console.log(`[Step5Review] Processing asset for card:`, JSON.parse(JSON.stringify(asset)));
-            console.log(`[Step5Review] Asset budget from wizardState.assets: ${asset.budget}, type: ${typeof asset.budget}`);
-            console.log(`[Step5Review] wizardState.Influencer:`, JSON.parse(JSON.stringify(data.Influencer)));
-            console.log(`[Step5Review] asset.associatedInfluencerIds:`, JSON.parse(JSON.stringify(asset.associatedInfluencerIds)));
+            console.log(
+              `[Step5Review] Processing asset for card:`,
+              JSON.parse(JSON.stringify(asset))
+            );
+            console.log(
+              `[Step5Review] Asset budget from wizardState.assets: ${asset.budget}, type: ${typeof asset.budget}`
+            );
+            console.log(
+              `[Step5Review] wizardState.Influencer:`,
+              JSON.parse(JSON.stringify(data.Influencer))
+            );
+            console.log(
+              `[Step5Review] asset.associatedInfluencerIds:`,
+              JSON.parse(JSON.stringify(asset.associatedInfluencerIds))
+            );
 
             // Get associated influencer handles for this asset
             let associatedInfluencerHandles: string[] = [];
-            if (Array.isArray(asset.associatedInfluencerIds) && asset.associatedInfluencerIds.length > 0 && Array.isArray(data.Influencer)) {
-              associatedInfluencerHandles = data.Influencer.filter(inf =>
-                inf && typeof inf.id === 'string' && (asset.associatedInfluencerIds as string[]).includes(inf.id)
+            if (
+              Array.isArray(asset.associatedInfluencerIds) &&
+              asset.associatedInfluencerIds.length > 0 &&
+              Array.isArray(data.Influencer)
+            ) {
+              associatedInfluencerHandles = data.Influencer.filter(
+                inf =>
+                  inf &&
+                  typeof inf.id === 'string' &&
+                  (asset.associatedInfluencerIds as string[]).includes(inf.id)
               ).map(inf => inf.handle);
             }
             console.log(`[Step5Review] Matched influencer handles:`, associatedInfluencerHandles);
@@ -564,15 +582,19 @@ const Step4Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
               description: asset.rationale || asset.description || '',
               budget: typeof asset.budget === 'number' ? asset.budget : undefined, // More explicit handling
               muxPlaybackId: asset.muxPlaybackId,
-              muxProcessingStatus: asset.muxProcessingStatus || "READY",
+              muxProcessingStatus: asset.muxProcessingStatus || 'READY',
               muxAssetId: asset.muxAssetId,
               fileName: asset.fileName,
               // Pass first associated influencer as handle (the card only shows one)
-              influencerHandle: associatedInfluencerHandles.length > 0 ? associatedInfluencerHandles[0] : '',
+              influencerHandle:
+                associatedInfluencerHandles.length > 0 ? associatedInfluencerHandles[0] : '',
               // Include missing fields
               rationale: asset.rationale || asset.description || '',
             };
-            console.log(`[Step5Review] assetCardData being passed to AssetCard:`, JSON.parse(JSON.stringify(assetCardData)));
+            console.log(
+              `[Step5Review] assetCardData being passed to AssetCard:`,
+              JSON.parse(JSON.stringify(assetCardData))
+            );
 
             return (
               <div key={assetCardData.id} className="flex flex-col h-full">
@@ -584,12 +606,14 @@ const Step4Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
                 />
 
                 {/* Add additional details below the card if not shown in the AssetCard */}
-                {(associatedInfluencerHandles.length > 1 || asset.rationale) && (
+                {associatedInfluencerHandles.length > 1 && (
                   <div className="mt-2 p-3 border rounded-md bg-muted/10">
                     {/* Show all associated influencers if more than one */}
                     {associatedInfluencerHandles.length > 1 && (
                       <div className="mb-2">
-                        <p className="text-xs font-medium text-muted-foreground">Associated Influencers:</p>
+                        <p className="text-xs font-medium text-muted-foreground">
+                          Associated Influencers:
+                        </p>
                         <div className="flex flex-wrap gap-1 mt-1">
                           {associatedInfluencerHandles.map((handle: string, i: number) => (
                             <Badge key={i} variant="secondary" className="text-xs">
@@ -597,14 +621,6 @@ const Step4Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
                             </Badge>
                           ))}
                         </div>
-                      </div>
-                    )}
-
-                    {/* Show rationale again for emphasis */}
-                    {asset.rationale && (
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground">Why this content:</p>
-                        <p className="text-xs text-foreground mt-1">{asset.rationale}</p>
                       </div>
                     )}
                   </div>

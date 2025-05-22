@@ -1027,8 +1027,7 @@ function Step4Content() {
                   const asset = field as unknown as DraftAsset;
 
                   console.log(
-                    `[Step4Content render] Rendering AssetCardStep4 for index: ${index}, field data:`,
-                    JSON.parse(JSON.stringify(asset))
+                    `[Step4Content RENDER ASSET] Index: ${index}, ID: ${asset.id}, InternalID: ${asset.internalAssetId}, PlaybackID: ${asset.muxPlaybackId}, Status: ${asset.muxProcessingStatus}, Name: ${asset.name}`
                   );
 
                   return (

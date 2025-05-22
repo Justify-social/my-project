@@ -208,3 +208,45 @@ When an asset is deleted from the list in Step 4 of the Campaign Wizard, the use
       - Search for known issues/solutions related to `media-chrome` or `MuxPlayer` CSS with Next.js/Turbopack.
 
 ---
+
+## Issue: Step 4 Asset Details (Budget, Rationale) Not Persisting/Displaying in Step 5
+
+**Date:** 2024-05-24
+
+**Observed Behavior:**
+Data input into fields like 'Budget', 'Why this content?' (rationale), and potentially 'Associated Influencer(s)' in `AssetCardStep4` on Step 4 of the wizard does not appear correctly when reviewing the assets in Step 5 (using `AssetCard`). The diagnostic info in Step 5 shows these fields as "Not provided to card."
+
+**Relevant Files & Components:**
+
+- **`src/components/ui/card-asset-step-4.tsx` (`AssetCardStep4`):** Input component for asset details in Step 4.
+- **`src/components/features/campaigns/Step4Content.tsx`:** Orchestrates Step 4, calls `wizard.saveProgress` with form data.
+- **`src/components/features/campaigns/types.ts` (`Step4BaseSchema`, `DraftAssetSchema`):** Zod schemas for validation.
+- **`src/app/api/campaigns/[campaignId]/wizard/[step]/route.ts` (PATCH handler for step 4):** Backend API that saves Step 4 data. Saves `rationale` to `CreativeAsset.description` and the full asset object (with budget, rationale, associatedInfluencerIds) to `CampaignWizard.assets` JSON field.
+- **`src/components/features/campaigns/WizardContext.tsx` (`loadCampaignData`, `saveProgress` response handling):** Merges data from `CampaignWizard.assets` (JSON) and `CreativeAsset` table (relation) to form `wizardState.assets`.
+- **Component rendering Step 5 (e.g., `Step5Content.tsx`):** Fetches `wizardState` and passes asset data to `AssetCard`.
+- **`src/components/ui/card-asset.tsx` (`AssetCard`):** Display component for assets, used in Step 5.
+
+**Hypothesis for Missing Data:**
+
+1.  **Incomplete Backend Schema Validation (`Step4BaseSchema`):** The `Step4BaseSchema` used by the backend API for validating the Step 4 PATCH request payload does not explicitly include the `assets` field. While Zod might passthrough unpicked fields by default, this is implicit. If `assets` (containing budget, rationale, etc.) is stripped during validation, it won't be saved correctly to `CampaignWizard.assets` JSON field.
+2.  **Incorrect Data Merging in `WizardContext`:** The logic in `loadCampaignData` (or `saveProgress` response handling) that merges data from `CampaignWizard.assets` (JSON) and the `creativeAssets` relation might be losing or incorrectly prioritizing fields, leading to `budget` or `rationale` being undefined when passed to Step 5.
+3.  **Prop Passing to `AssetCard` in Step 5:** The component rendering Step 5 might not be correctly extracting and passing all necessary fields (like `description` for rationale, `budget`, and resolved `influencerHandle`) to the `AssetCard` props.
+
+**SSOT for Step 4 Asset Metadata:**
+
+- The `CampaignWizard.assets` JSON field is intended to be the SSOT for the wizard-specific metadata (budget, rationale, associatedInfluencerIds) for each asset in the context of that wizard draft.
+- `CreativeAsset.description` is used as a secondary store for `rationale`.
+
+**Initial Recommended Fix:**
+
+1.  Modify `Step4BaseSchema` in `src/components/features/campaigns/types.ts` to explicitly include `assets: true`. This ensures the backend Zod validation is aware of and processes the full assets array from the client.
+
+**Next Steps for Investigation/Fixes:**
+
+1.  Apply the `Step4BaseSchema` fix.
+2.  Retest the flow: Enter data in Step 4, save/next, check API payload and response for `assets` content (especially budget, rationale), then check Step 5 display and diagnostic info.
+3.  If data is still missing in Step 5:
+    - Trace data flow from `wizardState.assets` in `WizardContext` to the props of `AssetCard` in Step 5.
+    - Verify the asset merging logic in `WizardContext.tsx` correctly prioritizes and includes `budget`, `rationale`, and `associatedInfluencerIds` from the `CampaignWizard.assets` JSON part of the data.
+
+---
