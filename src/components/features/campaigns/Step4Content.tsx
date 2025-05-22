@@ -151,6 +151,46 @@ function Step4Content() {
         logger.info(`Removing unsaved/temporary asset at index ${assetIndex} locally.`);
         removeAsset(assetIndex);
         toast.success(`Asset "${assetName || 'Untitled'}" removed locally.`);
+        // After local removal, save the new state of assets
+        const currentFormDataAfterLocalRemove = form.getValues(); // Renamed for clarity
+        const updatedAssetsAfterLocalRemove = currentFormDataAfterLocalRemove.assets.map(asset => ({
+          ...asset,
+          fieldId:
+            asset.fieldId ||
+            `field-${asset.id || Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+          rationale: asset.rationale || '',
+          budget: typeof asset.budget === 'number' ? asset.budget : null,
+          associatedInfluencerIds: Array.isArray(asset.associatedInfluencerIds)
+            ? asset.associatedInfluencerIds
+            : [],
+        }));
+        const payloadAfterLocalRemove: Partial<DraftCampaignData> = {
+          assets: updatedAssetsAfterLocalRemove,
+          // Re-evaluate completion based on remaining assets and overall form validity
+          step4Complete: updatedAssetsAfterLocalRemove.length > 0 && form.formState.isValid,
+          currentStep: 4,
+          guidelines: currentFormDataAfterLocalRemove.guidelines || null,
+          requirements: currentFormDataAfterLocalRemove.requirements || [],
+          notes: currentFormDataAfterLocalRemove.notes || null,
+        };
+        wizard
+          .saveProgress(payloadAfterLocalRemove)
+          .then(() => {
+            logger.info(
+              '[Step4Content handleDeleteAsset] Progress saved after local asset removal.'
+            );
+            // Ensure we stay on Step 4
+            if (wizard.campaignId) {
+              const targetUrl = `/campaigns/wizard/step-4?id=${wizard.campaignId}`;
+              router.push(targetUrl);
+            }
+          })
+          .catch(err => {
+            logger.error(
+              '[Step4Content handleDeleteAsset] Error saving progress after local asset removal:',
+              err
+            );
+          });
         return;
       }
 
@@ -178,6 +218,47 @@ function Step4Content() {
         // If successful, remove from the RHF field array
         removeAsset(assetIndex);
         showSuccessToast(`Asset "${assetName || 'Untitled'}" deleted successfully.`);
+        // After server deletion and local RHF removal, save the new state of assets
+        const currentFormDataAfterServerDelete = form.getValues(); // Renamed for clarity
+        const updatedAssetsAfterServerDelete = currentFormDataAfterServerDelete.assets.map(
+          asset => ({
+            ...asset,
+            fieldId:
+              asset.fieldId ||
+              `field-${asset.id || Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+            rationale: asset.rationale || '',
+            budget: typeof asset.budget === 'number' ? asset.budget : null,
+            associatedInfluencerIds: Array.isArray(asset.associatedInfluencerIds)
+              ? asset.associatedInfluencerIds
+              : [],
+          })
+        );
+        const payloadAfterServerDelete: Partial<DraftCampaignData> = {
+          assets: updatedAssetsAfterServerDelete,
+          step4Complete: updatedAssetsAfterServerDelete.length > 0 && form.formState.isValid, // Re-evaluate completion
+          currentStep: 4,
+          guidelines: currentFormDataAfterServerDelete.guidelines || null,
+          requirements: currentFormDataAfterServerDelete.requirements || [],
+          notes: currentFormDataAfterServerDelete.notes || null,
+        };
+        wizard
+          .saveProgress(payloadAfterServerDelete)
+          .then(() => {
+            logger.info(
+              '[Step4Content handleDeleteAsset] Progress saved after server asset deletion.'
+            );
+            // Ensure we stay on Step 4
+            if (wizard.campaignId) {
+              const targetUrl = `/campaigns/wizard/step-4?id=${wizard.campaignId}`;
+              router.push(targetUrl);
+            }
+          })
+          .catch(err => {
+            logger.error(
+              '[Step4Content handleDeleteAsset] Error saving progress after server asset deletion:',
+              err
+            );
+          });
       } catch (error: any) {
         logger.error(`Failed to delete asset ${assetId}:`, error);
         showErrorToast(error.message || 'Could not delete asset.');
@@ -700,7 +781,7 @@ function Step4Content() {
         `field-${asset.id || Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       // Ensure these fields are explicitly included for saving
       rationale: asset.rationale || '',
-      budget: typeof asset.budget === 'number' ? asset.budget : 0,
+      budget: typeof asset.budget === 'number' ? asset.budget : null,
       associatedInfluencerIds: Array.isArray(asset.associatedInfluencerIds)
         ? asset.associatedInfluencerIds
         : [],
@@ -801,7 +882,7 @@ function Step4Content() {
         `field-${asset.id || Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       // Ensure these fields are explicitly included for saving
       rationale: asset.rationale || '',
-      budget: typeof asset.budget === 'number' ? asset.budget : 0,
+      budget: typeof asset.budget === 'number' ? asset.budget : null,
       associatedInfluencerIds: Array.isArray(asset.associatedInfluencerIds)
         ? asset.associatedInfluencerIds
         : [],

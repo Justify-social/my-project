@@ -156,3 +156,55 @@ The primary hypothesis is that the polling mechanism in `Step4Content.tsx`, desi
 2.  **Refine Polling Trigger in `Step4Content.tsx`:** Make the `executePoll` function (within polling Effect 2) more defensive. Before calling `wizard.reloadCampaignData()`, it should re-verify against the _current form state_ (`form.getValues('assets')`) if any asset in its `processingAssetIdsInPoll` list is _still_ in a non-terminal processing state. If all are terminal, it should skip the reload, relying on Effect 3 to clear the poll list.
 3.  **Ensure Polling List (`processingAssetIdsInPoll`) is Accurately Cleaned:** Double-check Effect 3 in `Step4Content.tsx` to ensure it promptly and correctly removes assets that have reached a terminal state (`READY`, `ERROR`, etc.) or timed out from `processingAssetIdsInPoll`.
 4.  **Prop Stability for `AssetCardStep4`:** If `React.memo` (with the new `key`) isn't enough, investigate if the `asset` prop passed from `Step4Content.tsx` to `AssetCardStep4` is changing reference unnecessarily for 'READY' videos. This might require a custom comparison function for `React.memo` on `AssetCardStep4` or further refinement of the main sync `useEffect` in `Step4Content.tsx` to avoid unnecessary RHF updates for stable assets.
+
+---
+
+## Issue: Incorrect Redirect to Step 5 After Asset Deletion in Step 4
+
+**Date:** 2024-05-24
+
+**Observed Behavior:**
+When an asset is deleted from the list in Step 4 of the Campaign Wizard, the user is incorrectly redirected to Step 5. The desired behavior is for the user to remain on Step 4, allowing them to continue managing assets (e.g., re-adding videos).
+
+**Relevant Files & Components:**
+
+- **`src/components/features/campaigns/Step4Content.tsx`:** This component contains the `handleDeleteAsset` function, which is responsible for both calling the delete API and updating the local form state (removing the asset from the `useFieldArray`). The navigation logic (or lack thereof, leading to a default progression) after deletion likely resides here or in how the wizard context/navigation is structured post-action.
+- **`useWizard()` Context & `ProgressBarWizard`:** The wizard's navigation (`onNext`, `onBack`, `handleStepClick`) and how it determines the current/next step might be influenced by the state changes resulting from asset deletion.
+
+**Hypothesis for Incorrect Redirection:**
+
+1.  **State Update Triggering Navigation:** The removal of an asset from the `useFieldArray` in `Step4Content.tsx` might be causing a state update that the `ProgressBarWizard` or general wizard navigation logic interprets as a reason to move to the next step, especially if conditions for "completing" Step 4 are inadvertently met or re-evaluated.
+2.  **`saveProgress` Call After Deletion:** If `saveProgress` is called implicitly or explicitly after an asset deletion, and if the state of `step4Complete` is re-evaluated and set to true (perhaps because the "at least one asset" validation now passes if other assets remain, or fails in a way that doesn't block progression), it might trigger a move to Step 5.
+3.  **Default Fallback Navigation:** There might not be explicit navigation logic to "stay on Step 4" after deletion, and the wizard might default to progressing if no other action is specified and the step is considered "submittable."
+
+**SSOT Considerations for Navigation & Step Completion:**
+
+- **`CampaignWizard.currentStep` / `CampaignWizard.stepXComplete`:** These fields in the backend are the SSOT for the wizard's overall progress.
+- **Frontend Form Validity (`form.formState.isValid` in `Step4Content.tsx`):** This is the SSOT for whether the _current Step 4 form_ meets its own validation criteria.
+- **User Intent:** The user's intent after deleting an asset is likely to remain on Step 4 to continue editing or re-add assets, not to immediately proceed.
+
+**Update (Post-Investigation & Fix Attempt):**
+
+- **Action Taken (Budget Mapping in `Step4Content.tsx`):** Corrected the `budget` mapping in `onSubmitAndNavigate` and `handleSave` functions to use `null` for empty/undefined budgets, ensuring consistency with `AssetCardStep4`'s local save and `DraftAssetSchema`.
+- **Action Taken (Redirect After Delete in `Step4Content.tsx`):** Modified `handleDeleteAsset` to explicitly call `wizard.saveProgress()` after an asset is removed (both for local-only and server-backed deletions). This payload includes the updated asset list and a re-evaluated `step4Complete` status (e.g., `false` if no assets remain). An attempt to force staying on Step 4 using `router.push()` was also added after this save.
+- **Linter Fixes for `router.replace` (then `router.push`):** Corrected the syntax for `router.push(targetUrl)` calls within `handleDeleteAsset`.
+- **Outcome (Redirect):** User now correctly stays on Step 4 after asset deletion.
+- **New Observed Issue (Mux 404):** After deletion, a 404 error for the deleted Mux asset's playback ID appears in the console, although the UI correctly removes the asset card.
+- **New Observed Issue (Media Chrome):** A console warning `Media Chrome: No style sheet found on style tag of #shadow-root (open)` appears.
+
+**Next Steps for Investigation/Fixes (Console Errors on Step 4):**
+
+1.  **Mux 404 Error Post-Deletion:**
+
+    - **Cause:** Likely a race condition where `MuxPlayer` initiates a request for a playback ID just before its component is unmounted due to the asset being deleted from the state and Mux servers.
+    - **Robustness:** If the UI is correct (deleted asset card disappears), this console error might be a transient, low-priority issue that is hard to completely eliminate from the client-side without changes to `MuxPlayer` internals.
+    - **Further Checks:** Confirm no broken player UI remains. Consider if the perceived impact warrants deeper investigation into advanced player instance lifecycle management (if available via `MuxPlayer` API).
+
+2.  **Media Chrome Stylesheet Warning:**
+    - **Cause:** `media-chrome` (used by `MuxPlayer`) cannot find its expected stylesheet within its Shadow DOM.
+    - **Fix:**
+      - Review `@mux/mux-player-react` documentation for specific CSS import or Next.js/Turbopack setup instructions.
+      - Attempt importing Mux Player theme CSS (e.g., `@import '@mux/mux-player/themes/default.css';`) in a global stylesheet if not already present.
+      - Search for known issues/solutions related to `media-chrome` or `MuxPlayer` CSS with Next.js/Turbopack.
+
+---
