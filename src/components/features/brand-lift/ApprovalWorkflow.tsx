@@ -39,6 +39,7 @@ import {
 import CommentThread, { CommentData as DisplayCommentData } from './CommentThread'; // Use DisplayCommentData alias
 import StatusTag from './StatusTag';
 import { cn } from '@/lib/utils';
+import { SurveyQuestionPreviewList } from '@/components/features/brand-lift/SurveyQuestionPreviewList';
 
 interface ApprovalWorkflowProps {
   studyId: string;
@@ -309,27 +310,13 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({ studyId }) => {
           <CardContent>
             <h4 className="text-md font-semibold mb-2">Questions & Options (Read-Only)</h4>
             <div className="space-y-3 max-h-[600px] overflow-y-auto p-1 border rounded bg-slate-50">
-              {questions.length === 0 && (
+              {questions.length > 0 ? (
+                <SurveyQuestionPreviewList questions={questions} />
+              ) : (
                 <p className="text-muted-foreground p-4 text-center">
                   No questions in this survey.
                 </p>
               )}
-              {questions.map((q, index) => (
-                <Card key={q.id} className="p-3 bg-white">
-                  <p className="font-medium text-sm text-gray-800">
-                    {index + 1}. {q.text}
-                  </p>
-                  <ul className="list-disc pl-5 mt-1 text-xs text-gray-600 space-y-1">
-                    {q.options
-                      .sort((a, b) => a.order - b.order)
-                      .map(opt => (
-                        <li key={opt.id}>
-                          {opt.text} {opt.imageUrl ? '(image)' : ''}
-                        </li>
-                      ))}
-                  </ul>
-                </Card>
-              ))}
             </div>
           </CardContent>
         </Card>
