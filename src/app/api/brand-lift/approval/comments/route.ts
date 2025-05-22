@@ -34,25 +34,17 @@ const getCommentsQuerySchema = z.object({
 const notificationServiceInstance = new NotificationService();
 
 // Helper to verify study access for commenting/viewing comments
-async function verifyStudyAccessForComments(studyId: string, clerkUserId: string) {
-  const userRecord = await db.user.findUnique({
-    where: { clerkId: clerkUserId },
-    select: { id: true },
-  });
-  if (!userRecord) {
-    throw new NotFoundError('User not found for authorization.');
+async function verifyStudyAccessForComments(studyId: string, clerkUserId: string, userOrgId: string | null | undefined) {
+  if (!userOrgId) {
+    throw new ForbiddenError('User organization context is required to access study comments.');
   }
-  const internalUserId = userRecord.id;
 
   const study = await db.brandLiftStudy.findFirst({
     where: {
       id: studyId,
-      campaign: {
-        // Check access via campaign and user
-        userId: internalUserId,
-      },
+      orgId: userOrgId, // Allow access if study belongs to the user's org
     },
-    // Select campaignName for notifications, and campaign.userId for ownership checks
+    // Select campaignName for notifications, and campaign.userId for ownership checks (owner might still be useful for notifications)
     select: {
       id: true,
       status: true,
@@ -78,9 +70,12 @@ async function verifyStudyAccessForComments(studyId: string, clerkUserId: string
 // POST handler to add a new SurveyApprovalComment
 export const POST = async (req: NextRequest) => {
   try {
-    const { userId: clerkUserId } = await auth();
+    const { userId: clerkUserId, orgId: userOrgIdFromSession } = await auth();
     if (!clerkUserId)
       return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
+    if (!userOrgIdFromSession) {
+      throw new ForbiddenError('User organization context is required to post comments.');
+    }
 
     const { searchParams } = new URL(req.url);
     const studyId = searchParams.get('studyId');
@@ -88,7 +83,7 @@ export const POST = async (req: NextRequest) => {
       throw new BadRequestError('Valid Study ID is required as a query parameter.');
     }
 
-    const study = await verifyStudyAccessForComments(studyId, clerkUserId);
+    const study = await verifyStudyAccessForComments(studyId, clerkUserId, userOrgIdFromSession);
 
     const approvalStatus = await db.surveyApprovalStatus.upsert({
       where: { studyId: study.id },
@@ -196,8 +191,11 @@ export const POST = async (req: NextRequest) => {
 // GET handler to list SurveyApprovalComments for a study (and optionally a question)
 export const GET = async (req: NextRequest) => {
   try {
-    const { userId: clerkUserId } = await auth();
+    const { userId: clerkUserId, orgId: userOrgIdFromSession } = await auth();
     if (!clerkUserId) throw new UnauthenticatedError('Authentication required.');
+    if (!userOrgIdFromSession) {
+      throw new ForbiddenError('User organization context is required to view comments.');
+    }
 
     const { searchParams } = new URL(req.url);
     const queryParams = Object.fromEntries(searchParams.entries());
@@ -214,7 +212,7 @@ export const GET = async (req: NextRequest) => {
     const { studyId, questionId } = validation.data;
 
     // Verify study access first.
-    const verifiedStudy = await verifyStudyAccessForComments(studyId, clerkUserId);
+    const verifiedStudy = await verifyStudyAccessForComments(studyId, clerkUserId, userOrgIdFromSession);
 
     // Construct where clause for comments
     const whereClause: Prisma.SurveyApprovalCommentWhereInput = {
@@ -224,21 +222,43 @@ export const GET = async (req: NextRequest) => {
       whereClause.questionId = questionId;
     }
 
+    // Step 1: Fetch comments without trying to include author directly
     const comments = await db.surveyApprovalComment.findMany({
       where: whereClause,
       orderBy: {
-        createdAt: 'asc', // Show oldest comments first
+        createdAt: 'asc',
       },
-      // Include author details if User model is linked and you want to send them
-      // include: { author: { select: { name: true, avatarUrl: true } } }
+      // Ensure no 'include: { author: ... }' is here
     });
 
-    logger.info(`Fetched ${comments.length} comments`, {
+    // Step 2: Fetch user details for all unique authorIds
+    const authorIds = [...new Set(comments.map(comment => comment.authorId))];
+    const authors = await db.user.findMany({
+      where: {
+        clerkId: { in: authorIds },
+      },
+      select: {
+        clerkId: true,
+        name: true,
+        // avatarUrl: true, // If you add avatarUrl to your User model
+      },
+    });
+
+    const authorsMap = new Map(authors.map(author => [author.clerkId, author]));
+
+    // Step 3: Map author details into the comments
+    const commentsWithAuthorDetails = comments.map(comment => ({
+      ...comment,
+      authorName: authorsMap.get(comment.authorId)?.name || null,
+      // authorAvatarUrl: authorsMap.get(comment.authorId)?.avatarUrl || null,
+    }));
+
+    logger.info(`Fetched ${commentsWithAuthorDetails.length} comments`, {
       studyId,
       questionId,
       userId: clerkUserId,
     });
-    return NextResponse.json(comments);
+    return NextResponse.json(commentsWithAuthorDetails);
   } catch (error: any) {
     return handleApiError(error, req);
   }

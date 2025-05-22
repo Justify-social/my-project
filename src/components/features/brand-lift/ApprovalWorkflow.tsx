@@ -40,6 +40,7 @@ import CommentThread, { CommentData as DisplayCommentData } from './CommentThrea
 import StatusTag from './StatusTag';
 import { cn } from '@/lib/utils';
 import { SurveyQuestionPreviewList } from '@/components/features/brand-lift/SurveyQuestionPreviewList';
+import { showSuccessToast, showErrorToast } from '@/components/ui/toast';
 
 interface ApprovalWorkflowProps {
   studyId: string;
@@ -55,6 +56,8 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({ studyId }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({}); // For button loading states
+
+  const router = useRouter();
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -229,26 +232,23 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({ studyId }) => {
       const response = await fetch(`/api/brand-lift/surveys/${studyId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: BrandLiftStudyStatus.COLLECTING }), // Main study status
+        body: JSON.stringify({ status: BrandLiftStudyStatus.COLLECTING }),
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to update study status to COLLECTING.');
+        throw new Error(errorData.error || 'Failed to update study status.');
       }
-      const updatedStudy = await response.json();
-      setStudyData(updatedStudy); // Update local study data with new status
-      // Optionally, update approvalStatus if backend reflects this change, or refetch
-      // For now, main study status update is key.
-      logger.info(`Study ${studyId} status updated to COLLECTING.`);
-      // TODO: Show success toast: "Study submitted for data collection!"
-      // No navigation needed from here as per current MVP flow, page might show new status.
+      logger.info(`Study ${studyId} successfully submitted for processing (status set to COLLECTING).`);
+      showSuccessToast('Study submitted! Our team will process the report.');
+      router.push(`/brand-lift/study-submitted/${studyId}`);
+
     } catch (error: unknown) {
       logger.error('Error submitting study for data collection:', {
         studyId,
         error: (error as Error)?.message,
       });
-      setError((error as Error)?.message || 'Failed to submit for data collection.');
+      showErrorToast((error as Error)?.message || 'Failed to submit study.');
     } finally {
       setActionLoading(prev => ({ ...prev, [actionKey]: false }));
     }

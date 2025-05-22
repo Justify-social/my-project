@@ -36,23 +36,17 @@ type EnrichedStudyState = Prisma.BrandLiftStudyGetPayload<{
 
 async function verifyStudyForApprovalInteraction(
   studyId: string,
-  clerkUserId: string
+  clerkUserId: string,
+  userOrgId: string | null | undefined
 ): Promise<EnrichedStudyState> {
-  const userRecord = await db.user.findUnique({
-    where: { clerkId: clerkUserId },
-    select: { id: true },
-  });
-  if (!userRecord) {
-    throw new NotFoundError('User not found for authorization.');
+  if (!userOrgId) {
+    throw new ForbiddenError('User organization context is required to interact with study approval status.');
   }
-  const internalUserId = userRecord.id;
 
   const study = await db.brandLiftStudy.findFirst({
     where: {
       id: studyId,
-      campaign: {
-        userId: internalUserId,
-      },
+      orgId: userOrgId,
     },
     select: {
       id: true,
@@ -81,9 +75,12 @@ async function verifyStudyForApprovalInteraction(
 
 export const GET = async (req: NextRequest) => {
   try {
-    const { userId: clerkUserId } = await auth();
+    const { userId: clerkUserId, orgId: userOrgIdFromSession } = await auth();
     if (!clerkUserId)
       return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
+    if (!userOrgIdFromSession) {
+      throw new ForbiddenError('User organization context is required to view approval status.');
+    }
 
     const { searchParams } = new URL(req.url);
     const studyIdQueryParam = searchParams.get('studyId');
@@ -98,7 +95,7 @@ export const GET = async (req: NextRequest) => {
     }
     const { studyId } = parsedQuery.data;
 
-    await verifyStudyForApprovalInteraction(studyId, clerkUserId);
+    await verifyStudyForApprovalInteraction(studyId, clerkUserId, userOrgIdFromSession);
 
     const approvalStatus = await db.surveyApprovalStatus.findUnique({
       where: { studyId: studyId },
@@ -118,9 +115,12 @@ export const GET = async (req: NextRequest) => {
 
 export const PUT = async (req: NextRequest) => {
   try {
-    const { userId: clerkUserId } = await auth();
+    const { userId: clerkUserId, orgId: userOrgIdFromSession } = await auth();
     if (!clerkUserId)
       return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
+    if (!userOrgIdFromSession) {
+      throw new ForbiddenError('User organization context is required to update approval status.');
+    }
 
     const { searchParams } = new URL(req.url);
     const studyId = searchParams.get('studyId');
@@ -131,7 +131,8 @@ export const PUT = async (req: NextRequest) => {
     // verifyStudyForApprovalInteraction is called, which now uses the corrected allowed statuses
     const currentStudyState: EnrichedStudyState = await verifyStudyForApprovalInteraction(
       studyId,
-      clerkUserId
+      clerkUserId,
+      userOrgIdFromSession
     );
 
     const body = await req.json();
@@ -232,10 +233,10 @@ export const PUT = async (req: NextRequest) => {
     });
     const requesterDetails: UserDetails | null = requesterDetailsFull
       ? {
-          id: requesterDetailsFull.id,
-          email: requesterDetailsFull.email,
-          name: requesterDetailsFull.name ?? undefined,
-        }
+        id: requesterDetailsFull.id,
+        email: requesterDetailsFull.email,
+        name: requesterDetailsFull.name ?? undefined,
+      }
       : null;
 
     const studyDetailsForEmail: EmailStudyDetails = {
