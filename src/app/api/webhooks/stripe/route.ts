@@ -1,6 +1,7 @@
 import Stripe from 'stripe';
 // import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 // import { stripe } from '@/lib/stripe'; // Comment out unused import
 import { prisma } from '@/lib/prisma';
 // import { Analytics as _Analytics } from '@/lib/analytics/analytics'; // _Analytics is unused by active code
@@ -84,9 +85,9 @@ export async function POST(request: Request) {
       },
     });
     console.log(`Idempotency check passed: Recorded event ${event.id}`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Check if error is because the record already exists (unique constraint violation)
-    if (error.code === 'P2002') {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       // Prisma unique constraint violation code
       console.log(`Idempotency check failed: Event ${event.id} already processed.`);
       // Event already handled, return 200 OK to acknowledge receipt

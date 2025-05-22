@@ -3,6 +3,7 @@ import db from '@/lib/db'; // Use default import
 import { logger } from '@/utils/logger';
 import { z } from 'zod';
 import { auth } from '@clerk/nextjs/server'; // Import auth
+import { Prisma } from '@prisma/client';
 
 // Optional: Add dynamic export if needed, though GET requests are often dynamic by default
 // export const dynamic = 'force-dynamic';
@@ -60,7 +61,7 @@ export async function GET(request: NextRequest) {
 
   // 4. Perform the unique check scoped to the user
   try {
-    const whereClause: any = {
+    const whereClause: Prisma.CampaignWizardWhereInput = {
       userId: internalUserId, // Filter by the correct internal user ID
       name: {
         equals: validationResult.data,

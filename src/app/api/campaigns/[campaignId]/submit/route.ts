@@ -21,7 +21,6 @@ import {
   CreativeAssetType as PrismaCreativeAssetType,
   SubmissionStatus as PrismaSubmissionStatus,
   Status as PrismaCampaignStatus,
-  CampaignWizard,
 } from '@prisma/client';
 
 import { prisma } from '@/lib/db';

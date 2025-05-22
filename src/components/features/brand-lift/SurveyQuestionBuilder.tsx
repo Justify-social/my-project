@@ -786,7 +786,7 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
       currentSearchTerm?: string;
     } | null>(null);
 
-    // New states for progress modal
+    // New states for progress
     const [currentProgressStepIdx, setCurrentProgressStepIdx] = useState(0);
     const [progress, setProgress] = useState(0);
     const [completedSteps, setCompletedSteps] = useState<boolean[]>(
@@ -954,7 +954,7 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
         setError(err.message);
       }
       setIsLoading(false);
-    }, [studyId, isAuthLoaded, isSignedIn, activeOrgId, hasInitializedQuestions, saveQuestion]);
+    }, [studyId, isAuthLoaded, isSignedIn, activeOrgId]);
 
     useEffect(() => {
       fetchData();
@@ -971,15 +971,16 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
             ? 'Loading data...'
             : undefined;
 
-    const updateQuestionProperty = (
-      questionIdOrTempId: string,
-      data: Partial<SurveyQuestionData>
-    ) => {
-      const questionToSave = questions.find(
-        q => q.id === questionIdOrTempId || q.tempId === questionIdOrTempId
-      );
-      if (questionToSave) saveQuestion({ ...questionToSave, ...data });
-    };
+    const updateQuestionProperty = useCallback(
+      (questionIdOrTempId: string, data: Partial<SurveyQuestionData>) => {
+        const questionToSave = questions.find(
+          q => q.id === questionIdOrTempId || q.tempId === questionIdOrTempId
+        );
+        if (questionToSave) saveQuestion({ ...questionToSave, ...data });
+      },
+      [questions, saveQuestion]
+    );
+
     const handleUpdateQuestionText = (id: string, text: string) =>
       updateQuestionProperty(id, { text });
     const handleUpdateQuestionType = (id: string, type: SurveyQuestionType) =>
@@ -1080,45 +1081,48 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
       }
     };
 
-    const updateOptionProperty = (
-      questionIdOrTempId: string,
-      optionIdOrTempId: string,
-      data: Partial<TypeSurveyOptionData>
-    ) => {
-      console.log('[GIF_SELECT] updateOptionProperty called', {
-        questionIdOrTempId,
-        optionIdOrTempId,
-        data,
-      });
-      let questionToUpdate: SurveyQuestionData | undefined;
-      setQuestions(prevQuestions => {
-        const newQuestions = prevQuestions.map(q => {
-          if (q.id === questionIdOrTempId || q.tempId === questionIdOrTempId) {
-            const updatedOptions = q.options.map(opt =>
-              opt.id === optionIdOrTempId || opt.tempId === optionIdOrTempId
-                ? { ...opt, ...data }
-                : opt
-            );
-            questionToUpdate = {
-              ...q,
-              options: updatedOptions,
-            };
-            return questionToUpdate;
-          }
-          return q;
+    const updateOptionProperty = useCallback(
+      (
+        questionIdOrTempId: string,
+        optionIdOrTempId: string,
+        data: Partial<TypeSurveyOptionData>
+      ) => {
+        console.log('[GIF_SELECT] updateOptionProperty called', {
+          questionIdOrTempId,
+          optionIdOrTempId,
+          data,
         });
-        // Ensure a new array reference is returned if no changes occurred,
-        // though `map` typically does this. This is for extra certainty.
-        return Object.is(newQuestions, prevQuestions) ? [...newQuestions] : newQuestions;
-      });
+        let questionToUpdate: SurveyQuestionData | undefined;
+        setQuestions(prevQuestions => {
+          const newQuestions = prevQuestions.map(q => {
+            if (q.id === questionIdOrTempId || q.tempId === questionIdOrTempId) {
+              const updatedOptions = q.options.map(opt =>
+                opt.id === optionIdOrTempId || opt.tempId === optionIdOrTempId
+                  ? { ...opt, ...data }
+                  : opt
+              );
+              questionToUpdate = {
+                ...q,
+                options: updatedOptions,
+              };
+              return questionToUpdate;
+            }
+            return q;
+          });
+          // Ensure a new array reference is returned if no changes occurred,
+          // though `map` typically does this. This is for extra certainty.
+          return Object.is(newQuestions, prevQuestions) ? [...newQuestions] : newQuestions;
+        });
 
-      if (questionToUpdate) {
-        // Clone questionToUpdate to ensure saveQuestion receives a distinct object
-        // if there are any concerns about its modification or shared references,
-        // though current logic seems to handle it by spreading in saveQuestion.
-        saveQuestion({ ...questionToUpdate });
-      }
-    };
+        if (questionToUpdate) {
+          // Clone questionToUpdate to ensure saveQuestion receives a distinct object
+          // if there are any concerns about its modification or shared references,
+          // though current logic seems to handle it by spreading in saveQuestion.
+          saveQuestion({ ...questionToUpdate });
+        }
+      },
+      [saveQuestion]
+    );
 
     const handleUpdateOptionText = (qId: string, oId: string, text: string) =>
       updateOptionProperty(qId, oId, { text });

@@ -9,17 +9,15 @@ import { prisma } from '@/lib/prisma';
 import {} from // BrandLiftStudy as PrismaBrandLiftStudy, // Removed unused alias
 // CampaignWizardSubmission as PrismaCampaignWizardSubmission, // Not directly used if studiesFromDb has correct includes
 // CampaignWizard as PrismaCampaignWizard, // Not directly used
-// User as PrismaUser, // Not directly used
 '@prisma/client';
 import { logger } from '@/lib/logger';
 import { auth } from '@clerk/nextjs/server';
-import { BrandLiftStudy as PrismaBrandLiftStudyForType } from '@prisma/client'; // Keep for type if needed, alias if original name conflicts
-import { addOrUpdateBrandLiftStudyInAlgolia, deleteBrandLiftStudyFromAlgolia } from '@/lib/algolia';
+// User as PrismaUser, // Not directly used
 
 export async function GET(_request: NextRequest) {
   try {
     // Optional: Add authentication/authorization here
-    const { userId, orgId, has } = await auth();
+    const { has } = await auth();
     if (!has({ permission: 'org:admin' })) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
@@ -103,21 +101,5 @@ export async function GET(_request: NextRequest) {
       },
       { status: 500 }
     );
-  }
-}
-
-export async function POST() {
-  try {
-    const { userId } = await auth();
-    logger.info('Error during Algolia batch operation, individual fallbacks might have occurred.');
-    // Potentially return a different status or error details if critical
-  } catch (error: unknown) {
-    logger.error('Critical error during Algolia batch indexing operation for BrandLiftStudy', {
-      error: (error as Error).message,
-    });
-    return NextResponse.json({
-      success: true,
-      message: 'Brand Lift studies indexing process completed.',
-    });
   }
 }

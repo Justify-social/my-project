@@ -3,7 +3,6 @@
 'use client'; // This layout needs hooks
 
 import React from 'react';
-import { usePathname } from 'next/navigation';
 import { WizardProvider } from '@/components/features/campaigns/WizardContext';
 // AutosaveIndicator is no longer needed here as the status display is removed
 // import { AutosaveIndicator, AutosaveStatus } from '@/components/ui/autosave-indicator';
@@ -70,7 +69,6 @@ function WizardStatusIndicator() {
 export default function WizardLayout({ children }: { children: React.ReactNode }) {
   // This layout assumes it wraps individual step pages.
   // It provides the WizardContext.
-  const pathname = usePathname();
 
   return (
     // Provide Wizard context to all wizard steps

@@ -5,20 +5,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { useUser, useAuth } from '@clerk/nextjs'; // Import useAuth
-import { toast } from 'react-hot-toast';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 // Removed Tabs imports as settings layout handles tabs
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon/icon';
 import Link from 'next/link'; // Import Link
 import { Skeleton } from '@/components/ui/skeleton'; // Corrected import name
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog'; // Added Dialog components
 import {
   Table,
   TableBody,
@@ -27,29 +19,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'; // Added Table components
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'; // Added Select
 import { LoadingSpinner } from '@/components/ui/loading-spinner'; // Added LoadingSpinner
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query'; // Removed useQuery, useMutation
 
 // Define UserData structure (matches old page)
-interface UserData {
-  id: string;
-  name: string;
-  email: string;
-  companyId: string;
-  role: string;
-  lastLogin: string;
-  createdAt?: string;
-  updatedAt?: string;
-  isActive?: boolean;
-}
 
 // --- Skeleton ---
 const TeamPageSkeleton = () => (

@@ -2,10 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { WizardSkeleton } from '@/components/ui/loading-skeleton';
 import { Icon } from '@/components/ui/icon/icon';
 import { Button } from '@/components/ui/button';
-import { motion } from 'framer-motion';
 import { logger } from '@/lib/logger';
 import { Skeleton } from '@/components/ui/skeleton';
 

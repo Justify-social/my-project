@@ -11,24 +11,13 @@ import {
   // Feature, // Unused
   Status,
   CampaignWizardSubmission,
-  CampaignWizard,
-  // PrismaUser, // Removed PrismaUser
 } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { dbLogger, DbOperation } from '@/lib/data-mapping/db-logger';
 import { v4 as uuidv4 } from 'uuid';
 // import { withValidation, tryCatch } from '@/lib/middleware/api'; // tryCatch unused, withValidation used later
-import { withValidation } from '@/lib/middleware/api';
 import {
-  ContactSchema,
-  BudgetSchema,
   InfluencerSchema,
-  KPIEnum,
-  FeatureEnum,
-  StatusEnum,
-  DraftAssetSchema,
-  LocationSchema,
-  DemographicsSchema,
   DraftCampaignDataBaseSchema,
 } from '@/components/features/campaigns/types';
 // Need to import the *base* object schema for extending
@@ -38,9 +27,8 @@ import {
 // import { handleDbError, validateRequest } from '@/lib/middleware/api'; // Unused
 import logger from '@/lib/logger'; // Import shared logger
 import { handleApiError } from '@/lib/apiErrorHandler'; // Import shared error handler
-import { BadRequestError, ForbiddenError, UnauthenticatedError, NotFoundError } from '@/lib/errors'; // Import custom errors
+import { BadRequestError, UnauthenticatedError, NotFoundError } from '@/lib/errors'; // Import custom errors
 import { auth } from '@clerk/nextjs/server'; // Assuming Clerk setup
-import { tryCatch } from '@/lib/middleware/api/util-middleware'; // Corrected path and function name
 import { addOrUpdateCampaignInAlgolia } from '@/lib/algolia'; // Import Algolia utility
 import { EnumTransformers } from '@/utils/enum-transformers';
 

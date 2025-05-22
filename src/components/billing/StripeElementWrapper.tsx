@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   loadStripe,
-  Appearance,
   StripeElementsOptions,
   SetupIntentResult,
   SetupIntent,

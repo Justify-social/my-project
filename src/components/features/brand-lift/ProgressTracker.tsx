@@ -11,9 +11,6 @@ import { Progress } from '@/components/ui/progress'; // Shadcn Progress componen
 import StatusTag from './StatusTag'; // Corrected import path
 import { BrandLiftStudyStatus } from '@prisma/client'; // Import correct enum
 import logger from '@/lib/logger';
-import { handleApiError } from '@/lib/apiErrorHandler';
-import fetcher from '@/lib/fetcher'; // Use default import
-import useSWR from 'swr';
 
 interface ProgressData {
   studyId: string;
@@ -112,7 +109,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ studyId }) => {
           <CardTitle>Study Progress</CardTitle>
           {progressData?.studyStatus && (
             <CardDescription>
-              Status: <StatusTag status={studyStatus} type="study" />
+              Status: <StatusTag status={studyStatus} />
             </CardDescription>
           )}
         </div>
@@ -134,8 +131,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ studyId }) => {
           </p>
           {cintLiveProgress && (
             <div className="text-sm text-muted-foreground mt-2">
-              Cint Status:{' '}
-              <StatusTag status={cintLiveProgress.status.toUpperCase() as any} type="study" /> |
+              Cint Status: <StatusTag status={cintLiveProgress.status.toUpperCase() as any} /> |
               Prescreens: {cintLiveProgress.currentPrescreens} | Median IR:{' '}
               {cintLiveProgress.medianIR?.toFixed(2)} | Median LOI: ~
               {Math.round((cintLiveProgress.medianLOISeconds || 0) / 60)} min

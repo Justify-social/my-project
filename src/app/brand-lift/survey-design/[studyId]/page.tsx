@@ -9,7 +9,6 @@ import logger from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon/icon';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { IconButtonAction } from '@/components/ui/button-icon-action';
 import { BrandLiftStudyData } from '@/types/brand-lift';
 import { Skeleton } from '@/components/ui/skeleton';
 import BrandLiftPageSubtitle from '@/components/features/brand-lift/BrandLiftPageSubtitle';

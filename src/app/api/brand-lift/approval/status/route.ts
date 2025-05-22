@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@clerk/nextjs/server';
-import { Prisma, BrandLiftStudyStatus, SurveyOverallApprovalStatus, User } from '@prisma/client';
+import { Prisma, BrandLiftStudyStatus, SurveyOverallApprovalStatus } from '@prisma/client';
 
 import db from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { handleApiError } from '@/lib/apiErrorHandler';
-import { BadRequestError, ForbiddenError, NotFoundError, UnauthenticatedError } from '@/lib/errors';
+import { BadRequestError, ForbiddenError, NotFoundError } from '@/lib/errors';
 import {
   NotificationService,
   UserDetails,
@@ -262,10 +262,10 @@ export const PUT = async (req: NextRequest) => {
             requesterDetails
           );
           logger.info('"Approval Requested" notification sent', { studyId });
-        } catch (emailError: any) {
+        } catch (emailError: unknown) {
           logger.error('Failed to send "Approval Requested" email', {
             studyId,
-            error: emailError.message,
+            error: emailError instanceof Error ? emailError.message : String(emailError),
           });
         }
       }
@@ -288,10 +288,10 @@ export const PUT = async (req: NextRequest) => {
           logger.info(`"Study Status Change (${newApprovalStatusEnumValue})" notification sent`, {
             studyId,
           });
-        } catch (emailError: any) {
+        } catch (emailError: unknown) {
           logger.error('Failed to send "Study Status Change" email', {
             studyId,
-            error: emailError.message,
+            error: emailError instanceof Error ? emailError.message : String(emailError),
           });
         }
       }

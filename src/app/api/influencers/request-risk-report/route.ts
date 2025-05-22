@@ -99,7 +99,20 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
     // Check if the error object has a status code, default to 500 if not
-    const status = (error as any).response?.status || (error as any).status || 500;
+    let status = 500;
+    if (typeof error === 'object' && error !== null) {
+      if (
+        'response' in error &&
+        typeof (error as any).response === 'object' &&
+        (error as any).response !== null &&
+        'status' in (error as any).response &&
+        typeof (error as any).response.status === 'number'
+      ) {
+        status = (error as any).response.status;
+      } else if ('status' in error && typeof (error as any).status === 'number') {
+        status = (error as any).status;
+      }
+    }
     logger.error('[API /request-risk-report] Unexpected error:', error);
     return NextResponse.json({ success: false, error: errorMessage }, { status: status });
   }

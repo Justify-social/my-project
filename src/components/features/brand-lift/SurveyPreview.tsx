@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon/icon';
 import { SurveyQuestionData, SurveyOptionData } from '@/types/brand-lift'; // Assuming type definitions
 import logger from '@/lib/logger';
+import Image from 'next/image'; // Add import for Next/Image
 
 interface SurveyPreviewProps {
   studyId: string;
@@ -81,9 +82,11 @@ const SurveyPreview: React.FC<SurveyPreviewProps> = ({ studyId }) => {
               <label htmlFor={`opt-${opt.id || opt.tempId}`} className="text-sm text-gray-700">
                 {opt.text}
                 {opt.imageUrl && (
-                  <img
+                  <Image
                     src={opt.imageUrl}
                     alt={opt.text}
+                    width={40}
+                    height={40}
                     className="ml-2 h-10 w-10 object-contain inline-block"
                   />
                 )}

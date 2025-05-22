@@ -16,6 +16,7 @@ import { Button } from './button';
 import { Input } from '@/components/ui/input';
 import { IconButtonAction } from '@/components/ui/button-icon-action';
 import { Textarea } from '@/components/ui/textarea';
+import Image from 'next/image';
 
 export interface GifCardProps {
   /** URL of the GIF */
@@ -93,9 +94,11 @@ export function GifCard({
       <CardContent className="p-0 relative aspect-square flex-grow flex items-center justify-center bg-slate-50 group overflow-hidden">
         {gifUrl ? (
           <>
-            <img
+            <Image
               src={gifUrl}
               alt={altText || optionText}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className="object-contain w-full h-full"
             />
             {onSearchClick && !disabled && (

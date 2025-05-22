@@ -6,6 +6,7 @@ import { TikTokHeader } from './TikTokHeader';
 import { TikTokSidebarActions } from './TikTokSidebarActions';
 import { TikTokFooterInfo } from './TikTokFooterInfo';
 import { TikTokBottomNav } from './TikTokBottomNav';
+import Image from 'next/image';
 // TODO: Import atomic sub-components once created, e.g.:
 // import TikTokHeader from './TikTokHeader'; // Assuming sub-components in the same folder or ./tiktok/
 // import TikTokSidebarActions from './TikTokSidebarActions';
@@ -170,11 +171,12 @@ const TikTokScreenContent: React.FC<TikTokScreenContentProps> = ({
             }}
           />
         ) : media.type === 'image' && media.imageUrl ? (
-          <img
+          <Image
             src={media.imageUrl}
             alt={media.altText || caption || 'Creative'}
+            fill
             className="w-full h-full object-cover"
-            style={{ aspectRatio: '9/16' }}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">

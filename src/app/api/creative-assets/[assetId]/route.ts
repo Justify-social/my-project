@@ -105,18 +105,23 @@ export async function DELETE(
         logger.info(`Attempting to delete Mux asset: ${creativeAsset.muxAssetId}`);
         await muxClient.video.assets.delete(creativeAsset.muxAssetId);
         logger.info(`Successfully deleted Mux asset: ${creativeAsset.muxAssetId}`);
-      } catch (muxError: any) {
+      } catch (muxError: unknown) {
         // Log Mux error but proceed to delete from DB.
         // If Mux asset not found (404), it might have been deleted already or never fully processed.
-        if (muxError?.type === 'not_found') {
+        if (
+          typeof muxError === 'object' &&
+          muxError !== null &&
+          'type' in muxError &&
+          (muxError as any).type === 'not_found'
+        ) {
           logger.warn(
             `Mux asset ${creativeAsset.muxAssetId} not found on Mux. Proceeding with DB deletion.`
           );
         } else {
-          logger.error(
-            `Failed to delete Mux asset ${creativeAsset.muxAssetId}: ${muxError.message || muxError.toString()}`,
-            { error: muxError }
-          );
+          const message = muxError instanceof Error ? muxError.message : String(muxError);
+          logger.error(`Failed to delete Mux asset ${creativeAsset.muxAssetId}: ${message}`, {
+            error: muxError,
+          });
           // Depending on policy, you might choose to not delete from DB if Mux deletion fails critically.
           // For now, we'll proceed.
         }
@@ -137,11 +142,9 @@ export async function DELETE(
       { success: true, message: 'Creative asset deleted successfully.' },
       { status: 200 }
     );
-  } catch (error: any) {
-    logger.error(
-      `DELETE /api/creative-assets/${assetId} - Error: ${error.message || error.toString()}`,
-      { error }
-    );
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    logger.error(`DELETE /api/creative-assets/${assetId} - Error: ${message}`, { error });
     if (error instanceof UnauthenticatedError) {
       return NextResponse.json({ success: false, error: error.message }, { status: 401 });
     } else if (error instanceof NotFoundError) {

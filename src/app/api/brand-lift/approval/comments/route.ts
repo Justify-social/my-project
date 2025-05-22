@@ -172,11 +172,11 @@ export const POST = async (req: NextRequest) => {
           { studyId, commenterId: clerkUserId, ownerId: studyOwnerInternalId }
         );
       }
-    } catch (emailError: any) {
+    } catch (emailError: unknown) {
       logger.error('Failed to send new comment notification', {
         studyId,
         commentId: newComment.id,
-        error: emailError.message,
+        error: emailError instanceof Error ? emailError.message : String(emailError),
       });
     }
     // --- End Notification Trigger ---

@@ -130,7 +130,7 @@ function Step4Content() {
       );
       toast.success(`Video "${result.fileName}" is processing with Mux.`);
     },
-    [appendAsset]
+    [appendAsset, form]
   );
 
   // Handle upload errors (optional, FileUploader shows toast)
@@ -264,7 +264,7 @@ function Step4Content() {
         showErrorToast(error.message || 'Could not delete asset.');
       }
     },
-    [removeAsset]
+    [removeAsset, form, router, wizard]
   );
 
   // Main sync effect from wizard context to RHF form state - fix dependency array
@@ -497,7 +497,7 @@ function Step4Content() {
         '[Step4Content MAIN SYNC useEffect] Full asset reset deemed necessary but form is dirty. New assets from context may not appear, and existing form edits are preserved over context structural changes.'
       );
     }
-  }, [wizard.wizardState, wizard.campaignId, wizard.isLoading]);
+  }, [wizard.wizardState, wizard.campaignId, wizard.isLoading, form]);
 
   // ++ ROBUST POLLING LOGIC FOR PROCESSING ASSETS ++
   const [processingAssetIdsInPoll, setProcessingAssetIdsInPoll] = React.useState<
@@ -655,7 +655,7 @@ function Step4Content() {
         pollingIntervalRef.current = null;
       }
     };
-  }, [processingAssetIdsInPoll.length, wizard.isLoading, wizard.reloadCampaignData]);
+  }, [processingAssetIdsInPoll.length, wizard.isLoading, wizard.reloadCampaignData, form]);
 
   // Effect 3: Check RHF FORM state for assets that are done processing and remove from poll list
   useEffect(() => {

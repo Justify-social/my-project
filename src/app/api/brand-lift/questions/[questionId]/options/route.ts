@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@clerk/nextjs/server';
-import { Prisma, BrandLiftStudyStatus } from '@prisma/client';
+import { BrandLiftStudyStatus } from '@prisma/client';
 
 import db from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { handleApiError } from '@/lib/apiErrorHandler';
 import { BadRequestError, ForbiddenError, NotFoundError, UnauthenticatedError } from '@/lib/errors';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 // Zod schema for creating a SurveyOption (matches schema in options/[optionId]/route.ts for create)
 const createOptionSchema = z.object({

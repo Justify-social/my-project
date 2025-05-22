@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
-import { handleApiError } from '@/lib/apiErrorHandler';
-import { UnauthenticatedError, ForbiddenError } from '@/lib/errors';
+import { UnauthenticatedError } from '@/lib/errors';
 import { Status } from '@prisma/client';
 import { auth } from '@clerk/nextjs/server'; // Import auth
-import { CampaignWizardSubmission, SubmissionStatus } from '@prisma/client';
 
 export async function GET() {
   try {

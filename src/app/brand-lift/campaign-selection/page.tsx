@@ -33,7 +33,6 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 // Define the expected data structure for a brand lift study item
 interface BrandLiftStudyListItem {
@@ -113,7 +112,7 @@ const CampaignSelectionPage: React.FC = () => {
         month: 'short',
         day: 'numeric',
       });
-    } catch (e) {
+    } catch {
       logger.warn('Invalid date string for formatDate:', { dateString });
       return 'Invalid Date';
     }

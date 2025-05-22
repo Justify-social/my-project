@@ -11,7 +11,7 @@ const RESEND_WEBHOOK_SECRET = process.env.RESEND_WEBHOOK_SECRET;
 // For webhook verification, usually you use a method from the imported Resend object/class directly.
 
 function handleErrorResponse(error: unknown, type: string, res: typeof NextResponse) {
-  let errorData: any = 'Unknown error'; // Default error data
+  let errorData: string | unknown = 'Unknown error'; // Default error data, changed type
   let statusCode = 500;
 
   if (error instanceof Error) {
@@ -20,16 +20,20 @@ function handleErrorResponse(error: unknown, type: string, res: typeof NextRespo
       errorMessage: error.message,
     });
     errorData = error.message;
-    if ((error as any).code === 'ENOTFOUND' || (error as any).code === 'ECONNREFUSED') {
-      statusCode = 503; // Service Unavailable for network errors
+    // Check for code property more safely
+    if (typeof error === 'object' && error !== null && 'code' in error) {
+      const errorCode = (error as { code: unknown }).code;
+      if (errorCode === 'ENOTFOUND' || errorCode === 'ECONNREFUSED') {
+        statusCode = 503; // Service Unavailable for network errors
+      }
     }
   } else if (typeof error === 'object' && error !== null) {
     // For Zod-like errors or other structured errors
     if ('errors' in error) {
-      errorData = (error as { errors: any }).errors;
+      errorData = (error as { errors: unknown }).errors;
       statusCode = 400; // Bad Request for validation errors
     } else if ('message' in error) {
-      errorData = (error as { message: any }).message;
+      errorData = (error as { message: unknown }).message;
     } else {
       errorData = error; // Fallback to the error object itself if no message/errors field
     }
@@ -40,7 +44,10 @@ function handleErrorResponse(error: unknown, type: string, res: typeof NextRespo
     logger.error(`Resend webhook primitive error (${type})`, { errorData });
   }
 
-  return res.json({ error: errorData, type }, { status: statusCode });
+  return res.json(
+    { error: typeof errorData === 'string' ? errorData : JSON.stringify(errorData), type },
+    { status: statusCode }
+  );
 }
 
 export async function POST(request: Request) {
@@ -76,11 +83,12 @@ export async function POST(request: Request) {
     }) as Record<string, any>; // Assert type after verification
 
     logger.info('[Webhook Resend] Signature verified successfully.');
-  } catch (err: any) {
-    logger.error('[Webhook Resend] Error during signature verification:', err.message);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    logger.error('[Webhook Resend] Error during signature verification:', message);
     // Ensure specific error message for invalid signature
     return NextResponse.json(
-      { error: `Webhook signature verification failed: ${err.message}` },
+      { error: `Webhook signature verification failed: ${message}` },
       { status: 400 }
     );
   }

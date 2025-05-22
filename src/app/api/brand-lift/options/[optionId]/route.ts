@@ -12,7 +12,6 @@ import {
   ForbiddenError,
   NotFoundError,
   UnauthenticatedError,
-  DatabaseError,
   ZodValidationError,
 } from '@/lib/errors';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
@@ -77,12 +76,11 @@ async function verifyOptionAccess(optionId: string, clerkUserId: string) {
 }
 
 // PUT handler - Restoring context parameter
-export async function PUT(req: NextRequest, { params }: any) {
+export async function PUT(req: NextRequest, { optionId }: { optionId: string }) {
   try {
     const { userId: clerkUserId } = await auth(); // Changed
     if (!clerkUserId) throw new UnauthenticatedError('Authentication required.'); // Changed
 
-    const optionId = params?.optionId;
     if (!optionId) throw new BadRequestError('Option ID is required from path.');
 
     await verifyOptionAccess(optionId, clerkUserId);
@@ -120,8 +118,8 @@ export async function PUT(req: NextRequest, { params }: any) {
 
     logger.info('Survey option updated', { optionId: updatedOption.id, userId: clerkUserId }); // Changed
     return NextResponse.json(updatedOption);
-  } catch (error: any) {
-    if (error && error.code === 'P2025') {
+  } catch (error: unknown) {
+    if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
       throw new NotFoundError('Option not found for update.');
     }
     return handleApiError(error, req);
@@ -129,12 +127,11 @@ export async function PUT(req: NextRequest, { params }: any) {
 }
 
 // DELETE handler - Restoring context parameter
-export async function DELETE(req: NextRequest, { params }: any) {
+export async function DELETE(req: NextRequest, { optionId }: { optionId: string }) {
   try {
     const { userId: clerkUserId } = await auth(); // Changed
     if (!clerkUserId) throw new UnauthenticatedError('Authentication required.'); // Changed
 
-    const optionId = params?.optionId;
     if (!optionId) throw new BadRequestError('Option ID is required from path.');
 
     await verifyOptionAccess(optionId, clerkUserId);
@@ -153,8 +150,8 @@ export async function DELETE(req: NextRequest, { params }: any) {
       { message: 'Option deleted successfully' }, // Restored original success message
       { status: 200 } // Changed from 204 to allow message body
     );
-  } catch (error: any) {
-    if (error && error.code === 'P2025') {
+  } catch (error: unknown) {
+    if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
       throw new NotFoundError('Option not found for deletion.');
     }
     return handleApiError(error, req);

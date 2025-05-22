@@ -6,7 +6,6 @@ import './globals.css';
 // import { NextSSRPlugin } from '@uploadthing/react/next-ssr-plugin'; // REMOVE
 // import { extractRouterConfig } from 'uploadthing/server'; // REMOVE
 // import { ourFileRouter } from '@/app/api/uploadthing/core'; // REMOVE - ourFileRouter is deleted
-import { Suspense } from 'react';
 // import { connection } from 'next/server'; // Removed deprecated import
 // Import IconContextProvider for consistent icon behavior
 // import { IconContextProvider } from '@/components/ui/icon/icon-context'; // Removed context import

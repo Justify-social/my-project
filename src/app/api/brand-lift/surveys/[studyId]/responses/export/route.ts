@@ -8,13 +8,11 @@ import {
   SurveyOption,
 } from '@prisma/client';
 import { stringify } from 'csv-stringify/sync'; // For CSV generation
-import { z } from 'zod';
-import { BrandLiftStudy } from '@prisma/client';
+import { BadRequestError, NotFoundError, UnauthenticatedError, ForbiddenError } from '@/lib/errors';
 
 import db from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { handleApiError } from '@/lib/apiErrorHandler';
-import { BadRequestError, NotFoundError, UnauthenticatedError, ForbiddenError } from '@/lib/errors';
 
 // Helper to verify study access and if it's in a state suitable for export (e.g., COMPLETED)
 async function verifyStudyForExport(studyId: string, clerkUserId: string) {

@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@clerk/nextjs/server';
-import { Prisma, SurveyQuestionType, BrandLiftStudyStatus } from '@prisma/client';
+import { SurveyQuestionType, BrandLiftStudyStatus } from '@prisma/client';
 
 import db from '@/lib/db';
 import { logger } from '@/lib/logger';
-import { handleApiError } from '@/lib/apiErrorHandler';
 import { tryCatch } from '@/lib/middleware/api';
 import { BadRequestError, ForbiddenError, NotFoundError, UnauthenticatedError } from '@/lib/errors';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';

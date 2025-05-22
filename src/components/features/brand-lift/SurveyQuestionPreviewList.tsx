@@ -1,6 +1,7 @@
 import React from 'react';
 import { SurveyQuestionData } from '@/types/brand-lift';
 import { Icon } from '@/components/ui/icon/icon';
+import Image from 'next/image';
 // import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 export interface SurveyQuestionPreviewListProps {
@@ -51,9 +52,11 @@ const SurveyQuestionPreviewList: React.FC<SurveyQuestionPreviewListProps> = ({ q
                     >
                       {/* Image/GIF first, then text */}
                       {opt.imageUrl && (
-                        <img
+                        <Image
                           src={opt.imageUrl}
                           alt={opt.text}
+                          width={40}
+                          height={40}
                           className="mr-2 h-10 w-10 object-contain inline-block rounded"
                         />
                       )}

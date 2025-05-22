@@ -9,10 +9,9 @@ import {
 // Define possible statuses this component can handle
 type StatusTagProps = {
   status: BrandLiftStudyStatus | SurveyApprovalCommentStatus | SurveyOverallApprovalStatus | string; // Allow string for flexibility if needed
-  type: 'study' | 'comment' | 'approval'; // To help determine color/text logic
 };
 
-const StatusTag: React.FC<StatusTagProps> = ({ status, type }) => {
+const StatusTag: React.FC<StatusTagProps> = ({ status }) => {
   let variant:
     | 'default'
     | 'secondary'

@@ -1,13 +1,5 @@
 import { z } from 'zod';
-import {
-  Prisma,
-  Status,
-  Position,
-  Currency,
-  Platform,
-  KPI,
-  SubmissionStatus,
-} from '@prisma/client';
+import { Prisma, Status, SubmissionStatus } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 import { EnumTransformers } from '@/utils/enum-transformers';
 import { connectToDatabase, prisma } from '@/lib/db';

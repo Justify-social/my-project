@@ -18,6 +18,7 @@ import {
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import logger from '@/lib/logger';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 
 // Define a type for the user data expected from /api/admin/organizations/[orgId]/users
@@ -240,9 +241,11 @@ const OrganisationDetailPage: React.FC = () => {
                   <TableRow key={user.id}>
                     <TableCell>
                       {user.profileImageUrl && (
-                        <img
+                        <Image
                           src={user.profileImageUrl}
                           alt="avatar"
+                          width={32}
+                          height={32}
                           className="w-8 h-8 rounded-full inline-block mr-2"
                         />
                       )}

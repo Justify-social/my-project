@@ -67,7 +67,10 @@ const getIconInfo = (
 export default function ComponentBrowserPage() {
   const router = useRouter();
   const actualSearchParams = useNextSearchParams();
-  const currentSearchParams = actualSearchParams || new URLSearchParams();
+  const currentSearchParams = useMemo(
+    () => actualSearchParams || new URLSearchParams(),
+    [actualSearchParams]
+  );
 
   const [registry, setRegistry] = useState<ComponentRegistry | null>(null);
   const [isLoadingRegistry, setIsLoadingRegistry] = useState(true);

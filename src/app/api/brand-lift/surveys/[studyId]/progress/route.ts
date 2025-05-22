@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { Prisma, BrandLiftStudyStatus } from '@prisma/client';
-
+// import { Prisma, BrandLiftStudyStatus } from '@prisma/client'; // Prisma unused
+import { BrandLiftStudyStatus } from '@prisma/client';
 import db from '@/lib/db';
 import { logger } from '@/lib/logger';
-import { handleApiError } from '@/lib/apiErrorHandler';
-import { BadRequestError, NotFoundError, UnauthenticatedError, ForbiddenError } from '@/lib/errors';
+import { handleApiError } from '@/lib/apiErrorHandler'; // Restored: Used in catch block
 import { CintApiService } from '@/lib/cint'; // For fetching live Cint progress
+import { BadRequestError, UnauthenticatedError, ForbiddenError, NotFoundError } from '@/lib/errors';
 
 const cintService = new CintApiService(); // Relies on env vars
 
@@ -84,10 +84,10 @@ export const GET = async (
           cintProjectId: study.cintProjectId,
           cintTargetGroupId: study.cintTargetGroupId,
         });
-      } catch (cintError: any) {
+      } catch (cintError: unknown) {
         logger.warn('Failed to fetch live progress from Cint', {
           studyId,
-          error: cintError.message,
+          error: cintError instanceof Error ? cintError.message : String(cintError),
         });
         // Don't fail the whole request if Cint call fails, can still return local count
       }
@@ -122,7 +122,7 @@ export const GET = async (
 
     logger.info('Fetched study progress', { studyId, userId: clerkUserId });
     return NextResponse.json(responsePayload);
-  } catch (error: any) {
+  } catch (error: unknown) {
     return handleApiError(error, req);
   }
 };

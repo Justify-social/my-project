@@ -7,7 +7,13 @@ import { logger } from '@/lib/logger';
 import { tryCatch } from '@/lib/middleware/api/util-middleware';
 import { UnauthenticatedError, NotFoundError, BadRequestError } from '@/lib/errors';
 import { handleApiError } from '@/lib/apiErrorHandler';
-import { CampaignWizard, Prisma, CampaignWizardSubmission } from '@prisma/client';
+
+// Define a more specific type for assets if their structure is known
+interface WizardAsset {
+  uploadedAt?: string | Date; // Example field, add others as known
+  // Define other known properties of an asset object
+  [key: string]: unknown; // Allows for other properties not strictly typed yet
+}
 
 export async function GET(
   req: NextRequest,
@@ -65,7 +71,7 @@ export async function GET(
         endDate:
           campaign.endDate instanceof Date ? campaign.endDate.toISOString() : campaign.endDate,
         assets: campaign.assets
-          ? (campaign.assets as any[]).map(asset => ({
+          ? (campaign.assets as WizardAsset[]).map((asset: WizardAsset) => ({
               ...asset,
               uploadedAt:
                 asset.uploadedAt instanceof Date

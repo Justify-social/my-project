@@ -2,14 +2,12 @@ import React, { useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import StatusTag from './StatusTag'; // Corrected import path
 import { SurveyApprovalCommentStatus } from '@prisma/client'; // Correct import for the enum
 import { Icon } from '@/components/ui/icon/icon'; // Corrected path
 import { formatDistanceToNow } from 'date-fns'; // For relative timestamps
-import { SurveyApprovalCommentData } from '@/types/brand-lift';
-import { cn } from '@/lib/utils'; // For conditional styling
 
 // Interface matching expected data structure for a comment author
 export interface CommentAuthor {
@@ -41,7 +39,6 @@ export interface CommentData {
 interface CommentThreadProps {
   comments: CommentData[];
   onAddComment: (text: string, questionId?: string | null) => Promise<void>; // Make async
-  currentUserId: string;
   isLoading?: boolean; // Loading state for adding comments
   // Optional: Add props for resolving/updating comment status if handled here
   // onUpdateCommentStatus?: (commentId: string, newStatus: SurveyApprovalCommentStatus) => Promise<void>;
@@ -53,7 +50,7 @@ const formatDate = (dateInput: Date | string): string => {
   try {
     const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
     return formatDistanceToNow(date, { addSuffix: true });
-  } catch (e) {
+  } catch (_e) {
     return 'Invalid date';
   }
 };
@@ -61,7 +58,6 @@ const formatDate = (dateInput: Date | string): string => {
 const CommentThread: React.FC<CommentThreadProps> = ({
   comments,
   onAddComment,
-  currentUserId,
   isLoading = false,
   // onUpdateCommentStatus,
   // userHasModeratorRole = false,
@@ -124,7 +120,7 @@ const CommentThread: React.FC<CommentThreadProps> = ({
                     {comment.text}
                   </p>
                   <div className="mt-1 flex items-center space-x-2">
-                    <StatusTag status={comment.status} type="comment" />
+                    <StatusTag status={comment.status} />
                     {/* Resolve Button Placeholder - implement based on permissions */}
                     {/* {comment.status === SurveyApprovalCommentStatus.OPEN && onUpdateCommentStatus && (comment.author.id === currentUserId || userHasModeratorRole) && (
                                         <Button size="xs" variant="outline" onClick={() => onUpdateCommentStatus(comment.id, SurveyApprovalCommentStatus.RESOLVED)}>

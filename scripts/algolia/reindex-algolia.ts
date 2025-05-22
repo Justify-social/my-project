@@ -1,8 +1,6 @@
 // scripts/reindex-algolia.ts
-import { CampaignWizard } from '@prisma/client'; // Import type
 import { prisma } from '../../src/lib/prisma'; // Corrected path
 import { reindexAllCampaigns } from '../../src/lib/algolia'; // Changed import
-import { EnumTransformers } from '../../src/utils/enum-transformers'; // Corrected path - This might not be needed anymore if reindexAllCampaigns handles all transformations
 
 // FrontendReadyCampaign interface and manual transformation block will be removed.
 

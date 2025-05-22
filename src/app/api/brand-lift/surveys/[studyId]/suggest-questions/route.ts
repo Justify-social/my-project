@@ -3,7 +3,6 @@ import { auth } from '@clerk/nextjs/server';
 import OpenAI from 'openai';
 import { BrandLiftStudyStatus } from '@prisma/client';
 import https from 'https';
-import { z } from 'zod';
 
 import db from '@/lib/db';
 import { logger } from '@/lib/logger';

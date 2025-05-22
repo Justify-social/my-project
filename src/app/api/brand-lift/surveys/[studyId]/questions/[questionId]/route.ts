@@ -5,11 +5,7 @@ import prisma from '@/lib/db';
 import logger from '@/lib/logger';
 import { handleApiError } from '@/lib/apiErrorHandler';
 import { tryCatch } from '@/lib/middleware/api/util-middleware';
-import {
-  BrandLiftStudyStatus,
-  SurveyQuestionType,
-  SurveyQuestion as PrismaSurveyQuestion,
-} from '@prisma/client';
+import { BrandLiftStudyStatus, SurveyQuestionType } from '@prisma/client';
 import {
   UnauthenticatedError,
   ForbiddenError,
@@ -20,7 +16,7 @@ import {
 // Schema for updating a SurveyQuestion. Options are handled separately or as part of a full replace if needed.
 const updateQuestionSchema = z.object({
   text: z.string().min(1).max(500).optional(),
-  questionType: z.enum(['SINGLE_CHOICE', 'MULTIPLE_CHOICE']).optional(), // Adjust as per Prisma enum
+  questionType: z.nativeEnum(SurveyQuestionType).optional(),
   order: z.number().int().min(0).optional(),
   isRandomized: z.boolean().optional(),
   isMandatory: z.boolean().optional(),
@@ -62,8 +58,15 @@ async function getAndVerifyQuestion(studyId: string, questionId: string, clerkUs
     throw new NotFoundError('Question not found or not accessible by this user.');
   }
 
-  // Prevent changes if study is in a non-editable state
-  if (!['DRAFT', 'PENDING_APPROVAL', 'CHANGES_REQUESTED'].includes(question.study.status)) {
+  // Ensure comparison is between enum members
+  const allowedStatuses: BrandLiftStudyStatus[] = [
+    BrandLiftStudyStatus.DRAFT,
+    BrandLiftStudyStatus.PENDING_APPROVAL,
+    BrandLiftStudyStatus.CHANGES_REQUESTED,
+  ];
+
+  if (!allowedStatuses.includes(question.study.status)) {
+    // question.study.status is already BrandLiftStudyStatus type from Prisma
     throw new ForbiddenError(
       `Questions cannot be modified when study status is ${question.study.status}.`
     );

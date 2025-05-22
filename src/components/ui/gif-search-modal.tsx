@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Icon } from '@/components/ui/icon/icon';
 import logger from '@/lib/logger'; // Assuming logger is configured for client-side use
+import Image from 'next/image'; // Add import for Next/Image
 
 interface GifSearchModalProps {
   isOpen: boolean;
@@ -188,9 +189,11 @@ export function GifSearchModal({
                     className="aspect-square relative cursor-pointer border hover:border-primary rounded overflow-hidden group bg-muted/30"
                     onClick={() => handleGifClick(url)}
                   >
-                    <img
+                    <Image
                       src={url}
                       alt={`Search result ${idx + 1}`}
+                      fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw" // Adjust sizes as needed
                       className="absolute top-0 left-0 w-full h-full object-contain"
                       loading="lazy" // Lazy load GIF images
                     />

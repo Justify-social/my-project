@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@clerk/nextjs/server';
-import { Prisma, SurveyApprovalCommentStatus, BrandLiftStudyStatus } from '@prisma/client';
+import { SurveyApprovalCommentStatus, BrandLiftStudyStatus } from '@prisma/client';
 
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
@@ -11,7 +11,6 @@ import {
   ForbiddenError,
   NotFoundError,
   UnauthenticatedError,
-  DatabaseError,
   ZodValidationError,
 } from '@/lib/errors';
 
@@ -76,7 +75,7 @@ export async function PUT(req: NextRequest, context: any) {
     const { userId: clerkUserId } = await auth();
     if (!clerkUserId) throw new UnauthenticatedError('Authentication required.');
 
-    const commentId = context?.params?.commentId;
+    const commentId = context.params.commentId;
     if (!commentId) throw new BadRequestError('Comment ID is required.');
 
     await verifyCommentAccess(commentId, clerkUserId);

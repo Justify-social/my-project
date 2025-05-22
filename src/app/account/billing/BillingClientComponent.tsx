@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PricingGrid from '@/components/billing/PricingGrid';
 import FaqSection from '@/components/billing/FaqSection';
@@ -91,9 +90,11 @@ export default function BillingClientComponent() {
         setErrorMessage(error.message || 'Failed to redirect to checkout.');
       }
       // Note: Successful redirect means the user leaves this page.
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating or redirecting to checkout:', error);
-      setErrorMessage(error.message || 'Could not initiate checkout.');
+      setErrorMessage(
+        error instanceof Error ? error.message : String(error) || 'Could not initiate checkout.'
+      );
     } finally {
       setIsRedirecting(false); // Only reached on error
     }

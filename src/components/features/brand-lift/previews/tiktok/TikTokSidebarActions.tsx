@@ -1,6 +1,7 @@
 import React from 'react';
 import { CreativeProfileData } from '@/types/brand-lift'; // Assuming sound art might use profile pic as fallback
 import { Icon } from '@/components/ui/icon/icon';
+import Image from 'next/image'; // Add import for Next/Image
 
 interface TikTokSidebarActionsProps {
   profile: CreativeProfileData;
@@ -19,9 +20,11 @@ const TikTokSidebarActions: React.FC<TikTokSidebarActionsProps> = ({ profile, en
       {/* Profile Image with Plus Icon */}
       <div className="relative">
         {profile.profilePictureUrl ? (
-          <img
+          <Image
             src={profile.profilePictureUrl}
-            alt={profile.name}
+            alt={profile.name || 'Profile picture'}
+            width={40}
+            height={40}
             className="w-10 h-10 rounded-full border-2 border-white object-cover"
           />
         ) : (
@@ -54,9 +57,11 @@ const TikTokSidebarActions: React.FC<TikTokSidebarActionsProps> = ({ profile, en
       </div>
       {/* Sound/Music (Spinning record) - using profile pic as placeholder for sound art */}
       <div className="mt-2">
-        <img
+        <Image
           src={profile.profilePictureUrl || '/logo.png'} // Fallback to app logo if no profile pic for sound art
           alt="sound art"
+          width={40}
+          height={40}
           className="w-10 h-10 rounded-full border-[3px] border-gray-700 bg-gray-800 animate-spin-slow object-cover"
         />
       </div>

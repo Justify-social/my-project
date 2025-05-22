@@ -908,7 +908,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
         setIsLoading(false); // Set loading false at the end of all save operations
       }
     },
-    [campaignIdFromUrl, router, wizardState, activeOrgId, isAuthLoaded, loadCampaignData] // Added dependencies
+    [campaignIdFromUrl, router, wizardState, activeOrgId, isAuthLoaded]
   );
 
   // Debounced save function is no longer needed for autosave

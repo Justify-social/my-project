@@ -5,7 +5,7 @@ import { Prisma } from '@prisma/client'; // For SurveyResponse answsers/demograp
 import db from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { handleApiError } from '@/lib/apiErrorHandler';
-import { BadRequestError, ForbiddenError, NotFoundError } from '@/lib/errors'; // No UnauthenticatedError needed for public webhook
+import { BadRequestError, NotFoundError } from '@/lib/errors'; // No UnauthenticatedError needed for public webhook
 
 // --- Security TODO ---
 // This endpoint must be secured. Methods:
@@ -67,7 +67,6 @@ export const POST = async (req: NextRequest) => {
 
     const {
       id: cintRespondentId,
-      status: cintStatus,
       custom_vars,
       answers: rawAnswers,
       demographics: rawDemographics,

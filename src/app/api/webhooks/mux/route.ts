@@ -38,10 +38,11 @@ export async function POST(req: NextRequest) {
     logger.info(
       `[API /webhooks/mux] Received Mux webhook. Event Type: ${event.type}, Event ID: ${event.id}`
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
     logger.error(
       '[API /webhooks/mux] Webhook signature verification failed or unwrap error:',
-      error.message
+      message
     );
     return NextResponse.json({ error: 'Webhook signature verification failed.' }, { status: 400 });
   }
@@ -72,10 +73,11 @@ export async function POST(req: NextRequest) {
               `[API /webhooks/mux] video.asset.created: CreativeAsset not found by muxAssetId ${muxAssetId}. Waiting for video.upload.asset_created to link it, or create-video-upload needs to store muxAssetId if available there.`
             );
           }
-        } catch (e: any) {
+        } catch (e: unknown) {
+          const message = e instanceof Error ? e.message : String(e);
           logger.error(
             `[API /webhooks/mux] DB error in video.asset.created for Mux Asset ID ${event.data.id}:`,
-            e.message
+            message
           );
         }
         break;
@@ -158,10 +160,11 @@ export async function POST(req: NextRequest) {
               `[API /webhooks/mux] video.asset.ready: CRITICAL - No CreativeAsset found by muxAssetId (${muxAssetId}) and no muxUploadId available in webhook event to attempt fallback. Asset may be orphaned.`
             );
           }
-        } catch (e: any) {
+        } catch (e: unknown) {
+          const message = e instanceof Error ? e.message : String(e);
           logger.error(
             `[API /webhooks/mux] DB error in video.asset.ready for asset ${event.data.id}:`,
-            e.message
+            message
           );
         }
         break;
@@ -176,10 +179,11 @@ export async function POST(req: NextRequest) {
             where: { muxAssetId: assetErroredId },
             data: { muxProcessingStatus: 'ERROR' },
           });
-        } catch (e: any) {
+        } catch (e: unknown) {
+          const message = e instanceof Error ? e.message : String(e);
           logger.error(
             `[API /webhooks/mux] DB error in video.asset.errored for asset ${event.data.id}:`,
-            e.message
+            message
           );
         }
         break;
@@ -242,11 +246,12 @@ export async function POST(req: NextRequest) {
               { data: muxEventData } // Log the data we received
             );
           }
-        } catch (e: any) {
+        } catch (e: unknown) {
+          const message = e instanceof Error ? e.message : String(e);
           const muxEventDataForError = event.data as any; // Use this for logging
           logger.error(
             `[API /webhooks/mux] DB error in video.upload.asset_created. Upload ID: ${muxEventDataForError?.id}, Asset ID: ${muxEventDataForError?.asset_id}:`,
-            e.message
+            message
           );
         }
         break;
@@ -255,11 +260,14 @@ export async function POST(req: NextRequest) {
         logger.info(`[API /webhooks/mux] Received unhandled Mux event type: ${event.type}`);
     }
     return NextResponse.json({ received: true });
-  } catch (dbError: any) {
+  } catch (dbError: unknown) {
     logger.error(
       `[API /webhooks/mux] Outer DB error processing webhook for event ${event.id} (type: ${event.type}):`,
-      dbError
+      dbError // Log the full error object for dbError
     );
-    return NextResponse.json({ error: 'Database error processing webhook' }, { status: 500 });
+    return NextResponse.json(
+      { error: dbError instanceof Error ? dbError.message : 'Database error processing webhook' },
+      { status: 500 }
+    );
   }
 }

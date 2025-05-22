@@ -1,19 +1,14 @@
-import { NextResponse, NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import prisma from '@/lib/db'; // Actual Prisma client
-import { auth } from '@clerk/nextjs/server'; // Added auth, removed getAuth, clerkClient if unused
-import logger from '@/lib/logger';
+import { auth } from '@clerk/nextjs/server';
+
+import db from '@/lib/db';
+import { logger } from '@/lib/logger';
 import { handleApiError } from '@/lib/apiErrorHandler';
-import { UnauthenticatedError, NotFoundError } from '@/lib/errors';
-import { BrandLiftStudy, SurveyQuestion, SurveyOption } from '@prisma/client'; // Removed BrandLiftStudyStatus_API
+import { NotFoundError, UnauthenticatedError } from '@/lib/errors';
 
 // TODO: SSOT - Enums should be defined in and imported from src/types/brand-lift.ts
 // Defining locally for now
-enum BrandLiftStudyStatus_API {
-  DRAFT = 'DRAFT',
-  PENDING_APPROVAL = 'PENDING_APPROVAL',
-  // ... other statuses
-}
 
 // Zod schema for a new survey option
 const surveyOptionCreateSchema = z.object({
@@ -57,7 +52,7 @@ export const POST = async (
     });
 
     // TODO: Authorization Logic - P1-02 (Refined)
-    const question = await prisma.surveyQuestion.findUnique({
+    const question = await db.surveyQuestion.findUnique({
       where: { id: questionId, studyId: studyId },
     });
 
@@ -69,7 +64,7 @@ export const POST = async (
     const body = await request.json();
     const validatedOptionData = surveyOptionCreateSchema.parse(body);
 
-    const newOption = await prisma.surveyOption.create({
+    const newOption = await db.surveyOption.create({
       data: {
         ...validatedOptionData,
         questionId: questionId,

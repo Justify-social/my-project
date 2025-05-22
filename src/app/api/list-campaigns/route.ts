@@ -3,8 +3,7 @@ import { auth } from '@clerk/nextjs/server';
 import { logger } from '@/lib/logger';
 import { handleApiError } from '@/lib/apiErrorHandler';
 import { getAllCampaignsForOrg } from '@/lib/data/campaigns'; // Updated import
-import { UnauthenticatedError, ForbiddenError, NotFoundError } from '@/lib/errors'; // Removed BadRequestError
-import { CampaignWizard, Prisma } from '@prisma/client';
+import { UnauthenticatedError } from '@/lib/errors'; // Removed BadRequestError
 
 export async function GET(req: NextRequest) {
   try {

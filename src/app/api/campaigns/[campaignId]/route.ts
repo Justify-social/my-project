@@ -732,7 +732,7 @@ export async function PUT(
     let body;
     try {
       body = await request.json();
-    } catch (e: unknown) {
+    } catch (_unusedError: unknown) {
       return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
     }
     // Validate the body (type assertion doesn't replace runtime validation)

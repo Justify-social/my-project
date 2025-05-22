@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { useAuth, useUser } from '@clerk/nextjs';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useAuth } from '@clerk/nextjs';
 import {
   BrandLiftStudyStatus,
   SurveyOverallApprovalStatus,
   SurveyApprovalCommentStatus,
 } from '@prisma/client';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 // Shadcn UI Imports
 import { Button } from '@/components/ui/button';
@@ -22,11 +22,9 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Icon } from '@/components/ui/icon/icon';
-import { Textarea } from '@/components/ui/textarea'; // For general comment input
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'; // For comment authors
+import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge'; // Used by StatusTag
 import { ScrollArea } from '@/components/ui/scroll-area'; // For long lists of questions/comments
-import { Separator } from '@/components/ui/separator';
 import { toast } from 'react-hot-toast';
 
 import logger from '@/lib/logger';
@@ -38,7 +36,6 @@ import {
 } from '@/types/brand-lift';
 import CommentThread, { CommentData as DisplayCommentData } from './CommentThread'; // Use DisplayCommentData alias
 import StatusTag from './StatusTag';
-import { cn } from '@/lib/utils';
 import { SurveyQuestionPreviewList } from '@/components/features/brand-lift/SurveyQuestionPreviewList';
 import { showSuccessToast, showErrorToast } from '@/components/ui/toast';
 
@@ -299,13 +296,10 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({ studyId }) => {
             <CardTitle>Survey Review: {studyData?.name || 'Loading...'}</CardTitle>
             <CardDescription>
               Current Main Study Status:{' '}
-              <StatusTag
-                status={(studyData?.status as BrandLiftStudyStatus) || 'DEFAULT'}
-                type="study"
-              />
+              <StatusTag status={(studyData?.status as BrandLiftStudyStatus) || 'DEFAULT'} />
             </CardDescription>
             <CardDescription>
-              Approval Status: <StatusTag status={currentOverallStatus} type="approval" />
+              Approval Status: <StatusTag status={currentOverallStatus} />
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -332,7 +326,6 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({ studyId }) => {
             <CommentThread
               comments={displayComments.filter(c => !c.questionId)} // Use transformed comments
               onAddComment={text => handleAddComment(text, null)}
-              currentUserId={userId || ''} // Pass current user ID
               isLoading={actionLoading['addOverallComment']}
             />
           </CardContent>

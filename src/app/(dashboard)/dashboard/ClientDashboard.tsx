@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon/icon';
 import { CalendarUpcoming, type CalendarEvent } from '@/components/ui/calendar-upcoming';
 import { UpcomingCampaignsTable, type CampaignData } from '@/components/ui/card-upcoming-campaign';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
 // (User interface definition can likely be removed if fetched internally)
@@ -117,7 +117,6 @@ export default function ClientDashboard() {
   };
 
   const hasEvents = events && events.length > 0;
-  const hasCampaigns = campaigns && campaigns.length > 0;
 
   if (fetchError) {
     return <div className="p-4 text-red-600">Error loading dashboard data: {fetchError}</div>;

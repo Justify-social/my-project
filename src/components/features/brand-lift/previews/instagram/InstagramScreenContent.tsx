@@ -5,6 +5,7 @@ import { Icon } from '@/components/ui/icon/icon';
 import { InstagramPostHeader } from './InstagramPostHeader';
 import { InstagramActionButtons } from './InstagramActionButtons';
 import { InstagramPostInfo } from './InstagramPostInfo';
+import Image from 'next/image';
 
 export interface InstagramScreenContentProps {
   creativeData: CreativeDataProps;
@@ -74,10 +75,12 @@ const InstagramScreenContent: React.FC<InstagramScreenContentProps> = ({
             }}
           />
         ) : media.type === 'image' && media.imageUrl ? (
-          <img
+          <Image
             src={media.imageUrl}
             alt={media.altText || caption || 'Creative'}
+            fill
             className="w-full h-full object-contain"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center text-gray-500">

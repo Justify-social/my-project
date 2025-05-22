@@ -46,7 +46,13 @@ export async function GET(request: NextRequest) {
       errorMessage,
       error
     );
-    const statusCode = (error as any).statusCode || 500;
+    const statusCode =
+      typeof error === 'object' &&
+      error !== null &&
+      'statusCode' in error &&
+      typeof (error as any).statusCode === 'number'
+        ? (error as any).statusCode
+        : 500;
     return NextResponse.json(
       { success: false, error: 'Failed to process influencer profile', details: errorMessage },
       { status: statusCode }

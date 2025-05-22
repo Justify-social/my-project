@@ -34,25 +34,6 @@ const ApiVerificationPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [lastTestedTimes, setLastTestedTimes] = useState<Record<string, Date | null>>({});
 
-  // API descriptions shown in the UI
-  const apiDescriptions: Record<string, string> = {
-    geolocation:
-      'Used to determine user location for targeted campaigns and localized content. Helps optimize campaign delivery to specific regions.',
-    exchange:
-      'Powers currency conversion for budgeting in the Campaign Wizard. Ensures accurate financial calculations across different currencies.',
-    insightiq:
-      'Integrates with influencer platforms (via InsightIQ) to verify accounts and retrieve metrics. Critical for influencer-based campaigns.',
-    giphy:
-      'Powers GIF search and integration for campaign creative content. Provides access to an extensive library of animated content.',
-    cint: 'Market research platform that connects to consumer panels for surveys and audience insights. Essential for campaign targeting and market validation.',
-    stripe:
-      'Payment processing platform for subscription and one-time payments. Powers the billing system for premium features.',
-    database:
-      'Database connection using Postgres. Stores all application data including user profiles, campaigns, and analytics.',
-    algolia:
-      'Powers application search functionality, including campaigns, influencers, etc. Requires Search API Key.',
-  };
-
   const testAllApis = useCallback(async () => {
     setIsLoading(true);
     setResults([]);
@@ -125,7 +106,7 @@ const ApiVerificationPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [lastTestedTimes]);
 
   // Format latency as "123 ms"
   const formatLatency = (latency?: number) => {
@@ -166,12 +147,6 @@ const ApiVerificationPage: React.FC = () => {
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
-  };
-
-  // Format timestamp as local date/time string
-  const formatTimestamp = (date: Date | null) => {
-    if (!date) return 'Never';
-    return date.toLocaleString();
   };
 
   return (

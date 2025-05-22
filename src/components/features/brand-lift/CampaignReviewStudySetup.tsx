@@ -20,19 +20,12 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Icon } from '@/components/ui/icon/icon';
-import { Accordion, AccordionContent, AccordionItem } from '@/components/ui/accordion';
+import { Accordion } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { IconButtonAction } from '@/components/ui/button-icon-action';
 import logger from '@/lib/logger';

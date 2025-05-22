@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 // import { PrismaClient, Platform, Prisma } from '@prisma/client'; // Keep commented until DB logic is refactored
 // import crypto from 'crypto'; // crypto is unused
-import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 // import { makeInsightIQRequest } from '@/lib/insightiqService'; // Keep commented until service functions are implemented
 

@@ -542,7 +542,7 @@ const ClientCampaignList: React.FC = () => {
       await deleteCampaign(campaignToDelete.id);
       // Success toast is in deleteCampaign
       // No need to call setShowDeleteModal(false) here, ConfirmDeleteDialog's onClose will handle it.
-    } catch (error) {
+    } catch (_error) {
       // Error toast is in deleteCampaign or caught by it and re-thrown
       // showErrorToast(error instanceof Error ? error.message : 'Failed to delete campaign from dialog');
       // No need to call setShowDeleteModal(false) here, ConfirmDeleteDialog's onClose will handle it.
@@ -570,7 +570,7 @@ const ClientCampaignList: React.FC = () => {
       let data = { success: false, message: 'Unknown delete error' };
       try {
         data = await response.json();
-      } catch (e) {
+      } catch (_unusedError) {
         if (!response.ok && response.status !== 404) {
           // Don't throw if 404, handle below
           throw new Error(
@@ -609,9 +609,9 @@ const ClientCampaignList: React.FC = () => {
       }, 500); // Short delay
 
       return data;
-    } catch (error) {
-      console.error('Error in deleteCampaign function:', error);
-      throw error; // Re-throw to be caught by confirmDelete
+    } catch (_error) {
+      console.error('Error in deleteCampaign function:', _error);
+      throw _error; // Re-throw to be caught by confirmDelete
     }
   };
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { CreativeProfileData } from '@/types/brand-lift';
 import { Icon } from '@/components/ui/icon/icon';
+import Image from 'next/image';
 
 export interface InstagramPostHeaderProps {
   profile: CreativeProfileData;
@@ -12,9 +13,11 @@ const InstagramPostHeader: React.FC<InstagramPostHeaderProps> = ({ profile }) =>
     <div className="p-3 flex items-center justify-between border-b border-gray-200 dark:border-gray-700 h-14 flex-shrink-0 select-none">
       <div className="flex items-center space-x-3">
         {profile.profilePictureUrl ? (
-          <img
+          <Image
             src={profile.profilePictureUrl}
-            alt={profile.name}
+            alt={profile.name || 'Profile picture'}
+            width={32}
+            height={32}
             className="h-8 w-8 rounded-full object-cover"
           />
         ) : (

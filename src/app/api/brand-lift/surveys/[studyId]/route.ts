@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@clerk/nextjs/server';
-import { BrandLiftStudyStatus, Prisma } from '@prisma/client';
+import { BrandLiftStudyStatus } from '@prisma/client';
 import db from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { handleApiError } from '@/lib/apiErrorHandler';
@@ -9,7 +9,6 @@ import { BadRequestError, ForbiddenError, NotFoundError, UnauthenticatedError } 
 import { NotificationService } from '@/lib/notificationService';
 import { BASE_URL } from '@/config/constants';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { CintApiService } from '@/lib/cint';
 import { addOrUpdateBrandLiftStudyInAlgolia, deleteBrandLiftStudyFromAlgolia } from '@/lib/algolia';
 import { BrandLiftStudyData } from '@/types/brand-lift';
 
@@ -27,12 +26,6 @@ const updateStudySchema = z
   });
 
 const notificationServiceInstance = new NotificationService();
-const cintService = new CintApiService(
-  process.env.CINT_CLIENT_ID || 'mock_client_id',
-  process.env.CINT_CLIENT_SECRET || 'mock_client_secret',
-  process.env.CINT_ACCOUNT_ID || 'mock_account_id',
-  process.env.CINT_S2S_API_KEY || 'mock_s2s_key'
-);
 
 export const GET = async (
   req: NextRequest,
@@ -44,7 +37,8 @@ export const GET = async (
     if (!orgId)
       throw new BadRequestError('Active organization context is required to view this study.');
 
-    const { studyId } = await paramsPromise;
+    const params = await paramsPromise;
+    const { studyId } = params;
     if (!studyId) throw new BadRequestError('Study ID is required.');
 
     const studyData = await db.brandLiftStudy.findFirst({
@@ -64,6 +58,7 @@ export const GET = async (
         updatedAt: true,
         cintProjectId: true,
         cintTargetGroupId: true,
+        orgId: true,
         campaign: {
           select: {
             campaignName: true,
@@ -74,7 +69,6 @@ export const GET = async (
             },
           },
         },
-        _count: { select: { questions: true } },
       },
     });
 
@@ -82,33 +76,16 @@ export const GET = async (
       throw new NotFoundError('Study not found or you do not have permission to view it.');
     }
 
-    // Prepare campaign details for the response, ensuring UUID is available for linking
-    const campaignDetails = studyData.campaign
+    const campaignDetailsForResponse = studyData.campaign
       ? {
           campaignName: studyData.campaign.campaignName,
-          uuid: studyData.campaign.wizard?.id, // This is the CampaignWizard.id (Campaign UUID)
-          // We are not including the nested wizard object in the final campaign object
+          uuid: studyData.campaign.wizard?.id,
         }
       : undefined;
-
-    const responseData: BrandLiftStudyData = {
-      ...(studyData as any), // Cast to any to handle Prisma specific types before reshaping
-      campaignId: studyData.submissionId.toString(), // Keep original campaignId (submissionId) for compatibility if needed
-      campaign: campaignDetails,
-    };
-    // Remove the original nested campaign.wizard if it exists, as uuid is now at campaign.uuid
-    // This step depends on the exact structure of studyData and if direct manipulation is safe.
-    // A safer way is to explicitly pick fields for responseData if studyData is complex.
-    // For now, let's assume the spread and override is okay, but be mindful.
-
-    // Clean up potentially unneeded nested structure from the original studyData.campaign if it was spread.
-    // This is a bit tricky with direct spread. A more explicit construction of responseData is safer.
-    // Let's reconstruct responseData more carefully:
 
     const finalResponseData: BrandLiftStudyData = {
       id: studyData.id,
       name: studyData.name,
-      // campaignId in BrandLiftStudyData is the stringified submissionId (CampaignWizardSubmission.id)
       campaignId: studyData.submissionId.toString(),
       status: studyData.status,
       funnelStage: studyData.funnelStage,
@@ -118,9 +95,8 @@ export const GET = async (
       updatedAt: studyData.updatedAt,
       cintProjectId: studyData.cintProjectId,
       cintTargetGroupId: studyData.cintTargetGroupId,
-      campaign: campaignDetails, // This now has { campaignName, uuid }
-      // questions: undefined, // Questions are usually fetched separately for detailed views
-      // _count: studyData._count, // If needed by client
+      orgId: studyData.orgId,
+      campaign: campaignDetailsForResponse,
     };
 
     logger.info('Fetched Brand Lift Study details', { studyId, userId: clerkUserId, orgId });
@@ -216,79 +192,9 @@ export const PUT = async (
           orgId,
         }
       );
-      // try {
-      //   const fullStudyForCint = await db.brandLiftStudy.findUnique({
-      //     where: { id: studyId },
-      //     include: { campaign: true },
-      //   });
-      //   if (!fullStudyForCint)
-      //     throw new NotFoundError('Full study details not found for Cint launch.');
-
-      //   const CINT_PROJECT_MANAGER_ID = process.env.CINT_PROJECT_MANAGER_ID || 'pm_default_mock';
-      //   const CINT_BUSINESS_UNIT_ID = process.env.CINT_BUSINESS_UNIT_ID || 'bu_default_mock';
-
-      //   const cintProject = await cintService.createCintProject(
-      //     fullStudyForCint.name,
-      //     CINT_PROJECT_MANAGER_ID
-      //   );
-      //   logger.info('Cint Project created', { studyId, cintProjectId: cintProject.id, orgId });
-
-      //   const surveyLiveUrl = `${BASE_URL}/survey/${studyId}?rid=[%RID%]`;
-
-      //   const cintTargetGroup = await cintService.createCintTargetGroup(
-      //     cintProject.id,
-      //     fullStudyForCint as unknown as BrandLiftStudyData,
-      //     surveyLiveUrl,
-      //     CINT_PROJECT_MANAGER_ID,
-      //     CINT_BUSINESS_UNIT_ID
-      //   );
-      //   logger.info('Cint Target Group created', {
-      //     studyId,
-      //     cintTargetGroupId: cintTargetGroup.id,
-      //     orgId,
-      //   });
-
-      //   const endFieldingAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
-      //   await cintService.launchCintTargetGroup(cintProject.id, cintTargetGroup.id, endFieldingAt);
-      //   logger.info('Cint Target Group launched', {
-      //     studyId,
-      //     cintTargetGroupId: cintTargetGroup.id,
-      //     orgId,
-      //   });
-
-      //   const dataToUpdateForCintLaunch: Prisma.BrandLiftStudyUpdateInput = {
-      //     status: BrandLiftStudyStatus.COLLECTING,
-      //     cintProjectId: cintProject.id,
-      //     cintTargetGroupId: cintTargetGroup.id,
-      //   };
-      //   if (updateData.name) dataToUpdateForCintLaunch.name = updateData.name;
-      //   if (updateData.funnelStage) dataToUpdateForCintLaunch.funnelStage = updateData.funnelStage;
-      //   if (updateData.primaryKpi) dataToUpdateForCintLaunch.primaryKpi = updateData.primaryKpi;
-      //   if (updateData.secondaryKpis)
-      //     dataToUpdateForCintLaunch.secondaryKpis = updateData.secondaryKpis;
-
-      //   finalUpdatedStudy = await db.brandLiftStudy.update({
-      //     where: { id: studyId },
-      //     data: dataToUpdateForCintLaunch,
-      //     include: {
-      //       campaign: { select: { campaignName: true, wizard: { select: { orgId: true } } } },
-      //     },
-      //   });
-      // } catch (cintLaunchError: unknown) {
-      //   logger.error('Cint launch failed', {
-      //     studyId,
-      //     error: (cintLaunchError as Error).message,
-      //     orgId,
-      //   });
-      //   throw new Error(
-      //     `Cint launch failed: ${(cintLaunchError as Error).message}. Study status not changed to COLLECTING.`
-      //   );
-      // }
-
-      // For MVP with manual report: Just update status to COLLECTING
       finalUpdatedStudy = await db.brandLiftStudy.update({
         where: { id: studyId },
-        data: { status: BrandLiftStudyStatus.COLLECTING }, // Only update status
+        data: { status: BrandLiftStudyStatus.COLLECTING },
         include: {
           campaign: { select: { campaignName: true, wizard: { select: { orgId: true } } } },
         },
@@ -306,7 +212,6 @@ export const PUT = async (
       });
     }
 
-    // Index the updated study in Algolia
     try {
       logger.info(`[Algolia] Indexing updated BrandLiftStudy ${studyId}`);
       await addOrUpdateBrandLiftStudyInAlgolia(finalUpdatedStudy);
@@ -320,7 +225,6 @@ export const PUT = async (
           errorMessage: (algoliaError as Error).message,
         }
       );
-      // Non-critical error for the main PUT operation
     }
 
     if (

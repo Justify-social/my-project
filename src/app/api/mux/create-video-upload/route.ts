@@ -86,13 +86,14 @@ export async function POST(req: NextRequest) {
       internalAssetId: creativeAsset.id, // Our database ID for the CreativeAsset
       userId: internalUserId, // Return the internalUserId used for creation
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[API /mux/create-video-upload] Error:', error);
-    if (error.message.includes('Mux client not initialized')) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.includes('Mux client not initialized')) {
       return NextResponse.json({ error: 'Mux service not available' }, { status: 503 });
     }
-    if (error.message.startsWith('Mux API Error:')) {
-      return NextResponse.json({ error: error.message }, { status: 502 }); // Bad Gateway from upstream
+    if (message.startsWith('Mux API Error:')) {
+      return NextResponse.json({ error: message }, { status: 502 }); // Bad Gateway from upstream
     }
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
