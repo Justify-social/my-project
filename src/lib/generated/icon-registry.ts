@@ -51,6 +51,27 @@ export const iconRegistryData: IconRegistryData = {
     },
     {
       "category": "app",
+      "id": "appFunnelBottom",
+      "name": "Bottom funnel",
+      "faVersion": null,
+      "path": "/icons/app/appFunnelBottom.svg"
+    },
+    {
+      "category": "app",
+      "id": "appFunnelMiddle",
+      "name": "Middle funnel",
+      "faVersion": null,
+      "path": "/icons/app/appFunnelMiddle.svg"
+    },
+    {
+      "category": "app",
+      "id": "appFunnelTop",
+      "name": "Top funnel",
+      "faVersion": null,
+      "path": "/icons/app/appFunnelTop.svg"
+    },
+    {
+      "category": "app",
       "id": "appHelp",
       "name": "Help",
       "faVersion": null,
