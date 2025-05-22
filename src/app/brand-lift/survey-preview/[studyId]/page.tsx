@@ -13,6 +13,7 @@ import { Icon } from '@/components/ui/icon/icon';
 import logger from '@/lib/logger';
 import { showSuccessToast, showErrorToast } from '@/components/ui/toast';
 import { cn } from '@/lib/utils';
+import BrandLiftPageSubtitle from '@/components/features/brand-lift/BrandLiftPageSubtitle';
 
 type PlatformView = 'TikTok' | 'Instagram';
 
@@ -218,11 +219,15 @@ const SurveyPreviewPage = () => {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold">Preview & Submit Survey</h1>
-            {studyDetails.name && (
-              <p className="text-muted-foreground">
-                {studyDetails.name} - {studyDetails.funnelStage} - Brand Lift Study - Preview
-              </p>
+            {!isLoading && studyDetails && (
+              <BrandLiftPageSubtitle
+                campaignId={studyDetails.campaignId}
+                campaignName={studyDetails.campaign?.campaignName}
+                studyName={studyDetails.name}
+                funnelStage={studyDetails.funnelStage}
+              />
             )}
+            {isLoading && <Skeleton className="h-5 w-3/4 mt-1" />}
           </div>
           <Button onClick={handleShareForReview} size="lg" disabled={isShareButtonDisabled}>
             {isSubmittingReview ? (

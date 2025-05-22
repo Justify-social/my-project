@@ -12,6 +12,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { IconButtonAction } from '@/components/ui/button-icon-action';
 import { BrandLiftStudyData } from '@/types/brand-lift';
 import { Skeleton } from '@/components/ui/skeleton';
+import BrandLiftPageSubtitle from '@/components/features/brand-lift/BrandLiftPageSubtitle';
 
 const SurveyDesignPage: React.FC = () => {
   const params = useParams();
@@ -116,27 +117,16 @@ const SurveyDesignPage: React.FC = () => {
         {/* Campaign Link Section - make entire div clickable if desired, or keep <a> around icon+text */}
         {isLoadingStudyDetails && !studyDetails && <Skeleton className="h-5 w-1/2 mt-2 mb-2" />}
         {fetchErrorStudyDetails && (
-          <p className="text-sm text-destructive mt-1 mb-2">Error loading campaign name.</p>
+          <p className="text-sm text-destructive mt-1 mb-2">Error loading study details.</p>
         )}
-        {!isLoadingStudyDetails &&
-          studyDetails?.campaign?.campaignName &&
-          studyDetails?.campaignId && (
-            <a // Make the whole area a link
-              href={`/campaigns/${studyDetails.campaignId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-1 mb-2 text-sm text-muted-foreground flex items-center hover:underline w-fit" // w-fit to make it only as wide as content
-              title="View Campaign Profile"
-            >
-              <span>Study for Campaign: {studyDetails.campaign.campaignName}</span>
-              <IconButtonAction
-                iconBaseName="faClipboard"
-                ariaLabel="View Campaign Profile"
-                hoverColorClass="text-accent-dark"
-                className="p-1 h-auto inline-flex text-accent hover:text-accent-dark ml-2" // Added ml-2
-              />
-            </a>
-          )}
+        {!isLoadingStudyDetails && studyDetails && (
+          <BrandLiftPageSubtitle
+            campaignId={studyDetails.campaignId}
+            campaignName={studyDetails.campaign?.campaignName}
+            studyName={studyDetails.name}
+            funnelStage={studyDetails.funnelStage}
+          />
+        )}
       </div>
       <SurveyQuestionBuilder
         studyId={studyId}

@@ -45,8 +45,8 @@ const BrandLiftPageSubtitle: React.FC<BrandLiftPageSubtitleProps> = ({
                         target="_blank"
                         rel="noopener noreferrer"
                     >
-                        <Icon iconId="faClipboardLight" className="mr-1 h-3.5 w-3.5 group-hover:hidden flex-shrink-0" />
-                        <Icon iconId="faClipboardSolid" className="mr-1 h-3.5 w-3.5 hidden group-hover:inline-block flex-shrink-0" />
+                        <Icon iconId="faClipboardLight" className="mr-1 h-3 w-3 group-hover:hidden flex-shrink-0" />
+                        <Icon iconId="faClipboardSolid" className="mr-1 h-3 w-3 hidden group-hover:inline-block flex-shrink-0" />
                         <span>{campaignName}</span>
                     </Link>
                 </Badge>
@@ -54,7 +54,7 @@ const BrandLiftPageSubtitle: React.FC<BrandLiftPageSubtitleProps> = ({
 
             {studyName && (
                 <Badge variant="outline" className="flex items-center text-xs font-normal px-2 py-0.5">
-                    <Icon iconId="faChartLineLight" className="mr-1 h-3.5 w-3.5 flex-shrink-0" />
+                    <Icon iconId="faChartLineLight" className="mr-1 h-3 w-3 flex-shrink-0" />
                     <span className="font-medium text-foreground">{studyName}</span>
                 </Badge>
 
@@ -67,7 +67,7 @@ const BrandLiftPageSubtitle: React.FC<BrandLiftPageSubtitleProps> = ({
 
             {funnelStage && (
                 <Badge variant="outline" className="flex items-center text-xs font-normal px-2 py-0.5">
-                    <Icon iconId={funnelIconToDisplayForTest} className="mr-1 h-3.5 w-3.5 flex-shrink-0" />
+                    <Icon iconId={funnelIconToDisplayForTest} className="mr-1 h-3 w-3 flex-shrink-0" />
                     <span>{funnelStage.replace(/_/g, ' ')}</span>
                 </Badge>
             )}
