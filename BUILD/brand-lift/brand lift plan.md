@@ -716,17 +716,18 @@ To maintain SSOT and clarity, feature-specific UI logic is encapsulated within c
 ### New Epic: BL-MVP-EPIC_DEBUG: Debug & Internal Tools
 *Focus: Create internal tools to help with debugging, support, and manual processes for the MVP.*
 
-#### [COMPLETED - Pending Mux Dashboard URL refinement and thorough testing] Ticket BL-MVP-DEBUG-01: Implement Mux Asset Checker
+#### [COMPLETED - Pending Mux Dashboard URL refinement, thorough testing, and icon fix verification] Ticket BL-MVP-DEBUG-01: Implement Mux Asset Checker
 -   **Type:** Feature (Debug Tool)
 -   **Description:** Create a debug tool page for Super Admins to list all Creative Assets that have Mux IDs, view their status, and link to Mux streams/dashboard.
 -   **API:** `GET /api/debug/mux-assets` created. **[COMPLETED]**
--   **UI:** Page `src/app/(admin)/debug-tools/mux-assets/page.tsx` created and linked from main debug tools page. **[COMPLETED - Pending Mux Dashboard URL refinement and thorough testing]**
+-   **UI:** Page `src/app/(admin)/debug-tools/mux-assets/page.tsx` created and linked from main debug tools page. **[COMPLETED - Icon updated to faShareLight. Pending Mux Dashboard URL refinement and thorough testing.]**
 -   **Acceptance Criteria:** Super Admins can view a list of Mux assets, see their processing status, and access direct stream links and links to the Mux dashboard (URL might require manual ID input by user for Mux dashboard for now).
 -   **Dependencies:** Clerk, Prisma, Mux account details (for dashboard link structure).
 
-#### [NEW - MVP SUPPORT] Ticket BL-MVP-DEBUG-02: Implement Campaign Wizard Checker
+#### [COMPLETED - API created, UI page created. Pending thorough testing and resolution of any linter/environment issues for clerkClient by user.] Ticket BL-MVP-DEBUG-02: Implement Campaign Wizard Checker
 -   **Type:** Feature (Debug Tool)
 -   **Description:** Create a debug tool page for Super Admins to list all Campaign Wizards, view their status, and link to the user-facing campaign view.
+-   **API:** `GET /api/debug/campaign-wizards` created. **[COMPLETED - Pending linter/environment fix by user for clerkClient calls if issues persist]**
 -   **API:** `GET /api/debug/campaign-wizards` created. **[COMPLETED]**
 -   **UI:** Page `src/app/(admin)/debug-tools/campaign-wizards/page.tsx` created and linked from main debug tools page. The old "Verify Campaign Data" input section on the main debug tools page has been removed. **[COMPLETED - Pending thorough testing]**
 -   **Acceptance Criteria:** Super Admins can view a list of all campaign wizards with key details and link to them.
@@ -737,25 +738,24 @@ To maintain SSOT and clarity, feature-specific UI logic is encapsulated within c
 ### Epic: BL-MVP-EPIC_SA: Super Admin Enhancements
 *Focus: Provide essential tools for the Justify Success Manager and enhance the Super Admin dashboard for better oversight. This includes a drill-down view: Super Admin -> List of Organisations -> Organisation Details (Users, Campaigns, Studies).*
 
-#### [API COMPLETED - UI PARTIALLY IMPLEMENTED, BLOCKED BY 403 (Super Admin role check failing). Linter issue with clerkClient usage to be resolved by user environment checks.] Ticket BL-MVP-SA-01: Super Admin - List All Organisations
+#### [COMPLETED - Functionality for API and UI to list organisations is implemented. User Management table removed. UI Polish/Testing Pending. Linter/environment issues for clerkClient calls to be monitored by user.] Ticket BL-MVP-SA-01: Super Admin - List All Organisations
 -   **Type:** Feature (UI & API)
--   **Description:** Display a list of all organisations in the Super Admin section. The main Super Admin page will list organisations, and the existing direct "User Management" table will be removed once users can be viewed via an organisation drill-down.
--   **API:** New endpoint `GET /api/admin/organisations` created that fetches all `Organisation` records from Clerk, restricted to Super Admins. (Note: endpoint path might be /api/admin/organizations due to file naming conventions, verify actual path used).
--   **UI:** Update `src/app/settings/super-admin/page.tsx` to fetch and display these organisations. Each organisation row should be clickable, linking to `/settings/super-admin/organisation/[orgId]`.
+-   **Description:** Display a list of all organisations in the Super Admin section. The main Super Admin page will list organisations, and the existing direct "User Management" table has been removed.
+-   **API:** New endpoint `GET /api/admin/organisations` created that fetches all `Organisation` records from Clerk, restricted to Super Admins. **[COMPLETED]**
+-   **UI:** Update `src/app/settings/super-admin/page.tsx` to fetch and display these organisations. Each organisation row should be clickable, linking to `/settings/super-admin/organisation/[orgId]`. **[COMPLETED - Functionality implemented]**
 -   **Dependencies:** Clerk SDK, Table/List UI components.
 
-#### [PENDING] Ticket BL-MVP-SA-02: Super Admin - View Organisation Details (Users, Campaigns, Studies)
+#### [IN PROGRESS - APIs for Users, Campaign Wizards, & Studies created. Org Detail Page UI displays Users. Next: Integrate Wizard & Study data display.] Ticket BL-MVP-SA-02: Super Admin - View Organisation Details (Users, Campaigns, Studies)
 -   **Type:** Feature (UI & API)
 -   **Description:** When an organisation is clicked (from SA-01), navigate to a new dynamic route page (e.g., `/settings/super-admin/organisation/[orgId]`) that displays: List of users for that organisation, Campaign Wizards created by users in that org, and Brand Lift Studies linked to campaigns from that org.
 -   **APIs:** 
-    - `GET /api/admin/organisations/[orgId]/users` (fetches users for an org - API implemented, UI integration pending).
-    - `GET /api/admin/organisations/[orgId]/campaign-wizards` (to be created).
-    - `GET /api/admin/organisations/[orgId]/brand-lift-studies` (to be created).
--   **UI:** New page component for `settings/super-admin/organisation/[orgId]`. Links to user-facing views for campaigns/studies. Table for users, lists for campaigns and studies.
+    - `GET /api/admin/organisations/[orgId]/users` **[COMPLETED]** 
+    - `GET /api/admin/organisations/[orgId]/campaign-wizards` **[COMPLETED]**
+    - `GET /api/admin/organisations/[orgId]/brand-lift-studies` **[COMPLETED]**.
+-   **UI:** New page component `src/app/settings/super-admin/organisation/[orgId]/page.tsx` created. It currently fetches and displays users for the organisation. **[PENDING: UI integration for Campaign Wizards and Brand Lift Studies sections. Then full UI Polish/Testing.]**
 -   **Dependencies:** SA-01, Prisma, Clerk.
 
 #### [COMPLETED - API created. UI integration (button) planned for SA-02 UI.] Ticket BL-MVP-SA-03: Super Admin - Brand Lift Study JSON Export
-#### [COMPLETED - API created. UI integration (button) pending SA-02.] Ticket BL-MVP-SA-03: Super Admin - Brand Lift Study JSON Export (formerly BL-MVP-TOOL-02)
 -   **Type:** Feature (API & UI)
 -   **Description:** On the `organization/[orgId]` page (SA-02), or callable directly by Super Admin, provide a JSON download of a Brand Lift study's structure.
 -   **API:** Endpoint `GET /api/brand-lift/surveys/[studyId]/export-structure` is implemented. Authorization allows Super Admin or org members.

@@ -18,6 +18,7 @@ import {
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import logger from '@/lib/logger';
 import Link from 'next/link';
+import { Badge } from '@/components/ui/badge';
 
 // Define a type for the user data expected from /api/admin/organizations/[orgId]/users
 interface OrgUserData {
@@ -235,32 +236,37 @@ const OrganisationDetailPage: React.FC = () => {
             {/* Campaign Wizards Section */}
             <Card>
                 <CardHeader>
-                    <CardTitle>Campaign Wizards</CardTitle>
+                    <CardTitle>Campaign Wizards ({campaignWizards.length})</CardTitle>
                 </CardHeader>
                 <CardContent>
                     {campaignWizards.length > 0 ? (
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Campaign Name</TableHead>
+                                    <TableHead>Name</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead>Created By</TableHead>
                                     <TableHead>Created At</TableHead>
-                                    {/* <TableHead>Actions</TableHead> */}
+                                    <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {campaignWizards.map(wizard => (
                                     <TableRow key={wizard.id}>
+                                        <TableCell className="font-medium">{wizard.name || 'Untitled Wizard'}</TableCell>
+                                        <TableCell><Badge variant={wizard.status === 'DRAFT' ? 'outline' : 'default'}>{wizard.status}</Badge></TableCell>
                                         <TableCell>
-                                            <Link href={`/campaigns/${wizard.id}`} target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline">
-                                                {wizard.name}
-                                            </Link>
+                                            <div>{wizard.user?.name || 'N/A'}</div>
+                                            <div className="text-xs text-muted-foreground">{wizard.user?.email || wizard.userId}</div>
                                         </TableCell>
-                                        <TableCell>{wizard.status}</TableCell>
-                                        <TableCell>{wizard.user?.name || wizard.user?.email || wizard.userId}</TableCell>
                                         <TableCell>{new Date(wizard.createdAt).toLocaleDateString()}</TableCell>
-                                        {/* <TableCell> <Button variant="outline" size="sm">View Details</Button> </TableCell> */}
+                                        <TableCell className="text-right">
+                                            <Button asChild variant="outline" size="sm">
+                                                <Link href={`/campaigns/${wizard.id}`} target="_blank" rel="noopener noreferrer">
+                                                    <Icon iconId="faEyeLight" className="mr-2 h-3.5 w-3.5" /> View Wizard
+                                                </Link>
+                                            </Button>
+                                        </TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
@@ -274,7 +280,7 @@ const OrganisationDetailPage: React.FC = () => {
             {/* Brand Lift Studies Section */}
             <Card>
                 <CardHeader>
-                    <CardTitle>Brand Lift Studies</CardTitle>
+                    <CardTitle>Brand Lift Studies ({brandLiftStudies.length})</CardTitle>
                 </CardHeader>
                 <CardContent>
                     {brandLiftStudies.length > 0 ? (
@@ -291,15 +297,15 @@ const OrganisationDetailPage: React.FC = () => {
                             <TableBody>
                                 {brandLiftStudies.map(study => (
                                     <TableRow key={study.id}>
-                                        <TableCell>
-                                            <Link href={`/brand-lift/approval/${study.id}`} target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline">
+                                        <TableCell className="font-medium">
+                                            <Link href={`/brand-lift/approval/${study.id}`} target="_blank" rel="noopener noreferrer" className="hover:underline">
                                                 {study.name}
                                             </Link>
                                         </TableCell>
-                                        <TableCell>{study.status}</TableCell>
+                                        <TableCell><Badge variant={study.status === 'DRAFT' ? 'outline' : 'default'}>{study.status}</Badge></TableCell>
                                         <TableCell>
                                             {study.campaignWizardName ? (
-                                                <Link href={`/campaigns/${study.campaignWizardId}`} target="_blank" rel="noopener noreferrer" className="text-sm text-secondary hover:underline">
+                                                <Link href={`/campaigns/${study.campaignWizardId}`} target="_blank" rel="noopener noreferrer" className="text-sm hover:underline">
                                                     {study.campaignWizardName}
                                                 </Link>
                                             ) : 'N/A'}
@@ -310,6 +316,7 @@ const OrganisationDetailPage: React.FC = () => {
                                                 variant="outline"
                                                 size="sm"
                                                 onClick={() => window.open(`/api/brand-lift/surveys/${study.id}/export-structure`, '_blank')}
+                                                className="mr-2"
                                             >
                                                 <Icon iconId="faDownloadLight" className="mr-2 h-3.5 w-3.5" />
                                                 Export JSON
