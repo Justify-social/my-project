@@ -359,8 +359,8 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({ studyId }) => {
                     <Icon iconId="faSpinnerLight" className="animate-spin" />
                   ) : (
                     <Icon iconId="faCheckSolid" className="mr-2" />
-                  )}{' '}
-                  Approve Study
+                  )}{/* Space */}
+                  Approve
                 </Button>
                 <Button
                   variant="outline"
@@ -374,8 +374,8 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({ studyId }) => {
                     <Icon iconId="faSpinnerLight" className="animate-spin" />
                   ) : (
                     <Icon iconId="faPenToSquareLight" className="mr-2" />
-                  )}{' '}
-                  Request Changes
+                  )}{/* Space */}
+                  Revise
                 </Button>
               </div>
             )}
