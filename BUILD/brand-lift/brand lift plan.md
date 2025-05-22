@@ -589,7 +589,7 @@ To maintain SSOT and clarity, feature-specific UI logic is encapsulated within c
     -   Appropriate logging for key events and errors. **[COMPLETED]**
 -   **Dependencies:** Prisma client, Clerk, Zod, `src/types/brand-lift.ts`, Shared error/logging utilities.
 
-#### [COMPLETED - Core functionality and data integration. Detailed UI polish, styling to match Figma, full responsiveness testing, and accessibility compliance are high priority for production readiness. Role-based permission logic for actions is currently basic (status-driven) and marked TODO for stricter role enforcement if required for MVP.] Ticket BL-MVP-P3-02: Build Approval Workflow UI Component
+#### [COMPLETED - Core functionality and data integration. Authorization now org-level for viewing/commenting/status. Detailed UI polish, styling to match Figma, full responsiveness testing, and accessibility compliance are high priority for production readiness. Role-based permission logic for *specific actions* (e.g. who can Approve vs. Sign-off) beyond org-level access is currently basic (status-driven) and marked TODO for stricter role enforcement if required for MVP.] Ticket BL-MVP-P3-02: Build Approval Workflow UI Component
 -   **Type:** Feature (UI)
 -   **Description:** Implement the user interface for reviewing surveys, adding comments, and managing the approval process. The detailed commenting and status management UI should align with `@Collaborative Approval & Formal Sign-Off.png`.
 -   **Acceptance Criteria:**
@@ -597,7 +597,7 @@ To maintain SSOT and clarity, feature-specific UI logic is encapsulated within c
     -   `src/components/features/brand-lift/ApprovalWorkflow.tsx` is created with data fetching (study, questions, comments, approval status), read-only survey display, `CommentThread` integration, `StatusTag` usage, and action buttons. **[COMPLETED]**
     -   UI matches Figma designs provided. UI is responsive and adheres **strictly** to the design system (Shadcn components, `globals.css`). **[PENDING - High priority for production readiness.]**
     -   Loading/error states for fetching/posting comments and updating status are handled clearly. **[COMPLETED]**
-    -   Action buttons are conditionally rendered/disabled based on user permissions (placeholder) and study/approval status. **[COMPLETED - Status-based logic implemented. Stricter role-based permission logic (e.g., distinct 'Approver' role) is a TODO if required beyond current owner/general user access for MVP.]**
+    -   Action buttons are conditionally rendered/disabled based on user permissions (placeholder) and study/approval status. **[COMPLETED - Status-based logic implemented. Org-level access to view/take actions is now in place. Stricter role-based permission logic (e.g., distinct 'Approver' role for *specific critical actions*) is a TODO if required beyond current setup for MVP.]**
     -   Graceful handling of empty states (no comments, etc.). **[COMPLETED]**
 -   **Dependencies:** `CommentThread`, `StatusTag` molecules. Shadcn UI components. Approval & Survey/Question APIs. Clerk session data.
 
@@ -613,7 +613,7 @@ To maintain SSOT and clarity, feature-specific UI logic is encapsulated within c
     -   State updates are accurately reflected in UI post-API calls (via refetching). **[COMPLETED]**
 -   **Dependencies:** Approval APIs (P3-01), Survey CRUD API (P1-01).
 
-#### [COMPLETED - Basic notifications for study owner/commenter implemented. Recipient logic for specific distinct roles (e.g., designated Reviewers, Approvers) pending full implementation/clarification of role-based permissions (see P3-02).] Ticket BL-MVP-P3-04: Implement Resend Email Notifications for Approval Workflow
+#### [COMPLETED - Basic notifications for study owner/commenter implemented. Recipient logic for specific distinct roles (e.g., designated Reviewers, Approvers) pending full implementation/clarification of role-based permissions (see P3-02). Notifications will also now correctly reflect broader org-level interaction if the commenter is not the owner but is in the same org.] Ticket BL-MVP-P3-04: Implement Resend Email Notifications for Approval Workflow
 -   **Type:** Feature (Backend/Integration)
 -   **Description:** Integrate with Resend API to send email notifications at key stages of the Brand Lift survey approval process.
 -   **Acceptance Criteria:**
@@ -624,7 +624,7 @@ To maintain SSOT and clarity, feature-specific UI logic is encapsulated within c
         *   Approval/Sign-off requested: Notifies designated approvers. **[COMPLETED - Placeholder approvers]**
         *   Survey Approved or Changes Requested: Notifies study owner. **[COMPLETED]**
     -   Email content templates defined in `NotificationService`. **[COMPLETED - Basic HTML templates]**
-    -   Recipient logic defined (placeholder for complex roles, uses study owner/submitter). **[COMPLETED - Basic logic for study owner/submitter. Recipient logic for specific distinct roles like 'Reviewer' or 'Approver' pending clearer definition and implementation of role-based permissions in P3-02.]**
+    -   Recipient logic defined (placeholder for complex roles, uses study owner/submitter). **[COMPLETED - Basic logic for study owner/submitter. Notifications will correctly handle cases where the interactor (e.g. commenter) is different from the owner but in the same org. Recipient logic for specific distinct roles like 'Reviewer' or 'Approver' pending clearer definition and implementation of role-based permissions in P3-02.]**
     -   Resend API key managed via environment variables (mock client used if key not present). **[COMPLETED - Mock client with env var check]**
     -   Error handling for Resend API calls implemented and logged. **[COMPLETED - Within `NotificationService.sendEmail`]**
 -   **Dependencies:** Resend API credentials, `NotificationService`, User/Study data for context.
@@ -713,8 +713,35 @@ To maintain SSOT and clarity, feature-specific UI logic is encapsulated within c
 
 ---
 
-### New Epic: BL-MVP-EPIC_SM_TOOLS: Success Manager & MVP Finalization Tools
-*Focus: Provide essential tools for the Justify Success Manager for the manual MVP process and the user-facing page for post-submission feedback.*
+### New Epic: BL-MVP-EPIC_SA: Super Admin Enhancements
+*Focus: Provide essential tools for the Justify Success Manager and enhance the Super Admin dashboard for better oversight. This includes a drill-down view: Super Admin -> List of Organisations -> Organisation Details (Users, Campaigns, Studies).*
+
+#### [API COMPLETED - UI PARTIALLY IMPLEMENTED, BLOCKED BY 403 (Super Admin role check failing). Linter issue with clerkClient usage to be resolved by user environment checks.] Ticket BL-MVP-SA-01: Super Admin - List All Organisations
+-   **Type:** Feature (UI & API)
+-   **Description:** Display a list of all organisations in the Super Admin section. The main Super Admin page will list organisations, and the existing direct "User Management" table will be removed once users can be viewed via an organisation drill-down.
+-   **API:** New endpoint `GET /api/admin/organisations` created that fetches all `Organisation` records from Clerk, restricted to Super Admins. (Note: endpoint path might be /api/admin/organizations due to file naming conventions, verify actual path used).
+-   **UI:** Update `src/app/settings/super-admin/page.tsx` to fetch and display these organisations. Each organisation row should be clickable, linking to `/settings/super-admin/organisation/[orgId]`.
+-   **Dependencies:** Clerk SDK, Table/List UI components.
+
+#### [PENDING] Ticket BL-MVP-SA-02: Super Admin - View Organisation Details (Users, Campaigns, Studies)
+-   **Type:** Feature (UI & API)
+-   **Description:** When an organisation is clicked (from SA-01), navigate to a new dynamic route page (e.g., `/settings/super-admin/organisation/[orgId]`) that displays: List of users for that organisation, Campaign Wizards created by users in that org, and Brand Lift Studies linked to campaigns from that org.
+-   **APIs:** 
+    - `GET /api/admin/organisations/[orgId]/users` (fetches users for an org - API implemented, UI integration pending).
+    - `GET /api/admin/organisations/[orgId]/campaign-wizards` (to be created).
+    - `GET /api/admin/organisations/[orgId]/brand-lift-studies` (to be created).
+-   **UI:** New page component for `settings/super-admin/organisation/[orgId]`. Links to user-facing views for campaigns/studies. Table for users, lists for campaigns and studies.
+-   **Dependencies:** SA-01, Prisma, Clerk.
+
+#### [COMPLETED - API created. UI integration (button) planned for SA-02 UI.] Ticket BL-MVP-SA-03: Super Admin - Brand Lift Study JSON Export
+#### [COMPLETED - API created. UI integration (button) pending SA-02.] Ticket BL-MVP-SA-03: Super Admin - Brand Lift Study JSON Export (formerly BL-MVP-TOOL-02)
+-   **Type:** Feature (API & UI)
+-   **Description:** On the `organization/[orgId]` page (SA-02), or callable directly by Super Admin, provide a JSON download of a Brand Lift study's structure.
+-   **API:** Endpoint `GET /api/brand-lift/surveys/[studyId]/export-structure` is implemented. Authorization allows Super Admin or org members.
+-   **Output:** JSON file.
+-   **UI:** Button to trigger download (to be added in SA-02 UI).
+-   **Dependencies:** Prisma, Clerk, `src/types/brand-lift.ts`.
+
 
 #### [COMPLETED - Core functionality and styling alignment. Final responsiveness/accessibility testing pending.] Ticket BL-MVP-TOOL-01: Implement "Pending Report" Page for User
 -   **Type:** Feature (UI)
@@ -728,7 +755,7 @@ To maintain SSOT and clarity, feature-specific UI logic is encapsulated within c
     -   The `ApprovalWorkflow.tsx` component correctly redirects to this page after a successful final submission API call. **[COMPLETED]**
 -   **Dependencies:** `BrandLiftPageSubtitle`, `Button`, `Icon` UI components. Study data fetching API.
 
-#### [PENDING - Next Task] Ticket BL-MVP-TOOL-02: Implement Survey Structure Export (JSON) for Success Manager
+#### [DEFERRED - API implemented as BL-MVP-SA-03. Success Manager will use this for now.] Ticket BL-MVP-TOOL-02: Implement Survey Structure Export (JSON) for Success Manager
 -   **Type:** Feature (API)
 -   **Description:** Create a backend endpoint to allow a Justify Success Manager (or authorized user) to download the complete structure of a Brand Lift study (study details, all questions, all options) as a JSON file. This aids in the manual creation of reports for the MVP.
 -   **Acceptance Criteria:**

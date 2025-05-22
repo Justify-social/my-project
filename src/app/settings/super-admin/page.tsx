@@ -74,92 +74,48 @@ const TeamPageSkeleton = () => (
 
 // --- Main Component ---
 const SuperAdminSettingsPage = () => {
-  const { isLoaded: isUserLoaded } = useUser(); // Need user for checks
+  const { isLoaded: isUserLoaded } = useUser();
   const { isLoaded: isAuthLoaded, sessionClaims } = useAuth();
   const isSuperAdmin = sessionClaims?.['metadata.role'] === 'super_admin';
 
-  const [users, setUsers] = useState<UserData[]>([]);
-  const [isLoadingData, setIsLoadingData] = useState(true);
-  const [error, setError] = useState<string>('');
-  const [showSuspendConfirm, setShowSuspendConfirm] = useState(false);
-  const [userToSuspend, setUserToSuspend] = useState<UserData | null>(null);
-  const [isSuspending, setIsSuspending] = useState(false);
-  const [suspendedUserIds, setSuspendedUserIds] = useState<Set<string>>(new Set());
-  const _queryClient = useQueryClient(); // Prefixed
-  const _router = useRouter(); // Prefixed
-  const [_page, _setPage] = useState(1); // Prefixed
+  const [organizations, setOrganizations] = useState<any[]>([]);
+  const [isLoadingOrgs, setIsLoadingOrgs] = useState(true);
+  const [orgError, setOrgError] = useState<string>('');
+
+  const _queryClient = useQueryClient();
+  const _router = useRouter();
+  const [_page, _setPage] = useState(1);
 
   // --- Data Fetching Effect ---
   useEffect(() => {
     if (isAuthLoaded && isSuperAdmin) {
-      const fetchUsers = async () => {
-        setIsLoadingData(true);
-        setError('');
+      const fetchOrganizations = async () => {
+        setIsLoadingOrgs(true);
+        setOrgError('');
         try {
-          // Update the fetch URL to the new API endpoint
-          const response = await fetch('/api/settings/super-admin/users');
+          const response = await fetch('/api/admin/organizations');
           if (!response.ok) {
-            throw new Error(`API Error: ${response.status} ${response.statusText}`);
+            throw new Error(`API Error fetching organisations: ${response.status} ${response.statusText}`);
           }
           const data = await response.json();
-          if (data.success) {
-            setUsers(data.users || []);
-          } else {
-            throw new Error(data.error || 'Failed to parse users data');
-          }
+          setOrganizations(data || []);
         } catch (err) {
-          console.error('Error fetching users:', err);
-          setError(err instanceof Error ? err.message : 'Failed to load users');
+          console.error('Error fetching organisations:', err);
+          setOrgError(err instanceof Error ? err.message : 'Failed to load organisations');
         } finally {
-          setIsLoadingData(false);
+          setIsLoadingOrgs(false);
         }
       };
-      fetchUsers();
+
+      fetchOrganizations();
+
     } else if (isAuthLoaded && !isSuperAdmin) {
-      setIsLoadingData(false);
+      setIsLoadingOrgs(false);
     }
   }, [isAuthLoaded, isSuperAdmin]);
 
-  // --- Handlers ---
-  const handleUpdateUserRole = async (userId: string, newRole: string) => {
-    // TODO: Re-implement API call if needed
-    console.log('Update role for', userId, 'to', newRole);
-    toast('Role update endpoint not implemented yet.');
-  };
-
-  const handleViewUser = async (userData: UserData) => {
-    // TODO: Re-implement user detail modal logic
-    console.log('View user:', userData);
-    toast('User detail view not implemented yet.');
-  };
-
-  const handleSuspendUser = async () => {
-    if (!userToSuspend) return;
-    setIsSuspending(true);
-    toast('Suspend action endpoint not implemented yet.');
-    console.log('Suspend user:', userToSuspend.id);
-    // TODO: Re-implement API call if needed
-    // Mock success for UI testing
-    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate delay
-    setSuspendedUserIds(prev => {
-      const newSet = new Set(prev);
-      newSet.add(userToSuspend.id);
-      return newSet;
-    });
-    setShowSuspendConfirm(false);
-    setUserToSuspend(null);
-    setIsSuspending(false);
-    toast.success('Mock suspend complete.');
-  };
-
-  const isUserSuspended = (userId: string) => {
-    return suspendedUserIds.has(userId);
-  };
-  // --------------
-
   // --- Render Logic ---
   if (!isAuthLoaded || !isUserLoaded) {
-    // Wait for both user and auth
     return <TeamPageSkeleton />;
   }
 
@@ -169,9 +125,9 @@ const SuperAdminSettingsPage = () => {
 
   return (
     <div className="space-y-8">
-      {/* Header Section with Title and Debug Button */}
+      {/* Organisation Management Section */}
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold text-primary">User Management</h2>
+        <h2 className="text-xl font-semibold text-primary">Organisation Management</h2>
         <Link href="/debug-tools">
           <Button className="bg-orange-500 hover:bg-orange-600 text-white" asChild>
             <span>
@@ -181,95 +137,48 @@ const SuperAdminSettingsPage = () => {
           </Button>
         </Link>
       </div>
-      {isLoadingData ? (
+      {isLoadingOrgs ? (
         <div className="flex justify-center items-center h-40">
           <LoadingSpinner />
         </div>
-      ) : error ? (
+      ) : orgError ? (
         <div className="p-4 text-destructive bg-destructive/10 border border-destructive rounded-md">
-          Error loading users: {error}
+          Error loading organisations: {orgError}
         </div>
       ) : (
         <Card>
           <CardHeader>
-            <div className="flex justify-end">
-              <input
-                type="text"
-                placeholder="Search users..."
-                className="px-3 py-1 border border-input rounded-md focus:outline-none focus:ring-1 focus:ring-ring text-sm"
-              />
-            </div>
+            {/* Search for organisations can be added here later */}
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Company</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Last Login</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>ID/Slug</TableHead>
+                  <TableHead>Members</TableHead>
+                  <TableHead>Created At</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users.map(userData => (
-                  <TableRow key={userData.id} className="hover:bg-muted/50">
+                {organizations.map(org => (
+                  <TableRow key={org.id} className="hover:bg-muted/50">
                     <TableCell>
-                      <div className="font-medium text-primary">{userData.name}</div>
-                      <div className="text-xs text-secondary">{userData.email}</div>
+                      <Link href={`/settings/super-admin/organization/${org.id}`} className="font-medium text-primary hover:underline">
+                        {org.name}
+                      </Link>
                     </TableCell>
-                    <TableCell className="text-sm text-secondary">{userData.companyId}</TableCell>
-                    <TableCell>
-                      <Select
-                        defaultValue={userData.role}
-                        onValueChange={newRole => handleUpdateUserRole(userData.id, newRole)}
-                        disabled={isUserSuspended(userData.id)}
-                      >
-                        <SelectTrigger className="w-[100px] h-8 text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="OWNER">Owner</SelectItem>
-                          <SelectItem value="ADMIN">Admin</SelectItem>
-                          <SelectItem value="MEMBER">Member</SelectItem>
-                          <SelectItem value="VIEWER">Viewer</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
+                    <TableCell className="text-sm text-secondary">{org.slug || org.id}</TableCell>
+                    <TableCell className="text-sm text-secondary">{org.membersCount}</TableCell>
                     <TableCell className="text-sm text-secondary">
-                      {new Date(userData.lastLogin).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleViewUser(userData)}
-                        className="mr-2"
-                      >
-                        View
-                      </Button>
-                      {!isUserSuspended(userData.id) ? (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => {
-                            setUserToSuspend(userData);
-                            setShowSuspendConfirm(true);
-                          }}
-                        >
-                          Suspend
-                        </Button>
-                      ) : (
-                        <span className="text-xs text-muted-foreground italic">Suspended</span>
-                      )}
+                      {new Date(org.createdAt).toLocaleDateString()}
                     </TableCell>
                   </TableRow>
                 ))}
-                {users.length === 0 && (
+                {organizations.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                      No users found.
+                    <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                      No organisations found.
                     </TableCell>
                   </TableRow>
                 )}
@@ -278,34 +187,6 @@ const SuperAdminSettingsPage = () => {
           </CardContent>
         </Card>
       )}
-      {/* Suspend Confirmation Modal */}
-      <Dialog open={showSuspendConfirm} onOpenChange={setShowSuspendConfirm}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="text-destructive">Suspend User?</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <p>
-              Are you sure you want to suspend <strong>{userToSuspend?.name}</strong> (
-              {userToSuspend?.email})?
-            </p>
-            <p className="mt-2 text-sm text-muted-foreground">This action can be reversed later.</p>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="ghost"
-              onClick={() => setShowSuspendConfirm(false)}
-              disabled={isSuspending}
-            >
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleSuspendUser} disabled={isSuspending}>
-              {isSuspending ? <LoadingSpinner size="sm" className="mr-2" /> : null}
-              Suspend User
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

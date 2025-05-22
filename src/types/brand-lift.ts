@@ -25,6 +25,7 @@ export interface BrandLiftStudyData {
   updatedAt: Date;
   cintProjectId?: string | null; // ID from Cint API after project creation
   cintTargetGroupId?: string | null; // ID from Cint API after target group creation
+  orgId?: string | null; // Organization ID
   // Potentially: targetAudienceCriteria?: any; // To store criteria sent to Cint
   campaign?: {
     campaignName?: string | null;
