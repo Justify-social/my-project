@@ -45,9 +45,11 @@ function Step4Content() {
       assets:
         wizard.wizardState?.assets && Array.isArray(wizard.wizardState.assets)
           ? wizard.wizardState.assets.map(asset => ({
-            ...asset,
-            fieldId: asset.fieldId || `field-${asset.id || Date.now()}-${Math.random().toString(36).substring(2, 9)}`
-          }))
+              ...asset,
+              fieldId:
+                asset.fieldId ||
+                `field-${asset.id || Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+            }))
           : ([] as DraftAsset[]), // Explicitly type empty array if providing one
       step4Complete:
         wizard.wizardState && typeof wizard.wizardState.step4Complete === 'boolean'
@@ -68,7 +70,7 @@ function Step4Content() {
     },
   });
 
-  // Use type assertion to bypass the TypeScript error 
+  // Use type assertion to bypass the TypeScript error
   // This approach has been used in the codebase before and works
   const {
     fields: assetFields,
@@ -447,9 +449,7 @@ function Step4Content() {
 
     if (processingAssetIds && processingAssetIds.length > 0) {
       setProcessingAssetIdsInPoll(prevPollIds => {
-        const newIdsToPoll = processingAssetIds.filter(
-          id => !prevPollIds.includes(id)
-        );
+        const newIdsToPoll = processingAssetIds.filter(id => !prevPollIds.includes(id));
         if (newIdsToPoll.length > 0) {
           console.log(
             '[Step4Content Polling Effect1] Adding new assets to poll list:',
@@ -487,31 +487,25 @@ function Step4Content() {
 
     // Function that actually performs the polling
     const executePoll = () => {
-      // Skip this poll if the previous one hasn't completed yet
       if (isPollingActiveRef.current) {
         console.log('[Step4Content Polling] Skipping poll as previous request still in progress');
         return;
       }
-
-      // Skip if we're in a cooling period
       const now = Date.now();
       if (now - lastPollTimeRef.current < MIN_POLL_INTERVAL_MS) {
         console.log('[Step4Content Polling] Skipping poll due to minimum interval enforcement');
         return;
       }
-
-      // Skip if wizard is loading data
       if (wizard.isLoading) {
         console.log('[Step4Content Polling] Skipping poll as wizard is already loading');
         return;
       }
 
-      // Check attempts for each ID before reloading
-      let shouldReload = false;
+      let shouldReloadDueToAttempts = false;
       processingAssetIdsInPoll.forEach(id => {
         pollAttemptsRef.current[id] = (pollAttemptsRef.current[id] || 0) + 1;
         if (pollAttemptsRef.current[id] <= MAX_POLL_ATTEMPTS_PER_ASSET) {
-          shouldReload = true;
+          shouldReloadDueToAttempts = true;
         } else {
           console.warn(
             `[Step4Content Polling Effect2] Max poll attempts reached for asset ID ${id}. Will not trigger reload for this asset anymore.`
@@ -519,42 +513,54 @@ function Step4Content() {
         }
       });
 
-      if (!shouldReload) {
-        // All assets have reached their max poll attempts, so stop polling
+      if (!shouldReloadDueToAttempts) {
         if (pollingIntervalRef.current) {
           clearInterval(pollingIntervalRef.current);
           pollingIntervalRef.current = null;
         }
+        isPollingActiveRef.current = false;
         return;
       }
 
-      // Update the last poll time
-      lastPollTimeRef.current = now;
+      const currentFormAssets = form.getValues('assets');
+      const anyStillProcessingInPollList = processingAssetIdsInPoll.some(idToPoll => {
+        const formAsset = currentFormAssets?.find(
+          fa => String(fa.internalAssetId) === String(idToPoll)
+        );
+        if (!formAsset) return false;
+        const isTerminal =
+          formAsset.muxProcessingStatus === 'READY' ||
+          formAsset.muxProcessingStatus === 'ERROR' ||
+          formAsset.muxProcessingStatus === 'ERROR_NO_PLAYBACK_ID';
+        return !isTerminal;
+      });
 
-      // Mark polling as active before making the request
+      if (!anyStillProcessingInPollList) {
+        console.log(
+          '[Step4Content Polling executePoll] All assets in current poll list are now in terminal state (or gone from form). Skipping reload.'
+        );
+        isPollingActiveRef.current = false;
+        // Effect 3 will handle clearing processingAssetIdsInPoll and stopping the interval if list becomes empty.
+        return;
+      }
+
       isPollingActiveRef.current = true;
-
-      // Log the polling attempts
+      lastPollTimeRef.current = now;
       const activePollAttempts = processingAssetIdsInPoll.map(id => pollAttemptsRef.current[id]);
       console.log(
-        `[Step4Content Polling Effect2] Polling. Attempts for IDs ${processingAssetIdsInPoll.join(', ')}: ${activePollAttempts.join(', ')}. Reloading campaign data.`
+        `[Step4Content Polling Effect2] Polling. Attempts for IDs ${processingAssetIdsInPoll.join(', ')} : ${activePollAttempts.join(', ')}. Reloading campaign data.`
       );
-
-      // Call the reload function - this is a non-blocking call to prevent react hook issues
       try {
         wizard.reloadCampaignData();
       } catch (error) {
         console.error('[Step4Content Polling] Error reloading campaign data:', error);
       }
-
-      // Always set polling back to inactive after a delay
       setTimeout(() => {
         isPollingActiveRef.current = false;
       }, COOLING_PERIOD_AFTER_RELOAD_MS);
     };
 
-    // Set up the polling interval
-    pollingIntervalRef.current = setInterval(executePoll, MIN_POLL_INTERVAL_MS + 1000); // Add 1s buffer
+    pollingIntervalRef.current = setInterval(executePoll, MIN_POLL_INTERVAL_MS + 1000);
 
     // Run the poll immediately for the first time
     if (!isPollingActiveRef.current && processingAssetIdsInPoll.length > 0) {
@@ -689,11 +695,15 @@ function Step4Content() {
     // Ensure all assets have fieldId and required fields are properly formatted
     const assetsWithFieldIds = data.assets.map(asset => ({
       ...asset,
-      fieldId: asset.fieldId || `field-${asset.id || Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      fieldId:
+        asset.fieldId ||
+        `field-${asset.id || Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       // Ensure these fields are explicitly included for saving
       rationale: asset.rationale || '',
       budget: typeof asset.budget === 'number' ? asset.budget : 0,
-      associatedInfluencerIds: Array.isArray(asset.associatedInfluencerIds) ? asset.associatedInfluencerIds : []
+      associatedInfluencerIds: Array.isArray(asset.associatedInfluencerIds)
+        ? asset.associatedInfluencerIds
+        : [],
     }));
 
     // Log the prepared assets data for debugging
@@ -720,7 +730,7 @@ function Step4Content() {
       form.reset(
         {
           ...data,
-          assets: assetsWithFieldIds
+          assets: assetsWithFieldIds,
         },
         {
           keepValues: false,
@@ -786,11 +796,15 @@ function Step4Content() {
     // Ensure all assets have fieldId
     const assetsWithFieldIds = data.assets.map(asset => ({
       ...asset,
-      fieldId: asset.fieldId || `field-${asset.id || Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      fieldId:
+        asset.fieldId ||
+        `field-${asset.id || Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       // Ensure these fields are explicitly included for saving
       rationale: asset.rationale || '',
       budget: typeof asset.budget === 'number' ? asset.budget : 0,
-      associatedInfluencerIds: Array.isArray(asset.associatedInfluencerIds) ? asset.associatedInfluencerIds : []
+      associatedInfluencerIds: Array.isArray(asset.associatedInfluencerIds)
+        ? asset.associatedInfluencerIds
+        : [],
     }));
 
     // Log the prepared assets data for debugging
@@ -818,7 +832,7 @@ function Step4Content() {
         form.reset(
           {
             ...data,
-            assets: assetsWithFieldIds
+            assets: assetsWithFieldIds,
           },
           {
             keepValues: false,
@@ -867,7 +881,7 @@ function Step4Content() {
           isNextDisabled={true} // Disable if no state
           isNextLoading={wizard.isLoading}
           onSave={handleSave}
-        // getCurrentFormData may not be available if form is not initialized
+          // getCurrentFormData may not be available if form is not initialized
         />
       </div>
     );
@@ -904,8 +918,8 @@ function Step4Content() {
               {/* VideoFileUploader is now the primary/only uploader here */}
               <div className="mt-0 pt-0">
                 {wizard.wizardState &&
-                  typeof wizard.wizardState.id === 'string' &&
-                  wizard.wizardState.id ? (
+                typeof wizard.wizardState.id === 'string' &&
+                wizard.wizardState.id ? (
                   <VideoFileUploader
                     name="assets"
                     control={form.control}
@@ -940,6 +954,7 @@ function Step4Content() {
                     <div key={field.fieldId} className="relative group">
                       {/* Render the Step 4 card component with proper casting */}
                       <AssetCardStep4
+                        key={field.fieldId}
                         assetIndex={index}
                         asset={asset}
                         control={form.control}

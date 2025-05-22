@@ -90,7 +90,7 @@ export const DraftAssetSchema = z
     description: z.string().optional(),
     temp: z.boolean().optional(),
     rationale: z.string().optional(),
-    budget: z.number().positive({ message: 'Budget must be positive' }).optional(),
+    budget: z.number().positive({ message: 'Budget must be positive' }).optional().nullable(),
     associatedInfluencerIds: z.array(z.string()).optional(),
 
     // Mux-specific fields
@@ -672,8 +672,8 @@ export const Step4ValidationSchema = Step4BaseSchema.extend({
     return data.assets && data.assets.length > 0;
   },
   {
-    message: "At least one asset is required to complete this step.",
-    path: ["assets"], // Path for error message
+    message: 'At least one asset is required to complete this step.',
+    path: ['assets'], // Path for error message
   }
 );
 

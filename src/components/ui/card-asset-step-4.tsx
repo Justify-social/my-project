@@ -77,7 +77,7 @@ interface AssetData {
   type?: string; // 'image', 'video'
   influencerHandle?: string; // Kept for potential display, though not directly edited here
   description?: string; // Used for display
-  budget?: number | string;
+  budget?: number | null | undefined;
   rationale?: string; // Added based on usage
   associatedInfluencerIds?: string[]; // Added based on usage
 
@@ -111,7 +111,7 @@ export interface AssetCardProps {
  * @description Card component displaying asset information with preview, title, platform, and budget using standard Card components.
  * @status 10th April
  */
-export function AssetCardStep4({
+export const AssetCardStep4 = React.memo(function AssetCardStep4({
   assetIndex,
   asset,
   control,
@@ -264,19 +264,26 @@ export function AssetCardStep4({
               // Ensure all assets have a fieldId and required fields are properly formatted
               const assetsWithFieldIds = currentData.assets.map(asset => ({
                 ...asset,
-                fieldId: asset.fieldId || `field-${asset.id || Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+                fieldId:
+                  asset.fieldId ||
+                  `field-${asset.id || Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
                 // Ensure these fields are explicitly included for saving
                 rationale: asset.rationale || '',
-                budget: typeof asset.budget === 'number' ? asset.budget : 0,
-                associatedInfluencerIds: Array.isArray(asset.associatedInfluencerIds) ? asset.associatedInfluencerIds : []
+                budget: typeof asset.budget === 'number' ? asset.budget : null,
+                associatedInfluencerIds: Array.isArray(asset.associatedInfluencerIds)
+                  ? asset.associatedInfluencerIds
+                  : [],
               }));
 
-              console.log(`[Save icon] Prepared assets for save, including rationale, budget:`, assetsWithFieldIds);
+              console.log(
+                `[Save icon] Prepared assets for save, including rationale, budget:`,
+                assetsWithFieldIds
+              );
 
               const payload = {
                 ...currentData,
                 assets: assetsWithFieldIds,
-                currentStep: 4
+                currentStep: 4,
               };
               await saveProgress(payload);
               toast.success('Step 4 progress saved.');
@@ -484,6 +491,6 @@ export function AssetCardStep4({
       </CardContent>
     </Card>
   );
-}
+});
 
 export default AssetCardStep4;

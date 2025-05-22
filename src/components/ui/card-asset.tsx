@@ -195,7 +195,6 @@ export const AssetPreview = ({
           title={fileName}
           autoPlay="any"
           muted={true}
-          loop={true}
           preload="auto"
         />
         {mediaTypeIconId && (
@@ -353,7 +352,7 @@ interface AssetData {
   platform?: string | undefined; // Allow undefined
   influencerHandle?: string;
   description?: string;
-  budget?: number | string;
+  budget?: number | null | undefined; // Align with DraftAssetSchema (number | null | undefined)
   muxPlaybackId?: string;
   muxProcessingStatus?: string;
   fieldId?: string;
@@ -462,8 +461,10 @@ export function AssetCard({
             ) : (
               <p className="text-xs text-red-400">Influencer: Not provided to card</p>
             )}
-            {(budget !== undefined && budget !== null) ? (
-              <p className="text-xs text-red-600">Asset Budget: {formatCurrency(budget, currency)}</p>
+            {budget !== undefined && budget !== null ? (
+              <p className="text-xs text-red-600">
+                Asset Budget: {formatCurrency(budget, currency)}
+              </p>
             ) : (
               <p className="text-xs text-red-400">Asset Budget: Not provided to card</p>
             )}

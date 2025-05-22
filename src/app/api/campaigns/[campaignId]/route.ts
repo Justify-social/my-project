@@ -548,11 +548,76 @@ export async function DELETE(
       await tx.wizardHistory.deleteMany({
         where: { wizardId: campaignId },
       });
+
       if (campaignWizardToDelete.submissionId) {
-        await tx.campaignWizardSubmission.deleteMany({
-          where: { id: campaignWizardToDelete.submissionId },
+        const submissionIdToDelete = campaignWizardToDelete.submissionId;
+
+        // Fetch the CampaignWizardSubmission to get its related IDs
+        const submission = await tx.campaignWizardSubmission.findUnique({
+          where: { id: submissionIdToDelete },
+          select: { primaryContactId: true, secondaryContactId: true },
         });
+
+        if (submission) {
+          // Get all Audience IDs linked to this submission
+          const audiences = await tx.audience.findMany({
+            where: { submissionId: submissionIdToDelete },
+            select: { id: true },
+          });
+          const audienceIds = audiences.map(a => a.id);
+
+          if (audienceIds.length > 0) {
+            // Delete all "grandchildren" records linked to these Audience IDs
+            await tx.audienceLocation.deleteMany({
+              where: { audienceId: { in: audienceIds } },
+            });
+            await tx.audienceGender.deleteMany({
+              where: { audienceId: { in: audienceIds } },
+            });
+            await tx.audienceScreeningQuestion.deleteMany({
+              where: { audienceId: { in: audienceIds } },
+            });
+            await tx.audienceLanguage.deleteMany({
+              where: { audienceId: { in: audienceIds } },
+            });
+            await tx.audienceCompetitor.deleteMany({
+              where: { audienceId: { in: audienceIds } },
+            });
+
+            // Now delete the Audience records themselves
+            await tx.audience.deleteMany({
+              where: { id: { in: audienceIds } },
+            });
+          }
+
+          // Delete records from CreativeRequirement table referencing the CampaignWizardSubmission
+          await tx.creativeRequirement.deleteMany({
+            where: { submissionId: submissionIdToDelete },
+          });
+
+          // Note: CreativeAsset and BrandLiftStudy have onDelete: Cascade
+
+          // First, delete the CampaignWizardSubmission itself. This releases FK constraints.
+          await tx.campaignWizardSubmission.delete({
+            where: { id: submissionIdToDelete },
+          });
+
+          // Now, delete PrimaryContact if it existed
+          if (submission.primaryContactId) {
+            await tx.primaryContact.delete({
+              where: { id: submission.primaryContactId },
+            });
+          }
+
+          // And delete SecondaryContact if it existed
+          if (submission.secondaryContactId) {
+            await tx.secondaryContact.delete({
+              where: { id: submission.secondaryContactId },
+            });
+          }
+        }
       }
+
       await tx.campaignWizard.delete({
         where: { id: campaignId },
       });
