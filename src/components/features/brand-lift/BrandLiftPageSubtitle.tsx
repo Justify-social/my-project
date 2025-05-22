@@ -13,12 +13,12 @@ interface BrandLiftPageSubtitleProps {
     // TODO: Potentially add campaignPathPrefix if it's not always '/campaigns/'
 }
 
-// const FunnelIconMap: Record<string, string> = {
-//     'Top Funnel': 'appFunnelTop',
-//     'Middle Funnel': 'appFunnellMiddle', // Corrected typo if intended, or use appFunnelMiddle
-//     'Bottom Funnel': 'appFunnelBottom',
-//     'Full Funnel': 'appFunnelMiddle', 
-// }; // Commented out as we are using faMoonLight for testing
+const FunnelIconMap: Record<string, string> = {
+    'Top Funnel': 'appFunnelTop',
+    'Middle Funnel': 'appFunnelMiddle',
+    'Bottom Funnel': 'appFunnelBottom',
+    'Full Funnel': 'appFunnelMiddle', // Or a specific full funnel icon if available e.g. appFunnelFull
+};
 
 const BrandLiftPageSubtitle: React.FC<BrandLiftPageSubtitleProps> = ({
     campaignId,
@@ -30,7 +30,7 @@ const BrandLiftPageSubtitle: React.FC<BrandLiftPageSubtitleProps> = ({
         return null;
     }
 
-    const funnelIconToDisplayForTest = 'faMoonLight'; // Using faMoonLight for testing
+    const funnelIconId = (funnelStage && FunnelIconMap[funnelStage]) || 'faFilterList'; // Default icon
 
     // Determine if there's content before the funnel stage that would require a separator
     const hasContentBeforeFunnel = (campaignId && campaignName) || studyName;
@@ -67,7 +67,7 @@ const BrandLiftPageSubtitle: React.FC<BrandLiftPageSubtitleProps> = ({
 
             {funnelStage && (
                 <Badge variant="outline" className="flex items-center text-xs font-normal px-2 py-0.5">
-                    <Icon iconId={funnelIconToDisplayForTest} className="mr-1 h-3 w-3 flex-shrink-0" />
+                    <Icon iconId={funnelIconId} className="mr-1 h-3 w-3 flex-shrink-0" />
                     <span>{funnelStage.replace(/_/g, ' ')}</span>
                 </Badge>
             )}
