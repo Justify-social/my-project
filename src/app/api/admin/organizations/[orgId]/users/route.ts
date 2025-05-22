@@ -7,7 +7,7 @@ import { OrganizationMembership } from '@clerk/backend';
 
 export const GET = async (
     req: NextRequest,
-    { params }: { params: { orgId: string } }
+    { params: paramsPromise }: { params: Promise<{ orgId: string }> }
 ) => {
     try {
         const { userId: clerkUserId, sessionClaims } = await auth();
@@ -16,27 +16,30 @@ export const GET = async (
         }
 
         if (sessionClaims?.['metadata.role'] !== 'super_admin') {
+            const paramsForLog = await paramsPromise;
             logger.warn(
-                `Non-Super Admin attempted to access /api/admin/organizations/[orgId]/users for org ${params.orgId}`,
+                `User lacking Super Admin role attempted to access users for org ${paramsForLog.orgId}`,
                 { clerkUserId, metadataRole: sessionClaims?.['metadata.role'] }
             );
             throw new ForbiddenError('Access restricted to Super Admins.');
         }
 
+        const params = await paramsPromise;
         const { orgId } = params;
         if (!orgId) {
             throw new BadRequestError('Organization ID is required.');
         }
 
-        const organizationMembershipList = await clerkClient.organizations.getOrganizationMembershipList({ organizationId: orgId });
+        const client = await clerkClient();
+        const organizationMembershipList = await client.organizations.getOrganizationMembershipList({ organizationId: orgId });
 
-        const users = organizationMembershipList.map((membership: OrganizationMembership) => {
+        const users = organizationMembershipList.data.map((membership: OrganizationMembership) => {
             return {
                 id: membership.publicUserData?.userId,
                 firstName: membership.publicUserData?.firstName,
                 lastName: membership.publicUserData?.lastName,
                 identifier: membership.publicUserData?.identifier,
-                profileImageUrl: membership.publicUserData?.profileImageUrl,
+                profileImageUrl: membership.publicUserData?.imageUrl,
                 role: membership.role,
             };
         });

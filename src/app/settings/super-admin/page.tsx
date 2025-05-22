@@ -164,7 +164,7 @@ const SuperAdminSettingsPage = () => {
                 {organizations.map(org => (
                   <TableRow key={org.id} className="hover:bg-muted/50">
                     <TableCell>
-                      <Link href={`/settings/super-admin/organization/${org.id}`} className="font-medium text-primary hover:underline">
+                      <Link href={`/settings/super-admin/organisation/${org.id}`} className="font-medium text-primary hover:underline">
                         {org.name}
                       </Link>
                     </TableCell>
