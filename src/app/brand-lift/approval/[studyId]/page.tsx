@@ -69,7 +69,7 @@ const ApprovalPage: React.FC = () => {
     <>
       <div className="container mx-auto p-4 md:p-6">
         <h1 className="text-2xl font-bold mb-2">Survey Approval Workflow</h1>
-        {isLoadingStudyDetails && <Skeleton className="h-5 w-1/2 mb-4" />}
+        {isLoadingStudyDetails && <Skeleton className="h-5 w-1/2" />}
         {fetchErrorStudyDetails && (
           <p className="text-sm text-destructive mt-1 mb-4">Error loading study details.</p>
         )}

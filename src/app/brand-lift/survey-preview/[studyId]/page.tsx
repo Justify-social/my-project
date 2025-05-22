@@ -218,7 +218,7 @@ const SurveyPreviewPage = () => {
       <div className="flex-shrink-0 pb-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-bold">Preview & Submit Survey</h1>
+            <h1 className="text-2xl font-bold mb-2">Preview & Submit Survey</h1>
             {!isLoading && studyDetails && (
               <BrandLiftPageSubtitle
                 campaignId={studyDetails.campaignId}
@@ -227,7 +227,7 @@ const SurveyPreviewPage = () => {
                 funnelStage={studyDetails.funnelStage}
               />
             )}
-            {isLoading && <Skeleton className="h-5 w-3/4 mt-1" />}
+            {isLoading && <Skeleton className="h-5 w-3/4" />}
           </div>
           <Button onClick={handleShareForReview} size="lg" disabled={isShareButtonDisabled}>
             {isSubmittingReview ? (

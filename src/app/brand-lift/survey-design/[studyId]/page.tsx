@@ -77,66 +77,68 @@ const SurveyDesignPage: React.FC = () => {
 
   return (
     <>
-      <div className="mb-6">
-        <div className="flex justify-between items-center">
-          {' '}
-          {/* Container for title and buttons */}
-          <h1 className="text-2xl font-bold">Survey Design</h1>
-          <div className="flex gap-2 flex-wrap">
+      <div className="container mx-auto p-4 md:p-6">
+        <div className="mb-6">
+          <div className="flex justify-between items-center mb-2">
             {' '}
-            {/* Buttons moved here */}
-            <Button
-              variant="outline"
-              onClick={() => surveyBuilderRef.current?.handleSuggestQuestions()}
-              disabled={actionsDisabled || isAISuggesting} // Use state from SurveyDesignPage
-              title={
-                actionsDisabled && !isAISuggesting
-                  ? 'Loading data...'
-                  : isAISuggesting
-                    ? 'AI is suggesting...'
-                    : 'Suggest questions using AI'
-              } // Adjust title as needed
-            >
-              {isAISuggesting ? (
-                <Icon iconId="faSpinnerLight" className="animate-spin mr-2 h-4 w-4" />
-              ) : (
-                <Icon iconId="faSparklesLight" className="mr-2 h-4 w-4" />
-              )}
-              Draft
-            </Button>
-            <Button
-              onClick={() => surveyBuilderRef.current?.handleAddQuestion()}
-              disabled={actionsDisabled} // Use state from SurveyDesignPage
-              title={actionsDisabled ? 'Loading data...' : 'Add new question'}
-            >
-              <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" /> Add Question
-            </Button>
+            {/* Container for title and buttons */}
+            <h1 className="text-2xl font-bold">Survey Design</h1>
+            <div className="flex gap-2 flex-wrap">
+              {' '}
+              {/* Buttons moved here */}
+              <Button
+                variant="outline"
+                onClick={() => surveyBuilderRef.current?.handleSuggestQuestions()}
+                disabled={actionsDisabled || isAISuggesting} // Use state from SurveyDesignPage
+                title={
+                  actionsDisabled && !isAISuggesting
+                    ? 'Loading data...'
+                    : isAISuggesting
+                      ? 'AI is suggesting...'
+                      : 'Suggest questions using AI'
+                } // Adjust title as needed
+              >
+                {isAISuggesting ? (
+                  <Icon iconId="faSpinnerLight" className="animate-spin mr-2 h-4 w-4" />
+                ) : (
+                  <Icon iconId="faSparklesLight" className="mr-2 h-4 w-4" />
+                )}
+                Draft
+              </Button>
+              <Button
+                onClick={() => surveyBuilderRef.current?.handleAddQuestion()}
+                disabled={actionsDisabled} // Use state from SurveyDesignPage
+                title={actionsDisabled ? 'Loading data...' : 'Add new question'}
+              >
+                <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" /> Add Question
+              </Button>
+            </div>
           </div>
-        </div>
 
-        {/* Campaign Link Section - make entire div clickable if desired, or keep <a> around icon+text */}
-        {isLoadingStudyDetails && !studyDetails && <Skeleton className="h-5 w-1/2 mt-2 mb-2" />}
-        {fetchErrorStudyDetails && (
-          <p className="text-sm text-destructive mt-1 mb-2">Error loading study details.</p>
-        )}
-        {!isLoadingStudyDetails && studyDetails && (
-          <BrandLiftPageSubtitle
-            campaignId={studyDetails.campaignId}
-            campaignName={studyDetails.campaign?.campaignName}
-            studyName={studyDetails.name}
-            funnelStage={studyDetails.funnelStage}
-          />
-        )}
-      </div>
-      <SurveyQuestionBuilder
-        studyId={studyId}
-        ref={surveyBuilderRef}
-        onIsAISuggestingChange={setIsAISuggesting} // Pass setter to child
-      />
-      <div className="mt-8 pt-6 border-t border-gray-200 flex justify-end">
-        <Button onClick={() => router.push(`/brand-lift/survey-preview/${studyId}`)}>
-          Proceed to Preview
-        </Button>
+          {/* Campaign Link Section - make entire div clickable if desired, or keep <a> around icon+text */}
+          {isLoadingStudyDetails && !studyDetails && <Skeleton className="h-5 w-1/2 mt-2 mb-2" />}
+          {fetchErrorStudyDetails && (
+            <p className="text-sm text-destructive mt-1 mb-2">Error loading study details.</p>
+          )}
+          {!isLoadingStudyDetails && studyDetails && (
+            <BrandLiftPageSubtitle
+              campaignId={studyDetails.campaignId}
+              campaignName={studyDetails.campaign?.campaignName}
+              studyName={studyDetails.name}
+              funnelStage={studyDetails.funnelStage}
+            />
+          )}
+        </div>
+        <SurveyQuestionBuilder
+          studyId={studyId}
+          ref={surveyBuilderRef}
+          onIsAISuggestingChange={setIsAISuggesting} // Pass setter to child
+        />
+        <div className="mt-8 pt-6 border-t border-gray-200 flex justify-end">
+          <Button onClick={() => router.push(`/brand-lift/survey-preview/${studyId}`)}>
+            Proceed to Preview
+          </Button>
+        </div>
       </div>
     </>
   );

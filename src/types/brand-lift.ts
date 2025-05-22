@@ -28,6 +28,7 @@ export interface BrandLiftStudyData {
   // Potentially: targetAudienceCriteria?: any; // To store criteria sent to Cint
   campaign?: {
     campaignName?: string | null;
+    uuid?: string | null;
     primaryCreativeUrl?: string | null;
     primaryCreativeType?: string | null;
   };
