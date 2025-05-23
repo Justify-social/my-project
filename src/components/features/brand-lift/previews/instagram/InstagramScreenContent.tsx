@@ -17,6 +17,7 @@ const InstagramScreenContent: React.FC<InstagramScreenContentProps> = ({
   // videoReady = false // Temporarily remove
 }) => {
   const { profile, caption, media } = creativeData;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const playerRef = useRef<any>(null);
 
   // Try to autoplay the video when videoReady changes

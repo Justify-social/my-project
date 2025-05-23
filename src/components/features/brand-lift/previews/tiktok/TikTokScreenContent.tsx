@@ -38,6 +38,7 @@ const TikTokScreenContent: React.FC<TikTokScreenContentProps> = ({
   videoReady = false,
 }) => {
   const { profile, caption, media } = creativeData;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const playerRef = useRef<any>(null);
   const [playerState, setPlayerState] = useState<{
     loaded: boolean;

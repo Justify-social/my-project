@@ -387,16 +387,19 @@ export function WizardProvider({ children }: { children: ReactNode }) {
                 // The initial spread `...clientAsset` should handle this.
                 // For safety, we can re-assign them if they were part of clientAsset
                 if (clientAsset.hasOwnProperty('budget'))
-                  (mergedAsset as any).budget = clientAsset.budget;
+                  (mergedAsset as DraftAsset).budget = clientAsset.budget as
+                    | number
+                    | null
+                    | undefined;
                 if (clientAsset.hasOwnProperty('rationale'))
-                  (mergedAsset as any).rationale = String(clientAsset.rationale || '');
+                  (mergedAsset as DraftAsset).rationale = String(clientAsset.rationale || '');
                 if (clientAsset.hasOwnProperty('associatedInfluencerIds'))
-                  (mergedAsset as any).associatedInfluencerIds =
-                    clientAsset.associatedInfluencerIds;
+                  (mergedAsset as DraftAsset).associatedInfluencerIds =
+                    clientAsset.associatedInfluencerIds as string[];
 
                 return mergedAsset;
               }
-            ) as any;
+            ) as DraftAsset[];
           } else if (dbCreativeAssets.length > 0) {
             logger.warn(
               '[WizardContext loadCampaignData] CampaignWizard.assets (JSON) was empty. Mapping from creativeAssets relation (form-specific fields like explicit budget/rationale will be default).'
@@ -423,7 +426,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
               rationale: String(ca.description ?? ''), // Fallback for rationale if needed for display
               budget: undefined,
               associatedInfluencerIds: [],
-            })) as any;
+            })) as DraftAsset[];
           } else {
             finalAssets = [];
           }
@@ -804,15 +807,18 @@ export function WizardProvider({ children }: { children: ReactNode }) {
                     ),
                   };
                   if (clientAsset.hasOwnProperty('budget'))
-                    (mergedAsset as any).budget = clientAsset.budget;
+                    (mergedAsset as DraftAsset).budget = clientAsset.budget as
+                      | number
+                      | null
+                      | undefined;
                   if (clientAsset.hasOwnProperty('rationale'))
-                    (mergedAsset as any).rationale = String(clientAsset.rationale || '');
+                    (mergedAsset as DraftAsset).rationale = String(clientAsset.rationale || '');
                   if (clientAsset.hasOwnProperty('associatedInfluencerIds'))
-                    (mergedAsset as any).associatedInfluencerIds =
-                      clientAsset.associatedInfluencerIds;
+                    (mergedAsset as DraftAsset).associatedInfluencerIds =
+                      clientAsset.associatedInfluencerIds as string[];
                   return mergedAsset;
                 }
-              ) as any;
+              ) as DraftAsset[];
             } else if (dbCreativeAssetsFromSave.length > 0) {
               logger.warn(
                 '[WizardContext saveProgress] CampaignWizard.assets (JSON) was empty in save response. Mapping from creativeAssets relation.'
@@ -841,7 +847,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
                   budget: undefined,
                   associatedInfluencerIds: [],
                 })
-              ) as any;
+              ) as DraftAsset[];
             } else {
               finalAssetsForStateUpdate = [];
             }

@@ -1,7 +1,7 @@
 // src/services/influencer/index.ts
 
 // Import types and logger
-import { InfluencerSummary, InfluencerProfileData, AudienceDemographics } from '@/types/influencer';
+import { InfluencerSummary, InfluencerProfileData } from '@/types/influencer';
 import { PlatformEnum } from '@/types/enums';
 import { logger } from '@/utils/logger';
 import {
@@ -15,22 +15,16 @@ import {
 import {
   getInsightIQProfiles,
   getProfileUniqueId,
-  getInsightIQProfileById,
-  searchInsightIQProfilesByParams,
   fetchDetailedProfile,
 } from '@/lib/insightiqService';
-import {
-  InsightIQProfile,
-  InsightIQSearchProfile,
-  InsightIQProfileWithAnalytics,
-} from '@/types/insightiq';
+import { InsightIQSearchProfile, InsightIQProfileWithAnalytics } from '@/types/insightiq';
 import {
   mapInsightIQProfileToInfluencerProfileData,
   mapInsightIQProfileToInfluencerSummary,
   mapPrismaInfluencerToSummary,
 } from '@/lib/data-mapping/influencer';
 import { getInsightIQWorkPlatformId } from '@/lib/insightiqUtils';
-import { calculateDiscoveryScore, calculateFullJustifyScore } from '@/lib/scoringService';
+import { calculateFullJustifyScore } from '@/lib/scoringService';
 
 const prisma = new PrismaClient();
 
@@ -186,7 +180,7 @@ export function findPlatformEnumByValue(value: string | null): PlatformEnum | nu
 // --- Real API Service Implementation ---
 
 // Helper function to construct query strings safely
-const buildQueryString = (params: Record<string, any>): string => {
+const buildQueryString = (params: Record<string, unknown>): string => {
   const query = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
@@ -261,7 +255,7 @@ const apiService: IInfluencerService = {
     }
   },
 
-  getInfluencerByIdentifier: async (identifier, platformId) => {
+  getInfluencerByIdentifier: async (identifier, _platformId) => {
     logger.warn(
       '[influencerService] getInfluencerByIdentifier is deprecated. Use getAndMapProfileByHandle.'
     );
@@ -545,7 +539,7 @@ const apiService: IInfluencerService = {
       );
 
       const summaries: InfluencerSummary[] = dbInfluencers.map(inf =>
-        mapPrismaInfluencerToSummary(inf as any)
+        mapPrismaInfluencerToSummary(inf as Parameters<typeof mapPrismaInfluencerToSummary>[0])
       );
 
       const orderedSummaries = ids
@@ -671,7 +665,7 @@ const apiService: IInfluencerService = {
 
   // Deprecated implementation
   /** @deprecated Use getAndMapProfileByHandleAndPlatform */
-  async getAndMapProfileByHandle(handle: string): Promise<InfluencerProfileData | null> {
+  async getAndMapProfileByHandle(_handle: string): Promise<InfluencerProfileData | null> {
     logger.warn(
       '[influencerService] Calling deprecated getAndMapProfileByHandle. Use getAndMapProfileByHandleAndPlatform.'
     );
