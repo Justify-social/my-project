@@ -4,6 +4,31 @@ import { onCLS, onFCP, onLCP, onTTFB, onINP } from 'web-vitals';
 import { Analytics, WebVitalMetric } from './analytics';
 
 /**
+ * Interface for web-vitals metric callback parameter
+ * Based on the web-vitals library metric structure
+ */
+interface WebVitalsMetric {
+  name: string;
+  value: number;
+  id: string;
+  delta: number;
+  rating: 'good' | 'needs-improvement' | 'poor';
+  navigationType?: string;
+}
+
+/**
+ * Extended Navigator interface with connection property
+ */
+interface NavigatorWithConnection extends Navigator {
+  connection?: {
+    effectiveType?: string;
+    type?: string;
+    downlink?: number;
+    rtt?: number;
+  };
+}
+
+/**
  * Reports Web Vitals metrics to our analytics system
  * This function should be called on the client side to track Core Web Vitals
  */
@@ -13,7 +38,7 @@ export function reportWebVitals() {
     return;
   }
 
-  const handleMetric = (metric: any) => {
+  const handleMetric = (metric: WebVitalsMetric) => {
     // Transform web-vitals metric to our interface
     const webVitalMetric: WebVitalMetric = {
       name: metric.name as WebVitalMetric['name'],
@@ -63,10 +88,12 @@ export function trackPageLoad(pageName: string) {
 
   window.addEventListener('load', () => {
     const loadTime = performance.now() - startTime;
+    const navigatorWithConnection = navigator as NavigatorWithConnection;
+
     Analytics.trackPerformance('page_load', loadTime, {
       page_name: pageName,
       user_agent: navigator.userAgent,
-      connection_type: (navigator as any).connection?.effectiveType || 'unknown',
+      connection_type: navigatorWithConnection.connection?.effectiveType || 'unknown',
     });
   });
 }
