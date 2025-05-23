@@ -56,9 +56,10 @@ export const serverConfig = {
     tokenSecret: process.env.MUX_TOKEN_SECRET,
     webhookSecret: process.env.MUX_WEBHOOK_SIGNING_SECRET, // Added for webhook verification
   },
-  // *** Add SendGrid Config ***
-  sendgrid: {
-    apiKey: process.env.SENDGRID_API_KEY,
+  // *** Add Resend Config ***
+  resend: {
+    apiKey: process.env.RESEND_API_KEY,
+    webhookSecret: process.env.RESEND_WEBHOOK_SECRET,
   },
   // Add other server-side variables here
 };
@@ -80,6 +81,7 @@ logger.info('[Server Config] Loaded server configuration', {
   muxTokenIdSet: !!serverConfig.mux.tokenId, // Check Mux Token ID
   muxTokenSecretSet: !!serverConfig.mux.tokenSecret, // Check Mux Token Secret
   muxWebhookSecretSet: !!serverConfig.mux.webhookSecret, // Check Mux Webhook Secret
-  sendgridApiKeySet: !!serverConfig.sendgrid.apiKey, // Check SendGrid API Key
+  resendApiKeySet: !!serverConfig.resend.apiKey, // Check Resend API Key
+  resendWebhookSecretSet: !!serverConfig.resend.webhookSecret, // Check Resend Webhook Secret
   // Add checks for other critical keys
 });

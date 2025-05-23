@@ -1467,7 +1467,7 @@ export async function verifyMuxApiServerSide(): Promise<ApiVerificationResult> {
 export async function verifyResendApi(): Promise<ApiVerificationResult> {
   const apiName = 'Resend API';
   const endpoint = 'resend.domains.list()'; // Conceptual endpoint for logging
-  const apiKey = process.env.RESEND_SECRET;
+  const apiKey = process.env.RESEND_API_KEY;
 
   if (!apiKey) {
     return {
@@ -1476,8 +1476,8 @@ export async function verifyResendApi(): Promise<ApiVerificationResult> {
       endpoint,
       error: {
         type: ApiErrorType.AUTHENTICATION_ERROR,
-        message: 'Missing Resend API Key (RESEND_SECRET) in environment variables.',
-        details: 'Please set RESEND_SECRET in your .env file.',
+        message: 'Missing Resend API Key (RESEND_API_KEY) in environment variables.',
+        details: 'Please set RESEND_API_KEY in your .env file.',
         isRetryable: false,
       },
     };
