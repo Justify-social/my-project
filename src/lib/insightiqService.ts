@@ -696,97 +696,159 @@ export async function fetchDetailedProfile(
   }
 
   logger.info(
-    `[InsightIQService] Fetching detailed profile via /analytics for handle: ${handle}, Platform: ${platformEnum} (InsightIQ ID: ${workPlatformId})`
+    `[InsightIQService] Fetching detailed profile via async /analytics for handle: ${handle}, Platform: ${platformEnum} (InsightIQ ID: ${workPlatformId})`
   );
 
-  const endpoint = '/v1/social/creators/profiles/analytics';
+  // Step 1: Submit async analytics request
+  const submitEndpoint = '/v1/social/creators/async/profiles/analytics';
   const requestBody = {
     identifier: handle,
     work_platform_id: workPlatformId,
   };
 
   try {
-    // Use makeInsightIQRequest to call the /analytics endpoint
-    const analyticsResponse = await makeInsightIQRequest<CreatorProfileAnalyticsResponse>(
-      endpoint,
-      {
-        method: 'POST',
-        body: JSON.stringify(requestBody),
-      }
-    );
+    // Submit the analytics request
+    const submitResponse = await makeInsightIQRequest<{
+      id: string;
+      status: string;
+      identifier: string;
+      work_platform: any;
+    }>(submitEndpoint, {
+      method: 'POST',
+      body: JSON.stringify(requestBody),
+    });
 
-    if (!analyticsResponse || !analyticsResponse.profile) {
+    if (!submitResponse || !submitResponse.id) {
       logger.warn(
-        `[InsightIQService] /analytics endpoint returned no profile data for handle: ${handle}, platformId: ${workPlatformId}`,
-        { response: analyticsResponse }
+        `[InsightIQService] Failed to submit analytics request for handle: ${handle}, platformId: ${workPlatformId}`,
+        { response: submitResponse }
       );
-      // Fallback to mock data ONLY if in SANDBOX and analytics fails
+      // Fallback to mock data in sandbox
       if (serverConfig.insightiq.baseUrl?.includes('sandbox')) {
         logger.warn(
-          `[InsightIQService] Sandbox mode: Falling back to mock profile data for ${handle} due to analytics failure.`
+          `[InsightIQService] Sandbox mode: Falling back to mock profile data for ${handle} due to submit failure.`
         );
-        return mockInsightIQProfile; // Ensure mockInsightIQProfile is correctly typed as InsightIQProfileWithAnalytics
+        return mockInsightIQProfile;
       }
       return null;
     }
 
-    // Log the raw profile data from the analytics response
-    logger.debug(
-      `[InsightIQService] Raw profile from /analytics for ${handle}:`,
-      analyticsResponse.profile
-    );
+    const jobId = submitResponse.id;
+    logger.info(`[InsightIQService] Analytics job submitted for ${handle}, job ID: ${jobId}`);
 
-    // Validate that the returned profile matches the requested handle (case-insensitive)
-    const returnedHandle = analyticsResponse.profile.platform_username?.toLowerCase();
-    const requestedHandleLower = handle.toLowerCase();
+    // Step 2: Poll for results (with timeout)
+    const getEndpoint = `/v1/social/creators/async/profiles/analytics/${jobId}`;
+    const maxAttempts = 10;
+    const pollIntervalMs = 2000; // 2 seconds
 
-    if (returnedHandle && returnedHandle !== requestedHandleLower) {
-      const isSandbox = serverConfig.insightiq.baseUrl?.includes('sandbox');
-      const mismatchMessage = `CRITICAL MISMATCH: Requested handle ${requestedHandleLower} but /analytics returned ${returnedHandle}`;
-      if (isSandbox) {
-        logger.warn(`[Sandbox Mode] ${mismatchMessage}. Proceeding with received data.`);
-        // In sandbox mode, accept the mismatch but ensure work_platform is properly set
-      } else {
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      logger.info(
+        `[InsightIQService] Polling for analytics results, attempt ${attempt}/${maxAttempts}`
+      );
+
+      try {
+        const analyticsResponse = await makeInsightIQRequest<any>(getEndpoint, {
+          method: 'GET',
+        });
+
+        if (
+          analyticsResponse &&
+          analyticsResponse.status === 'SUCCESS' &&
+          analyticsResponse.profile
+        ) {
+          logger.info(`[InsightIQService] Analytics completed successfully for ${handle}`);
+
+          // Validate the returned profile matches the requested handle
+          const returnedHandle = analyticsResponse.profile.platform_username?.toLowerCase();
+          const requestedHandleLower = handle.toLowerCase();
+
+          if (returnedHandle && returnedHandle !== requestedHandleLower) {
+            const isSandbox = serverConfig.insightiq.baseUrl?.includes('sandbox');
+            const mismatchMessage = `CRITICAL MISMATCH: Requested handle ${requestedHandleLower} but analytics returned ${returnedHandle}`;
+            if (isSandbox) {
+              logger.warn(`[Sandbox Mode] ${mismatchMessage}. Proceeding with received data.`);
+            } else {
+              logger.error(
+                `[Non-Sandbox Mode] ${mismatchMessage}. Returning null as data integrity is compromised.`
+              );
+              return null;
+            }
+          }
+
+          // Ensure work_platform is set for getProfileUniqueId compatibility
+          let profile = analyticsResponse.profile as InsightIQProfileWithAnalytics;
+          if (!profile.work_platform?.id && serverConfig.insightiq.baseUrl?.includes('sandbox')) {
+            logger.warn(
+              `[Sandbox Mode] work_platform.id is missing from profile response. Adding fallback platform ID: ${workPlatformId}`
+            );
+            profile = {
+              ...profile,
+              work_platform: {
+                id: workPlatformId,
+                name:
+                  profile.work_platform?.name ||
+                  getInsightIQWorkPlatformName(platformEnum) ||
+                  'Instagram',
+                logo_url:
+                  profile.work_platform?.logo_url ||
+                  'https://cdn.insightiq.ai/platforms_logo/logos/logo_instagram.png',
+              },
+            };
+          }
+
+          return profile;
+        } else if (analyticsResponse && analyticsResponse.status === 'FAILURE') {
+          logger.error(
+            `[InsightIQService] Analytics job failed for ${handle}: ${JSON.stringify(analyticsResponse)}`
+          );
+          break;
+        } else if (analyticsResponse && analyticsResponse.status === 'IN_PROGRESS') {
+          logger.info(
+            `[InsightIQService] Analytics job still in progress for ${handle}, waiting...`
+          );
+          if (attempt < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, pollIntervalMs));
+          }
+        } else {
+          logger.warn(
+            `[InsightIQService] Unexpected analytics response for ${handle}:`,
+            analyticsResponse
+          );
+          break;
+        }
+      } catch (pollError) {
         logger.error(
-          `[Non-Sandbox Mode] ${mismatchMessage}. Returning null as data integrity is compromised.`
+          `[InsightIQService] Error polling analytics results (attempt ${attempt}):`,
+          pollError
         );
-        return null;
+        if (attempt === maxAttempts) {
+          break;
+        }
+        await new Promise(resolve => setTimeout(resolve, pollIntervalMs));
       }
     }
 
-    // SANDBOX FIX: Ensure work_platform.id is available for the getProfileUniqueId function
-    let profile = analyticsResponse.profile as InsightIQProfileWithAnalytics;
-
-    // If work_platform.id is missing, add it for sandbox compatibility
-    if (!profile.work_platform?.id && serverConfig.insightiq.baseUrl?.includes('sandbox')) {
-      logger.warn(
-        `[Sandbox Mode] work_platform.id is missing from profile response. Adding fallback platform ID: ${workPlatformId}`
-      );
-      profile = {
-        ...profile,
-        work_platform: {
-          id: workPlatformId,
-          name:
-            profile.work_platform?.name ||
-            getInsightIQWorkPlatformName(platformEnum) ||
-            'Instagram',
-          logo_url:
-            profile.work_platform?.logo_url ||
-            'https://cdn.insightiq.ai/platforms_logo/logos/logo_instagram.png',
-        },
-      };
-    }
-
-    return profile;
-  } catch (error: unknown) {
-    logger.error(
-      `[InsightIQService] Error calling /analytics for handle ${handle}, platformId ${workPlatformId}:`,
-      error
+    logger.warn(
+      `[InsightIQService] Analytics polling timed out or failed for ${handle} after ${maxAttempts} attempts`
     );
-    // Fallback to mock data ONLY if in SANDBOX and analytics fails
+
+    // Fallback to mock data in sandbox
     if (serverConfig.insightiq.baseUrl?.includes('sandbox')) {
       logger.warn(
-        `[InsightIQService] Sandbox mode: Falling back to mock profile data for ${handle} due to analytics call error.`
+        `[InsightIQService] Sandbox mode: Falling back to mock profile data for ${handle} due to polling timeout/failure.`
+      );
+      return mockInsightIQProfile;
+    }
+    return null;
+  } catch (error) {
+    logger.error(
+      `[InsightIQService] Error in async analytics flow for handle ${handle}, platformId ${workPlatformId}:`,
+      error
+    );
+    // Fallback to mock data in sandbox
+    if (serverConfig.insightiq.baseUrl?.includes('sandbox')) {
+      logger.warn(
+        `[InsightIQService] Sandbox mode: Falling back to mock profile data for ${handle} due to analytics error.`
       );
       return mockInsightIQProfile;
     }

@@ -91,6 +91,34 @@ export const mapInsightIQProfileToInfluencerProfileData = (
     `[mapInsightIQProfileToInfluencerProfileData] Calculated Score for ${uniqueId}: ${calculatedScore}`
   );
 
+  // Extract audience demographics from InsightIQ profile with analytics
+  const audienceDemographics = (profile as any).audience
+    ? {
+        countries: (profile as any).audience.countries || [],
+        cities: (profile as any).audience.cities || [],
+        gender_age_distribution: (profile as any).audience.gender_age_distribution || [],
+        // Add other audience fields from InsightIQ API
+        ethnicities: (profile as any).audience.ethnicities || [],
+        languages: (profile as any).audience.languages || [],
+        brand_affinity: (profile as any).audience.brand_affinity || [],
+        interests: (profile as any).audience.interests || [],
+        follower_types: (profile as any).audience.follower_types || [],
+        credibility_score: (profile as any).audience.credibility_score,
+        significant_followers_percentage: (profile as any).audience
+          .significant_followers_percentage,
+        significant_followers: (profile as any).audience.significant_followers,
+        lookalikes: (profile as any).audience.lookalikes || [],
+      }
+    : null;
+
+  // Extract engagement metrics from InsightIQ profile with analytics
+  const engagementMetrics = {
+    averageLikes: (profile as any).average_likes || null,
+    averageComments: (profile as any).average_comments || null,
+    averageViews: (profile as any).average_views || null,
+    averageShares: null, // Not directly available in InsightIQ
+  };
+
   const profileData: InfluencerProfileData = {
     id: uniqueId,
     name: name,
@@ -117,10 +145,24 @@ export const mapInsightIQProfileToInfluencerProfileData = (
       profile.emails?.find(e => e.type === 'WORK')?.email_id ??
       profile.emails?.[0]?.email_id ??
       null,
-    audienceDemographics: null,
-    engagementMetrics: null,
+    audienceDemographics: audienceDemographics, // Now properly extracted from API response
+    engagementMetrics: engagementMetrics, // Now properly extracted from API response
     website: profile.website ?? null,
     category: profile.category ?? null,
+  };
+
+  // Store the full InsightIQ profile with analytics for component access
+  // This allows components to access additional data like top_hashtags, top_mentions, etc.
+  (profileData as any).insightiq = {
+    profile: profile,
+    audience: (profile as any).audience,
+    content: {
+      top_contents: (profile as any).top_contents,
+      recent_contents: (profile as any).recent_contents,
+      sponsored_contents: (profile as any).sponsored_contents,
+      top_hashtags: (profile as any).top_hashtags,
+      top_mentions: (profile as any).top_mentions,
+    },
   };
 
   if (!profileData.profileId) {
@@ -131,6 +173,13 @@ export const mapInsightIQProfileToInfluencerProfileData = (
   if (!profileData.platformSpecificId) {
     logger.warn(
       `[mapInsightIQProfileToInfluencerProfileData] Mapped profile is missing platformSpecificId (platform_profile_id). Identifier: ${uniqueId}`
+    );
+  }
+
+  // Log successful extraction of audience data
+  if (audienceDemographics) {
+    logger.info(
+      `[mapInsightIQProfileToInfluencerProfileData] Successfully extracted audience analytics for ${uniqueId}: ${Object.keys(audienceDemographics).length} fields`
     );
   }
 

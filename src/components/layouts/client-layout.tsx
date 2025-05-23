@@ -96,11 +96,11 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
       id: 'brand-lift',
       label: 'Brand Lift',
       icon: 'appBrandLift',
-      href: '/brand-lift',
+      href: '/brand-lift/campaign-selection',
       children: [
         {
-          id: 'brand-lift-list',
-          label: 'List',
+          id: 'brand-lift-selection',
+          label: 'Campaign Selection',
           href: '/brand-lift/campaign-selection',
         },
         {

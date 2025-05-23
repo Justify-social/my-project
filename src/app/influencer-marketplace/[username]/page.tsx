@@ -12,6 +12,9 @@ import { ProfileHeader } from '@/components/features/influencers/ProfileHeader';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 // Import Section components
 import { OverallPerformanceSection } from '@/components/features/influencers/OverallPerformanceSection';
+import { AudienceAnalyticsSection } from '@/components/features/influencers/AudienceAnalyticsSection';
+import { ContentAnalyticsSection } from '@/components/features/influencers/ContentAnalyticsSection';
+import { DemographicsSection } from '@/components/features/influencers/DemographicsSection';
 import { CertificationStatusSection } from '@/components/features/influencers/CertificationStatusSection';
 import { RiskScoreSection } from '@/components/features/influencers/RiskScoreSection';
 import { RecentCampaignsSection } from '@/components/features/influencers/RecentCampaignsSection';
@@ -336,17 +339,26 @@ export default function InfluencerProfilePage() {
 
           {/* --- Profile Details Tabs --- */}
           <Tabs defaultValue="performance" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-4">
-              {' '}
-              {/* Adjust grid-cols based on number of tabs */}
+            <TabsList className="grid w-full grid-cols-7 mb-4">
               <TabsTrigger value="performance">Performance</TabsTrigger>
+              <TabsTrigger value="audience">Audience</TabsTrigger>
+              <TabsTrigger value="content">Content</TabsTrigger>
+              <TabsTrigger value="demographics">Demographics</TabsTrigger>
               <TabsTrigger value="certifications">Certifications</TabsTrigger>
               <TabsTrigger value="risk">Risk Score</TabsTrigger>
               <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
-              {/* TODO: Add Audience/Content tabs later */}
             </TabsList>
             <TabsContent value="performance">
               <OverallPerformanceSection influencer={influencer} />
+            </TabsContent>
+            <TabsContent value="audience">
+              <AudienceAnalyticsSection influencer={influencer} />
+            </TabsContent>
+            <TabsContent value="content">
+              <ContentAnalyticsSection influencer={influencer} />
+            </TabsContent>
+            <TabsContent value="demographics">
+              <DemographicsSection influencer={influencer} />
             </TabsContent>
             <TabsContent value="certifications">
               <CertificationStatusSection influencer={influencer} />
@@ -357,7 +369,6 @@ export default function InfluencerProfilePage() {
             <TabsContent value="campaigns">
               <RecentCampaignsSection influencer={influencer} />
             </TabsContent>
-            {/* TODO: Add Audience/Content TabsContent later */}
           </Tabs>
         </div>
       ) : (

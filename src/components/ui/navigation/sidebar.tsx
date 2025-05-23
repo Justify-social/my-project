@@ -212,19 +212,49 @@ export function Sidebar({
   const isActive = useCallback(
     (path: string) => {
       if (!path) return false; // Handle cases where href might be missing
-      // Exact match or parent path match for active state
-      return (
-        activePath === path || (path !== '/' && activePath.startsWith(path) && path.length > 1)
-      );
+
+      // Exact match always takes priority
+      if (activePath === path) return true;
+
+      // For prefix matching, be more restrictive to avoid sibling conflicts
+      if (path !== '/' && path.length > 1 && activePath.startsWith(path)) {
+        const nextChar = activePath.charAt(path.length);
+        if (nextChar === '/') {
+          // Check if there are nested path segments after this path
+          const remainingPath = activePath.substring(path.length + 1);
+          const hasNestedSegments = remainingPath.includes('/');
+
+          // Only match prefix if this is a direct child route (no additional nesting)
+          // This prevents /campaigns from matching /campaigns/wizard/step-1
+          // while still allowing /campaigns to match /campaigns/some-direct-child
+          return !hasNestedSegments;
+        } else if (nextChar === '') {
+          // Path ends exactly with our test path
+          return true;
+        }
+      }
+
+      return false;
     },
     [activePath]
   );
 
   const hasActiveChild = useCallback(
     (item: { children?: { href: string }[] }) => {
-      return item.children?.some(child => isActive(child.href));
+      return item.children?.some(child => {
+        // Check for exact match first
+        if (activePath === child.href) return true;
+
+        // For child paths, also check if activePath starts with child.href
+        if (child.href !== '/' && child.href.length > 1 && activePath.startsWith(child.href)) {
+          const nextChar = activePath.charAt(child.href.length);
+          return nextChar === '/' || nextChar === '';
+        }
+
+        return false;
+      });
     },
-    [isActive]
+    [isActive, activePath]
   );
 
   return (
@@ -263,12 +293,22 @@ export function Sidebar({
           {items.map((item, index) => {
             const itemKey = item.label + index; // Create a key for hover state and expansion
 
-            // Enhanced logic: parent is active if its own href is active OR if it has an active child.
+            // Enhanced logic: parent is active if its own href is active BUT NOT if it has an active child.
+            // This prevents both parent and child from being highlighted simultaneously.
             const isParentDirectlyActive = item.href ? isActive(item.href) : false;
-            const isActiveParent = isParentDirectlyActive || hasActiveChild(item);
+            const hasActiveChildItem = hasActiveChild(item);
+
+            // Parent is only highlighted if:
+            // 1. Its direct href is active AND no child is active, OR
+            // 2. It has no href and no active children (for non-navigable parents)
+            const isActiveParent = isParentDirectlyActive && !hasActiveChildItem;
 
             const isHoveredParent = (isHydrated && hoverStates[itemKey]) || false;
-            const isExpanded = (isHydrated && expandedSections[itemKey]) || false; // Check if section is expanded
+
+            // Auto-expand section if any child is active
+            const shouldAutoExpand = hasActiveChildItem;
+            const isExpanded =
+              (isHydrated && (expandedSections[itemKey] || shouldAutoExpand)) || false;
             const parentIconName = item.icon; // ONLY use explicitly provided icon for parents
             const parentIconPath = parentIconName ? iconRegistry[parentIconName] : undefined;
 
