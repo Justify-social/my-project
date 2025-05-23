@@ -1,33 +1,48 @@
+/**
+ * @component Toast
+ * @category atom
+ * @subcategory feedback
+ * @description Standardized toast notification functions for success and error messages with customizable icons.
+ * @status 23rd May 2025
+ * @author Justify
+ * @since 2023-05-15
+ */
 import React from 'react';
 import { toast } from 'react-hot-toast';
 import { Icon } from '@/components/ui/icon/icon'; // Using alias for robustness
 
 /**
- * Displays a standardized success toast.
- * @param message The message to display.
- * @param iconId Optional FontAwesome icon ID to override the default (faFloppyDiskLight).
+ * Display a success toast notification
+ * @param message - The message to display
+ * @param iconId - Optional icon ID to display (defaults to faFloppyDiskLight)
+ * @param duration - Optional duration in milliseconds (defaults to 3000)
  */
-export const showSuccessToast = (message: string, iconId?: string) => {
-  const finalIconId = iconId || 'faFloppyDiskLight';
-  const successIcon = <Icon iconId={finalIconId} className="h-5 w-5 text-success" />;
+export const showSuccessToast = (
+  message: string,
+  iconId: string = 'faFloppyDiskLight',
+  duration: number = 3000
+) => {
   toast.success(message, {
-    duration: 3000, // Standard success duration 3s
-    className: 'toast-success-custom', // Defined in globals.css
-    icon: successIcon,
+    duration,
+    className: 'success-toast',
+    icon: <Icon iconId={iconId} className="text-white" />,
   });
 };
 
 /**
- * Displays a standardized error toast.
- * @param message The message to display.
- * @param iconId Optional FontAwesome icon ID to override the default (faTriangleExclamationLight).
+ * Display an error toast notification
+ * @param message - The error message to display
+ * @param iconId - Optional icon ID to display (defaults to faTriangleExclamationLight)
+ * @param duration - Optional duration in milliseconds (defaults to 5000)
  */
-export const showErrorToast = (message: string, iconId?: string) => {
-  const finalIconId = iconId || 'faTriangleExclamationLight';
-  const errorIcon = <Icon iconId={finalIconId} className="h-5 w-5 text-destructive" />;
+export const showErrorToast = (
+  message: string,
+  iconId: string = 'faTriangleExclamationLight',
+  duration: number = 5000
+) => {
   toast.error(message, {
-    duration: 5000, // Standard error duration 5s
-    className: 'toast-error-custom', // Defined in globals.css
-    icon: errorIcon,
+    duration,
+    className: 'error-toast',
+    icon: <Icon iconId={iconId} className="text-white" />,
   });
 };
