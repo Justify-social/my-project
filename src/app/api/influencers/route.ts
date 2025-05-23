@@ -45,14 +45,14 @@ const InfluencerQuerySchema = z.object({
 // function mapPlatformNameToEnum(...) { ... }
 
 export async function GET(req: NextRequest) {
-  // logger.info('[API /influencers] GET request received');
+  _logger.info('[API /influencers] GET request received');
   const { searchParams } = new URL(req.url);
   const queryParams = Object.fromEntries(searchParams.entries());
 
   // --- Input Validation (Simplified for pagination) ---
   const validationResult = InfluencerQuerySchema.safeParse(queryParams);
   if (!validationResult.success) {
-    // logger.warn('[API /influencers] Invalid query parameters:', validationResult.error.flatten());
+    _logger.warn('[API /influencers] Invalid query parameters:', validationResult.error.flatten());
     return NextResponse.json(
       {
         success: false,
@@ -63,19 +63,17 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const { page: _page, limit: _limit, ..._filters } = validationResult.data; // Separate filters from pagination - Prefixed
+  const { page, limit, ...filters } = validationResult.data; // Separate filters from pagination
 
   // filters object now contains searchTerm if provided
-  // logger.info(`[API /influencers] Requesting page ${page}, limit ${limit} with filters:`, filters);
+  _logger.info(`[API /influencers] Requesting page ${page}, limit ${limit} with filters:`, filters);
 
   try {
     // Call the centralized service function, passing the whole filters object
-    // const result = await influencerService.getProcessedInfluencerList({
-    //   filters, // Pass validated filters (including searchTerm)
-    //   pagination: { page, limit }, // Pass pagination
-    // });
-    // MOCKING RESULT FOR NOW
-    const result = { influencers: [], page: 1, limit: 12, total: 0 };
+    const result = await _influencerService.getProcessedInfluencerList({
+      filters, // Pass validated filters (including searchTerm)
+      pagination: { page, limit }, // Pass pagination
+    });
 
     // Format the response (matches original structure)
     const responsePayload = {
@@ -91,15 +89,15 @@ export async function GET(req: NextRequest) {
 
     // Add specific logging for the generated workPlatformId for the first few influencers
     if (result.influencers && result.influencers.length > 0) {
-      // logger.debug('[API /influencers] Sample of generated influencer summaries for list:', {
-      //   // Wrap the array in an object property
-      //   influencerSamples: result.influencers.slice(0, 3).map((inf: any) => ({
-      //     id: inf.id,
-      //     handle: inf.handle,
-      //     platform: inf.platforms ? inf.platforms[0] : 'N/A', // Show the PlatformEnum used
-      //     workPlatformId: inf.workPlatformId, // Log the generated ID
-      //   })),
-      // });
+      _logger.debug('[API /influencers] Sample of generated influencer summaries for list:', {
+        // Wrap the array in an object property
+        influencerSamples: result.influencers.slice(0, 3).map((inf: any) => ({
+          id: inf.id,
+          handle: inf.handle,
+          platform: inf.platforms ? inf.platforms[0] : 'N/A', // Show the PlatformEnum used
+          workPlatformId: inf.workPlatformId, // Log the generated ID
+        })),
+      });
     }
     return NextResponse.json(responsePayload);
 
@@ -143,12 +141,12 @@ export async function GET(req: NextRequest) {
     // const responsePayload = {
     //   // ... (construct payload) ...
     // };
-  } catch {
+  } catch (error) {
     // Keep the general error handling for unexpected service errors
-    // logger.error('[API /influencers] Error processing request:', {
-    //   error: error instanceof Error ? error.message : String(error),
-    //   query: queryParams,
-    // });
+    _logger.error('[API /influencers] Error processing request:', {
+      error: error instanceof Error ? error.message : String(error),
+      query: queryParams,
+    });
 
     return NextResponse.json(
       {

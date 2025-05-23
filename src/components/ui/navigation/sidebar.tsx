@@ -40,6 +40,12 @@ function SidebarItem({
   isLoadingRegistry,
 }: SidebarItemProps) {
   const [isHovered, setIsHovered] = useState(false); // Add hover state
+  const [isHydrated, setIsHydrated] = useState(false); // Add hydration state
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
   const active = isActive || false; // Provide default for isActive
   const iconPath = icon && !isLoadingRegistry ? iconRegistry[icon] : undefined; // Get path from registry, prevent lookup while loading
 
@@ -48,11 +54,11 @@ function SidebarItem({
       <Link
         href={href}
         onClick={onClick}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        onMouseEnter={() => isHydrated && setIsHovered(true)}
+        onMouseLeave={() => isHydrated && setIsHovered(false)}
         className={cn(
           'flex items-center py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group',
-          active || isHovered
+          active || (isHydrated && isHovered)
             ? 'text-accent bg-accent/10 font-medium'
             : 'text-foreground hover:text-accent hover:bg-accent/5'
         )}
@@ -67,7 +73,7 @@ function SidebarItem({
               height={20}
               style={{
                 filter:
-                  active || isHovered
+                  active || (isHydrated && isHovered)
                     ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)'
                     : 'none', // Accent color filter on hover/active
                 transition: 'filter 0.15s ease-in-out',
@@ -92,7 +98,7 @@ function SidebarItem({
 
         {/* Use text-xs for child items and text-sm for parent/standalone items */}
         <span
-          className={`flex-grow ${isChild ? 'text-xs' : 'text-sm'} font-heading font-medium truncate ${active || isHovered ? 'text-accent' : 'text-foreground'}`}
+          className={`flex-grow ${isChild ? 'text-xs' : 'text-sm'} font-heading font-medium truncate ${active || (isHydrated && isHovered) ? 'text-accent' : 'text-foreground'}`}
         >
           {label}
         </span>
@@ -144,6 +150,13 @@ export function Sidebar({
   const [isRegistryLoading, setIsRegistryLoading] = useState(true); // Added loading state
   const [loadingError, setLoadingError] = useState<string | null>(null);
 
+  // --- Hydration State ---
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
   useEffect(() => {
     setIsRegistryLoading(true); // Set loading true at start
     // Fetch the icon registry from the public path
@@ -180,6 +193,7 @@ export function Sidebar({
 
   // Function to toggle section expansion
   const toggleSection = (itemKey: string) => {
+    if (!isHydrated) return; // Prevent state changes before hydration
     setExpandedSections(prev => ({
       ...prev,
       [itemKey]: !prev[itemKey],
@@ -190,6 +204,7 @@ export function Sidebar({
   // --- Hover State for Parent Items ---
   const [hoverStates, setHoverStates] = useState<Record<string, boolean>>({});
   const setHover = (id: string, isHovered: boolean) => {
+    if (!isHydrated) return; // Prevent state changes before hydration
     setHoverStates(prev => ({ ...prev, [id]: isHovered }));
   };
   // --- End Hover State ---
@@ -252,8 +267,8 @@ export function Sidebar({
             const isParentDirectlyActive = item.href ? isActive(item.href) : false;
             const isActiveParent = isParentDirectlyActive || hasActiveChild(item);
 
-            const isHoveredParent = hoverStates[itemKey] || false;
-            const isExpanded = expandedSections[itemKey] || false; // Check if section is expanded
+            const isHoveredParent = (isHydrated && hoverStates[itemKey]) || false;
+            const isExpanded = (isHydrated && expandedSections[itemKey]) || false; // Check if section is expanded
             const parentIconName = item.icon; // ONLY use explicitly provided icon for parents
             const parentIconPath = parentIconName ? iconRegistry[parentIconName] : undefined;
 
@@ -262,67 +277,120 @@ export function Sidebar({
                 {item.children ? (
                   // Render parent item similar to sidebar-ui-components categories
                   <li className="w-full">
-                    <div
-                      onClick={() => toggleSection(itemKey)} // Toggle expansion on click
-                      onMouseEnter={() => setHover(itemKey, true)}
-                      onMouseLeave={() => setHover(itemKey, false)}
-                      className={cn(
-                        'flex items-center justify-between py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group cursor-pointer', // Added cursor-pointer
-                        isActiveParent || isHoveredParent
-                          ? 'text-accent bg-accent/10 font-medium' // THEMED
-                          : 'text-foreground hover:text-accent hover:bg-accent/5' // THEMED
-                      )}
-                    >
-                      <div className="flex items-center">
-                        {parentIconPath ? (
-                          <div className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0">
-                            <Image
-                              src={parentIconPath}
-                              alt={`${item.label} icon`}
-                              className="w-5 h-5"
-                              width={20}
-                              height={20}
-                              style={{
-                                filter:
-                                  isActiveParent || isHoveredParent
-                                    ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)'
-                                    : 'none',
-                                transition: 'filter 0.15s ease-in-out',
-                              }}
-                              unoptimized
-                            />
-                          </div>
-                        ) : parentIconName ? (
-                          <div
-                            className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0"
-                            title={`Icon '${parentIconName}' not found in registry`}
-                          >
-                            <span className="flex items-center justify-center w-5 h-5 text-xs bg-gray-200 rounded-full">
-                              {parentIconName.charAt(0).toUpperCase()}
-                            </span>
-                          </div>
-                        ) : (
-                          <div className="w-6 h-6 mr-2 flex-shrink-0"></div> // Placeholder
+                    {item.href ? (
+                      // If parent has href, render as Link but also make it expandable
+                      <Link
+                        href={item.href}
+                        onClick={() => {
+                          toggleSection(itemKey);
+                          onItemClick?.();
+                        }}
+                        onMouseEnter={() => setHover(itemKey, true)}
+                        onMouseLeave={() => setHover(itemKey, false)}
+                        className={cn(
+                          'flex items-center justify-between py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group',
+                          isActiveParent || isHoveredParent
+                            ? 'text-accent bg-accent/10 font-medium' // THEMED
+                            : 'text-foreground hover:text-accent hover:bg-accent/5' // THEMED
                         )}
-                        {/* Parent item label: text-sm */}
-                        <span
-                          className={`text-sm font-heading font-medium truncate ${isActiveParent || isHoveredParent ? 'text-accent' : 'text-foreground'}`}
-                        >
-                          {' '}
-                          {/* Ensure text-sm */}
-                          {item.label}
-                        </span>
+                      >
+                        <div className="flex items-center">
+                          {parentIconPath ? (
+                            <div className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0">
+                              <Image
+                                src={parentIconPath}
+                                alt={`${item.label} icon`}
+                                className="w-5 h-5"
+                                width={20}
+                                height={20}
+                                style={{
+                                  filter:
+                                    isActiveParent || isHoveredParent
+                                      ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)'
+                                      : 'none',
+                                  transition: 'filter 0.15s ease-in-out',
+                                }}
+                                unoptimized
+                              />
+                            </div>
+                          ) : parentIconName ? (
+                            <div
+                              className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0"
+                              title={`Icon '${parentIconName}' not found in registry`}
+                            >
+                              <span className="flex items-center justify-center w-5 h-5 text-xs bg-gray-200 rounded-full">
+                                {parentIconName.charAt(0).toUpperCase()}
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="w-6 h-6 mr-2 flex-shrink-0"></div> // Placeholder
+                          )}
+                          {/* Parent item label: text-sm */}
+                          <span
+                            className={`text-sm font-heading font-medium truncate ${isActiveParent || isHoveredParent ? 'text-accent' : 'text-foreground'}`}
+                          >
+                            {item.label}
+                          </span>
+                        </div>
+                      </Link>
+                    ) : (
+                      // If parent has no href, render as non-navigable div
+                      <div
+                        onClick={() => toggleSection(itemKey)} // Toggle expansion on click
+                        onMouseEnter={() => setHover(itemKey, true)}
+                        onMouseLeave={() => setHover(itemKey, false)}
+                        className={cn(
+                          'flex items-center justify-between py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group cursor-pointer', // Added cursor-pointer
+                          isActiveParent || isHoveredParent
+                            ? 'text-accent bg-accent/10 font-medium' // THEMED
+                            : 'text-foreground hover:text-accent hover:bg-accent/5' // THEMED
+                        )}
+                      >
+                        <div className="flex items-center">
+                          {parentIconPath ? (
+                            <div className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0">
+                              <Image
+                                src={parentIconPath}
+                                alt={`${item.label} icon`}
+                                className="w-5 h-5"
+                                width={20}
+                                height={20}
+                                style={{
+                                  filter:
+                                    isActiveParent || isHoveredParent
+                                      ? 'invert(50%) sepia(98%) saturate(3316%) hue-rotate(180deg) brightness(102%) contrast(101%)'
+                                      : 'none',
+                                  transition: 'filter 0.15s ease-in-out',
+                                }}
+                                unoptimized
+                              />
+                            </div>
+                          ) : parentIconName ? (
+                            <div
+                              className="w-6 h-6 mr-2 flex items-center justify-center flex-shrink-0"
+                              title={`Icon '${parentIconName}' not found in registry`}
+                            >
+                              <span className="flex items-center justify-center w-5 h-5 text-xs bg-gray-200 rounded-full">
+                                {parentIconName.charAt(0).toUpperCase()}
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="w-6 h-6 mr-2 flex-shrink-0"></div> // Placeholder
+                          )}
+                          {/* Parent item label: text-sm */}
+                          <span
+                            className={`text-sm font-heading font-medium truncate ${isActiveParent || isHoveredParent ? 'text-accent' : 'text-foreground'}`}
+                          >
+                            {item.label}
+                          </span>
+                        </div>
                       </div>
-                    </div>
+                    )}
                     {/* Render children conditionally based on isExpanded */}
                     <div
                       className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
                     >
-                      {' '}
-                      {/* Conditional expansion & opacity */}
                       <ul className="pl-6 mt-0.5 space-y-0">
-                        {' '}
-                        {/* Ensure indent is pl-6 */}
                         {item.children.map((child, childIndex) => (
                           <SidebarItem
                             key={`${itemKey}-${childIndex}`}
@@ -359,8 +427,6 @@ export function Sidebar({
       </nav>
       {/* Settings Footer Area - Apply ONLY border-t */}
       <div className="p-2 border-t h-[var(--footer-height)] flex flex-col justify-center">
-        {' '}
-        {/* Removed general 'border', kept 'border-t' */}
         <ul className="list-none space-y-0.5">
           {/* Settings Item - Use props if available, otherwise hide/fallback */}
           {settingsHref && settingsLabel && (
