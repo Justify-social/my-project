@@ -118,121 +118,111 @@ interface ExtendedDbHealthData extends DbHealthData {
 }
 
 export default function DatabaseHealthPage() {
-  const { user, isLoaded } = useUser();
-  const { isLoaded: isAuthLoaded, sessionClaims } = useAuth();
   const router = useRouter();
+  const { user, isLoaded } = useUser();
+  const { isLoaded: isAuthLoaded } = useAuth();
+
   const [dbHealth, setDbHealth] = useState<ExtendedDbHealthData | null>(null);
   const [isLoadingHealth, setIsLoadingHealth] = useState(true);
   const [healthCheckError, setHealthCheckError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<string>('overview');
+  const [activeDocTab, setActiveDocTab] = useState<string>('all');
+  const [isRunningTest, setIsRunningTest] = useState(false);
   const [transactionTestResult, setTransactionTestResult] = useState<TransactionTestResult | null>(
     null
-  ); // Use defined type
-  const [isRunningTest, setIsRunningTest] = useState(false);
-  const [activeTab, setActiveTab] = useState('overview');
-  const [activeDocTab, setActiveDocTab] = useState('all');
+  );
 
-  // Documentation files available in the system
+  // Documentation files
   const docs: DocFile[] = [
     {
-      name: 'Database Schema',
-      path: '/docs/DATABASE_SCHEMA.md',
-      description: 'Comprehensive documentation of the database schema and entity relationships',
+      name: 'schema.prisma',
+      path: '/schema.prisma',
+      description: 'Database schema and model definitions',
       category: 'database',
-      icon: <Icon iconId="faServerLight" className="h-5 w-5 text-blue-600 font-body" />,
+      icon: (
+        <Icon iconId="faDatabaseLight" className="h-5 w-5 text-[var(--accent-color)] font-body" />
+      ),
     },
     {
-      name: 'Database Schema Audit',
-      path: '/docs/schema-audit-summary.md',
-      description: 'Database schema validation and audit results',
+      name: 'Prisma Documentation',
+      path: 'https://www.prisma.io/docs',
+      description: 'Official Prisma ORM documentation',
       category: 'database',
-      icon: <Icon iconId="faChartBarLight" className="h-5 w-5 text-blue-600 font-body" />,
+      icon: <Icon iconId="faBookLight" className="h-5 w-5 text-[var(--accent-color)] font-body" />,
     },
     {
-      name: 'Project Progress',
-      path: '/docs/PROGRESS.md',
-      description: 'Development progress and roadmap for the application',
+      name: 'README.md',
+      path: '/README.md',
+      description: 'Project setup and overview',
       category: 'general',
-      icon: <Icon iconId="faFileLight" className="h-5 w-5 text-green-600 font-body" />,
+      icon: <Icon iconId="faInfoCircleLight" className="h-5 w-5 text-blue-600 font-body" />,
     },
     {
-      name: 'User Flow',
-      path: '/docs/User-Flow.md',
-      description: 'User journey and application flow documentation',
+      name: 'eslint.config.mjs',
+      path: '/eslint.config.mjs',
+      description: 'ESLint configuration for code quality',
+      category: 'linter',
+      icon: <Icon iconId="faCodeLight" className="h-5 w-5 text-green-600 font-body" />,
+    },
+    {
+      name: 'package.json',
+      path: '/package.json',
+      description: 'Project dependencies and scripts',
       category: 'general',
-      icon: <Icon iconId="faFileLight" className="h-5 w-5 text-green-600 font-body" />,
+      icon: <Icon iconId="faFileCodeLight" className="h-5 w-5 text-purple-600 font-body" />,
     },
     {
-      name: 'Campaign Wizard Validation',
-      path: '/docs/campaign-wizard-validation.md',
-      description: 'Validation rules and requirements for the campaign wizard',
+      name: 'next.config.js',
+      path: '/next.config.js',
+      description: 'Next.js framework configuration',
       category: 'general',
-      icon: <Icon iconId="faFileLight" className="h-5 w-5 text-green-600 font-body" />,
+      icon: <Icon iconId="faCogLight" className="h-5 w-5 text-gray-600 font-body" />,
     },
     {
-      name: 'Cint API Documentation',
-      path: '/docs/Cint_API_info.md',
-      description: 'Integration documentation for the Cint API',
+      name: 'Jest Configuration',
+      path: '/jest.config.js',
+      description: 'Testing framework setup',
       category: 'api',
-      icon: <Icon iconId="faFileLight" className="h-5 w-5 text-purple-600 font-body" />,
+      icon: <Icon iconId="faVialLight" className="h-5 w-5 text-red-600 font-body" />,
     },
     {
-      name: 'Any Type Usage Report',
-      path: '/docs/any-type-usage-report.md',
-      description: 'ESLint report on any type usage in the codebase',
+      name: 'Typescript Config',
+      path: '/tsconfig.json',
+      description: 'TypeScript compiler options',
       category: 'linter',
-      icon: <Icon iconId="faWarningLight" className="h-5 w-5 text-yellow-600 font-body" />,
+      icon: <Icon iconId="faFileCodeLight" className="h-5 w-5 text-blue-500 font-body" />,
     },
     {
-      name: 'Image Tag Usage Report',
-      path: '/docs/img-tag-usage-report.md',
-      description: 'Report on <img> tag usage instead of Next.js Image component',
+      name: 'Tailwind Config',
+      path: '/tailwind.config.js',
+      description: 'Tailwind CSS configuration',
+      category: 'general',
+      icon: <Icon iconId="faPaletteLight" className="h-5 w-5 text-teal-600 font-body" />,
+    },
+    {
+      name: 'Prettier Config',
+      path: '/.prettierrc.json',
+      description: 'Code formatting rules',
       category: 'linter',
-      icon: <Icon iconId="faWarningLight" className="h-5 w-5 text-yellow-600 font-body" />,
+      icon: <Icon iconId="faBrushLight" className="h-5 w-5 text-pink-600 font-body" />,
     },
     {
-      name: 'Hook Dependency Issues Report',
-      path: '/docs/hook-dependency-issues-report.md',
-      description: 'Report on React Hook dependency issues in the codebase',
-      category: 'linter',
-      icon: <Icon iconId="faWarningLight" className="h-5 w-5 text-yellow-600 font-body" />,
-    },
-    {
-      name: 'API Documentation',
-      path: '/docs/API.md',
-      description: 'API endpoints, parameters, and example responses',
+      name: 'Vercel Config',
+      path: '/vercel.json',
+      description: 'Deployment configuration',
       category: 'api',
-      icon: <Icon iconId="faFileLight" className="h-5 w-5 text-green-600 font-body" />,
+      icon: <Icon iconId="faRocketLight" className="h-5 w-5 text-black font-body" />,
     },
     {
-      name: 'Data Models',
-      path: '/docs/MODELS.md',
-      description: 'Database models and their relationships',
-      category: 'database',
+      name: 'Environment Example',
+      path: '/.env.example',
+      description: 'Environment variables template',
+      category: 'api',
       icon: <Icon iconId="faWarningLight" className="h-5 w-5 text-yellow-600 font-body" />,
     },
   ];
 
-  // Check if user is admin using Clerk metadata
-  const isAdmin = useMemo(() => {
-    if (!isLoaded || !user) return false;
-    const metadata = user.publicMetadata as PublicMetadata;
-    const claimsRole = sessionClaims?.['metadata.role'];
-    const userRole = metadata?.role || claimsRole;
-    return userRole === 'ADMIN' || userRole === 'super_admin';
-  }, [isLoaded, user, sessionClaims]);
-
-  const isDevelopment = process.env.NODE_ENV === 'development';
-  const canAccess = isAdmin || isDevelopment;
-
-  // Redirect if not authorized after Clerk loads
-  useEffect(() => {
-    if (isLoaded && !canAccess) {
-      console.warn('Redirecting non-admin user from Database Debug page');
-      router.push('/debug-tools');
-    }
-  }, [isLoaded, canAccess, router]);
-
-  // Fetch database health information - only if user can access
+  // Fetch database health information
   useEffect(() => {
     async function fetchDbHealth() {
       setIsLoadingHealth(true);
@@ -251,10 +241,9 @@ export default function DatabaseHealthPage() {
         setIsLoadingHealth(false);
       }
     }
-    if (isLoaded && canAccess) {
-      fetchDbHealth();
-    }
-  }, [isLoaded, canAccess]);
+
+    fetchDbHealth();
+  }, []);
 
   // Run database transaction test
   const runTransactionTest = async (testType: string) => {
@@ -314,25 +303,6 @@ export default function DatabaseHealthPage() {
               className="h-8 w-8 animate-spin text-[var(--accent-color)]"
             />
             <p className="mt-2 text-[var(--secondary-color)] font-body">Loading...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show Access Denied message if user is loaded but not authorized
-  if (!canAccess) {
-    return (
-      <div className="container mx-auto p-6 max-w-5xl font-body">
-        <div className="flex items-center justify-center h-64 font-body">
-          <div className="text-center font-body">
-            <p className="text-[var(--error-color)] font-medium text-lg font-body">Access Denied</p>
-            <p className="mt-2 text-[var(--secondary-color)] font-body">
-              Admin access required for this page.
-            </p>
-            <Button asChild className="mt-4" variant="default">
-              <Link href="/debug-tools">Return to Debug Tools</Link>
-            </Button>
           </div>
         </div>
       </div>

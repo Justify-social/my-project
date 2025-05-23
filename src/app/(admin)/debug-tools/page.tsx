@@ -90,6 +90,12 @@ export default function DebugToolsPage() {
           linkHref="/debug-tools/campaign-wizards" // Link to the new page
           buttonText="Check Campaign Wizards"
         />
+        <DebugToolCard
+          title="Documentation Hub"
+          description="Access comprehensive developer documentation and guides."
+          buttonText="View Documentation"
+          onButtonClick={() => window.open('https://justify-1.gitbook.io/jzyx2tuf', '_blank')}
+        />
       </div>
 
       {/* Campaign Verification Tool Section - REMOVED */}

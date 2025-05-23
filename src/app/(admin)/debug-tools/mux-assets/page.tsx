@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@clerk/nextjs';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon/icon';
@@ -34,60 +33,48 @@ interface MuxAsset {
 }
 
 const MuxAssetCheckerPage: React.FC = () => {
-  const { isLoaded: isAuthLoaded, sessionClaims } = useAuth();
-  const isSuperAdmin = sessionClaims?.['metadata.role'] === 'super_admin';
-
   const [assets, setAssets] = useState<MuxAsset[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isAuthLoaded && !isSuperAdmin) {
-      setError('Access Denied. Super Admin role required.');
-      setIsLoading(false);
-      return;
-    }
-
-    if (isAuthLoaded && isSuperAdmin) {
-      const fetchAssets = async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-          const response = await fetch('/api/debug/mux-assets');
-          if (!response.ok) {
-            const errData = await response.json().catch(() => ({}));
-            throw new Error(
-              errData.error ||
-                `API Error fetching Mux assets: ${response.status} ${response.statusText}`
-            );
-          }
-          const data = await response.json();
-          setAssets(data || []);
-        } catch (err: unknown) {
-          const errorMessage = err instanceof Error ? err.message : String(err);
-          logger.error('Error fetching Mux assets:', { error: errorMessage });
-          setError(errorMessage);
-        } finally {
-          setIsLoading(false);
+    const fetchAssets = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await fetch('/api/debug/mux-assets');
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(
+            errData.error ||
+              `API Error fetching Mux assets: ${response.status} ${response.statusText}`
+          );
         }
-      };
-      fetchAssets();
-    }
-  }, [isAuthLoaded, isSuperAdmin]);
+        const data = await response.json();
+        setAssets(data || []);
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        logger.error('Error fetching Mux assets:', { error: errorMessage });
+        setError(errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAssets();
+  }, []);
 
   const getMuxStatusBadgeVariant = (
     status: string | null | undefined
   ): 'default' | 'destructive' | 'secondary' | 'outline' => {
-    // | 'success'  // Removed custom variants not directly supported by default Badge
-    // | 'warning'
     if (!status) return 'default';
     switch (status.toUpperCase()) {
       case 'READY':
-        return 'default'; // Or 'secondary' if you prefer a slightly different look for success
+        return 'default';
       case 'MUX_PROCESSING':
       case 'AWAITING_UPLOAD':
       case 'PREPARING':
-        return 'outline'; // Use outline for pending/warning states
+        return 'outline';
       case 'ERROR':
       case 'ERROR_NO_PLAYBACK_ID':
         return 'destructive';
@@ -95,20 +82,6 @@ const MuxAssetCheckerPage: React.FC = () => {
         return 'secondary';
     }
   };
-
-  if (!isAuthLoaded) {
-    return (
-      <div className="container mx-auto p-4 md:p-6 text-center">
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
-  if (!isSuperAdmin && isAuthLoaded) {
-    return (
-      <div className="container mx-auto p-4 md:p-6">Access Denied. Super Admin role required.</div>
-    );
-  }
 
   return (
     <div className="container mx-auto p-4 md:p-6 space-y-6">
