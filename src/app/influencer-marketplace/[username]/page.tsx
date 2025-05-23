@@ -5,7 +5,6 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'; // Hook
 import { InfluencerProfileData } from '@/types/influencer';
 import { logger } from '@/lib/logger';
 import { Skeleton } from '@/components/ui/skeleton'; // Use actual Skeleton
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'; // Use actual Alert
 import { Icon } from '@/components/ui/icon/icon'; // Assuming Icon component exists
 import { ProfileHeader } from '@/components/features/influencers/ProfileHeader'; // Import the ProfileHeader component
 // Import Tabs components
@@ -48,7 +47,6 @@ import {
 import { toast } from 'react-hot-toast';
 import { ButtonAddToCampaign } from '@/components/ui/button-add-to-campaign'; // Import new component
 import { Button } from '@/components/ui/button'; // Added Button import
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 // import { ProfilePageLayout } from '@/components/layouts/ProfilePageLayout';
 

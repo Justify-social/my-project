@@ -67,17 +67,21 @@ const getFollowerTypeBadge = (type: string, value: number) => {
 
 const AudienceAnalyticsSection: React.FC<AudienceAnalyticsSectionProps> = ({ influencer }) => {
   // Extract comprehensive InsightIQ data
-  const insightiq = (influencer as any).insightiq;
-  const audienceData = insightiq?.audience;
-  const contactData = insightiq?.contacts;
-  const pricingData = insightiq?.pricing;
+  const insightiq = (influencer as Record<string, unknown>).insightiq as Record<string, unknown>;
+  const audienceData = insightiq?.audience as Record<string, unknown>;
+  const contactData = insightiq?.contacts as Record<string, unknown>;
+  const pricingData = insightiq?.pricing as Record<string, unknown>;
 
   // Executive Summary Metrics
-  const credibilityScore = audienceData?.credibility_score || 0;
-  const significantFollowersPercentage = audienceData?.significant_followers_percentage || 0;
-  const followerTypes = audienceData?.follower_types || [];
-  const topCountries = audienceData?.countries?.slice(0, 5) || [];
-  const topCities = audienceData?.cities?.slice(0, 5) || [];
+  const credibilityScore = (audienceData?.credibility_score as number) || 0;
+  const significantFollowersPercentage =
+    (audienceData?.significant_followers_percentage as number) || 0;
+  const followerTypes =
+    (audienceData?.follower_types as Array<{ name: string; value: number }>) || [];
+  const topCountries =
+    (audienceData?.countries as Array<{ code: string; value: number }>)?.slice(0, 5) || [];
+  const topCities =
+    (audienceData?.cities as Array<{ name: string; value: number }>)?.slice(0, 5) || [];
 
   // Contact Information for Marketing Directors
   const ContactCard = () => (
@@ -96,21 +100,21 @@ const AudienceAnalyticsSection: React.FC<AudienceAnalyticsSectionProps> = ({ inf
               href={`mailto:${contactData.email}`}
               className="text-sm font-medium text-interactive hover:underline"
             >
-              {contactData.email}
+              {contactData.email as string}
             </a>
           </div>
         )}
         {contactData?.phone && (
           <div className="flex items-center gap-2">
             <Icon iconId="faPhoneLight" className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">{contactData.phone}</span>
+            <span className="text-sm font-medium">{contactData.phone as string}</span>
           </div>
         )}
         {contactData?.website && (
           <div className="flex items-center gap-2">
             <Icon iconId="faGlobeLight" className="h-4 w-4 text-muted-foreground" />
             <a
-              href={contactData.website}
+              href={contactData.website as string}
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm font-medium text-interactive hover:underline"
@@ -125,20 +129,24 @@ const AudienceAnalyticsSection: React.FC<AudienceAnalyticsSectionProps> = ({ inf
             <div className="text-sm font-medium text-success mb-2">
               Estimated Collaboration Cost
             </div>
-            {pricingData.pricing.post_type && (
+            {(pricingData.pricing as Record<string, unknown>).post_type && (
               <div className="grid grid-cols-2 gap-2 text-xs">
-                {Object.entries(pricingData.pricing.post_type).map(
-                  ([type, range]: [string, any]) => (
-                    <div key={type} className="flex justify-between">
-                      <span className="capitalize text-muted-foreground">
-                        {type.replace('_', ' ')}:
-                      </span>
-                      <span className="font-medium">
-                        ${range.min?.toLocaleString()} - ${range.max?.toLocaleString()}
-                      </span>
-                    </div>
-                  )
-                )}
+                {Object.entries(
+                  (pricingData.pricing as Record<string, unknown>).post_type as Record<
+                    string,
+                    unknown
+                  >
+                ).map(([type, range]: [string, unknown]) => (
+                  <div key={type} className="flex justify-between">
+                    <span className="capitalize text-muted-foreground">
+                      {type.replace('_', ' ')}:
+                    </span>
+                    <span className="font-medium">
+                      ${(range as { min?: number; max?: number }).min?.toLocaleString()} - $
+                      {(range as { min?: number; max?: number }).max?.toLocaleString()}
+                    </span>
+                  </div>
+                ))}
               </div>
             )}
           </div>
