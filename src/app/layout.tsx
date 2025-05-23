@@ -21,6 +21,8 @@ import { Icon } from '@/components/ui/icon/icon'; // Assuming Icon component pat
 // Import ClerkProvider and UI components
 import { ClerkProvider } from '@clerk/nextjs';
 // Remove dynamic import: import dynamic from 'next/dynamic';
+// Import Clerk configuration debug utility
+import { debugClerkConfig } from '@/lib/auth/clerk-config';
 
 // Import diagnostic script for legacy compatibility
 // Removed as part of icon system simplification - functionality now built into Icon component
@@ -50,6 +52,11 @@ async function UTSSR() {
 */
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // Debug Clerk configuration in development
+  if (process.env.NODE_ENV === 'development') {
+    debugClerkConfig();
+  }
+
   return (
     <ClerkProvider>
       {' '}

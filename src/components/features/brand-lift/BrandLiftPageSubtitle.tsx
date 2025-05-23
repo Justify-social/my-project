@@ -42,8 +42,6 @@ const BrandLiftPageSubtitle: React.FC<BrandLiftPageSubtitleProps> = ({
           <Link
             href={`/campaigns/${campaignId}`}
             className="hover:underline hover:text-accent transition-colors flex items-center group"
-            target="_blank"
-            rel="noopener noreferrer"
           >
             <Icon
               iconId="faClipboardLight"

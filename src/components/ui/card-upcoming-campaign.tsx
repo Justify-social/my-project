@@ -184,8 +184,7 @@ export function UpcomingCampaignsTable({
                                   width={16}
                                   height={16}
                                   title={campaign.platform}
-                                  className="opacity-80"
-                                  style={{ width: 'auto', height: 'auto' }}
+                                  className="opacity-80 w-4 h-4"
                                 />
                               );
                             }
@@ -224,8 +223,7 @@ export function UpcomingCampaignsTable({
                                             width={14}
                                             height={14}
                                             title={platformName}
-                                            className="opacity-80"
-                                            style={{ width: 'auto', height: 'auto' }}
+                                            className="opacity-80 w-3.5 h-3.5"
                                           />
                                         ) : (
                                           <span
