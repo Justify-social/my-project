@@ -6,16 +6,17 @@ This section contains specific how-to guides tailored for developers working on 
 
 ## Core Development Workflows
 
-- **[Contributing Guide](./contributing.md)**: _(To be created/moved)_ The essential guide covering our Git branching strategy, Pull Request process, code review expectations, and general development workflow. **Start here if you plan to contribute code.**
+- **[Contributing Guide](./contributing.md)**: The essential guide covering our Git branching strategy, Pull Request process, code review expectations, and general development workflow. **Start here if you plan to contribute to the codebase.**
 - **[Debugging Guide](./debugging-guide.md)**: _(Placeholder)_ Practical steps and techniques for debugging common issues in the frontend (React components, browser) and backend (API routes, server logic).
 - **[Local Testing Guide](./local-testing-guide.md)**: _(Placeholder)_ How to run various types of tests (unit, integration, E2E) locally and best practices for writing effective tests.
-- **[Troubleshooting Guide](./troubleshooting.md)**: _(To be created/populated)_ A collection of common problems encountered during development (e.g., setup issues, build errors, runtime exceptions) and their solutions.
+- **[Troubleshooting Guide](../../troubleshooting/README.md)**: Comprehensive troubleshooting and problem resolution guide with visual decision trees, common error messages, and step-by-step solutions for development issues.
 
 ## System-Specific Guides
 
-- **[Deployment Guide](./deployment.md)**: _(To be recreated)_ Instructions and information regarding the deployment process, environments (local, preview, staging, production), and Vercel configuration.
 - **[Icon System Guide](./icon-system-guide.md)**: _(To be recreated)_ How to use the application's icon system, including finding icons, using the `<Icon>` component, and potentially adding new icons.
 - **[Turbopack Guide](./turbopack.md)**: _(To be recreated/reviewed)_ Information on using Turbopack for potentially faster local development builds (if still relevant and supported).
+
+For deployment information, refer to the comprehensive **[Deployment & CI/CD Documentation](../../deployment/README.md)**.
 
 ## Feature Development Guides
 

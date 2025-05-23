@@ -96,4 +96,4 @@ This command will typically start the application on `http://localhost:3000` (or
 - **Migration Failures**: Look at the error messages from `npm run db:migrate`. Sometimes, manual intervention in the database or migration files is needed, but consult with your team lead first.
 - **Missing Environment Variables**: If the application fails to start or features don't work, ensure all required variables in `.env.local` are correctly set.
 
-If you encounter persistent issues, please refer to the more detailed **[Troubleshooting Guide](../guides/developer/troubleshooting.md)** or consult with your team.
+If you encounter persistent issues, please refer to the comprehensive **[Troubleshooting Guide](../troubleshooting/README.md)** or consult with your team.

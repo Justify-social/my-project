@@ -149,8 +149,10 @@ export function CampaignCard({ campaign, onView }) {
 - **Matches** - Suggested pairings between brands and influencers
 - **Analytics** - Performance data for campaigns and influencer content
 
-## Related Documentation
+## Further Reading
+
+Looking to explore deeper? Here are your next steps:
 
 - [Architecture Overview](../architecture/README.md) - How the system is built
-- [UI Components](../reference/ui/README.md) - Our component library
-- [API Reference](../reference/api/README.md) - Backend service APIs
+- [Component Library](../components/component-library.md) - Our comprehensive UI component system
+- [API Reference](../api/comprehensive-reference.md) - Complete backend service documentation

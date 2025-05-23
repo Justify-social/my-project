@@ -70,7 +70,7 @@ Thank you for your interest in contributing to our project. This guide explains 
 
 If you have questions or need assistance:
 
-- Check the [Troubleshooting Guide](./guides/developer/troubleshooting.md)
+- Check the [Troubleshooting Guide](../troubleshooting/README.md)
 - Ask for help in the PR comments
 - Reach out to the development team
 
