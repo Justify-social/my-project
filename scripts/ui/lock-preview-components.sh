@@ -8,17 +8,12 @@ set -e # Exit immediately if a command exits with a non-zero status.
 
 # Define the target directory relative to the project root
 TARGET_DIR="src/app/(admin)/debug-tools/ui-components/preview"
-BACKUP_DIR="scripts/ui/preview_backups"
 
 # Check if the directory exists
 if [ ! -d "$TARGET_DIR" ]; then
   echo "Error: Target directory not found: $TARGET_DIR" >&2
   exit 1
 fi
-
-# Create backup directory
-mkdir -p "$BACKUP_DIR"
-echo "Created backup directory (if not exists): $BACKUP_DIR"
 
 # Find files to process and store in an array (more portable than mapfile)
 files_to_lock=()
@@ -32,16 +27,6 @@ if [ ${#files_to_lock[@]} -eq 0 ]; then
 fi
 
 echo "Found ${#files_to_lock[@]} files to lock in $TARGET_DIR..."
-
-# Backup files first
-echo "--> Backing up files to $BACKUP_DIR..."
-# Use xargs for potentially large number of files
-printf '%s\0' "${files_to_lock[@]}" | xargs -0 -I {} cp {} "$BACKUP_DIR/"
-if [ $? -ne 0 ]; then
-    echo "Error: Failed to backup one or more files" >&2
-    exit 1
-fi
-echo "  Backup complete."
 
 # 1. Set permissions to 444 (read-only for all)
 echo "--> Setting read-only permissions (chmod 444)..."
