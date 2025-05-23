@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useUser, useAuth } from '@clerk/nextjs';
+import { useAuth } from '@clerk/nextjs';
 import { Icon } from '@/components/ui/icon/icon';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,11 +18,6 @@ import { Badge } from '@/components/ui/badge';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
-
-// Define expected structure for Clerk publicMetadata
-interface PublicMetadata {
-  role?: string;
-}
 
 interface DocFile {
   name: string;
@@ -118,8 +112,6 @@ interface ExtendedDbHealthData extends DbHealthData {
 }
 
 export default function DatabaseHealthPage() {
-  const router = useRouter();
-  const { user, isLoaded } = useUser();
   const { isLoaded: isAuthLoaded } = useAuth();
 
   const [dbHealth, setDbHealth] = useState<ExtendedDbHealthData | null>(null);
@@ -293,7 +285,7 @@ export default function DatabaseHealthPage() {
     activeDocTab === 'all' ? docs : docs.filter(doc => doc.category === activeDocTab);
 
   // Show loading state while Clerk is loading
-  if (!isLoaded || !isAuthLoaded) {
+  if (!isAuthLoaded) {
     return (
       <div className="container mx-auto p-6 max-w-5xl font-body">
         <div className="flex items-center justify-center h-64 font-body">
