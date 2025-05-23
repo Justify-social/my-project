@@ -11,7 +11,7 @@
  */
 import { DateService } from './date-service';
 import { logger } from './logger';
-import { User, Platform as PrismaPlatform } from '@prisma/client'; // Import User type and Prisma Platform
+import { User } from '@prisma/client'; // Import User type, removed PrismaPlatform
 import { PlatformEnum } from '@/types/enums'; // Import the SSOT PlatformEnum
 import { v4 as uuidv4 } from 'uuid'; // Import uuid for default influencer
 

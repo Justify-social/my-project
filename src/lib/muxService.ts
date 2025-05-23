@@ -58,11 +58,10 @@ export async function createDirectUploadUrl(corsOrigin: string = '*') {
       );
       throw new Error('Failed to create Mux direct upload URL.');
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error('[MuxService] Error creating Mux direct upload URL:', error);
-    // Consider more specific error handling based on Mux APIError types
-    if (error.messages && error.messages.length > 0) {
-      throw new Error(`Mux API Error: ${error.messages.join(', ')}`);
+    if (error instanceof Mux.APIError && error.message) {
+      throw new Error(`Mux API Error: ${error.message}`);
     }
     throw new Error('Failed to create Mux direct upload URL due to an internal error.');
   }
@@ -103,17 +102,15 @@ export async function getAssetPlaybackInfo(muxAssetId: string) {
       );
       throw new Error(`Failed to retrieve Mux asset info for Asset ID: ${muxAssetId}.`);
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error(
       `[MuxService] Error retrieving Mux asset info for Asset ID: ${muxAssetId}:`,
       error
     );
-    if (error.messages && error.messages.length > 0) {
-      throw new Error(`Mux API Error: ${error.messages.join(', ')}`);
+    if (error instanceof Mux.APIError && error.message) {
+      throw new Error(`Mux API Error: ${error.message}`);
     }
-    // Handle specific Mux errors, e.g., NotFoundError if asset doesn't exist
-    if (error.constructor?.name === 'NotFoundError') {
-      // Or check error.type from Mux error object
+    if (error instanceof Mux.NotFoundError) {
       throw new Error(`Mux Asset with ID ${muxAssetId} not found.`);
     }
     throw new Error(

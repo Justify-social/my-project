@@ -46,7 +46,7 @@ export async function checkCampaignNameExists(
       try {
         const errorData = await response.json();
         errorMsg = errorData.error || errorData.message || errorMsg;
-      } catch (parseError) {
+      } catch {
         /* ignore */
       }
 

@@ -32,7 +32,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({
   companyName,
-  remainingCredits,
+  remainingCredits: _remainingCredits,
   notificationsCount,
   onMenuClick,
   authControls,

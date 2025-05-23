@@ -81,7 +81,9 @@ export async function GET(_request: NextRequest) {
       `[API /search/index-brand-lift-studies] Indexing ${studiesFromDb.length} fetched BrandLiftStudies...`
     );
     // Pass the raw studiesFromDb; reindexAllBrandLiftStudies will handle transformation and orgId resolution internally
-    await reindexAllBrandLiftStudies(studiesFromDb as any); // Cast to any for now, will be fixed by Prisma types in algolia.ts for studies parameter
+    await reindexAllBrandLiftStudies(
+      studiesFromDb as Parameters<typeof reindexAllBrandLiftStudies>[0]
+    ); // Use Parameters to get the correct type
 
     logger.info('[API /search/index-brand-lift-studies] Indexing complete!');
     return NextResponse.json({

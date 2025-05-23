@@ -13,7 +13,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Icon } from './icon/icon';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
-import { Input } from '@/components/ui/input';
+import { Input as _Input } from '@/components/ui/input';
 import { IconButtonAction } from '@/components/ui/button-icon-action';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
@@ -68,7 +68,7 @@ export function GifCard({
   onCancelText,
   editTextSaveDisabled,
 }: GifCardProps) {
-  const [isPaused, setIsPaused] = useState(false); // Visual state for pause
+  const [_isPaused, _setIsPaused] = useState(false); // Visual state for pause - Prefixed
 
   const handleCardClick = () => {
     if (disabled) return;

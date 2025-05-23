@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import {
-  Platform as PrismaPlatform,
+  // Platform as PrismaPlatform, // REMOVED: Unused import
   KPI as PrismaKPI,
   Feature as PrismaFeature,
   Status as PrismaStatus, // For CampaignWizard status
@@ -11,7 +11,7 @@ import {
 // Import the SSOT PlatformEnum
 import { PlatformEnum } from '@/types/enums';
 import { checkCampaignNameExists } from '@/lib/actions/campaigns'; // Placeholder import
-import { logger } from '@/utils/logger'; // Import logger
+import { logger as _logger } from '@/utils/logger'; // Import logger - Prefixed
 
 //---------------------------------------------------------------------------
 // Prisma Enum Definitions & Zod Schemas
@@ -118,6 +118,9 @@ export const DraftAssetSchema = z
     isPrimaryForBrandLiftPreview: z.boolean().nullable().optional(),
   })
   .passthrough(); // Use passthrough instead of strict
+
+/** TypeScript type inferred from DraftAssetSchema. */
+export type DraftAsset = z.infer<typeof DraftAssetSchema>; // EXPORT DraftAsset type
 
 /** Schema for Demographics object (used within DraftCampaignData). */
 export const DemographicsSchema = z
@@ -398,7 +401,7 @@ export const DraftCampaignDataSchema = DraftCampaignDataBaseSchema
       } catch (error) {
         // If check fails, treat as validation failure
         // The message below will be shown
-        logger.error('Async name validation failed:', error);
+        _logger.error('Async name validation failed:', error);
         return false;
       }
     },

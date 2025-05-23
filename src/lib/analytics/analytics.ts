@@ -8,8 +8,8 @@ export const Analytics = {
   },
 };
 
-export const trackEvent = (eventName: string, properties: Record<string, any>) => {
-  // console.log(`[Analytics] ${eventName}`, properties);
+export const trackEvent = (_eventName: string, _properties: Record<string, unknown>) => {
+  // console.log(`[Analytics] ${_eventName}`, _properties);
   // Replace with your actual analytics SDK call, e.g.:
-  // analytics.track(eventName, properties);
+  // analytics.track(_eventName, _properties);
 };

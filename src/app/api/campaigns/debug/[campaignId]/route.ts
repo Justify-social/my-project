@@ -12,7 +12,10 @@ import { z } from 'zod';
 //   params: { campaignId: string };
 // }
 
-export async function GET(req: NextRequest, context: any) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ campaignId: string }> }
+) {
   // Revert to any for params
   return tryCatch(
     async () => {
@@ -22,7 +25,7 @@ export async function GET(req: NextRequest, context: any) {
         throw new UnauthenticatedError('User not authenticated');
       }
 
-      const { campaignId } = context.params; // Access campaignId from context.params
+      const { campaignId } = await params; // Access campaignId from awaited params
 
       if (!campaignId || !z.string().uuid().safeParse(campaignId).success) {
         throw new BadRequestError('Valid Campaign Wizard ID (UUID) is required.');

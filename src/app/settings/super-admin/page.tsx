@@ -25,6 +25,16 @@ import { useQueryClient } from '@tanstack/react-query'; // Removed useQuery, use
 
 // Define UserData structure (matches old page)
 
+// Define OrganizationData structure
+interface OrganizationData {
+  id: string;
+  name: string;
+  slug?: string | null;
+  membersCount?: number | null;
+  createdAt: string; // Assuming it comes as a string from the API
+  // Add other fields as necessary from your API response
+}
+
 // --- Skeleton ---
 const TeamPageSkeleton = () => (
   <div className="space-y-8">
@@ -52,7 +62,7 @@ const SuperAdminSettingsPage = () => {
   const { isLoaded: isAuthLoaded, sessionClaims } = useAuth();
   const isSuperAdmin = sessionClaims?.['metadata.role'] === 'super_admin';
 
-  const [organizations, setOrganizations] = useState<any[]>([]);
+  const [organizations, setOrganizations] = useState<OrganizationData[]>([]);
   const [isLoadingOrgs, setIsLoadingOrgs] = useState(true);
   const [orgError, setOrgError] = useState<string>('');
 

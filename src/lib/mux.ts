@@ -23,7 +23,7 @@ const MUX_API_BASE_URL = 'https://api.mux.com';
 
 // Mock client for simulating Mux API calls
 const mockMuxApiClient = {
-  post: async (url: string, data: any, headers?: any): Promise<any> => {
+  post: async (url: string, data: unknown, _headers?: Record<string, string>): Promise<unknown> => {
     logger.info(`[MOCK MUX API] POST ${url}`, { data });
     if (url.includes('/video/v1/uploads')) {
       return {
@@ -34,7 +34,7 @@ const mockMuxApiClient = {
     }
     return { message: 'Mock Mux POST success' };
   },
-  get: async (url: string, headers?: any): Promise<any> => {
+  get: async (url: string, _headers?: Record<string, string>): Promise<unknown> => {
     logger.info(`[MOCK MUX API] GET ${url}`);
     if (url.includes('/video/v1/assets/')) {
       const assetId = url.split('/').pop() || `mux_asset_mock_${Date.now()}`;
@@ -52,10 +52,14 @@ const mockMuxApiClient = {
 // Actual client (conceptual - requires real implementation with Mux Node SDK or raw fetch)
 const realMuxApiClient = {
   // TODO: Implement actual Mux API calls
-  post: async (url: string, data: any, headers?: any): Promise<any> => {
+  post: async (
+    _url: string,
+    _data: unknown,
+    _headers?: Record<string, string>
+  ): Promise<unknown> => {
     throw new Error('Real Mux API client not implemented');
   },
-  get: async (url: string, headers?: any): Promise<any> => {
+  get: async (_url: string, _headers?: Record<string, string>): Promise<unknown> => {
     throw new Error('Real Mux API client not implemented');
   },
 };
@@ -86,7 +90,11 @@ export class MuxService {
     };
   }
 
-  private async makeMuxApiRequest(method: 'get' | 'post', path: string, data?: any): Promise<any> {
+  private async makeMuxApiRequest(
+    method: 'get' | 'post',
+    path: string,
+    data?: unknown
+  ): Promise<unknown> {
     if (MUX_API_MOCK_ENABLED) {
       return method === 'get'
         ? muxApiClient.get(`${MUX_API_BASE_URL}${path}`)
@@ -101,9 +109,9 @@ export class MuxService {
           ? await muxApiClient.get(`${MUX_API_BASE_URL}${path}`, headers)
           : await muxApiClient.post(`${MUX_API_BASE_URL}${path}`, data, headers);
       return response;
-    } catch (error: any) {
+    } catch (error) {
       logger.error(`Mux API request failed: ${method.toUpperCase()} ${path}`, {
-        error: error.message,
+        error: (error as Error).message,
       });
       // TODO: Implement specific Mux error handling
       throw error;
@@ -126,7 +134,7 @@ export class MuxService {
       cors_origin: corsOrigin,
       // TODO: Add other necessary settings like test mode for development
     };
-    return this.makeMuxApiRequest('post', path, payload);
+    return this.makeMuxApiRequest('post', path, payload) as Promise<MuxUploadResponse>;
   }
 
   /**
@@ -135,7 +143,7 @@ export class MuxService {
   async getAssetInfo(assetId: string): Promise<MuxAssetResponse> {
     logger.info(`Getting Mux asset info for ID: ${assetId}`);
     const path = `/video/v1/assets/${assetId}`;
-    return this.makeMuxApiRequest('get', path);
+    return this.makeMuxApiRequest('get', path) as Promise<MuxAssetResponse>;
   }
 
   getPlaybackUrl(

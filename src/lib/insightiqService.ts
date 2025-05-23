@@ -2,7 +2,7 @@ import { logger } from '@/utils/logger';
 import { serverConfig } from '@/config/server-config'; // Import server config
 // Import the new types
 import {
-  InsightIQGetProfileResponse,
+  InsightIQGetProfileResponse as _InsightIQGetProfileResponse,
   InsightIQProfile,
   InsightIQWorkPlatformList,
   InsightIQUserResponse,
@@ -21,16 +21,6 @@ import axios from 'axios'; // Using axios as suggested by Grok for easier handli
 import { Platform } from '@prisma/client';
 
 // --- Add Necessary Type Definitions Inline ---
-
-// Define an inline type for the expected list response structure for GET /v1/profiles
-interface InsightIQProfileListResponse {
-  data: InsightIQProfile[];
-  metadata?: {
-    offset: number;
-    limit: number;
-    total?: number;
-  };
-}
 
 // Define a type for the filters accepted by getInsightIQProfiles
 // This should align with the filters parsed in the API route
@@ -261,7 +251,7 @@ export async function makeInsightIQRequest<T>(
         const jsonError = JSON.parse(errorBody);
         // If JSON, stringify for better logging, otherwise use raw text
         errorBody = JSON.stringify(jsonError, null, 2);
-      } catch (e) {
+      } catch {
         // Ignore if parsing fails, keep raw text
       }
       // Log request-id with error
@@ -332,9 +322,9 @@ export async function getInsightIQProfileById(profileId: string): Promise<Insigh
     // Log the raw response from GET /v1/profiles/{id}
     logger.debug('[getInsightIQProfileById] Raw response:', { responseData: profileResponse });
     return profileResponse; // Return the fetched profile directly
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Distinguish between 404 (Not Found) and other errors
-    if (error.message?.includes('(404)')) {
+    if ((error as Error).message?.includes('(404)')) {
       logger.warn(
         `[InsightIQService] InsightIQ profile not found via GET /v1/profiles/${profileId}`
       );
@@ -356,7 +346,7 @@ export async function getInsightIQProfileById(profileId: string): Promise<Insigh
  */
 export async function checkInsightIQConnection(): Promise<{
   success: boolean;
-  data?: any;
+  data?: { platformCount: number };
   error?: string;
 }> {
   logger.info('[InsightIQService] Checking InsightIQ API connection...');
@@ -378,11 +368,11 @@ export async function checkInsightIQConnection(): Promise<{
       );
       return { success: false, error: 'Unexpected response format from health check endpoint.' };
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[InsightIQService] InsightIQ API connection check failed:', error);
     // Use the original error handling logic that relies on makeInsightIQRequest's error
-    const errorMessage = error?.message?.includes('InsightIQ API Error')
-      ? error.message // Pass specific API error
+    const errorMessage = (error as { message?: string })?.message?.includes('InsightIQ API Error')
+      ? (error as { message: string }).message // Cast to a more specific type
       : 'Failed to connect to InsightIQ API. Check credentials and base URL.';
     return { success: false, error: errorMessage };
   }
@@ -459,8 +449,8 @@ export async function getInsightIQAudience(
   try {
     const response = await makeInsightIQRequest<InsightIQGetAudienceResponse>(endpoint);
     return response;
-  } catch (error: any) {
-    if (error.message?.includes('(404)')) {
+  } catch (error: unknown) {
+    if ((error as Error).message?.includes('(404)')) {
       logger.warn(
         `[InsightIQService] InsightIQ audience data not found for accountId: ${accountId}`
       );
@@ -535,7 +525,7 @@ export async function searchInsightIQProfilesByParams(
   const endpoint = '/v1/social/creators/profiles/search';
   const url = `${baseUrl}${endpoint}`;
 
-  const requestBody: any = {
+  const requestBody: Record<string, unknown> = {
     limit: limit,
     offset: offset,
     sort_by: { field: 'FOLLOWER_COUNT', order: 'DESCENDING' }, // Always include sort_by
@@ -625,9 +615,9 @@ export async function searchInsightIQProfilesByParams(
       return null;
     }
     return response.data;
-  } catch (error: any) {
-    logger.error(`[searchInsightIQProfiles] Error: ${error.message}`, {
-      errorData: error?.response?.data,
+  } catch (error: unknown) {
+    logger.error(`[searchInsightIQProfiles] Error: ${(error as Error).message}`, {
+      errorData: (error as { response?: { data?: unknown } })?.response?.data,
     });
     // Throw specific error types if needed, otherwise return null or rethrow
     // Returning null for now to allow service layer to handle
@@ -742,7 +732,7 @@ export async function fetchDetailedProfile(
     }
 
     return analyticsResponse.profile as InsightIQProfileWithAnalytics;
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(
       `[InsightIQService] Error calling /analytics for handle ${handle}, platformId ${workPlatformId}:`,
       error
@@ -814,9 +804,9 @@ export async function submitSocialProfileScreeningRequest(
       );
       return { jobId: null, error: 'Unexpected response from InsightIQ' };
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(`[InsightIQService] Error submitting screening request for ${profileUrl}:`, error);
-    return { jobId: null, error: error.message || 'Failed to submit screening request' };
+    return { jobId: null, error: (error as Error).message || 'Failed to submit screening request' };
   }
 }
 

@@ -85,12 +85,12 @@ export async function POST(req: Request) {
       '[Clerk Webhook] Signature verified successfully! Event type: ' +
         evt.type +
         ', Event ID: ' +
-        evt.data.id
+        (evt.data as { id?: string }).id
     );
-  } catch (err: any) {
+  } catch (err: unknown) {
     logger.error('[Clerk Webhook] Error verifying webhook signature with Svix library:', {
-      errorMessage: err.message,
-      errorStack: err.stack,
+      errorMessage: (err as Error).message,
+      errorStack: (err as Error).stack,
       // fullError: err, // Avoid logging full error object if it might contain sensitive details from Svix internals
     });
     // This specific error message is what Clerk dashboard shows for signature failures.

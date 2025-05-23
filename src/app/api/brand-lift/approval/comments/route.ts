@@ -187,7 +187,7 @@ export const POST = async (req: NextRequest) => {
       userId: clerkUserId,
     });
     return NextResponse.json(newComment, { status: 201 });
-  } catch (error: any) {
+  } catch (error) {
     return handleApiError(error, req);
   }
 };
@@ -267,7 +267,7 @@ export const GET = async (req: NextRequest) => {
       userId: clerkUserId,
     });
     return NextResponse.json(commentsWithAuthorDetails);
-  } catch (error: any) {
+  } catch (error) {
     return handleApiError(error, req);
   }
 };

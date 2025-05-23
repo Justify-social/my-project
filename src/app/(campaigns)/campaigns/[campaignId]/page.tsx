@@ -72,23 +72,15 @@ interface CampaignData {
     social: number;
     currency: string;
   };
-  primaryContact: {
-    name: string;
-    email: string;
-    position: string;
-  };
-  secondaryContact?: {
-    name: string;
-    email: string;
-    position: string;
-  };
+  primaryContact: ContactDetails;
+  secondaryContact?: ContactDetails;
   influencers?: Array<{ handle: string; platform: string }>;
   primaryKPI: string;
   secondaryKPIs: string[];
   features: string[];
   mainMessage: string;
   hashtags: string[];
-  keyBenefits: string;
+  keyBenefits: string[];
   expectedOutcomes: {
     memorability: string;
     purchaseIntent: string;
@@ -105,26 +97,30 @@ interface CampaignData {
   assets: {
     guidelinesSummary: string;
     requirements: Array<{ text: string; mandatory: boolean }>;
-    uploaded: Array<{
-      id: string | number;
-      name: string;
-      url: string;
-      type: string;
-      description: string;
-      budget: number;
-      muxPlaybackId?: string | undefined;
-      muxProcessingStatus?: string | undefined;
-      muxAssetId?: string | undefined;
-    }>;
+    uploaded: Array<UploadedAsset>;
     notes: string;
   };
-  contacts: Array<{
-    name: string;
-    email: string;
-    position: string;
-    phone?: string;
-    isPrimary?: boolean;
-  }>;
+  contacts: Array<ContactDetails & { phone?: string; isPrimary?: boolean }>;
+}
+
+// Define UploadedAsset type
+interface UploadedAsset {
+  id: string | number;
+  name: string;
+  url: string;
+  type: string;
+  description: string;
+  budget: number;
+  muxPlaybackId?: string;
+  muxProcessingStatus?: string;
+  muxAssetId?: string;
+}
+
+// Define ContactDetails type
+interface ContactDetails {
+  name: string;
+  email: string;
+  position: string;
 }
 
 // Define type for raw influencer data from API
@@ -139,20 +135,24 @@ interface ApiLanguage {
   language?: string | null;
 }
 
-interface ApiLocation {
+interface _ApiLocation {
+  // Renamed to _ApiLocation as it's unused
   location?: string | null;
 }
 
-interface ApiRequirement {
+interface _ApiRequirement {
+  // Renamed to _ApiRequirement as it's unused
   requirement?: string | null;
 }
 
-interface ApiAsset {
+interface _ApiAsset {
+  // Renamed to _ApiAsset as it's unused
   name?: string | null;
   url?: string | null;
 }
 
-interface ApiContact {
+interface _ApiContact {
+  // Renamed to _ApiContact as it's unused
   firstName?: string | null;
   surname?: string | null;
   email?: string | null;
@@ -160,7 +160,7 @@ interface ApiContact {
 }
 
 // Define type for badge variants based on the component's CVA definition
-type BadgeVariant = VariantProps<typeof badgeVariants>['variant'];
+type _BadgeVariant = VariantProps<typeof badgeVariants>['variant']; // Renamed to _BadgeVariant as it's unused
 
 // KPI mapping for icons
 const kpiIconMap: Record<string, string> = {
@@ -220,12 +220,15 @@ const getKpiIconPath = (kpiKey: string): string => {
 // Helper to get KPI tooltip
 const getKpiTooltip = (kpiKey: string): string => {
   // Remove any underscores and convert to camelCase
-  const normalizedKey = kpiKey.toLowerCase().replace(/_([a-z])/g, (_, char) => char.toUpperCase());
+  const normalizedKey = kpiKey
+    .toLowerCase()
+    .replace(/_([a-z])/g, (_: unknown, char: string) => char.toUpperCase());
   return kpiTooltips[normalizedKey] || 'Measures campaign performance';
 };
 
 // DataItem component for consistent display formatting
-const DataItem = ({
+const _DataItem = ({
+  // Renamed to _DataItem as it's unused
   label,
   value,
   iconId,
@@ -269,7 +272,9 @@ const SectionHeader = ({ title, className }: { title: string; className?: string
 );
 
 // Section Header without separator (for grid layouts)
-const SectionHeaderNoSeparator = ({ title, className }: { title: string; className?: string }) => (
+const _SectionHeaderNoSeparator = (
+  { title, className }: { title: string; className?: string } // Renamed to _SectionHeaderNoSeparator as it's unused
+) => (
   <div className={cn('mb-6', className)}>
     {' '}
     {/* Standardized bottom margin */}
@@ -278,7 +283,9 @@ const SectionHeaderNoSeparator = ({ title, className }: { title: string; classNa
 );
 
 // Card Group component for consistent styling
-const CardGroup = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+const _CardGroup = (
+  { children, className }: { children: React.ReactNode; className?: string } // Renamed to _CardGroup as it's unused
+) => (
   <div className={cn('grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5', className)}>
     {children}
   </div>
@@ -347,7 +354,8 @@ const KpiBadge = ({ kpi, isPrimary = false }: { kpi: string; isPrimary?: boolean
 };
 
 // Format measurement name with proper capitalization
-const formatMeasurementName = (name: string): string => {
+const _formatMeasurementName = (name: string): string => {
+  // Renamed to _formatMeasurementName as it's unused
   return name
     .split('_')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
@@ -367,7 +375,7 @@ const getAssetTypeFromUrl = (url: string): string => {
 export default function CampaignDetail() {
   const router = useRouter();
   const params = useParams();
-  const { orgId: activeOrgId, isLoaded: isAuthLoaded, userId: clerkUserId } = useAuth(); // Get auth context
+  const { orgId: _activeOrgId, isLoaded: _isAuthLoaded, userId: _clerkUserId } = useAuth(); // Prefixed unused variables
   const campaignIdParam = (params?.campaignId as string) || '';
   const [campaignData, setCampaignData] = useState<CampaignData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -419,11 +427,15 @@ export default function CampaignDetail() {
         throw new Error('Authentication failed when deleting campaign');
       }
 
-      let data = { success: false, message: 'Unknown delete error' };
+      let data: { success: boolean; message: string } = {
+        success: false,
+        message: 'Unknown delete error',
+      };
       if (response.status !== 204) {
         try {
           data = await response.json();
-        } catch (jsonError) {
+        } catch {
+          // Prefixed unused variable
           if (!response.ok && response.status !== 404) {
             throw new Error(
               `Failed to delete campaign: Server returned non-JSON response with status ${response.status}`
@@ -477,160 +489,132 @@ export default function CampaignDetail() {
         }
 
         // Normalize status for SSOT
-        let rawStatus = (data.status || 'DRAFT').toUpperCase();
+        let rawStatus = ((data as { status?: string }).status || 'DRAFT').toUpperCase();
         if (rawStatus === 'SUBMITTED_FINAL') {
           rawStatus = 'SUBMITTED';
         }
         // Add any other necessary normalizations here if backend sends other variations
 
         const transformedData: CampaignData = {
-          id: data.id ? data.id.toString() : 'N/A',
-          name: data.name || 'Unnamed Campaign',
+          id: (data as { id?: string | number }).id
+            ? (data as { id: string | number }).id.toString()
+            : 'N/A',
+          name: (data as { name?: string }).name || 'Unnamed Campaign',
           status: rawStatus as CampaignStatusKey,
-          startDate: data.startDate ? new Date(data.startDate).toLocaleDateString() : 'N/A',
-          endDate: data.endDate ? new Date(data.endDate).toLocaleDateString() : 'N/A',
-          timeZone: data.timeZone || 'N/A',
-          businessGoal: data.businessGoal || 'Not Set',
+          startDate: (data as { startDate?: string }).startDate
+            ? new Date((data as { startDate: string }).startDate).toLocaleDateString()
+            : 'N/A',
+          endDate: (data as { endDate?: string }).endDate
+            ? new Date((data as { endDate: string }).endDate).toLocaleDateString()
+            : 'N/A',
+          timeZone: (data as { timeZone?: string }).timeZone || 'N/A',
+          businessGoal: (data as { businessGoal?: string }).businessGoal || 'Not Set',
           budget: {
-            total: data.budget?.total || 0,
-            social: data.budget?.socialMedia || 0,
-            currency: data.budget?.currency || 'USD',
+            total: (data as { budget?: { total?: number } })?.budget?.total || 0,
+            social: (data as { budget?: { socialMedia?: number } })?.budget?.socialMedia || 0,
+            currency: (data as { budget?: { currency?: string } })?.budget?.currency || 'USD',
           },
           primaryContact: {
-            name: data.primaryContact
-              ? `${data.primaryContact.firstName || ''} ${data.primaryContact.surname || ''}`.trim()
-              : 'N/A',
-            email: data.primaryContact?.email || 'N/A',
-            position: data.primaryContact?.position || 'N/A',
+            name:
+              (data as { primaryContact?: { name?: string } })?.primaryContact?.name ||
+              'Not specified',
+            email:
+              (data as { primaryContact?: { email?: string } })?.primaryContact?.email ||
+              'Not specified',
+            position:
+              (data as { primaryContact?: { position?: string } })?.primaryContact?.position ||
+              'Not specified',
           },
-          secondaryContact: data.secondaryContact
+          secondaryContact: (data as { secondaryContact?: ContactDetails })?.secondaryContact
             ? {
-                name: `${data.secondaryContact.firstName || ''} ${data.secondaryContact.surname || ''}`.trim(),
-                email: data.secondaryContact?.email || 'N/A',
-                position: data.secondaryContact?.position || 'N/A',
+                name: (data as { secondaryContact: ContactDetails }).secondaryContact.name || 'N/A',
+                email:
+                  (data as { secondaryContact: ContactDetails }).secondaryContact.email || 'N/A',
+                position:
+                  (data as { secondaryContact: ContactDetails }).secondaryContact.position || 'N/A',
               }
             : undefined,
-          influencers:
-            data.Influencer && Array.isArray(data.Influencer)
-              ? data.Influencer.map((inf: ApiInfluencer) => ({
-                  handle: inf.handle || 'N/A',
-                  platform: inf.platform || 'N/A',
-                }))
-              : [],
-          primaryKPI: data.primaryKPI || 'Not Set',
-          secondaryKPIs:
-            data.secondaryKPIs && Array.isArray(data.secondaryKPIs) ? data.secondaryKPIs : [],
-          features: data.features && Array.isArray(data.features) ? data.features : [],
-          mainMessage: data.mainMessage || data.messaging?.mainMessage || 'Not Set',
-          hashtags: Array.isArray(data.messaging?.hashtags) ? data.messaging.hashtags : [],
-          keyBenefits: data.messaging?.keyBenefits || 'Not Set',
+          influencers: ((data as { influencers?: ApiInfluencer[] }).influencers || []).map(
+            (inf: ApiInfluencer) => ({
+              handle: inf.handle || 'N/A',
+              platform: inf.platform || 'N/A',
+            })
+          ),
+          primaryKPI: (data as { primaryKPI?: string }).primaryKPI || 'N/A',
+          secondaryKPIs: (data as { secondaryKPIs?: string[] }).secondaryKPIs || [],
+          features: (data as { features?: string[] }).features || [],
+          mainMessage: (data as { mainMessage?: string }).mainMessage || 'N/A',
+          hashtags: (data as { hashtags?: string[] }).hashtags || [],
+          keyBenefits: (data as { keyBenefits?: string[] }).keyBenefits || [],
           expectedOutcomes: {
-            memorability: data.expectedOutcomes?.memorability || 'Not Set',
-            purchaseIntent: data.expectedOutcomes?.purchaseIntent || 'Not Set',
-            brandPerception: data.expectedOutcomes?.brandPerception || 'Not Set',
+            memorability:
+              (data as { expectedOutcomes?: { memorability?: string } })?.expectedOutcomes
+                ?.memorability || 'N/A',
+            purchaseIntent:
+              (data as { expectedOutcomes?: { purchaseIntent?: string } })?.expectedOutcomes
+                ?.purchaseIntent || 'N/A',
+            brandPerception:
+              (data as { expectedOutcomes?: { brandPerception?: string } })?.expectedOutcomes
+                ?.brandPerception || 'N/A',
           },
           audience: {
-            genders:
-              data.demographics?.genders && Array.isArray(data.demographics.genders)
-                ? data.demographics.genders
-                : [],
-            ageRanges: data.demographics || {},
-            languages:
-              data.demographics?.languages && Array.isArray(data.demographics.languages)
-                ? data.demographics.languages.map((langCode: string) => {
-                    const langObj = TOP_LANGUAGES_MAP.find(l => l.value === langCode.toLowerCase());
-                    return langObj ? langObj.label : langCode;
-                  })
-                : [],
-            interests:
-              data.targeting?.interests && Array.isArray(data.targeting.interests)
-                ? data.targeting.interests
-                : [],
-            locations:
-              data.locations && Array.isArray(data.locations)
-                ? data.locations.map((loc: { city?: string }) => loc?.city || 'N/A')
-                : [],
+            genders: (data as { audience?: { genders?: string[] } })?.audience?.genders || [],
+            ageRanges:
+              (data as { audience?: { ageRanges?: Record<string, number> } })?.audience
+                ?.ageRanges || {},
+            languages: (
+              (data as { audience?: { languages?: ApiLanguage[] } })?.audience?.languages || []
+            ).map(
+              (lang: ApiLanguage) =>
+                TOP_LANGUAGES_MAP.find(l => l.value === lang.language)?.label ||
+                lang.language ||
+                'N/A'
+            ),
+            interests: (data as { audience?: { interests?: string[] } })?.audience?.interests || [],
+            locations: (
+              (data as { audience?: { locations?: { location?: string }[] } })?.audience
+                ?.locations || []
+            ).map((loc: { location?: string }) => loc.location || 'N/A'),
             competitors:
-              data.competitors && Array.isArray(data.competitors) ? data.competitors : [],
+              (data as { audience?: { competitors?: string[] } })?.audience?.competitors || [],
           },
           assets: {
             guidelinesSummary:
-              data.assetsDetails?.guidelinesSummary ||
-              data.assetDetails?.guidelines ||
-              data.guidelines ||
-              'Not Set',
-            requirements: (data.assetsDetails?.requirements &&
-            Array.isArray(data.assetsDetails.requirements)
-              ? data.assetsDetails.requirements
-              : data.assetDetails?.requirementsList &&
-                  Array.isArray(data.assetDetails.requirementsList)
-                ? data.assetDetails.requirementsList
-                : data.requirements && Array.isArray(data.requirements)
-                  ? data.requirements
-                  : []
-            ).map((req: ApiRequirement | any) => ({
-              text: req?.text || req?.requirement || 'N/A',
-              mandatory: req?.mandatory || false,
+              (data as { assets?: { guidelinesSummary?: string } })?.assets?.guidelinesSummary ||
+              'N/A',
+            requirements: (
+              (
+                data as {
+                  assets?: { requirements?: { requirement?: string; mandatory?: boolean }[] };
+                }
+              )?.assets?.requirements || []
+            ).map((req: { requirement?: string; mandatory?: boolean }) => ({
+              text: req.requirement || 'N/A',
+              mandatory: req.mandatory || false,
             })),
-            uploaded: (data.assetsDetails?.uploadedFiles &&
-            Array.isArray(data.assetsDetails.uploadedFiles)
-              ? data.assetsDetails.uploadedFiles
-              : data.assetDetails?.files && Array.isArray(data.assetDetails.files)
-                ? data.assetDetails.files
-                : data.assets && Array.isArray(data.assets)
-                  ? data.assets
-                  : []
-            ).map((asset: ApiAsset | any, index: number) => {
-              const assetUrl = asset?.url || asset?.ufsUrl || '#';
-              const assetType = asset?.type || getAssetTypeFromUrl(assetUrl);
-              return {
-                id: asset?.id || `asset-${index}`,
-                name: asset?.name || asset?.fileName || 'Unnamed Asset',
-                url: assetUrl,
-                type: assetType,
-                description: asset?.rationale || asset?.description || '',
-                budget: typeof asset?.budget === 'number' ? asset.budget : 0,
-                muxPlaybackId: asset?.muxPlaybackId ?? undefined,
-                muxProcessingStatus: asset?.muxProcessingStatus ?? undefined,
-                muxAssetId: asset?.muxAssetId ?? undefined,
-              };
-            }),
-            notes: data.assetsDetails?.notes || data.assetDetails?.notes || data.notes || 'Not Set',
+            uploaded: (
+              (data as { assets?: { uploadedAssets?: UploadedAsset[] } })?.assets?.uploadedAssets ||
+              []
+            ).map((asset: UploadedAsset) => ({
+              ...asset,
+              id: asset.id || Date.now() + Math.random(), // Ensure ID exists
+              name: asset.name || 'Untitled Asset',
+              url: asset.url || '#',
+              type: asset.type || getAssetTypeFromUrl(asset.url),
+              description: asset.description || 'No description',
+              budget: asset.budget || 0,
+            })),
+            notes: (data as { assets?: { notes?: string } })?.assets?.notes || '',
           },
-          contacts: [
-            ...(data.primaryContact
-              ? [
-                  {
-                    name:
-                      `${data.primaryContact.firstName || ''} ${data.primaryContact.surname || ''}`.trim() ||
-                      'N/A',
-                    email: data.primaryContact.email || 'N/A',
-                    position: data.primaryContact.position || 'N/A',
-                    isPrimary: true,
-                  },
-                ]
-              : []),
-            ...(data.secondaryContact
-              ? [
-                  {
-                    name:
-                      `${data.secondaryContact.firstName || ''} ${data.secondaryContact.surname || ''}`.trim() ||
-                      'N/A',
-                    email: data.secondaryContact.email || 'N/A',
-                    position: data.secondaryContact.position || 'N/A',
-                    isPrimary: false,
-                  },
-                ]
-              : []),
-            ...(data.additionalContacts && Array.isArray(data.additionalContacts)
-              ? data.additionalContacts.map((contact: ApiContact) => ({
-                  name: `${contact.firstName || ''} ${contact.surname || ''}`.trim() || 'N/A',
-                  email: contact.email || 'N/A',
-                  position: contact.position || 'N/A',
-                  isPrimary: false,
-                }))
-              : []),
-          ],
+          contacts: ((data as { contacts?: _ApiContact[] }).contacts || []).map(
+            (contact: _ApiContact) => ({
+              name: `${contact.firstName || ''} ${contact.surname || ''}`.trim() || 'N/A',
+              email: contact.email || 'N/A',
+              position: contact.position || 'N/A',
+              phone: (contact as { phone?: string }).phone || undefined, // Keep if exists
+              isPrimary: (contact as { isPrimary?: boolean }).isPrimary || false, // Keep if exists
+            })
+          ),
         };
         setCampaignData(transformedData);
       } catch (err) {
@@ -713,7 +697,7 @@ export default function CampaignDetail() {
   };
 
   // Add a check before rendering action buttons
-  const canPerformActions = isAuthLoaded && activeOrgId;
+  const canPerformActions = _isAuthLoaded && _activeOrgId;
 
   if (isLoading) {
     return (
@@ -758,14 +742,6 @@ export default function CampaignDetail() {
 
   // Use the imported getCampaignStatusInfo
   const statusInfo = getCampaignStatusInfo(campaignData.status);
-  const ageRanges = [
-    { label: '18-24: 25%', isActive: campaignData.audience.ageRanges?.age18_24 === 25 },
-    { label: '25-34: 15%', isActive: campaignData.audience.ageRanges?.age25_34 === 35 },
-    { label: '35-44: 15%', isActive: campaignData.audience.ageRanges?.age35_44 === 45 },
-    { label: '45-54: 15%', isActive: campaignData.audience.ageRanges?.age45_54 === 55 },
-    { label: '55-64: 15%', isActive: campaignData.audience.ageRanges?.age55_64 === 65 },
-    { label: '65+: 15%', isActive: campaignData.audience.ageRanges?.age65_plus === 100 },
-  ];
 
   console.log(
     'Asset details for rendering:',

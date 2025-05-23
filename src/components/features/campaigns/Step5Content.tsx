@@ -8,8 +8,8 @@ import { z } from 'zod';
 import { useWizard } from '@/components/features/campaigns/WizardContext';
 import {
   DraftCampaignData,
-  SubmissionPayloadData,
-  StatusEnum,
+  SubmissionPayloadData as _SubmissionPayloadData,
+  StatusEnum as _StatusEnum,
 } from '@/components/features/campaigns/types';
 import { WizardSkeleton } from '@/components/ui/loading-skeleton';
 import { Icon } from '@/components/ui/icon/icon';
@@ -35,7 +35,7 @@ import { AssetCard } from '@/components/ui/card-asset';
 import Image from 'next/image';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
-import { toast } from 'react-hot-toast';
+import { toast as _toast } from 'react-hot-toast';
 
 // --- Utility Functions ---
 const formatDate = (dateString: string | null | undefined): string => {
@@ -46,7 +46,7 @@ const formatDate = (dateString: string | null | undefined): string => {
       month: 'long',
       day: 'numeric',
     });
-  } catch (e) {
+  } catch {
     return 'Invalid Date';
   }
 };
@@ -63,7 +63,7 @@ const formatCurrency = (
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
-  } catch (e) {
+  } catch {
     return String(amount); // Fallback
   }
 };

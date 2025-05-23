@@ -5,9 +5,9 @@ import { InfluencerProfileData, InfluencerSummary } from '@/types/influencer';
 import { PlatformEnum } from '@/types/enums';
 import { logger } from '@/utils/logger';
 import { calculateDiscoveryScore, calculateFullJustifyScore } from '@/lib/scoringService';
-import { getInsightIQWorkPlatformId } from '@/lib/insightiqUtils';
+import { getInsightIQWorkPlatformId as _getInsightIQWorkPlatformId } from '@/lib/insightiqUtils';
 import { Platform as PlatformBackend } from '@prisma/client';
-import { getProfileUniqueId } from '@/lib/insightiqService';
+import { getProfileUniqueId as _getProfileUniqueId } from '@/lib/insightiqService';
 
 /**
  * Maps an InsightIQ platform name string to our PlatformEnum.

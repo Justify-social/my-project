@@ -103,14 +103,14 @@ export async function POST(request: NextRequest) {
     if (typeof error === 'object' && error !== null) {
       if (
         'response' in error &&
-        typeof (error as any).response === 'object' &&
-        (error as any).response !== null &&
-        'status' in (error as any).response &&
-        typeof (error as any).response.status === 'number'
+        typeof (error as { response?: unknown }).response === 'object' &&
+        (error as { response?: { status?: unknown } }).response !== null &&
+        'status' in (error as { response: { status?: unknown } }).response &&
+        typeof (error as { response: { status?: unknown } }).response.status === 'number'
       ) {
-        status = (error as any).response.status;
-      } else if ('status' in error && typeof (error as any).status === 'number') {
-        status = (error as any).status;
+        status = (error as { response: { status: number } }).response.status;
+      } else if ('status' in error && typeof (error as { status?: unknown }).status === 'number') {
+        status = (error as { status: number }).status;
       }
     }
     logger.error('[API /request-risk-report] Unexpected error:', error);

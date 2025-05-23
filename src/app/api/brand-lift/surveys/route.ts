@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
 
       const body = await req.json();
       const validation = createStudySchema.safeParse(body);
-      if (!validation.success) throw new ZodValidationError(validation.error.errors);
+      if (!validation.success) throw new ZodValidationError(validation.error.flatten().fieldErrors);
 
       const {
         name,
@@ -200,13 +200,13 @@ export async function GET(req: NextRequest) {
 
       if (!validation.success) {
         logger.warn('Invalid query parameters for fetching studies', {
-          errors: validation.error.errors,
-          userId: clerkUserId, // Log clerkUserId
+          errors: validation.error.flatten().fieldErrors,
+          userId: clerkUserId,
         });
-        throw new ZodValidationError(validation.error.errors);
+        throw new ZodValidationError(validation.error.flatten().fieldErrors);
       }
 
-      const { campaignId: campaignIdQuery } = validation.data; // This is now potentially a string from query
+      const { campaignId: campaignIdQuery } = validation.data;
 
       // Fetch internal user ID
       const userRecord = await prisma.user.findUnique({

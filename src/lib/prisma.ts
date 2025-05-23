@@ -6,7 +6,10 @@ const effectiveDbUrl = process.env.POSTGRES_DATABASE_URL || process.env.DATABASE
 const dbUrlSource = process.env.DATABASE_URL_SOURCE || 'DATABASE_URL';
 
 // Log only once during initialization if needed for debugging deployed env
-if (typeof globalThis !== 'undefined' && !(globalThis as any)._prismaDbUrlLogged) {
+if (
+  typeof globalThis !== 'undefined' &&
+  !(globalThis as { _prismaDbUrlLogged?: boolean })._prismaDbUrlLogged
+) {
   console.log(`[src/lib/prisma.ts] Effective Database URL Source: ${dbUrlSource}`);
   console.log(
     '[src/lib/prisma.ts] Runtime Effective DATABASE_URL:',
@@ -14,7 +17,7 @@ if (typeof globalThis !== 'undefined' && !(globalThis as any)._prismaDbUrlLogged
       ? effectiveDbUrl.substring(0, effectiveDbUrl.indexOf('@') + 1) + '...'
       : 'NOT SET'
   );
-  (globalThis as any)._prismaDbUrlLogged = true;
+  (globalThis as { _prismaDbUrlLogged?: boolean })._prismaDbUrlLogged = true;
 }
 
 if (!effectiveDbUrl) {

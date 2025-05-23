@@ -8,6 +8,8 @@ import { campaignService as _campaignService } from '@/lib/data-mapping/campaign
 import { deleteCampaignFromAlgolia } from '@/lib/algolia'; // Import Algolia utility
 import { logger } from '@/lib/logger'; // Added logger import back
 import { UnauthenticatedError, NotFoundError, ForbiddenError, BadRequestError } from '@/lib/errors';
+import { Prisma, CreativeAsset, Influencer } from '@prisma/client'; // Removed CampaignWizard, CampaignWizardSubmission
+// import { campaignUpdateSchema } from '@/lib/validations/campaign'; // THIS LINE SHOULD BE COMMENTED OUT or REMOVED
 
 // type RouteParams = { params: { id: string } }; // Unused
 
@@ -192,6 +194,31 @@ const campaignUpdateSchema = z.object({
   influencers: z.array(z.unknown()).optional(),
 });
 
+// Define MergedAsset interface based on usage
+interface MergedAsset {
+  id: string;
+  internalAssetId?: number | string; // From DB or JSON
+  name: string;
+  fileName?: string; // Keep if used from JSON, but CreativeAsset model doesn't have it
+  type: string;
+  description: string;
+  rationale?: string;
+  budget?: number | null;
+  associatedInfluencerIds?: string[];
+  url?: string | null;
+  fileSize?: number | null;
+  muxAssetId?: string | null;
+  muxPlaybackId?: string | null;
+  muxProcessingStatus?: string | null;
+  duration?: number | null;
+  userId?: string | null;
+  createdAt?: string; // ISO string
+  updatedAt?: string; // ISO string
+  isPrimaryForBrandLiftPreview?: boolean;
+  fieldId: string;
+  // Add any other properties that are expected on mergedAsset
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ campaignId: string }> }
@@ -222,7 +249,23 @@ export async function GET(
     await connectToDatabase();
     console.log('[API GET /api/campaigns/[campaignId]] Database connected');
 
-    let campaign: any = null;
+    let campaign:
+      | Prisma.CampaignWizardGetPayload<{
+          include: {
+            Influencer: true;
+            creativeAssets: true;
+          };
+        }>
+      | Prisma.CampaignWizardSubmissionGetPayload<{
+          include: {
+            primaryContact: true;
+            secondaryContact: true;
+            audience: true;
+            creativeAssets: true;
+            creativeRequirements: true;
+          };
+        }>
+      | null = null;
     let isSubmittedCampaign = false;
 
     if (isUuid) {
@@ -320,75 +363,86 @@ export async function GET(
     );
 
     // --- START ASSET ENRICHMENT / MAPPING (REVISED) ---
-    let responseAssets = [];
-    const wizardJsonAssets =
-      campaign.assets && Array.isArray(campaign.assets) ? campaign.assets : [];
+    let responseAssets: MergedAsset[] = [];
+    const wizardJsonAssetsValue = 'assets' in campaign && campaign.assets ? campaign.assets : null;
+    let wizardJsonAssets: Prisma.JsonArray = [];
+    if (wizardJsonAssetsValue && Array.isArray(wizardJsonAssetsValue)) {
+      wizardJsonAssets = wizardJsonAssetsValue as Prisma.JsonArray;
+    }
+
     const dbCreativeAssets =
-      campaign.creativeAssets && Array.isArray(campaign.creativeAssets)
-        ? campaign.creativeAssets
+      'creativeAssets' in campaign &&
+      campaign.creativeAssets &&
+      Array.isArray(campaign.creativeAssets)
+        ? (campaign.creativeAssets as CreativeAsset[])
         : [];
 
     if (wizardJsonAssets.length > 0) {
       logger.info(
         '[API GET /api/campaigns/[campaignId]] Prioritizing CampaignWizard.assets (JSON) and merging with CreativeAsset data.'
       );
-      responseAssets = wizardJsonAssets.map((jsonAsset: any) => {
+      responseAssets = wizardJsonAssets.map((jsonAssetValue: Prisma.JsonValue) => {
+        const jsonObject = jsonAssetValue as Prisma.JsonObject;
         const dbAssetMatch = dbCreativeAssets.find(
-          (db_ca: any) =>
+          (db_ca: CreativeAsset) =>
             db_ca.id !== null &&
             db_ca.id !== undefined &&
-            String(db_ca.id) === String(jsonAsset.internalAssetId || jsonAsset.id)
+            String(db_ca.id) === String(jsonObject.internalAssetId || jsonObject.id)
         );
 
-        const mergedAsset = {
-          ...jsonAsset, // Start with everything from the CampaignWizard.assets JSON item
-          ...(dbAssetMatch
-            ? {
-                // Override/augment with fields from the CreativeAsset table record
-                id: String(dbAssetMatch.id), // Canonical DB ID for CreativeAsset
-                internalAssetId: dbAssetMatch.id, // Ensure this points to CreativeAsset ID
-                name: jsonAsset.name || dbAssetMatch.name || '', // Prefer JSON name (Step 4 edit), then DB name
-                fileName: jsonAsset.fileName || dbAssetMatch.fileName || dbAssetMatch.name || '', // Prefer JSON fileName
-                type: dbAssetMatch.type || jsonAsset.type || 'video',
-                description:
-                  dbAssetMatch.description || jsonAsset.rationale || jsonAsset.description || '',
-                rationale: jsonAsset.rationale || dbAssetMatch.description || '', // Ensure rationale is populated
-                url: dbAssetMatch.url || jsonAsset.url, // Prefer Mux URL from CreativeAsset when ready
-                fileSize: dbAssetMatch.fileSize ?? jsonAsset.fileSize,
-                muxAssetId: dbAssetMatch.muxAssetId ?? jsonAsset.muxAssetId,
-                muxPlaybackId: dbAssetMatch.muxPlaybackId ?? jsonAsset.muxPlaybackId,
-                muxProcessingStatus:
-                  dbAssetMatch.muxProcessingStatus ?? jsonAsset.muxProcessingStatus,
-                duration: dbAssetMatch.duration ?? jsonAsset.duration,
-                userId: dbAssetMatch.userId ?? jsonAsset.userId,
-                createdAt:
-                  dbAssetMatch.createdAt?.toISOString() ??
-                  jsonAsset.createdAt?.toISOString() ??
-                  undefined,
-                updatedAt:
-                  dbAssetMatch.updatedAt?.toISOString() ??
-                  jsonAsset.updatedAt?.toISOString() ??
-                  undefined,
-                isPrimaryForBrandLiftPreview:
-                  dbAssetMatch.isPrimaryForBrandLiftPreview ??
-                  jsonAsset.isPrimaryForBrandLiftPreview ??
-                  false,
-              }
-            : {
-                // If no dbAssetMatch, ensure essential Mux fields from jsonAsset are still there
-                muxAssetId: jsonAsset.muxAssetId,
-                muxPlaybackId: jsonAsset.muxPlaybackId,
-                muxProcessingStatus: jsonAsset.muxProcessingStatus,
-                url: jsonAsset.url,
-              }),
-          // Ensure fields edited in Step 4 (budget, rationale, associatedInfluencerIds) are from jsonAsset
-          budget: jsonAsset.budget, // This can be number, null, or undefined from the JSON
-          associatedInfluencerIds: Array.isArray(jsonAsset.associatedInfluencerIds)
-            ? jsonAsset.associatedInfluencerIds
+        // All properties from jsonObject are optional in MergedAsset or will be overwritten by specific assignments below.
+        // So, casting to Partial<MergedAsset> for the spread should be safe.
+        const baseAssetFromJsonObject: Partial<MergedAsset> = jsonObject as Partial<MergedAsset>;
+
+        const mergedAsset: MergedAsset = {
+          ...baseAssetFromJsonObject, // Spread the jsonObject safely
+          id: String(jsonObject.id || dbAssetMatch?.id || Date.now()),
+          internalAssetId: (jsonObject.internalAssetId || dbAssetMatch?.id) as
+            | string
+            | number
+            | undefined,
+          name: String(jsonObject.name || dbAssetMatch?.name || ''),
+          fileName: String(jsonObject.fileName || jsonObject.name || ''), // Only from jsonObject if exists
+          type: String(dbAssetMatch?.type || jsonObject.type || 'video'),
+          description: String(
+            dbAssetMatch?.description || jsonObject.rationale || jsonObject.description || ''
+          ),
+          rationale: String(jsonObject.rationale || dbAssetMatch?.description || ''),
+          url: dbAssetMatch?.url || (jsonObject.url as string) || undefined,
+          fileSize: dbAssetMatch?.fileSize ?? (jsonObject.fileSize as number | undefined),
+          muxAssetId: dbAssetMatch?.muxAssetId ?? (jsonObject.muxAssetId as string | undefined),
+          muxPlaybackId:
+            dbAssetMatch?.muxPlaybackId ?? (jsonObject.muxPlaybackId as string | undefined),
+          muxProcessingStatus:
+            dbAssetMatch?.muxProcessingStatus ??
+            (jsonObject.muxProcessingStatus as string | undefined),
+          duration: dbAssetMatch?.duration ?? (jsonObject.duration as number | undefined),
+          userId: dbAssetMatch?.userId ?? (jsonObject.userId as string | undefined),
+          createdAt:
+            dbAssetMatch?.createdAt?.toISOString() ??
+            (jsonObject.createdAt
+              ? new Date(jsonObject.createdAt as string | number).toISOString()
+              : undefined),
+          updatedAt:
+            dbAssetMatch?.updatedAt?.toISOString() ??
+            (jsonObject.updatedAt
+              ? new Date(jsonObject.updatedAt as string | number).toISOString()
+              : undefined),
+          isPrimaryForBrandLiftPreview:
+            dbAssetMatch?.isPrimaryForBrandLiftPreview ??
+            (jsonObject.isPrimaryForBrandLiftPreview as boolean | undefined) ??
+            false,
+          budget: (jsonObject.budget !== undefined ? jsonObject.budget : undefined) as
+            | number
+            | null
+            | undefined,
+          associatedInfluencerIds: Array.isArray(jsonObject.associatedInfluencerIds)
+            ? (jsonObject.associatedInfluencerIds as string[])
             : [],
-          fieldId:
-            jsonAsset.fieldId ||
-            `field-get-${jsonAsset.id || jsonAsset.internalAssetId || Date.now()}`, // Ensure fieldId for client
+          fieldId: String(
+            jsonObject.fieldId ||
+              `field-get-${jsonObject.id || jsonObject.internalAssetId || Date.now()}`
+          ),
         };
         return mergedAsset;
       });
@@ -396,16 +450,15 @@ export async function GET(
       logger.warn(
         '[API GET /api/campaigns/[campaignId]] CampaignWizard.assets (JSON) was empty. Mapping from creativeAssets relation (Step 4 specific fields like budget/rationale will be default/empty).'
       );
-      responseAssets = dbCreativeAssets.map((ca: any) => ({
+      responseAssets = dbCreativeAssets.map((ca: CreativeAsset) => ({
         id: String(ca.id),
         internalAssetId: ca.id,
         name: String(ca.name ?? ''),
-        fileName: String(ca.fileName ?? ca.name ?? ''),
         type: String(ca.type ?? 'video'),
-        description: String(ca.description ?? ''), // This is CreativeAsset.description (saved rationale)
-        rationale: String(ca.description ?? ''), // Use description as fallback for rationale
-        budget: undefined, // No budget field on CreativeAsset table
-        associatedInfluencerIds: [], // No direct field on CreativeAsset for this
+        description: String(ca.description ?? ''),
+        rationale: String(ca.description ?? ''),
+        budget: undefined,
+        associatedInfluencerIds: [],
         url: ca.url ?? undefined,
         fileSize: ca.fileSize ?? undefined,
         muxAssetId: ca.muxAssetId ?? undefined,
@@ -432,39 +485,42 @@ export async function GET(
         'locations' in campaign &&
         Array.isArray(campaign.locations) &&
         campaign.locations.length > 0 &&
-        typeof campaign.locations[0] === 'string'
-          ? campaign.locations.map((loc: string) => ({ city: loc }))
-          : 'locations' in campaign
-            ? campaign.locations
+        // Ensure all elements are strings before mapping
+        campaign.locations.every(loc => typeof loc === 'string')
+          ? campaign.locations.map((loc: Prisma.JsonValue) => ({ city: loc as string })) // map after check
+          : 'locations' in campaign && Array.isArray(campaign.locations) // If it's an array but not all strings, or other JsonValue
+            ? campaign.locations // Keep as is, or handle more granularly
             : [],
       budget:
         'budget' in campaign && campaign.budget && typeof campaign.budget === 'object'
           ? {
-              currency: String((campaign.budget as any).currency ?? 'GBP'),
-              total: Number((campaign.budget as any).total ?? 0),
-              socialMedia: Number((campaign.budget as any).socialMedia ?? 0),
+              currency: String((campaign.budget as Prisma.JsonObject).currency ?? 'GBP'),
+              total: Number((campaign.budget as Prisma.JsonObject).total ?? 0),
+              socialMedia: Number((campaign.budget as Prisma.JsonObject).socialMedia ?? 0),
             }
           : { currency: 'GBP', total: 0, socialMedia: 0 },
       primaryContact:
         'primaryContact' in campaign &&
         campaign.primaryContact &&
-        typeof campaign.primaryContact === 'object'
+        typeof campaign.primaryContact === 'object' &&
+        campaign.primaryContact !== null
           ? {
-              firstName: String((campaign.primaryContact as any).firstName ?? ''),
-              surname: String((campaign.primaryContact as any).surname ?? ''),
-              email: String((campaign.primaryContact as any).email ?? ''),
-              position: String((campaign.primaryContact as any).position ?? ''),
+              firstName: String((campaign.primaryContact as Prisma.JsonObject).firstName ?? ''),
+              surname: String((campaign.primaryContact as Prisma.JsonObject).surname ?? ''),
+              email: String((campaign.primaryContact as Prisma.JsonObject).email ?? ''),
+              position: String((campaign.primaryContact as Prisma.JsonObject).position ?? ''),
             }
           : null,
       secondaryContact:
         'secondaryContact' in campaign &&
         campaign.secondaryContact &&
-        typeof campaign.secondaryContact === 'object'
+        typeof campaign.secondaryContact === 'object' &&
+        campaign.secondaryContact !== null
           ? {
-              firstName: String((campaign.secondaryContact as any).firstName ?? ''),
-              surname: String((campaign.secondaryContact as any).surname ?? ''),
-              email: String((campaign.secondaryContact as any).email ?? ''),
-              position: String((campaign.secondaryContact as any).position ?? ''),
+              firstName: String((campaign.secondaryContact as Prisma.JsonObject).firstName ?? ''),
+              surname: String((campaign.secondaryContact as Prisma.JsonObject).surname ?? ''),
+              email: String((campaign.secondaryContact as Prisma.JsonObject).email ?? ''),
+              position: String((campaign.secondaryContact as Prisma.JsonObject).position ?? ''),
             }
           : null,
       additionalContacts:
@@ -474,11 +530,10 @@ export async function GET(
       assets: responseAssets,
       Influencer:
         'Influencer' in campaign && Array.isArray(campaign.Influencer)
-          ? campaign.Influencer.map((influencer_item: any) => ({
+          ? (campaign.Influencer as Influencer[]).map((influencer_item: Influencer) => ({
               id: String(influencer_item.id ?? ''),
               platform: String(influencer_item.platform ?? 'INSTAGRAM'),
               handle: String(influencer_item.handle ?? ''),
-              platformId: String(influencer_item.platformId ?? ''),
             }))
           : [],
     };
@@ -732,7 +787,7 @@ export async function PUT(
     let body;
     try {
       body = await request.json();
-    } catch (_unusedError: unknown) {
+    } catch {
       return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
     }
     // Validate the body (type assertion doesn't replace runtime validation)

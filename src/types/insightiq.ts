@@ -188,7 +188,6 @@ export interface InsightIQWorkPlatformList {
 import {
   MarketplaceInfluencer as PrismaMarketplaceInfluencer,
   InsightIQAccountLink as PrismaInsightIQAccountLink,
-  Platform,
 } from '@prisma/client';
 
 export type MarketplaceInfluencerWithLinks = PrismaMarketplaceInfluencer & {
@@ -264,10 +263,10 @@ export interface InsightIQProfileWithAnalytics extends InsightIQProfile {
   top_mentions?: { name: string }[] | null;
   top_interests?: { name: string }[] | null;
   brand_affinity?: { name: string; value: number }[] | null; // Different structure?
-  top_contents?: any[] | null; // Define CreatorContentBasicDetails later if needed
-  recent_contents?: any[] | null;
+  top_contents?: unknown[] | null; // Define CreatorContentBasicDetails later if needed
+  recent_contents?: unknown[] | null;
   posts_hidden_likes_percentage_value?: number | null;
-  sponsored_contents?: any[] | null;
+  sponsored_contents?: unknown[] | null;
   lookalikes?: InsightIQSearchProfile[] | null;
   contact_details?: { type?: string | null; value?: string | null }[] | null;
   // The crucial audience object

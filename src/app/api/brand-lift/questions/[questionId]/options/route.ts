@@ -110,7 +110,7 @@ export const POST = async (
       userId: clerkUserId,
     });
     return NextResponse.json(newOption, { status: 201 });
-  } catch (error: any) {
+  } catch (error) {
     return handleApiError(error, req);
   }
 };

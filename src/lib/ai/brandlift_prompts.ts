@@ -52,8 +52,10 @@ You are a creative assistant specializing in sourcing culturally sensitive and r
  */
 export function createQuestionGenerationPrompt(study: Partial<BrandLiftStudyData>): string {
   const campaignNameForPrompt =
-    (study.campaign as any)?.campaignName || "the campaign's associated marketing efforts";
-  const brandName = (study.campaign as any)?.campaignName?.split(' ')[0] || 'the brand';
+    (study.campaign as { campaignName?: string })?.campaignName ||
+    "the campaign's associated marketing efforts";
+  const brandName =
+    (study.campaign as { campaignName?: string })?.campaignName?.split(' ')[0] || 'the brand';
 
   const context = `
 Campaign Context: ${campaignNameForPrompt}

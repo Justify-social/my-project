@@ -10,6 +10,7 @@ import {
   UnauthenticatedError,
   ForbiddenError,
   NotFoundError,
+  BadRequestError,
   ZodValidationError,
 } from '@/lib/errors';
 
@@ -85,13 +86,13 @@ export async function PUT(
 
       const { studyId, questionId } = await paramsPromise;
       if (!studyId || !questionId)
-        throw new ZodValidationError('Study ID and Question ID are required.');
+        throw new BadRequestError('Study ID and Question ID are required.');
 
       await getAndVerifyQuestion(studyId, questionId, clerkUserId);
 
       const body = await req.json();
       const parsedBody = updateQuestionSchema.safeParse(body);
-      if (!parsedBody.success) throw new ZodValidationError(parsedBody.error);
+      if (!parsedBody.success) throw new ZodValidationError(parsedBody.error.flatten().fieldErrors);
 
       const updateData = parsedBody.data;
       if (Object.keys(updateData).length === 0) {
@@ -126,7 +127,7 @@ export async function DELETE(
 
       const { studyId, questionId } = await paramsPromise;
       if (!studyId || !questionId)
-        throw new ZodValidationError('Study ID and Question ID are required.');
+        throw new BadRequestError('Study ID and Question ID are required.');
 
       await getAndVerifyQuestion(studyId, questionId, clerkUserId);
 

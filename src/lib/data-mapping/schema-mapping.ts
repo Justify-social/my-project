@@ -1,5 +1,5 @@
 import { KPI, Feature, Platform, Currency, Prisma, CreativeAssetType } from '@prisma/client';
-import { CreativeAssetTypeEnum } from '@/components/features/campaigns/types'; // Import for DraftAsset like structure
+import { CreativeAssetTypeEnum as _CreativeAssetTypeEnum } from '@/components/features/campaigns/types'; // Import for DraftAsset like structure - Prefixed
 
 /**
  * Type definitions for form data from each step of the wizard

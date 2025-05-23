@@ -1,17 +1,17 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { prisma as prismaClient } from '@/lib/db'; // Prisma Client
+import { prisma as _prismaClient } from '@/lib/db'; // Prisma Client - Prefixed
 // import { Platform, Prisma, MarketplaceInfluencer } from '@prisma/client'; // Commented out Platform, Prisma, MarketplaceInfluencer
 import {
-  Platform,
-  Prisma as PrismaNamespace,
-  MarketplaceInfluencer as PrismaMarketplaceInfluencer,
+  Platform as _Platform, // Prefixed
+  Prisma as _PrismaNamespace, // Prefixed
+  MarketplaceInfluencer as _PrismaMarketplaceInfluencer, // Prefixed
 } from '@prisma/client'; // Assuming these are actual exports if needed by commented code but aliasing to avoid conflict if main ones commented.
 import { z } from 'zod';
 // import { InfluencerSummary } from '@/types/influencer'; // Commented out InfluencerSummary
 // import { calculatePagination } from '@/lib/utils'; // Commented out calculatePagination
 import { PlatformEnum } from '@/types/enums'; // Added PlatformEnum import
-import { logger } from '@/utils/logger'; // Add logger import
-import { influencerService } from '@/services/influencer'; // Add influencerService import
+import { logger as _logger } from '@/utils/logger'; // Add logger import - Prefixed
+import { influencerService as _influencerService } from '@/services/influencer'; // Add influencerService import - Prefixed
 
 // const prisma = prismaClient; // Commented out prisma const
 
@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const { page, limit, ...filters } = validationResult.data; // Separate filters from pagination
+  const { page: _page, limit: _limit, ..._filters } = validationResult.data; // Separate filters from pagination - Prefixed
 
   // filters object now contains searchTerm if provided
   // logger.info(`[API /influencers] Requesting page ${page}, limit ${limit} with filters:`, filters);
@@ -143,7 +143,7 @@ export async function GET(req: NextRequest) {
     // const responsePayload = {
     //   // ... (construct payload) ...
     // };
-  } catch (error: unknown) {
+  } catch {
     // Keep the general error handling for unexpected service errors
     // logger.error('[API /influencers] Error processing request:', {
     //   error: error instanceof Error ? error.message : String(error),

@@ -14,7 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Icon } from './icon/icon';
 import { cn } from '@/lib/utils';
 import { PlatformEnum } from '@/types/enums';
-import { z } from 'zod';
+import { z as _z } from 'zod';
 
 // Helper function to format large numbers (e.g., follower counts)
 const formatNumber = (num: number | undefined | null): string => {

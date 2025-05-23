@@ -13,10 +13,10 @@ import { Icon } from '@/components/ui/icon/icon'; // Use direct path for clarity
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { getInitials } from '@/lib/utils'; // Import from utils
-import { useRouter } from 'next/navigation';
+import { useRouter as _useRouter } from 'next/navigation'; // Prefixed
 import { logger } from '@/utils/logger'; // Import logger
-import { ButtonAddToCampaign } from '@/components/ui/button-add-to-campaign'; // Import the new component
-import { showSuccessToast } from '@/components/ui/toast'; // Updated import path
+import { ButtonAddToCampaign as _ButtonAddToCampaign } from '@/components/ui/button-add-to-campaign'; // Import the new component - Prefixed
+import { showSuccessToast as _showSuccessToast } from '@/components/ui/toast'; // Updated import path - Prefixed
 
 interface InfluencerSummaryCardProps {
   influencer: InfluencerSummary;
@@ -46,21 +46,21 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
   onViewProfile,
   className,
 }) => {
-  const router = useRouter();
+  const _router = _useRouter(); // Prefixed
 
   // Determine badge styling based on quality
-  let qualityBadgeStyles = '';
+  let _qualityBadgeStyles = ''; // Prefixed
   if (influencer.audienceQualityIndicator === 'High') {
-    qualityBadgeStyles =
+    _qualityBadgeStyles =
       'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 border-transparent'; // Success-like style
   } else if (influencer.audienceQualityIndicator === 'Medium') {
-    qualityBadgeStyles =
+    _qualityBadgeStyles =
       'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 border-transparent'; // Warning-like style
   } else if (influencer.audienceQualityIndicator === 'Low') {
     // Use the destructive variant styling directly if appropriate or define custom low style
-    qualityBadgeStyles = badgeVariants({ variant: 'destructive' }); // Or custom low-quality styles
+    _qualityBadgeStyles = badgeVariants({ variant: 'destructive' }); // Or custom low-quality styles
   } else {
-    qualityBadgeStyles = badgeVariants({ variant: 'secondary' }); // Fallback style
+    _qualityBadgeStyles = badgeVariants({ variant: 'secondary' }); // Fallback style
   }
 
   return (

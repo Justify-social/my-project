@@ -50,7 +50,7 @@ const formatDate = (dateInput: Date | string): string => {
   try {
     const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
     return formatDistanceToNow(date, { addSuffix: true });
-  } catch (_e) {
+  } catch {
     return 'Invalid date';
   }
 };

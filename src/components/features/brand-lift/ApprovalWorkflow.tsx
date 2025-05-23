@@ -22,10 +22,10 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Icon } from '@/components/ui/icon/icon';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge'; // Used by StatusTag
-import { ScrollArea } from '@/components/ui/scroll-area'; // For long lists of questions/comments
-import { toast } from 'react-hot-toast';
+import { Separator as _Separator } from '@/components/ui/separator';
+import { Badge as _Badge } from '@/components/ui/badge'; // Used by StatusTag
+import { ScrollArea as _ScrollArea } from '@/components/ui/scroll-area'; // For long lists of questions/comments
+import { toast as _toast } from 'react-hot-toast';
 
 import logger from '@/lib/logger';
 import {

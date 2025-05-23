@@ -10,7 +10,7 @@ import {
   Step3FormData,
   DraftCampaignData,
 } from '@/components/features/campaigns/types';
-import { toast } from 'react-hot-toast';
+import { toast as _toast } from 'react-hot-toast';
 import { WizardSkeleton } from '@/components/ui/loading-skeleton';
 import { Icon } from '@/components/ui/icon/icon';
 import { Button } from '@/components/ui/button';

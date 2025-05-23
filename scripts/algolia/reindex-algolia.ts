@@ -29,7 +29,7 @@ async function main() {
     console.log('Re-indexing complete!');
   } catch (error) {
     console.error('Error during re-indexing:', error);
-    (process as any).exit(1);
+    (process as NodeJS.Process).exit(1);
   } finally {
     await prisma.$disconnect();
     console.log('Prisma client disconnected.');

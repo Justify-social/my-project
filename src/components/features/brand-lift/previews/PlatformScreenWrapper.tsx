@@ -3,7 +3,7 @@ import { CreativeDataProps } from '@/types/brand-lift';
 import { TikTokScreenContent } from './tiktok/TikTokScreenContent';
 import { InstagramScreenContent } from './instagram/InstagramScreenContent';
 import { Icon } from '@/components/ui/icon/icon'; // For status bar icons
-import { cn } from '@/lib/utils'; // Import cn for conditional classes
+import { cn as _cn } from '@/lib/utils'; // Import cn for conditional classes - Prefixed
 
 export interface PlatformScreenWrapperProps {
   platform: 'tiktok' | 'instagram';

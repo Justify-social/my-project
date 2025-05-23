@@ -14,7 +14,6 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Icon } from '@/components/ui/icon/icon';
-import logger from '@/lib/logger'; // Assuming logger is configured for client-side use
 import Image from 'next/image'; // Add import for Next/Image
 
 interface GifSearchModalProps {
@@ -55,7 +54,11 @@ async function fetchGifFromGiphyInternal(
     const data = await response.json();
     if (data.data && Array.isArray(data.data)) {
       return data.data
-        .map((gif: any) => gif.images?.downsized_medium?.url || gif.images?.original?.url)
+        .map(
+          (gif: {
+            images?: { downsized_medium?: { url?: string }; original?: { url?: string } };
+          }) => gif.images?.downsized_medium?.url || gif.images?.original?.url
+        )
         .filter((gifUrl: string | undefined): gifUrl is string => typeof gifUrl === 'string');
     }
     // console.info('[Giphy] No GIFs found for term in modal:', { searchTerm });
@@ -98,8 +101,8 @@ export function GifSearchModal({
       if (gifs.length === 0) {
         setError('No GIFs found for that term.');
       }
-    } catch (e: any) {
-      setError(e.message || 'Failed to search for GIFs.');
+    } catch (e) {
+      setError((e as Error).message || 'Failed to search for GIFs.');
     } finally {
       setIsLoading(false);
     }

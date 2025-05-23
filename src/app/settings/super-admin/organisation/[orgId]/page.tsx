@@ -107,8 +107,8 @@ const OrganisationDetailPage: React.FC = () => {
           ]);
 
           // Process Org Details for header
-          const allOrgsData = orgDetailsRes; // Already parsed if Promise.all waited
-          const currentOrg = allOrgsData.find((o: any) => o.id === orgId);
+          const allOrgsData = orgDetailsRes as OrganisationDetails[];
+          const currentOrg = allOrgsData.find((o: OrganisationDetails) => o.id === orgId);
           if (currentOrg) {
             setOrganisation({ id: currentOrg.id, name: currentOrg.name });
           } else {

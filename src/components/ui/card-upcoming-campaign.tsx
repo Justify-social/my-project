@@ -75,7 +75,7 @@ export function UpcomingCampaignsTable({
   className,
   onRowClick,
 }: UpcomingCampaignsTableProps) {
-  const handleRowClick = (campaignId: string | number) => {
+  const _handleRowClick = (campaignId: string | number) => {
     if (onRowClick) {
       onRowClick(campaignId);
     }
@@ -92,7 +92,7 @@ export function UpcomingCampaignsTable({
   };
 
   // Helper to format single dates (remains for tooltip or single date display)
-  const formatDate = (date?: Date) => {
+  const _formatDate = (date?: Date) => {
     if (!date) return '-';
     try {
       return format(date, 'MMM dd, yyyy');
@@ -115,7 +115,7 @@ export function UpcomingCampaignsTable({
 
     const endFormatted = format(endDate, 'd');
     const endMonthFormatted = format(endDate, 'MMM d');
-    const endYearFormatted = format(endDate, 'yyyy');
+    const _endYearFormatted = format(endDate, 'yyyy');
     const endFullFormatted = format(endDate, 'MMM d, yyyy');
 
     if (isSameYear(startDate, endDate)) {

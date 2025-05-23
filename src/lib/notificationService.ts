@@ -34,7 +34,6 @@ const mockResendClient = {
 
 const APP_NAME = 'Justify Platform'; // Or your application's name
 const DEFAULT_FROM_EMAIL = process.env.DEFAULT_FROM_EMAIL || 'noreply@justifyplatform.com';
-const APP_BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
 // TODO: Define more specific types for user and study details needed for emails
 // Export UserDetails to be used by other modules
@@ -105,12 +104,12 @@ export class NotificationService {
       }
       logger.info('Email sent successfully via Resend', { emailId: data?.id, to, subject });
       return true;
-    } catch (e: any) {
+    } catch (e) {
       logger.error('Exception during email sending', {
-        error: e.message,
+        error: (e as Error).message, // Cast to Error
         to,
         subject,
-        stack: e.stack,
+        stack: (e as Error).stack, // Cast to Error
       });
       return false;
     }

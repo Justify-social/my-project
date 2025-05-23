@@ -199,13 +199,13 @@ export function VideoFileUploader<TFieldValues extends FieldValues = FieldValues
           onUploadError(new Error(errorData.detail.message || 'UpChunk upload failed'));
         }
       });
-    } catch (error: any) {
+    } catch (error) {
       logger.error('Video upload initiation or process error:', error);
-      setErrorState(error.message || 'An unexpected error occurred.');
-      toast.error(error.message || 'Failed to start upload.');
+      setErrorState((error as Error).message || 'An unexpected error occurred.');
+      toast.error((error as Error).message || 'Failed to start upload.');
       setIsUploading(false);
       if (onUploadError) {
-        onUploadError(error);
+        onUploadError(error as Error);
       }
     }
   };

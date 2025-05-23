@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { CreativeDataProps, MuxPlayerElement } from '@/types/brand-lift';
+import { CreativeDataProps } from '@/types/brand-lift';
 import MuxPlayer from '@mux/mux-player-react';
 import { Icon } from '@/components/ui/icon/icon';
 import { TikTokHeader } from './TikTokHeader';
@@ -38,7 +38,7 @@ const TikTokScreenContent: React.FC<TikTokScreenContentProps> = ({
   videoReady = false,
 }) => {
   const { profile, caption, media } = creativeData;
-  const playerRef = useRef<MuxPlayerElement | null>(null);
+  const playerRef = useRef<any>(null);
   const [playerState, setPlayerState] = useState<{
     loaded: boolean;
     playing: boolean;

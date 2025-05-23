@@ -190,9 +190,9 @@ export interface CampaignFormData {
 import { PlatformEnum } from './enums'; // Assuming PlatformEnum exists
 // Import InsightIQ specific types for reference
 import {
-  InsightIQProfile,
+  // InsightIQProfile, // REMOVED
   InsightIQDemographicsAttributes,
-  InsightIQContentEngagement,
+  // InsightIQContentEngagement, // REMOVED
 } from './insightiq';
 
 /**

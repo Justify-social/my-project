@@ -66,7 +66,7 @@ export async function setupServer() {
       const wss = new WebSocketServer({ server: httpServer });
       global.WebSocketServerInstance = wss;
 
-      wss.on('connection', ws => {
+      wss.on('connection', _ws => {
         // ... existing code ...
       });
     });

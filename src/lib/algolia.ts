@@ -1,9 +1,11 @@
 import { algoliasearch } from 'algoliasearch';
-import type { SearchClient } from 'algoliasearch'; // SearchIndex type is likely not needed directly with v5 client.
+import type { SearchClient } from 'algoliasearch';
+// import type { SaveObjectResponse } from '@algolia/client-search'; // REMOVED: Unused import
 import type {
   CampaignWizard,
   BrandLiftStudy as PrismaBrandLiftStudy,
-  CampaignWizardSubmission as PrismaCampaignWizardSubmission,
+  // CreativeAsset, // REMOVE: Unused import
+  CampaignWizardSubmission as _PrismaCampaignWizardSubmission,
 } from '@prisma/client'; // Assuming CampaignWizard is your Prisma model
 import { EnumTransformers } from '@/utils/enum-transformers'; // For potential enum transformations
 import { logger } from '@/utils/logger'; // Assuming you have a logger
@@ -11,18 +13,18 @@ import { logger } from '@/utils/logger'; // Assuming you have a logger
 // Configuration from environment variables
 const appId =
   (typeof process !== 'undefined' &&
-    (process as any).env &&
-    (process as any).env.NEXT_PUBLIC_ALGOLIA_APP_ID) ||
+    process.env && // Check if process.env exists
+    process.env.NEXT_PUBLIC_ALGOLIA_APP_ID) ||
   '';
 const searchOnlyApiKey =
   (typeof process !== 'undefined' &&
-    (process as any).env &&
-    (process as any).env.NEXT_PUBLIC_ALGOLIA_API_KEY) ||
+    process.env && // Check if process.env exists
+    process.env.NEXT_PUBLIC_ALGOLIA_API_KEY) ||
   '';
 const adminApiKey =
   (typeof process !== 'undefined' &&
-    (process as any).env &&
-    (process as any).env.ALGOLIA_ADMIN_API_KEY) ||
+    process.env && // Check if process.env exists
+    process.env.ALGOLIA_ADMIN_API_KEY) ||
   '';
 const indexName = 'campaigns';
 
@@ -135,28 +137,37 @@ export interface BrandLiftStudyAlgoliaRecord {
  * This is the SSOT for how campaign data is structured in Algolia.
  */
 export function transformCampaignForAlgolia(campaign: CampaignWizard): CampaignAlgoliaRecord {
-  const frontendReady = EnumTransformers.transformObjectFromBackend(campaign) as any;
+  const frontendReady = EnumTransformers.transformObjectFromBackend(campaign) as Record<
+    string,
+    unknown
+  >;
   const record: CampaignAlgoliaRecord = {
     objectID: campaign.id,
     id: campaign.id,
-    orgId: campaign.orgId ?? undefined, // Handle potential null from Prisma type
-    campaignName: frontendReady.name || 'Unknown Campaign',
-    description: frontendReady.businessGoal || '',
+    orgId: campaign.orgId ?? undefined,
+    campaignName: (frontendReady.name as string) || 'Unknown Campaign',
+    description: (frontendReady.businessGoal as string) || '',
     status: frontendReady.status ? String(frontendReady.status).toUpperCase() : undefined,
     startDate:
-      frontendReady.startDate instanceof Date ? frontendReady.startDate.toISOString() : undefined,
+      frontendReady.startDate instanceof Date
+        ? (frontendReady.startDate as Date).toISOString()
+        : undefined,
     endDate:
-      frontendReady.endDate instanceof Date ? frontendReady.endDate.toISOString() : undefined,
-    timeZone: frontendReady.timeZone || undefined,
-    primaryKPI: frontendReady.primaryKPI || undefined,
-    brand: frontendReady.brand || undefined,
+      frontendReady.endDate instanceof Date
+        ? (frontendReady.endDate as Date).toISOString()
+        : undefined,
+    timeZone: (frontendReady.timeZone as string) || undefined,
+    primaryKPI: (frontendReady.primaryKPI as string) || undefined,
+    brand: (frontendReady.brand as string) || undefined,
     platform: frontendReady.platform ? String(frontendReady.platform) : undefined,
-    currency: frontendReady.budget?.currency || undefined,
+    currency: (frontendReady.budget as { currency?: string })?.currency || undefined,
     totalBudget:
-      frontendReady.budget?.total !== undefined ? Number(frontendReady.budget.total) : undefined,
+      (frontendReady.budget as { total?: number })?.total !== undefined
+        ? Number((frontendReady.budget as { total: number }).total)
+        : undefined,
     socialMediaBudget:
-      frontendReady.budget?.socialMedia !== undefined
-        ? Number(frontendReady.budget.socialMedia)
+      (frontendReady.budget as { socialMedia?: number })?.socialMedia !== undefined
+        ? Number((frontendReady.budget as { socialMedia: number }).socialMedia)
         : undefined,
   };
   return record;
@@ -179,7 +190,14 @@ export async function addOrUpdateCampaignInAlgolia(campaignData: CampaignWizard)
       indexName,
       body: algoliaRecord as unknown as Record<string, unknown>,
     });
-    await adminClient.waitForTask({ indexName, taskID: response.taskID });
+    if (response.taskID) {
+      await adminClient.waitForTask({ indexName, taskID: response.taskID });
+    } else {
+      logger.warn(
+        `[Algolia] addOrUpdateCampaignInAlgolia: saveObject did not return a processable taskID.`,
+        response
+      );
+    }
     logger.info(`[Algolia] Successfully saved object ${algoliaRecord.objectID}`);
   } catch (error) {
     logger.error('[Algolia] Error saving object', { objectID: algoliaRecord.objectID, error });
@@ -202,7 +220,7 @@ export async function deleteCampaignFromAlgolia(objectID: string): Promise<void>
     logger.info(`[Algolia] Successfully deleted object ${objectID}`);
   } catch (error) {
     logger.error('[Algolia] Error deleting object', { objectID, error });
-    if ((error as any).status === 404) {
+    if ((error as { status?: number }).status === 404) {
       logger.warn(`[Algolia] Object ${objectID} not found for deletion, likely already deleted.`);
       return;
     }
@@ -228,14 +246,18 @@ export async function reindexAllCampaigns(campaigns: CampaignWizard[]): Promise<
     if (campaigns && campaigns.length > 0) {
       const algoliaRecords = campaigns.map(transformCampaignForAlgolia);
       logger.info(`[Algolia] Indexing ${algoliaRecords.length} campaigns...`);
-      const saveResponse = await adminClient.saveObjects({
-        indexName: indexName,
+      const responses = await adminClient.saveObjects({
+        indexName,
         objects: algoliaRecords as unknown as Array<Record<string, unknown>>,
-      });
-      if (Array.isArray(saveResponse) && saveResponse.length > 0 && saveResponse[0].taskID) {
-        await adminClient.waitForTask({ indexName, taskID: saveResponse[0].taskID });
-      } else if (!Array.isArray(saveResponse) && (saveResponse as any).taskID) {
-        await adminClient.waitForTask({ indexName, taskID: (saveResponse as any).taskID });
+      }); // responses is BatchResponse[]
+
+      if (responses && responses.length > 0 && responses[0].taskID) {
+        await adminClient.waitForTask({ indexName, taskID: responses[0].taskID });
+      } else {
+        logger.warn(
+          '[Algolia] reindexAllCampaigns: saveObjects did not return a processable taskID.',
+          responses
+        );
       }
       logger.info(`[Algolia] Successfully indexed ${algoliaRecords.length} campaigns.`);
     } else {
@@ -266,7 +288,7 @@ export async function searchAlgoliaCampaigns(
   const fetchTimerLabel = `[Algolia SDK] Search Campaigns: ${query} (Org: ${orgId || 'any'})`;
   console.time(fetchTimerLabel);
   try {
-    const searchParams: Record<string, any> = { query };
+    const searchParams: Record<string, string | string[] | number | boolean> = { query };
     if (orgId) {
       searchParams.filters = `orgId:'${orgId}'`;
     }
@@ -302,7 +324,7 @@ export async function searchAlgoliaBrandLiftStudies(
   const fetchTimerLabel = `[Algolia SDK] Search BrandLiftStudies: ${query} (Org: ${orgId || 'any'})`;
   console.time(fetchTimerLabel);
   try {
-    const searchParams: Record<string, any> = { query };
+    const searchParams: Record<string, string | string[] | number | boolean> = { query };
     if (orgId) {
       searchParams.filters = `orgId:'${orgId}'`;
     }
@@ -353,15 +375,18 @@ export async function indexObjects<T extends { objectID: string }>(
 
   try {
     logger.info(`[Algolia] Batch indexing ${objects.length} objects to '${indexName}'...`);
-    const response = await adminClient.saveObjects({
+    const responses = await adminClient.saveObjects({
       indexName,
       objects: objects as unknown as Array<Record<string, unknown>>,
-    });
+    }); // responses is BatchResponse[]
 
-    if (Array.isArray(response) && response.length > 0 && response[0].taskID) {
-      await adminClient.waitForTask({ indexName, taskID: response[0].taskID });
-    } else if (!Array.isArray(response) && (response as any).taskID) {
-      await adminClient.waitForTask({ indexName, taskID: (response as any).taskID });
+    if (responses && responses.length > 0 && responses[0].taskID) {
+      await adminClient.waitForTask({ indexName, taskID: responses[0].taskID });
+    } else {
+      logger.warn(
+        '[Algolia] indexObjects: saveObjects did not return a processable taskID.',
+        responses
+      );
     }
 
     logger.info(
@@ -410,16 +435,13 @@ export async function addOrUpdateBrandLiftStudyInAlgolia(
     logger.error('[Algolia] Admin client not initialized for BrandLiftStudy add/update.');
     throw new Error('Algolia admin client not configured.');
   }
-  // TODO: Resolve orgId carefully here if not directly on studyData, or ensure caller provides it
-  // For now, assuming studyData.orgId exists or transformBrandLiftStudyToAlgoliaRecord handles it
   const resolvedOrgId = studyData.orgId || studyData.campaign?.wizard?.orgId;
 
   if (!resolvedOrgId) {
     logger.error('[Algolia] Missing orgId for BrandLiftStudy, cannot index.', {
       studyId: studyData.id,
     });
-    // Depending on strictness, either throw or skip
-    return; // Or throw new Error('Missing orgId for BrandLiftStudy');
+    return;
   }
   const algoliaRecord = transformBrandLiftStudyToAlgoliaRecord(studyData, resolvedOrgId);
   try {
@@ -433,10 +455,18 @@ export async function addOrUpdateBrandLiftStudyInAlgolia(
       indexName: BRAND_LIFT_STUDIES_INDEX_NAME,
       body: algoliaRecord as unknown as Record<string, unknown>,
     });
-    await adminClient.waitForTask({
-      indexName: BRAND_LIFT_STUDIES_INDEX_NAME,
-      taskID: response.taskID,
-    });
+
+    if (response.taskID) {
+      await adminClient.waitForTask({
+        indexName: BRAND_LIFT_STUDIES_INDEX_NAME,
+        taskID: response.taskID,
+      });
+    } else {
+      logger.warn(
+        `[Algolia] addOrUpdateBrandLiftStudyInAlgolia: saveObject did not return a processable taskID.`,
+        response
+      );
+    }
     logger.info(`[Algolia] Successfully saved BrandLiftStudy object ${algoliaRecord.objectID}`);
   } catch (error) {
     logger.error('[Algolia] Error saving BrandLiftStudy object', {
@@ -469,7 +499,7 @@ export async function deleteBrandLiftStudyFromAlgolia(objectID: string): Promise
     logger.info(`[Algolia] Successfully deleted BrandLiftStudy object ${objectID}`);
   } catch (error) {
     logger.error('[Algolia] Error deleting BrandLiftStudy object', { objectID, error });
-    if ((error as any).status === 404) {
+    if ((error as { status?: number }).status === 404) {
       logger.warn(
         `[Algolia] BrandLiftStudy object ${objectID} not found for deletion, likely already deleted.`
       );
@@ -501,42 +531,43 @@ export async function reindexAllBrandLiftStudies(
     logger.info(`[Algolia] Index '${BRAND_LIFT_STUDIES_INDEX_NAME}' cleared successfully.`);
 
     if (studies && studies.length > 0) {
+      // Resolve orgId for each study before transformation
       const algoliaRecords = studies
         .map(study => {
-          const orgId = study.orgId || study.campaign?.wizard?.orgId; // Example resolution
-          if (!orgId) {
-            logger.warn('[Algolia] Skipping study in reindex due to missing orgId', {
-              studyId: study.id,
-            });
+          const resolvedOrgId = study.orgId || study.campaign?.wizard?.orgId;
+          if (!resolvedOrgId) {
+            logger.warn(
+              `[Algolia] Missing orgId for BrandLiftStudy ${study.id} during reindex, skipping.`
+            );
             return null;
           }
-          return transformBrandLiftStudyToAlgoliaRecord(study, orgId);
+          return transformBrandLiftStudyToAlgoliaRecord(study, resolvedOrgId);
         })
-        .filter(record => record !== null) as BrandLiftStudyAlgoliaRecord[];
+        .filter(Boolean) as BrandLiftStudyAlgoliaRecord[]; // Filter out nulls and assert type
 
       if (algoliaRecords.length === 0) {
         logger.info(
-          '[Algolia] No valid BrandLiftStudy records to index after transformation during reindex.'
+          '[Algolia] No BrandLiftStudies with resolvable orgIds to index after filtering.'
         );
         return;
       }
 
       logger.info(`[Algolia] Indexing ${algoliaRecords.length} BrandLiftStudies...`);
-      const saveResponse = await adminClient.saveObjects({
+      const responses = await adminClient.saveObjects({
         indexName: BRAND_LIFT_STUDIES_INDEX_NAME,
         objects: algoliaRecords as unknown as Array<Record<string, unknown>>,
-      });
-      // waitForTask logic as in reindexAllCampaigns
-      if (Array.isArray(saveResponse) && saveResponse.length > 0 && saveResponse[0].taskID) {
+      }); // responses is BatchResponse[]
+
+      if (responses && responses.length > 0 && responses[0].taskID) {
         await adminClient.waitForTask({
           indexName: BRAND_LIFT_STUDIES_INDEX_NAME,
-          taskID: saveResponse[0].taskID,
+          taskID: responses[0].taskID,
         });
-      } else if (!Array.isArray(saveResponse) && (saveResponse as any).taskID) {
-        await adminClient.waitForTask({
-          indexName: BRAND_LIFT_STUDIES_INDEX_NAME,
-          taskID: (saveResponse as any).taskID,
-        });
+      } else {
+        logger.warn(
+          '[Algolia] reindexAllBrandLiftStudies: saveObjects did not return processable taskIDs.',
+          responses
+        );
       }
       logger.info(`[Algolia] Successfully indexed ${algoliaRecords.length} BrandLiftStudies.`);
     } else {

@@ -8,7 +8,6 @@ import { cn } from '@/lib/utils';
 import { Influencer } from '@/types/influencer';
 import { InfluencerCard } from '@/components/ui/card-influencer';
 import { PlatformEnum } from '@/types/enums';
-import { z } from 'zod';
 
 export interface MarketplaceListProps {
   influencers: Influencer[];

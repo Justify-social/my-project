@@ -112,7 +112,7 @@ export async function DELETE(
           typeof muxError === 'object' &&
           muxError !== null &&
           'type' in muxError &&
-          (muxError as any).type === 'not_found'
+          (muxError as { type: string }).type === 'not_found'
         ) {
           logger.warn(
             `Mux asset ${creativeAsset.muxAssetId} not found on Mux. Proceeding with DB deletion.`

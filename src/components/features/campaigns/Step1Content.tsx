@@ -9,6 +9,7 @@ import {
   UseFormReturn,
   FormProvider,
   useFormContext,
+  ControllerRenderProps,
 } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -108,7 +109,7 @@ interface InfluencerEntryProps {
 }
 
 const InfluencerEntry: React.FC<InfluencerEntryProps> = ({ index, control, errors, remove }) => {
-  const { watch } = useFormContext<Step1FormData>();
+  const { watch: _watch } = useFormContext<Step1FormData>();
 
   return (
     <Card className="mb-4 border-border bg-card/50 relative overflow-hidden">
@@ -305,7 +306,7 @@ const getPlatformDisplayName = (platform: PlatformEnum): string => {
 
 // --- TimeZone FormField Internal Component ---
 const TimeZoneFormFieldContent: React.FC<{
-  field: any; // Adjust type as per react-hook-form FieldRenderProps if available
+  field: ControllerRenderProps<Step1FormData, 'timeZone'>;
   localizationLoading: boolean;
 }> = ({ field, localizationLoading }) => {
   const [open, setOpen] = React.useState(false);
@@ -378,7 +379,7 @@ const TimeZoneFormFieldContent: React.FC<{
 function Step1Content() {
   const {
     wizardState,
-    updateWizardState,
+    updateWizardState: _updateWizardState,
     isLoading: isWizardLoading,
     saveProgress,
     stepsConfig,
@@ -553,7 +554,7 @@ function Step1Content() {
       }
       // *** END NEW SURGICAL INTERVENTION ***
 
-      const formValuesAfterResetAndIntervention = form.getValues();
+      const _formValuesAfterResetAndIntervention = form.getValues();
       initialDataLoaded.current = true;
     }
   }, [initialFormState, form, localization.isLoading, localization.currency, wizardState?.id]);

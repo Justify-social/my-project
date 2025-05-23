@@ -22,8 +22,7 @@ import {
 // Enable debug logging in development
 // Workaround for potential process.env typing issues
 const isDev =
-  (typeof process !== 'undefined' && (process as any).env && (process as any).env.NODE_ENV) ===
-  'development';
+  (typeof process !== 'undefined' && process.env && process.env.NODE_ENV) === 'development';
 const debugLog = (message: string) => {
   if (isDev) {
     console.log(message);

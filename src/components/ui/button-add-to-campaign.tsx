@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation'; // May not be needed here if navigation is handled by parent
+import { useRouter as _useRouter } from 'next/navigation'; // May not be needed here if navigation is handled by parent - Prefixed
 import { Button, ButtonProps } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -39,7 +39,6 @@ interface CampaignDropdownItem {
 }
 
 export interface ButtonAddToCampaignProps {
-  influencerId: string; // Or a more detailed object if ID is not enough for API
   influencerHandle: string;
   influencerName: string; // For dialog title
   /** The platform the influencer is being added from, or their primary platform */
@@ -54,7 +53,6 @@ export interface ButtonAddToCampaignProps {
 }
 
 export const ButtonAddToCampaign: React.FC<ButtonAddToCampaignProps> = ({
-  influencerId,
   influencerHandle,
   influencerName,
   currentPlatform,

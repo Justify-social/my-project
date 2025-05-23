@@ -7,7 +7,7 @@ interface AssetPreviewProps {
   mediaTypeLabel?: string;
   fileName?: string;
   className?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 const AssetPreview: React.FC<AssetPreviewProps> = ({

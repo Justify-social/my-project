@@ -70,12 +70,15 @@ async function verifyCommentAccess(commentId: string, clerkUserId: string) {
 }
 
 // PUT handler to update a SurveyApprovalComment status
-export async function PUT(req: NextRequest, context: any) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ commentId: string }> }
+) {
   try {
     const { userId: clerkUserId } = await auth();
     if (!clerkUserId) throw new UnauthenticatedError('Authentication required.');
 
-    const commentId = context.params.commentId;
+    const { commentId } = await params;
     if (!commentId) throw new BadRequestError('Comment ID is required.');
 
     await verifyCommentAccess(commentId, clerkUserId);
@@ -104,7 +107,7 @@ export async function PUT(req: NextRequest, context: any) {
       userId: clerkUserId,
     });
     return NextResponse.json(updatedComment);
-  } catch (error: any) {
+  } catch (error: unknown) {
     return handleApiError(error, req);
   }
 }

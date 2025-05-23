@@ -742,6 +742,9 @@ const apiService: IInfluencerService = {
           primaryAudienceLocation: profile.country ?? profile.creator_location?.country, // Combine sources
           primaryAudienceAgeRange: profile.audience?.gender_age_distribution ? 'See Details' : null, // Indicate data exists
           primaryAudienceGender: profile.audience?.gender_age_distribution ? 'See Details' : null, // Indicate data exists
+          audienceDemographics: profile.audience
+            ? (profile.audience as Prisma.InputJsonValue)
+            : Prisma.JsonNull, // Store raw audience data if exists
           updatedAt: new Date(),
         },
         create: {
@@ -759,7 +762,9 @@ const apiService: IInfluencerService = {
           primaryAudienceLocation: profile.country ?? profile.creator_location?.country,
           primaryAudienceAgeRange: profile.audience?.gender_age_distribution ? 'See Details' : null,
           primaryAudienceGender: profile.audience?.gender_age_distribution ? 'See Details' : null,
-          audienceDemographics: profile.audience ? (profile.audience as any) : Prisma.JsonNull, // Store raw audience data if exists
+          audienceDemographics: profile.audience
+            ? (profile.audience as Prisma.InputJsonValue)
+            : Prisma.JsonNull, // Store raw audience data if exists
           createdAt: new Date(),
           updatedAt: new Date(),
         },

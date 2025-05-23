@@ -44,9 +44,12 @@ const SurveyPreview: React.FC<SurveyPreviewProps> = ({ studyId }) => {
       }
       const fetchedQuestions: SurveyQuestionData[] = await questionsRes.json();
       setQuestions(fetchedQuestions.sort((a, b) => a.order - b.order));
-    } catch (err: any) {
-      logger.error('Error fetching data for SurveyPreview:', { studyId, error: err.message });
-      setError(err.message || 'Failed to load survey data.');
+    } catch (err) {
+      logger.error('Error fetching data for SurveyPreview:', {
+        studyId,
+        error: (err as Error).message,
+      });
+      setError((err as Error).message || 'Failed to load survey data.');
     }
     setIsLoading(false);
   }, [studyId]);

@@ -46,33 +46,3 @@ ${customInstructions || ''}`;
     customInstructions,
   };
 }
-
-/**
- * Helper to determine if a query is likely a follow-up
- */
-function isFollowUpQuery(query: string): boolean {
-  const followUpPhrases = [
-    'continue',
-    'go on',
-    'proceed',
-    'next',
-    'and then',
-    'what about',
-    'additionally',
-    'also',
-    'furthermore',
-    'can you',
-    'please',
-    'now',
-  ];
-
-  // Check if query starts with any follow-up phrases
-  const startsWithFollowUp = followUpPhrases.some(phrase =>
-    query.toLowerCase().trim().startsWith(phrase)
-  );
-
-  // Check for pronouns referring to previous context
-  const hasReferentialPronouns = /\b(it|this|that|these|those)\b/i.test(query);
-
-  return startsWithFollowUp || hasReferentialPronouns;
-}

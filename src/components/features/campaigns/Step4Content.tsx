@@ -12,7 +12,7 @@ import {
   DraftCampaignData,
   // Import sub-schemas if needed
   DraftAssetSchema,
-  CreativeAssetTypeEnum,
+  CreativeAssetTypeEnum as _CreativeAssetTypeEnum,
   InfluencerSchema,
 } from '@/components/features/campaigns/types';
 import { toast } from 'react-hot-toast';
@@ -29,9 +29,11 @@ import { logger } from '@/lib/logger'; // Added logger import
 type DraftAsset = z.infer<typeof DraftAssetSchema>;
 
 // Define a custom interface that extends Step4FormData for better type support with useFieldArray
+/* // REMOVED: Unused interface CustomStep4FormData
 interface CustomStep4FormData extends Omit<Step4FormData, 'assets'> {
   assets: DraftAsset[];
 }
+*/
 
 // --- Main Step 4 Component ---
 function Step4Content() {
@@ -259,9 +261,9 @@ function Step4Content() {
               err
             );
           });
-      } catch (error: any) {
-        logger.error(`Failed to delete asset ${assetId}:`, error);
-        showErrorToast(error.message || 'Could not delete asset.');
+      } catch (error) {
+        logger.error(`Failed to delete asset ${assetId}:`, { error });
+        showErrorToast((error as Error).message || 'Could not delete asset.');
       }
     },
     [removeAsset, form, router, wizard]
@@ -655,7 +657,7 @@ function Step4Content() {
         pollingIntervalRef.current = null;
       }
     };
-  }, [processingAssetIdsInPoll.length, wizard.isLoading, wizard.reloadCampaignData, form]);
+  }, [processingAssetIdsInPoll, wizard.isLoading, wizard.reloadCampaignData, form, wizard]);
 
   // Effect 3: Check RHF FORM state for assets that are done processing and remove from poll list
   useEffect(() => {

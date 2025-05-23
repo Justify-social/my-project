@@ -275,7 +275,7 @@ const SurveyPreviewPage = () => {
                   )}
                   aria-label={`Select ${tab.platform} preview`}
                 >
-                  <Icon iconId={tab.icon as any} className="h-6 w-6" />
+                  <Icon iconId={tab.icon} className="h-6 w-6" />
                 </Button>
               ))}
             </div>

@@ -656,9 +656,21 @@ export async function verifyInsightIQApi(): Promise<ApiVerificationResult> {
   const testProfileId = '00000000-0000-0000-0000-000000000000'; // Placeholder UUID
   const testAccountId = '00000000-0000-0000-0000-000000000000'; // Placeholder UUID
 
+  interface ProfileCheckData {
+    status?: string;
+    profileId?: string | null;
+    name?: string | null;
+  }
+
+  interface AudienceCheckData {
+    status?: string;
+    audienceId?: string | null;
+    countryCount?: number;
+  }
+
   // 2. Profile Check
   logger.info(`[verifyInsightIQApi] Testing Get Profile endpoint with ID: ${testProfileId}`);
-  let profileResultData: any = null;
+  let profileResultData: ProfileCheckData | null = null;
   let profileSuccess = false;
   let profileError: ApiErrorInfo | undefined;
   const profileStartTime = Date.now();
@@ -682,15 +694,15 @@ export async function verifyInsightIQApi(): Promise<ApiVerificationResult> {
       // Should not happen if service handles errors, but safety check
       throw new Error('Get Profile returned unexpected null/undefined without specific error.');
     }
-  } catch (error: any) {
-    // Catch errors re-thrown by the service
+  } catch (error: unknown) {
     logger.error(`[verifyInsightIQApi] Get Profile call failed:`, error);
     profileSuccess = false;
     profileError = {
-      type: error.message?.includes('(401)')
-        ? ApiErrorType.AUTHENTICATION_ERROR
-        : ApiErrorType.UNKNOWN_ERROR,
-      message: `Get Profile failed: ${error.message || 'Unknown error'}`,
+      type:
+        error instanceof Error && error.message?.includes('(401)') // Check if Error before accessing message
+          ? ApiErrorType.AUTHENTICATION_ERROR
+          : ApiErrorType.UNKNOWN_ERROR,
+      message: `Get Profile failed: ${error instanceof Error ? error.message : String(error)}`, // Safe access
       isRetryable: false,
       details: error,
     };
@@ -716,7 +728,7 @@ export async function verifyInsightIQApi(): Promise<ApiVerificationResult> {
     );
     let audienceSuccess = false;
     let audienceError: ApiErrorInfo | undefined;
-    let audienceResultData: any = null;
+    let audienceResultData: AudienceCheckData | null = null;
     const audienceStartTime = Date.now();
     try {
       const audience = await getInsightIQAudience(testAccountId);
@@ -735,14 +747,15 @@ export async function verifyInsightIQApi(): Promise<ApiVerificationResult> {
       } else {
         throw new Error('Get Audience returned unexpected null/undefined without specific error.');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error(`[verifyInsightIQApi] Get Audience call failed:`, error);
       audienceSuccess = false;
       audienceError = {
-        type: error.message?.includes('(401)')
-          ? ApiErrorType.AUTHENTICATION_ERROR
-          : ApiErrorType.UNKNOWN_ERROR,
-        message: `Get Audience failed: ${error.message || 'Unknown error'}`,
+        type:
+          error instanceof Error && error.message?.includes('(401)') // Check if Error
+            ? ApiErrorType.AUTHENTICATION_ERROR
+            : ApiErrorType.UNKNOWN_ERROR,
+        message: `Get Audience failed: ${error instanceof Error ? error.message : String(error)}`, // Safe access
         isRetryable: false,
         details: error,
       };
@@ -779,9 +792,9 @@ export async function verifyInsightIQApi(): Promise<ApiVerificationResult> {
 export async function verifyDatabaseConnectionServerSide(): Promise<ApiVerificationResult> {
   const apiName = 'Database Connection';
   const dbUrl = serverConfig.database.url;
-  const endpoint = dbUrl
-    ? `postgres://...${dbUrl.substring(dbUrl.lastIndexOf('@'))}`
-    : 'Database URL Missing';
+  // const endpoint = dbUrl // REMOVED
+  //   ? `postgres://...${dbUrl.substring(dbUrl.lastIndexOf('@'))}`
+  //   : 'Database URL Missing';
 
   if (!dbUrl) {
     return {
@@ -845,14 +858,14 @@ export async function verifyDatabaseConnectionServerSide(): Promise<ApiVerificat
  */
 export async function verifyStripeApiServerSide(): Promise<ApiVerificationResult> {
   const apiName = 'Stripe API';
-  const endpoint = 'https://api.stripe.com/v1/products'; // Example endpoint
+  const endpoint = 'https://api.stripe.com/v1/products'; // REVERTED: endpoint is used
   const secretKey = serverConfig.stripe.secretKey;
 
   if (!secretKey) {
     return {
       success: false,
       apiName,
-      endpoint,
+      endpoint: endpoint, // Use endpoint
       error: {
         type: ApiErrorType.AUTHENTICATION_ERROR,
         message: 'Missing Stripe API secret key in server configuration.',
@@ -864,7 +877,7 @@ export async function verifyStripeApiServerSide(): Promise<ApiVerificationResult
 
   const startTime = Date.now();
   try {
-    console.info(`[Server Verify] Testing ${apiName}`);
+    logger.info(`[Server Verify] Testing ${apiName}`);
     const stripe = new Stripe(secretKey, { apiVersion: '2025-04-30.basil' }); // Use the specific apiVersion required by the installed Stripe library
 
     // Make a simple read call, e.g., list products with a limit of 1
@@ -879,7 +892,7 @@ export async function verifyStripeApiServerSide(): Promise<ApiVerificationResult
     return {
       success: true,
       apiName,
-      endpoint,
+      endpoint: endpoint,
       latency,
       data: {
         status: 'Authenticated & Connected',
@@ -923,7 +936,7 @@ export async function verifyStripeApiServerSide(): Promise<ApiVerificationResult
     return {
       success: false,
       apiName,
-      endpoint,
+      endpoint: endpoint,
       latency,
       error: {
         type: errorType,
@@ -1011,7 +1024,6 @@ export async function verifyCintExchangeApiServerSide(): Promise<ApiVerification
       `[Server Verify] Cint - Request Body: ${JSON.stringify(requestBody, (key, value) => (key === 'client_secret' ? 'REDACTED' : value))}`
     );
 
-    const accountId = serverConfig.cint.accountId;
     const headers = {
       'Content-Type': 'application/json',
       'Cint-API-Version': '2025-02-17',
@@ -1086,7 +1098,7 @@ export async function verifyCintExchangeApiServerSide(): Promise<ApiVerification
       logger.error('[Server Verify] Cint Fetch Error Details:', {
         name: tokenFetchError.name,
         message: tokenFetchError.message,
-        cause: (tokenFetchError as any).cause,
+        cause: (tokenFetchError as { cause?: unknown }).cause, // Safer access to cause
       });
     }
     return {
@@ -1108,15 +1120,6 @@ export async function verifyCintExchangeApiServerSide(): Promise<ApiVerification
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-    // Get Account ID from config
-    const accountId = serverConfig.cint.accountId; // Read accountId from serverConfig
-
-    if (!accountId) {
-      logger.warn(`[Server Verify] ${apiName} - Missing Account ID in server configuration.`);
-      // Consider if this should be a fatal error for verification
-      // For now, proceed without the header but log warning
-    }
 
     const response = await fetch(testResourceEndpoint, {
       method: 'GET',

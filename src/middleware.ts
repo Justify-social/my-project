@@ -15,7 +15,7 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 // Define ALL routes that should be protected
-const isProtectedRoute = createRouteMatcher([
+const _isProtectedRoute = createRouteMatcher([
   '/(dashboard|campaigns|brand-lift|settings|account)(.*)', // All routes under these paths
   '/influencer-marketplace(.*)',
   '/admin(.*)', // Admin tools

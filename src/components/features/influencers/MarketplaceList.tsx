@@ -74,7 +74,7 @@ export const MarketplaceList: React.FC<MarketplaceListProps> = ({
         });
 
         // Ensure handle exists, fallback to id if absolutely necessary (though handle should be preferred)
-        const publicIdentifier = influencer.handle || influencer.id;
+        const _publicIdentifier = influencer.handle || influencer.id;
 
         return (
           <InfluencerSummaryCard

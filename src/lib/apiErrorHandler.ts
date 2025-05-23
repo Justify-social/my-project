@@ -3,7 +3,7 @@ import { z } from 'zod';
 import logger from './logger'; // Assuming logger.ts is in the same lib directory
 import { UnauthenticatedError, ForbiddenError, NotFoundError, BadRequestError } from './errors'; // Assuming errors.ts is in the same lib directory
 
-export const handleApiError = (error: any, request?: NextRequest): NextResponse => {
+export const handleApiError = (error: unknown, request?: NextRequest): NextResponse => {
   let statusCode = 500;
   let errorMessage = 'An unexpected internal server error occurred. Please try again later.';
 
@@ -33,17 +33,29 @@ export const handleApiError = (error: any, request?: NextRequest): NextResponse 
       ...requestInfo,
       statusCode,
     });
-  } else if (error && typeof error === 'object' && error.name === 'PrismaClientKnownRequestError') {
-    logger.error(error, { ...requestInfo, prismaCode: error.code });
-    if (error.code === 'P2002') {
+  } else if (
+    error &&
+    typeof error === 'object' &&
+    'name' in error &&
+    error.name === 'PrismaClientKnownRequestError' &&
+    'code' in error &&
+    typeof error.code === 'string'
+  ) {
+    // Check for PrismaClientKnownRequestError properties
+    const prismaError = error as {
+      code: string;
+      meta?: { target?: string[]; cause?: string; field_name?: string };
+    }; // Type assertion
+    logger.error(prismaError, { ...requestInfo, prismaCode: prismaError.code });
+    if (prismaError.code === 'P2002') {
       statusCode = 409; // Conflict
-      errorMessage = `A record with this information already exists. Please check your input. (Fields: ${error.meta?.target?.join(', ')})`;
-    } else if (error.code === 'P2025') {
+      errorMessage = `A record with this information already exists. Please check your input. (Fields: ${prismaError.meta?.target?.join(', ')})`;
+    } else if (prismaError.code === 'P2025') {
       statusCode = 404;
-      errorMessage = (error.meta?.cause as string) || 'The requested resource was not found.';
-    } else if (error.code === 'P2003') {
+      errorMessage = prismaError.meta?.cause || 'The requested resource was not found.';
+    } else if (prismaError.code === 'P2003') {
       statusCode = 400; // Bad request due to foreign key constraint
-      errorMessage = `Invalid reference: The operation failed due to a missing related record. (Field: ${error.meta?.field_name})`;
+      errorMessage = `Invalid reference: The operation failed due to a missing related record. (Field: ${prismaError.meta?.field_name})`;
     } else {
       // Generic Prisma error, don't leak too much detail
       errorMessage = 'A database error occurred. Please try again.';

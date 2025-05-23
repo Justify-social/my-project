@@ -10,6 +10,16 @@ const RESEND_WEBHOOK_SECRET = process.env.RESEND_WEBHOOK_SECRET;
 // or you use a global instance for other purposes.
 // For webhook verification, usually you use a method from the imported Resend object/class directly.
 
+interface ResendEventData {
+  email_id?: string;
+  to?: string;
+  reason?: string;
+  type?: string;
+  email?: string;
+  url?: string;
+  [key: string]: unknown; // Allow other properties
+}
+
 function handleErrorResponse(error: unknown, type: string, res: typeof NextResponse) {
   let errorData: string | unknown = 'Unknown error'; // Default error data, changed type
   let statusCode = 500;
@@ -72,7 +82,7 @@ export async function POST(request: Request) {
 
   const wh = new Webhook(RESEND_WEBHOOK_SECRET);
   const rawBody = await request.text();
-  let event: Record<string, any>; // Use a generic record type initially
+  let event: { type: string; data: ResendEventData; id?: string }; // Use a more specific type for event
 
   try {
     // Verify the webhook signature
@@ -80,7 +90,7 @@ export async function POST(request: Request) {
       'svix-id': svix_id,
       'svix-timestamp': svix_timestamp,
       'svix-signature': svix_signature,
-    }) as Record<string, any>; // Assert type after verification
+    }) as { type: string; data: ResendEventData; id?: string }; // Assert type after verification
 
     logger.info('[Webhook Resend] Signature verified successfully.');
   } catch (err: unknown) {

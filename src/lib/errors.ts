@@ -40,8 +40,11 @@ export class DatabaseError extends Error {
 }
 
 export class ZodValidationError extends Error {
-  public details: any;
-  constructor(errorDetails: any, message = 'Input validation failed.') {
+  public details: Record<string, string[] | undefined> | { _errors: string[] };
+  constructor(
+    errorDetails: Record<string, string[] | undefined> | { _errors: string[] },
+    message = 'Input validation failed.'
+  ) {
     super(message);
     this.name = 'ZodValidationError';
     this.details = errorDetails;

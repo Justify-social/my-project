@@ -29,12 +29,10 @@ export async function POST(req: NextRequest) {
 
   const rawBody = await req.text(); // Mux expects the raw body string for verification
 
-  let event: any; // Use 'any' for now, or a more specific base type if known.
-  // The Mux SDK should provide proper types for 'event.data' after unwrap.
+  let event: Mux.Webhooks.BaseWebhookEvent; // Changed to BaseWebhookEvent
 
   try {
-    // Verify and parse the webhook event using the Mux SDK's unwrap method
-    event = mux.webhooks.unwrap(rawBody, req.headers);
+    event = mux.webhooks.unwrap(rawBody, req.headers) as Mux.Webhooks.BaseWebhookEvent; // Cast to BaseWebhookEvent
     logger.info(
       `[API /webhooks/mux] Received Mux webhook. Event Type: ${event.type}, Event ID: ${event.id}`
     );
@@ -52,7 +50,8 @@ export async function POST(req: NextRequest) {
     switch (event.type) {
       case 'video.asset.created':
         try {
-          const muxAssetId = event.data.id;
+          const assetData = event.data as Mux.Video.Asset; // Use Mux.Video namespace
+          const muxAssetId = assetData.id;
           logger.info(`[API /webhooks/mux] video.asset.created: Mux Asset ID ${muxAssetId}`);
           // This event confirms the asset exists on Mux. Update status if we have a matching muxAssetId.
           // This might be the first time we learn the muxAssetId if video.upload.asset_created was missed or if create-video-upload didn't get it.
@@ -76,7 +75,7 @@ export async function POST(req: NextRequest) {
         } catch (e: unknown) {
           const message = e instanceof Error ? e.message : String(e);
           logger.error(
-            `[API /webhooks/mux] DB error in video.asset.created for Mux Asset ID ${event.data.id}:`,
+            `[API /webhooks/mux] DB error in video.asset.created for Mux Asset ID ${(event.data as Mux.Video.Asset).id}:`,
             message
           );
         }
@@ -84,15 +83,22 @@ export async function POST(req: NextRequest) {
 
       case 'video.asset.ready':
         try {
+          const assetReadyData = event.data as Mux.Video.Asset; // Use Mux.Video namespace
           logger.info(
-            `[API /webhooks/mux] video.asset.ready: Asset ID ${event.data.id}, Upload ID: ${event.data.upload_id}`
+            `[API /webhooks/mux] video.asset.ready: Asset ID ${assetReadyData.id}, Upload ID: ${assetReadyData.upload_id}`
           );
-          const assetReady = event.data as Mux.Video.Asset;
-          const muxAssetId = assetReady.id;
-          const muxUploadId = assetReady.upload_id; // Get the upload_id from the event
+          const muxAssetId = assetReadyData.id;
+          const muxUploadId = assetReadyData.upload_id;
 
-          const publicPlaybackId = assetReady.playback_ids?.find(
-            pid => pid.policy === 'public'
+          // Infer the element type of playback_ids array
+          type PlaybackIdElement = typeof assetReadyData.playback_ids extends
+            | (infer E)[]
+            | undefined
+            ? E
+            : never;
+
+          const publicPlaybackId = assetReadyData.playback_ids?.find(
+            (pid: PlaybackIdElement) => pid.policy === 'public'
           )?.id;
 
           if (!publicPlaybackId) {
@@ -119,7 +125,7 @@ export async function POST(req: NextRequest) {
 
           const updateData = {
             muxPlaybackId: publicPlaybackId,
-            duration: assetReady.duration ? Math.round(assetReady.duration) : null,
+            duration: assetReadyData.duration ? Math.round(assetReadyData.duration) : null,
             muxProcessingStatus: 'READY' as const, // Ensure it's a literal type
             url: `https://stream.mux.com/${publicPlaybackId}.m3u8`,
             muxAssetId: muxAssetId, // Ensure muxAssetId is also set/confirmed here
@@ -163,7 +169,7 @@ export async function POST(req: NextRequest) {
         } catch (e: unknown) {
           const message = e instanceof Error ? e.message : String(e);
           logger.error(
-            `[API /webhooks/mux] DB error in video.asset.ready for asset ${event.data.id}:`,
+            `[API /webhooks/mux] DB error in video.asset.ready for asset ${(event.data as Mux.Video.Asset).id}:`,
             message
           );
         }
@@ -171,10 +177,11 @@ export async function POST(req: NextRequest) {
 
       case 'video.asset.errored':
         try {
+          const assetErroredData = event.data as Mux.Video.Asset; // Use Mux.Video namespace
           logger.warn(
-            `[API /webhooks/mux] video.asset.errored: Asset ID ${event.data.id}. Errors: ${JSON.stringify(event.data.errors)}`
+            `[API /webhooks/mux] video.asset.errored: Asset ID ${assetErroredData.id}. Errors: ${JSON.stringify(assetErroredData.errors)}`
           );
-          const assetErroredId = event.data.id;
+          const assetErroredId = assetErroredData.id;
           await prisma.creativeAsset.update({
             where: { muxAssetId: assetErroredId },
             data: { muxProcessingStatus: 'ERROR' },
@@ -182,7 +189,7 @@ export async function POST(req: NextRequest) {
         } catch (e: unknown) {
           const message = e instanceof Error ? e.message : String(e);
           logger.error(
-            `[API /webhooks/mux] DB error in video.asset.errored for asset ${event.data.id}:`,
+            `[API /webhooks/mux] DB error in video.asset.errored for asset ${(event.data as Mux.Video.Asset).id}:`,
             message
           );
         }
@@ -190,9 +197,9 @@ export async function POST(req: NextRequest) {
 
       case 'video.upload.asset_created':
         try {
-          const muxEventData = event.data as any; // Cast to any to avoid TS complaints, then check props
-          const upload_id_from_mux = muxEventData?.id as string | undefined;
-          const asset_id_from_mux = muxEventData?.asset_id as string | undefined;
+          const uploadAssetCreatedData = event.data as Mux.Video.Upload; // Use Mux.Video namespace
+          const upload_id_from_mux = uploadAssetCreatedData?.id;
+          const asset_id_from_mux = uploadAssetCreatedData?.asset_id;
 
           logger.info(
             `[API /webhooks/mux] video.upload.asset_created: Received Mux Upload ID ${upload_id_from_mux}, Mux Asset ID ${asset_id_from_mux}`
@@ -221,7 +228,8 @@ export async function POST(req: NextRequest) {
               const assetByMuxId = await prisma.creativeAsset.findUnique({
                 where: { muxAssetId: asset_id_from_mux },
               });
-              if (assetByMuxId && !(assetByMuxId as any).muxUploadId) {
+              if (assetByMuxId && !(assetByMuxId as { muxUploadId?: string | null }).muxUploadId) {
+                // Cast for muxUploadId check
                 // Cast to any for muxUploadId check if TS still complains
                 await prisma.creativeAsset.update({
                   where: { id: assetByMuxId.id },
@@ -243,14 +251,17 @@ export async function POST(req: NextRequest) {
           } else {
             logger.warn(
               '[API /webhooks/mux] video.upload.asset_created: Missing upload_id or asset_id in webhook payload.',
-              { data: muxEventData } // Log the data we received
+              { data: uploadAssetCreatedData }
             );
           }
         } catch (e: unknown) {
           const message = e instanceof Error ? e.message : String(e);
-          const muxEventDataForError = event.data as any; // Use this for logging
+          const uploadDataForError =
+            event.type === 'video.upload.asset_created'
+              ? (event.data as Mux.Video.Upload)
+              : { id: 'unknown', asset_id: 'unknown' }; // Use Mux.Video namespace
           logger.error(
-            `[API /webhooks/mux] DB error in video.upload.asset_created. Upload ID: ${muxEventDataForError?.id}, Asset ID: ${muxEventDataForError?.asset_id}:`,
+            `[API /webhooks/mux] DB error in video.upload.asset_created. Upload ID: ${uploadDataForError?.id}, Asset ID: ${uploadDataForError?.asset_id}:`,
             message
           );
         }
@@ -262,7 +273,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true });
   } catch (dbError: unknown) {
     logger.error(
-      `[API /webhooks/mux] Outer DB error processing webhook for event ${event.id} (type: ${event.type}):`,
+      `[API /webhooks/mux] Outer DB error processing webhook for event ${event.id} (type: ${event.type}):`, // Reverted to direct property access
       dbError // Log the full error object for dbError
     );
     return NextResponse.json(

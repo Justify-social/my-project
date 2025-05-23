@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
-import { auth } from '@clerk/nextjs/server';
+import { prisma as _prisma } from '@/lib/db';
+import { auth as _auth } from '@clerk/nextjs/server';
 // import { InfluencerSummary } from '@/types/influencer'; // Commented: Unused due to GET handler being commented
 import { logger } from '@/lib/logger';
-import { handleApiError } from '@/lib/apiErrorHandler';
-import { UnauthenticatedError, BadRequestError } from '@/lib/errors';
+import { handleApiError as _handleApiError } from '@/lib/apiErrorHandler';
+import {
+  UnauthenticatedError as _UnauthenticatedError,
+  BadRequestError as _BadRequestError,
+} from '@/lib/errors';
 // import { PlatformBackend } from '@/types/platforms'; // Commented: Unused type
 import { z } from 'zod';
 // Keep logger import

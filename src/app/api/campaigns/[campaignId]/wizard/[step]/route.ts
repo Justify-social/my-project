@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Prisma, Status, SubmissionStatus } from '@prisma/client';
+import { Prisma, Status, SubmissionStatus, CreativeAsset } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 import { EnumTransformers } from '@/utils/enum-transformers';
 import { connectToDatabase, prisma } from '@/lib/db';
@@ -22,6 +22,28 @@ interface ApiInfluencer {
   handle?: string | null;
   platform?: string | null;
   platformId?: string | null;
+}
+
+interface CreativeAssetClientPayload {
+  id?: string | number;
+  name?: string;
+  type?: string;
+  internalAssetId?: number;
+  rationale?: string;
+  budget?: number | null;
+  associatedInfluencerIds?: string[];
+  url?: string;
+  fileSize?: number;
+  muxAssetId?: string;
+  muxPlaybackId?: string;
+  muxProcessingStatus?: string;
+  duration?: number;
+  userId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  isPrimaryForBrandLiftPreview?: boolean;
+  fileName?: string;
+  [key: string]: unknown;
 }
 
 /**
@@ -264,62 +286,44 @@ export async function PATCH(
       // Additionally, update CreativeAsset records with form field data
       if (dataToSave.assets && Array.isArray(dataToSave.assets)) {
         // Process each asset to update its corresponding CreativeAsset record
-        const updatePromises = dataToSave.assets.map(
-          async (asset: {
-            id?: string | number; // Should match CreativeAsset.id or internalAssetId from client
-            name?: string; // Add name field
-            type?: string; // To know if it's image/video if needed for CreativeAsset
-            internalAssetId?: number; // Client might send this
-            rationale?: string;
-            budget?: number | null; // Allow null
-            associatedInfluencerIds?: string[];
-            // Add other relevant fields from DraftAsset if they are part of dataToSave.assets
-            // and might be needed to update CreativeAsset or for context here
-          }) => {
-            const assetIdToUpdate =
-              asset.internalAssetId ||
-              (typeof asset.id === 'number'
-                ? asset.id
-                : asset.id
-                  ? parseInt(asset.id, 10)
-                  : undefined);
+        const updatePromises = dataToSave.assets.map(async (asset: CreativeAssetClientPayload) => {
+          const assetIdToUpdate =
+            asset.internalAssetId ||
+            (typeof asset.id === 'number'
+              ? asset.id
+              : asset.id
+                ? parseInt(asset.id, 10)
+                : undefined);
 
-            if (!assetIdToUpdate) {
-              console.warn(
-                `[PATCH Step 4] Asset missing a valid ID (id or internalAssetId) for DB update, cannot update CreativeAsset:`,
-                asset
-              );
-              return; // Skip if no valid ID to update CreativeAsset
-            }
-
-            console.log(
-              `[PATCH Step 4] Updating CreativeAsset ${assetIdToUpdate} with form data:`,
-              {
-                name: asset.name,
-                rationale: asset.rationale,
-                budget: asset.budget, // Budget is not saved on CreativeAsset, but logged here
-                associatedInfluencerIds: asset.associatedInfluencerIds,
-              }
+          if (!assetIdToUpdate) {
+            console.warn(
+              `[PATCH Step 4] Asset missing a valid ID (id or internalAssetId) for DB update, cannot update CreativeAsset:`,
+              asset
             );
-
-            try {
-              await prisma.creativeAsset.update({
-                where: {
-                  id: assetIdToUpdate,
-                },
-                data: {
-                  name: asset.name || undefined,
-                  description: asset.rationale || null,
-                },
-              });
-            } catch (error) {
-              console.error(
-                `[PATCH Step 4] Error updating CreativeAsset ${assetIdToUpdate}:`,
-                error
-              );
-            }
+            return; // Skip if no valid ID to update CreativeAsset
           }
-        );
+
+          console.log(`[PATCH Step 4] Updating CreativeAsset ${assetIdToUpdate} with form data:`, {
+            name: asset.name,
+            rationale: asset.rationale,
+            budget: asset.budget, // Budget is not saved on CreativeAsset, but logged here
+            associatedInfluencerIds: asset.associatedInfluencerIds,
+          });
+
+          try {
+            await prisma.creativeAsset.update({
+              where: {
+                id: assetIdToUpdate,
+              },
+              data: {
+                name: asset.name || undefined,
+                description: asset.rationale || null,
+              },
+            });
+          } catch (error) {
+            console.error(`[PATCH Step 4] Error updating CreativeAsset ${assetIdToUpdate}:`, error);
+          }
+        });
 
         try {
           await Promise.all(updatePromises);
@@ -584,7 +588,7 @@ export async function PATCH(
     //   EnumTransformers.transformObjectFromBackend(campaignDataForResponse);
 
     // Define mappedResponseAssets here to ensure it's in scope for responsePayload
-    let mappedResponseAssetsForPATCH: any[] = [];
+    let mappedResponseAssetsForPATCH: CreativeAssetClientPayload[] = [];
 
     // Index the updated campaign in Algolia
     if (campaignDataForResponse) {
@@ -594,42 +598,77 @@ export async function PATCH(
         Array.isArray(campaignDataForResponse.creativeAssets)
       ) {
         logger.info('[WIZARD PATCH API] Mapping creativeAssets for response.');
-        mappedResponseAssetsForPATCH = campaignDataForResponse.creativeAssets.map((ca: any) => ({
-          id: String(ca.id),
-          internalAssetId: ca.id,
-          name: String(ca.name ?? ''),
-          fileName: String(ca.fileName ?? ca.name ?? ''),
-          type: String(ca.type ?? 'video'),
-          description: String(ca.description ?? ''),
-          url: ca.url ?? undefined,
-          fileSize: ca.fileSize ?? undefined,
-          muxAssetId: ca.muxAssetId ?? undefined,
-          muxPlaybackId: ca.muxPlaybackId ?? undefined,
-          muxProcessingStatus: ca.muxProcessingStatus ?? undefined,
-          duration: ca.duration ?? undefined,
-          userId: ca.userId ?? undefined,
-          createdAt: ca.createdAt?.toISOString() ?? undefined,
-          updatedAt: ca.updatedAt?.toISOString() ?? undefined,
-          isPrimaryForBrandLiftPreview: ca.isPrimaryForBrandLiftPreview ?? false,
-          // Fields not on CreativeAsset model, to be handled by frontend state if needed
-          rationale: '',
-          budget: undefined,
-          associatedInfluencerIds: [],
-        }));
+        mappedResponseAssetsForPATCH = campaignDataForResponse.creativeAssets.map(
+          (ca: CreativeAsset): CreativeAssetClientPayload => ({
+            id: String(ca.id),
+            internalAssetId: ca.id,
+            name: String(ca.name ?? ''),
+            fileName: String(ca.name ?? ''),
+            type: String(ca.type ?? 'video'),
+            description: String(ca.description ?? ''),
+            url: ca.url ?? undefined,
+            fileSize: ca.fileSize ?? undefined,
+            muxAssetId: ca.muxAssetId ?? undefined,
+            muxPlaybackId: ca.muxPlaybackId ?? undefined,
+            muxProcessingStatus: ca.muxProcessingStatus ?? undefined,
+            duration: ca.duration ?? undefined,
+            userId: ca.userId ?? undefined,
+            createdAt: ca.createdAt?.toISOString() ?? undefined,
+            updatedAt: ca.updatedAt?.toISOString() ?? undefined,
+            isPrimaryForBrandLiftPreview: ca.isPrimaryForBrandLiftPreview ?? false,
+            rationale: '',
+            budget: undefined,
+            associatedInfluencerIds: [],
+          })
+        );
       } else {
         logger.info(
           '[WIZARD PATCH API] No creativeAssets found on campaignDataForResponse to map for response. campaignDataForResponse.assets (Json[]) will be used if it exists, or empty.'
         );
         mappedResponseAssetsForPATCH =
           campaignDataForResponse.assets && Array.isArray(campaignDataForResponse.assets)
-            ? campaignDataForResponse.assets
+            ? (campaignDataForResponse.assets as Prisma.JsonArray).map(jsonVal => {
+                const asset = jsonVal as Prisma.JsonObject;
+                return {
+                  id: String(asset.id || Date.now()),
+                  name: String(asset.name || ''),
+                  fileName: String(asset.fileName || asset.name || ''),
+                  type: String(asset.type || 'video'),
+                  description: String(asset.description || asset.rationale || ''),
+                  url: asset.url as string | undefined,
+                  fileSize: asset.fileSize as number | undefined,
+                  muxAssetId: asset.muxAssetId as string | undefined,
+                  muxPlaybackId: asset.muxPlaybackId as string | undefined,
+                  muxProcessingStatus: asset.muxProcessingStatus as string | undefined,
+                  duration: asset.duration as number | undefined,
+                  userId: asset.userId as string | undefined,
+                  createdAt: asset.createdAt
+                    ? new Date(asset.createdAt as string | number).toISOString()
+                    : undefined,
+                  updatedAt: asset.updatedAt
+                    ? new Date(asset.updatedAt as string | number).toISOString()
+                    : undefined,
+                  isPrimaryForBrandLiftPreview:
+                    (asset.isPrimaryForBrandLiftPreview as boolean | undefined) ?? false,
+                  rationale: String(asset.rationale || ''),
+                  budget: asset.budget as number | null | undefined,
+                  associatedInfluencerIds: Array.isArray(asset.associatedInfluencerIds)
+                    ? (asset.associatedInfluencerIds as string[])
+                    : [],
+                  internalAssetId: asset.internalAssetId as number | undefined,
+                } as CreativeAssetClientPayload;
+              })
             : [];
       }
       // END SSOT ASSET MAPPING FOR RESPONSE
 
       const algoliaIndexStartTime = Date.now();
       // Fire and forget Algolia indexing for faster API response
-      addOrUpdateCampaignInAlgolia(campaignDataForResponse as any)
+      addOrUpdateCampaignInAlgolia(
+        campaignDataForResponse as Prisma.CampaignWizardGetPayload<{
+          include: { Influencer: true; submission: true; creativeAssets: true };
+        }>
+      )
         .then(() => {
           logger.info(
             `[WIZARD_PATCH_PERF] Algolia indexing completed in background in ${Date.now() - algoliaIndexStartTime}ms`
@@ -667,7 +706,7 @@ export async function PATCH(
         ? {
             ...EnumTransformers.transformObjectFromBackend(campaignDataForResponse),
             submissionId: finalSubmissionId,
-            assets: mappedResponseAssetsForPATCH, // Use the correctly scoped and mapped assets
+            assets: mappedResponseAssetsForPATCH,
           }
         : null,
       message: `Step ${step} updated${messageSuffix}`,
@@ -755,27 +794,29 @@ export async function GET(
     let responseAssetsForGET = [];
     if (campaign.creativeAssets && Array.isArray(campaign.creativeAssets)) {
       logger.info('[WIZARD GET API] Mapping creativeAssets for response.');
-      responseAssetsForGET = campaign.creativeAssets.map((ca: any) => ({
-        id: String(ca.id),
-        internalAssetId: ca.id,
-        name: String(ca.name ?? ''),
-        fileName: String(ca.fileName ?? ca.name ?? ''),
-        type: String(ca.type ?? 'video'),
-        description: String(ca.description ?? ''),
-        url: ca.url ?? undefined,
-        fileSize: ca.fileSize ?? undefined,
-        muxAssetId: ca.muxAssetId ?? undefined,
-        muxPlaybackId: ca.muxPlaybackId ?? undefined,
-        muxProcessingStatus: ca.muxProcessingStatus ?? undefined,
-        duration: ca.duration ?? undefined,
-        userId: ca.userId ?? undefined,
-        createdAt: ca.createdAt?.toISOString() ?? undefined,
-        updatedAt: ca.updatedAt?.toISOString() ?? undefined,
-        isPrimaryForBrandLiftPreview: ca.isPrimaryForBrandLiftPreview ?? false,
-        rationale: '',
-        budget: undefined,
-        associatedInfluencerIds: [],
-      }));
+      responseAssetsForGET = campaign.creativeAssets.map(
+        (ca: Prisma.CreativeAssetGetPayload<object>) => ({
+          id: String(ca.id),
+          internalAssetId: ca.id,
+          name: String(ca.name ?? ''),
+          fileName: String(ca.name ?? ''),
+          type: String(ca.type ?? 'video'),
+          description: String(ca.description ?? ''),
+          url: ca.url ?? undefined,
+          fileSize: ca.fileSize ?? undefined,
+          muxAssetId: ca.muxAssetId ?? undefined,
+          muxPlaybackId: ca.muxPlaybackId ?? undefined,
+          muxProcessingStatus: ca.muxProcessingStatus ?? undefined,
+          duration: ca.duration ?? undefined,
+          userId: ca.userId ?? undefined,
+          createdAt: ca.createdAt?.toISOString() ?? undefined,
+          updatedAt: ca.updatedAt?.toISOString() ?? undefined,
+          isPrimaryForBrandLiftPreview: ca.isPrimaryForBrandLiftPreview ?? false,
+          rationale: '',
+          budget: undefined,
+          associatedInfluencerIds: [],
+        })
+      );
     } else {
       logger.info(
         '[WIZARD GET API] No creativeAssets found on campaign to map for response. Using campaign.assets (Json[]) if available.'

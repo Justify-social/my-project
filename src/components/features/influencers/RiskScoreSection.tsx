@@ -12,7 +12,7 @@ interface RiskScoreSectionProps {
   // or the data model updated.
 }
 
-export function RiskScoreSection({ influencer }: RiskScoreSectionProps) {
+export function RiskScoreSection({ influencer: _influencer }: RiskScoreSectionProps) {
   // TODO: Replace with actual data from props or updated influencer object
   const riskScore: number | undefined = undefined; // influencer.riskScore ?? undefined;
   const riskChange: number | undefined = undefined; // influencer.riskChange ?? undefined;

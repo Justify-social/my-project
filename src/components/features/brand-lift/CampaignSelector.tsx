@@ -24,6 +24,16 @@ interface Campaign {
   status: string;
 }
 
+// Define a more specific type for items coming from the API
+interface CampaignFromApi {
+  id: string | number; // API might send number or string
+  name: string;
+  status: string;
+  startDate?: string;
+  updatedAt?: string;
+  // Add other potential fields from /api/campaigns/selectable-list if known
+}
+
 interface CampaignSelectorProps {
   onCampaignSelected: (campaignId: string | null) => void; // Expecting string | null
 }
@@ -51,7 +61,7 @@ const CampaignSelector: React.FC<CampaignSelectorProps> = ({ onCampaignSelected 
 
         if (result.success && Array.isArray(result.data)) {
           // Map API data to the local Campaign interface
-          const campaignsData: Campaign[] = result.data.map((item: any) => ({
+          const campaignsData: Campaign[] = result.data.map((item: CampaignFromApi) => ({
             id: String(item.id), // Ensure id is a string for the Campaign interface and SelectItem value
             campaignName: item.name, // API returns 'name', component expects 'campaignName' via interface
             status: item.status,
@@ -72,9 +82,13 @@ const CampaignSelector: React.FC<CampaignSelectorProps> = ({ onCampaignSelected 
           );
           throw new Error(result.error || 'Invalid data format received from API.');
         }
-      } catch (err: any) {
-        logger.error('Error fetching campaigns for Brand Lift Selector:', { error: err.message });
-        setError(err.message || 'An unexpected error occurred while fetching campaigns.');
+      } catch (err) {
+        logger.error('Error fetching campaigns for Brand Lift Selector:', {
+          error: (err as Error).message,
+        });
+        setError(
+          (err as Error).message || 'An unexpected error occurred while fetching campaigns.'
+        );
       }
       setIsLoading(false);
     };

@@ -1,4 +1,4 @@
-import { PrismaClient, Status, Prisma } from '@prisma/client';
+import { PrismaClient, Status as _Status, Prisma } from '@prisma/client';
 import { logger } from '@/lib/logger';
 
 const prisma = new PrismaClient();

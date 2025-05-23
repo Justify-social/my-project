@@ -15,8 +15,9 @@ const registry = iconRegistryData; // Use the imported data object
 // Debug flag
 // Workaround for potential process.env typing issues to enable debug logs
 const DEBUG =
-  (typeof process !== 'undefined' && (process as any).env && (process as any).env.NODE_ENV) ===
-  'development';
+  typeof process !== 'undefined' &&
+  process.env && // Check if process.env exists
+  process.env.NODE_ENV === 'development';
 
 // Set to keep track of logged warnings
 const loggedWarnings = new Set<string>();

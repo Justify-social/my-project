@@ -133,7 +133,7 @@ export const PATCH = async (
       count: updates.length,
     });
     return NextResponse.json({ message: 'Options reordered successfully' }, { status: 200 });
-  } catch (error: any) {
+  } catch (error) {
     return handleApiError(error, req);
   }
 };

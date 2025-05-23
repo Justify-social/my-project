@@ -75,7 +75,7 @@ export interface SurveyResponseData {
     optionIds?: string[]; // For MULTIPLE_CHOICE, SINGLE_CHOICE (will have one item)
     textAnswer?: string | null; // For potential open-ended in future
   }>;
-  demographics?: Record<string, any> | null; // JSON object for demographic data from Cint (e.g., age, gender, location)
+  demographics?: Record<string, unknown> | null; // Changed from any
   respondedAt?: Date;
   createdAt?: Date;
   updatedAt?: Date;
@@ -198,10 +198,10 @@ export interface BrandLiftCreative {
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      'mux-player': any;
+      'mux-player': Record<string, unknown>; // Changed from any
     }
   }
 }
 
 // Use any type for MuxPlayerElement to avoid complex type errors
-export type MuxPlayerElement = any;
+export type MuxPlayerElement = unknown; // Changed from any

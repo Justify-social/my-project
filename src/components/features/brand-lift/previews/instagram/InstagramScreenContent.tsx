@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import MuxPlayer from '@mux/mux-player-react';
-import { CreativeDataProps, MuxPlayerElement } from '@/types/brand-lift';
+import { CreativeDataProps } from '@/types/brand-lift';
 import { Icon } from '@/components/ui/icon/icon';
 import { InstagramPostHeader } from './InstagramPostHeader';
 import { InstagramActionButtons } from './InstagramActionButtons';

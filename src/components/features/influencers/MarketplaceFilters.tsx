@@ -8,7 +8,7 @@ import {
   SheetTitle,
   SheetDescription,
   SheetFooter,
-  SheetClose,
+  SheetClose as _SheetClose,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';

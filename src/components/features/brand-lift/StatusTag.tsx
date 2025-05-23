@@ -89,20 +89,20 @@ const StatusTag: React.FC<StatusTagProps> = ({ status }) => {
 
   // Ensure the Badge component accepts these variants or map them
   // If Badge variants don't match ('success', 'warning', 'info'), map them here:
-  const badgeVariantMapping = {
+  const badgeVariantMapping: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
     default: 'default',
     secondary: 'secondary',
     destructive: 'destructive',
     outline: 'outline',
-    success: 'success', // Assuming Badge has a success variant
-    warning: 'warning', // Assuming Badge has a warning variant
-    info: 'info', // Assuming Badge has an info variant
+    success: 'default', // Map to a valid Badge variant
+    warning: 'secondary', // Map to a valid Badge variant
+    info: 'outline', // Map to a valid Badge variant
   };
 
   const finalVariant = badgeVariantMapping[variant] || 'secondary';
 
   return (
-    <Badge variant={finalVariant as any} className="capitalize">
+    <Badge variant={finalVariant} className="capitalize">
       {text}
     </Badge>
   );

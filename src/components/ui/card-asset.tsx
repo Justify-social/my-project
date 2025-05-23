@@ -10,7 +10,12 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Icon } from '@/components/ui/icon/icon';
-import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardHeader as _CardHeader,
+  CardContent as _CardContent,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import MuxPlayer from '@mux/mux-player-react';

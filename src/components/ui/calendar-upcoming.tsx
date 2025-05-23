@@ -105,7 +105,7 @@ const formatCampaignDuration = (startDate?: Date, endDate?: Date): string => {
 
     const endFormatted = format(new Date(endDate), 'd');
     const endMonthFormatted = format(new Date(endDate), 'MMM d');
-    const endYearFormatted = format(new Date(endDate), 'yyyy');
+    const _endYearFormatted = format(new Date(endDate), 'yyyy');
     const endFullFormatted = format(new Date(endDate), 'MMM d, yyyy');
 
     if (isSameYear(new Date(startDate), new Date(endDate))) {

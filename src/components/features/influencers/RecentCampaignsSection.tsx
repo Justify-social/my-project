@@ -16,7 +16,8 @@ interface RecentCampaignsSectionProps {
 // Placeholder data removed
 
 export function RecentCampaignsSection({
-  influencer /*, campaignHistory = [] */,
+  influencer: _influencer, // Prefixed
+  // campaignHistory = []
 }: RecentCampaignsSectionProps) {
   // Use campaignHistory prop when available
   const campaignsToShow = [
@@ -34,7 +35,13 @@ export function RecentCampaignsSection({
         {campaignsToShow.length > 0 ? (
           campaignsToShow.map(
             (
-              campaign: any // Use any temporarily until type is defined
+              campaign: {
+                id: string;
+                brandName: string;
+                campaignName: string;
+                metric: string;
+                iconId: string;
+              } // Added specific type
             ) => (
               <div
                 key={campaign.id}

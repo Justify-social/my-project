@@ -125,11 +125,11 @@ export const POST = async (req: NextRequest) => {
       { message: 'Webhook received successfully.', surveyResponseId: surveyResponse.id },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error) {
     // Log error before passing to generic handler
     logger.error('Error processing Cint webhook /api/brand-lift/respond', {
-      errorMessage: error.message,
-      stack: error.stack,
+      errorMessage: error instanceof Error ? error.message : String(error), // Safely access error message
+      stack: error instanceof Error ? error.stack : undefined, // Safely access error stack
       requestBody: await req.text().catch(() => 'Could not read request body'), // Log raw body on error if possible
     });
     return handleApiError(error, req);

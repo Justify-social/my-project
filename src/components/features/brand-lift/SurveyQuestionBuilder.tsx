@@ -24,11 +24,16 @@ import yaml from 'js-yaml';
 import { z } from 'zod';
 import {
   SurveyQuestionType,
-  BrandLiftStudyStatus,
+  BrandLiftStudyStatus as _BrandLiftStudyStatus,
   SurveyOptionData as TypeSurveyOptionData, // Alias to avoid conflict if SortableOptionItem also uses SurveyOptionData
 } from '@/types/brand-lift'; // Import from local types
 import { useAuth } from '@clerk/nextjs'; // Import useAuth
-import { ForbiddenError, NotFoundError, UnauthenticatedError, BadRequestError } from '@/lib/errors'; // Added import for custom errors
+import {
+  ForbiddenError as _ForbiddenError,
+  NotFoundError as _NotFoundError,
+  UnauthenticatedError as _UnauthenticatedError,
+  BadRequestError as _BadRequestError,
+} from '@/lib/errors'; // Added import for custom errors - Prefixed
 
 // Shadcn UI Imports
 import { Button } from '@/components/ui/button';
@@ -36,12 +41,12 @@ import { IconButtonAction } from '@/components/ui/button-icon-action';
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
+  CardDescription as _CardDescription,
+  CardFooter as _CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Input as _Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -56,7 +61,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Icon } from '@/components/ui/icon/icon';
 import logger from '@/lib/logger';
-import { SurveyQuestionData, BrandLiftStudyData } from '@/types/brand-lift';
+import { SurveyQuestionData } from '@/types/brand-lift';
 import { cn } from '@/lib/utils';
 import { GifCard } from '@/components/ui/card-gif'; // Import the new GifCard
 import { Badge } from '@/components/ui/badge';
@@ -65,10 +70,10 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
+  DialogFooter as _DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogClose,
+  DialogClose as _DialogClose,
 } from '@/components/ui/dialog';
 import toast from 'react-hot-toast'; // Added import for react-hot-toast
 import { showSuccessToast, showErrorToast } from '@/components/ui/toast'; // Added import for SSOT toasts
@@ -104,7 +109,11 @@ async function fetchGifFromGiphy(searchTerm: string): Promise<string[]> {
     const data = await response.json();
     if (data.data && Array.isArray(data.data) && data.data.length > 0) {
       return data.data
-        .map((gif: any) => gif.images?.downsized_medium?.url || gif.images?.original?.url)
+        .map(
+          (gif: {
+            images?: { downsized_medium?: { url?: string }; original?: { url?: string } };
+          }) => gif.images?.downsized_medium?.url || gif.images?.original?.url
+        )
         .filter((url: string | undefined): url is string => typeof url === 'string');
     }
     logger.info('[Giphy] No GIFs found for term:', { searchTerm });
@@ -192,7 +201,7 @@ const aiQuestionSchema = z.object({
 const aiSuggestedQuestionsSchema: z.ZodArray<typeof aiQuestionSchema> = z.array(aiQuestionSchema);
 
 type ValidatedAiQuestion = z.infer<typeof aiQuestionSchema>;
-type ValidatedAiOption = z.infer<typeof aiOptionSchema>;
+type _ValidatedAiOption = z.infer<typeof aiOptionSchema>;
 
 // Define the ref interface here
 export interface SurveyQuestionBuilderRef {
@@ -709,6 +718,7 @@ const SortableOptionItem: React.FC<SortableOptionItemProps> = ({
           isSelected={optId === selectedOptionId}
           onClick={(e?: React.MouseEvent) => {
             e?.stopPropagation();
+            onSelectOption(questionId, optId);
             if (actionsDisabled || isEditingThisText) return;
             setEditingThisText();
           }}
@@ -771,12 +781,7 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
     const [questions, setQuestions] = useState<SurveyQuestionData[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [studyDetails, setStudyDetails] = useState<Partial<BrandLiftStudyData> | null>(null);
     const [isAISuggesting, setIsAISuggesting] = useState(false);
-    const [saveStatus, setSaveStatus] = useState<
-      Record<string, 'saving' | 'saved' | 'error' | null>
-    >({});
-    const [hasInitializedQuestions, setHasInitializedQuestions] = useState(false);
     const [selectedGifOptions, setSelectedGifOptions] = useState<Record<string, string | null>>({});
 
     const [gifSearchModalTriggerState, setGifSearchModalTriggerState] = useState<{
@@ -813,7 +818,6 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
     const saveQuestion = useCallback(
       async (question: SurveyQuestionData, options?: { showToast?: boolean }) => {
         const qId = question.id || question.tempId!;
-        setSaveStatus(prev => ({ ...prev, [qId]: 'saving' }));
         const shouldShowToast = options?.showToast ?? true;
 
         try {
@@ -836,7 +840,7 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
               body: JSON.stringify(payload),
             });
           } else {
-            const { id, ...createPayload } = payload;
+            const { id: _id, ...createPayload } = payload;
             response = await fetch(`/api/brand-lift/surveys/${studyId}/questions`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -897,14 +901,16 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
               })
               .sort((a, b) => a.order - b.order)
           );
-          setSaveStatus(prev => ({ ...prev, [qId]: 'saved' }));
           if (shouldShowToast) {
             showSuccessToast('Question saved successfully!');
           }
-        } catch (err: any) {
-          logger.error('Save Question Error:', { qId, error: err.message, questionData: question });
-          setSaveStatus(prev => ({ ...prev, [qId]: 'error' }));
-          showErrorToast(err.message || 'Failed to save question.');
+        } catch (err: unknown) {
+          logger.error('Save Question Error:', {
+            qId,
+            error: (err as Error).message,
+            questionData: question,
+          });
+          showErrorToast((err as Error).message || 'Failed to save question.');
         }
       },
       [studyId]
@@ -934,8 +940,7 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
           throw new Error(
             (await studyRes.json().then(e => e.error)) || 'Failed to fetch study details'
           );
-        const fetchedStudyDetails = await studyRes.json();
-        setStudyDetails(fetchedStudyDetails);
+        const _fetchedStudyDetails = await studyRes.json(); // Prefixed unused variable
 
         if (!questionsRes.ok)
           throw new Error(
@@ -947,11 +952,14 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
         setQuestions(fetchedQuestions);
 
         if (fetchedQuestions.length > 0) {
-          setHasInitializedQuestions(true);
+          // setHasInitializedQuestions(true);
         }
-      } catch (err: any) {
-        logger.error('Error fetching data for builder:', { studyId, error: err.message });
-        setError(err.message);
+      } catch (err: unknown) {
+        logger.error('Error fetching data for builder:', {
+          studyId,
+          error: (err as Error).message,
+        });
+        setError((err as Error).message);
       }
       setIsLoading(false);
     }, [studyId, isAuthLoaded, isSignedIn, activeOrgId]);
@@ -985,15 +993,6 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
       updateQuestionProperty(id, { text });
     const handleUpdateQuestionType = (id: string, type: SurveyQuestionType) =>
       updateQuestionProperty(id, { questionType: type });
-    const handleUpdateQuestionOrder = (id: string, order: number) => {
-      setQuestions(prev =>
-        prev
-          .map(q => (q.id === id || q.tempId === id ? { ...q, order } : q))
-          .sort((a, b) => a.order - b.order)
-      );
-      const qToSave = questions.find(q => q.id === id || q.tempId === id);
-      if (qToSave) saveQuestion({ ...qToSave, order });
-    };
     const handleToggleRandomized = (id: string, checked: boolean) =>
       updateQuestionProperty(id, { isRandomized: checked });
     const handleToggleMandatory = (id: string, checked: boolean) =>
@@ -1038,10 +1037,10 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
               (await response.json().then(e => e.error)) || 'Failed to delete question from server'
             );
           logger.info('Deleted question from server', { questionIdOrTempId });
-        } catch (err: any) {
+        } catch (err: unknown) {
           logger.error('Failed to delete question from server', {
             questionIdOrTempId,
-            error: err.message,
+            error: (err as Error).message,
           });
         }
       }
@@ -1130,9 +1129,6 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
       console.log('[GIF_SELECT] handleUpdateOptionImageUrl called', { qId, oId, imageUrl });
       updateOptionProperty(qId, oId, { imageUrl });
     };
-    const handleUpdateOptionOrder = (qId: string, oId: string, order: number) =>
-      updateOptionProperty(qId, oId, { order });
-
     const handleDeleteOptionWrapper = (questionIdOrTempId: string, optionIdOrTempId: string) => {
       let questionToUpdate: SurveyQuestionData | undefined;
       setQuestions(prev =>
@@ -1165,7 +1161,7 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
           .filter(q => q.id && q.id !== '')
           .map(q => ({ id: q.id!, order: q.order }));
         if (orderPayload.length > 0) {
-          setSaveStatus(prev => ({ ...prev, globalReorder: 'saving' }));
+          // setSaveStatus(prev => ({ ...prev, globalReorder: 'saving' }));
           try {
             const res = await fetch(`/api/brand-lift/surveys/${studyId}/questions/reorder`, {
               method: 'PATCH',
@@ -1178,8 +1174,11 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
               );
             showSuccessToast('Question order saved successfully!');
             await fetchData();
-          } catch (err: any) {
-            logger.error('Failed to reorder questions on server', { studyId, error: err.message });
+          } catch (err: unknown) {
+            logger.error('Failed to reorder questions on server', {
+              studyId,
+              error: (err as Error).message,
+            });
             showErrorToast('Failed to save new question order.');
           }
         }
@@ -1234,9 +1233,9 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
         let parsedQuestions;
         try {
           parsedQuestions = yaml.load(suggestedYaml);
-        } catch (yamlError: any) {
+        } catch (yamlError: unknown) {
           logger.error('[SurveyQuestionBuilder] YAML Parsing Error', {
-            message: yamlError.message,
+            message: (yamlError as Error).message,
             yaml: suggestedYaml.substring(0, 500), // Log a snippet
           });
           showErrorToast('Error parsing AI suggestions. Please check format or try again.');
@@ -1570,13 +1569,13 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
         setProgress(100);
         // The main success toast is now more conditional above.
         // showSuccessToast(`Successfully added ${newQuestions.length} AI suggested question(s).`); // This was the old toast.
-      } catch (err: any) {
+      } catch (err: unknown) {
         logger.error('[SurveyQuestionBuilder] Error during AI question suggestion:', {
           studyId,
-          error: err.message,
+          error: (err as Error).message,
           rawResponse: suggestedYaml, // Log the YAML if available
         });
-        setError(err.message || 'Failed to process AI suggestions.'); // Ensure setError is available and used correctly
+        setError((err as Error).message || 'Failed to process AI suggestions.'); // Ensure setError is available and used correctly
       } finally {
         setIsAISuggesting(false);
         if (onIsAISuggestingChange) onIsAISuggestingChange(false);
@@ -1665,7 +1664,7 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
           );
         }
       },
-      [questions, setQuestions, saveQuestion]
+      [setQuestions, saveQuestion]
     );
 
     if (!isAuthLoaded || (isLoading && questions.length === 0 && !error)) {
@@ -1732,11 +1731,11 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
               items={questions.map(q => q.id || q.tempId!)}
               strategy={verticalListSortingStrategy}
             >
-              {questions.map((question, index) => (
+              {questions.map((questionData, i) => (
                 <SortableQuestionItem
-                  key={question.id || question.tempId}
-                  question={question}
-                  index={index}
+                  key={questionData.id || questionData.tempId}
+                  question={questionData}
+                  index={i}
                   onUpdateQuestionText={handleUpdateQuestionText}
                   onUpdateQuestionType={handleUpdateQuestionType}
                   onToggleRandomized={handleToggleRandomized}

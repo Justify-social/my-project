@@ -53,9 +53,9 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ studyId }) => {
         }
         const data: ProgressData = await response.json();
         setProgressData(data);
-      } catch (err: any) {
-        logger.error('Error fetching study progress:', { studyId, error: err.message });
-        setError(err.message || 'Failed to load progress data.');
+      } catch (err) {
+        logger.error('Error fetching study progress:', { studyId, error: (err as Error).message });
+        setError((err as Error).message || 'Failed to load progress data.');
       }
       if (!isRefresh) setIsLoading(false);
     },
@@ -131,7 +131,8 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ studyId }) => {
           </p>
           {cintLiveProgress && (
             <div className="text-sm text-muted-foreground mt-2">
-              Cint Status: <StatusTag status={cintLiveProgress.status.toUpperCase() as any} /> |
+              Cint Status:{' '}
+              <StatusTag status={cintLiveProgress.status.toUpperCase() as BrandLiftStudyStatus} /> |
               Prescreens: {cintLiveProgress.currentPrescreens} | Median IR:{' '}
               {cintLiveProgress.medianIR?.toFixed(2)} | Median LOI: ~
               {Math.round((cintLiveProgress.medianLOISeconds || 0) / 60)} min

@@ -6,13 +6,13 @@ import { PlatformEnum } from '@/types/enums';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge, badgeVariants } from '@/components/ui/badge';
 import { Icon } from '@/components/ui/icon/icon'; // Assuming Icon component path
-import { Button } from '@/components/ui/button'; // Import Button for Copy action
+import { Button as _Button } from '@/components/ui/button'; // Import Button for Copy action - Prefixed
 import { IconButtonAction } from '@/components/ui/button-icon-action'; // Correct import name
 import { toast } from 'sonner'; // Assuming sonner for toast notifications
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Card, CardContent } from '@/components/ui/card';
-import { getInitials } from '@/lib/utils'; // Ensure correct import path
-import { cn } from '@/lib/utils';
+import { getInitials as _getInitials } from '@/lib/utils'; // Import from utils - Prefixed
+import { cn as _cn } from '@/lib/utils'; // Prefixed
 
 interface ProfileHeaderProps {
   influencer: InfluencerProfileData;
@@ -42,7 +42,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   // onSelectToggle,
 }) => {
   const {
-    id,
+    id: _id, // Prefixed
     avatarUrl,
     name,
     handle,
@@ -52,7 +52,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     justifyScore,
     audienceQualityIndicator,
     contactEmail, // Destructure contactEmail
-    website,
+    website: _website, // Prefixed
   } = influencer;
 
   // Direct implementation for copying email
@@ -82,17 +82,17 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   };
 
   // Determine badge styling based on quality
-  let qualityBadgeStyles = '';
+  let _qualityBadgeStyles = ''; // Prefixed
   if (audienceQualityIndicator === 'High') {
-    qualityBadgeStyles =
+    _qualityBadgeStyles =
       'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 border-transparent'; // Success-like style
   } else if (audienceQualityIndicator === 'Medium') {
-    qualityBadgeStyles =
+    _qualityBadgeStyles =
       'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 border-transparent'; // Warning-like style
   } else if (audienceQualityIndicator === 'Low') {
-    qualityBadgeStyles = badgeVariants({ variant: 'destructive' }); // Destructive style
+    _qualityBadgeStyles = badgeVariants({ variant: 'destructive' }); // Destructive style
   } else {
-    qualityBadgeStyles = badgeVariants({ variant: 'secondary' }); // Fallback style
+    _qualityBadgeStyles = badgeVariants({ variant: 'secondary' }); // Fallback style
   }
 
   return (

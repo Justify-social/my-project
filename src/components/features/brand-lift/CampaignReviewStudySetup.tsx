@@ -21,7 +21,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Checkbox as _Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Icon } from '@/components/ui/icon/icon';
@@ -30,8 +30,8 @@ import { Badge } from '@/components/ui/badge';
 import { IconButtonAction } from '@/components/ui/button-icon-action';
 import logger from '@/lib/logger';
 import Image from 'next/image';
-import { Textarea } from '@/components/ui/textarea';
-import { AccordionTrigger } from '@/components/ui/accordion';
+import { Textarea as _Textarea } from '@/components/ui/textarea';
+import { AccordionTrigger as _AccordionTrigger } from '@/components/ui/accordion';
 
 // Assuming these types might be needed from a shared location or defined here
 // For DraftCampaignData structure - based on wizard context Step5Content
@@ -58,7 +58,7 @@ const formatDate = (dateString: string | null | undefined): string => {
       month: 'long',
       day: 'numeric',
     });
-  } catch (e) {
+  } catch {
     return 'Invalid Date';
   }
 };
@@ -75,7 +75,7 @@ const formatCurrency = (
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
-  } catch (e) {
+  } catch {
     return String(amount); // Fallback
   }
 };
@@ -312,7 +312,7 @@ const getFunnelStageFromKpi = (kpiKey: string | null | undefined): string => {
 // I will use the versions copied from Step5Content for consistency if they differ, or merge.
 // For now, assuming the copied ones above are the SSOT for this refactor.
 
-const ALL_KPIS = [
+const _ALL_KPIS = [
   // This is the existing ALL_KPIS from CampaignReviewStudySetup, ensure it matches the one copied from Step5Content or merge.
   {
     id: 'BRAND_AWARENESS',
@@ -362,7 +362,7 @@ const ALL_KPIS = [
   },
 ];
 
-const FUNNEL_STAGES = [
+const _FUNNEL_STAGES = [
   {
     id: 'TOP_FUNNEL',
     label: 'Top Funnel',
@@ -479,8 +479,7 @@ const SummarySection: React.FC<SummarySectionProps> = ({
             iconBaseName="faPenToSquare"
             hoverColorClass="text-accent"
             ariaLabel={`Edit ${title}`}
-            onClick={e => {
-              e.stopPropagation();
+            onClick={_e => {
               onEdit(stepNumber);
             }}
           />

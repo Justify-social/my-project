@@ -110,7 +110,7 @@ export const GET = async (req: NextRequest) => {
     }
     logger.info('SurveyApprovalStatus fetched successfully', { studyId, userId: clerkUserId });
     return NextResponse.json(approvalStatus);
-  } catch (error: any) {
+  } catch (error) {
     return handleApiError(error, req);
   }
 };
@@ -307,7 +307,7 @@ export const PUT = async (req: NextRequest) => {
       approvalStatus: updatedApprovalStatus,
       studyStatus: finalStudyDbState.status,
     });
-  } catch (error: any) {
+  } catch (error) {
     return handleApiError(error, req);
   }
 };

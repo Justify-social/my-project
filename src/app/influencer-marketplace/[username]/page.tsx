@@ -311,9 +311,8 @@ export default function InfluencerProfilePage() {
               influencer.handle &&
               influencer.name && (
                 <ButtonAddToCampaign
-                  influencerId={influencer.profileId} // Now guaranteed by the conditional render
-                  influencerHandle={influencer.handle} // Now guaranteed
-                  influencerName={influencer.name} // Now guaranteed
+                  influencerHandle={influencer.handle}
+                  influencerName={influencer.name}
                   currentPlatform={platformEnum}
                   availablePlatforms={influencer.platforms}
                   onSuccess={(campaignId, campaignName) => {

@@ -26,9 +26,13 @@ import {
   CommandList,
 } from '@/components/ui/command';
 import { Input } from '@/components/ui/input';
-import { toast } from 'react-hot-toast';
+import { toast as _toast } from 'react-hot-toast';
 import { Control, UseFormGetValues, useWatch } from 'react-hook-form';
-import { Step4FormData, DraftCampaignData } from '@/components/features/campaigns/types';
+import {
+  Step4FormData,
+  DraftCampaignData,
+  DraftAsset,
+} from '@/components/features/campaigns/types';
 
 // Define InfluencerOption type used in props and internally
 interface InfluencerOption {
@@ -128,7 +132,7 @@ export const AssetCardStep4 = React.memo(function AssetCardStep4({
   const watchedAsset = useWatch({
     control,
     name: `assets.${assetIndex}`,
-    defaultValue: asset as any, // Use type assertion to bypass strict typing
+    defaultValue: asset as DraftAsset, // Cast to imported DraftAsset
   });
 
   // Merge the original asset with any updates from the form
@@ -169,7 +173,7 @@ export const AssetCardStep4 = React.memo(function AssetCardStep4({
     url,
     type,
     influencerHandle,
-    description,
+    description: _description,
     muxProcessingStatus = currentAsset.muxProcessingStatus,
     muxPlaybackId = currentAsset.muxPlaybackId,
   } = currentAsset;
