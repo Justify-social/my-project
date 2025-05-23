@@ -266,14 +266,14 @@ export function Sidebar({
         return false;
       });
     },
-    [isActive, activePath]
+    [activePath]
   );
 
   // Handle auto-expansion with accordion behavior
   useEffect(() => {
     if (!isHydrated) return;
 
-    const autoExpandKey = items.find((item, index) => {
+    const autoExpandKey = items.find((item, _index) => {
       const hasActiveChildItem = hasActiveChild(item);
       return hasActiveChildItem;
     });

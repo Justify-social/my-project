@@ -9,6 +9,121 @@ import { getInsightIQWorkPlatformId as _getInsightIQWorkPlatformId } from '@/lib
 import { Platform as PlatformBackend } from '@prisma/client';
 import { getProfileUniqueId as _getProfileUniqueId } from '@/lib/insightiqService';
 
+// Extended interface for InsightIQ profile with all analytics fields
+type ExtendedInsightIQProfile = InsightIQProfile & {
+  // Audience analytics fields
+  audience?: {
+    countries?: Array<{ code: string; value: number }>;
+    cities?: Array<{ name: string; value: number }>;
+    gender_age_distribution?: Array<{ gender: string; age_range: string; value: number }>;
+    ethnicities?: Array<{ name: string; value: number }>;
+    languages?: Array<{ name: string; value: number }>;
+    brand_affinity?: Array<{ name: string; percentage: number; logo_url?: string }>;
+    interests?: Array<{ name: string; value: number }>;
+    follower_types?: Array<{ name: string; value: number }>;
+    credibility_score?: number;
+    credibility_score_band?: Array<{ min: number; max: number; total_profile_count: number }>;
+    significant_followers_percentage?: number;
+    significant_followers?: {
+      platform_username: string;
+      image_url?: string;
+      is_verified?: boolean;
+      follower_count?: number;
+    };
+    lookalikes?: Array<unknown>;
+  };
+
+  // Engagement metrics fields
+  average_likes?: number;
+  average_comments?: number;
+  average_views?: number;
+  average_reels_views?: number;
+
+  // Contact details
+  contact_details?: Array<{ type: string; value: string }>;
+
+  // Reputation history
+  reputation_history?: Array<{
+    month: string;
+    follower_count?: number;
+    following_count?: number;
+    average_likes?: number;
+    subscriber_count?: number;
+  }>;
+
+  // Creator brand affinity
+  brand_affinity?: Array<{
+    name: string;
+    affinity_score: number;
+    category?: string;
+    logo_url?: string;
+  }>;
+
+  // Content data
+  top_contents?: Array<unknown>;
+  recent_contents?: Array<unknown>;
+  sponsored_contents?: Array<unknown>;
+  content_count?: number;
+  sponsored_posts_performance?: number;
+
+  // Hashtags and mentions
+  top_hashtags?: Array<{ name: string }>;
+  top_mentions?: Array<{ name: string }>;
+  top_interests?: Array<{ name: string }>;
+
+  // Location data
+  location?: {
+    city?: string;
+    state?: string;
+    country?: string;
+  };
+
+  // Audience likers data
+  audience_likers?: {
+    significant_likers_percentage?: number;
+    significant_likers?: Array<{
+      platform_username: string;
+      image_url?: string;
+      is_verified?: boolean;
+      follower_count?: number;
+    }>;
+    countries?: Array<{ code: string; value: number }>;
+    credibility_score?: number;
+  };
+
+  // Engagement rate histogram
+  engagement_rate_histogram?: Array<{
+    engagement_rate_band?: { min: number; max: number };
+    count?: number;
+  }>;
+
+  // Lookalikes
+  lookalikes?: Array<{
+    platform_username: string;
+    image_url?: string;
+    is_verified?: boolean;
+    follower_count?: number;
+    category?: string;
+    similarity_score?: number;
+    engagement_rate?: number;
+    average_likes?: number;
+    country?: string;
+  }>;
+
+  // Pricing information
+  pricing?: {
+    currency?: string;
+    post_type?: Record<string, { min?: number; max?: number }>;
+  };
+
+  // Pricing explanations
+  pricing_explanations?: Record<string, { level: string; description: string }>;
+
+  // Creator demographics (using gender from base InsightIQProfile)
+  age_group?: string;
+  language?: string;
+};
+
 /**
  * Maps an InsightIQ platform name string to our PlatformEnum.
  * Logs a warning for unmapped platforms.
@@ -77,7 +192,7 @@ const mapPlatformsToFrontend = (backendPlatforms: PlatformBackend[]): PlatformEn
  * @returns InfluencerProfileData object.
  */
 export const mapInsightIQProfileToInfluencerProfileData = (
-  profile: InsightIQProfile,
+  profile: ExtendedInsightIQProfile,
   uniqueId: string
 ): InfluencerProfileData => {
   const handle =
@@ -92,37 +207,36 @@ export const mapInsightIQProfileToInfluencerProfileData = (
   );
 
   // Extract audience demographics from InsightIQ profile with analytics
-  const audienceDemographics = (profile as any).audience
+  const audienceDemographics = profile.audience
     ? {
-        countries: (profile as any).audience.countries || [],
-        cities: (profile as any).audience.cities || [],
-        gender_age_distribution: (profile as any).audience.gender_age_distribution || [],
+        countries: profile.audience.countries || [],
+        cities: profile.audience.cities || [],
+        gender_age_distribution: profile.audience.gender_age_distribution || [],
         // Add other audience fields from InsightIQ API
-        ethnicities: (profile as any).audience.ethnicities || [],
-        languages: (profile as any).audience.languages || [],
-        brand_affinity: (profile as any).audience.brand_affinity || [],
-        interests: (profile as any).audience.interests || [],
-        follower_types: (profile as any).audience.follower_types || [],
-        credibility_score: (profile as any).audience.credibility_score,
-        credibility_score_band: (profile as any).audience.credibility_score_band || [],
-        significant_followers_percentage: (profile as any).audience
-          .significant_followers_percentage,
-        significant_followers: (profile as any).audience.significant_followers,
-        lookalikes: (profile as any).audience.lookalikes || [],
+        ethnicities: profile.audience.ethnicities || [],
+        languages: profile.audience.languages || [],
+        brand_affinity: profile.audience.brand_affinity || [],
+        interests: profile.audience.interests || [],
+        follower_types: profile.audience.follower_types || [],
+        credibility_score: profile.audience.credibility_score,
+        credibility_score_band: profile.audience.credibility_score_band || [],
+        significant_followers_percentage: profile.audience.significant_followers_percentage,
+        significant_followers: profile.audience.significant_followers,
+        lookalikes: profile.audience.lookalikes || [],
       }
     : null;
 
   // Extract engagement metrics from InsightIQ profile with analytics
   const engagementMetrics = {
-    averageLikes: (profile as any).average_likes || null,
-    averageComments: (profile as any).average_comments || null,
-    averageViews: (profile as any).average_views || null,
-    averageReelsViews: (profile as any).average_reels_views || null,
+    averageLikes: profile.average_likes || null,
+    averageComments: profile.average_comments || null,
+    averageViews: profile.average_views || null,
+    averageReelsViews: profile.average_reels_views || null,
     averageShares: null, // Not directly available in InsightIQ
   };
 
   // Extract contact details from InsightIQ API response
-  const contactDetails = (profile as any).contact_details || [];
+  const contactDetails = profile.contact_details || [];
   const extractedContacts = {
     email: contactDetails.find((c: any) => c.type?.toLowerCase().includes('email'))?.value || null,
     phone: contactDetails.find((c: any) => c.type?.toLowerCase().includes('phone'))?.value || null,
@@ -140,54 +254,54 @@ export const mapInsightIQProfileToInfluencerProfileData = (
   };
 
   // Extract reputation history
-  const reputationHistory = (profile as any).reputation_history || [];
+  const reputationHistory = profile.reputation_history || [];
 
   // Extract brand affinity for the creator (not audience)
-  const creatorBrandAffinity = (profile as any).brand_affinity || [];
+  const creatorBrandAffinity = profile.brand_affinity || [];
 
   // Extract content data
   const contentData = {
-    topContents: (profile as any).top_contents || [],
-    recentContents: (profile as any).recent_contents || [],
-    sponsoredContents: (profile as any).sponsored_contents || [],
-    contentCount: (profile as any).content_count || null,
-    sponsoredPostsPerformance: (profile as any).sponsored_posts_performance || null,
+    topContents: profile.top_contents || [],
+    recentContents: profile.recent_contents || [],
+    sponsoredContents: profile.sponsored_contents || [],
+    contentCount: profile.content_count || null,
+    sponsoredPostsPerformance: profile.sponsored_posts_performance || null,
   };
 
   // Extract hashtags and mentions
   const hashtagsAndMentions = {
-    topHashtags: (profile as any).top_hashtags || [],
-    topMentions: (profile as any).top_mentions || [],
-    topInterests: (profile as any).top_interests || [],
+    topHashtags: profile.top_hashtags || [],
+    topMentions: profile.top_mentions || [],
+    topInterests: profile.top_interests || [],
   };
 
   // Extract location data
-  const locationData = (profile as any).location
+  const locationData = profile.location
     ? {
-        city: (profile as any).location.city || null,
-        state: (profile as any).location.state || null,
-        country: (profile as any).location.country || null,
+        city: profile.location.city || null,
+        state: profile.location.state || null,
+        country: profile.location.country || null,
       }
     : null;
 
   // Extract audience likers data (separate from followers)
-  const audienceLikers = (profile as any).audience_likers || null;
+  const audienceLikers = profile.audience_likers || null;
 
   // Extract engagement rate histogram
-  const engagementRateHistogram = (profile as any).engagement_rate_histogram || [];
+  const engagementRateHistogram = profile.engagement_rate_histogram || [];
 
   // Extract lookalikes
-  const lookalikes = (profile as any).lookalikes || [];
+  const lookalikes = profile.lookalikes || [];
 
   // Extract pricing information
-  const pricingData = (profile as any).pricing || null;
-  const pricingExplanations = (profile as any).pricing_explanations || null;
+  const pricingData = profile.pricing || null;
+  const pricingExplanations = profile.pricing_explanations || null;
 
   // Extract creator demographics
   const creatorDemographics = {
-    gender: (profile as any).gender || null,
-    ageGroup: (profile as any).age_group || null,
-    language: (profile as any).language || null,
+    gender: profile.gender || null,
+    ageGroup: profile.age_group || null,
+    language: profile.language || null,
   };
 
   const profileData: InfluencerProfileData = {
@@ -251,11 +365,11 @@ export const mapInsightIQProfileToInfluencerProfileData = (
       pricing: pricingData,
       explanations: pricingExplanations,
     },
-    top_contents: (profile as any).top_contents,
-    recent_contents: (profile as any).recent_contents,
-    sponsored_contents: (profile as any).sponsored_contents,
-    top_hashtags: (profile as any).top_hashtags,
-    top_mentions: (profile as any).top_mentions,
+    top_contents: profile.top_contents,
+    recent_contents: profile.recent_contents,
+    sponsored_contents: profile.sponsored_contents,
+    top_hashtags: profile.top_hashtags,
+    top_mentions: profile.top_mentions,
   };
 
   if (!profileData.profileId) {

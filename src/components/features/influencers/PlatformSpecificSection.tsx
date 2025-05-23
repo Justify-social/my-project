@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
-import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon/icon';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { InfluencerProfileData } from '@/types/influencer';
@@ -14,9 +13,32 @@ interface PlatformSpecificSectionProps {
   influencer: InfluencerProfileData;
 }
 
+// Type definitions for InsightIQ data
+interface InsightIQData {
+  profile?: {
+    work_platform?: { name: string };
+    reputation?: {
+      follower_count?: number;
+      subscriber_count?: number;
+      following_count?: number;
+    };
+  };
+  content?: {
+    contentCount?: number;
+    recentContents?: unknown[];
+  };
+  engagement?: {
+    averageViews?: number;
+    averageReelsViews?: number;
+  };
+  audience?: {
+    significant_followers_percentage?: number;
+  };
+}
+
 const PlatformSpecificSection: React.FC<PlatformSpecificSectionProps> = ({ influencer }) => {
-  // Extract comprehensive InsightIQ platform data
-  const insightiq = (influencer as any).insightiq;
+  // Extract comprehensive InsightIQ platform data with proper typing
+  const insightiq = (influencer as InfluencerProfileData & { insightiq?: InsightIQData }).insightiq;
   const profileData = insightiq?.profile;
   const contentData = insightiq?.content;
   const engagementData = insightiq?.engagement;
@@ -32,14 +54,6 @@ const PlatformSpecificSection: React.FC<PlatformSpecificSectionProps> = ({ influ
     averageViews: engagementData?.averageViews || 0,
     averageReelsViews: engagementData?.averageReelsViews || 0,
   };
-
-  // Content type analysis
-  const contentTypes = [
-    { type: 'Photos', count: 0, avgEngagement: 0 },
-    { type: 'Videos', count: 0, avgEngagement: 0 },
-    { type: 'Reels', count: 0, avgEngagement: 0 },
-    { type: 'Stories', count: 0, avgEngagement: 0 },
-  ];
 
   // Calculate posting frequency
   const recentContents = contentData?.recentContents || [];

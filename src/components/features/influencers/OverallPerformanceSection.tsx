@@ -12,6 +12,31 @@ interface OverallPerformanceSectionProps {
   influencer: InfluencerProfileData;
 }
 
+// Type definitions for InsightIQ profile data
+interface InsightIQProfileData {
+  average_reels_views?: number;
+  content_count?: number;
+  sponsored_posts_performance?: number;
+  posts_hidden_likes_percentage_value?: number;
+  platform_account_type?: string;
+  gender?: string;
+  age_group?: string;
+  language?: string;
+  engagement_rate_percentile?: number;
+  follower_growth_percentile?: number;
+  content_quality_score?: number;
+  story_completion_rate?: number;
+  reel_shares?: number;
+  profile_visits_monthly?: number;
+}
+
+interface ExtendedInfluencerData extends InfluencerProfileData {
+  profile?: InsightIQProfileData;
+  insightiq?: {
+    profile?: InsightIQProfileData;
+  };
+}
+
 // Helper to format large numbers into k/m format
 const formatNumber = (num: number | undefined | null): string => {
   if (num === undefined || num === null) return 'N/A';
@@ -43,7 +68,8 @@ export function OverallPerformanceSection({ influencer }: OverallPerformanceSect
   const avgViews = engagementMetricsData?.averageViews;
 
   // Extract comprehensive analytics from InsightIQ API response if available
-  const profileData = (influencer as any).profile || (influencer as any).insightiq?.profile;
+  const extendedInfluencer = influencer as ExtendedInfluencerData;
+  const profileData = extendedInfluencer.profile || extendedInfluencer.insightiq?.profile;
 
   // Advanced metrics from InsightIQ API
   const averageReelsViews = profileData?.average_reels_views;
