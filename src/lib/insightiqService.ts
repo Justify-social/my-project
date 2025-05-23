@@ -932,8 +932,155 @@ export async function submitSocialProfileScreeningRequest(
   }
 }
 
-// Actual implementation would involve calling InsightIQ APIs.
-// This is a placeholder service.
+/**
+ * Submit email lookup request to find social profiles associated with email addresses.
+ * Endpoint: POST /v1/social/creators/email-lookup
+ */
+export async function submitEmailLookupRequest(
+  emails: string[]
+): Promise<{ jobId: string | null; error?: string }> {
+  logger.info(`[InsightIQService] Submitting email lookup for ${emails.length} email(s)`);
+  const endpoint = '/v1/social/creators/email-lookup';
+  const requestBody = { emails };
+
+  try {
+    const response = await makeInsightIQRequest<{
+      id: string;
+      created_at: string;
+      emails: string[];
+      status: string;
+    }>(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(requestBody),
+    });
+
+    if (response && response.id && response.status === 'IN_PROGRESS') {
+      logger.info(`[InsightIQService] Email lookup request accepted. Job ID: ${response.id}`);
+      return { jobId: response.id };
+    } else {
+      logger.error(
+        '[InsightIQService] Unexpected response format from email lookup submission:',
+        response
+      );
+      return { jobId: null, error: 'Unexpected response from InsightIQ' };
+    }
+  } catch (error: unknown) {
+    logger.error(`[InsightIQService] Error submitting email lookup request:`, error);
+    return {
+      jobId: null,
+      error: (error as Error).message || 'Failed to submit email lookup request',
+    };
+  }
+}
+
+/**
+ * Get email lookup results.
+ * Endpoint: GET /v1/social/creators/email-lookup/{id}
+ */
+export async function getEmailLookupResults(jobId: string): Promise<{
+  lookupReport: any;
+  matchedEmails: any[];
+  nonMatchedEmails: string[];
+  error?: string;
+} | null> {
+  logger.info(`[InsightIQService] Fetching email lookup results for job: ${jobId}`);
+  const endpoint = `/v1/social/creators/email-lookup/${jobId}`;
+
+  try {
+    const response = await makeInsightIQRequest<{
+      lookup_report: any;
+      matched_emails: any[];
+      non_matched_emails: string[];
+    }>(endpoint, { method: 'GET' });
+
+    if (response) {
+      logger.info(`[InsightIQService] Email lookup results retrieved successfully`);
+      return {
+        lookupReport: response.lookup_report,
+        matchedEmails: response.matched_emails,
+        nonMatchedEmails: response.non_matched_emails,
+      };
+    } else {
+      return {
+        lookupReport: null,
+        matchedEmails: [],
+        nonMatchedEmails: [],
+        error: 'No response data',
+      };
+    }
+  } catch (error: unknown) {
+    logger.error(`[InsightIQService] Error fetching email lookup results:`, error);
+    return null;
+  }
+}
+
+/**
+ * Submit audience overlap analysis request.
+ * Endpoint: POST /v1/social/creators/audience-overlap
+ */
+export async function submitAudienceOverlapRequest(
+  identifiers: string[],
+  workPlatformId: string
+): Promise<{ jobId: string | null; error?: string }> {
+  logger.info(
+    `[InsightIQService] Submitting audience overlap analysis for ${identifiers.length} creators`
+  );
+  const endpoint = '/v1/social/creators/audience-overlap';
+  const requestBody = {
+    work_platform_id: workPlatformId,
+    identifiers: identifiers,
+  };
+
+  try {
+    const response = await makeInsightIQRequest<{
+      id: string;
+      identifiers: string[];
+      status: string;
+      work_platform: any;
+    }>(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(requestBody),
+    });
+
+    if (response && response.id && response.status === 'IN_PROGRESS') {
+      logger.info(`[InsightIQService] Audience overlap request accepted. Job ID: ${response.id}`);
+      return { jobId: response.id };
+    } else {
+      logger.error(
+        '[InsightIQService] Unexpected response format from audience overlap submission:',
+        response
+      );
+      return { jobId: null, error: 'Unexpected response from InsightIQ' };
+    }
+  } catch (error: unknown) {
+    logger.error(`[InsightIQService] Error submitting audience overlap request:`, error);
+    return {
+      jobId: null,
+      error: (error as Error).message || 'Failed to submit audience overlap request',
+    };
+  }
+}
+
+/**
+ * Get audience overlap analysis results.
+ * Endpoint: GET /v1/social/creators/audience-overlap/{id}
+ */
+export async function getAudienceOverlapResults(jobId: string): Promise<any | null> {
+  logger.info(`[InsightIQService] Fetching audience overlap results for job: ${jobId}`);
+  const endpoint = `/v1/social/creators/audience-overlap/${jobId}`;
+
+  try {
+    const response = await makeInsightIQRequest<any>(endpoint, { method: 'GET' });
+    if (response) {
+      logger.info(`[InsightIQService] Audience overlap results retrieved successfully`);
+      return response;
+    }
+    return null;
+  } catch (error: unknown) {
+    logger.error(`[InsightIQService] Error fetching audience overlap results:`, error);
+    return null;
+  }
+}
 
 // Ensure the service is exported correctly with the refined fetchDetailedProfile
 export const insightIQService = {
@@ -946,4 +1093,8 @@ export const insightIQService = {
   searchInsightIQProfilesByParams,
   getInsightIQProfiles,
   submitSocialProfileScreeningRequest,
+  submitEmailLookupRequest,
+  getEmailLookupResults,
+  submitAudienceOverlapRequest,
+  getAudienceOverlapResults,
 };

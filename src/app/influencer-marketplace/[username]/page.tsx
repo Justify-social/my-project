@@ -10,11 +10,14 @@ import { Icon } from '@/components/ui/icon/icon'; // Assuming Icon component exi
 import { ProfileHeader } from '@/components/features/influencers/ProfileHeader'; // Import the ProfileHeader component
 // Import Tabs components
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-// Import Section components
+// Import ALL analytics components (existing + new)
 import { OverallPerformanceSection } from '@/components/features/influencers/OverallPerformanceSection';
-import { AudienceAnalyticsSection } from '@/components/features/influencers/AudienceAnalyticsSection';
-import { ContentAnalyticsSection } from '@/components/features/influencers/ContentAnalyticsSection';
-import { DemographicsSection } from '@/components/features/influencers/DemographicsSection';
+import AudienceAnalyticsSection from '@/components/features/influencers/AudienceAnalyticsSection';
+import ContentAnalyticsSection from '@/components/features/influencers/ContentAnalyticsSection';
+import DemographicsSection from '@/components/features/influencers/DemographicsSection';
+import ContactAnalyticsSection from '@/components/features/influencers/ContactAnalyticsSection';
+import PlatformSpecificSection from '@/components/features/influencers/PlatformSpecificSection';
+import AdvancedAnalyticsSection from '@/components/features/influencers/AdvancedAnalyticsSection';
 import { CertificationStatusSection } from '@/components/features/influencers/CertificationStatusSection';
 import { RiskScoreSection } from '@/components/features/influencers/RiskScoreSection';
 import { RecentCampaignsSection } from '@/components/features/influencers/RecentCampaignsSection';
@@ -45,6 +48,8 @@ import {
 import { toast } from 'react-hot-toast';
 import { ButtonAddToCampaign } from '@/components/ui/button-add-to-campaign'; // Import new component
 import { Button } from '@/components/ui/button'; // Added Button import
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 // import { ProfilePageLayout } from '@/components/layouts/ProfilePageLayout';
 
 // Helper function to get enum key from value (case-insensitive)
@@ -64,41 +69,56 @@ function getPlatformEnumFromString(value: string | null): PlatformEnum | null {
   return null; // Not found
 }
 
-// Define a simple skeleton placeholder
+// Enhanced skeleton with premium design
 const ProfileSkeleton = () => (
-  <div className="space-y-6 animate-pulse">
-    {/* Header Skeleton */}
-    <div className="flex items-center space-x-4 p-4 border rounded-lg">
-      <Skeleton className="h-24 w-24 rounded-full" />
-      <div className="space-y-2 flex-1">
-        <Skeleton className="h-6 w-1/2" />
-        <Skeleton className="h-4 w-1/4" />
-        <Skeleton className="h-12 w-full" />
+  <div className="space-y-8">
+    {/* Premium Header Skeleton */}
+    <Card className="border border-border/50 shadow-sm bg-gradient-to-br from-background to-muted/20">
+      <CardContent className="p-8">
+        <div className="flex items-center space-x-6">
+          <Skeleton className="h-32 w-32 rounded-full border-4 border-accent/20" />
+          <div className="space-y-4 flex-1">
+            <Skeleton className="h-8 w-1/2" />
+            <Skeleton className="h-5 w-1/3" />
+            <Skeleton className="h-16 w-full" />
+          </div>
+          <div className="space-y-3">
+            <Skeleton className="h-10 w-32" />
+            <Skeleton className="h-10 w-32" />
+            <Skeleton className="h-10 w-32" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+
+    {/* Enhanced Tabs Skeleton */}
+    <div className="space-y-6">
+      <Skeleton className="h-12 w-full" />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Skeleton className="h-64 w-full rounded-lg" />
+        <Skeleton className="h-64 w-full rounded-lg" />
       </div>
-      <div className="space-y-2">
-        <Skeleton className="h-8 w-24" />
-        <Skeleton className="h-8 w-24" />
-      </div>
-    </div>
-    {/* Tabs/Details Skeleton */}
-    <div className="space-y-4 p-4 border rounded-lg">
-      <Skeleton className="h-8 w-1/4" />
-      <Skeleton className="h-40 w-full" />
-    </div>
-    <div className="space-y-4 p-4 border rounded-lg">
-      <Skeleton className="h-8 w-1/4" />
-      <Skeleton className="h-40 w-full" />
+      <Skeleton className="h-96 w-full rounded-lg" />
     </div>
   </div>
 );
 
-// Define a simple error display
+// Enhanced error display
 const ErrorDisplay = ({ message }: { message: string }) => (
-  <Alert variant="destructive">
-    {/* <Icon name="triangle-exclamation" className="h-4 w-4" /> */}
-    <AlertTitle>Error Loading Profile</AlertTitle>
-    <AlertDescription>{message || 'An unexpected error occurred.'}</AlertDescription>
-  </Alert>
+  <div className="flex items-center justify-center min-h-[400px]">
+    <Card className="border-destructive/20 bg-destructive/5 max-w-md">
+      <CardContent className="p-6 text-center">
+        <Icon
+          iconId="faTriangleExclamationLight"
+          className="h-12 w-12 text-destructive mx-auto mb-4"
+        />
+        <h3 className="text-lg font-semibold text-destructive mb-2">Error Loading Profile</h3>
+        <p className="text-sm text-muted-foreground">
+          {message || 'An unexpected error occurred.'}
+        </p>
+      </CardContent>
+    </Card>
+  </div>
 );
 
 export default function InfluencerProfilePage() {
@@ -236,13 +256,13 @@ export default function InfluencerProfilePage() {
     const sampleReportUrl = '/Jonathan+Mark+Doe.pdf'; // Relative path in /public
 
     // Directly simulate the async process and show PDF
-    const generatingToastId = toast('Generating sample report...');
+    const generatingToastId = toast('Generating comprehensive risk report...');
 
     try {
       // Simulate delay for Sandbox/testing
       await new Promise(resolve => setTimeout(resolve, 4000)); // Use await with Promise for cleaner async simulation
 
-      toast.success('Sample report ready. Opening...', { id: generatingToastId });
+      toast.success('Risk report ready. Opening...', { id: generatingToastId });
       window.open(sampleReportUrl, '_blank');
     } catch (error: unknown) {
       // Catch potential errors from setTimeout or window.open, though unlikely
@@ -250,7 +270,7 @@ export default function InfluencerProfilePage() {
         error: (error as Error).message,
         originalError: error,
       });
-      toast.error('An unexpected error occurred while preparing the sample report.', {
+      toast.error('An unexpected error occurred while preparing the report.', {
         id: generatingToastId,
       });
     } finally {
@@ -260,121 +280,209 @@ export default function InfluencerProfilePage() {
 
   return (
     // <ProfilePageLayout>
-    <div className="p-4 md:p-6 space-y-4">
-      {/* Top Bar: Back Button & Actions */}
-      <div className="flex justify-between items-center">
-        <Button variant="outline" size="sm" onClick={() => router.back()}>
-          <Icon iconId="faArrowLeftLight" className="mr-2 h-4 w-4" />
-          Back to Marketplace
-        </Button>
-        {/* Action Buttons - Rendered when data is loaded */}
-        {!isLoading && !error && influencer && (
-          <div className="flex items-center gap-2">
-            {/* Enable Buttons */}
-            <Button variant="outline" size="sm">
-              Remove Influencer
-            </Button>
-            <Button variant="outline" size="sm">
-              Edit Profile
-            </Button>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      <div className="container mx-auto px-4 md:px-6 py-6 space-y-8">
+        {/* Enhanced Top Bar */}
+        <div className="flex justify-between items-center">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.back()}
+            className="shadow-sm hover:shadow-md transition-shadow"
+          >
+            <Icon iconId="faArrowLeftLight" className="mr-2 h-4 w-4" />
+            Back to Marketplace
+          </Button>
 
-            {/* Risk Report Dialog */}
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="outline" size="sm" disabled={isRequestingReport}>
-                  {isRequestingReport ? 'Requesting...' : 'Request Risk Report'}
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Request Influencer Risk Report</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action will trigger a background check to review the influencer's profile
-                    and content for any potential risks, such as inappropriate material or harmful
-                    associations, based on set criteria. The full report will be generated once the
-                    check is complete.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel disabled={isRequestingReport}>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleRequestRiskReport}
+          {!isLoading && !error && influencer && (
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                className="hover:bg-destructive/10 hover:border-destructive/20"
+              >
+                <Icon iconId="faTrashLight" className="mr-2 h-4 w-4" />
+                Remove
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="hover:bg-interactive/10 hover:border-interactive/20"
+              >
+                <Icon iconId="faEditLight" className="mr-2 h-4 w-4" />
+                Edit Profile
+              </Button>
+
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
                     disabled={isRequestingReport}
+                    className="hover:bg-warning/10 hover:border-warning/20"
                   >
-                    Confirm & Request Report
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                    <Icon iconId="faShieldLight" className="mr-2 h-4 w-4" />
+                    {isRequestingReport ? 'Generating...' : 'Risk Report'}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="max-w-md">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-lg">Request Risk Assessment</AlertDialogTitle>
+                    <AlertDialogDescription className="text-sm">
+                      Generate a comprehensive risk report analyzing this influencer's profile,
+                      content, and potential brand safety concerns.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel disabled={isRequestingReport}>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleRequestRiskReport}
+                      disabled={isRequestingReport}
+                      className="bg-warning hover:bg-warning/90"
+                    >
+                      Generate Report
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
 
-            {/* Use the new ButtonAddToCampaign component */}
-            {influencer &&
-              platformEnum &&
-              influencer.profileId &&
-              influencer.handle &&
-              influencer.name && (
-                <ButtonAddToCampaign
-                  influencerHandle={influencer.handle}
-                  influencerName={influencer.name}
-                  currentPlatform={platformEnum}
-                  availablePlatforms={influencer.platforms}
-                  onSuccess={(campaignId, campaignName) => {
-                    toast.success(`${influencer?.name || 'Influencer'} added to ${campaignName}`); // Safe access for toast
-                    // Optionally, refetch data or update UI further if needed
-                  }}
-                />
-              )}
+              {influencer &&
+                platformEnum &&
+                influencer.profileId &&
+                influencer.handle &&
+                influencer.name && (
+                  <ButtonAddToCampaign
+                    influencerHandle={influencer.handle}
+                    influencerName={influencer.name}
+                    currentPlatform={platformEnum}
+                    availablePlatforms={influencer.platforms}
+                    onSuccess={(campaignId, campaignName) => {
+                      toast.success(`${influencer?.name || 'Influencer'} added to ${campaignName}`);
+                    }}
+                  />
+                )}
+            </div>
+          )}
+        </div>
+        {/* Content Area: Loading, Error, or Profile Structure */}
+        {isLoading ? (
+          <ProfileSkeleton />
+        ) : error ? (
+          <ErrorDisplay message={error} />
+        ) : influencer ? (
+          <div className="space-y-8">
+            {/* Enhanced Profile Header */}
+            <ProfileHeader influencer={influencer} />
+
+            {/* Enhanced Analytics Tabs */}
+            <Tabs defaultValue="performance" className="w-full">
+              <div className="border-b border-border/50 bg-card/50 rounded-t-lg p-1">
+                <TabsList className="grid w-full grid-cols-4 lg:grid-cols-9 gap-1 bg-transparent h-auto p-0">
+                  <TabsTrigger
+                    value="performance"
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm font-medium px-4 py-3 rounded-md"
+                  >
+                    <Icon iconId="faChartLineLight" className="mr-2 h-4 w-4" />
+                    Performance
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="audience"
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm font-medium px-4 py-3 rounded-md"
+                  >
+                    <Icon iconId="faUsersLight" className="mr-2 h-4 w-4" />
+                    Audience
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="content"
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm font-medium px-4 py-3 rounded-md"
+                  >
+                    <Icon iconId="faImageLight" className="mr-2 h-4 w-4" />
+                    Content
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="demographics"
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm font-medium px-4 py-3 rounded-md"
+                  >
+                    <Icon iconId="faChartPieLight" className="mr-2 h-4 w-4" />
+                    Demographics
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="contact"
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm font-medium px-4 py-3 rounded-md"
+                  >
+                    <Icon iconId="faAddressCardLight" className="mr-2 h-4 w-4" />
+                    Contact
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="platform"
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm font-medium px-4 py-3 rounded-md"
+                  >
+                    <Icon iconId="faGlobeLight" className="mr-2 h-4 w-4" />
+                    Platform
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="advanced"
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm font-medium px-4 py-3 rounded-md"
+                  >
+                    <Icon iconId="faCrownLight" className="mr-2 h-4 w-4" />
+                    Advanced
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="risk"
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm font-medium px-4 py-3 rounded-md"
+                  >
+                    <Icon iconId="faShieldLight" className="mr-2 h-4 w-4" />
+                    Risk
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="campaigns"
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm font-medium px-4 py-3 rounded-md"
+                  >
+                    <Icon iconId="faBullhornLight" className="mr-2 h-4 w-4" />
+                    Campaigns
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+
+              <div className="bg-card/30 border border-t-0 border-border/50 rounded-b-lg p-6">
+                <TabsContent value="performance" className="mt-0">
+                  <OverallPerformanceSection influencer={influencer} />
+                </TabsContent>
+                <TabsContent value="audience" className="mt-0">
+                  <AudienceAnalyticsSection influencer={influencer} />
+                </TabsContent>
+                <TabsContent value="content" className="mt-0">
+                  <ContentAnalyticsSection influencer={influencer} />
+                </TabsContent>
+                <TabsContent value="demographics" className="mt-0">
+                  <DemographicsSection influencer={influencer} />
+                </TabsContent>
+                <TabsContent value="contact" className="mt-0">
+                  <ContactAnalyticsSection influencer={influencer} />
+                </TabsContent>
+                <TabsContent value="platform" className="mt-0">
+                  <PlatformSpecificSection influencer={influencer} />
+                </TabsContent>
+                <TabsContent value="advanced" className="mt-0">
+                  <AdvancedAnalyticsSection influencer={influencer} />
+                </TabsContent>
+                <TabsContent value="risk" className="mt-0">
+                  <div className="space-y-6">
+                    <RiskScoreSection influencer={influencer} />
+                    <CertificationStatusSection influencer={influencer} />
+                  </div>
+                </TabsContent>
+                <TabsContent value="campaigns" className="mt-0">
+                  <RecentCampaignsSection influencer={influencer} />
+                </TabsContent>
+              </div>
+            </Tabs>
           </div>
+        ) : (
+          // Should not happen if error handles not found, but as fallback
+          <ErrorDisplay message={'Influencer data could not be loaded.'} />
         )}
       </div>
-      {/* Content Area: Loading, Error, or Profile Structure */}
-      {isLoading ? (
-        <ProfileSkeleton />
-      ) : error ? (
-        <ErrorDisplay message={error} />
-      ) : influencer ? (
-        <div className="space-y-6">
-          {/* --- Render Profile Header --- */}
-          <ProfileHeader influencer={influencer} />
-
-          {/* --- Profile Details Tabs --- */}
-          <Tabs defaultValue="performance" className="w-full">
-            <TabsList className="grid w-full grid-cols-7 mb-4">
-              <TabsTrigger value="performance">Performance</TabsTrigger>
-              <TabsTrigger value="audience">Audience</TabsTrigger>
-              <TabsTrigger value="content">Content</TabsTrigger>
-              <TabsTrigger value="demographics">Demographics</TabsTrigger>
-              <TabsTrigger value="certifications">Certifications</TabsTrigger>
-              <TabsTrigger value="risk">Risk Score</TabsTrigger>
-              <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
-            </TabsList>
-            <TabsContent value="performance">
-              <OverallPerformanceSection influencer={influencer} />
-            </TabsContent>
-            <TabsContent value="audience">
-              <AudienceAnalyticsSection influencer={influencer} />
-            </TabsContent>
-            <TabsContent value="content">
-              <ContentAnalyticsSection influencer={influencer} />
-            </TabsContent>
-            <TabsContent value="demographics">
-              <DemographicsSection influencer={influencer} />
-            </TabsContent>
-            <TabsContent value="certifications">
-              <CertificationStatusSection influencer={influencer} />
-            </TabsContent>
-            <TabsContent value="risk">
-              <RiskScoreSection influencer={influencer} />
-            </TabsContent>
-            <TabsContent value="campaigns">
-              <RecentCampaignsSection influencer={influencer} />
-            </TabsContent>
-          </Tabs>
-        </div>
-      ) : (
-        // Should not happen if error handles not found, but as fallback
-        <ErrorDisplay message={'Influencer data could not be loaded.'} />
-      )}
     </div>
     // </ProfilePageLayout>
   );

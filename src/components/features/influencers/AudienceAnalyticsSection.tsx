@@ -8,6 +8,8 @@ import { Progress } from '@/components/ui/progress';
 import { Icon } from '@/components/ui/icon/icon';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
 
 interface AudienceAnalyticsSectionProps {
   influencer: InfluencerProfileData;
@@ -63,361 +65,332 @@ const getFollowerTypeBadge = (type: string, value: number) => {
   }
 };
 
-export function AudienceAnalyticsSection({ influencer }: AudienceAnalyticsSectionProps) {
-  // Extract actual audience data from InsightIQ API response if available
-  // Note: The exact property structure depends on how the InsightIQ API response is stored
-  const audienceData = (influencer as any).audience || (influencer as any).insightiq?.audience;
-  const profileData = (influencer as any).profile || (influencer as any).insightiq?.profile;
+const AudienceAnalyticsSection: React.FC<AudienceAnalyticsSectionProps> = ({ influencer }) => {
+  // Extract comprehensive InsightIQ data
+  const insightiq = (influencer as any).insightiq;
+  const audienceData = insightiq?.audience;
+  const contactData = insightiq?.contacts;
+  const pricingData = insightiq?.pricing;
 
-  // If no advanced analytics are available, show a message
-  if (!audienceData && !profileData) {
+  // Executive Summary Metrics
+  const credibilityScore = audienceData?.credibility_score || 0;
+  const significantFollowersPercentage = audienceData?.significant_followers_percentage || 0;
+  const followerTypes = audienceData?.follower_types || [];
+  const topCountries = audienceData?.countries?.slice(0, 5) || [];
+  const topCities = audienceData?.cities?.slice(0, 5) || [];
+
+  // Contact Information for Marketing Directors
+  const ContactCard = () => (
+    <Card className="border-accent/20 bg-gradient-to-br from-accent/5 to-transparent">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-lg text-primary">
+          <Icon iconId="faAddressCardLight" className="h-5 w-5 text-accent" />
+          Contact & Collaboration
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {contactData?.email && (
+          <div className="flex items-center gap-2">
+            <Icon iconId="faEnvelopeLight" className="h-4 w-4 text-muted-foreground" />
+            <a
+              href={`mailto:${contactData.email}`}
+              className="text-sm font-medium text-interactive hover:underline"
+            >
+              {contactData.email}
+            </a>
+          </div>
+        )}
+        {contactData?.phone && (
+          <div className="flex items-center gap-2">
+            <Icon iconId="faPhoneLight" className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">{contactData.phone}</span>
+          </div>
+        )}
+        {contactData?.website && (
+          <div className="flex items-center gap-2">
+            <Icon iconId="faGlobeLight" className="h-4 w-4 text-muted-foreground" />
+            <a
+              href={contactData.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium text-interactive hover:underline"
+            >
+              Website
+            </a>
+          </div>
+        )}
+
+        {pricingData?.pricing && (
+          <div className="mt-4 p-3 bg-success/5 border border-success/20 rounded-lg">
+            <div className="text-sm font-medium text-success mb-2">
+              Estimated Collaboration Cost
+            </div>
+            {pricingData.pricing.post_type && (
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                {Object.entries(pricingData.pricing.post_type).map(
+                  ([type, range]: [string, any]) => (
+                    <div key={type} className="flex justify-between">
+                      <span className="capitalize text-muted-foreground">
+                        {type.replace('_', ' ')}:
+                      </span>
+                      <span className="font-medium">
+                        ${range.min?.toLocaleString()} - ${range.max?.toLocaleString()}
+                      </span>
+                    </div>
+                  )
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        <Button className="w-full mt-3" size="sm">
+          <Icon iconId="faArrowRightLight" className="h-4 w-4 mr-2" />
+          Initiate Outreach
+        </Button>
+      </CardContent>
+    </Card>
+  );
+
+  // Executive Summary for Research Analysts
+  const ExecutiveSummary = () => (
+    <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-lg text-primary">
+          <Icon iconId="faChartLineLight" className="h-5 w-5 text-accent" />
+          Executive Summary
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-primary">
+              {(credibilityScore * 100).toFixed(1)}%
+            </div>
+            <div className="text-sm text-muted-foreground">Audience Credibility</div>
+            <div className="mt-1">
+              <Badge
+                variant={
+                  credibilityScore > 0.7
+                    ? 'default'
+                    : credibilityScore > 0.4
+                      ? 'secondary'
+                      : 'destructive'
+                }
+              >
+                {credibilityScore > 0.7 ? 'High' : credibilityScore > 0.4 ? 'Medium' : 'Low'}{' '}
+                Quality
+              </Badge>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <div className="text-2xl font-bold text-primary">
+              {significantFollowersPercentage.toFixed(1)}%
+            </div>
+            <div className="text-sm text-muted-foreground">Significant Followers</div>
+            <div className="mt-1">
+              <Badge variant={significantFollowersPercentage > 10 ? 'default' : 'secondary'}>
+                {significantFollowersPercentage > 10 ? 'Influential' : 'Emerging'}
+              </Badge>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <div className="text-2xl font-bold text-primary">{topCountries[0]?.code || 'N/A'}</div>
+            <div className="text-sm text-muted-foreground">Primary Market</div>
+            <div className="mt-1">
+              <Badge variant="outline">{topCountries[0]?.value?.toFixed(1)}% reach</Badge>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <div className="text-2xl font-bold text-primary">
+              {influencer.engagementRate ? (influencer.engagementRate * 100).toFixed(1) : 'N/A'}%
+            </div>
+            <div className="text-sm text-muted-foreground">Engagement Rate</div>
+            <div className="mt-1">
+              <Badge
+                variant={
+                  influencer.engagementRate && influencer.engagementRate > 0.03
+                    ? 'default'
+                    : 'secondary'
+                }
+              >
+                {influencer.engagementRate && influencer.engagementRate > 0.03
+                  ? 'Above Average'
+                  : 'Standard'}
+              </Badge>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  // Enhanced Audience Quality Analysis
+  const AudienceQualityCard = () => (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-primary">
+          <Icon iconId="faShieldCheckLight" className="h-5 w-5 text-success" />
+          Audience Quality Assessment
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {followerTypes.map((type: any, index: number) => {
+          const isPositive = ['REAL', 'INFLUENCERS'].includes(type.name);
+          const isNegative = ['MASS_FOLLOWERS', 'SUSPICIOUS'].includes(type.name);
+
+          return (
+            <div key={index} className="space-y-2">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`w-3 h-3 rounded-full ${
+                      isPositive ? 'bg-success' : isNegative ? 'bg-destructive' : 'bg-warning'
+                    }`}
+                  />
+                  <span className="text-sm font-medium capitalize">
+                    {type.name.toLowerCase().replace('_', ' ')}
+                  </span>
+                </div>
+                <span className="text-sm font-bold">{type.value.toFixed(1)}%</span>
+              </div>
+              <Progress
+                value={type.value}
+                className={`h-2 ${
+                  isPositive
+                    ? '[&>div]:bg-success'
+                    : isNegative
+                      ? '[&>div]:bg-destructive'
+                      : '[&>div]:bg-warning'
+                }`}
+              />
+            </div>
+          );
+        })}
+
+        <Separator className="my-4" />
+
+        <div className="bg-muted/30 p-3 rounded-lg">
+          <div className="text-sm font-medium text-primary mb-2">Risk Assessment</div>
+          <div className="text-xs text-muted-foreground">
+            {credibilityScore > 0.7
+              ? '✅ Low risk - High-quality audience with authentic engagement patterns'
+              : credibilityScore > 0.4
+                ? '⚠️ Medium risk - Monitor engagement quality and audience authenticity'
+                : '🚫 High risk - Significant concerns about audience quality and authenticity'}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  // Geographic Distribution with Enhanced Insights
+  const GeographicInsights = () => (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-primary">
+          <Icon iconId="faGlobeLight" className="h-5 w-5 text-interactive" />
+          Geographic Distribution & Market Reach
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div>
+          <div className="text-sm font-medium text-primary mb-3">Top Countries</div>
+          <div className="space-y-3">
+            {topCountries.map((country: any, index: number) => (
+              <div key={index} className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-6 rounded border border-border flex items-center justify-center text-xs font-medium">
+                    {country.code}
+                  </div>
+                  <span className="text-sm font-medium">{country.code}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-24">
+                    <Progress value={country.value} className="h-2" />
+                  </div>
+                  <span className="text-sm font-bold w-12 text-right">
+                    {country.value.toFixed(1)}%
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <Separator />
+
+        <div>
+          <div className="text-sm font-medium text-primary mb-3">Top Cities</div>
+          <div className="space-y-3">
+            {topCities.map((city: any, index: number) => (
+              <div key={index} className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Icon iconId="faBuildingLight" className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">{city.name}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-20">
+                    <Progress value={city.value} className="h-2" />
+                  </div>
+                  <span className="text-sm font-bold w-12 text-right">
+                    {city.value.toFixed(1)}%
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-interactive/5 p-3 rounded-lg border border-interactive/20">
+          <div className="text-sm font-medium text-interactive mb-1">Market Opportunity</div>
+          <div className="text-xs text-muted-foreground">
+            Primary audience concentrated in {topCountries[0]?.code} (
+            {topCountries[0]?.value?.toFixed(1)}%) with strong urban presence in{' '}
+            {topCities[0]?.name}.
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  if (!audienceData) {
     return (
       <Card>
-        <CardContent className="p-6">
-          <div className="text-center space-y-3">
-            <Icon iconId="faCircleInfoLight" className="h-8 w-8 text-muted-foreground mx-auto" />
-            <div>
-              <h3 className="font-semibold text-sm mb-1">Advanced Audience Analytics</h3>
-              <p className="text-sm text-muted-foreground">
-                Detailed audience analytics from InsightIQ are not available in sandbox mode.
-              </p>
-              <p className="text-xs text-muted-foreground mt-2">
-                This section will populate with comprehensive demographic data, geographic
-                distribution, interests, and audience quality metrics when connected to production
-                InsightIQ API.
-              </p>
-            </div>
+        <CardContent className="flex items-center justify-center h-32">
+          <div className="text-center">
+            <Icon iconId="faChartPieLight" className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">
+              Comprehensive audience analytics will be available here once InsightIQ data is fully
+              processed.
+            </p>
           </div>
         </CardContent>
       </Card>
     );
   }
 
-  const credibilityScore = audienceData?.credibility_score;
-  const significantFollowersPercentage = audienceData?.significant_followers_percentage;
-  const followerTypes = audienceData?.follower_types;
-  const countries = audienceData?.countries;
-  const cities = audienceData?.cities;
-  const interests = audienceData?.interests;
-  const brandAffinity = audienceData?.brand_affinity;
-  const languages = audienceData?.languages;
-  const ethnicities = audienceData?.ethnicities;
-  const lookalikes = audienceData?.lookalikes;
-  const significantFollowers = audienceData?.significant_followers;
-
   return (
     <div className="space-y-6">
-      {/* Audience Quality Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Icon iconId="faShieldLight" className="h-4 w-4 text-primary" />
-              Credibility Score
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center space-x-2">
-              <div className={`text-2xl font-bold ${getCredibilityColor(credibilityScore || 0)}`}>
-                {credibilityScore ? `${credibilityScore.toFixed(1)}%` : 'N/A'}
-              </div>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Icon iconId="faCircleInfoLight" className="h-4 w-4 text-muted-foreground" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>
-                      Percentage of genuine users in the audience, excluding bots and fraudulent
-                      profiles
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Executive Summary Row */}
+      <ExecutiveSummary />
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Icon iconId="faStarLight" className="h-4 w-4 text-primary" />
-              Significant Followers
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-interactive">
-              {formatPercentage(significantFollowersPercentage)}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">High-quality audience members</p>
-          </CardContent>
-        </Card>
+      {/* Main Analytics Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <AudienceQualityCard />
+          <GeographicInsights />
+        </div>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Icon iconId="faUsersLight" className="h-4 w-4 text-primary" />
-              Audience Quality
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {followerTypes?.map((type: any, index: number) => (
-                <div key={index}>{getFollowerTypeBadge(type.name || type.type, type.value)}</div>
-              )) || <p className="text-sm text-muted-foreground">No data available</p>}
-            </div>
-          </CardContent>
-        </Card>
+        <div className="space-y-6">
+          <ContactCard />
+        </div>
       </div>
-
-      {/* Geographic Distribution */}
-      {(countries || cities) && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Icon iconId="faGlobeLight" className="h-5 w-5 text-primary" />
-              Geographic Distribution
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Top Countries */}
-              {countries && (
-                <div>
-                  <h4 className="font-semibold mb-3 text-sm text-foreground">Top Countries</h4>
-                  <div className="space-y-3">
-                    {countries.slice(0, 5).map((country: any, index: number) => (
-                      <div key={index} className="flex items-center justify-between">
-                        <span className="text-sm font-medium min-w-0 flex-shrink-0">
-                          {country.code || country.name}
-                        </span>
-                        <div className="flex items-center gap-3 flex-1 mx-3">
-                          <Progress value={country.value} className="flex-1 h-2" />
-                          <span className="text-sm text-muted-foreground w-12 text-right flex-shrink-0">
-                            {formatPercentage(country.value)}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Top Cities */}
-              {cities && (
-                <div>
-                  <h4 className="font-semibold mb-3 text-sm text-foreground">Top Cities</h4>
-                  <div className="space-y-3">
-                    {cities.slice(0, 5).map((city: any, index: number) => (
-                      <div key={index} className="flex items-center justify-between">
-                        <span className="text-sm font-medium min-w-0 flex-shrink-0">
-                          {city.name}
-                        </span>
-                        <div className="flex items-center gap-3 flex-1 mx-3">
-                          <Progress value={city.value} className="flex-1 h-2" />
-                          <span className="text-sm text-muted-foreground w-12 text-right flex-shrink-0">
-                            {formatPercentage(city.value)}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Interests & Brand Affinity */}
-      {(interests || brandAffinity) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {interests && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Icon iconId="faHeartLight" className="h-5 w-5 text-primary" />
-                  Top Interests
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {interests.slice(0, 8).map((interest: any, index: number) => (
-                    <div key={index} className="flex items-center justify-between py-1">
-                      <span className="text-sm font-medium truncate">{interest.name}</span>
-                      <Badge variant="outline" className="text-xs ml-2 flex-shrink-0">
-                        {formatPercentage(interest.value)}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {brandAffinity && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Icon iconId="faStarLight" className="h-5 w-5 text-primary" />
-                  Brand Affinity
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {brandAffinity.slice(0, 8).map((brand: any, index: number) => (
-                    <div key={index} className="flex items-center justify-between py-1">
-                      <span className="text-sm font-medium truncate">{brand.name}</span>
-                      <Badge variant="outline" className="text-xs ml-2 flex-shrink-0">
-                        {formatPercentage(brand.value)}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      )}
-
-      {/* Languages & Demographics */}
-      {(languages || ethnicities) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {languages && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Icon iconId="faGlobeLight" className="h-5 w-5 text-primary" />
-                  Languages
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {languages.slice(0, 6).map((language: any, index: number) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <span className="text-sm font-medium min-w-0 flex-shrink-0">
-                        {language.code}
-                      </span>
-                      <div className="flex items-center gap-3 flex-1 mx-3">
-                        <Progress value={language.value} className="flex-1 h-2" />
-                        <span className="text-sm text-muted-foreground w-12 text-right flex-shrink-0">
-                          {formatPercentage(language.value)}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {ethnicities && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Icon iconId="faUsersLight" className="h-5 w-5 text-primary" />
-                  Ethnicities
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {ethnicities.slice(0, 6).map((ethnicity: any, index: number) => (
-                    <div key={index} className="flex items-center justify-between py-1">
-                      <span className="text-sm font-medium truncate">{ethnicity.name}</span>
-                      <Badge variant="outline" className="text-xs ml-2 flex-shrink-0">
-                        {formatPercentage(ethnicity.value)}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      )}
-
-      {/* Lookalikes & Significant Followers */}
-      {(lookalikes || significantFollowers) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {lookalikes && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Icon iconId="faCopyLight" className="h-5 w-5 text-primary" />
-                  Similar Audiences
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {lookalikes.slice(0, 4).map((profile: any, index: number) => (
-                    <div
-                      key={index}
-                      className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
-                    >
-                      <Avatar className="h-8 w-8 flex-shrink-0">
-                        <AvatarImage src={profile.image_url} alt={profile.platform_username} />
-                        <AvatarFallback className="text-xs">
-                          {profile.platform_username?.charAt(0).toUpperCase() || '?'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">@{profile.platform_username}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatNumber(profile.follower_count)} followers
-                        </p>
-                      </div>
-                      {profile.is_verified && (
-                        <Icon
-                          iconId="faCircleCheckSolid"
-                          className="h-4 w-4 text-interactive flex-shrink-0"
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {significantFollowers && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Icon iconId="faStarLight" className="h-5 w-5 text-primary" />
-                  Notable Followers
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                  <Avatar className="h-10 w-10 flex-shrink-0">
-                    <AvatarImage
-                      src={significantFollowers.image_url}
-                      alt={significantFollowers.platform_username}
-                    />
-                    <AvatarFallback className="text-sm">
-                      {significantFollowers.platform_username?.charAt(0).toUpperCase() || '?'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
-                      @{significantFollowers.platform_username}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatNumber(significantFollowers.follower_count)} followers
-                    </p>
-                  </div>
-                  {significantFollowers.is_verified && (
-                    <Icon
-                      iconId="faCircleCheckSolid"
-                      className="h-4 w-4 text-interactive flex-shrink-0"
-                    />
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      )}
     </div>
   );
-}
+};
+
+export default AudienceAnalyticsSection;

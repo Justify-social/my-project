@@ -1,319 +1,454 @@
 'use client';
 
 import React from 'react';
-import { InfluencerProfileData } from '@/types/influencer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon/icon';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { InfluencerProfileData } from '@/types/influencer';
 
 interface DemographicsSectionProps {
   influencer: InfluencerProfileData;
 }
 
-// Helper function to format percentages
-const formatPercentage = (value: number | undefined): string => {
-  if (value === undefined || value === null) return '0%';
-  return `${value.toFixed(1)}%`;
-};
+const DemographicsSection: React.FC<DemographicsSectionProps> = ({ influencer }) => {
+  // Extract comprehensive InsightIQ demographics data
+  const insightiq = (influencer as any).insightiq;
+  const audienceData = insightiq?.audience;
+  const creatorDemographics = insightiq?.demographics?.creator;
+  const locationData = insightiq?.demographics?.location;
+  const analyticsData = insightiq?.analytics;
+  const audienceLikers = audienceData?.audienceLikers;
 
-// Helper function to format large numbers
-const formatNumber = (num: number | undefined | null): string => {
-  if (num === undefined || num === null) return 'N/A';
-  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-  if (num >= 1000) return `${(num / 1000).toFixed(0)}K`;
-  return num.toString();
-};
+  // Creator Profile Overview
+  const CreatorProfileCard = () => (
+    <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-lg text-primary">
+          <Icon iconId="faUserLight" className="h-5 w-5 text-accent" />
+          Creator Profile Demographics
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-primary">
+              {creatorDemographics?.gender || 'N/A'}
+            </div>
+            <div className="text-sm text-muted-foreground">Gender</div>
+            <div className="mt-1">
+              <Badge variant="outline">Creator Identity</Badge>
+            </div>
+          </div>
 
-export function DemographicsSection({ influencer }: DemographicsSectionProps) {
-  // Extract actual demographic data from InsightIQ API response if available
-  const profileData = (influencer as any).profile || (influencer as any).insightiq?.profile;
-  const audienceData = (influencer as any).audience || (influencer as any).insightiq?.audience;
+          <div className="text-center">
+            <div className="text-2xl font-bold text-primary">
+              {creatorDemographics?.ageGroup || 'N/A'}
+            </div>
+            <div className="text-sm text-muted-foreground">Age Group</div>
+            <div className="mt-1">
+              <Badge
+                variant={creatorDemographics?.ageGroup?.includes('25-34') ? 'default' : 'secondary'}
+              >
+                {creatorDemographics?.ageGroup?.includes('25-34') ? 'Prime Demo' : 'Niche Demo'}
+              </Badge>
+            </div>
+          </div>
 
-  // Get gender/age distribution from API
-  const genderAgeDistribution = audienceData?.gender_age_distribution;
-  const reputationHistory = profileData?.reputation_history;
+          <div className="text-center">
+            <div className="text-2xl font-bold text-primary">
+              {creatorDemographics?.language || 'N/A'}
+            </div>
+            <div className="text-sm text-muted-foreground">Primary Language</div>
+            <div className="mt-1">
+              <Badge variant="outline">Content Language</Badge>
+            </div>
+          </div>
+        </div>
 
-  // Extract basic profile demographics from API
-  const profileDemographics = {
-    gender: profileData?.gender,
-    age_group: profileData?.age_group,
-    language: profileData?.language,
-    location: profileData?.location,
-  };
+        {locationData && (
+          <div className="mt-6 p-3 bg-interactive/5 border border-interactive/20 rounded-lg">
+            <div className="text-sm font-medium text-interactive mb-2">Creator Location</div>
+            <div className="grid grid-cols-3 gap-2 text-xs">
+              <div>
+                <span className="text-muted-foreground">City:</span>
+                <div className="font-medium">{locationData.city || 'N/A'}</div>
+              </div>
+              <div>
+                <span className="text-muted-foreground">State:</span>
+                <div className="font-medium">{locationData.state || 'N/A'}</div>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Country:</span>
+                <div className="font-medium">{locationData.country || 'N/A'}</div>
+              </div>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
 
-  // If no demographic data is available, show informative message
-  if (!profileData && !audienceData && !genderAgeDistribution) {
+  // Audience Gender & Age Distribution
+  const AudienceDistributionCard = () => (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-primary">
+          <Icon iconId="faChartPieLight" className="h-5 w-5 text-interactive" />
+          Audience Gender & Age Distribution
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {audienceData?.gender_age_distribution &&
+        audienceData.gender_age_distribution.length > 0 ? (
+          <div className="space-y-4">
+            {audienceData.gender_age_distribution.map((demo: any, index: number) => (
+              <div key={index} className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`w-3 h-3 rounded-full ${
+                        demo.gender === 'FEMALE'
+                          ? 'bg-accent'
+                          : demo.gender === 'MALE'
+                            ? 'bg-interactive'
+                            : 'bg-warning'
+                      }`}
+                    />
+                    <span className="text-sm font-medium capitalize">
+                      {demo.gender?.toLowerCase()} • {demo.age_range}
+                    </span>
+                  </div>
+                  <span className="text-sm font-bold">{demo.value?.toFixed(1)}%</span>
+                </div>
+                <Progress
+                  value={demo.value}
+                  className={`h-2 ${
+                    demo.gender === 'FEMALE'
+                      ? '[&>div]:bg-accent'
+                      : demo.gender === 'MALE'
+                        ? '[&>div]:bg-interactive'
+                        : '[&>div]:bg-warning'
+                  }`}
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-6">
+            <Icon iconId="faChartPieLight" className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">
+              Gender & age distribution data not available
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  // Audience Credibility Benchmarking
+  const CredibilityBenchmarkCard = () => (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-primary">
+          <Icon iconId="faShieldLight" className="h-5 w-5 text-success" />
+          Industry Credibility Benchmarking
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {audienceData?.credibility_score_band && audienceData.credibility_score_band.length > 0 ? (
+          <div className="space-y-3">
+            <div className="text-sm text-muted-foreground mb-3">
+              Credibility score distribution across similar profiles
+            </div>
+            {audienceData.credibility_score_band.map((band: any, index: number) => (
+              <div key={index} className="border border-border rounded-lg p-3">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium">
+                    {band.min}% - {band.max}% Credibility
+                  </span>
+                  <Badge variant="outline">{band.total_profile_count} profiles</Badge>
+                </div>
+                <Progress value={(band.total_profile_count / 1000) * 100} className="h-2" />
+                <div className="text-xs text-muted-foreground mt-1">
+                  Industry benchmark for this credibility range
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-success/5 p-3 rounded-lg border border-success/20">
+            <div className="text-sm font-medium text-success mb-1">Current Credibility Score</div>
+            <div className="text-2xl font-bold text-success">
+              {audienceData?.credibility_score
+                ? `${(audienceData.credibility_score * 100).toFixed(1)}%`
+                : 'N/A'}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Benchmark data will show when available
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  // Reputation History Timeline
+  const ReputationHistoryCard = () => (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-primary">
+          <Icon iconId="faChartLineLight" className="h-5 w-5 text-warning" />
+          Growth & Reputation History
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {analyticsData?.reputationHistory && analyticsData.reputationHistory.length > 0 ? (
+          <div className="space-y-3">
+            <div className="text-sm text-muted-foreground mb-3">
+              Historical performance metrics over time
+            </div>
+            {analyticsData.reputationHistory.slice(-6).map((period: any, index: number) => (
+              <div key={index} className="border border-border rounded-lg p-3 space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">{period.month}</span>
+                  <Badge variant="secondary" className="text-xs">
+                    {period.follower_count?.toLocaleString()} followers
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-3 gap-3 text-xs">
+                  <div>
+                    <span className="text-muted-foreground">Following:</span>
+                    <div className="font-medium">
+                      {period.following_count?.toLocaleString() || 'N/A'}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Avg Likes:</span>
+                    <div className="font-medium">
+                      {period.average_likes?.toLocaleString() || 'N/A'}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Subscribers:</span>
+                    <div className="font-medium">
+                      {period.subscriber_count?.toLocaleString() || 'N/A'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-6">
+            <Icon
+              iconId="faChartLineLight"
+              className="h-8 w-8 text-muted-foreground mx-auto mb-2"
+            />
+            <p className="text-sm text-muted-foreground">Historical growth data not available</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  // Significant Followers Analysis
+  const SignificantFollowersCard = () => (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-primary">
+          <Icon iconId="faStarLight" className="h-5 w-5 text-accent" />
+          Notable Followers & Influence
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="text-center p-3 bg-accent/5 border border-accent/20 rounded-lg">
+            <div className="text-lg font-bold text-accent">
+              {audienceData?.significant_followers_percentage?.toFixed(1) || 0}%
+            </div>
+            <div className="text-xs text-muted-foreground">Significant Followers</div>
+          </div>
+          <div className="text-center p-3 bg-interactive/5 border border-interactive/20 rounded-lg">
+            <div className="text-lg font-bold text-interactive">
+              {audienceLikers?.significant_likers_percentage?.toFixed(1) || 0}%
+            </div>
+            <div className="text-xs text-muted-foreground">Significant Likers</div>
+          </div>
+        </div>
+
+        {audienceData?.significant_followers && (
+          <div className="border border-border rounded-lg p-3">
+            <div className="text-sm font-medium text-primary mb-2">
+              Featured Significant Follower
+            </div>
+            <div className="flex items-center gap-3">
+              <Avatar className="h-10 w-10">
+                <AvatarImage
+                  src={audienceData.significant_followers.image_url}
+                  alt={audienceData.significant_followers.platform_username}
+                />
+                <AvatarFallback>
+                  {audienceData.significant_followers.platform_username?.charAt(0).toUpperCase() ||
+                    '?'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium">
+                    @{audienceData.significant_followers.platform_username}
+                  </span>
+                  {audienceData.significant_followers.is_verified && (
+                    <Icon iconId="faCircleCheckSolid" className="h-4 w-4 text-interactive" />
+                  )}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {audienceData.significant_followers.follower_count?.toLocaleString()} followers
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {audienceLikers?.significant_likers && audienceLikers.significant_likers.length > 0 && (
+          <div className="space-y-2">
+            <div className="text-sm font-medium text-primary">Top Significant Likers</div>
+            {audienceLikers.significant_likers.slice(0, 3).map((liker: any, index: number) => (
+              <div key={index} className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg">
+                <Avatar className="h-6 w-6">
+                  <AvatarImage src={liker.image_url} alt={liker.platform_username} />
+                  <AvatarFallback className="text-xs">
+                    {liker.platform_username?.charAt(0).toUpperCase() || '?'}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-sm">@{liker.platform_username}</span>
+                {liker.is_verified && (
+                  <Icon iconId="faCircleCheckSolid" className="h-3 w-3 text-interactive" />
+                )}
+                <span className="text-xs text-muted-foreground ml-auto">
+                  {liker.follower_count?.toLocaleString()} followers
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  // Audience vs Likers Comparison
+  const AudienceLikersComparisonCard = () => (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-primary">
+          <Icon iconId="faBalanceScaleLight" className="h-5 w-5 text-warning" />
+          Followers vs Likers Analysis
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {audienceLikers && (
+          <>
+            <div className="text-sm text-muted-foreground mb-4">
+              Comparing audience demographics with active engagement patterns
+            </div>
+
+            {/* Geographic Comparison */}
+            <div>
+              <div className="text-sm font-medium text-primary mb-3">
+                Geographic Engagement Patterns
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-xs text-muted-foreground mb-2">Top Follower Countries</div>
+                  {audienceData?.countries?.slice(0, 3).map((country: any, index: number) => (
+                    <div key={index} className="flex justify-between text-xs mb-1">
+                      <span>{country.code}</span>
+                      <span>{country.value?.toFixed(1)}%</span>
+                    </div>
+                  ))}
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground mb-2">Top Liker Countries</div>
+                  {audienceLikers.countries?.slice(0, 3).map((country: any, index: number) => (
+                    <div key={index} className="flex justify-between text-xs mb-1">
+                      <span>{country.code}</span>
+                      <span>{country.value?.toFixed(1)}%</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Credibility Comparison */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                <div className="text-lg font-bold text-primary">
+                  {audienceData?.credibility_score
+                    ? (audienceData.credibility_score * 100).toFixed(1)
+                    : 'N/A'}
+                  %
+                </div>
+                <div className="text-xs text-muted-foreground">Follower Credibility</div>
+              </div>
+              <div className="text-center p-3 bg-success/5 border border-success/20 rounded-lg">
+                <div className="text-lg font-bold text-success">
+                  {audienceLikers.credibility_score
+                    ? (audienceLikers.credibility_score * 100).toFixed(1)
+                    : 'N/A'}
+                  %
+                </div>
+                <div className="text-xs text-muted-foreground">Liker Credibility</div>
+              </div>
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  if (!audienceData && !creatorDemographics && !locationData) {
     return (
       <Card>
-        <CardContent className="p-6">
-          <div className="text-center space-y-3">
-            <Icon iconId="faUsersLight" className="h-8 w-8 text-muted-foreground mx-auto" />
-            <div>
-              <h3 className="font-semibold text-sm mb-1">Demographics & Growth Analytics</h3>
-              <p className="text-sm text-muted-foreground">
-                Comprehensive demographic analytics from InsightIQ are not available in sandbox
-                mode.
-              </p>
-              <p className="text-xs text-muted-foreground mt-2">
-                This section will show audience gender/age breakdown, geographic distribution,
-                growth trends, and historical performance data when connected to production
-                InsightIQ API.
-              </p>
-            </div>
+        <CardContent className="flex items-center justify-center h-32">
+          <div className="text-center">
+            <Icon iconId="faUsersLight" className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">
+              Comprehensive demographic analytics will be available here once InsightIQ data is
+              fully processed.
+            </p>
           </div>
         </CardContent>
       </Card>
     );
   }
 
-  // Calculate growth metrics if reputation history is available
-  let followerGrowth = 0;
-  let likesGrowth = 0;
-  let currentFollowers = 0;
-  let previousFollowers = 0;
-  let currentLikes = 0;
-  let previousLikes = 0;
-
-  if (reputationHistory && reputationHistory.length >= 2) {
-    currentFollowers = reputationHistory[0]?.follower_count || 0;
-    previousFollowers = reputationHistory[1]?.follower_count || 0;
-    followerGrowth =
-      previousFollowers > 0
-        ? ((currentFollowers - previousFollowers) / previousFollowers) * 100
-        : 0;
-
-    currentLikes = reputationHistory[0]?.average_likes || 0;
-    previousLikes = reputationHistory[1]?.average_likes || 0;
-    likesGrowth = previousLikes > 0 ? ((currentLikes - previousLikes) / previousLikes) * 100 : 0;
-  }
-
-  // Aggregate gender data for overview if available
-  const femalePercentage =
-    genderAgeDistribution
-      ?.filter((item: any) => item.gender === 'FEMALE')
-      ?.reduce((sum: number, item: any) => sum + (item.value || 0), 0) || 0;
-
-  const malePercentage =
-    genderAgeDistribution
-      ?.filter((item: any) => item.gender === 'MALE')
-      ?.reduce((sum: number, item: any) => sum + (item.value || 0), 0) || 0;
-
-  const otherPercentage = Math.max(0, 100 - femalePercentage - malePercentage);
-
   return (
     <div className="space-y-6">
-      {/* Creator Profile Demographics */}
-      {profileDemographics &&
-        (profileDemographics.gender ||
-          profileDemographics.age_group ||
-          profileDemographics.language ||
-          profileDemographics.location) && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Icon iconId="faUserLight" className="h-5 w-5 text-primary" />
-                Creator Profile
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {profileDemographics.gender && (
-                  <div className="text-center">
-                    <p className="text-sm text-muted-foreground mb-2">Gender</p>
-                    <Badge variant="outline" className="text-sm font-semibold">
-                      {profileDemographics.gender}
-                    </Badge>
-                  </div>
-                )}
-                {profileDemographics.age_group && (
-                  <div className="text-center">
-                    <p className="text-sm text-muted-foreground mb-2">Age Group</p>
-                    <Badge variant="outline" className="text-sm font-semibold">
-                      {profileDemographics.age_group}
-                    </Badge>
-                  </div>
-                )}
-                {profileDemographics.language && (
-                  <div className="text-center">
-                    <p className="text-sm text-muted-foreground mb-2">Language</p>
-                    <Badge variant="outline" className="text-sm font-semibold">
-                      {profileDemographics.language}
-                    </Badge>
-                  </div>
-                )}
-                {profileDemographics.location && (
-                  <div className="text-center">
-                    <p className="text-sm text-muted-foreground mb-2">Location</p>
-                    <div className="space-y-1">
-                      {profileDemographics.location.city && (
-                        <Badge variant="secondary" className="text-xs block">
-                          {profileDemographics.location.city}
-                        </Badge>
-                      )}
-                      {profileDemographics.location.country && (
-                        <Badge variant="outline" className="text-xs block">
-                          {profileDemographics.location.country}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+      {/* Creator Profile Overview */}
+      <CreatorProfileCard />
 
-      {/* Audience Gender Overview */}
-      {genderAgeDistribution &&
-        genderAgeDistribution.length > 0 &&
-        (femalePercentage > 0 || malePercentage > 0) && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Icon iconId="faChartPieLight" className="h-5 w-5 text-primary" />
-                Audience Gender Distribution
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-accent mb-2">
-                    {formatPercentage(femalePercentage)}
-                  </div>
-                  <p className="text-sm text-muted-foreground">Female</p>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-interactive mb-2">
-                    {formatPercentage(malePercentage)}
-                  </div>
-                  <p className="text-sm text-muted-foreground">Male</p>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-muted-foreground mb-2">
-                    {formatPercentage(otherPercentage)}
-                  </div>
-                  <p className="text-sm text-muted-foreground">Other</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-      {/* Detailed Age & Gender Breakdown */}
-      {genderAgeDistribution && genderAgeDistribution.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Icon iconId="faChartBarLight" className="h-5 w-5 text-primary" />
-              Age & Gender Breakdown
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {genderAgeDistribution.map((item: any, index: number) => (
-                <div key={index} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <Badge
-                      variant="outline"
-                      className={
-                        item.gender === 'FEMALE'
-                          ? 'border-accent/30 text-accent'
-                          : 'border-interactive/30 text-interactive'
-                      }
-                    >
-                      {item.gender}
-                    </Badge>
-                    <span className="text-sm font-medium">{item.age_range}</span>
-                  </div>
-                  <div className="flex items-center gap-3 flex-1 mx-4">
-                    <Progress value={item.value} className="flex-1 h-2" />
-                    <span className="text-sm text-muted-foreground w-12 text-right flex-shrink-0">
-                      {formatPercentage(item.value)}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Growth Metrics & Historical Trends */}
-      {reputationHistory && reputationHistory.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Icon iconId="faArrowTrendUpLight" className="h-5 w-5 text-primary" />
-                Monthly Growth
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {reputationHistory.length >= 2 && (
-                  <>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Followers</span>
-                      <div className="text-right">
-                        <div className="text-lg font-bold">
-                          +{formatNumber(currentFollowers - previousFollowers)}
-                        </div>
-                        <div
-                          className={`text-xs ${followerGrowth >= 0 ? 'text-success' : 'text-destructive'}`}
-                        >
-                          {followerGrowth >= 0 ? '+' : ''}
-                          {followerGrowth.toFixed(1)}%
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Avg. Likes</span>
-                      <div className="text-right">
-                        <div className="text-lg font-bold">
-                          +{formatNumber(currentLikes - previousLikes)}
-                        </div>
-                        <div
-                          className={`text-xs ${likesGrowth >= 0 ? 'text-success' : 'text-destructive'}`}
-                        >
-                          {likesGrowth >= 0 ? '+' : ''}
-                          {likesGrowth.toFixed(1)}%
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Icon iconId="faCalendarLight" className="h-5 w-5 text-primary" />
-                Historical Trends
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {reputationHistory.slice(0, 3).map((item: any, index: number) => (
-                  <div key={index} className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">{item.month}</span>
-                    <div className="text-right">
-                      <div className="font-medium">
-                        {formatNumber(item.follower_count)} followers
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {formatNumber(item.average_likes)} avg likes
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+      {/* Main Demographics Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="space-y-6">
+          <AudienceDistributionCard />
+          <ReputationHistoryCard />
         </div>
-      )}
+
+        <div className="space-y-6">
+          <CredibilityBenchmarkCard />
+          <SignificantFollowersCard />
+        </div>
+      </div>
+
+      {/* Advanced Analysis */}
+      {audienceLikers && <AudienceLikersComparisonCard />}
     </div>
   );
-}
+};
+
+export default DemographicsSection;

@@ -104,6 +104,7 @@ export const mapInsightIQProfileToInfluencerProfileData = (
         interests: (profile as any).audience.interests || [],
         follower_types: (profile as any).audience.follower_types || [],
         credibility_score: (profile as any).audience.credibility_score,
+        credibility_score_band: (profile as any).audience.credibility_score_band || [],
         significant_followers_percentage: (profile as any).audience
           .significant_followers_percentage,
         significant_followers: (profile as any).audience.significant_followers,
@@ -116,7 +117,77 @@ export const mapInsightIQProfileToInfluencerProfileData = (
     averageLikes: (profile as any).average_likes || null,
     averageComments: (profile as any).average_comments || null,
     averageViews: (profile as any).average_views || null,
+    averageReelsViews: (profile as any).average_reels_views || null,
     averageShares: null, // Not directly available in InsightIQ
+  };
+
+  // Extract contact details from InsightIQ API response
+  const contactDetails = (profile as any).contact_details || [];
+  const extractedContacts = {
+    email: contactDetails.find((c: any) => c.type?.toLowerCase().includes('email'))?.value || null,
+    phone: contactDetails.find((c: any) => c.type?.toLowerCase().includes('phone'))?.value || null,
+    twitter:
+      contactDetails.find((c: any) => c.type?.toLowerCase().includes('twitter'))?.value || null,
+    website:
+      contactDetails.find((c: any) => c.type?.toLowerCase().includes('website'))?.value || null,
+    other:
+      contactDetails.filter(
+        (c: any) =>
+          !['email', 'phone', 'twitter', 'website'].some(type =>
+            c.type?.toLowerCase().includes(type)
+          )
+      ) || [],
+  };
+
+  // Extract reputation history
+  const reputationHistory = (profile as any).reputation_history || [];
+
+  // Extract brand affinity for the creator (not audience)
+  const creatorBrandAffinity = (profile as any).brand_affinity || [];
+
+  // Extract content data
+  const contentData = {
+    topContents: (profile as any).top_contents || [],
+    recentContents: (profile as any).recent_contents || [],
+    sponsoredContents: (profile as any).sponsored_contents || [],
+    contentCount: (profile as any).content_count || null,
+    sponsoredPostsPerformance: (profile as any).sponsored_posts_performance || null,
+  };
+
+  // Extract hashtags and mentions
+  const hashtagsAndMentions = {
+    topHashtags: (profile as any).top_hashtags || [],
+    topMentions: (profile as any).top_mentions || [],
+    topInterests: (profile as any).top_interests || [],
+  };
+
+  // Extract location data
+  const locationData = (profile as any).location
+    ? {
+        city: (profile as any).location.city || null,
+        state: (profile as any).location.state || null,
+        country: (profile as any).location.country || null,
+      }
+    : null;
+
+  // Extract audience likers data (separate from followers)
+  const audienceLikers = (profile as any).audience_likers || null;
+
+  // Extract engagement rate histogram
+  const engagementRateHistogram = (profile as any).engagement_rate_histogram || [];
+
+  // Extract lookalikes
+  const lookalikes = (profile as any).lookalikes || [];
+
+  // Extract pricing information
+  const pricingData = (profile as any).pricing || null;
+  const pricingExplanations = (profile as any).pricing_explanations || null;
+
+  // Extract creator demographics
+  const creatorDemographics = {
+    gender: (profile as any).gender || null,
+    ageGroup: (profile as any).age_group || null,
+    language: (profile as any).language || null,
   };
 
   const profileData: InfluencerProfileData = {
@@ -144,25 +215,47 @@ export const mapInsightIQProfileToInfluencerProfileData = (
     contactEmail:
       profile.emails?.find(e => e.type === 'WORK')?.email_id ??
       profile.emails?.[0]?.email_id ??
-      null,
-    audienceDemographics: audienceDemographics, // Now properly extracted from API response
-    engagementMetrics: engagementMetrics, // Now properly extracted from API response
-    website: profile.website ?? null,
+      extractedContacts.email,
+    audienceDemographics: audienceDemographics,
+    engagementMetrics: engagementMetrics,
+    website: profile.website ?? extractedContacts.website,
     category: profile.category ?? null,
   };
 
-  // Store the full InsightIQ profile with analytics for component access
-  // This allows components to access additional data like top_hashtags, top_mentions, etc.
+  // Store the comprehensive InsightIQ data with all extracted analytics
   (profileData as any).insightiq = {
     profile: profile,
-    audience: (profile as any).audience,
-    content: {
-      top_contents: (profile as any).top_contents,
-      recent_contents: (profile as any).recent_contents,
-      sponsored_contents: (profile as any).sponsored_contents,
-      top_hashtags: (profile as any).top_hashtags,
-      top_mentions: (profile as any).top_mentions,
+    audience: {
+      ...audienceDemographics,
+      audienceLikers: audienceLikers,
     },
+    content: {
+      ...contentData,
+      ...hashtagsAndMentions,
+    },
+    engagement: {
+      ...engagementMetrics,
+      engagementRateHistogram: engagementRateHistogram,
+    },
+    contacts: extractedContacts,
+    demographics: {
+      creator: creatorDemographics,
+      location: locationData,
+    },
+    analytics: {
+      reputationHistory: reputationHistory,
+      creatorBrandAffinity: creatorBrandAffinity,
+      lookalikes: lookalikes,
+    },
+    pricing: {
+      pricing: pricingData,
+      explanations: pricingExplanations,
+    },
+    top_contents: (profile as any).top_contents,
+    recent_contents: (profile as any).recent_contents,
+    sponsored_contents: (profile as any).sponsored_contents,
+    top_hashtags: (profile as any).top_hashtags,
+    top_mentions: (profile as any).top_mentions,
   };
 
   if (!profileData.profileId) {
