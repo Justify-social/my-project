@@ -12,6 +12,7 @@ import './globals.css';
 import { SidebarProvider } from '@/providers/SidebarProvider';
 import { SearchProvider } from '@/providers/SearchProvider';
 import { LocalizationProvider } from '@/providers/LocalizationProvider'; // Import the new provider
+import { WebVitalsProvider } from '@/components/providers/WebVitalsProvider'; // Import Web Vitals tracking
 // Remove the custom AuthStateProvider import
 // import { AuthStateProvider } from '@/lib/auth/authCoordinator';
 // Import react-hot-toast Toaster and Icon component
@@ -58,38 +59,40 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <body className={`${inter.className} bg-white`}>
           {/* Wrap with LocalizationProvider */}
           <LocalizationProvider>
-            <SidebarProvider>
-              <SearchProvider>
-                {/* REMOVE UTSSR USAGE 
-                <Suspense>
-                  <UTSSR />
-                </Suspense>
-                */}
-                {/* Use ConditionalLayout to wrap children */}
-                <ConditionalLayout>{children}</ConditionalLayout>
-                {/* Replace Shadcn Toaster with react-hot-toast HotToaster and apply SSOT configurations */}
-                <HotToaster
-                  position="top-center"
-                  toastOptions={{
-                    duration: 5000, // Default duration 5s
-                    success: {
-                      duration: 3000, // Success duration 3s
-                      icon: <Icon iconId="faFloppyDiskLight" className="h-5 w-5 text-success" />,
-                      className: 'toast-success-custom',
-                    },
-                    error: {
-                      icon: (
-                        <Icon
-                          iconId="faTriangleExclamationLight"
-                          className="h-5 w-5 text-destructive"
-                        />
-                      ),
-                      className: 'toast-error-custom',
-                    },
-                  }}
-                />
-              </SearchProvider>
-            </SidebarProvider>
+            <WebVitalsProvider>
+              <SidebarProvider>
+                <SearchProvider>
+                  {/* REMOVE UTSSR USAGE 
+                  <Suspense>
+                    <UTSSR />
+                  </Suspense>
+                  */}
+                  {/* Use ConditionalLayout to wrap children */}
+                  <ConditionalLayout>{children}</ConditionalLayout>
+                  {/* Replace Shadcn Toaster with react-hot-toast HotToaster and apply SSOT configurations */}
+                  <HotToaster
+                    position="top-center"
+                    toastOptions={{
+                      duration: 5000, // Default duration 5s
+                      success: {
+                        duration: 3000, // Success duration 3s
+                        icon: <Icon iconId="faFloppyDiskLight" className="h-5 w-5 text-success" />,
+                        className: 'toast-success-custom',
+                      },
+                      error: {
+                        icon: (
+                          <Icon
+                            iconId="faTriangleExclamationLight"
+                            className="h-5 w-5 text-destructive"
+                          />
+                        ),
+                        className: 'toast-error-custom',
+                      },
+                    }}
+                  />
+                </SearchProvider>
+              </SidebarProvider>
+            </WebVitalsProvider>
           </LocalizationProvider>
         </body>
       </html>
