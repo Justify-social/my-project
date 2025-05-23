@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -13,12 +14,62 @@ interface ContentAnalyticsSectionProps {
   influencer: InfluencerProfileData;
 }
 
+// Type definitions for InsightIQ content data
+interface ContentEngagement {
+  like_count?: number;
+  comment_count?: number;
+  view_count?: number;
+}
+
+interface Content {
+  type?: string;
+  published_at?: string;
+  description?: string;
+  thumbnail_url?: string;
+  url?: string;
+  engagement?: ContentEngagement;
+}
+
+interface Hashtag {
+  name: string;
+}
+
+interface Mention {
+  name: string;
+}
+
+interface EngagementRateHistogram {
+  engagement_rate_band?: {
+    min: number;
+    max: number;
+  };
+  count?: number;
+}
+
+interface InsightIQContentData {
+  content?: {
+    contentCount?: number;
+    topContents?: Content[];
+    recentContents?: Content[];
+    sponsoredContents?: Content[];
+    topHashtags?: Hashtag[];
+    topMentions?: Mention[];
+    sponsoredPostsPerformance?: number;
+  };
+  engagement?: {
+    averageLikes?: number;
+    averageComments?: number;
+    averageViews?: number;
+    engagementRateHistogram?: EngagementRateHistogram[];
+  };
+}
+
 const ContentAnalyticsSection: React.FC<ContentAnalyticsSectionProps> = ({ influencer }) => {
-  // Extract comprehensive InsightIQ content data
-  const insightiq = (influencer as any).insightiq;
+  // Extract comprehensive InsightIQ content data with proper typing
+  const insightiq = (influencer as InfluencerProfileData & { insightiq?: InsightIQContentData })
+    .insightiq;
   const contentData = insightiq?.content;
   const engagementData = insightiq?.engagement;
-  const profileData = insightiq?.profile;
 
   // Content performance metrics
   const topContents = contentData?.topContents || [];
@@ -102,7 +153,7 @@ const ContentAnalyticsSection: React.FC<ContentAnalyticsSectionProps> = ({ influ
       </CardHeader>
       <CardContent className="space-y-4">
         {topContents.length > 0 ? (
-          topContents.slice(0, 5).map((content: any, index: number) => (
+          topContents.slice(0, 5).map((content: Content, index: number) => (
             <div key={index} className="border border-border rounded-lg p-3 space-y-2">
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
@@ -122,12 +173,14 @@ const ContentAnalyticsSection: React.FC<ContentAnalyticsSectionProps> = ({ influ
                 </div>
                 {content.thumbnail_url && (
                   <div className="ml-3 w-16 h-16 bg-muted rounded-lg overflow-hidden flex-shrink-0">
-                    <img
+                    <Image
                       src={content.thumbnail_url}
                       alt="Content thumbnail"
-                      className="w-full h-full object-cover"
-                      onError={e => {
-                        (e.target as HTMLImageElement).style.display = 'none';
+                      width={64}
+                      height={64}
+                      className="object-cover"
+                      onError={() => {
+                        // Handle error silently
                       }}
                     />
                   </div>
@@ -181,7 +234,7 @@ const ContentAnalyticsSection: React.FC<ContentAnalyticsSectionProps> = ({ influ
       </CardHeader>
       <CardContent className="space-y-3">
         {recentContents.length > 0 ? (
-          recentContents.slice(0, 4).map((content: any, index: number) => (
+          recentContents.slice(0, 4).map((content: Content, index: number) => (
             <div
               key={index}
               className="flex items-center justify-between p-2 border border-border rounded-lg"
@@ -236,7 +289,7 @@ const ContentAnalyticsSection: React.FC<ContentAnalyticsSectionProps> = ({ influ
             <div className="text-sm text-muted-foreground mb-3">
               {sponsoredContents.length} sponsored posts identified
             </div>
-            {sponsoredContents.slice(0, 3).map((content: any, index: number) => (
+            {sponsoredContents.slice(0, 3).map((content: Content, index: number) => (
               <div key={index} className="border border-warning/20 rounded-lg p-3 space-y-2">
                 <div className="flex items-center justify-between">
                   <Badge className="bg-warning/10 text-warning border-warning/20">Sponsored</Badge>
@@ -279,7 +332,7 @@ const ContentAnalyticsSection: React.FC<ContentAnalyticsSectionProps> = ({ influ
           <div className="text-sm font-medium text-primary mb-3">Most Used Hashtags</div>
           {topHashtags.length > 0 ? (
             <div className="flex flex-wrap gap-2">
-              {topHashtags.slice(0, 10).map((hashtag: any, index: number) => (
+              {topHashtags.slice(0, 10).map((hashtag: Hashtag, index: number) => (
                 <Badge key={index} variant="outline" className="text-xs">
                   #{hashtag.name}
                 </Badge>
@@ -297,7 +350,7 @@ const ContentAnalyticsSection: React.FC<ContentAnalyticsSectionProps> = ({ influ
           <div className="text-sm font-medium text-primary mb-3">Frequently Mentioned Accounts</div>
           {topMentions.length > 0 ? (
             <div className="space-y-2">
-              {topMentions.slice(0, 5).map((mention: any, index: number) => (
+              {topMentions.slice(0, 5).map((mention: Mention, index: number) => (
                 <div key={index} className="flex items-center gap-2">
                   <Icon iconId="faAtLight" className="h-3 w-3 text-muted-foreground" />
                   <span className="text-sm">@{mention.name}</span>
@@ -327,7 +380,7 @@ const ContentAnalyticsSection: React.FC<ContentAnalyticsSectionProps> = ({ influ
             <div className="text-sm text-muted-foreground">
               Distribution of engagement rates across content
             </div>
-            {engagementHistogram.map((band: any, index: number) => (
+            {engagementHistogram.map((band: EngagementRateHistogram, index: number) => (
               <div key={index} className="space-y-1">
                 <div className="flex justify-between text-sm">
                   <span>
@@ -336,7 +389,7 @@ const ContentAnalyticsSection: React.FC<ContentAnalyticsSectionProps> = ({ influ
                   <span className="font-medium">{band.count || 0} posts</span>
                 </div>
                 <Progress
-                  value={((band.count || 0) / contentData?.contentCount) * 100}
+                  value={((band.count || 0) / (contentData?.contentCount || 1)) * 100}
                   className="h-2"
                 />
               </div>

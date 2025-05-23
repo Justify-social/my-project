@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -16,12 +17,69 @@ interface AdvancedAnalyticsSectionProps {
   influencer: InfluencerProfileData;
 }
 
+// Type definitions for InsightIQ advanced analytics data
+interface BrandAffinity {
+  name: string;
+  logo_url?: string;
+  category?: string;
+  affinity_score?: number;
+  percentage?: number;
+}
+
+interface LookalikeProfile {
+  platform_username: string;
+  image_url?: string;
+  is_verified?: boolean;
+  follower_count?: number;
+  category?: string;
+  similarity_score?: number;
+  engagement_rate?: number;
+  average_likes?: number;
+  country?: string;
+}
+
+interface EngagementRateHistogram {
+  engagement_rate_band?: {
+    min: number;
+    max: number;
+  };
+  count?: number;
+}
+
+interface InterestLanguageEthnicity {
+  name: string;
+  value?: number;
+}
+
+interface InsightIQAdvancedData {
+  audience?: {
+    brand_affinity?: BrandAffinity[];
+    interests?: InterestLanguageEthnicity[];
+    languages?: InterestLanguageEthnicity[];
+    ethnicities?: InterestLanguageEthnicity[];
+  };
+  analytics?: {
+    creatorBrandAffinity?: BrandAffinity[];
+    lookalikes?: LookalikeProfile[];
+  };
+  engagement?: {
+    engagementRateHistogram?: EngagementRateHistogram[];
+  };
+  content?: {
+    contentCount?: number;
+  };
+  profile?: {
+    posts_hidden_likes_percentage_value?: number;
+  };
+}
+
 const AdvancedAnalyticsSection: React.FC<AdvancedAnalyticsSectionProps> = ({ influencer }) => {
   const [emailLookupEmail, setEmailLookupEmail] = useState('');
   const [audienceOverlapHandles, setAudienceOverlapHandles] = useState('');
 
-  // Extract comprehensive InsightIQ advanced data
-  const insightiq = (influencer as any).insightiq;
+  // Extract comprehensive InsightIQ advanced data with proper typing
+  const insightiq = (influencer as InfluencerProfileData & { insightiq?: InsightIQAdvancedData })
+    .insightiq;
   const audienceData = insightiq?.audience;
   const analyticsData = insightiq?.analytics;
   const engagementData = insightiq?.engagement;
@@ -42,35 +100,42 @@ const AdvancedAnalyticsSection: React.FC<AdvancedAnalyticsSectionProps> = ({ inf
           <div className="text-sm font-medium text-primary mb-3">Creator Brand Affinity</div>
           {analyticsData?.creatorBrandAffinity && analyticsData.creatorBrandAffinity.length > 0 ? (
             <div className="space-y-2">
-              {analyticsData.creatorBrandAffinity.slice(0, 5).map((brand: any, index: number) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-2 border border-border rounded-lg"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center">
-                      {brand.logo_url ? (
-                        <img
-                          src={brand.logo_url}
-                          alt={brand.name}
-                          className="w-6 h-6 object-contain"
-                        />
-                      ) : (
-                        <Icon iconId="faBuildingLight" className="h-4 w-4 text-muted-foreground" />
-                      )}
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium">{brand.name}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {brand.category || 'Brand'}
+              {analyticsData.creatorBrandAffinity
+                .slice(0, 5)
+                .map((brand: BrandAffinity, index: number) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-2 border border-border rounded-lg"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center">
+                        {brand.logo_url ? (
+                          <Image
+                            src={brand.logo_url}
+                            alt={brand.name}
+                            width={24}
+                            height={24}
+                            className="object-contain"
+                          />
+                        ) : (
+                          <Icon
+                            iconId="faBuildingLight"
+                            className="h-4 w-4 text-muted-foreground"
+                          />
+                        )}
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium">{brand.name}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {brand.category || 'Brand'}
+                        </div>
                       </div>
                     </div>
+                    <Badge variant="outline" className="text-xs">
+                      {brand.affinity_score ? `${(brand.affinity_score * 100).toFixed(0)}%` : 'N/A'}
+                    </Badge>
                   </div>
-                  <Badge variant="outline" className="text-xs">
-                    {brand.affinity_score ? `${(brand.affinity_score * 100).toFixed(0)}%` : 'N/A'}
-                  </Badge>
-                </div>
-              ))}
+                ))}
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
@@ -86,32 +151,36 @@ const AdvancedAnalyticsSection: React.FC<AdvancedAnalyticsSectionProps> = ({ inf
           <div className="text-sm font-medium text-primary mb-3">Audience Brand Affinity</div>
           {audienceData?.brand_affinity && audienceData.brand_affinity.length > 0 ? (
             <div className="space-y-2">
-              {audienceData.brand_affinity.slice(0, 8).map((brand: any, index: number) => (
-                <div key={index} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-muted rounded flex items-center justify-center">
-                      {brand.logo_url ? (
-                        <img
-                          src={brand.logo_url}
-                          alt={brand.name}
-                          className="w-4 h-4 object-contain"
-                        />
-                      ) : (
-                        <div className="w-2 h-2 rounded-full bg-accent"></div>
-                      )}
+              {audienceData.brand_affinity
+                .slice(0, 8)
+                .map((brand: BrandAffinity, index: number) => (
+                  <div key={index} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 bg-muted rounded flex items-center justify-center">
+                        {brand.logo_url ? (
+                          <Image
+                            src={brand.logo_url}
+                            alt={brand.name}
+                            width={16}
+                            height={16}
+                            className="object-contain"
+                          />
+                        ) : (
+                          <div className="w-2 h-2 rounded-full bg-accent"></div>
+                        )}
+                      </div>
+                      <span className="text-sm">{brand.name}</span>
                     </div>
-                    <span className="text-sm">{brand.name}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-16">
-                      <Progress value={brand.percentage || 0} className="h-1" />
+                    <div className="flex items-center gap-2">
+                      <div className="w-16">
+                        <Progress value={brand.percentage || 0} className="h-1" />
+                      </div>
+                      <span className="text-xs font-medium w-8 text-right">
+                        {brand.percentage?.toFixed(1)}%
+                      </span>
                     </div>
-                    <span className="text-xs font-medium w-8 text-right">
-                      {brand.percentage?.toFixed(1)}%
-                    </span>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
@@ -138,55 +207,57 @@ const AdvancedAnalyticsSection: React.FC<AdvancedAnalyticsSectionProps> = ({ inf
             <div className="text-sm text-muted-foreground mb-3">
               Profiles with similar audience demographics and engagement patterns
             </div>
-            {analyticsData.lookalikes.slice(0, 5).map((lookalike: any, index: number) => (
-              <div key={index} className="border border-border rounded-lg p-3">
-                <div className="flex items-center gap-3 mb-2">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={lookalike.image_url} alt={lookalike.platform_username} />
-                    <AvatarFallback>
-                      {lookalike.platform_username?.charAt(0).toUpperCase() || '?'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">@{lookalike.platform_username}</span>
-                      {lookalike.is_verified && (
-                        <Icon iconId="faCircleCheckSolid" className="h-4 w-4 text-interactive" />
-                      )}
+            {analyticsData.lookalikes
+              .slice(0, 5)
+              .map((lookalike: LookalikeProfile, index: number) => (
+                <div key={index} className="border border-border rounded-lg p-3">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={lookalike.image_url} alt={lookalike.platform_username} />
+                      <AvatarFallback>
+                        {lookalike.platform_username?.charAt(0).toUpperCase() || '?'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">@{lookalike.platform_username}</span>
+                        {lookalike.is_verified && (
+                          <Icon iconId="faCircleCheckSolid" className="h-4 w-4 text-interactive" />
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {lookalike.follower_count?.toLocaleString()} followers •{' '}
+                        {lookalike.category || 'Creator'}
+                      </div>
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      {lookalike.follower_count?.toLocaleString()} followers •{' '}
-                      {lookalike.category || 'Creator'}
+                    <Badge variant="outline" className="text-xs">
+                      {lookalike.similarity_score
+                        ? `${(lookalike.similarity_score * 100).toFixed(0)}% match`
+                        : 'Similar'}
+                    </Badge>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3 text-xs">
+                    <div>
+                      <span className="text-muted-foreground">Engagement:</span>
+                      <div className="font-medium">
+                        {lookalike.engagement_rate
+                          ? `${(lookalike.engagement_rate * 100).toFixed(1)}%`
+                          : 'N/A'}
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Avg Likes:</span>
+                      <div className="font-medium">
+                        {lookalike.average_likes?.toLocaleString() || 'N/A'}
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Country:</span>
+                      <div className="font-medium">{lookalike.country || 'N/A'}</div>
                     </div>
                   </div>
-                  <Badge variant="outline" className="text-xs">
-                    {lookalike.similarity_score
-                      ? `${(lookalike.similarity_score * 100).toFixed(0)}% match`
-                      : 'Similar'}
-                  </Badge>
                 </div>
-                <div className="grid grid-cols-3 gap-3 text-xs">
-                  <div>
-                    <span className="text-muted-foreground">Engagement:</span>
-                    <div className="font-medium">
-                      {lookalike.engagement_rate
-                        ? `${(lookalike.engagement_rate * 100).toFixed(1)}%`
-                        : 'N/A'}
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Avg Likes:</span>
-                    <div className="font-medium">
-                      {lookalike.average_likes?.toLocaleString() || 'N/A'}
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Country:</span>
-                    <div className="font-medium">{lookalike.country || 'N/A'}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
+              ))}
           </div>
         ) : (
           <div className="text-center py-6">
@@ -216,20 +287,22 @@ const AdvancedAnalyticsSection: React.FC<AdvancedAnalyticsSectionProps> = ({ inf
           {engagementData?.engagementRateHistogram &&
           engagementData.engagementRateHistogram.length > 0 ? (
             <div className="space-y-2">
-              {engagementData.engagementRateHistogram.map((band: any, index: number) => (
-                <div key={index} className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <span>
-                      {band.engagement_rate_band?.min}% - {band.engagement_rate_band?.max}%
-                    </span>
-                    <span className="font-medium">{band.count || 0} posts</span>
+              {engagementData.engagementRateHistogram.map(
+                (band: EngagementRateHistogram, index: number) => (
+                  <div key={index} className="space-y-1">
+                    <div className="flex justify-between text-xs">
+                      <span>
+                        {band.engagement_rate_band?.min}% - {band.engagement_rate_band?.max}%
+                      </span>
+                      <span className="font-medium">{band.count || 0} posts</span>
+                    </div>
+                    <Progress
+                      value={((band.count || 0) / (contentData?.contentCount || 1)) * 100}
+                      className="h-1"
+                    />
                   </div>
-                  <Progress
-                    value={((band.count || 0) / (contentData?.contentCount || 1)) * 100}
-                    className="h-1"
-                  />
-                </div>
-              ))}
+                )
+              )}
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
@@ -362,11 +435,13 @@ const AdvancedAnalyticsSection: React.FC<AdvancedAnalyticsSectionProps> = ({ inf
             <div className="text-sm text-muted-foreground">Audience interest categories</div>
             {audienceData?.interests && audienceData.interests.length > 0 ? (
               <div className="flex flex-wrap gap-2">
-                {audienceData.interests.slice(0, 12).map((interest: any, index: number) => (
-                  <Badge key={index} variant="outline" className="text-xs">
-                    {interest.name} ({interest.value?.toFixed(1)}%)
-                  </Badge>
-                ))}
+                {audienceData.interests
+                  .slice(0, 12)
+                  .map((interest: InterestLanguageEthnicity, index: number) => (
+                    <Badge key={index} variant="outline" className="text-xs">
+                      {interest.name} ({interest.value?.toFixed(1)}%)
+                    </Badge>
+                  ))}
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">Interest data not available</p>
@@ -377,19 +452,21 @@ const AdvancedAnalyticsSection: React.FC<AdvancedAnalyticsSectionProps> = ({ inf
             <div className="text-sm text-muted-foreground">Audience language distribution</div>
             {audienceData?.languages && audienceData.languages.length > 0 ? (
               <div className="space-y-2">
-                {audienceData.languages.slice(0, 6).map((language: any, index: number) => (
-                  <div key={index} className="flex items-center justify-between">
-                    <span className="text-sm">{language.name}</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-16">
-                        <Progress value={language.value || 0} className="h-1" />
+                {audienceData.languages
+                  .slice(0, 6)
+                  .map((language: InterestLanguageEthnicity, index: number) => (
+                    <div key={index} className="flex items-center justify-between">
+                      <span className="text-sm">{language.name}</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-16">
+                          <Progress value={language.value || 0} className="h-1" />
+                        </div>
+                        <span className="text-xs font-medium w-8 text-right">
+                          {language.value?.toFixed(1)}%
+                        </span>
                       </div>
-                      <span className="text-xs font-medium w-8 text-right">
-                        {language.value?.toFixed(1)}%
-                      </span>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">Language data not available</p>
@@ -400,19 +477,21 @@ const AdvancedAnalyticsSection: React.FC<AdvancedAnalyticsSectionProps> = ({ inf
             <div className="text-sm text-muted-foreground">Audience ethnic composition</div>
             {audienceData?.ethnicities && audienceData.ethnicities.length > 0 ? (
               <div className="space-y-2">
-                {audienceData.ethnicities.slice(0, 6).map((ethnicity: any, index: number) => (
-                  <div key={index} className="flex items-center justify-between">
-                    <span className="text-sm">{ethnicity.name}</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-16">
-                        <Progress value={ethnicity.value || 0} className="h-1" />
+                {audienceData.ethnicities
+                  .slice(0, 6)
+                  .map((ethnicity: InterestLanguageEthnicity, index: number) => (
+                    <div key={index} className="flex items-center justify-between">
+                      <span className="text-sm">{ethnicity.name}</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-16">
+                          <Progress value={ethnicity.value || 0} className="h-1" />
+                        </div>
+                        <span className="text-xs font-medium w-8 text-right">
+                          {ethnicity.value?.toFixed(1)}%
+                        </span>
                       </div>
-                      <span className="text-xs font-medium w-8 text-right">
-                        {ethnicity.value?.toFixed(1)}%
-                      </span>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">Ethnicity data not available</p>

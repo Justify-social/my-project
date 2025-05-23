@@ -12,12 +12,68 @@ interface ContactAnalyticsSectionProps {
   influencer: InfluencerProfileData;
 }
 
+// Type definitions for InsightIQ contact data
+interface ContactEmail {
+  email_id: string;
+  type?: string;
+}
+
+interface ContactPhone {
+  phone_number: string;
+  type?: string;
+  country_code?: string;
+}
+
+interface ContactAddress {
+  type?: string;
+  street_address?: string;
+  city?: string;
+  state?: string;
+  postal_code?: string;
+  country?: string;
+}
+
+interface PricingRange {
+  min?: number;
+  max?: number;
+}
+
+interface InsightIQContactData {
+  contacts?: {
+    email?: string;
+    phone?: string;
+    website?: string;
+  };
+  pricing?: {
+    pricing?: {
+      currency?: string;
+      post_type?: Record<string, PricingRange>;
+    };
+    explanations?: Record<string, { level: string; description: string }>;
+  };
+  audience?: {
+    credibility_score?: number;
+    significant_followers_percentage?: number;
+  };
+  profile?: {
+    emails?: ContactEmail[];
+    phone_numbers?: ContactPhone[];
+    addresses?: ContactAddress[];
+    is_verified?: boolean;
+    is_business?: boolean;
+    is_official_artist?: boolean;
+    platform_account_type?: string;
+    platform_profile_published_at?: string;
+    category?: string;
+  };
+}
+
 const ContactAnalyticsSection: React.FC<ContactAnalyticsSectionProps> = ({ influencer }) => {
-  // Extract comprehensive InsightIQ data
-  const insightiq = (influencer as any).insightiq;
+  // Extract comprehensive InsightIQ data with proper typing
+  const insightiq = (influencer as InfluencerProfileData & { insightiq?: InsightIQContactData })
+    .insightiq;
   const contactData = insightiq?.contacts;
   const pricingData = insightiq?.pricing;
-  const audienceData = insightiq?.audience;
   const profileData = insightiq?.profile;
 
   // Extract ALL contact information (not just first)
@@ -42,15 +98,8 @@ const ContactAnalyticsSection: React.FC<ContactAnalyticsSectionProps> = ({ influ
       )
     : null;
 
-  // Calculate collaboration viability score
+  // Calculate collaboration viability indicators
   const hasContactInfo = !!(contactData?.email || contactData?.phone || contactData?.website);
-  const hasPricingData = !!pricingData?.pricing;
-  const highQualityAudience = (audienceData?.credibility_score || 0) > 0.6;
-  const significantReach = (audienceData?.significant_followers_percentage || 0) > 5;
-
-  const collaborationScore =
-    [hasContactInfo, hasPricingData, highQualityAudience, significantReach].filter(Boolean).length *
-    25;
 
   // Enhanced Contact Information Card
   const ContactInfoCard = () => (
@@ -67,7 +116,7 @@ const ContactAnalyticsSection: React.FC<ContactAnalyticsSectionProps> = ({ influ
           <div className="text-sm font-medium text-primary mb-3">Email Addresses</div>
           {allEmails.length > 0 ? (
             <div className="space-y-2">
-              {allEmails.map((email: any, index: number) => (
+              {allEmails.map((email: ContactEmail, index: number) => (
                 <div
                   key={index}
                   className="flex items-center justify-between p-2 bg-muted/30 rounded-lg"
@@ -102,7 +151,7 @@ const ContactAnalyticsSection: React.FC<ContactAnalyticsSectionProps> = ({ influ
           <div className="text-sm font-medium text-primary mb-3">Phone Numbers</div>
           {allPhones.length > 0 ? (
             <div className="space-y-2">
-              {allPhones.map((phone: any, index: number) => (
+              {allPhones.map((phone: ContactPhone, index: number) => (
                 <div
                   key={index}
                   className="flex items-center justify-between p-2 bg-muted/30 rounded-lg"
@@ -134,7 +183,7 @@ const ContactAnalyticsSection: React.FC<ContactAnalyticsSectionProps> = ({ influ
           <div className="text-sm font-medium text-primary mb-3">Physical Addresses</div>
           {allAddresses.length > 0 ? (
             <div className="space-y-2">
-              {allAddresses.map((address: any, index: number) => (
+              {allAddresses.map((address: ContactAddress, index: number) => (
                 <div key={index} className="p-3 bg-muted/30 rounded-lg">
                   <div className="flex items-start gap-2">
                     <Icon iconId="faMapMarkerAltLight" className="h-4 w-4 text-warning mt-1" />
@@ -276,7 +325,7 @@ const ContactAnalyticsSection: React.FC<ContactAnalyticsSectionProps> = ({ influ
               <div className="space-y-3">
                 <div className="text-sm font-medium text-primary">Content Type Pricing</div>
                 {Object.entries(pricingData.pricing.post_type).map(
-                  ([type, range]: [string, any]) => (
+                  ([type, range]: [string, PricingRange]) => (
                     <div key={type} className="border border-border rounded-lg p-3 space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium capitalize">
@@ -288,7 +337,8 @@ const ContactAnalyticsSection: React.FC<ContactAnalyticsSectionProps> = ({ influ
                         ${range.min?.toLocaleString()} - ${range.max?.toLocaleString()}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        Average: ${Math.round((range.min + range.max) / 2).toLocaleString()}
+                        Average: $
+                        {Math.round(((range.min || 0) + (range.max || 0)) / 2).toLocaleString()}
                       </div>
                     </div>
                   )
@@ -301,15 +351,17 @@ const ContactAnalyticsSection: React.FC<ContactAnalyticsSectionProps> = ({ influ
                 <Separator className="my-4" />
                 <div className="space-y-3">
                   <div className="text-sm font-medium text-primary">Pricing Factors</div>
-                  {Object.entries(pricingData.explanations).map(([factor, data]: [string, any]) => (
-                    <div key={factor} className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm capitalize">{factor.replace('_', ' ')}</span>
-                        <Badge variant="secondary">{data.level}</Badge>
+                  {Object.entries(pricingData.explanations).map(
+                    ([factor, data]: [string, { level: string; description: string }]) => (
+                      <div key={factor} className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm capitalize">{factor.replace('_', ' ')}</span>
+                          <Badge variant="secondary">{data.level}</Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{data.description}</p>
                       </div>
-                      <p className="text-xs text-muted-foreground">{data.description}</p>
-                    </div>
-                  ))}
+                    )
+                  )}
                 </div>
               </>
             )}

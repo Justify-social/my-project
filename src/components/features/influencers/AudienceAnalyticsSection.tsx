@@ -6,8 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Icon } from '@/components/ui/icon/icon';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 
@@ -21,13 +19,46 @@ const formatPercentage = (value: number | undefined): string => {
   return `${value.toFixed(1)}%`;
 };
 
-// Helper function to format large numbers
-const formatNumber = (num: number | undefined | null): string => {
-  if (num === undefined || num === null) return 'N/A';
-  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-  if (num >= 1000) return `${(num / 1000).toFixed(0)}K`;
-  return num.toString();
-};
+// Type definitions for InsightIQ data
+interface FollowerType {
+  name: string;
+  value: number;
+}
+
+interface CountryData {
+  code: string;
+  value: number;
+}
+
+interface CityData {
+  name: string;
+  value: number;
+}
+
+interface PricingRange {
+  min?: number;
+  max?: number;
+}
+
+interface InsightIQData {
+  audience?: {
+    credibility_score?: number;
+    significant_followers_percentage?: number;
+    follower_types?: FollowerType[];
+    countries?: CountryData[];
+    cities?: CityData[];
+  };
+  contacts?: {
+    email?: string;
+    phone?: string;
+    website?: string;
+  };
+  pricing?: {
+    pricing?: {
+      post_type?: Record<string, PricingRange>;
+    };
+  };
+}
 
 // Helper function to get credibility color based on design system
 const getCredibilityColor = (score: number): string => {
@@ -66,22 +97,18 @@ const getFollowerTypeBadge = (type: string, value: number) => {
 };
 
 const AudienceAnalyticsSection: React.FC<AudienceAnalyticsSectionProps> = ({ influencer }) => {
-  // Extract comprehensive InsightIQ data
-  const insightiq = (influencer as Record<string, unknown>).insightiq as Record<string, unknown>;
-  const audienceData = insightiq?.audience as Record<string, unknown>;
-  const contactData = insightiq?.contacts as Record<string, unknown>;
-  const pricingData = insightiq?.pricing as Record<string, unknown>;
+  // Extract comprehensive InsightIQ data with proper typing
+  const insightiq = (influencer as InfluencerProfileData & { insightiq?: InsightIQData }).insightiq;
+  const audienceData = insightiq?.audience;
+  const contactData = insightiq?.contacts;
+  const pricingData = insightiq?.pricing;
 
   // Executive Summary Metrics
-  const credibilityScore = (audienceData?.credibility_score as number) || 0;
-  const significantFollowersPercentage =
-    (audienceData?.significant_followers_percentage as number) || 0;
-  const followerTypes =
-    (audienceData?.follower_types as Array<{ name: string; value: number }>) || [];
-  const topCountries =
-    (audienceData?.countries as Array<{ code: string; value: number }>)?.slice(0, 5) || [];
-  const topCities =
-    (audienceData?.cities as Array<{ name: string; value: number }>)?.slice(0, 5) || [];
+  const credibilityScore = audienceData?.credibility_score || 0;
+  const significantFollowersPercentage = audienceData?.significant_followers_percentage || 0;
+  const followerTypes = audienceData?.follower_types || [];
+  const topCountries = audienceData?.countries?.slice(0, 5) || [];
+  const topCities = audienceData?.cities?.slice(0, 5) || [];
 
   // Contact Information for Marketing Directors
   const ContactCard = () => (

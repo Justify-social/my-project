@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
-import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon/icon';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { InfluencerProfileData } from '@/types/influencer';
@@ -14,9 +13,83 @@ interface DemographicsSectionProps {
   influencer: InfluencerProfileData;
 }
 
+// Type definitions for InsightIQ demographics data
+interface GenderAgeDistribution {
+  gender: string;
+  age_range: string;
+  value: number;
+}
+
+interface CredibilityScoreBand {
+  min: number;
+  max: number;
+  total_profile_count: number;
+}
+
+interface CountryData {
+  code: string;
+  value: number;
+}
+
+interface ReputationHistory {
+  month: string;
+  follower_count?: number;
+  following_count?: number;
+  average_likes?: number;
+  subscriber_count?: number;
+}
+
+interface SignificantFollower {
+  platform_username: string;
+  image_url?: string;
+  is_verified?: boolean;
+  follower_count?: number;
+}
+
+interface SignificantLiker {
+  platform_username: string;
+  image_url?: string;
+  is_verified?: boolean;
+  follower_count?: number;
+}
+
+interface InsightIQDemographicsData {
+  audience?: {
+    gender_age_distribution?: GenderAgeDistribution[];
+    credibility_score?: number;
+    credibility_score_band?: CredibilityScoreBand[];
+    significant_followers_percentage?: number;
+    significant_followers?: SignificantFollower;
+    countries?: CountryData[];
+    audienceLikers?: {
+      significant_likers_percentage?: number;
+      significant_likers?: SignificantLiker[];
+      countries?: CountryData[];
+      credibility_score?: number;
+    };
+  };
+  demographics?: {
+    creator?: {
+      gender?: string;
+      ageGroup?: string;
+      language?: string;
+    };
+    location?: {
+      city?: string;
+      state?: string;
+      country?: string;
+    };
+  };
+  analytics?: {
+    reputationHistory?: ReputationHistory[];
+  };
+}
+
 const DemographicsSection: React.FC<DemographicsSectionProps> = ({ influencer }) => {
-  // Extract comprehensive InsightIQ demographics data
-  const insightiq = (influencer as any).insightiq;
+  // Extract comprehensive InsightIQ demographics data with proper typing
+  const insightiq = (
+    influencer as InfluencerProfileData & { insightiq?: InsightIQDemographicsData }
+  ).insightiq;
   const audienceData = insightiq?.audience;
   const creatorDemographics = insightiq?.demographics?.creator;
   const locationData = insightiq?.demographics?.location;
@@ -105,37 +178,39 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({ influencer })
         {audienceData?.gender_age_distribution &&
         audienceData.gender_age_distribution.length > 0 ? (
           <div className="space-y-4">
-            {audienceData.gender_age_distribution.map((demo: any, index: number) => (
-              <div key={index} className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={`w-3 h-3 rounded-full ${
-                        demo.gender === 'FEMALE'
-                          ? 'bg-accent'
-                          : demo.gender === 'MALE'
-                            ? 'bg-interactive'
-                            : 'bg-warning'
-                      }`}
-                    />
-                    <span className="text-sm font-medium capitalize">
-                      {demo.gender?.toLowerCase()} • {demo.age_range}
-                    </span>
+            {audienceData.gender_age_distribution.map(
+              (demo: GenderAgeDistribution, index: number) => (
+                <div key={index} className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`w-3 h-3 rounded-full ${
+                          demo.gender === 'FEMALE'
+                            ? 'bg-accent'
+                            : demo.gender === 'MALE'
+                              ? 'bg-interactive'
+                              : 'bg-warning'
+                        }`}
+                      />
+                      <span className="text-sm font-medium capitalize">
+                        {demo.gender?.toLowerCase()} • {demo.age_range}
+                      </span>
+                    </div>
+                    <span className="text-sm font-bold">{demo.value?.toFixed(1)}%</span>
                   </div>
-                  <span className="text-sm font-bold">{demo.value?.toFixed(1)}%</span>
+                  <Progress
+                    value={demo.value}
+                    className={`h-2 ${
+                      demo.gender === 'FEMALE'
+                        ? '[&>div]:bg-accent'
+                        : demo.gender === 'MALE'
+                          ? '[&>div]:bg-interactive'
+                          : '[&>div]:bg-warning'
+                    }`}
+                  />
                 </div>
-                <Progress
-                  value={demo.value}
-                  className={`h-2 ${
-                    demo.gender === 'FEMALE'
-                      ? '[&>div]:bg-accent'
-                      : demo.gender === 'MALE'
-                        ? '[&>div]:bg-interactive'
-                        : '[&>div]:bg-warning'
-                  }`}
-                />
-              </div>
-            ))}
+              )
+            )}
           </div>
         ) : (
           <div className="text-center py-6">
@@ -164,20 +239,22 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({ influencer })
             <div className="text-sm text-muted-foreground mb-3">
               Credibility score distribution across similar profiles
             </div>
-            {audienceData.credibility_score_band.map((band: any, index: number) => (
-              <div key={index} className="border border-border rounded-lg p-3">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium">
-                    {band.min}% - {band.max}% Credibility
-                  </span>
-                  <Badge variant="outline">{band.total_profile_count} profiles</Badge>
+            {audienceData.credibility_score_band.map(
+              (band: CredibilityScoreBand, index: number) => (
+                <div key={index} className="border border-border rounded-lg p-3">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium">
+                      {band.min}% - {band.max}% Credibility
+                    </span>
+                    <Badge variant="outline">{band.total_profile_count} profiles</Badge>
+                  </div>
+                  <Progress value={(band.total_profile_count / 1000) * 100} className="h-2" />
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Industry benchmark for this credibility range
+                  </div>
                 </div>
-                <Progress value={(band.total_profile_count / 1000) * 100} className="h-2" />
-                <div className="text-xs text-muted-foreground mt-1">
-                  Industry benchmark for this credibility range
-                </div>
-              </div>
-            ))}
+              )
+            )}
           </div>
         ) : (
           <div className="bg-success/5 p-3 rounded-lg border border-success/20">
@@ -211,36 +288,38 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({ influencer })
             <div className="text-sm text-muted-foreground mb-3">
               Historical performance metrics over time
             </div>
-            {analyticsData.reputationHistory.slice(-6).map((period: any, index: number) => (
-              <div key={index} className="border border-border rounded-lg p-3 space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">{period.month}</span>
-                  <Badge variant="secondary" className="text-xs">
-                    {period.follower_count?.toLocaleString()} followers
-                  </Badge>
+            {analyticsData.reputationHistory
+              .slice(-6)
+              .map((period: ReputationHistory, index: number) => (
+                <div key={index} className="border border-border rounded-lg p-3 space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">{period.month}</span>
+                    <Badge variant="secondary" className="text-xs">
+                      {period.follower_count?.toLocaleString()} followers
+                    </Badge>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3 text-xs">
+                    <div>
+                      <span className="text-muted-foreground">Following:</span>
+                      <div className="font-medium">
+                        {period.following_count?.toLocaleString() || 'N/A'}
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Avg Likes:</span>
+                      <div className="font-medium">
+                        {period.average_likes?.toLocaleString() || 'N/A'}
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Subscribers:</span>
+                      <div className="font-medium">
+                        {period.subscriber_count?.toLocaleString() || 'N/A'}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="grid grid-cols-3 gap-3 text-xs">
-                  <div>
-                    <span className="text-muted-foreground">Following:</span>
-                    <div className="font-medium">
-                      {period.following_count?.toLocaleString() || 'N/A'}
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Avg Likes:</span>
-                    <div className="font-medium">
-                      {period.average_likes?.toLocaleString() || 'N/A'}
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Subscribers:</span>
-                    <div className="font-medium">
-                      {period.subscriber_count?.toLocaleString() || 'N/A'}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+              ))}
           </div>
         ) : (
           <div className="text-center py-6">
@@ -316,23 +395,25 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({ influencer })
         {audienceLikers?.significant_likers && audienceLikers.significant_likers.length > 0 && (
           <div className="space-y-2">
             <div className="text-sm font-medium text-primary">Top Significant Likers</div>
-            {audienceLikers.significant_likers.slice(0, 3).map((liker: any, index: number) => (
-              <div key={index} className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg">
-                <Avatar className="h-6 w-6">
-                  <AvatarImage src={liker.image_url} alt={liker.platform_username} />
-                  <AvatarFallback className="text-xs">
-                    {liker.platform_username?.charAt(0).toUpperCase() || '?'}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-sm">@{liker.platform_username}</span>
-                {liker.is_verified && (
-                  <Icon iconId="faCircleCheckSolid" className="h-3 w-3 text-interactive" />
-                )}
-                <span className="text-xs text-muted-foreground ml-auto">
-                  {liker.follower_count?.toLocaleString()} followers
-                </span>
-              </div>
-            ))}
+            {audienceLikers.significant_likers
+              .slice(0, 3)
+              .map((liker: SignificantLiker, index: number) => (
+                <div key={index} className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg">
+                  <Avatar className="h-6 w-6">
+                    <AvatarImage src={liker.image_url} alt={liker.platform_username} />
+                    <AvatarFallback className="text-xs">
+                      {liker.platform_username?.charAt(0).toUpperCase() || '?'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm">@{liker.platform_username}</span>
+                  {liker.is_verified && (
+                    <Icon iconId="faCircleCheckSolid" className="h-3 w-3 text-interactive" />
+                  )}
+                  <span className="text-xs text-muted-foreground ml-auto">
+                    {liker.follower_count?.toLocaleString()} followers
+                  </span>
+                </div>
+              ))}
           </div>
         )}
       </CardContent>
@@ -363,21 +444,25 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({ influencer })
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <div className="text-xs text-muted-foreground mb-2">Top Follower Countries</div>
-                  {audienceData?.countries?.slice(0, 3).map((country: any, index: number) => (
-                    <div key={index} className="flex justify-between text-xs mb-1">
-                      <span>{country.code}</span>
-                      <span>{country.value?.toFixed(1)}%</span>
-                    </div>
-                  ))}
+                  {audienceData?.countries
+                    ?.slice(0, 3)
+                    .map((country: CountryData, index: number) => (
+                      <div key={index} className="flex justify-between text-xs mb-1">
+                        <span>{country.code}</span>
+                        <span>{country.value?.toFixed(1)}%</span>
+                      </div>
+                    ))}
                 </div>
                 <div>
                   <div className="text-xs text-muted-foreground mb-2">Top Liker Countries</div>
-                  {audienceLikers.countries?.slice(0, 3).map((country: any, index: number) => (
-                    <div key={index} className="flex justify-between text-xs mb-1">
-                      <span>{country.code}</span>
-                      <span>{country.value?.toFixed(1)}%</span>
-                    </div>
-                  ))}
+                  {audienceLikers.countries
+                    ?.slice(0, 3)
+                    .map((country: CountryData, index: number) => (
+                      <div key={index} className="flex justify-between text-xs mb-1">
+                        <span>{country.code}</span>
+                        <span>{country.value?.toFixed(1)}%</span>
+                      </div>
+                    ))}
                 </div>
               </div>
             </div>
