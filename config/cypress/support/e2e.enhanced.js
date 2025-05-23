@@ -81,12 +81,3 @@ Cypress.Commands.add('waitUntilVisible', (selector, options = {}) => {
   const { timeout = 10000 } = options;
   cy.waitUntil(() => cy.get(selector).then($el => $el.is(':visible')), { timeout });
 });
-
-// Hide fetch/XHR requests in the Cypress command log (optional)
-const app = window.top;
-if (!app.document.head.querySelector('[data-hide-command-log-request]')) {
-  const style = app.document.createElement('style');
-  style.innerHTML = '.command-name-request, .command-name-xhr { display: none }';
-  style.setAttribute('data-hide-command-log-request', '');
-  app.document.head.appendChild(style);
-}

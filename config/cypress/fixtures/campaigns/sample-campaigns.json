@@ -1,0 +1,23 @@
+{
+  "basicCampaign": {
+    "name": "Basic Test Campaign",
+    "budget": 10000,
+    "startDate": "2024-01-01",
+    "endDate": "2024-12-31",
+    "objective": "brand-awareness",
+    "status": "draft"
+  },
+  "advancedCampaign": {
+    "name": "Advanced Test Campaign",
+    "budget": 50000,
+    "startDate": "2024-01-01",
+    "endDate": "2024-06-30",
+    "objective": "conversion",
+    "status": "active",
+    "targeting": {
+      "ageRange": [25, 45],
+      "interests": ["technology", "business"],
+      "locations": ["US", "CA"]
+    }
+  }
+}
