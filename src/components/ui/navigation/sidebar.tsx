@@ -191,13 +191,25 @@ export function Sidebar({
   // --- Collapsible Section State ---
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
 
-  // Function to toggle section expansion
+  // Function to toggle section expansion with accordion behavior
   const toggleSection = (itemKey: string) => {
     if (!isHydrated) return; // Prevent state changes before hydration
-    setExpandedSections(prev => ({
-      ...prev,
-      [itemKey]: !prev[itemKey],
-    }));
+
+    setExpandedSections(prev => {
+      // If clicking on already expanded section, collapse it
+      if (prev[itemKey]) {
+        return { ...prev, [itemKey]: false };
+      }
+
+      // Otherwise, collapse all sections and expand only the clicked one
+      const newState: Record<string, boolean> = {};
+      Object.keys(prev).forEach(key => {
+        newState[key] = false; // Collapse all sections
+      });
+      newState[itemKey] = true; // Expand only the clicked section
+
+      return newState;
+    });
   };
   // --- End Collapsible Section State ---
 
@@ -257,6 +269,32 @@ export function Sidebar({
     [isActive, activePath]
   );
 
+  // Handle auto-expansion with accordion behavior
+  useEffect(() => {
+    if (!isHydrated) return;
+
+    const autoExpandKey = items.find((item, index) => {
+      const hasActiveChildItem = hasActiveChild(item);
+      return hasActiveChildItem;
+    });
+
+    if (autoExpandKey) {
+      const itemKey = autoExpandKey.label + items.indexOf(autoExpandKey);
+      setExpandedSections(prev => {
+        // If this section should be expanded but isn't, expand it and collapse others
+        if (!prev[itemKey]) {
+          const newState: Record<string, boolean> = {};
+          Object.keys(prev).forEach(key => {
+            newState[key] = false; // Collapse all sections
+          });
+          newState[itemKey] = true; // Expand only this section
+          return newState;
+        }
+        return prev;
+      });
+    }
+  }, [activePath, isHydrated, items, hasActiveChild]);
+
   return (
     <aside
       className={cn(
@@ -307,6 +345,7 @@ export function Sidebar({
 
             // Auto-expand section if any child is active
             const shouldAutoExpand = hasActiveChildItem;
+
             const isExpanded =
               (isHydrated && (expandedSections[itemKey] || shouldAutoExpand)) || false;
             const parentIconName = item.icon; // ONLY use explicitly provided icon for parents
