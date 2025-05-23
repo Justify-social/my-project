@@ -79,6 +79,12 @@ export default function DebugToolsPage() {
           buttonText="View Database Health"
         />
         <DebugToolCard
+          title="Clerk Authentication"
+          description="Test and debug authentication flow, configuration, and user states."
+          linkHref="/debug-tools/clerk-auth"
+          buttonText="Test Authentication"
+        />
+        <DebugToolCard
           title="Mux Asset Checker"
           description="View and verify Mux video assets."
           linkHref="/debug-tools/mux-assets"
