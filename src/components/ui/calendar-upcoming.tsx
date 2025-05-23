@@ -286,6 +286,7 @@ export function CalendarUpcoming({
                                     height={14}
                                     title={platformName}
                                     className="opacity-80"
+                                    style={{ width: 'auto', height: 'auto' }}
                                   />
                                 ) : (
                                   <span
