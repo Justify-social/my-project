@@ -45,13 +45,13 @@ export default function ToastPreviewPage() {
 showSuccessToast('Data saved successfully!')
 
 // Success toast with custom icon
-showSuccessToast('File uploaded!', 'faCloudUploadAltLight')
+showSuccessToast('File uploaded!', 'faUploadLight')
 
 // Basic error toast
 showErrorToast('Failed to save data')
 
 // Error toast with custom icon
-showErrorToast('Upload failed', 'faCloudUploadAltLight')`,
+showErrorToast('Upload failed', 'faUploadLight')`,
   ];
 
   return (
@@ -130,12 +130,10 @@ showErrorToast('Upload failed', 'faCloudUploadAltLight')`,
                   Success toast with custom icon:
                 </p>
                 <Button
-                  onClick={() =>
-                    showSuccessToast('File uploaded successfully!', 'faCloudUploadAltLight')
-                  }
+                  onClick={() => showSuccessToast('File uploaded successfully!', 'faUploadLight')}
                   variant="secondary"
                 >
-                  <Icon iconId="faCloudUploadAltLight" className="mr-2" />
+                  <Icon iconId="faUploadLight" className="mr-2" />
                   Upload Success
                 </Button>
               </div>
@@ -166,7 +164,7 @@ showErrorToast('Upload failed', 'faCloudUploadAltLight')`,
                   variant="destructive"
                   className="mr-4"
                 >
-                  <Icon iconId="faExclamationTriangleLight" className="mr-2" />
+                  <Icon iconId="faTriangleExclamationLight" className="mr-2" />
                   Show Error Toast
                 </Button>
               </div>
@@ -186,11 +184,11 @@ showErrorToast('Upload failed', 'faCloudUploadAltLight')`,
                 <p className="text-sm text-muted-foreground mb-2">Validation error:</p>
                 <Button
                   onClick={() =>
-                    showErrorToast('Please fill in all required fields', 'faExclamationCircleLight')
+                    showErrorToast('Please fill in all required fields', 'faCircleXmarkLight')
                   }
                   variant="destructive"
                 >
-                  <Icon iconId="faExclamationCircleLight" className="mr-2" />
+                  <Icon iconId="faCircleXmarkLight" className="mr-2" />
                   Validation Error
                 </Button>
               </div>
@@ -241,7 +239,7 @@ showErrorToast('Upload failed', 'faCloudUploadAltLight')`,
                 }}
                 variant="outline"
               >
-                <Icon iconId="faLayerGroupLight" className="mr-2" />
+                <Icon iconId="faListLight" className="mr-2" />
                 Show Multiple Toasts
               </Button>
             </div>
@@ -294,11 +292,16 @@ showErrorToast('Upload failed', 'faCloudUploadAltLight')`,
 
       {/* Note */}
       <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <p className="text-sm text-blue-800">
-          <Icon iconId="faInfoCircleLight" className="inline mr-2" />
-          <strong>Note:</strong> Toast notifications use react-hot-toast under the hood and require
-          a Toaster component to be rendered in your app root. The styling is defined in globals.css
-          with custom classes.
+        <p className="text-sm text-blue-800 flex items-start">
+          <Icon
+            iconId="faCircleInfoLight"
+            className="w-4 h-4 min-w-[1rem] min-h-[1rem] max-w-[1rem] max-h-[1rem] mr-2 mt-0.5 flex-shrink-0"
+          />
+          <span>
+            <strong>Note:</strong> Toast notifications use react-hot-toast under the hood and
+            require a Toaster component to be rendered in your app root. The styling is defined in
+            globals.css with custom classes.
+          </span>
         </p>
       </div>
     </div>
