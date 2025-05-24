@@ -349,7 +349,7 @@ export const mapInsightIQProfileToInfluencerProfileData = (
   };
 
   // Store the comprehensive InsightIQ data with all extracted analytics
-  (profileData as any).insightiq = {
+  (profileData as Record<string, unknown> & InfluencerProfileData).insightiq = {
     profile: profile,
     audience: {
       ...audienceDemographics,
