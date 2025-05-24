@@ -54,11 +54,17 @@
     "index-campaigns": "node scripts/campaign/index-campaigns.js",
     "cy:open": "cypress open",
     "cy:run": "cypress run",
-    "cy:run:parallel": "cypress run --record --parallel",
+    "cy:run:parallel": "cypress run --config-file config/cypress/cypress-parallel.config.js --record --parallel",
+    "cy:run:parallel:local": "npm run cy:run:parallel:container1 & npm run cy:run:parallel:container2 & npm run cy:run:parallel:container3 & npm run cy:run:parallel:container4 & wait",
+    "cy:run:parallel:container1": "CONTAINER_ID=1 cypress run --config-file config/cypress/cypress-parallel.config.js",
+    "cy:run:parallel:container2": "CONTAINER_ID=2 cypress run --config-file config/cypress/cypress-parallel.config.js",
+    "cy:run:parallel:container3": "CONTAINER_ID=3 cypress run --config-file config/cypress/cypress-parallel.config.js",
+    "cy:run:parallel:container4": "CONTAINER_ID=4 cypress run --config-file config/cypress/cypress-parallel.config.js",
     "cy:run:headed": "cypress run --headed",
     "cy:test": "start-server-and-test start http://localhost:3000 cy:run",
-    "cy:test:parallel": "start-server-and-test start http://localhost:3000 cy:run:parallel",
-    "cy:report": "npx mochawesome-merge config/cypress/reports/*.json > config/cypress/reports/combined-report.json && npx marge config/cypress/reports/combined-report.json --reportDir config/cypress/reports --inline"
+    "cy:test:parallel": "start-server-and-test start http://localhost:3000 cy:run:parallel:local",
+    "cy:report": "npx mochawesome-merge config/cypress/reports/*.json > config/cypress/reports/combined-report.json && npx marge config/cypress/reports/combined-report.json --reportDir config/cypress/reports --inline",
+    "cy:report:aggregate": "node config/cypress/scripts/aggregate-parallel-results.js"
   },
   "dependencies": {
     "@algolia/client-search": "^5.25.0",

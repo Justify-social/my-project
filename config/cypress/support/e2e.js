@@ -3,6 +3,7 @@ import './commands/auth';
 import './commands/forms';
 import './commands/api';
 import './commands/navigation';
+import './commands/performance';
 
 // Import additional libraries
 import 'cypress-file-upload';
@@ -57,10 +58,7 @@ beforeEach(() => {
   });
 });
 
-// Performance monitoring
-Cypress.Commands.add('measurePageLoadTime', url => {
-  cy.visitWithPerformance(url, { performanceBudget: 3000 });
-});
+// Performance monitoring is now handled in ./commands/performance
 
 // Accessibility testing
 Cypress.Commands.add('checkA11y', (selector = null, options = {}) => {
