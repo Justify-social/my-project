@@ -56,6 +56,7 @@ function SidebarItem({
         onClick={onClick}
         onMouseEnter={() => isHydrated && setIsHovered(true)}
         onMouseLeave={() => isHydrated && setIsHovered(false)}
+        data-cy={`nav-link-${label.toLowerCase().replace(/\s+/g, '-')}`}
         className={cn(
           'flex items-center py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group',
           active || (isHydrated && isHovered)
@@ -302,10 +303,11 @@ export function Sidebar({
         className
       )}
       data-testid="sidebar"
+      data-cy="main-sidebar"
     >
       {/* Sidebar header */}
-      <div className={cn('h-14 flex items-center px-4 border-b border')}>
-        <div className="flex items-center">
+      <div className={cn('h-14 flex items-center px-4 border-b border')} data-cy="sidebar-header">
+        <div className="flex items-center" data-cy="sidebar-logo">
           {/* Replaced img with Image */}
           {logoSrc && (
             <Image
@@ -314,16 +316,22 @@ export function Sidebar({
               className="h-6 w-auto mr-2" // Keep className, w-auto might allow flexibility
               width={24} // Provide width (6 * 4px)
               height={24} // Provide height (6 * 4px)
+              data-cy="sidebar-logo-image"
               // Add unoptimized if logoSrc can be external/dynamic
               // unoptimized
             />
           )}
-          <span className="font-medium text-foreground">{title}</span>
+          <span className="font-medium text-foreground" data-cy="sidebar-title">
+            {title}
+          </span>
         </div>
       </div>
       {loadingError && <div className="p-4 text-xs text-red-600 bg-red-100">{loadingError}</div>}
       {/* Navigation items - Make this flexible and scrollable, remove bottom padding */}
-      <nav className="flex-1 overflow-y-auto p-2 pb-[var(--footer-height)]">
+      <nav
+        className="flex-1 overflow-y-auto p-2 pb-[var(--footer-height)]"
+        data-cy="main-navigation"
+      >
         {isRegistryLoading && (
           <div className="p-4 text-xs text-muted-foreground">Loading icons...</div>
         )}
@@ -366,6 +374,7 @@ export function Sidebar({
                         }}
                         onMouseEnter={() => setHover(itemKey, true)}
                         onMouseLeave={() => setHover(itemKey, false)}
+                        data-cy={`nav-link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
                         className={cn(
                           'flex items-center justify-between py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group',
                           isActiveParent || isHoveredParent
@@ -418,6 +427,7 @@ export function Sidebar({
                         onClick={() => toggleSection(itemKey)} // Toggle expansion on click
                         onMouseEnter={() => setHover(itemKey, true)}
                         onMouseLeave={() => setHover(itemKey, false)}
+                        data-cy={`nav-link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
                         className={cn(
                           'flex items-center justify-between py-2 pl-4 pr-2 rounded-md transition-all duration-150 w-full group cursor-pointer', // Added cursor-pointer
                           isActiveParent || isHoveredParent

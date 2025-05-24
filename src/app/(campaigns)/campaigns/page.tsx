@@ -807,186 +807,387 @@ const ClientCampaignList: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-        <h1 className="text-2xl font-bold text-primary">Campaigns</h1>
-        <div className="flex items-center gap-3">
-          <Sheet open={isFiltersSheetOpen} onOpenChange={setIsFiltersSheetOpen}>
-            <SheetTrigger asChild>
-              <Button variant="outline">
-                <Icon iconId="faFilterLight" className="mr-2 h-4 w-4" />
-                Filters
-              </Button>
-            </SheetTrigger>
-            <SheetContent className="w-80 md:w-96 flex flex-col" side="right">
-              <SheetHeader className="mb-4 border-b pb-4">
-                <SheetTitle>Filter Campaigns</SheetTitle>
-                <SheetDescription>Refine the list based on your criteria.</SheetDescription>
-              </SheetHeader>
-              <CampaignFilters
-                isOpen={isFiltersSheetOpen}
-                onOpenChange={setIsFiltersSheetOpen}
-                currentFilters={currentFilterValues}
-                onApplyFilters={handleApplyCampaignFilters}
-                onResetFilters={handleResetCampaignFilters}
-                uniqueDates={uniqueDates}
-                kpiOptions={KPI_OPTIONS}
-                formatDate={formatDate}
-              />
-            </SheetContent>
-          </Sheet>
-          <Link href="/campaigns/wizard/step-1">
-            <Button
-              className="bg-accent hover:bg-accent/90 text-white"
-              disabled={!orgId || !isAuthLoaded}
-              title={!orgId ? 'Select an organization to create a new campaign' : 'New Campaign'}
-            >
-              <Icon iconId="faPlusLight" className="-ml-1 mr-2 h-5 w-5" />
-              New Campaign
-            </Button>
-          </Link>
-        </div>
+    <div className="px-4 md:px-6 py-6 font-body min-h-screen" data-cy="campaigns-list">
+      {/* Header */}
+      <div className="mb-6" data-cy="campaigns-header">
+        <h1 className="text-3xl font-bold text-primary font-heading" data-cy="campaigns-title">
+          Campaigns
+        </h1>
+        <p className="mt-2 text-muted-foreground" data-cy="campaigns-subtitle">
+          Manage and track your brand campaigns
+        </p>
       </div>
-
-      {error && campaigns.length === 0 && (
-        <div className="bg-white p-6 text-center text-destructive">{error}</div>
-      )}
-      {!error && sortedCampaigns.length === 0 && !isLoadingData && (
-        <div className="bg-white p-6 text-center">
-          No campaigns found. Try adjusting your search criteria or create a new campaign.
-        </div>
-      )}
-      {sortedCampaigns.length > 0 && (
-        <>
-          <div className="hidden md:block border rounded-lg border-divider overflow-hidden">
-            <Table>
-              <TableHeader className="bg-background">
-                <TableRow>
-                  <TableHead
-                    className="cursor-pointer text-secondary"
-                    onClick={() => requestSort('campaignName')}
-                  >
-                    Campaign Name
-                  </TableHead>
-                  <TableHead
-                    className="cursor-pointer text-secondary"
-                    onClick={() => requestSort('status')}
-                  >
-                    Status
-                  </TableHead>
-                  <TableHead
-                    className="cursor-pointer text-secondary"
-                    onClick={() => requestSort('primaryKPI')}
-                  >
-                    Objective{' '}
-                    {sortConfig?.key === 'primaryKPI' &&
-                      (sortConfig.direction === 'ascending' ? '▲' : '▼')}
-                  </TableHead>
-                  <TableHead
-                    className="cursor-pointer text-secondary"
-                    onClick={() => requestSort('startDate')}
-                  >
-                    Start Date
-                  </TableHead>
-                  <TableHead
-                    className="cursor-pointer text-secondary"
-                    onClick={() => requestSort('endDate')}
-                  >
-                    End Date
-                  </TableHead>
-                  <TableHead className="text-center text-secondary">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {displayedCampaigns.map(campaign => {
-                  const statusInfo = getCampaignStatusInfo(campaign.status);
-                  return (
-                    <TableRow key={campaign.id} className="hover:bg-gray-50">
-                      <TableCell className="font-medium">
-                        <Link
-                          href={`/campaigns/${campaign.id}`}
-                          className="text-accent hover:underline"
-                        >
-                          {campaign.campaignName}
-                        </Link>
-                      </TableCell>
-                      <TableCell>
-                        <span
-                          className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusInfo.class}`}
-                        >
-                          {statusInfo.text}
-                        </span>
-                      </TableCell>
-                      <TableCell>{getKpiDisplayName(campaign.primaryKPI)}</TableCell>
-                      <TableCell>
-                        {campaign.startDate ? formatDate(campaign.startDate) : 'N/A'}
-                      </TableCell>
-                      <TableCell>
-                        {campaign.endDate ? formatDate(campaign.endDate) : 'N/A'}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-1 justify-center">
-                          <IconButtonAction
-                            iconBaseName="faEye"
-                            hoverColorClass="text-accent"
-                            ariaLabel="View campaign"
-                            onClick={() => handleViewCampaign(campaign.id.toString())}
-                            className="w-8 h-8"
-                          />
-                          <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`}>
-                            <IconButtonAction
-                              iconBaseName="faPenToSquare"
-                              hoverColorClass="text-accent"
-                              ariaLabel="Edit campaign"
-                              className="w-8 h-8"
-                            />
-                          </Link>
-                          <IconButtonAction
-                            iconBaseName="faCopy"
-                            hoverColorClass="text-accent"
-                            ariaLabel="Duplicate campaign"
-                            onClick={() => handleDuplicateClick(campaign)}
-                            className="w-8 h-8"
-                          />
-                          <IconButtonAction
-                            iconBaseName="faTrashCan"
-                            hoverColorClass="text-destructive"
-                            ariaLabel="Delete campaign"
-                            onClick={() => handleDeleteClick(campaign)}
-                            className="w-8 h-8"
-                          />
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
-
-          <div className="hidden md:flex items-center justify-between mt-4 px-2 py-3 border-t border-divider">
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-700">Show</span>
-              <Select
-                value={campaignsPerPage.toString()}
-                onValueChange={value => {
-                  setCampaignsPerPage(Number(value));
-                  setCurrentPage(1);
-                }}
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+          <h1 className="text-2xl font-bold text-primary">Campaigns</h1>
+          <div className="flex items-center gap-3">
+            <Sheet open={isFiltersSheetOpen} onOpenChange={setIsFiltersSheetOpen}>
+              <SheetTrigger asChild>
+                <Button variant="outline" data-cy="filters-button">
+                  <Icon iconId="faFilterLight" className="mr-2 h-4 w-4" />
+                  Filters
+                </Button>
+              </SheetTrigger>
+              <SheetContent
+                className="w-80 md:w-96 flex flex-col"
+                side="right"
+                data-cy="filters-panel"
               >
-                <SelectTrigger className="w-[75px] border-divider">
-                  <SelectValue placeholder={campaignsPerPage.toString()} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="25">25</SelectItem>
-                  <SelectItem value="50">50</SelectItem>
-                  <SelectItem value="100">100</SelectItem>
-                </SelectContent>
-              </Select>
-              <span className="text-sm text-gray-700">entries</span>
+                <SheetHeader className="mb-4 border-b pb-4">
+                  <SheetTitle>Filter Campaigns</SheetTitle>
+                  <SheetDescription>Refine the list based on your criteria.</SheetDescription>
+                </SheetHeader>
+                <CampaignFilters
+                  isOpen={isFiltersSheetOpen}
+                  onOpenChange={setIsFiltersSheetOpen}
+                  currentFilters={currentFilterValues}
+                  onApplyFilters={handleApplyCampaignFilters}
+                  onResetFilters={handleResetCampaignFilters}
+                  uniqueDates={uniqueDates}
+                  kpiOptions={KPI_OPTIONS}
+                  formatDate={formatDate}
+                />
+              </SheetContent>
+            </Sheet>
+            <Link href="/campaigns/wizard/step-1">
+              <Button
+                className="bg-accent hover:bg-accent/90 text-white"
+                disabled={!orgId || !isAuthLoaded}
+                title={!orgId ? 'Select an organization to create a new campaign' : 'New Campaign'}
+                data-cy="new-campaign-button"
+              >
+                <Icon iconId="faPlusLight" className="-ml-1 mr-2 h-5 w-5" />
+                New Campaign
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {error && campaigns.length === 0 && (
+          <div className="bg-white p-6 text-center text-destructive">{error}</div>
+        )}
+        {!error && sortedCampaigns.length === 0 && !isLoadingData && (
+          <div className="bg-white p-6 text-center">
+            No campaigns found. Try adjusting your search criteria or create a new campaign.
+          </div>
+        )}
+        {sortedCampaigns.length > 0 && (
+          <>
+            <div
+              className="hidden md:block border rounded-lg border-divider overflow-hidden"
+              data-cy="campaigns-table"
+            >
+              <Table>
+                <TableHeader className="bg-background">
+                  <TableRow data-cy="table-header">
+                    <TableHead
+                      className="cursor-pointer text-secondary"
+                      onClick={() => requestSort('campaignName')}
+                      data-cy="sort-campaign-name"
+                    >
+                      Campaign Name
+                    </TableHead>
+                    <TableHead
+                      className="cursor-pointer text-secondary"
+                      onClick={() => requestSort('status')}
+                      data-cy="sort-status"
+                    >
+                      Status
+                    </TableHead>
+                    <TableHead
+                      className="cursor-pointer text-secondary"
+                      onClick={() => requestSort('primaryKPI')}
+                      data-cy="sort-objective"
+                    >
+                      Objective{' '}
+                      {sortConfig?.key === 'primaryKPI' &&
+                        (sortConfig.direction === 'ascending' ? '▲' : '▼')}
+                    </TableHead>
+                    <TableHead
+                      className="cursor-pointer text-secondary"
+                      onClick={() => requestSort('startDate')}
+                      data-cy="sort-start-date"
+                    >
+                      Start Date
+                    </TableHead>
+                    <TableHead
+                      className="cursor-pointer text-secondary"
+                      onClick={() => requestSort('endDate')}
+                      data-cy="sort-end-date"
+                    >
+                      End Date
+                    </TableHead>
+                    <TableHead className="text-center text-secondary" data-cy="actions-header">
+                      Actions
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody data-cy="table-body">
+                  {displayedCampaigns.map(campaign => {
+                    const statusInfo = getCampaignStatusInfo(campaign.status);
+                    return (
+                      <TableRow
+                        key={campaign.id}
+                        className="hover:bg-gray-50"
+                        data-cy={`campaign-row-${campaign.id}`}
+                      >
+                        <TableCell className="font-medium">
+                          <Link
+                            href={`/campaigns/${campaign.id}`}
+                            className="text-accent hover:underline"
+                            data-cy={`campaign-link-${campaign.id}`}
+                          >
+                            {campaign.campaignName}
+                          </Link>
+                        </TableCell>
+                        <TableCell>
+                          <span
+                            className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusInfo.class}`}
+                            data-cy={`campaign-status-${campaign.id}`}
+                          >
+                            {statusInfo.text}
+                          </span>
+                        </TableCell>
+                        <TableCell data-cy={`campaign-objective-${campaign.id}`}>
+                          {getKpiDisplayName(campaign.primaryKPI)}
+                        </TableCell>
+                        <TableCell data-cy={`campaign-start-date-${campaign.id}`}>
+                          {campaign.startDate ? formatDate(campaign.startDate) : 'N/A'}
+                        </TableCell>
+                        <TableCell data-cy={`campaign-end-date-${campaign.id}`}>
+                          {campaign.endDate ? formatDate(campaign.endDate) : 'N/A'}
+                        </TableCell>
+                        <TableCell>
+                          <div
+                            className="flex items-center space-x-1 justify-center"
+                            data-cy={`campaign-actions-${campaign.id}`}
+                          >
+                            <IconButtonAction
+                              iconBaseName="faEye"
+                              hoverColorClass="text-accent"
+                              ariaLabel="View campaign"
+                              onClick={() => handleViewCampaign(campaign.id.toString())}
+                              className="w-8 h-8"
+                              data-cy={`view-campaign-${campaign.id}`}
+                            />
+                            <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`}>
+                              <IconButtonAction
+                                iconBaseName="faPenToSquare"
+                                hoverColorClass="text-accent"
+                                ariaLabel="Edit campaign"
+                                className="w-8 h-8"
+                                data-cy={`edit-campaign-${campaign.id}`}
+                              />
+                            </Link>
+                            <IconButtonAction
+                              iconBaseName="faCopy"
+                              hoverColorClass="text-accent"
+                              ariaLabel="Duplicate campaign"
+                              onClick={() => handleDuplicateClick(campaign)}
+                              className="w-8 h-8"
+                              data-cy={`duplicate-campaign-${campaign.id}`}
+                            />
+                            <IconButtonAction
+                              iconBaseName="faTrashCan"
+                              hoverColorClass="text-destructive"
+                              ariaLabel="Delete campaign"
+                              onClick={() => handleDeleteClick(campaign)}
+                              className="w-8 h-8"
+                              data-cy={`delete-campaign-${campaign.id}`}
+                            />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
             </div>
-            <div className="flex items-center space-x-2">
+
+            <div className="hidden md:flex items-center justify-between mt-4 px-2 py-3 border-t border-divider">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-700">Show</span>
+                <Select
+                  value={campaignsPerPage.toString()}
+                  onValueChange={value => {
+                    setCampaignsPerPage(Number(value));
+                    setCurrentPage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-[75px] border-divider">
+                    <SelectValue placeholder={campaignsPerPage.toString()} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="25">25</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                    <SelectItem value="100">100</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span className="text-sm text-gray-700">entries</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="border-divider"
+                >
+                  Previous
+                </Button>
+                <span className="text-sm text-gray-700">
+                  {' '}
+                  Page {currentPage} of {totalPages}{' '}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages || totalPages === 0}
+                  className="border-divider"
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
+        {campaignToDelete && (
+          <ConfirmDeleteDialog
+            isOpen={showDeleteModal}
+            onClose={() => {
+              setShowDeleteModal(false);
+              setCampaignToDelete(null);
+            }}
+            onConfirm={executeDeleteCampaign}
+            itemName={campaignToDelete?.name || 'this item'}
+          />
+        )}
+        <Dialog open={isDuplicateDialogOpen} onOpenChange={setIsDuplicateDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Duplicate Campaign</DialogTitle>
+              <DialogDescription>
+                Enter a new name for the duplicated campaign (originally "
+                {campaignToDuplicate?.name}
+                ").
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-2">
+              {/* <Label htmlFor="duplicate-name">New Campaign Name</Label> Replaced by direct use in CampaignFilters */}
+              {/* <Input id="duplicate-name" ... /> */}
+            </div>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsDuplicateDialogOpen(false)}
+                  disabled={isDuplicating}
+                >
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button
+                onClick={handleDuplicateConfirm}
+                disabled={
+                  !isUserLoaded ||
+                  !user ||
+                  isDuplicating ||
+                  isCheckingName ||
+                  !newDuplicateName.trim() ||
+                  !!nameError
+                }
+                className="bg-accent text-primary-foreground hover:bg-accent/90 hover:text-foreground"
+              >
+                {isDuplicating ? (
+                  <>
+                    <Icon iconId="faCircleNotchLight" className="animate-spin mr-2 h-4 w-4" />{' '}
+                    Duplicating...
+                  </>
+                ) : (
+                  'Duplicate Campaign'
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        <div className="md:hidden space-y-4">
+          {displayedCampaigns.map(campaign => {
+            const statusInfo = getCampaignStatusInfo(campaign.status);
+            return (
+              <div
+                key={campaign.id}
+                className="bg-white border border-divider rounded-lg p-4 shadow-sm"
+              >
+                <div className="flex justify-between items-start mb-3">
+                  <Link href={`/campaigns/${campaign.id}`}>
+                    <h3 className="font-semibold text-accent hover:underline">
+                      {campaign.campaignName || 'Untitled Campaign'}
+                    </h3>
+                  </Link>
+                  <span
+                    className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusInfo.class}`}
+                  >
+                    {statusInfo.text}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+                  <div>
+                    <p className="text-gray-500 mb-1">Objective</p>
+                    <p className="font-medium text-gray-900">
+                      {campaign.primaryKPI ? getKpiDisplayName(campaign.primaryKPI) : 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 mb-1">Start Date</p>
+                    <p className="font-medium text-gray-900">
+                      {campaign.startDate ? formatDate(campaign.startDate) : 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 mb-1">End Date</p>
+                    <p className="font-medium text-gray-900">
+                      {campaign.endDate ? formatDate(campaign.endDate) : 'N/A'}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex justify-end space-x-1 border-t border-divider pt-3 mt-3">
+                  <IconButtonAction
+                    iconBaseName="faEye"
+                    hoverColorClass="text-accent"
+                    ariaLabel="View campaign"
+                    onClick={() => handleViewCampaign(campaign.id.toString())}
+                    className="w-8 h-8"
+                  />
+                  <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`}>
+                    <IconButtonAction
+                      iconBaseName="faPenToSquare"
+                      hoverColorClass="text-accent"
+                      ariaLabel="Edit campaign"
+                      className="w-8 h-8"
+                    />
+                  </Link>
+                  <IconButtonAction
+                    iconBaseName="faCopy"
+                    hoverColorClass="text-accent"
+                    ariaLabel="Duplicate campaign"
+                    onClick={() => handleDuplicateClick(campaign)}
+                    className="w-8 h-8"
+                  />
+                  <IconButtonAction
+                    iconBaseName="faTrashCan"
+                    hoverColorClass="text-destructive"
+                    ariaLabel="Delete campaign"
+                    onClick={() => handleDeleteClick(campaign)}
+                    className="w-8 h-8"
+                  />
+                </div>
+              </div>
+            );
+          })}
+          {totalPages > 0 && (
+            <div className="flex items-center justify-between mt-4 px-2 py-3 border-t border-divider">
               <Button
                 variant="outline"
                 size="sm"
@@ -997,8 +1198,7 @@ const ClientCampaignList: React.FC = () => {
                 Previous
               </Button>
               <span className="text-sm text-gray-700">
-                {' '}
-                Page {currentPage} of {totalPages}{' '}
+                Page {currentPage} of {totalPages}
               </span>
               <Button
                 variant="outline"
@@ -1010,166 +1210,8 @@ const ClientCampaignList: React.FC = () => {
                 Next
               </Button>
             </div>
-          </div>
-        </>
-      )}
-      {campaignToDelete && (
-        <ConfirmDeleteDialog
-          isOpen={showDeleteModal}
-          onClose={() => {
-            setShowDeleteModal(false);
-            setCampaignToDelete(null);
-          }}
-          onConfirm={executeDeleteCampaign}
-          itemName={campaignToDelete?.name || 'this item'}
-        />
-      )}
-      <Dialog open={isDuplicateDialogOpen} onOpenChange={setIsDuplicateDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Duplicate Campaign</DialogTitle>
-            <DialogDescription>
-              Enter a new name for the duplicated campaign (originally "{campaignToDuplicate?.name}
-              ").
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4 space-y-2">
-            {/* <Label htmlFor="duplicate-name">New Campaign Name</Label> Replaced by direct use in CampaignFilters */}
-            {/* <Input id="duplicate-name" ... /> */}
-          </div>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button
-                variant="outline"
-                onClick={() => setIsDuplicateDialogOpen(false)}
-                disabled={isDuplicating}
-              >
-                Cancel
-              </Button>
-            </DialogClose>
-            <Button
-              onClick={handleDuplicateConfirm}
-              disabled={
-                !isUserLoaded ||
-                !user ||
-                isDuplicating ||
-                isCheckingName ||
-                !newDuplicateName.trim() ||
-                !!nameError
-              }
-              className="bg-accent text-primary-foreground hover:bg-accent/90 hover:text-foreground"
-            >
-              {isDuplicating ? (
-                <>
-                  <Icon iconId="faCircleNotchLight" className="animate-spin mr-2 h-4 w-4" />{' '}
-                  Duplicating...
-                </>
-              ) : (
-                'Duplicate Campaign'
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      <div className="md:hidden space-y-4">
-        {displayedCampaigns.map(campaign => {
-          const statusInfo = getCampaignStatusInfo(campaign.status);
-          return (
-            <div
-              key={campaign.id}
-              className="bg-white border border-divider rounded-lg p-4 shadow-sm"
-            >
-              <div className="flex justify-between items-start mb-3">
-                <Link href={`/campaigns/${campaign.id}`}>
-                  <h3 className="font-semibold text-accent hover:underline">
-                    {campaign.campaignName || 'Untitled Campaign'}
-                  </h3>
-                </Link>
-                <span
-                  className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusInfo.class}`}
-                >
-                  {statusInfo.text}
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-4 text-sm mb-4">
-                <div>
-                  <p className="text-gray-500 mb-1">Objective</p>
-                  <p className="font-medium text-gray-900">
-                    {campaign.primaryKPI ? getKpiDisplayName(campaign.primaryKPI) : 'N/A'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-500 mb-1">Start Date</p>
-                  <p className="font-medium text-gray-900">
-                    {campaign.startDate ? formatDate(campaign.startDate) : 'N/A'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-500 mb-1">End Date</p>
-                  <p className="font-medium text-gray-900">
-                    {campaign.endDate ? formatDate(campaign.endDate) : 'N/A'}
-                  </p>
-                </div>
-              </div>
-              <div className="flex justify-end space-x-1 border-t border-divider pt-3 mt-3">
-                <IconButtonAction
-                  iconBaseName="faEye"
-                  hoverColorClass="text-accent"
-                  ariaLabel="View campaign"
-                  onClick={() => handleViewCampaign(campaign.id.toString())}
-                  className="w-8 h-8"
-                />
-                <Link href={`/campaigns/wizard/step-1?id=${campaign.id}`}>
-                  <IconButtonAction
-                    iconBaseName="faPenToSquare"
-                    hoverColorClass="text-accent"
-                    ariaLabel="Edit campaign"
-                    className="w-8 h-8"
-                  />
-                </Link>
-                <IconButtonAction
-                  iconBaseName="faCopy"
-                  hoverColorClass="text-accent"
-                  ariaLabel="Duplicate campaign"
-                  onClick={() => handleDuplicateClick(campaign)}
-                  className="w-8 h-8"
-                />
-                <IconButtonAction
-                  iconBaseName="faTrashCan"
-                  hoverColorClass="text-destructive"
-                  ariaLabel="Delete campaign"
-                  onClick={() => handleDeleteClick(campaign)}
-                  className="w-8 h-8"
-                />
-              </div>
-            </div>
-          );
-        })}
-        {totalPages > 0 && (
-          <div className="flex items-center justify-between mt-4 px-2 py-3 border-t border-divider">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className="border-divider"
-            >
-              Previous
-            </Button>
-            <span className="text-sm text-gray-700">
-              Page {currentPage} of {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages || totalPages === 0}
-              className="border-divider"
-            >
-              Next
-            </Button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

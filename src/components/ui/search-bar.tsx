@@ -183,13 +183,14 @@ export function SearchBar({
   };
 
   return (
-    <div className={cn('relative w-full', className)}>
+    <div className={cn('relative w-full', className)} data-cy="search-bar">
       {/* Search Icon */}
       <div
         className={cn(
           'absolute top-1/2 -translate-y-1/2 pointer-events-none', // Added pointer-events-none
           getIconPosition()
         )}
+        data-cy="search-icon"
       >
         <Icon
           iconId="faSearchLight" // Consider making icon prop configurable?
@@ -205,6 +206,7 @@ export function SearchBar({
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
+        data-cy="search-input"
         className={cn(
           getInputHeightClass(),
           getInputPaddingClasses(),
@@ -219,13 +221,17 @@ export function SearchBar({
 
       {/* Loading Spinner or Clear Button */}
       {(isLoading || (showClear && value && value.length > 0)) && (
-        <div className={cn('absolute top-1/2 -translate-y-1/2', getClearPosition())}>
+        <div
+          className={cn('absolute top-1/2 -translate-y-1/2', getClearPosition())}
+          data-cy="search-actions"
+        >
           {isLoading ? (
             <div
               className={cn(
                 'animate-spin rounded-full border-2 border-border border-t-primary', // Use theme colors
                 getIconSize()
               )}
+              data-cy="search-loading"
             />
           ) : (
             <button
@@ -236,6 +242,7 @@ export function SearchBar({
                 'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2' // Add focus ring
               )}
               aria-label="Clear search"
+              data-cy="search-clear"
             >
               <Icon iconId="faTimesLight" className={getIconSize()} />
             </button>

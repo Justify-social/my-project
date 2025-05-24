@@ -127,13 +127,13 @@ export default function ClientDashboard() {
   }
 
   return (
-    <div className="space-y-6 font-body">
+    <div className="space-y-6 font-body" data-cy="dashboard-content">
       {/* Header Row */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-primary font-heading">
+      <div className="flex justify-between items-center" data-cy="dashboard-header">
+        <h1 className="text-3xl font-bold text-primary font-heading" data-cy="dashboard-title">
           {user ? `${user.fullName || user.firstName || 'User'}'s Dashboard` : 'Dashboard'}
         </h1>
-        <Button disabled={!isLoaded || !user} asChild>
+        <Button disabled={!isLoaded || !user} asChild data-cy="new-campaign-button">
           <Link href="/campaigns/wizard/step-1">
             <span className="flex items-center">
               {' '}
@@ -145,15 +145,15 @@ export default function ClientDashboard() {
         </Button>
       </div>
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" data-cy="dashboard-grid">
         {/* Calendar Card - Header Removed */}
-        <Card className="h-full flex flex-col">
+        <Card className="h-full flex flex-col" data-cy="calendar-card">
           {/* <CardHeader>
             <CardTitle>Upcoming Schedule</CardTitle>
           </CardHeader> */}
-          <CardContent className="flex-grow p-4">
+          <CardContent className="flex-grow p-4" data-cy="calendar-content">
             {isLoadingData ? (
-              <div className="space-y-3">
+              <div className="space-y-3" data-cy="calendar-loading">
                 <Skeleton className="h-8 w-3/4" />
                 <Skeleton className="h-6 w-full" />
                 <Skeleton className="h-6 w-full" />
@@ -162,7 +162,10 @@ export default function ClientDashboard() {
             ) : hasEvents ? (
               <CalendarUpcoming events={events} />
             ) : (
-              <div className="flex flex-col items-center justify-center h-full text-center min-h-[200px]">
+              <div
+                className="flex flex-col items-center justify-center h-full text-center min-h-[200px]"
+                data-cy="calendar-empty-state"
+              >
                 <Icon
                   iconId="faCalendarDaysLight"
                   className="w-16 h-16 text-muted-foreground mb-4"
@@ -177,11 +180,11 @@ export default function ClientDashboard() {
         </Card>
 
         {/* Campaigns Table Card - Header Removed */}
-        <Card className="h-full flex flex-col">
+        <Card className="h-full flex flex-col" data-cy="campaigns-card">
           {/* <CardHeader>
             <CardTitle>Upcoming Campaigns</CardTitle>
           </CardHeader> */}
-          <CardContent className="flex-grow p-0">
+          <CardContent className="flex-grow p-0" data-cy="campaigns-content">
             {isLoadingData ? (
               <div className="p-4 space-y-3">
                 {/* Skeleton for table headers */}
