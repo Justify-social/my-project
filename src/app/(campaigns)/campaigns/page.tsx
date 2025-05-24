@@ -813,9 +813,6 @@ const ClientCampaignList: React.FC = () => {
         <h1 className="text-3xl font-bold text-primary font-heading" data-cy="campaigns-title">
           Campaigns
         </h1>
-        <p className="mt-2 text-muted-foreground" data-cy="campaigns-subtitle">
-          Manage and track your brand campaigns
-        </p>
       </div>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">

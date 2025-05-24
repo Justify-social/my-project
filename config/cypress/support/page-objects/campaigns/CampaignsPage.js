@@ -12,7 +12,6 @@ export class CampaignsPage extends BasePage {
     campaignsList: () => cy.get('[data-cy="campaigns-list"]'),
     campaignsHeader: () => cy.get('[data-cy="campaigns-header"]'),
     campaignsTitle: () => cy.get('[data-cy="campaigns-title"]'),
-    campaignsSubtitle: () => cy.get('[data-cy="campaigns-subtitle"]'),
 
     // Action buttons
     filtersButton: () => cy.get('[data-cy="filters-button"]'),
@@ -199,7 +198,6 @@ export class CampaignsPage extends BasePage {
 
   expectPageTitle() {
     this.elements.campaignsTitle().should('contain', 'Campaigns');
-    this.elements.campaignsSubtitle().should('contain', 'Manage and track your brand campaigns');
     return this;
   }
 
