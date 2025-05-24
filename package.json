@@ -64,7 +64,11 @@
     "cy:test": "start-server-and-test start http://localhost:3000 cy:run",
     "cy:test:parallel": "start-server-and-test start http://localhost:3000 cy:run:parallel:local",
     "cy:report": "npx mochawesome-merge config/cypress/reports/*.json > config/cypress/reports/combined-report.json && npx marge config/cypress/reports/combined-report.json --reportDir config/cypress/reports --inline",
-    "cy:report:aggregate": "node config/cypress/scripts/aggregate-parallel-results.js"
+    "cy:report:aggregate": "node config/cypress/scripts/aggregate-parallel-results.js",
+    "cy:report:html": "node config/cypress/scripts/generate-html-report.js",
+    "cy:report:complete": "npm run cy:report:aggregate && npm run cy:report:html",
+    "cy:optimize": "node config/cypress/scripts/optimize-test-execution.js",
+    "cy:analyze": "npm run cy:optimize && npm run cy:report:complete"
   },
   "dependencies": {
     "@algolia/client-search": "^5.25.0",
