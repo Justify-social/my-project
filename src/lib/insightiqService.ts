@@ -72,7 +72,7 @@ interface InsightIQProfileWithAnalytics extends InsightIQProfile {
 }
 
 // Define the expected structure for the analytics response
-interface CreatorProfileAnalyticsResponse {
+interface _CreatorProfileAnalyticsResponse {
   profile: InsightIQProfileWithAnalytics;
 }
 
@@ -712,7 +712,7 @@ export async function fetchDetailedProfile(
       id: string;
       status: string;
       identifier: string;
-      work_platform: any;
+      work_platform: WorkPlatform;
     }>(submitEndpoint, {
       method: 'POST',
       body: JSON.stringify(requestBody),
@@ -747,7 +747,11 @@ export async function fetchDetailedProfile(
       );
 
       try {
-        const analyticsResponse = await makeInsightIQRequest<any>(getEndpoint, {
+        const analyticsResponse = await makeInsightIQRequest<{
+          status: string;
+          profile?: InsightIQProfileWithAnalytics;
+          [key: string]: unknown;
+        }>(getEndpoint, {
           method: 'GET',
         });
 
@@ -978,8 +982,8 @@ export async function submitEmailLookupRequest(
  * Endpoint: GET /v1/social/creators/email-lookup/{id}
  */
 export async function getEmailLookupResults(jobId: string): Promise<{
-  lookupReport: any;
-  matchedEmails: any[];
+  lookupReport: EmailLookupReport | null;
+  matchedEmails: MatchedEmail[];
   nonMatchedEmails: string[];
   error?: string;
 } | null> {
@@ -988,8 +992,8 @@ export async function getEmailLookupResults(jobId: string): Promise<{
 
   try {
     const response = await makeInsightIQRequest<{
-      lookup_report: any;
-      matched_emails: any[];
+      lookup_report: EmailLookupReport;
+      matched_emails: MatchedEmail[];
       non_matched_emails: string[];
     }>(endpoint, { method: 'GET' });
 
@@ -1036,7 +1040,7 @@ export async function submitAudienceOverlapRequest(
       id: string;
       identifiers: string[];
       status: string;
-      work_platform: any;
+      work_platform: WorkPlatform;
     }>(endpoint, {
       method: 'POST',
       body: JSON.stringify(requestBody),
@@ -1065,12 +1069,16 @@ export async function submitAudienceOverlapRequest(
  * Get audience overlap analysis results.
  * Endpoint: GET /v1/social/creators/audience-overlap/{id}
  */
-export async function getAudienceOverlapResults(jobId: string): Promise<any | null> {
+export async function getAudienceOverlapResults(
+  jobId: string
+): Promise<AudienceOverlapResponse | null> {
   logger.info(`[InsightIQService] Fetching audience overlap results for job: ${jobId}`);
   const endpoint = `/v1/social/creators/audience-overlap/${jobId}`;
 
   try {
-    const response = await makeInsightIQRequest<any>(endpoint, { method: 'GET' });
+    const response = await makeInsightIQRequest<AudienceOverlapResponse>(endpoint, {
+      method: 'GET',
+    });
     if (response) {
       logger.info(`[InsightIQService] Audience overlap results retrieved successfully`);
       return response;
@@ -1098,3 +1106,26 @@ export const insightIQService = {
   submitAudienceOverlapRequest,
   getAudienceOverlapResults,
 };
+
+// Type for work platform information
+interface WorkPlatform {
+  id: string;
+  name: string;
+  logo_url: string;
+}
+
+// Type for email lookup response structures
+interface EmailLookupReport {
+  [key: string]: unknown;
+}
+
+interface MatchedEmail {
+  email: string;
+  profiles?: unknown[];
+  [key: string]: unknown;
+}
+
+// Type for audience overlap response structures
+interface AudienceOverlapResponse {
+  [key: string]: unknown;
+}

@@ -27,7 +27,7 @@ const isProtectedRoute = createRouteMatcher([
 export default clerkMiddleware(async (auth, req) => {
   const currentPath = req.nextUrl.pathname;
   const isDevelopment = process.env.NODE_ENV === 'development';
-  const isProduction = process.env.VERCEL_ENV === 'production';
+  const _isProduction = process.env.VERCEL_ENV === 'production';
 
   // Enhanced logging for development
   if (isDevelopment) {

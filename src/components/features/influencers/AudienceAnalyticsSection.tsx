@@ -61,14 +61,14 @@ interface InsightIQData {
 }
 
 // Helper function to get credibility color based on design system
-const getCredibilityColor = (score: number): string => {
+const _getCredibilityColor = (score: number): string => {
   if (score >= 80) return 'text-success';
   if (score >= 60) return 'text-warning';
   return 'text-destructive';
 };
 
 // Helper function to get follower type badge variant
-const getFollowerTypeBadge = (type: string, value: number) => {
+const _getFollowerTypeBadge = (type: string, value: number) => {
   const percentage = formatPercentage(value);
   switch (type) {
     case 'REAL':
@@ -273,7 +273,7 @@ const AudienceAnalyticsSection: React.FC<AudienceAnalyticsSectionProps> = ({ inf
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {followerTypes.map((type: any, index: number) => {
+        {followerTypes.map((type: FollowerType, index: number) => {
           const isPositive = ['REAL', 'INFLUENCERS'].includes(type.name);
           const isNegative = ['MASS_FOLLOWERS', 'SUSPICIOUS'].includes(type.name);
 
@@ -335,7 +335,7 @@ const AudienceAnalyticsSection: React.FC<AudienceAnalyticsSectionProps> = ({ inf
         <div>
           <div className="text-sm font-medium text-primary mb-3">Top Countries</div>
           <div className="space-y-3">
-            {topCountries.map((country: any, index: number) => (
+            {topCountries.map((country: CountryData, index: number) => (
               <div key={index} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-6 rounded border border-border flex items-center justify-center text-xs font-medium">
@@ -361,7 +361,7 @@ const AudienceAnalyticsSection: React.FC<AudienceAnalyticsSectionProps> = ({ inf
         <div>
           <div className="text-sm font-medium text-primary mb-3">Top Cities</div>
           <div className="space-y-3">
-            {topCities.map((city: any, index: number) => (
+            {topCities.map((city: CityData, index: number) => (
               <div key={index} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Icon iconId="faBuildingLight" className="h-4 w-4 text-muted-foreground" />

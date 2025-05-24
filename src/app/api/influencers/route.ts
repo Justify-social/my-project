@@ -7,7 +7,7 @@ import {
   MarketplaceInfluencer as _PrismaMarketplaceInfluencer, // Prefixed
 } from '@prisma/client'; // Assuming these are actual exports if needed by commented code but aliasing to avoid conflict if main ones commented.
 import { z } from 'zod';
-// import { InfluencerSummary } from '@/types/influencer'; // Commented out InfluencerSummary
+import { InfluencerSummary } from '@/types/influencer'; // Import InfluencerSummary type
 // import { calculatePagination } from '@/lib/utils'; // Commented out calculatePagination
 import { PlatformEnum } from '@/types/enums'; // Added PlatformEnum import
 import { logger as _logger } from '@/utils/logger'; // Add logger import - Prefixed
@@ -91,7 +91,7 @@ export async function GET(req: NextRequest) {
     if (result.influencers && result.influencers.length > 0) {
       _logger.debug('[API /influencers] Sample of generated influencer summaries for list:', {
         // Wrap the array in an object property
-        influencerSamples: result.influencers.slice(0, 3).map((inf: any) => ({
+        influencerSamples: result.influencers.slice(0, 3).map((inf: InfluencerSummary) => ({
           id: inf.id,
           handle: inf.handle,
           platform: inf.platforms ? inf.platforms[0] : 'N/A', // Show the PlatformEnum used

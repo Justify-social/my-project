@@ -9,6 +9,12 @@ import { getInsightIQWorkPlatformId as _getInsightIQWorkPlatformId } from '@/lib
 import { Platform as PlatformBackend } from '@prisma/client';
 import { getProfileUniqueId as _getProfileUniqueId } from '@/lib/insightiqService';
 
+// Type for contact details from InsightIQ API
+interface ContactDetail {
+  type: string;
+  value: string;
+}
+
 // Extended interface for InsightIQ profile with all analytics fields
 type ExtendedInsightIQProfile = InsightIQProfile & {
   // Audience analytics fields
@@ -238,15 +244,21 @@ export const mapInsightIQProfileToInfluencerProfileData = (
   // Extract contact details from InsightIQ API response
   const contactDetails = profile.contact_details || [];
   const extractedContacts = {
-    email: contactDetails.find((c: any) => c.type?.toLowerCase().includes('email'))?.value || null,
-    phone: contactDetails.find((c: any) => c.type?.toLowerCase().includes('phone'))?.value || null,
+    email:
+      contactDetails.find((c: ContactDetail) => c.type?.toLowerCase().includes('email'))?.value ||
+      null,
+    phone:
+      contactDetails.find((c: ContactDetail) => c.type?.toLowerCase().includes('phone'))?.value ||
+      null,
     twitter:
-      contactDetails.find((c: any) => c.type?.toLowerCase().includes('twitter'))?.value || null,
+      contactDetails.find((c: ContactDetail) => c.type?.toLowerCase().includes('twitter'))?.value ||
+      null,
     website:
-      contactDetails.find((c: any) => c.type?.toLowerCase().includes('website'))?.value || null,
+      contactDetails.find((c: ContactDetail) => c.type?.toLowerCase().includes('website'))?.value ||
+      null,
     other:
       contactDetails.filter(
-        (c: any) =>
+        (c: ContactDetail) =>
           !['email', 'phone', 'twitter', 'website'].some(type =>
             c.type?.toLowerCase().includes(type)
           )
