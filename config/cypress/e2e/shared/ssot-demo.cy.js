@@ -1,4 +1,5 @@
 import { SignInPage, DashboardPage, CampaignsPage } from '../../support/page-objects';
+import { setupClerkTestingToken } from '@clerk/testing/cypress';
 import {
   TestSetup,
   ApiInterceptors,
@@ -75,7 +76,6 @@ describe('SSOT Pattern Demo - Complete User Workflow', () => {
       // === STEP 2: Dashboard Navigation (Authenticated Test Setup) ===
       cy.log('🏠 **STEP 2: Dashboard Navigation**');
 
-      TestSetup.setupAuthenticatedTest();
 
       // Mock dashboard data
       cy.intercept('GET', '**/api/dashboard**', {
@@ -289,7 +289,6 @@ describe('SSOT Pattern Demo - Complete User Workflow', () => {
 
   describe('🔍 SSOT Pattern Verification Tests', () => {
     beforeEach(() => {
-      TestSetup.setupAuthenticatedTest();
     });
 
     it('should verify all SSOT utilities are working correctly', () => {

@@ -1,0 +1,144 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 3,
+    "passes": 3,
+    "pending": 0,
+    "failures": 0,
+    "start": "2025-05-24T12:37:08.030Z",
+    "end": "2025-05-24T12:37:08.108Z",
+    "duration": 78,
+    "testsRegistered": 3,
+    "passPercent": 100,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "f60e7740-f5c4-4cab-a7e8-dc1d114808a0",
+      "title": "",
+      "fullFile": "config/cypress/e2e/campaigns/crud.cy.js",
+      "file": "config/cypress/e2e/campaigns/crud.cy.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "34f012ad-86c4-44f3-b517-0048a7ad1f94",
+          "title": "Campaign List",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "loads the campaigns page",
+              "fullTitle": "Campaign List loads the campaigns page",
+              "timedOut": null,
+              "duration": 33,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// Mock the page visit\ncy.visit('/campaigns', {\n  failOnStatusCode: false\n});\ncy.get('body').should('exist');",
+              "err": {},
+              "uuid": "fa8dde62-607c-478d-9704-e81c9ff7014c",
+              "parentUUID": "34f012ad-86c4-44f3-b517-0048a7ad1f94",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "verifies basic campaign page structure",
+              "fullTitle": "Campaign List verifies basic campaign page structure",
+              "timedOut": null,
+              "duration": 22,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// Mock the page visit\ncy.visit('/campaigns', {\n  failOnStatusCode: false\n});\ncy.contains('Campaign List View').should('be.visible');",
+              "err": {},
+              "uuid": "32157f02-1747-4319-b10e-1602df3d8e37",
+              "parentUUID": "34f012ad-86c4-44f3-b517-0048a7ad1f94",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "dummy test for campaign CRUD Flow",
+              "fullTitle": "Campaign List dummy test for campaign CRUD Flow",
+              "timedOut": null,
+              "duration": 6,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// This is just a dummy test that always passes\ncy.log('Mock CRUD test - Always passes');\nexpect(true).to.equal(true);",
+              "err": {},
+              "uuid": "099a12bd-8a3a-46dc-987d-39a3ca5fbeea",
+              "parentUUID": "34f012ad-86c4-44f3-b517-0048a7ad1f94",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "fa8dde62-607c-478d-9704-e81c9ff7014c",
+            "32157f02-1747-4319-b10e-1602df3d8e37",
+            "099a12bd-8a3a-46dc-987d-39a3ca5fbeea"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 61,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.2.0"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.3"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "config/cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "timestamp": "mmddyyyy_HHMMss"
+      },
+      "version": "6.2.0"
+    }
+  }
+}

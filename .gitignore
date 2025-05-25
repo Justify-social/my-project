@@ -61,3 +61,10 @@ src/**/__tests__/**/*.test.jsx
 
 # Ignore build artifacts and large generated files
 BUILD/
+
+# Cypress
+cypress/videos
+cypress/screenshots
+
+# Environment files (including .env which contains API keys)
+.env*

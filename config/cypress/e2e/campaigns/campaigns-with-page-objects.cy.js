@@ -1,4 +1,5 @@
 import { CampaignsPage } from '../../support/page-objects';
+import { setupClerkTestingToken } from '@clerk/testing/cypress';
 import {
   TestSetup,
   ApiInterceptors,
@@ -13,7 +14,6 @@ describe('Campaigns Page - Using Page Objects (SSOT Pattern)', () => {
 
   beforeEach(() => {
     // Use SSOT test setup for authenticated tests
-    TestSetup.setupAuthenticatedTest();
 
     // Initialize page object
     campaignsPage = new CampaignsPage();
@@ -49,6 +49,7 @@ describe('Campaigns Page - Using Page Objects (SSOT Pattern)', () => {
 
   describe('Page Loading and Core Elements', () => {
     it('should load campaigns page with all core elements', () => {
+      setupClerkTestingToken();
       campaignsPage.logAction('Loading campaigns page');
 
       // Mock campaigns data
@@ -78,6 +79,7 @@ describe('Campaigns Page - Using Page Objects (SSOT Pattern)', () => {
     });
 
     it('should display correct table headers', () => {
+      setupClerkTestingToken();
       campaignsPage.visit().expectTableHeaders();
 
       // Verify all sortable columns
@@ -89,12 +91,15 @@ describe('Campaigns Page - Using Page Objects (SSOT Pattern)', () => {
     });
 
     it('should pass accessibility checks', () => {
+      setupClerkTestingToken();
       campaignsPage.visit().checkAccessibility();
     });
   });
 
   describe('Campaign Table Display and Data', () => {
     beforeEach(() => {
+      setupClerkTestingToken();
+
       // Mock campaigns data for all tests in this describe block
       cy.intercept('GET', '**/api/campaigns**', {
         statusCode: 200,
@@ -138,6 +143,8 @@ describe('Campaigns Page - Using Page Objects (SSOT Pattern)', () => {
 
   describe('Campaign CRUD Operations', () => {
     beforeEach(() => {
+      setupClerkTestingToken();
+
       cy.intercept('GET', '**/api/campaigns**', {
         statusCode: 200,
         body: {
@@ -226,6 +233,8 @@ describe('Campaigns Page - Using Page Objects (SSOT Pattern)', () => {
 
   describe('Table Sorting and Filtering', () => {
     beforeEach(() => {
+      setupClerkTestingToken();
+
       cy.intercept('GET', '**/api/campaigns**', {
         statusCode: 200,
         body: {
@@ -341,6 +350,7 @@ describe('Campaigns Page - Using Page Objects (SSOT Pattern)', () => {
     });
 
     it('should display correctly on mobile devices', () => {
+      setupClerkTestingToken();
       cy.viewport('iphone-x');
 
       campaignsPage.visit().expectToBeOnCampaignsPage();
@@ -353,6 +363,7 @@ describe('Campaigns Page - Using Page Objects (SSOT Pattern)', () => {
     });
 
     it('should display correctly on tablet devices', () => {
+      setupClerkTestingToken();
       cy.viewport('ipad-2');
 
       campaignsPage.visit().expectToBeOnCampaignsPage();
@@ -367,6 +378,7 @@ describe('Campaigns Page - Using Page Objects (SSOT Pattern)', () => {
 
   describe('Error Handling and Edge Cases', () => {
     it('should handle empty campaign list gracefully', () => {
+      setupClerkTestingToken();
       campaignsPage.logAction('Testing empty state');
 
       // Mock empty response
@@ -387,6 +399,7 @@ describe('Campaigns Page - Using Page Objects (SSOT Pattern)', () => {
     });
 
     it('should handle API errors gracefully', () => {
+      setupClerkTestingToken();
       campaignsPage.logAction('Testing API error handling');
 
       // Mock API error
@@ -404,6 +417,7 @@ describe('Campaigns Page - Using Page Objects (SSOT Pattern)', () => {
     });
 
     it('should handle slow loading gracefully', () => {
+      setupClerkTestingToken();
       campaignsPage.logAction('Testing slow loading');
 
       // Mock slow response
@@ -425,6 +439,7 @@ describe('Campaigns Page - Using Page Objects (SSOT Pattern)', () => {
     });
 
     it('should handle pagination for large datasets', () => {
+      setupClerkTestingToken();
       // Generate large dataset
       const largeCampaignSet = Array.from({ length: 50 }, (_, i) =>
         TestDataGenerators.generateCampaign({
@@ -453,6 +468,7 @@ describe('Campaigns Page - Using Page Objects (SSOT Pattern)', () => {
 
   describe('Performance and Analytics', () => {
     it('should load within performance budget', () => {
+      setupClerkTestingToken();
       campaignsPage.logAction('Testing performance budget');
 
       cy.intercept('GET', '**/api/campaigns**', {
@@ -469,6 +485,7 @@ describe('Campaigns Page - Using Page Objects (SSOT Pattern)', () => {
     });
 
     it('should track user interactions for analytics', () => {
+      setupClerkTestingToken();
       cy.intercept('GET', '**/api/campaigns**', {
         statusCode: 200,
         body: {

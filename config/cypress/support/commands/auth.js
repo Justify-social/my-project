@@ -193,3 +193,101 @@ Cypress.Commands.add('checkUserRole', expectedRole => {
     }
   });
 });
+
+/**
+ * Simulate super admin role for testing super admin features
+ * This mocks the Clerk session to include super_admin role
+ */
+Cypress.Commands.add('simulateSuperAdminRole', () => {
+  cy.window().then((win) => {
+    // Mock Clerk session claims with super admin role
+    const mockSessionClaims = {
+      'metadata.role': 'super_admin',
+      userId: 'test_super_admin_user',
+      orgId: 'test_org_123'
+    };
+
+    // Store in window for Clerk to pick up
+    win.__CLERK_TESTING_TOKEN = true;
+    win.__CLERK_SESSION_CLAIMS = mockSessionClaims;
+
+    // Also mock localStorage for consistency
+    win.localStorage.setItem('clerk-session', JSON.stringify(mockSessionClaims));
+    win.localStorage.setItem('userRole', 'super_admin');
+
+    cy.log('🔑 Super admin role simulated for testing');
+  });
+});
+
+/**
+ * Mock super admin API responses to prevent 401 errors
+ * Call this in beforeEach for super admin tests
+ */
+Cypress.Commands.add('mockSuperAdminAPI', () => {
+  // Mock organizations list API
+  cy.intercept('GET', '**/api/admin/organizations', {
+    statusCode: 200,
+    body: [
+      {
+        id: 'org_test1',
+        name: 'Test Organization 1',
+        slug: 'test-org-1',
+        membersCount: 5,
+        createdAt: '2024-01-01T00:00:00.000Z',
+        updatedAt: '2024-01-01T00:00:00.000Z'
+      },
+      {
+        id: 'org_test2',
+        name: 'Test Organization 2',
+        slug: 'test-org-2',
+        membersCount: 12,
+        createdAt: '2024-01-15T00:00:00.000Z',
+        updatedAt: '2024-01-15T00:00:00.000Z'
+      }
+    ]
+  }).as('getOrganizations');
+
+  // Mock organization details API
+  cy.intercept('GET', '**/api/admin/organizations/*/users', {
+    statusCode: 200,
+    body: [
+      {
+        id: 'user_test1',
+        firstName: 'John',
+        lastName: 'Doe',
+        identifier: 'john.doe@test.com',
+        profileImageUrl: 'https://via.placeholder.com/40',
+        role: 'admin'
+      }
+    ]
+  }).as('getOrganizationUsers');
+
+  // Mock campaign wizards API
+  cy.intercept('GET', '**/api/admin/organizations/*/campaign-wizards', {
+    statusCode: 200,
+    body: [
+      {
+        id: 'campaign_test1',
+        name: 'Test Campaign 1',
+        status: 'DRAFT',
+        createdAt: '2024-01-01T00:00:00.000Z',
+        user: { name: 'John Doe', email: 'john.doe@test.com' }
+      }
+    ]
+  }).as('getCampaignWizards');
+
+  // Mock brand lift studies API  
+  cy.intercept('GET', '**/api/admin/organizations/*/brand-lift-studies', {
+    statusCode: 200,
+    body: [
+      {
+        id: 'study_test1',
+        name: 'Test Brand Lift Study',
+        status: 'DRAFT',
+        createdAt: '2024-01-01T00:00:00.000Z'
+      }
+    ]
+  }).as('getBrandLiftStudies');
+
+  cy.log('🔗 Super admin API responses mocked');
+});

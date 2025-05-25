@@ -1,0 +1,225 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 7,
+    "passes": 6,
+    "pending": 0,
+    "failures": 1,
+    "start": "2025-05-24T11:25:35.432Z",
+    "end": "2025-05-24T11:26:06.131Z",
+    "duration": 30699,
+    "testsRegistered": 7,
+    "passPercent": 85.71428571428571,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "5d359d12-7b9d-4a2e-a978-2a1eac588a96",
+      "title": "",
+      "fullFile": "config/cypress/e2e/brand-lift/brand-lift-minimal.cy.js",
+      "file": "config/cypress/e2e/brand-lift/brand-lift-minimal.cy.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "0ce0b41a-8b6d-41cd-94db-5b61f2b665ef",
+          "title": "Brand Lift Module - Minimal Verification",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "should successfully create and use all Brand Lift page objects",
+              "fullTitle": "Brand Lift Module - Minimal Verification should successfully create and use all Brand Lift page objects",
+              "timedOut": null,
+              "duration": 26,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// Create all page objects\nconst brandLiftPage = new _pageObjects.BrandLiftPage();\nconst surveyDesignPage = new _pageObjects.SurveyDesignPage();\nconst campaignSelectionPage = new _pageObjects.CampaignSelectionPage();\nconst progressPage = new _pageObjects.ProgressPage();\nconst approvalPage = new _pageObjects.ApprovalPage();\n// Verify they can be instantiated\nexpect(brandLiftPage).to.be.instanceOf(_pageObjects.BrandLiftPage);\nexpect(surveyDesignPage).to.be.instanceOf(_pageObjects.SurveyDesignPage);\nexpect(campaignSelectionPage).to.be.instanceOf(_pageObjects.CampaignSelectionPage);\nexpect(progressPage).to.be.instanceOf(_pageObjects.ProgressPage);\nexpect(approvalPage).to.be.instanceOf(_pageObjects.ApprovalPage);\n// Verify they have BasePage methods\nexpect(brandLiftPage.visit).to.exist;\nexpect(surveyDesignPage.logAction).to.exist;\nexpect(campaignSelectionPage.elements).to.exist;\nexpect(progressPage.pageUrl).to.exist;\nexpect(approvalPage.pageTitle).to.exist;\ncy.log('✅ All Brand Lift page objects created successfully');\ncy.log('✅ SSOT implementation working correctly');\ncy.log('✅ Step 14: Brand Lift Module - COMPLETE');",
+              "err": {},
+              "uuid": "496086ae-be9d-4e07-8aad-c760c2b7283c",
+              "parentUUID": "0ce0b41a-8b6d-41cd-94db-5b61f2b665ef",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "should verify SSOT exports are working",
+              "fullTitle": "Brand Lift Module - Minimal Verification should verify SSOT exports are working",
+              "timedOut": null,
+              "duration": 12,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// Test that our central exports file is working\ncy.wrap({\n  BrandLiftPage: _pageObjects.BrandLiftPage,\n  SurveyDesignPage: _pageObjects.SurveyDesignPage,\n  CampaignSelectionPage: _pageObjects.CampaignSelectionPage,\n  ProgressPage: _pageObjects.ProgressPage,\n  ApprovalPage: _pageObjects.ApprovalPage\n}).should('exist');\ncy.log('✅ Central exports from page-objects/index.js working');\ncy.log('✅ SSOT architecture verified');",
+              "err": {},
+              "uuid": "6d8eafc1-d0d6-42ab-b70a-60a12f71b3ec",
+              "parentUUID": "0ce0b41a-8b6d-41cd-94db-5b61f2b665ef",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "should have correct page URLs configured",
+              "fullTitle": "Brand Lift Module - Minimal Verification should have correct page URLs configured",
+              "timedOut": null,
+              "duration": 7,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "const brandLiftPage = new _pageObjects.BrandLiftPage();\nconst surveyDesignPage = new _pageObjects.SurveyDesignPage();\nconst campaignSelectionPage = new _pageObjects.CampaignSelectionPage();\nconst progressPage = new _pageObjects.ProgressPage();\nconst approvalPage = new _pageObjects.ApprovalPage();\nexpect(brandLiftPage.pageUrl).to.equal('/brand-lift/campaign-selection');\nexpect(surveyDesignPage.pageUrl).to.equal('/brand-lift/survey-design');\nexpect(campaignSelectionPage.pageUrl).to.equal('/brand-lift/campaign-review-setup');\nexpect(progressPage.pageUrl).to.equal('/brand-lift/progress');\nexpect(approvalPage.pageUrl).to.equal('/brand-lift/approval');\ncy.log('✅ All page URLs configured correctly');",
+              "err": {},
+              "uuid": "896bfb53-0633-4faa-9c17-dfecfb58ff61",
+              "parentUUID": "0ce0b41a-8b6d-41cd-94db-5b61f2b665ef",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "should have proper page titles configured",
+              "fullTitle": "Brand Lift Module - Minimal Verification should have proper page titles configured",
+              "timedOut": null,
+              "duration": 7,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "const brandLiftPage = new _pageObjects.BrandLiftPage();\nconst surveyDesignPage = new _pageObjects.SurveyDesignPage();\nconst campaignSelectionPage = new _pageObjects.CampaignSelectionPage();\nconst progressPage = new _pageObjects.ProgressPage();\nconst approvalPage = new _pageObjects.ApprovalPage();\nexpect(brandLiftPage.pageTitle).to.equal('Brand Lift');\nexpect(surveyDesignPage.pageTitle).to.equal('Survey Design');\nexpect(campaignSelectionPage.pageTitle).to.equal('Campaign Review & Study Setup');\nexpect(progressPage.pageTitle).to.equal('Brand Lift Study Progress');\nexpect(approvalPage.pageTitle).to.equal('Survey Approval');\ncy.log('✅ All page titles configured correctly');",
+              "err": {},
+              "uuid": "86bc51d8-ef45-44d7-bb93-e1cbe74d6803",
+              "parentUUID": "0ce0b41a-8b6d-41cd-94db-5b61f2b665ef",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "should have elements defined for all page objects",
+              "fullTitle": "Brand Lift Module - Minimal Verification should have elements defined for all page objects",
+              "timedOut": null,
+              "duration": 9,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "const pageObjects = [new _pageObjects.BrandLiftPage(), new _pageObjects.SurveyDesignPage(), new _pageObjects.CampaignSelectionPage(), new _pageObjects.ProgressPage(), new _pageObjects.ApprovalPage()];\npageObjects.forEach((pageObj, index) => {\n  expect(pageObj.elements).to.exist;\n  expect(typeof pageObj.elements).to.equal('object');\n  cy.log(`✅ Page object ${index + 1} has elements defined`);\n});",
+              "err": {},
+              "uuid": "46125a5e-46e2-4579-9243-b8a8a2a86d16",
+              "parentUUID": "0ce0b41a-8b6d-41cd-94db-5b61f2b665ef",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "should verify method chaining patterns work correctly",
+              "fullTitle": "Brand Lift Module - Minimal Verification should verify method chaining patterns work correctly",
+              "timedOut": null,
+              "duration": 10169,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "const brandLiftPage = new _pageObjects.BrandLiftPage();\n// Test that methods return the page object for chaining\nconst result = brandLiftPage.expectToBeOnBrandLiftPage();\nexpect(result).to.equal(brandLiftPage);\ncy.log('✅ Method chaining working correctly');\ncy.log('✅ Fluent interface patterns implemented');",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 10000ms: expected 'about:blank' to include '/brand-lift'",
+                "estack": "AssertionError: Timed out retrying after 10000ms: expected 'about:blank' to include '/brand-lift'\n    at BrandLiftPage.expectToBeOnBrandLiftPage (webpack://my-project/./config/cypress/support/page-objects/brand-lift/BrandLiftPage.js:186:17)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/brand-lift/brand-lift-minimal.cy.js:110:37)",
+                "diff": null
+              },
+              "uuid": "0419ee72-ac6b-42dc-ae6c-12172df1c5cd",
+              "parentUUID": "0ce0b41a-8b6d-41cd-94db-5b61f2b665ef",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "should have comprehensive element selectors",
+              "fullTitle": "Brand Lift Module - Minimal Verification should have comprehensive element selectors",
+              "timedOut": null,
+              "duration": 16,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "const pageObjects = [{\n  name: 'BrandLiftPage',\n  obj: new _pageObjects.BrandLiftPage()\n}, {\n  name: 'SurveyDesignPage',\n  obj: new _pageObjects.SurveyDesignPage()\n}, {\n  name: 'CampaignSelectionPage',\n  obj: new _pageObjects.CampaignSelectionPage()\n}, {\n  name: 'ProgressPage',\n  obj: new _pageObjects.ProgressPage()\n}, {\n  name: 'ApprovalPage',\n  obj: new _pageObjects.ApprovalPage()\n}];\npageObjects.forEach(({\n  name,\n  obj\n}) => {\n  const elementCount = Object.keys(obj.elements).length;\n  expect(elementCount).to.be.greaterThan(10); // Each page should have substantial element coverage\n  cy.log(`✅ ${name} has ${elementCount} element selectors`);\n});",
+              "err": {},
+              "uuid": "8d7143f7-827f-4831-a10f-ade836792fd5",
+              "parentUUID": "0ce0b41a-8b6d-41cd-94db-5b61f2b665ef",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "496086ae-be9d-4e07-8aad-c760c2b7283c",
+            "6d8eafc1-d0d6-42ab-b70a-60a12f71b3ec",
+            "896bfb53-0633-4faa-9c17-dfecfb58ff61",
+            "86bc51d8-ef45-44d7-bb93-e1cbe74d6803",
+            "46125a5e-46e2-4579-9243-b8a8a2a86d16",
+            "8d7143f7-827f-4831-a10f-ade836792fd5"
+          ],
+          "failures": [
+            "0419ee72-ac6b-42dc-ae6c-12172df1c5cd"
+          ],
+          "pending": [],
+          "skipped": [],
+          "duration": 10246,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.2.0"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.3"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "config/cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "timestamp": "mmddyyyy_HHMMss"
+      },
+      "version": "6.2.0"
+    }
+  }
+}

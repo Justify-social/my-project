@@ -1,0 +1,509 @@
+{
+  "stats": {
+    "suites": 9,
+    "tests": 12,
+    "passes": 4,
+    "pending": 0,
+    "failures": 8,
+    "start": "2025-05-24T12:57:02.015Z",
+    "end": "2025-05-24T13:01:22.232Z",
+    "duration": 260217,
+    "testsRegistered": 12,
+    "passPercent": 33.33333333333333,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "f10ad9b2-26d0-4229-8567-633c28220077",
+      "title": "",
+      "fullFile": "config/cypress/e2e/dashboard/interactions.cy.js",
+      "file": "config/cypress/e2e/dashboard/interactions.cy.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "10031c53-22e2-4550-982d-fcf5c7ad34a3",
+          "title": "Dashboard User Interactions",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [],
+          "suites": [
+            {
+              "uuid": "908227d5-d764-4259-ae68-54bd2b141112",
+              "title": "Timeframe Selection",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "allows changing the timeframe filter",
+                  "fullTitle": "Dashboard User Interactions Timeframe Selection allows changing the timeframe filter",
+                  "timedOut": null,
+                  "duration": 10634,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Select different timeframes and verify the selection changes\ncy.get('select').select('Last 90 days');\ncy.get('select').should('have.value', 'Last 90 days');\ncy.get('select').select('Last 6 months');\ncy.get('select').should('have.value', 'Last 6 months');\ncy.get('select').select('Last year');\ncy.get('select').should('have.value', 'Last year');\ncy.get('select').select('Custom range');\ncy.get('select').should('have.value', 'Custom range');\n// If a date picker appears when selecting custom range, test that too\ncy.get('body').then($body => {\n  if ($body.find('[data-cy=\"date-picker\"]').length > 0) {\n    cy.get('[data-cy=\"date-picker\"]').should('be.visible');\n  }\n});",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `select`, but never found it.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `select`, but never found it.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/interactions.cy.js:13:9)",
+                    "diff": null
+                  },
+                  "uuid": "3f6cada8-76a7-4a2e-8ef0-d8543c313df4",
+                  "parentUUID": "908227d5-d764-4259-ae68-54bd2b141112",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "3f6cada8-76a7-4a2e-8ef0-d8543c313df4"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 10634,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "bb95e7fb-3f67-4de7-9e23-790ef655b9e5",
+              "title": "Campaign Calendar Navigation",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "allows navigating between months",
+                  "fullTitle": "Dashboard User Interactions Campaign Calendar Navigation allows navigating between months",
+                  "timedOut": null,
+                  "duration": 10690,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Find calendar navigation buttons\ncy.get('[data-cy=\"calendar-dashboard\"]').within(() => {\n  // Get the current month displayed\n  cy.get('[data-cy=\"calendar-month-title\"]').invoke('text').as('initialMonth');\n  // Click next month\n  cy.get('button[aria-label=\"Next month\"]').click();\n  // Verify month changed\n  cy.get('[data-cy=\"calendar-month-title\"]').invoke('text').as('nextMonth');\n  cy.get('@initialMonth').then(initialMonth => {\n    cy.get('@nextMonth').should('not.equal', initialMonth);\n  });\n  // Click previous month\n  cy.get('button[aria-label=\"Previous month\"]').click();\n  // Verify month returned to initial\n  cy.get('[data-cy=\"calendar-month-title\"]').invoke('text').as('returnedMonth');\n  cy.get('@initialMonth').then(initialMonth => {\n    cy.get('@returnedMonth').should('equal', initialMonth);\n  });\n});",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"calendar-dashboard\"]`, but never found it.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"calendar-dashboard\"]`, but never found it.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/interactions.cy.js:37:9)",
+                    "diff": null
+                  },
+                  "uuid": "a72d627d-ffb1-4287-86bf-6ca59873333a",
+                  "parentUUID": "bb95e7fb-3f67-4de7-9e23-790ef655b9e5",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "shows campaign events on the calendar",
+                  "fullTitle": "Dashboard User Interactions Campaign Calendar Navigation shows campaign events on the calendar",
+                  "timedOut": null,
+                  "duration": 10856,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Find calendar events\ncy.get('[data-cy=\"calendar-dashboard\"]').within(() => {\n  cy.get('.calendar-event').should('exist');\n  // Hover over an event to see details\n  cy.get('.calendar-event').first().trigger('mouseover');\n  // Check if tooltip appears\n  cy.get('body').then($body => {\n    if ($body.find('.event-tooltip').length > 0) {\n      cy.get('.event-tooltip').should('be.visible');\n      cy.get('.event-tooltip').should('contain', 'Campaign');\n    }\n  });\n});",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"calendar-dashboard\"]`, but never found it.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"calendar-dashboard\"]`, but never found it.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/interactions.cy.js:63:9)",
+                    "diff": null
+                  },
+                  "uuid": "9e5ef193-b6b6-448d-9e84-6a67bf7cde62",
+                  "parentUUID": "bb95e7fb-3f67-4de7-9e23-790ef655b9e5",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "a72d627d-ffb1-4287-86bf-6ca59873333a",
+                "9e5ef193-b6b6-448d-9e84-6a67bf7cde62"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 21546,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "81e55d29-8cd4-406b-90b1-97f3725ef2a5",
+              "title": "Chart Interactions",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "shows tooltips on chart hover",
+                  "fullTitle": "Dashboard User Interactions Chart Interactions shows tooltips on chart hover",
+                  "timedOut": null,
+                  "duration": 10866,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Find performance charts\ncy.get('[data-cy=\"chart-card\"]').first().within(() => {\n  // Hover over a chart point\n  cy.get('svg').then($svg => {\n    // Find any chart elements like lines, bars, or points\n    const chartElements = $svg.find('path, circle, rect').filter((i, el) => {\n      var _el$getAttribute;\n      // Filter out axis lines and other non-data elements\n      return !el.classList.contains('axis') && !el.classList.contains('grid') && !((_el$getAttribute = el.getAttribute('stroke-width')) !== null && _el$getAttribute !== void 0 && _el$getAttribute.includes('2'));\n    });\n    if (chartElements.length) {\n      // Hover over the first data element\n      cy.wrap(chartElements).first().trigger('mouseover', {\n        force: true\n      });\n      // Check if tooltip appears\n      cy.get('body').then($body => {\n        if ($body.find('.recharts-tooltip-wrapper').length > 0) {\n          cy.get('.recharts-tooltip-wrapper').should('be.visible');\n        }\n      });\n    }\n  });\n});",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"chart-card\"]`, but never found it.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"chart-card\"]`, but never found it.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/interactions.cy.js:83:9)",
+                    "diff": null
+                  },
+                  "uuid": "51d62c02-ec43-4849-980b-e3b1d74e6a3f",
+                  "parentUUID": "81e55d29-8cd4-406b-90b1-97f3725ef2a5",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "allows switching between chart views",
+                  "fullTitle": "Dashboard User Interactions Chart Interactions allows switching between chart views",
+                  "timedOut": null,
+                  "duration": 560,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Find any chart tabs if they exist\ncy.get('body').then($body => {\n  if ($body.find('[data-cy=\"chart-tabs\"]').length > 0) {\n    cy.get('[data-cy=\"chart-tabs\"]').within(() => {\n      // Get all tab buttons\n      cy.get('button').each(($tab, index) => {\n        if (index > 0) {\n          // Skip the first tab which is already active\n          // Click each tab\n          cy.wrap($tab).click();\n          // Verify the tab becomes active\n          cy.wrap($tab).should('have.attr', 'aria-selected', 'true');\n          // Verify chart content changes\n          cy.get('[data-cy=\"chart-content\"]').should('be.visible');\n        }\n      });\n    });\n  }\n});",
+                  "err": {},
+                  "uuid": "9f278ee5-a243-4dc4-9f77-d820b41d8158",
+                  "parentUUID": "81e55d29-8cd4-406b-90b1-97f3725ef2a5",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [
+                "9f278ee5-a243-4dc4-9f77-d820b41d8158"
+              ],
+              "failures": [
+                "51d62c02-ec43-4849-980b-e3b1d74e6a3f"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 11426,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "184d8ffc-edd7-413d-8459-eaf22a0177bf",
+              "title": "Upcoming Campaigns",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "allows creating a new campaign",
+                  "fullTitle": "Dashboard User Interactions Upcoming Campaigns allows creating a new campaign",
+                  "timedOut": null,
+                  "duration": 10755,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Find \"New Campaign\" button in the upcoming campaigns section\ncy.get('[data-cy=\"upcoming-campaigns-card\"]').within(() => {\n  cy.contains('New Campaign').click();\n});\n// Verify navigation to campaign creation\ncy.url().should('include', '/campaigns/wizard/step-1');\n// Go back to dashboard\ncy.go('back');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"upcoming-campaigns-card\"]`, but never found it.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"upcoming-campaigns-card\"]`, but never found it.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/interactions.cy.js:141:9)",
+                    "diff": null
+                  },
+                  "uuid": "541a24c2-9481-4fb3-8c80-f987af9ccb8d",
+                  "parentUUID": "184d8ffc-edd7-413d-8459-eaf22a0177bf",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "allows viewing campaign details",
+                  "fullTitle": "Dashboard User Interactions Upcoming Campaigns allows viewing campaign details",
+                  "timedOut": null,
+                  "duration": 476,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Find campaign cards\ncy.get('body').then($body => {\n  if ($body.find('[data-cy=\"campaign-card\"]').length > 0) {\n    // Click the first campaign card\n    cy.get('[data-cy=\"campaign-card\"]').first().click();\n    // Verify navigation to campaign details\n    cy.url().should('include', '/campaigns/');\n    // Go back to dashboard\n    cy.go('back');\n  }\n});",
+                  "err": {},
+                  "uuid": "2b9a7a14-b22d-4fac-956a-a931233294de",
+                  "parentUUID": "184d8ffc-edd7-413d-8459-eaf22a0177bf",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [
+                "2b9a7a14-b22d-4fac-956a-a931233294de"
+              ],
+              "failures": [
+                "541a24c2-9481-4fb3-8c80-f987af9ccb8d"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 11231,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "437ae455-25c4-458a-8d4f-1b52caa1929f",
+              "title": "Dashboard Metrics",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "shows detailed information on metric click",
+                  "fullTitle": "Dashboard User Interactions Dashboard Metrics shows detailed information on metric click",
+                  "timedOut": null,
+                  "duration": 10590,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Click on a metric card\ncy.get('[data-cy=\"metric-card\"]').first().click();\n// Depending on the implementation, this might:\n// 1. Open a modal with details\ncy.get('body').then($body => {\n  if ($body.find('[data-cy=\"metric-details-modal\"]').length > 0) {\n    cy.get('[data-cy=\"metric-details-modal\"]').should('be.visible');\n    // Close the modal\n    cy.get('[data-cy=\"modal-close\"]').click();\n  }\n  // 2. Navigate to a details page\n  else if (cy.url().should('not.include', '/dashboard')) {\n    // Go back to dashboard\n    cy.go('back');\n  }\n  // 3. Expand the card in place\n  else if ($body.find('[data-cy=\"metric-card-expanded\"]').length > 0) {\n    cy.get('[data-cy=\"metric-card-expanded\"]').should('be.visible');\n  }\n});",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"metric-card\"]`, but never found it.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"metric-card\"]`, but never found it.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/interactions.cy.js:172:9)",
+                    "diff": null
+                  },
+                  "uuid": "b8ae0723-d498-4ae5-9d7b-781bc0c07c7f",
+                  "parentUUID": "437ae455-25c4-458a-8d4f-1b52caa1929f",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "b8ae0723-d498-4ae5-9d7b-781bc0c07c7f"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 10590,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "c4db411d-2c83-4be0-91e5-49ed7a52ed4d",
+              "title": "Export Functionality",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "allows exporting dashboard data",
+                  "fullTitle": "Dashboard User Interactions Export Functionality allows exporting dashboard data",
+                  "timedOut": null,
+                  "duration": 10676,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Find export button\ncy.contains('button', 'Export').click();\n// Check for export options modal or direct download\ncy.get('body').then($body => {\n  if ($body.find('[data-cy=\"export-options-modal\"]').length > 0) {\n    cy.get('[data-cy=\"export-options-modal\"]').should('be.visible');\n    // Select PDF option if available\n    if ($body.find('[data-cy=\"export-pdf\"]').length > 0) {\n      cy.get('[data-cy=\"export-pdf\"]').click();\n    }\n    // Close the modal\n    cy.get('[data-cy=\"modal-close\"]').click();\n  }\n  // Check for success message\n  cy.contains(/export|downloaded|success/i).should('exist');\n});",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Export' within the selector: 'button' but never did.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Export' within the selector: 'button' but never did.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/interactions.cy.js:198:9)",
+                    "diff": null
+                  },
+                  "uuid": "d2f255d6-7197-47e0-ae9c-26d382be2f7e",
+                  "parentUUID": "c4db411d-2c83-4be0-91e5-49ed7a52ed4d",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "d2f255d6-7197-47e0-ae9c-26d382be2f7e"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 10676,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "77b5810e-f3d1-4862-a3cf-3badbda2df3a",
+              "title": "Notifications",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "shows and interacts with notifications",
+                  "fullTitle": "Dashboard User Interactions Notifications shows and interacts with notifications",
+                  "timedOut": null,
+                  "duration": 509,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Find notifications icon if it exists\ncy.get('body').then($body => {\n  if ($body.find('[data-cy=\"notifications-icon\"]').length > 0) {\n    cy.get('[data-cy=\"notifications-icon\"]').click();\n    // Check if notifications panel opens\n    cy.get('[data-cy=\"notifications-panel\"]').should('be.visible');\n    // Click a notification if any exist\n    if ($body.find('[data-cy=\"notification-item\"]').length > 0) {\n      cy.get('[data-cy=\"notification-item\"]').first().click();\n      // This might navigate away, so go back to dashboard\n      cy.visit('/dashboard');\n    }\n    // Close notifications panel\n    cy.get('body').click();\n    cy.get('[data-cy=\"notifications-panel\"]').should('not.exist');\n  }\n});",
+                  "err": {},
+                  "uuid": "2f0b0fcb-11d9-49f8-a368-451587822184",
+                  "parentUUID": "77b5810e-f3d1-4862-a3cf-3badbda2df3a",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [
+                "2f0b0fcb-11d9-49f8-a368-451587822184"
+              ],
+              "failures": [],
+              "pending": [],
+              "skipped": [],
+              "duration": 509,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "68906205-744e-4d1d-b943-85cce37ce0e0",
+              "title": "Responsive Behavior",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "adapts layout for mobile viewport",
+                  "fullTitle": "Dashboard User Interactions Responsive Behavior adapts layout for mobile viewport",
+                  "timedOut": null,
+                  "duration": 10662,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Test mobile view\ncy.viewport('iphone-x');\n// Verify the layout adjusts\ncy.get('[data-cy=\"metric-card\"]').should('have.length.at.least', 1);\n// Check that calendar adjusts to smaller view\ncy.get('[data-cy=\"calendar-dashboard\"]').should('exist');\n// Check that charts are still visible\ncy.get('[data-cy=\"chart-card\"]').should('be.visible');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"metric-card\"]`, but never found it.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"metric-card\"]`, but never found it.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/interactions.cy.js:252:40)",
+                    "diff": null
+                  },
+                  "uuid": "79b91f1b-fdb7-4521-9180-2fca64cd278e",
+                  "parentUUID": "68906205-744e-4d1d-b943-85cce37ce0e0",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "adapts layout for tablet viewport",
+                  "fullTitle": "Dashboard User Interactions Responsive Behavior adapts layout for tablet viewport",
+                  "timedOut": null,
+                  "duration": 726,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Test tablet view\ncy.viewport('ipad-2');\n// Verify the grid layout adjusts\ncy.get('.grid').should('exist');",
+                  "err": {},
+                  "uuid": "4b3d02ec-234d-4f61-aa8c-1d8c86df6531",
+                  "parentUUID": "68906205-744e-4d1d-b943-85cce37ce0e0",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [
+                "4b3d02ec-234d-4f61-aa8c-1d8c86df6531"
+              ],
+              "failures": [
+                "79b91f1b-fdb7-4521-9180-2fca64cd278e"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 11388,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            }
+          ],
+          "passes": [],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 0,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.2.0"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.3"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "config/cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "timestamp": "mmddyyyy_HHMMss"
+      },
+      "version": "6.2.0"
+    }
+  }
+}

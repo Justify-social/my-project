@@ -1,11 +1,12 @@
 import { DashboardPage, CampaignsPage } from '../../support/page-objects';
+import { setupClerkTestingToken } from '@clerk/testing/cypress';
 import { TestSetup, WaitUtilities } from '../../support/utils/test-helpers.js';
 
 describe('Performance Monitoring - SSOT Implementation', () => {
   let dashboardPage, campaignsPage;
 
   beforeEach(() => {
-    TestSetup.setupAuthenticatedTest();
+    setupClerkTestingToken();
     dashboardPage = new DashboardPage();
     campaignsPage = new CampaignsPage();
   });

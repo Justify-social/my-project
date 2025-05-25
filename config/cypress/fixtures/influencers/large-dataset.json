@@ -1,0 +1,33 @@
+{
+    "influencers": [
+        {
+            "id": "inf-large-1",
+            "handle": "influencer_1",
+            "platform": "INSTAGRAM",
+            "followerCount": 125000,
+            "verified": true,
+            "engagementRate": 2.8
+        },
+        {
+            "id": "inf-large-2",
+            "handle": "influencer_2",
+            "platform": "TIKTOK",
+            "followerCount": 200000,
+            "verified": false,
+            "engagementRate": 5.2
+        },
+        {
+            "id": "inf-large-3",
+            "handle": "influencer_3",
+            "platform": "INSTAGRAM",
+            "followerCount": 180000,
+            "verified": true,
+            "engagementRate": 3.5
+        }
+    ],
+    "total": 1000,
+    "page": 1,
+    "limit": 12,
+    "hasMore": true,
+    "note": "Simulated large dataset for performance testing"
+}

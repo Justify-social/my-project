@@ -1,0 +1,25 @@
+{
+    "campaigns": [
+        {
+            "id": "camp-1",
+            "name": "Summer Collection Campaign",
+            "status": "active",
+            "objective": "brand-awareness",
+            "budget": 15000
+        },
+        {
+            "id": "camp-2",
+            "name": "Beauty Campaign",
+            "status": "draft",
+            "objective": "conversions",
+            "budget": 8000
+        },
+        {
+            "id": "camp-3",
+            "name": "Health & Wellness Campaign",
+            "status": "active",
+            "objective": "engagement",
+            "budget": 12000
+        }
+    ]
+}

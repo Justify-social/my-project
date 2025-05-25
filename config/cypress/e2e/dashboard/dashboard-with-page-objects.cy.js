@@ -6,20 +6,21 @@ import {
   WaitUtilities,
   TestDataGenerators,
 } from '../../support/utils/test-helpers.js';
+import { setupClerkTestingToken } from '@clerk/testing/cypress';
 
 describe('Dashboard Page - Using Page Objects (SSOT Pattern)', () => {
   let dashboardPage;
 
   beforeEach(() => {
-    // Use SSOT test setup for authenticated tests
-    TestSetup.setupAuthenticatedTest();
-
     // Initialize page object
     dashboardPage = new DashboardPage();
+    cy.clearLocalStorage();
+    cy.clearCookies();
   });
 
   describe('Page Loading and Core Elements', () => {
     it('should load dashboard with all core elements visible', () => {
+      setupClerkTestingToken();
       dashboardPage.logAction('Loading dashboard page');
 
       dashboardPage.visit().expectDashboardLoaded().expectToBeOnDashboard();
@@ -41,6 +42,7 @@ describe('Dashboard Page - Using Page Objects (SSOT Pattern)', () => {
     });
 
     it('should display user-specific dashboard title', () => {
+      setupClerkTestingToken();
       // Generate test user data
       const testUser = TestDataGenerators.generateUser({
         firstName: 'John',
@@ -59,12 +61,14 @@ describe('Dashboard Page - Using Page Objects (SSOT Pattern)', () => {
     });
 
     it('should pass accessibility checks', () => {
+      setupClerkTestingToken();
       dashboardPage.visit().checkAccessibility();
     });
   });
 
   describe('Navigation and Header Functionality', () => {
     beforeEach(() => {
+      setupClerkTestingToken();
       dashboardPage.visit();
     });
 
@@ -104,6 +108,7 @@ describe('Dashboard Page - Using Page Objects (SSOT Pattern)', () => {
 
   describe('Search Functionality', () => {
     beforeEach(() => {
+      setupClerkTestingToken();
       dashboardPage.visit();
     });
 
@@ -135,6 +140,7 @@ describe('Dashboard Page - Using Page Objects (SSOT Pattern)', () => {
 
   describe('Calendar Component', () => {
     beforeEach(() => {
+      setupClerkTestingToken();
       dashboardPage.visit();
     });
 
@@ -179,6 +185,7 @@ describe('Dashboard Page - Using Page Objects (SSOT Pattern)', () => {
 
   describe('Campaigns Section', () => {
     beforeEach(() => {
+      setupClerkTestingToken();
       dashboardPage.visit();
     });
 
@@ -217,6 +224,7 @@ describe('Dashboard Page - Using Page Objects (SSOT Pattern)', () => {
 
   describe('Responsive Design and Mobile Experience', () => {
     it('should display correctly on mobile devices', () => {
+      setupClerkTestingToken();
       cy.viewport('iphone-x');
 
       dashboardPage.visit().expectDashboardLoaded();
@@ -227,6 +235,7 @@ describe('Dashboard Page - Using Page Objects (SSOT Pattern)', () => {
     });
 
     it('should display correctly on tablet devices', () => {
+      setupClerkTestingToken();
       cy.viewport('ipad-2');
 
       dashboardPage.visit().expectDashboardLoaded();
@@ -236,6 +245,7 @@ describe('Dashboard Page - Using Page Objects (SSOT Pattern)', () => {
     });
 
     it('should handle mobile navigation menu', () => {
+      setupClerkTestingToken();
       cy.viewport('iphone-x');
 
       dashboardPage.visit();
@@ -247,6 +257,7 @@ describe('Dashboard Page - Using Page Objects (SSOT Pattern)', () => {
 
   describe('Error Handling and Edge Cases', () => {
     it('should handle dashboard API errors gracefully', () => {
+      setupClerkTestingToken();
       // Mock API error
       cy.intercept('GET', '**/api/dashboard**', {
         statusCode: 500,
@@ -262,6 +273,7 @@ describe('Dashboard Page - Using Page Objects (SSOT Pattern)', () => {
     });
 
     it('should handle slow loading gracefully', () => {
+      setupClerkTestingToken();
       // Mock slow API responses
       ApiInterceptors.setupDashboardInterceptors();
       cy.intercept('GET', '**/api/dashboard**', {
@@ -279,6 +291,7 @@ describe('Dashboard Page - Using Page Objects (SSOT Pattern)', () => {
     });
 
     it('should handle authentication expiry', () => {
+      setupClerkTestingToken();
       // Mock auth expiry
       cy.intercept('GET', '**/api/user**', {
         statusCode: 401,
@@ -295,6 +308,7 @@ describe('Dashboard Page - Using Page Objects (SSOT Pattern)', () => {
 
   describe('Performance and Analytics', () => {
     it('should load within performance budget', () => {
+      setupClerkTestingToken();
       dashboardPage.logAction('Testing performance budget');
 
       dashboardPage.visit().measurePagePerformance(3000); // 3 second budget
@@ -307,6 +321,7 @@ describe('Dashboard Page - Using Page Objects (SSOT Pattern)', () => {
     });
 
     it('should track key user interactions', () => {
+      setupClerkTestingToken();
       dashboardPage.visit();
 
       // Track navigation interactions
@@ -321,6 +336,7 @@ describe('Dashboard Page - Using Page Objects (SSOT Pattern)', () => {
 
   describe('Data Integration and State Management', () => {
     it('should handle real-time data updates', () => {
+      setupClerkTestingToken();
       // Test WebSocket or polling updates
       dashboardPage.visit();
 
@@ -342,6 +358,7 @@ describe('Dashboard Page - Using Page Objects (SSOT Pattern)', () => {
     });
 
     it('should maintain state during navigation', () => {
+      setupClerkTestingToken();
       dashboardPage.visit().searchFor('test query').navigateToCampaigns();
 
       // Navigate back
@@ -350,6 +367,17 @@ describe('Dashboard Page - Using Page Objects (SSOT Pattern)', () => {
       // Search state might or might not be maintained
       // depending on implementation
       dashboardPage.expectToBeOnDashboard();
+    });
+  });
+
+  describe('SSOT Implementation', () => {
+    it('should display dashboard content correctly', () => {
+      setupClerkTestingToken();
+
+      cy.visit('/dashboard');
+
+      cy.url().should('include', '/dashboard');
+      cy.get('body').should('be.visible');
     });
   });
 

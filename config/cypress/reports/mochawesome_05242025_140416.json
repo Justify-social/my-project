@@ -1,0 +1,176 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 4,
+    "passes": 1,
+    "pending": 0,
+    "failures": 3,
+    "start": "2025-05-24T13:02:39.070Z",
+    "end": "2025-05-24T13:04:15.997Z",
+    "duration": 96927,
+    "testsRegistered": 4,
+    "passPercent": 25,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "e626ee21-e6d4-4729-bd0d-94d41a698755",
+      "title": "",
+      "fullFile": "config/cypress/e2e/brand-lift/survey-preview.cy.js",
+      "file": "config/cypress/e2e/brand-lift/survey-preview.cy.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "483abb47-b884-4c85-a2b9-4e5221587fcf",
+          "title": "Brand Lift Survey Preview",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "loads the page",
+              "fullTitle": "Brand Lift Survey Preview loads the page",
+              "timedOut": null,
+              "duration": 537,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('body').should('exist');",
+              "err": {},
+              "uuid": "7a22578a-1d22-41f4-8cf6-c80fcc90a8c6",
+              "parentUUID": "483abb47-b884-4c85-a2b9-4e5221587fcf",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "displays the Survey Preview header and time/cost info",
+              "fullTitle": "Brand Lift Survey Preview displays the Survey Preview header and time/cost info",
+              "timedOut": null,
+              "duration": 10638,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('h1').should('contain', 'Survey Preview & Submit');\ncy.contains('Estimated Time').should('exist');\ncy.contains('Credits Cost').should('exist');",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 10000ms: expected '<h1.cl-headerTitle.text-primary.text-xl.font-semibold.🔒️.cl-internal-1tpvhd8>' to contain 'Survey Preview & Submit'",
+                "estack": "AssertionError: Timed out retrying after 10000ms: expected '<h1.cl-headerTitle.text-primary.text-xl.font-semibold.🔒️.cl-internal-1tpvhd8>' to contain 'Survey Preview & Submit'\n    at Context.eval (webpack://my-project/./config/cypress/e2e/brand-lift/survey-preview.cy.js:11:17)",
+                "diff": null
+              },
+              "uuid": "b646d76b-6e84-4d0a-a9c0-90ca966dff6c",
+              "parentUUID": "483abb47-b884-4c85-a2b9-4e5221587fcf",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "allows navigation between survey questions",
+              "fullTitle": "Brand Lift Survey Preview allows navigation between survey questions",
+              "timedOut": null,
+              "duration": 10607,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "// Verify that \"Previous\" is disabled on the first question.\ncy.contains('Previous').should('be.disabled');\n// Click \"Next\" and confirm the question counter updates.\ncy.contains('Next').click();\ncy.get('p').contains(/question\\s+\\d+\\s+of/i).should('exist');",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Previous' but never did.",
+                "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Previous' but never did.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/brand-lift/survey-preview.cy.js:18:28)",
+                "diff": null
+              },
+              "uuid": "398cc142-a238-4f5e-9048-934378146f74",
+              "parentUUID": "483abb47-b884-4c85-a2b9-4e5221587fcf",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "has footer buttons to return for edits and to submit the survey",
+              "fullTitle": "Brand Lift Survey Preview has footer buttons to return for edits and to submit the survey",
+              "timedOut": null,
+              "duration": 10622,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.contains('Return for Edits').should('exist');\ncy.contains('Submit Survey').should('exist');\n// Stub window.alert to catch submission message.\ncy.window().then(win => {\n  cy.stub(win, 'alert').as('alert');\n});\ncy.contains('Submit Survey').click();\ncy.get('@alert').should('have.been.calledWith', 'Survey submitted for final review!');\ncy.url().should('include', '/brand-lift/thank-you');",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Return for Edits' but never did.",
+                "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Return for Edits' but never did.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/brand-lift/survey-preview.cy.js:27:36)",
+                "diff": null
+              },
+              "uuid": "f4f1057b-1d4e-4edc-bbdc-7b7a65093435",
+              "parentUUID": "483abb47-b884-4c85-a2b9-4e5221587fcf",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "7a22578a-1d22-41f4-8cf6-c80fcc90a8c6"
+          ],
+          "failures": [
+            "b646d76b-6e84-4d0a-a9c0-90ca966dff6c",
+            "398cc142-a238-4f5e-9048-934378146f74",
+            "f4f1057b-1d4e-4edc-bbdc-7b7a65093435"
+          ],
+          "pending": [],
+          "skipped": [],
+          "duration": 32404,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.2.0"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.3"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "config/cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "timestamp": "mmddyyyy_HHMMss"
+      },
+      "version": "6.2.0"
+    }
+  }
+}

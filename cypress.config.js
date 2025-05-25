@@ -1,1 +1,1 @@
-config/cypress/cypress.config.js
+const { defineConfig } = require('cypress'); const { clerkSetup } = require('@clerk/testing/cypress'); module.exports = defineConfig({ e2e: { setupNodeEvents(on, config) { process.env.CYPRESS_ENV = 'true'; return clerkSetup({ config }); }, baseUrl: 'http://localhost:3000', specPattern: 'config/cypress/e2e/**/*.cy.{js,jsx,ts,tsx}', supportFile: 'config/cypress/support/e2e.js', }, });

@@ -1,0 +1,91 @@
+{
+  "stats": {
+    "suites": 0,
+    "tests": 1,
+    "passes": 0,
+    "pending": 0,
+    "failures": 1,
+    "start": "2025-05-24T09:56:55.655Z",
+    "end": "2025-05-24T09:56:57.129Z",
+    "duration": 1474,
+    "testsRegistered": 1,
+    "passPercent": 0,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "e610694a-ad72-4542-a27f-2d0b6b2d327a",
+      "title": "",
+      "fullFile": "config/cypress/e2e/shared/ssot-demo.cy.js",
+      "file": "config/cypress/e2e/shared/ssot-demo.cy.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [
+        {
+          "title": "An uncaught error was detected outside of a test",
+          "fullTitle": "An uncaught error was detected outside of a test",
+          "timedOut": null,
+          "duration": 96,
+          "state": "failed",
+          "speed": null,
+          "pass": false,
+          "fail": true,
+          "pending": false,
+          "context": null,
+          "code": "throw err;",
+          "err": {
+            "message": "ReferenceError: The following error originated from your test code, not from Cypress.\n\n  > SignInPage is not defined\n\nWhen Cypress detects uncaught errors originating from your test code it will automatically fail the current test.\n\nCypress could not associate this error to any specific test.\n\nWe dynamically generated a new test to display this failure.",
+            "estack": "ReferenceError: The following error originated from your test code, not from Cypress.\n\n  > SignInPage is not defined\n\nWhen Cypress detects uncaught errors originating from your test code it will automatically fail the current test.\n\nCypress could not associate this error to any specific test.\n\nWe dynamically generated a new test to display this failure.\n    at ./config/cypress/support/page-objects/index.js (webpack://my-project/./config/cypress/support/page-objects/index.js:46:16)\n    at __webpack_require__ (webpack://my-project/webpack/bootstrap:19:0)\n    at eval (webpack://my-project/./config/cypress/e2e/shared/ssot-demo.cy.js:1:0)\n    at eval (http://localhost:3000/__cypress/tests?p=config/cypress/e2e/shared/ssot-demo.cy.js:1695:3)\n    at eval (http://localhost:3000/__cypress/tests?p=config/cypress/e2e/shared/ssot-demo.cy.js:1697:12)\n    at eval (<anonymous>)\n    at <unknown> (http://localhost:3000/__cypress/runner/cypress_runner.js:112902:23)\n    at tryCatcher (http://localhost:3000/__cypress/runner/cypress_runner.js:1777:23)\n    at Object.gotValue (http://localhost:3000/__cypress/runner/cypress_runner.js:6446:18)\n    at Object.gotAccum (http://localhost:3000/__cypress/runner/cypress_runner.js:6435:25)",
+            "diff": null
+          },
+          "uuid": "765bdedc-c0a9-4047-9ff4-9ac8c1c84d01",
+          "parentUUID": "e610694a-ad72-4542-a27f-2d0b6b2d327a",
+          "isHook": false,
+          "skipped": false
+        }
+      ],
+      "suites": [],
+      "passes": [],
+      "failures": [
+        "765bdedc-c0a9-4047-9ff4-9ac8c1c84d01"
+      ],
+      "pending": [],
+      "skipped": [],
+      "duration": 96,
+      "root": true,
+      "rootEmpty": false,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.2.0"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.3"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "config/cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "timestamp": "mmddyyyy_HHMMss"
+      },
+      "version": "6.2.0"
+    }
+  }
+}

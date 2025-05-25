@@ -1,10 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import CypressMonitoringPanel from '@/components/features/admin/CypressMonitoringPanel';
 
 // --- Helper: Card for Debug Tool Links ---
 interface DebugToolCardProps {
@@ -46,7 +47,7 @@ const DebugToolCard: React.FC<DebugToolCardProps> = ({
 // -------------------------------------
 
 export default function DebugToolsPage() {
-  // const [campaignId, setCampaignId] = useState<string>(''); // Removed, as Verify Campaign Data section is removed
+  const [showCypressMonitoring, setShowCypressMonitoring] = useState(false);
 
   return (
     <div className="container mx-auto p-6 space-y-8 max-w-6xl">
@@ -102,7 +103,28 @@ export default function DebugToolsPage() {
           buttonText="View Documentation"
           onButtonClick={() => window.open('https://justify-1.gitbook.io/jzyx2tuf', '_blank')}
         />
+        <DebugToolCard
+          title="Cypress Analytics Dashboard"
+          description="Comprehensive test analytics, performance metrics, coverage analysis, and error patterns."
+          linkHref="/debug-tools/analytics"
+          buttonText="View Analytics Dashboard"
+        />
+        <DebugToolCard
+          title="Cypress Test Monitoring"
+          description="Real-time test status, coverage metrics, and performance insights for application stability."
+          buttonText={showCypressMonitoring ? "Hide Monitoring" : "Show Monitoring"}
+          onButtonClick={() => setShowCypressMonitoring(!showCypressMonitoring)}
+        />
       </div>
+
+      {/* Cypress Test Monitoring Panel */}
+      {showCypressMonitoring && (
+        <Card className="border-divider">
+          <CardContent className="p-6">
+            <CypressMonitoringPanel />
+          </CardContent>
+        </Card>
+      )}
 
       {/* Campaign Verification Tool Section - REMOVED */}
       {/* 

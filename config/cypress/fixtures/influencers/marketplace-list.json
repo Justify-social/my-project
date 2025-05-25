@@ -1,0 +1,62 @@
+{
+    "influencers": [
+        {
+            "id": "inf-1",
+            "handle": "test_influencer",
+            "platform": "INSTAGRAM",
+            "followerCount": 150000,
+            "verified": true,
+            "avatarUrl": "https://example.com/avatar1.jpg",
+            "bio": "Test influencer for demo purposes",
+            "engagementRate": 3.2,
+            "categories": [
+                "lifestyle",
+                "fashion"
+            ],
+            "location": {
+                "country": "United States",
+                "city": "Los Angeles"
+            }
+        },
+        {
+            "id": "inf-2",
+            "handle": "fashion_influencer_test",
+            "platform": "INSTAGRAM",
+            "followerCount": 250000,
+            "verified": true,
+            "avatarUrl": "https://example.com/avatar2.jpg",
+            "bio": "Fashion and lifestyle content creator",
+            "engagementRate": 4.1,
+            "categories": [
+                "fashion",
+                "beauty"
+            ],
+            "location": {
+                "country": "United States",
+                "city": "New York"
+            }
+        },
+        {
+            "id": "inf-3",
+            "handle": "fitness_influencer_1",
+            "platform": "INSTAGRAM",
+            "followerCount": 180000,
+            "verified": true,
+            "avatarUrl": "https://example.com/avatar3.jpg",
+            "bio": "Fitness and wellness coach",
+            "engagementRate": 3.8,
+            "categories": [
+                "fitness",
+                "health"
+            ],
+            "location": {
+                "country": "United States",
+                "city": "Miami"
+            }
+        }
+    ],
+    "total": 12,
+    "page": 1,
+    "limit": 12,
+    "hasMore": true
+}

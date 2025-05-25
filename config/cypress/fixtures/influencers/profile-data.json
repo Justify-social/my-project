@@ -1,0 +1,63 @@
+{
+    "id": "inf-1",
+    "handle": "test_influencer",
+    "platform": "INSTAGRAM",
+    "followerCount": 150000,
+    "verified": true,
+    "avatarUrl": "https://example.com/avatar1.jpg",
+    "bio": "Test influencer profile data for comprehensive testing",
+    "engagementRate": 3.2,
+    "categories": [
+        "lifestyle",
+        "fashion"
+    ],
+    "location": {
+        "country": "United States",
+        "city": "Los Angeles"
+    },
+    "metrics": {
+        "avgLikes": 5000,
+        "avgComments": 250,
+        "avgViews": 15000,
+        "engagement": {
+            "rate": 3.2,
+            "trend": "increasing"
+        }
+    },
+    "demographics": {
+        "ageRange": "25-34",
+        "gender": "female",
+        "topCountries": [
+            "United States",
+            "Canada",
+            "United Kingdom"
+        ]
+    },
+    "contentAnalysis": {
+        "postFrequency": "daily",
+        "contentTypes": [
+            "photo",
+            "video",
+            "carousel"
+        ],
+        "topHashtags": [
+            "#fashion",
+            "#lifestyle",
+            "#ootd"
+        ]
+    },
+    "collaborationHistory": {
+        "totalCampaigns": 25,
+        "successRate": 92,
+        "averageRoi": 4.2
+    },
+    "riskAssessment": {
+        "score": 85,
+        "level": "low",
+        "factors": [
+            "high_engagement",
+            "verified_account",
+            "authentic_audience"
+        ]
+    }
+}

@@ -1,0 +1,221 @@
+{
+  "stats": {
+    "suites": 3,
+    "tests": 5,
+    "passes": 5,
+    "pending": 0,
+    "failures": 0,
+    "start": "2025-05-24T13:25:09.696Z",
+    "end": "2025-05-24T13:25:11.930Z",
+    "duration": 2234,
+    "testsRegistered": 5,
+    "passPercent": 100,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "f20866de-547d-4627-a173-811c99151962",
+      "title": "",
+      "fullFile": "config/cypress/e2e/auth/auth-test-minimal.cy.js",
+      "file": "config/cypress/e2e/auth/auth-test-minimal.cy.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "f61e50f8-1aa2-4ce1-9991-6c985a117670",
+          "title": "Authentication - Minimal Test (SSOT Verification)",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [],
+          "suites": [
+            {
+              "uuid": "f220c112-198b-45ec-b19c-c1499247d8d6",
+              "title": "Sign-In Page Access",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should load sign-in page without authentication",
+                  "fullTitle": "Authentication - Minimal Test (SSOT Verification) Sign-In Page Access should load sign-in page without authentication",
+                  "timedOut": null,
+                  "duration": 1065,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/sign-in');\ncy.url().should('include', '/sign-in');\ncy.get('body').should('be.visible');\n// Verify sign-in form elements are present\ncy.get('.cl-formButtonPrimary, [data-testid=\"sign-in-button\"], button').should('exist');\ncy.log('✅ Sign-in page loads successfully');",
+                  "err": {},
+                  "uuid": "15298e75-1000-4a04-be36-11b3d9c9f389",
+                  "parentUUID": "f220c112-198b-45ec-b19c-c1499247d8d6",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should verify SSOT utilities are working",
+                  "fullTitle": "Authentication - Minimal Test (SSOT Verification) Sign-In Page Access should verify SSOT utilities are working",
+                  "timedOut": null,
+                  "duration": 442,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Test AssertionHelpers\ncy.visit('/sign-in');\n_testHelpers.AssertionHelpers.expectUrlToContain('/sign-in');\n// Test API interceptors are set up\ncy.window().then(() => {\n  cy.log('✅ SSOT utilities working correctly');\n});",
+                  "err": {},
+                  "uuid": "5d0664f2-f18d-4b03-989f-5d4b79c0720e",
+                  "parentUUID": "f220c112-198b-45ec-b19c-c1499247d8d6",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should handle performance measurement",
+                  "fullTitle": "Authentication - Minimal Test (SSOT Verification) Sign-In Page Access should handle performance measurement",
+                  "timedOut": null,
+                  "duration": 31,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.measurePageLoadTime(() => {\n  cy.visit('/sign-in');\n}, 'sign-in-page-load', 3000);\ncy.get('body').should('be.visible');\ncy.log('✅ Performance measurement working');",
+                  "err": {},
+                  "uuid": "75006df1-daf9-4a40-8512-a82288090382",
+                  "parentUUID": "f220c112-198b-45ec-b19c-c1499247d8d6",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [
+                "15298e75-1000-4a04-be36-11b3d9c9f389",
+                "5d0664f2-f18d-4b03-989f-5d4b79c0720e",
+                "75006df1-daf9-4a40-8512-a82288090382"
+              ],
+              "failures": [],
+              "pending": [],
+              "skipped": [],
+              "duration": 1538,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "aeeaf40b-1903-4b3f-a6c0-18c9b35edc9f",
+              "title": "SSOT Verification Tests",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should verify BasePage methods work",
+                  "fullTitle": "Authentication - Minimal Test (SSOT Verification) SSOT Verification Tests should verify BasePage methods work",
+                  "timedOut": null,
+                  "duration": 489,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/sign-in');\n// Test BasePage utilities\nsignInPage.logAction('Testing BasePage inheritance');\nsignInPage.expectUrl('/sign-in');\ncy.log('✅ BasePage methods working correctly');",
+                  "err": {},
+                  "uuid": "440d9c5a-d749-4bf5-aaa8-7af79478fa9b",
+                  "parentUUID": "aeeaf40b-1903-4b3f-a6c0-18c9b35edc9f",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should verify API interceptors are functional",
+                  "fullTitle": "Authentication - Minimal Test (SSOT Verification) SSOT Verification Tests should verify API interceptors are functional",
+                  "timedOut": null,
+                  "duration": 16,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "// The auth interceptors should be set up\ncy.window().then(() => {\n  // Check that interceptors are configured\n  cy.log('✅ API interceptors configured via TestSetup');\n});",
+                  "err": {},
+                  "uuid": "c01ffbfa-6f19-4fac-a461-b2c47a08a389",
+                  "parentUUID": "aeeaf40b-1903-4b3f-a6c0-18c9b35edc9f",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [
+                "440d9c5a-d749-4bf5-aaa8-7af79478fa9b",
+                "c01ffbfa-6f19-4fac-a461-b2c47a08a389"
+              ],
+              "failures": [],
+              "pending": [],
+              "skipped": [],
+              "duration": 505,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            }
+          ],
+          "passes": [],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 0,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.2.0"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.3"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "config/cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "timestamp": "mmddyyyy_HHMMss"
+      },
+      "version": "6.2.0"
+    }
+  }
+}

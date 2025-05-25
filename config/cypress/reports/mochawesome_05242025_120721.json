@@ -1,0 +1,144 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 3,
+    "passes": 3,
+    "pending": 0,
+    "failures": 0,
+    "start": "2025-05-24T11:07:21.914Z",
+    "end": "2025-05-24T11:07:21.998Z",
+    "duration": 84,
+    "testsRegistered": 3,
+    "passPercent": 100,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "9c7c3595-acd7-42c9-882d-df6cf384257b",
+      "title": "",
+      "fullFile": "config/cypress/e2e/settings/settings-minimal.cy.js",
+      "file": "config/cypress/e2e/settings/settings-minimal.cy.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "8db8b9d5-3888-46dc-ba1a-452b1c15f6a8",
+          "title": "Settings Module - Minimal Verification",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "should successfully create and use all Settings page objects",
+              "fullTitle": "Settings Module - Minimal Verification should successfully create and use all Settings page objects",
+              "timedOut": null,
+              "duration": 34,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// Create all page objects\nconst settingsPage = new _pageObjects.SettingsPage();\nconst teamPage = new _pageObjects.TeamManagementPage();\nconst billingPage = new _pageObjects.BillingPage();\nconst profilePage = new _pageObjects.ProfilePage();\nconst superAdminPage = new _pageObjects.SuperAdminPage();\n// Verify they can be instantiated\nexpect(settingsPage).to.be.instanceOf(_pageObjects.SettingsPage);\nexpect(teamPage).to.be.instanceOf(_pageObjects.TeamManagementPage);\nexpect(billingPage).to.be.instanceOf(_pageObjects.BillingPage);\nexpect(profilePage).to.be.instanceOf(_pageObjects.ProfilePage);\nexpect(superAdminPage).to.be.instanceOf(_pageObjects.SuperAdminPage);\n// Verify they have BasePage methods\nexpect(settingsPage.visit).to.exist;\nexpect(teamPage.logAction).to.exist;\nexpect(billingPage.elements).to.exist;\nexpect(profilePage.pageUrl).to.exist;\nexpect(superAdminPage.pageTitle).to.exist;\ncy.log('✅ All Settings page objects created successfully');\ncy.log('✅ SSOT implementation working correctly');\ncy.log('✅ Step 13: Settings Module - COMPLETE');",
+              "err": {},
+              "uuid": "bbf4cc46-70ef-446f-b1fc-b847b8874e19",
+              "parentUUID": "8db8b9d5-3888-46dc-ba1a-452b1c15f6a8",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "should verify SSOT exports are working",
+              "fullTitle": "Settings Module - Minimal Verification should verify SSOT exports are working",
+              "timedOut": null,
+              "duration": 14,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// Test that our central exports file is working\ncy.wrap({\n  SettingsPage: _pageObjects.SettingsPage,\n  TeamManagementPage: _pageObjects.TeamManagementPage,\n  BillingPage: _pageObjects.BillingPage,\n  ProfilePage: _pageObjects.ProfilePage,\n  SuperAdminPage: _pageObjects.SuperAdminPage\n}).should('exist');\ncy.log('✅ Central exports from page-objects/index.js working');\ncy.log('✅ SSOT architecture verified');",
+              "err": {},
+              "uuid": "76c6468b-1a72-4577-a89e-8825ceff808f",
+              "parentUUID": "8db8b9d5-3888-46dc-ba1a-452b1c15f6a8",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "should have correct page URLs configured",
+              "fullTitle": "Settings Module - Minimal Verification should have correct page URLs configured",
+              "timedOut": null,
+              "duration": 9,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "const settingsPage = new _pageObjects.SettingsPage();\nconst teamPage = new _pageObjects.TeamManagementPage();\nconst billingPage = new _pageObjects.BillingPage();\nconst profilePage = new _pageObjects.ProfilePage();\nconst superAdminPage = new _pageObjects.SuperAdminPage();\nexpect(settingsPage.pageUrl).to.equal('/settings');\nexpect(teamPage.pageUrl).to.equal('/settings/team');\nexpect(billingPage.pageUrl).to.equal('/account/billing');\nexpect(profilePage.pageUrl).to.equal('/settings/profile');\nexpect(superAdminPage.pageUrl).to.equal('/settings/super-admin');\ncy.log('✅ All page URLs configured correctly');",
+              "err": {},
+              "uuid": "17205210-c66f-41b2-bc1b-2202898e380b",
+              "parentUUID": "8db8b9d5-3888-46dc-ba1a-452b1c15f6a8",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "bbf4cc46-70ef-446f-b1fc-b847b8874e19",
+            "76c6468b-1a72-4577-a89e-8825ceff808f",
+            "17205210-c66f-41b2-bc1b-2202898e380b"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 57,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.2.0"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.3"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "config/cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "timestamp": "mmddyyyy_HHMMss"
+      },
+      "version": "6.2.0"
+    }
+  }
+}
