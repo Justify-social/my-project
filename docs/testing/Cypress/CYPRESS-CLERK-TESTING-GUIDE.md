@@ -203,31 +203,35 @@ export default clerkMiddleware(async (auth, req) => {
 
 ## 🔐 Environment Setup
 
-### 1. Create Cypress Environment File
+### 1. Single Source of Truth Configuration
 
-**Create `cypress.env.json` (add to .gitignore):**
-
-```json
-{
-  "CLERK_PUBLISHABLE_KEY": "pk_test_your_actual_key_here",
-  "CLERK_SECRET_KEY": "sk_test_your_actual_secret_here"
-}
-```
-
-⚠️ **CRITICAL**: Replace with your actual Clerk API keys from the Dashboard.
-
-### 2. Application Environment
-
-**Ensure `.env.local` contains:**
+**All environment variables are now loaded from your main `.env` file:**
 
 ```bash
+# .env file (SSOT for all environments)
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_your_key_here
 CLERK_SECRET_KEY=sk_test_your_key_here
 ```
 
-### 3. Security Notes
+**Modern cypress.config.js automatically loads from .env:**
 
-- Add `cypress.env.json` to `.gitignore`
+```javascript
+// cypress.config.js - Automatic Environment Loading
+require('dotenv').config();
+
+config.env = {
+  ...config.env,
+  CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
+  CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+};
+```
+
+⚠️ **CRITICAL**: No separate `cypress.env.json` file needed - this follows SSOT principles.
+
+### 2. Security Notes
+
+- All environment variables in single `.env` file
+- Add `.env` to `.gitignore` (not `cypress.env.json`)
 - Never commit real API keys to version control
 - Use environment variables in CI/CD
 
@@ -405,7 +409,7 @@ npx cypress run --spec "config/cypress/e2e/auth/auth-official-clerk.cy.js"
 - **Single Configuration**: One `cypress.config.js` with `clerkSetup()`
 - **Single Test Helper**: One `TestSetup.setupAuthenticatedTest()` method
 - **Single Auth Strategy**: Only `setupClerkTestingToken()`
-- **Single Environment**: One `cypress.env.json` file
+- **Single Environment**: Environment variables in `.env` file (SSOT)
 - **Single Truth**: This guide is the only reference
 
 ---
@@ -420,7 +424,7 @@ npx cypress run --spec "config/cypress/e2e/auth/auth-official-clerk.cy.js"
 ❌ Problem: Testing Token not working
 ✅ Solution:
   - Check setupClerkTestingToken() is called
-  - Verify API keys in cypress.env.json
+  - Verify API keys in .env file
   - Ensure clerkSetup() in cypress.config.js
 ```
 
@@ -449,7 +453,7 @@ npx cypress run --spec "config/cypress/e2e/auth/auth-official-clerk.cy.js"
 ```
 ❌ Problem: Keys not found
 ✅ Solution:
-  - Create cypress.env.json file
+  - Verify .env file has Clerk keys
   - Add to .gitignore
   - Verify key format (pk_test_, sk_test_)
 ```
@@ -480,8 +484,8 @@ cy.url().then(url => {
 
 ```
 my-project/
-├── cypress.config.js                          # ✅ Uses clerkSetup()
-├── cypress.env.json                           # ✅ Clerk API keys (gitignored)
+├── cypress.config.js                          # ✅ Uses clerkSetup() + dotenv
+├── .env                                       # ✅ SSOT for all environment variables
 ├── src/middleware.ts                          # ✅ Clean implementation
 └── config/cypress/
     ├── support/
@@ -499,8 +503,8 @@ my-project/
 # Setup new project
 npm install --save-dev cypress @clerk/testing
 
-# Create environment file
-echo '{"CLERK_PUBLISHABLE_KEY":"your_key","CLERK_SECRET_KEY":"your_secret"}' > cypress.env.json
+# Verify environment file exists with Clerk keys
+grep "CLERK_SECRET_KEY" .env
 
 # Run tests
 npm run dev & npm run cy:run

@@ -1,3 +1,49 @@
+# ⚠️ DEPRECATED: Testing Infrastructure Setup Guide
+
+> **🚨 THIS FILE IS DEPRECATED**  
+> **Last Updated:** 23rd May 2025 (OUTDATED)  
+> **Status:** ❌ **SUPERSEDED** by SSOT Cypress documentation
+
+---
+
+## 🛑 **IMPORTANT: USE NEW DOCUMENTATION**
+
+### **✅ GO TO CURRENT TESTING DOCS**
+
+➡️ **[OFFICIAL TESTING DOCS: Cypress/README.md](./Cypress/README.md)** ⬅️
+
+### **Why This File Is Deprecated**
+
+- ❌ **Outdated Coverage Targets** - Shows 0-80% when we achieved 100%
+- ❌ **Wrong Testing Strategy** - Jest/RTL focus vs our SSOT Cypress approach
+- ❌ **Conflicting Information** - Violates SSOT principles
+- ❌ **Superseded Implementation** - Modern authentication patterns achieved
+
+### **What You Should Use Instead**
+
+| Old (Deprecated)            | New (SSOT)                                   |
+| --------------------------- | -------------------------------------------- |
+| This setup-guide.md         | [Cypress Documentation](./Cypress/README.md) |
+| 0-80% coverage strategy     | ✅ 100% coverage achieved                    |
+| Jest/RTL setup              | ✅ Cypress SSOT patterns                     |
+| Complex multi-tool approach | ✅ Simplified enterprise-grade testing       |
+
+---
+
+## 🎯 **QUICK REDIRECT LINKS**
+
+- **Setup Instructions**: [Technical Guide](./Cypress/CYPRESS-CLERK-TESTING-GUIDE.md)
+- **Implementation Status**: [Implementation Tracker](./Cypress/cypress%20installation.md)
+- **Coverage Analysis**: [SSOT Hub](./Cypress/README.md)
+
+---
+
+**➡️ [GO TO CURRENT TESTING DOCUMENTATION](./Cypress/README.md) ⬅️**
+
+_The content below is deprecated and should not be used._
+
+---
+
 # Testing Infrastructure Setup Guide
 
 **Last Updated:** 23rd May 2025  

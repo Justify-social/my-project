@@ -53,7 +53,7 @@ This section provides a structured onboarding journey for new developers, design
 
 - [ ] **[Authentication Flow](../architecture/authentication.md)** - Clerk integration patterns
 - [ ] **[Database Schema](../database/README.md)** - Data modeling and relationships
-- [ ] **[Testing Strategy](../testing/setup-guide.md)** - Quality assurance approach
+- [ ] **[Testing Strategy](../testing/Cypress/README.md)** - SSOT testing documentation ✅
 - [ ] **[Security Implementation](../security/README.md)** - OWASP compliance
 
 **🎯 Success Criteria:** Can explain system architecture to a colleague
@@ -157,7 +157,7 @@ npm run start        # Production server
 
 - **[Component Library](../components/component-library.md)** - 40+ UI components with examples
 - **[API Endpoints](../api/comprehensive-reference.md)** - Complete backend reference
-- **[Testing Patterns](../testing/setup-guide.md)** - Quality assurance strategies
+- **[Testing Patterns](../testing/Cypress/README.md)** - SSOT Cypress documentation ✅
 - **[Security Practices](../security/README.md)** - OWASP compliance implementation
 
 ### **External Learning**

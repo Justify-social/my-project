@@ -65,6 +65,7 @@ BUILD/
 # Cypress
 cypress/videos
 cypress/screenshots
+.cypress-results/
 
 # Environment files (including .env which contains API keys)
 .env*
