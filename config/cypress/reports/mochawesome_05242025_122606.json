@@ -174,9 +174,7 @@
             "46125a5e-46e2-4579-9243-b8a8a2a86d16",
             "8d7143f7-827f-4831-a10f-ade836792fd5"
           ],
-          "failures": [
-            "0419ee72-ac6b-42dc-ae6c-12172df1c5cd"
-          ],
+          "failures": ["0419ee72-ac6b-42dc-ae6c-12172df1c5cd"],
           "pending": [],
           "skipped": [],
           "duration": 10246,

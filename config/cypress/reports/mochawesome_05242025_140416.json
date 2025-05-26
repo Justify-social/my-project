@@ -120,9 +120,7 @@
             }
           ],
           "suites": [],
-          "passes": [
-            "7a22578a-1d22-41f4-8cf6-c80fcc90a8c6"
-          ],
+          "passes": ["7a22578a-1d22-41f4-8cf6-c80fcc90a8c6"],
           "failures": [
             "b646d76b-6e84-4d0a-a9c0-90ca966dff6c",
             "398cc142-a238-4f5e-9048-934378146f74",

@@ -1,8 +1,11 @@
+import { setupClerkTestingToken } from '@clerk/testing/cypress';
+
 describe('Sidebar Navigation', () => {
   beforeEach(() => {
-    // Simulate a logged-in user by setting a dummy session cookie.
-    cy.setCookie('appSession.0', 'dummyValue', { path: '/' });
-    // Visit the dashboard page (which includes the sidebar).
+    // Setup authenticated test environment
+    setupClerkTestingToken();
+
+    // Visit the dashboard page (which includes the sidebar)
     cy.visit('/dashboard');
     // Dismiss the onboarding modal if it appears.
     cy.get('body').then($body => {

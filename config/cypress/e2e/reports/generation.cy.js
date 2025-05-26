@@ -1,5 +1,10 @@
+import { setupClerkTestingToken } from '@clerk/testing/cypress';
+
 describe('Report Generation Interface', () => {
   beforeEach(() => {
+    // Setup authenticated test environment
+    setupClerkTestingToken();
+
     // Visit the Reports page
     cy.visit('/reports');
   });

@@ -103,7 +103,9 @@ export default clerkMiddleware(async (auth, req) => {
       await auth.protect();
       console.log(`[MIDDLEWARE] Protected route authenticated: ${pathname}`);
     } catch (error) {
-      console.log(`[MIDDLEWARE] Protected route accessed without auth, redirecting to sign-in: ${pathname}`);
+      console.log(
+        `[MIDDLEWARE] Protected route accessed without auth, redirecting to sign-in: ${pathname}`
+      );
       // Let Clerk handle the redirect
     }
   }

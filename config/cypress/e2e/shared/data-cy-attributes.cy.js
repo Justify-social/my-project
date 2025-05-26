@@ -1,3 +1,5 @@
+import { setupClerkTestingToken } from '@clerk/testing/cypress';
+
 /**
  * Data-cy Attributes Verification Test
  * Tests that all newly added data-cy attributes are accessible and working

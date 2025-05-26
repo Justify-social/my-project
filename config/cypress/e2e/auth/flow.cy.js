@@ -1,7 +1,10 @@
+import { setupClerkTestingToken } from '@clerk/testing/cypress';
+
 describe('Full Authentication Flow', () => {
   beforeEach(() => {
-    // Simulate a logged-in admin user.
-    cy.setCookie('appSession.0', 'dummyValue', { path: '/' });
+    // Setup authenticated test environment
+    setupClerkTestingToken();
+
     cy.visit('/dashboard');
     // Dismiss the onboarding modal if it appears.
     cy.get('body').then($body => {

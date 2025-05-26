@@ -54,9 +54,7 @@
             }
           ],
           "suites": [],
-          "passes": [
-            "b4fccab5-1bdf-44e6-a488-7e4fd6378942"
-          ],
+          "passes": ["b4fccab5-1bdf-44e6-a488-7e4fd6378942"],
           "failures": [],
           "pending": [],
           "skipped": [],

@@ -54,7 +54,10 @@ export class DashboardPage extends BasePage {
   // Page actions
   visit() {
     cy.visit('/dashboard');
-    this.elements.dashboardContent().should('be.visible', { timeout: 15000 });
+    // Wait for authentication to be established
+    cy.window().should('have.property', '__clerk_loaded', true);
+    // Wait for dashboard content with longer timeout
+    this.elements.dashboardContent().should('be.visible', { timeout: 20000 });
     return this;
   }
 

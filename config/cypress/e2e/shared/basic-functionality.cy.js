@@ -1,3 +1,5 @@
+import { setupClerkTestingToken } from '@clerk/testing/cypress';
+
 /**
  * Basic Functionality Test
  * Tests basic Cypress setup without authentication requirements

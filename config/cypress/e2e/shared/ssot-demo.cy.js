@@ -76,7 +76,6 @@ describe('SSOT Pattern Demo - Complete User Workflow', () => {
       // === STEP 2: Dashboard Navigation (Authenticated Test Setup) ===
       cy.log('🏠 **STEP 2: Dashboard Navigation**');
 
-
       // Mock dashboard data
       cy.intercept('GET', '**/api/dashboard**', {
         statusCode: 200,
@@ -288,8 +287,7 @@ describe('SSOT Pattern Demo - Complete User Workflow', () => {
   });
 
   describe('🔍 SSOT Pattern Verification Tests', () => {
-    beforeEach(() => {
-    });
+    beforeEach(() => {});
 
     it('should verify all SSOT utilities are working correctly', () => {
       // Test ApiInterceptors

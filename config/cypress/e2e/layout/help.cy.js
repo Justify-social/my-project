@@ -1,5 +1,10 @@
+import { setupClerkTestingToken } from '@clerk/testing/cypress';
+
 describe('Help Page', () => {
   beforeEach(() => {
+    // Setup authenticated test environment
+    setupClerkTestingToken();
+
     cy.visit('/help', { failOnStatusCode: false });
   });
 

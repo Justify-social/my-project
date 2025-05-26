@@ -1,7 +1,9 @@
+import { setupClerkTestingToken } from '@clerk/testing/cypress';
+
 describe('Campaign Wizard - Submission', () => {
   beforeEach(() => {
-    // Handle auth errors
-    cy.on('uncaught:exception', () => false);
+    // Setup authenticated test environment
+    setupClerkTestingToken();
 
     // Mock the page content with more realistic HTML structure
     cy.intercept('GET', '/campaigns/wizard/submission*', {
@@ -65,9 +67,6 @@ describe('Campaign Wizard - Submission', () => {
         },
       },
     }).as('getSubmissionData');
-
-    // Set up a session cookie
-    cy.setCookie('appSession', 'dummyValue');
 
     // Visit submission page - use the standard URL pattern without the campaign ID parameter
     cy.visit('/campaigns/wizard/submission', { failOnStatusCode: false });

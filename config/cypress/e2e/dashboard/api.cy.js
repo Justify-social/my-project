@@ -1,5 +1,10 @@
+import { setupClerkTestingToken } from '@clerk/testing/cypress';
+
 describe('Dashboard API Integration', () => {
   beforeEach(() => {
+    // Setup authenticated test environment
+    setupClerkTestingToken();
+
     // Mock the API responses before visiting the page
     cy.intercept('GET', '/api/campaigns', {
       fixture: 'dashboard/campaigns.json',
@@ -8,9 +13,6 @@ describe('Dashboard API Integration', () => {
 
     // Visit the dashboard page
     cy.visit('/dashboard');
-
-    // Handle any uncaught exceptions
-    cy.on('uncaught:exception', () => false);
 
     // Wait for API call to complete
     cy.wait('@getCampaigns');

@@ -199,12 +199,12 @@ Cypress.Commands.add('checkUserRole', expectedRole => {
  * This mocks the Clerk session to include super_admin role
  */
 Cypress.Commands.add('simulateSuperAdminRole', () => {
-  cy.window().then((win) => {
+  cy.window().then(win => {
     // Mock Clerk session claims with super admin role
     const mockSessionClaims = {
       'metadata.role': 'super_admin',
       userId: 'test_super_admin_user',
-      orgId: 'test_org_123'
+      orgId: 'test_org_123',
     };
 
     // Store in window for Clerk to pick up
@@ -234,7 +234,7 @@ Cypress.Commands.add('mockSuperAdminAPI', () => {
         slug: 'test-org-1',
         membersCount: 5,
         createdAt: '2024-01-01T00:00:00.000Z',
-        updatedAt: '2024-01-01T00:00:00.000Z'
+        updatedAt: '2024-01-01T00:00:00.000Z',
       },
       {
         id: 'org_test2',
@@ -242,9 +242,9 @@ Cypress.Commands.add('mockSuperAdminAPI', () => {
         slug: 'test-org-2',
         membersCount: 12,
         createdAt: '2024-01-15T00:00:00.000Z',
-        updatedAt: '2024-01-15T00:00:00.000Z'
-      }
-    ]
+        updatedAt: '2024-01-15T00:00:00.000Z',
+      },
+    ],
   }).as('getOrganizations');
 
   // Mock organization details API
@@ -257,9 +257,9 @@ Cypress.Commands.add('mockSuperAdminAPI', () => {
         lastName: 'Doe',
         identifier: 'john.doe@test.com',
         profileImageUrl: 'https://via.placeholder.com/40',
-        role: 'admin'
-      }
-    ]
+        role: 'admin',
+      },
+    ],
   }).as('getOrganizationUsers');
 
   // Mock campaign wizards API
@@ -271,12 +271,12 @@ Cypress.Commands.add('mockSuperAdminAPI', () => {
         name: 'Test Campaign 1',
         status: 'DRAFT',
         createdAt: '2024-01-01T00:00:00.000Z',
-        user: { name: 'John Doe', email: 'john.doe@test.com' }
-      }
-    ]
+        user: { name: 'John Doe', email: 'john.doe@test.com' },
+      },
+    ],
   }).as('getCampaignWizards');
 
-  // Mock brand lift studies API  
+  // Mock brand lift studies API
   cy.intercept('GET', '**/api/admin/organizations/*/brand-lift-studies', {
     statusCode: 200,
     body: [
@@ -284,9 +284,9 @@ Cypress.Commands.add('mockSuperAdminAPI', () => {
         id: 'study_test1',
         name: 'Test Brand Lift Study',
         status: 'DRAFT',
-        createdAt: '2024-01-01T00:00:00.000Z'
-      }
-    ]
+        createdAt: '2024-01-01T00:00:00.000Z',
+      },
+    ],
   }).as('getBrandLiftStudies');
 
   cy.log('🔗 Super admin API responses mocked');

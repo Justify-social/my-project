@@ -1,5 +1,10 @@
+import { setupClerkTestingToken } from '@clerk/testing/cypress';
+
 describe('Brand Lift Survey Design Page', () => {
   beforeEach(() => {
+    // Setup authenticated test environment
+    setupClerkTestingToken();
+
     cy.visit('/brand-lift/survey-design');
   });
 

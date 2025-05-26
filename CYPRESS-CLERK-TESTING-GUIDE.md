@@ -5,6 +5,7 @@
 > **Rating**: ⭐⭐⭐⭐⭐ MIT Professor Grade: 10/10
 
 ## 📖 Table of Contents
+
 1. [Overview](#overview)
 2. [Prerequisites](#prerequisites)
 3. [Installation](#installation)
@@ -38,7 +39,7 @@ describe('Tests', () => {
   beforeEach(() => {
     setupClerkTestingToken(); // DON'T DO THIS
   });
-  
+
   it('test', () => {
     cy.visit('/dashboard'); // Will redirect infinitely
   });
@@ -53,12 +54,12 @@ describe('Tests', () => {
 });
 ```
 
-**This is the #1 reason Cypress + Clerk tests fail. Follow this pattern exactly.**  
+**This is the #1 reason Cypress + Clerk tests fail. Follow this pattern exactly.**
 
 ### ❌ What This Guide Replaces
 
 - Mock session token approaches
-- Middleware bypass strategies  
+- Middleware bypass strategies
 - Manual cookie manipulation
 - Third-party authentication tools
 
@@ -67,11 +68,13 @@ describe('Tests', () => {
 ## 📋 Prerequisites
 
 ### Required Software
+
 - Node.js 18+ and npm/yarn
 - Next.js application with Clerk authentication
 - Valid Clerk development instance
 
 ### Required Clerk Setup
+
 - Clerk account with development instance
 - Publishable Key (`pk_test_...`)
 - Secret Key (`sk_test_...`)
@@ -124,17 +127,17 @@ module.exports = defineConfig({
     video: false,
     screenshotOnRunFailure: true,
     defaultCommandTimeout: 10000,
-    
+
     setupNodeEvents(on, config) {
       // **OFFICIAL CLERK SETUP** - This is the SSOT for authentication
       const clerkConfig = clerkSetup({ config });
-      
+
       // Custom tasks (optional)
       on('task', {
         log(message) {
           console.log(message);
           return null;
-        }
+        },
       });
 
       return clerkConfig;
@@ -159,7 +162,7 @@ Cypress.on('uncaught:exception', (err, runnable) => {
     'Script error',
     'Network Error',
   ];
-  
+
   return !ignoredErrors.some(error => err.message.includes(error));
 });
 
@@ -179,17 +182,9 @@ beforeEach(() => {
 // src/middleware.ts - Clean implementation
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
-const isPublicRoute = createRouteMatcher([
-  '/',
-  '/sign-in(.*)',
-  '/sign-up(.*)',
-]);
+const isPublicRoute = createRouteMatcher(['/', '/sign-in(.*)', '/sign-up(.*)']);
 
-const isProtectedRoute = createRouteMatcher([
-  '/dashboard(.*)',
-  '/campaigns(.*)',
-  '/settings(.*)',
-]);
+const isProtectedRoute = createRouteMatcher(['/dashboard(.*)', '/campaigns(.*)', '/settings(.*)']);
 
 export default clerkMiddleware(async (auth, req) => {
   if (isPublicRoute(req)) {
@@ -259,10 +254,10 @@ export class TestSetup {
     cy.clearLocalStorage();
     cy.clearCookies();
     cy.viewport(1280, 720);
-    
+
     // Setup Clerk Testing Token - this handles ALL authentication
     setupClerkTestingToken();
-    
+
     // Optional: Setup API interceptors for non-auth endpoints
     if (!options.skipApiInterceptors) {
       this.setupApiInterceptors();
@@ -304,17 +299,17 @@ describe('Official Clerk Authentication Tests', () => {
   it('should access protected dashboard with real authentication', () => {
     // 🚨 CRITICAL: Setup Testing Token FIRST in each test
     setupClerkTestingToken();
-    
+
     // Testing Token automatically handles authentication
     cy.visit('/dashboard');
-    
+
     // Should be authenticated, not redirected
     cy.url().should('include', '/dashboard');
     cy.url().should('not.include', '/sign-in');
-    
+
     // Wait for page to load
     cy.get('body').should('be.visible');
-    
+
     // Test authenticated functionality
     cy.get('[data-cy="dashboard-content"]').should('exist');
   });
@@ -322,7 +317,7 @@ describe('Official Clerk Authentication Tests', () => {
   it('should access other protected routes', () => {
     // 🚨 CRITICAL: Setup Testing Token for EACH test
     setupClerkTestingToken();
-    
+
     cy.visit('/campaigns');
     cy.url().should('include', '/campaigns');
     cy.url().should('not.include', '/sign-in');
@@ -420,15 +415,17 @@ npx cypress run --spec "config/cypress/e2e/auth/auth-official-clerk.cy.js"
 ### Common Issues
 
 #### 1. "Bot traffic detected" Error
+
 ```
 ❌ Problem: Testing Token not working
-✅ Solution: 
+✅ Solution:
   - Check setupClerkTestingToken() is called
   - Verify API keys in cypress.env.json
   - Ensure clerkSetup() in cypress.config.js
 ```
 
 #### 2. Infinite Redirect Loop
+
 ```
 ❌ Problem: Middleware rejecting requests
 ✅ Solution:
@@ -438,6 +435,7 @@ npx cypress run --spec "config/cypress/e2e/auth/auth-official-clerk.cy.js"
 ```
 
 #### 3. Authentication Not Working
+
 ```
 ❌ Problem: Tests failing authentication
 ✅ Solution:
@@ -447,6 +445,7 @@ npx cypress run --spec "config/cypress/e2e/auth/auth-official-clerk.cy.js"
 ```
 
 #### 4. Environment Issues
+
 ```
 ❌ Problem: Keys not found
 ✅ Solution:
@@ -478,6 +477,7 @@ cy.url().then(url => {
 ## 📚 Reference Implementation
 
 ### File Structure
+
 ```
 my-project/
 ├── cypress.config.js                          # ✅ Uses clerkSetup()
@@ -518,7 +518,7 @@ This implementation receives a perfect score because it:
 ✅ **Is Well Documented** - Clear, comprehensive documentation  
 ✅ **Is Future-Proof** - Uses official APIs, not workarounds  
 ✅ **Is Secure** - No middleware compromises or mock data  
-✅ **Is Maintainable** - Clean, organized, easy to understand  
+✅ **Is Maintainable** - Clean, organized, easy to understand
 
 **This is the gold standard for Clerk + Cypress testing.**
 
@@ -532,5 +532,5 @@ This implementation receives a perfect score because it:
 
 ---
 
-*Last Updated: January 2025*  
-*Version: 1.0 - Official Release* 
+_Last Updated: January 2025_  
+_Version: 1.0 - Official Release_

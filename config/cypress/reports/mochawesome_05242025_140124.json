@@ -140,9 +140,7 @@
               ],
               "suites": [],
               "passes": [],
-              "failures": [
-                "51e0dc5a-430a-4d23-8e84-df70d4d4b27e"
-              ],
+              "failures": ["51e0dc5a-430a-4d23-8e84-df70d4d4b27e"],
               "pending": [],
               "skipped": [
                 "16e6c059-611e-4d6a-ab08-d88f99111db8",

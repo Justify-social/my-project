@@ -1,8 +1,12 @@
+import { setupClerkTestingToken } from '@clerk/testing/cypress';
+
 // End-to-end tests for team management page
 
 describe('Team Management Page', () => {
   // Mock user authentication and API responses before each test
   beforeEach(() => {
+    // Setup authenticated test environment
+    setupClerkTestingToken();
     // Intercept API calls and provide mock responses
     cy.intercept('GET', '/api/team/members', {
       statusCode: 200,
@@ -73,13 +77,6 @@ describe('Team Management Page', () => {
         },
       },
     }).as('updateMemberRole');
-
-    // Mock authentication (simplified for test)
-    localStorage.setItem('authToken', 'fake-token');
-    localStorage.setItem(
-      'user',
-      JSON.stringify({ id: '1', email: 'john@example.com', role: 'admin' })
-    );
 
     // Visit team management page
     cy.visit('/settings/team-management');

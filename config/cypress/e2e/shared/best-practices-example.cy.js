@@ -1,3 +1,5 @@
+import { setupClerkTestingToken } from '@clerk/testing/cypress';
+
 /**
  * Example test demonstrating Cypress best practices
  * This file serves as a template for writing high-quality Cypress tests
@@ -11,6 +13,9 @@ describe('Best Practices Example', () => {
   const campaignListPage = new CampaignListPage();
 
   beforeEach(() => {
+    // Setup authenticated test environment
+    setupClerkTestingToken();
+
     // ✅ Clean state before each test
     cy.resetTestData();
 

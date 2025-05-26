@@ -1,8 +1,12 @@
+import { setupClerkTestingToken } from '@clerk/testing/cypress';
+
 // End-to-end tests for branding page
 
 describe('Branding Page', () => {
   // Mock user authentication and API responses before each test
   beforeEach(() => {
+    // Setup authenticated test environment
+    setupClerkTestingToken();
     // Intercept API calls and provide mock responses
     cy.intercept('GET', '/api/branding/settings', {
       statusCode: 200,
@@ -50,13 +54,6 @@ describe('Branding Page', () => {
         },
       },
     }).as('removeBrandLogo');
-
-    // Mock authentication (simplified for test)
-    localStorage.setItem('authToken', 'fake-token');
-    localStorage.setItem(
-      'user',
-      JSON.stringify({ id: '1', email: 'admin@example.com', role: 'admin' })
-    );
 
     // Visit branding page
     cy.visit('/settings/branding');

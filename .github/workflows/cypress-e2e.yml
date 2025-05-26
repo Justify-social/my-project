@@ -13,26 +13,26 @@ jobs:
       fail-fast: false
       matrix:
         containers: [1, 2, 3, 4]
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Start application
         run: npm start &
-        
+
       - name: Wait for application
         run: npx wait-on http://localhost:3000 --timeout 60000
-      
+
       - name: Run Cypress tests
         uses: cypress-io/github-action@v6
         with:
@@ -46,13 +46,13 @@ jobs:
           # Test environment variables
           TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
           TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
-      
+
       - name: Generate test report
         if: always()
         run: |
           npx mochawesome-merge config/cypress/reports/*.json > config/cypress/reports/combined-report.json
           npx marge config/cypress/reports/combined-report.json --reportDir config/cypress/reports --inline
-      
+
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
@@ -62,7 +62,7 @@ jobs:
             config/cypress/screenshots
             config/cypress/videos
             config/cypress/reports
-      
+
       - name: Comment PR with test results
         if: github.event_name == 'pull_request' && failure()
         uses: actions/github-script@v7

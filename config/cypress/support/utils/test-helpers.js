@@ -3,7 +3,7 @@
  *
  * This file implements Clerk's official Testing Tokens approach.
  * Testing Tokens bypass bot detection mechanisms while maintaining security.
- * 
+ *
  * IMPORTANT: This is the Single Source of Truth for all Cypress authentication testing.
  * Do NOT use mock data or session token manipulation - use Testing Tokens only.
  */
@@ -114,7 +114,7 @@ export class ApiInterceptors {
             followerCount: 150000,
             verified: true,
             avatarUrl: 'https://example.com/avatar1.jpg',
-            bio: 'Test influencer for demo purposes'
+            bio: 'Test influencer for demo purposes',
           },
           {
             id: 'inf-2',
@@ -123,12 +123,12 @@ export class ApiInterceptors {
             followerCount: 250000,
             verified: true,
             avatarUrl: 'https://example.com/avatar2.jpg',
-            bio: 'Fashion and lifestyle content creator'
-          }
+            bio: 'Fashion and lifestyle content creator',
+          },
         ],
         total: 12,
         page: 1,
-        limit: 12
+        limit: 12,
       },
     }).as('getInfluencers');
 
@@ -146,8 +146,8 @@ export class ApiInterceptors {
         metrics: {
           avgLikes: 5000,
           avgComments: 250,
-          avgViews: 15000
-        }
+          avgViews: 15000,
+        },
       },
     }).as('getProfile');
 
@@ -158,8 +158,8 @@ export class ApiInterceptors {
         campaigns: [
           { id: 'camp-1', name: 'Summer Collection Campaign' },
           { id: 'camp-2', name: 'Beauty Campaign' },
-          { id: 'camp-3', name: 'Health & Wellness Campaign' }
-        ]
+          { id: 'camp-3', name: 'Health & Wellness Campaign' },
+        ],
       },
     }).as('getCampaigns');
 
@@ -200,7 +200,7 @@ export class TestSetup {
 
   /**
    * Performance test setup with authentication
-   * 
+   *
    * Note: Call setupClerkTestingToken() in your test before using this
    */
   static setupPerformanceTest(options = {}) {

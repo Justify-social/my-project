@@ -1,14 +1,10 @@
 {
-    "success": true,
-    "message": "Influencers added successfully to campaign",
-    "data": {
-        "campaignId": "camp-1",
-        "addedInfluencers": 3,
-        "totalInfluencers": 8,
-        "influencerIds": [
-            "inf-1",
-            "inf-2",
-            "inf-3"
-        ]
-    }
+  "success": true,
+  "message": "Influencers added successfully to campaign",
+  "data": {
+    "campaignId": "camp-1",
+    "addedInfluencers": 3,
+    "totalInfluencers": 8,
+    "influencerIds": ["inf-1", "inf-2", "inf-3"]
+  }
 }

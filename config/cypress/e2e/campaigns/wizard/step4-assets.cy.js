@@ -1,7 +1,9 @@
+import { setupClerkTestingToken } from '@clerk/testing/cypress';
+
 describe('Campaign Wizard - Step 4: Creative Assets', () => {
   beforeEach(() => {
-    // Handle auth errors
-    cy.on('uncaught:exception', () => false);
+    // Setup authenticated test environment
+    setupClerkTestingToken();
 
     // Mock the page content with more realistic HTML structure
     cy.intercept('GET', '/campaigns/wizard/step-4*', {
@@ -138,9 +140,6 @@ describe('Campaign Wizard - Step 4: Creative Assets', () => {
       statusCode: 200,
       body: { success: true },
     }).as('saveStep4');
-
-    // Set up a session cookie
-    cy.setCookie('appSession', 'dummyValue');
 
     // Visit step 4 page
     cy.visit('/campaigns/wizard/step-4', { failOnStatusCode: false });

@@ -1,7 +1,9 @@
+import { setupClerkTestingToken } from '@clerk/testing/cypress';
+
 describe('Campaign Wizard - Step 5: Review & Launch', () => {
   beforeEach(() => {
-    // Handle auth errors
-    cy.on('uncaught:exception', () => false);
+    // Setup authenticated test environment
+    setupClerkTestingToken();
 
     // Mock the page content with more realistic HTML structure
     cy.intercept('GET', '/campaigns/wizard/step-5*', {
@@ -196,9 +198,6 @@ describe('Campaign Wizard - Step 5: Review & Launch', () => {
         },
       },
     }).as('launchCampaign');
-
-    // Set up a session cookie
-    cy.setCookie('appSession', 'dummyValue');
 
     // Visit step 5 page
     cy.visit('/campaigns/wizard/step-5', { failOnStatusCode: false });

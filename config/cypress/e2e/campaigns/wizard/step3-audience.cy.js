@@ -1,7 +1,9 @@
+import { setupClerkTestingToken } from '@clerk/testing/cypress';
+
 describe('Campaign Wizard - Step 3: Audience Targeting', () => {
   beforeEach(() => {
-    // Handle auth errors
-    cy.on('uncaught:exception', () => false);
+    // Setup authenticated test environment
+    setupClerkTestingToken();
 
     // Mock the page content with more realistic HTML structure
     cy.intercept('GET', '/campaigns/wizard/step-3*', {
@@ -162,9 +164,6 @@ describe('Campaign Wizard - Step 3: Audience Targeting', () => {
       statusCode: 200,
       body: { success: true },
     }).as('saveStep3');
-
-    // Set up a session cookie
-    cy.setCookie('appSession', 'dummyValue');
 
     // Visit step 3 page
     cy.visit('/campaigns/wizard/step-3', { failOnStatusCode: false });

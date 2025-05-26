@@ -107,9 +107,7 @@
                 "5aef71ec-3cc4-4cef-b072-b49cb60328df",
                 "ae58fffd-d404-4a8c-b448-61652a6b1fb6"
               ],
-              "failures": [
-                "7b0a2db0-dcef-40f0-b55c-339b2bc9959a"
-              ],
+              "failures": ["7b0a2db0-dcef-40f0-b55c-339b2bc9959a"],
               "pending": [],
               "skipped": [],
               "duration": 1234,

@@ -19,6 +19,7 @@ import {
   verifyAlgoliaApiServerSide,
   verifyMuxApiServerSide,
   verifyResendApi,
+  verifyCypressApi,
 } from '@/lib/api-verification';
 
 // Import shared TYPES/ENUMS from the client-safe file
@@ -34,6 +35,7 @@ const ApiNameSchema = z.object({
 const ALL_API_VERIFIERS = [
   { name: 'algolia', func: verifyAlgoliaApiServerSide, category: 'Search' },
   { name: 'cint', func: verifyCintExchangeApiServerSide, category: 'Surveys' },
+  { name: 'cypress', func: verifyCypressApi, category: 'Testing' },
   { name: 'database', func: verifyDatabaseConnectionServerSide, category: 'Infrastructure' },
   { name: 'exchange', func: verifyExchangeRatesApi, category: 'Utilities' },
   { name: 'geolocation', func: verifyGeolocationApi, category: 'Utilities' },

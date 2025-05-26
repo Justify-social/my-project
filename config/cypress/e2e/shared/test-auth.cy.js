@@ -1,3 +1,5 @@
+import { setupClerkTestingToken } from '@clerk/testing/cypress';
+
 /**
  * Authentication Test for Clerk
  * Tests the custom authentication commands with Clerk
@@ -5,6 +7,9 @@
 
 describe('Clerk Authentication Test', () => {
   beforeEach(() => {
+    // Setup authenticated test environment
+    setupClerkTestingToken();
+
     // Clear any existing sessions
     cy.clearLocalStorage();
     cy.clearCookies();

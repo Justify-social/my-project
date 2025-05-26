@@ -1,10 +1,12 @@
+import { setupClerkTestingToken } from '@clerk/testing/cypress';
+
 describe('Dashboard User Interactions', () => {
   beforeEach(() => {
+    // Setup authenticated test environment
+    setupClerkTestingToken();
+
     // Visit the dashboard page
     cy.visit('/dashboard');
-
-    // Handle any uncaught exceptions
-    cy.on('uncaught:exception', () => false);
   });
 
   describe('Timeframe Selection', () => {

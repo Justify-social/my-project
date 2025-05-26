@@ -1,8 +1,12 @@
+import { setupClerkTestingToken } from '@clerk/testing/cypress';
+
 // End-to-end tests for settings pages
 
 describe('Settings Pages', () => {
   // Mock user authentication before each test
   beforeEach(() => {
+    // Setup authenticated test environment
+    setupClerkTestingToken();
     // Intercept API calls and provide mock responses
     cy.intercept('GET', '/api/user/profile', {
       statusCode: 200,
@@ -58,10 +62,6 @@ describe('Settings Pages', () => {
         },
       },
     }).as('updateNotificationPreferences');
-
-    // Mock authentication (simplified for test)
-    localStorage.setItem('authToken', 'fake-token');
-    localStorage.setItem('user', JSON.stringify({ id: '1', email: 'john.doe@example.com' }));
 
     // Visit settings page
     cy.visit('/settings');

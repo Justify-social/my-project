@@ -1,12 +1,13 @@
+import { setupClerkTestingToken } from '@clerk/testing/cypress';
 import { SignInPage } from '../../support/page-objects';
-import { TestSetup, AssertionHelpers, WaitUtilities } from '../../support/utils/test-helpers.js';
+import { AssertionHelpers, WaitUtilities } from '../../support/utils/test-helpers.js';
 
 describe('Sign-In Page - Using Page Objects (SSOT Pattern)', () => {
   let signInPage;
 
   beforeEach(() => {
-    // Use SSOT test setup for unauthenticated tests
-    TestSetup.setupUnauthenticatedTest();
+    // Setup authenticated test environment (for accessing sign-in page)
+    setupClerkTestingToken();
 
     // Initialize page object
     signInPage = new SignInPage();

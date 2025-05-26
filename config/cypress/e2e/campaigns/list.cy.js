@@ -1,7 +1,9 @@
+import { setupClerkTestingToken } from '@clerk/testing/cypress';
+
 describe('Campaigns Page', () => {
   beforeEach(() => {
-    // Handle auth errors
-    cy.on('uncaught:exception', () => false);
+    // Setup authenticated test environment
+    setupClerkTestingToken();
 
     // Mock the page content
     cy.intercept('GET', '/campaigns*', {

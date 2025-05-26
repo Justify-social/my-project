@@ -152,9 +152,7 @@
                 }
               ],
               "suites": [],
-              "passes": [
-                "3acb2afa-256c-4926-85ce-ba3f4162d939"
-              ],
+              "passes": ["3acb2afa-256c-4926-85ce-ba3f4162d939"],
               "failures": [],
               "pending": [],
               "skipped": [],
@@ -196,9 +194,7 @@
               ],
               "suites": [],
               "passes": [],
-              "failures": [
-                "07fad47d-68d4-4b05-9117-b81b3128cad1"
-              ],
+              "failures": ["07fad47d-68d4-4b05-9117-b81b3128cad1"],
               "pending": [],
               "skipped": [],
               "duration": 10639,

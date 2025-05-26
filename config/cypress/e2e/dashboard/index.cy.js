@@ -1,13 +1,15 @@
+import { setupClerkTestingToken } from '@clerk/testing/cypress';
+
 describe('Dashboard Page', () => {
   beforeEach(() => {
+    // Setup authenticated test environment
+    setupClerkTestingToken();
+
     // Visit the dashboard page before each test
     cy.visit('/dashboard', {
       failOnStatusCode: false,
       timeout: 10000,
     });
-
-    // Handle any uncaught exceptions
-    cy.on('uncaught:exception', () => false);
   });
 
   // Dashboard header tests
