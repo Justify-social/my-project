@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Icon } from '@/components/ui/icon/icon';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import {
   ComprehensiveMetricsOverview,
   EnhancedTestExecutions,
@@ -574,9 +575,7 @@ export default function ComprehensiveCypressAnalyticsPage() {
         <Card className="border-accent">
           <CardContent className="py-4">
             <div className="flex items-center gap-3">
-              {isRunningTests && (
-                <Icon iconId="faSpinnerLight" size="sm" className="animate-spin" />
-              )}
+              {isRunningTests && <LoadingSpinner />}
               <div className="flex-1">
                 <div className="text-sm font-medium text-primary">
                   {isRunningTests ? 'Cypress Test Execution In Progress' : 'Test Execution Status'}
