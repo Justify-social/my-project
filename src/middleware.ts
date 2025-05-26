@@ -88,7 +88,7 @@ export default clerkMiddleware(async (auth, req) => {
       try {
         await auth.protect();
         console.log(`[MIDDLEWARE] Protected API route authenticated: ${pathname}`);
-      } catch (error) {
+      } catch {
         console.log(`[MIDDLEWARE] Protected API route access denied: ${pathname}`);
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
@@ -102,7 +102,7 @@ export default clerkMiddleware(async (auth, req) => {
     try {
       await auth.protect();
       console.log(`[MIDDLEWARE] Protected route authenticated: ${pathname}`);
-    } catch (error) {
+    } catch {
       console.log(
         `[MIDDLEWARE] Protected route accessed without auth, redirecting to sign-in: ${pathname}`
       );
