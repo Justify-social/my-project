@@ -75,11 +75,11 @@ export async function POST(request: NextRequest) {
         },
         maxBuffer: 1024 * 1024 * 10, // 10MB buffer for large output
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Cypress returns non-zero exit code for failed tests, but we still want the output
       cypressOutput = {
-        stdout: error.stdout || '',
-        stderr: error.stderr || '',
+        stdout: (error as { stdout?: string })?.stdout || '',
+        stderr: (error as { stderr?: string })?.stderr || '',
       };
     }
 
@@ -169,7 +169,7 @@ async function parseCypressResults(cypressOutput: {
     // Look for Cypress results in various formats
     const lines = output.split('\n');
     let currentFile = '';
-    const currentTest = '';
+    const _currentTest = '';
 
     for (const line of lines) {
       // Parse test file execution
@@ -355,7 +355,7 @@ export async function GET() {
     const result = JSON.parse(content);
 
     return NextResponse.json(result);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         success: false,

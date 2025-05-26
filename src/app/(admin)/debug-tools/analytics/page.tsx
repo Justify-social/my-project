@@ -19,8 +19,6 @@ import {
   ComprehensiveErrorAnalysis,
   EnhancedCoverageAnalysis,
   PerformanceAnalysisDashboard,
-  SSOTComplianceDashboard,
-  HistoricalTrendsChart,
 } from '@/components/analytics/comprehensive-metrics';
 import {
   CypressTestMetrics,
@@ -28,13 +26,22 @@ import {
   ErrorPattern,
   CoverageMetrics,
   PerformanceAnalysis,
-  SSOTCompliance,
-  HistoricalTrend,
 } from '@/lib/analytics/cypress-analytics';
 
 // Helper functions to generate real data from test results (NO MOCK DATA)
 // ✅ VERIFIED: This function uses ONLY real test execution data - no hardcoded values
-function generateRealCoverageFromTests(testResults: any[]): CoverageMetrics[] {
+interface TestResult {
+  testName: string;
+  filePath: string;
+  status: 'passed' | 'failed' | 'skipped';
+  duration: number;
+  error?: string;
+  memoryUsage?: number;
+  networkRequests?: number;
+  screenshots?: number;
+}
+
+function generateRealCoverageFromTests(testResults: TestResult[]): CoverageMetrics[] {
   const categories = [
     { name: 'Authentication & Authorization', pattern: /auth\//i },
     { name: 'Billing & Payments', pattern: /billing\//i },
@@ -78,10 +85,10 @@ function generateRealCoverageFromTests(testResults: any[]): CoverageMetrics[] {
 }
 
 // ✅ VERIFIED: This function uses ONLY real test execution data - no hardcoded values
-function generateRealErrorsFromTests(testResults: any[]): ErrorPattern[] {
+function generateRealErrorsFromTests(testResults: TestResult[]): ErrorPattern[] {
   const failedTests = testResults.filter(test => test.status === 'failed');
 
-  return failedTests.map((test, index) => ({
+  return failedTests.map(test => ({
     error: test.error || `Test failure in ${test.testName}`,
     category: test.filePath.includes('auth')
       ? ('Authentication' as const)
@@ -112,8 +119,8 @@ export default function ComprehensiveCypressAnalyticsPage() {
   const [errorPatterns, setErrorPatterns] = useState<ErrorPattern[]>([]);
   const [coverageMetrics, setCoverageMetrics] = useState<CoverageMetrics[]>([]);
   const [performanceAnalysis, setPerformanceAnalysis] = useState<PerformanceAnalysis[]>([]);
-  const [ssotCompliance, setSsotCompliance] = useState<SSOTCompliance[]>([]);
-  const [historicalTrends, setHistoricalTrends] = useState<HistoricalTrend[]>([]);
+  const [ssotCompliance, setSsotCompliance] = useState<Record<string, unknown>[]>([]);
+  const [historicalTrends, setHistoricalTrends] = useState<Record<string, unknown>[]>([]);
 
   // Load all analytics data - REAL DATA ONLY (NO MOCK DATA)
   const loadAnalyticsData = async () => {
@@ -134,14 +141,18 @@ export default function ComprehensiveCypressAnalyticsPage() {
               failureRate: 100 - latestResults.passRate,
               avgExecutionTime: latestResults.totalDuration / latestResults.totalTests,
               totalExecutionTime: latestResults.totalDuration,
-              fastestTest: latestResults.testResults.reduce((min: any, t: any) =>
+              fastestTest: latestResults.testResults.reduce((min: TestResult, t: TestResult) =>
                 t.duration < min.duration ? t : min
               ).testName,
-              slowestTest: latestResults.testResults.reduce((max: any, t: any) =>
+              slowestTest: latestResults.testResults.reduce((max: TestResult, t: TestResult) =>
                 t.duration > max.duration ? t : max
               ).testName,
-              fastestTime: Math.min(...latestResults.testResults.map((t: any) => t.duration)),
-              slowestTime: Math.max(...latestResults.testResults.map((t: any) => t.duration)),
+              fastestTime: Math.min(
+                ...latestResults.testResults.map((t: TestResult) => t.duration)
+              ),
+              slowestTime: Math.max(
+                ...latestResults.testResults.map((t: TestResult) => t.duration)
+              ),
               performanceGrade:
                 latestResults.passRate > 95
                   ? 'A'
@@ -152,8 +163,9 @@ export default function ComprehensiveCypressAnalyticsPage() {
                       : latestResults.passRate > 65
                         ? 'D'
                         : ('F' as 'A' | 'B' | 'C' | 'D' | 'F'),
-              flakyTestCount: latestResults.testResults.filter((t: any) => t.status === 'failed')
-                .length,
+              flakyTestCount: latestResults.testResults.filter(
+                (t: TestResult) => t.status === 'failed'
+              ).length,
               retryCount: 0,
               stabilityScore: latestResults.passRate,
               ssotCompliantFiles: latestResults.modernAuthPatterns || 0,
@@ -167,7 +179,7 @@ export default function ComprehensiveCypressAnalyticsPage() {
             // Convert REAL API results to test executions format
             const apiExecutions = latestResults.testResults
               .slice(0, 20)
-              .map((test: any, index: number) => ({
+              .map((test: TestResult, index: number) => ({
                 id: `real-exec-${Date.now()}-${index}`,
                 name: test.testName,
                 spec: test.filePath,
@@ -203,7 +215,7 @@ export default function ComprehensiveCypressAnalyticsPage() {
             return;
           }
         }
-      } catch (apiError) {
+      } catch {
         console.log('[Analytics] No recent test results available');
       }
 
@@ -332,7 +344,7 @@ export default function ComprehensiveCypressAnalyticsPage() {
       setMetrics(updatedMetrics);
 
       // Add new test executions to the list
-      const newExecutions = results.testResults.map((test: any, index: number) => ({
+      const newExecutions = results.testResults.map((test: TestResult, index: number) => ({
         id: `exec-${Date.now()}-${index}`,
         name: test.testName,
         spec: test.filePath,

@@ -443,7 +443,7 @@ class CypressAnalyticsService {
     return `${days} day${days > 1 ? 's' : ''} ago`;
   }
 
-  private generateErrorMessage(spec: string): string {
+  private generateErrorMessage(_spec: string): string {
     const errors = [
       'Element timeout after 4000ms',
       'Navigation timeout exceeded',
@@ -534,7 +534,7 @@ class CypressAnalyticsService {
   }
 
   // Save/load from localStorage for persistence (free tier optimization)
-  public saveAnalyticsData(data: any): void {
+  public saveAnalyticsData(data: Record<string, unknown>): void {
     try {
       localStorage.setItem(
         this.storageKey,
@@ -548,7 +548,7 @@ class CypressAnalyticsService {
     }
   }
 
-  public loadAnalyticsData(): any {
+  public loadAnalyticsData(): Record<string, unknown> | null {
     try {
       const stored = localStorage.getItem(this.storageKey);
       if (stored) {
