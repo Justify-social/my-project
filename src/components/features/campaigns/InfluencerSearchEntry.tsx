@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, Control, FieldErrors, FieldValues } from 'react-hook-form';
 import { useDebouncedCallback } from 'use-debounce';
 import { influencerService } from '@/services/influencer';
 import { InfluencerSummary } from '@/types/influencer';
@@ -30,6 +30,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Icon } from '@/components/ui/icon/icon';
+import { IconButtonAction } from '@/components/ui/button-icon-action';
 import { cn } from '@/lib/utils';
 
 // Import the same platform data from Step1Content
@@ -68,8 +69,8 @@ const supportedPlatforms = [
 
 interface InfluencerSearchEntryProps {
   index: number;
-  control: any;
-  errors: any;
+  control: Control<FieldValues>;
+  errors: FieldErrors<FieldValues>;
   remove: (index: number) => void;
 }
 
@@ -238,18 +239,18 @@ export const InfluencerSearchEntry: React.FC<InfluencerSearchEntryProps> = ({
   return (
     <Card className="mb-4 border-border bg-card/50 relative overflow-hidden transition-all duration-200 hover:shadow-md">
       <CardContent className="p-4 space-y-4">
-        <div className="flex justify-end absolute top-2 right-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0 opacity-60 hover:opacity-100 transition-opacity hover:text-destructive"
-            onClick={() => remove(index)}
-            aria-label="Remove Influencer"
-          >
-            <Icon iconId="faTrashCanLight" className="h-4 w-4" />
-          </Button>
-        </div>
+        {/* Only show trash icon for second influencer and beyond */}
+        {index > 0 && (
+          <div className="flex justify-end absolute top-2 right-2">
+            <IconButtonAction
+              iconBaseName="faTrashCan"
+              hoverColorClass="text-destructive"
+              ariaLabel="Remove Influencer"
+              className="h-7 w-7"
+              onClick={() => remove(index)}
+            />
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
           {/* Platform Selection */}
@@ -282,7 +283,7 @@ export const InfluencerSearchEntry: React.FC<InfluencerSearchEntryProps> = ({
                     ))}
                   </SelectContent>
                 </Select>
-                <FormMessage>{errors.Influencer?.[index]?.platform?.message}</FormMessage>
+                <FormMessage>{(errors as any)?.Influencer?.[index]?.platform?.message}</FormMessage>
               </FormItem>
             )}
           />
@@ -488,7 +489,7 @@ export const InfluencerSearchEntry: React.FC<InfluencerSearchEntryProps> = ({
                     </div>
                   )}
                 </div>
-                <FormMessage>{errors.Influencer?.[index]?.handle?.message}</FormMessage>
+                <FormMessage>{(errors as any)?.Influencer?.[index]?.handle?.message}</FormMessage>
               </FormItem>
             )}
           />

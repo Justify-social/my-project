@@ -208,40 +208,6 @@ const getCurrencySymbol = (currencyCode?: string | null): string => {
   }
 };
 
-// Curated platforms with icons (alphabetical order, excluding Twitch and Pinterest)
-const supportedPlatforms = [
-  {
-    value: PlatformEnum.Facebook,
-    label: 'Facebook',
-    iconId: 'brandsFacebook',
-  },
-  {
-    value: PlatformEnum.Instagram,
-    label: 'Instagram',
-    iconId: 'brandsInstagram',
-  },
-  {
-    value: PlatformEnum.LinkedIn,
-    label: 'LinkedIn',
-    iconId: 'brandsLinkedin',
-  },
-  {
-    value: PlatformEnum.TikTok,
-    label: 'TikTok',
-    iconId: 'brandsTiktok',
-  },
-  {
-    value: PlatformEnum.Twitter,
-    label: 'Twitter/X',
-    iconId: 'brandsXTwitter',
-  },
-  {
-    value: PlatformEnum.YouTube,
-    label: 'YouTube',
-    iconId: 'brandsYoutube',
-  },
-];
-
 // --- TimeZone FormField Internal Component ---
 const TimeZoneFormFieldContent: React.FC<{
   field: ControllerRenderProps<Step1FormData, 'timeZone'>;
@@ -939,16 +905,15 @@ function Step1Content() {
                 />
               </div>
 
-              {/* Row 2: Duration Badge and Empty Cell */}
-              <div className="md:col-span-1 flex items-center min-h-[2.25rem] pt-1">
+              {/* Row 2: Duration Badge - Centered and Prominent */}
+              <div className="md:col-span-2 flex justify-center pt-3 pb-1">
                 {campaignDuration && (
-                  <Badge variant="outline" className="font-normal">
-                    <Icon iconId="faCalendarDaysLight" className="mr-1.5 h-3 w-3" />
+                  <Badge className="bg-accent/10 text-accent border-accent/20 font-medium text-sm px-4 py-2 hover:bg-accent/15 transition-colors">
+                    <Icon iconId="faCalendarDaysLight" className="mr-2 h-4 w-4" />
                     Duration: {campaignDuration}
                   </Badge>
                 )}
               </div>
-              <div className="md:col-span-1"></div>
 
               {/* Row 3: Time Zone */}
               <div className="md:col-span-2 pt-2">
