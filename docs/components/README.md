@@ -34,6 +34,15 @@ We use a centralised icon system built upon **FontAwesome Pro**.
 - Provide the unique `iconId` (e.g., `faCheckLight`, `appSettings`) defined in the JSON registries located in `/public/static/`.
 - See the **[Icon System Guide](./icons/README.md)** for detailed usage and how to add new icons.
 
+## Loading Skeletons
+
+We use a comprehensive skeleton loading system to improve perceived performance:
+
+- **Single Source of Truth:** All 7 skeleton variants centralized in `src/components/ui/loading-skeleton.tsx`
+- **Responsive Design:** Works across all screen sizes (320px to 1440px+)
+- **Usage:** `LoadingSkeleton`, `TableSkeleton`, `DashboardSkeleton`, `WizardSkeleton`, `AuthSkeleton`, `BillingSkeleton`, `ProfileSkeleton`
+- See the **[Loading Skeletons Implementation Guide](./ui/implementation/loading-skeletons.md)** for detailed usage patterns.
+
 ## Usage & Examples
 
 Refer to the README file within each specific component directory in `src/components/ui/` for detailed props information and usage examples (if available). Storybook also serves as interactive documentation.

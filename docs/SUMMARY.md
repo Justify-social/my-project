@@ -27,6 +27,7 @@
 - [Components](./components/README.md)
   - [Component Library](./components/component-library.md)
   - [UI Components](./components/ui/README.md)
+    - [Loading Skeletons Implementation](./components/ui/implementation/loading-skeletons.md)
   - [Icons](./components/icons/README.md)
 - [Performance](./performance/README.md)
   - [Monitoring](./performance/monitoring.md)

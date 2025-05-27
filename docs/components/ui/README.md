@@ -68,6 +68,7 @@ While many components are standard Shadcn UI patterns, be aware of these more co
 - **`MobileMenu`:** Sheet-based menu. Expects state props and `menuItems` array.
 - **`UpcomingCampaignsTable`:** Card containing a Table for specific campaign data structure.
 - **`Icon`:** The central component for displaying all icons based on registry IDs.
+- **Loading Skeletons:** Comprehensive skeleton loading system with 7 specialized variants. See [Loading Skeletons Implementation Guide](./implementation/loading-skeletons.md) for detailed usage.
 
 ## Best Practices
 
