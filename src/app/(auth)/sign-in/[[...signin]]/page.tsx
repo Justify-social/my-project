@@ -4,6 +4,8 @@ import { SignIn } from '@clerk/nextjs';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { AuthSkeleton } from '@/components/ui/loading-skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 
 // Removed Link import as it's handled by Clerk component
 // import Link from 'next/link';
@@ -12,15 +14,47 @@ function SignInComponent() {
   const searchParams = useSearchParams();
   const redirectUrl = searchParams?.get('redirect_url');
 
-  // Debug: Log environment information (remove in production)
-  if (process.env.NODE_ENV === 'development') {
-    console.log('🔍 [DEBUG] Sign-in page environment:', {
-      clerkPublishableKey: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.substring(0, 20) + '...',
-      signInUrl: process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL,
-      nodeEnv: process.env.NODE_ENV,
-      vercelEnv: process.env.VERCEL_ENV,
-      redirectUrl,
-    });
+  const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const isClerkConfigured = !!clerkPublishableKey && clerkPublishableKey.length > 0;
+
+  // Always log configuration status for debugging production issues
+  console.log('🔍 [SIGN-IN] Environment check:', {
+    hasClerkKey: !!clerkPublishableKey,
+    keyPrefix: clerkPublishableKey?.substring(0, 15) + '...',
+    nodeEnv: process.env.NODE_ENV,
+    vercelEnv: process.env.VERCEL_ENV,
+    redirectUrl,
+    timestamp: new Date().toISOString(),
+  });
+
+  // Show error state if Clerk is not configured
+  if (!isClerkConfigured) {
+    return (
+      <div className="w-full max-w-md mx-auto space-y-4">
+        <Alert variant="destructive">
+          <AlertTitle>Authentication Service Unavailable</AlertTitle>
+          <AlertDescription>
+            The authentication service is not properly configured. Please contact support if this
+            persists.
+          </AlertDescription>
+        </Alert>
+
+        {process.env.NODE_ENV === 'development' && (
+          <Alert>
+            <AlertTitle>Development Debug Info</AlertTitle>
+            <AlertDescription>
+              <code>NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY</code> is missing or invalid.
+              <br />
+              Current value: {clerkPublishableKey || 'undefined'}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <Button onClick={() => window.location.reload()} className="w-full" variant="outline">
+          Retry
+        </Button>
+      </div>
+    );
   }
 
   return (

@@ -6,7 +6,6 @@ import { NextResponse } from 'next/server';
  * Route Matchers - SSOT for route protection rules
  */
 const isPublicRoute = createRouteMatcher([
-  '/',
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/api/webhooks(.*)',
@@ -73,6 +72,26 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.next();
   }
 
+  // Handle root path - redirect unauthenticated users to sign-in
+  if (pathname === '/') {
+    try {
+      const { userId } = await auth();
+      if (!userId) {
+        console.log(`[MIDDLEWARE] Unauthenticated user at root, redirecting to sign-in`);
+        const signInUrl = new URL('/sign-in', req.url);
+        return NextResponse.redirect(signInUrl);
+      } else {
+        console.log(`[MIDDLEWARE] Authenticated user at root, redirecting to dashboard`);
+        const dashboardUrl = new URL('/dashboard', req.url);
+        return NextResponse.redirect(dashboardUrl);
+      }
+    } catch (error) {
+      console.log(`[MIDDLEWARE] Auth check failed for root path, redirecting to sign-in`);
+      const signInUrl = new URL('/sign-in', req.url);
+      return NextResponse.redirect(signInUrl);
+    }
+  }
+
   // Allow public routes
   if (isPublicRoute(req)) {
     console.log(`[MIDDLEWARE] Public route allowed: ${pathname}`);
@@ -106,7 +125,10 @@ export default clerkMiddleware(async (auth, req) => {
       console.log(
         `[MIDDLEWARE] Protected route accessed without auth, redirecting to sign-in: ${pathname}`
       );
-      // Let Clerk handle the redirect
+      const signInUrl = new URL('/sign-in', req.url);
+      const redirectUrl = signInUrl;
+      redirectUrl.searchParams.set('redirect_url', pathname);
+      return NextResponse.redirect(redirectUrl);
     }
   }
 
