@@ -309,7 +309,10 @@ const ContentAnalyticsSection: React.FC<ContentAnalyticsSectionProps> = ({ influ
           </>
         ) : (
           <div className="text-center py-6">
-            <Icon iconId="faMegaphoneLight" className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+            <Icon
+              iconId="faMegaphoneLight"
+              className="h-8 w-8 text-muted-foreground mx-auto mb-2"
+            />
             <p className="text-sm text-muted-foreground">No sponsored content detected</p>
           </div>
         )}
@@ -397,10 +400,7 @@ const ContentAnalyticsSection: React.FC<ContentAnalyticsSectionProps> = ({ influ
           </div>
         ) : (
           <div className="text-center py-6">
-            <Icon
-              iconId="faChartBarLight"
-              className="h-8 w-8 text-muted-foreground mx-auto mb-2"
-            />
+            <Icon iconId="faChartBarLight" className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
             <p className="text-sm text-muted-foreground">
               Engagement distribution data not available
             </p>

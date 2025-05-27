@@ -20,6 +20,37 @@ interface ResendEventData {
   [key: string]: unknown; // Allow other properties
 }
 
+// Store email event in database for analytics tracking
+async function storeEmailEvent(status: string, eventData: ResendEventData) {
+  try {
+    if (!eventData?.email_id || !eventData?.to) {
+      logger.warn(`Missing required data for email event storage:`, { status, eventData });
+      return;
+    }
+
+    await prisma.stripeEvent.create({
+      data: {
+        id: `resend_${eventData.email_id}_${status}_${Date.now()}`,
+        type: `email.${status}`,
+        data: {
+          emailId: eventData.email_id,
+          to: eventData.to,
+          status,
+          timestamp: new Date().toISOString(),
+          ...eventData,
+        },
+        processed: true,
+        livemode: true,
+        createdAt: new Date(),
+      },
+    });
+
+    logger.info(`Stored email event: ${status} for ${eventData.email_id}`);
+  } catch (error) {
+    logger.error(`Failed to store email event:`, { status, eventData, error });
+  }
+}
+
 function handleErrorResponse(error: unknown, type: string, res: typeof NextResponse) {
   let errorData: string | unknown = 'Unknown error'; // Default error data, changed type
   let statusCode = 500;
@@ -117,17 +148,17 @@ export async function POST(request: Request) {
     switch (eventType) {
       case 'email.sent':
         logger.info(`Email Sent: ID ${eventData?.email_id} to ${eventData?.to}`);
-        // Optional: Update internal status if needed
+        await storeEmailEvent('sent', eventData);
         break;
 
       case 'email.delivered':
         logger.info(`Email Delivered: ID ${eventData?.email_id} to ${eventData?.to}`);
-        // Optional: Mark email as confirmed delivered
+        await storeEmailEvent('delivered', eventData);
         break;
 
       case 'email.delivery_delayed':
         logger.warn(`Email Delivery Delayed: ID ${eventData?.email_id} to ${eventData?.to}`);
-        // Optional: Monitor or notify internally
+        await storeEmailEvent('delayed', eventData);
         break;
 
       case 'email.bounced':
@@ -135,6 +166,7 @@ export async function POST(request: Request) {
           bounceReason: eventData?.reason,
           bounceType: eventData?.type,
         });
+        await storeEmailEvent('bounced', eventData);
         if (eventData?.email) {
           try {
             await prisma.user.updateMany({
@@ -155,6 +187,7 @@ export async function POST(request: Request) {
 
       case 'email.complained':
         logger.warn(`Email Complaint (Spam): ID ${eventData?.email_id} from ${eventData?.to}`);
+        await storeEmailEvent('complained', eventData);
         if (eventData?.email) {
           try {
             await prisma.user.updateMany({
@@ -178,14 +211,14 @@ export async function POST(request: Request) {
 
       case 'email.opened':
         logger.info(`Email Opened: ID ${eventData?.email_id} by ${eventData?.to}`);
-        // Optional: Track opens for analytics
+        await storeEmailEvent('opened', eventData);
         break;
 
       case 'email.clicked':
         logger.info(
           `Email Clicked: ID ${eventData?.email_id} by ${eventData?.to}, URL: ${eventData?.url}`
         );
-        // Optional: Track clicks for analytics
+        await storeEmailEvent('clicked', eventData);
         break;
 
       default:

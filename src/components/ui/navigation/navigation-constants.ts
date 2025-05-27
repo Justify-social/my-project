@@ -7,13 +7,13 @@
 // SSOT: Navigation icon sizing
 export const NAVIGATION_CONSTANTS = {
   // Different sizes for different icons
-  coinsSize: 'w-[25px] h-[25px]', // Coins: 25px
+  coinsSize: 'w-[24px] h-[24px]', // Coins: 24px
   bellSize: 'w-[27px] h-[27px]', // Bell: 27px
   profileSize: 'w-[27px] h-[27px]', // Profile: 27px
   iconGap: '13px', // 13px spacing
 
   // CSS classes to force exact sizes (overrides Button padding)
-  forceCoinsSize: '[&_svg]:!w-[25px] [&_svg]:!h-[25px] [&_*]:!w-[25px] [&_*]:!h-[25px]',
+  forceCoinsSize: '[&_svg]:!w-[24px] [&_svg]:!h-[24px] [&_*]:!w-[24px] [&_*]:!h-[24px]',
   forceBellSize: '[&_svg]:!w-[27px] [&_svg]:!h-[27px] [&_*]:!w-[27px] [&_*]:!h-[27px]',
   forceProfileSize: '[&_svg]:!w-[27px] [&_svg]:!h-[27px] [&_*]:!w-[27px] [&_*]:!h-[27px]',
 

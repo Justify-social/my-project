@@ -176,7 +176,7 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({ influencer })
       </CardHeader>
       <CardContent className="space-y-6">
         {audienceData?.gender_age_distribution &&
-          audienceData.gender_age_distribution.length > 0 ? (
+        audienceData.gender_age_distribution.length > 0 ? (
           <div className="space-y-4">
             {audienceData.gender_age_distribution.map(
               (demo: GenderAgeDistribution, index: number) => (
@@ -184,12 +184,13 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({ influencer })
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
                       <div
-                        className={`w-3 h-3 rounded-full ${demo.gender === 'FEMALE'
+                        className={`w-3 h-3 rounded-full ${
+                          demo.gender === 'FEMALE'
                             ? 'bg-accent'
                             : demo.gender === 'MALE'
                               ? 'bg-interactive'
                               : 'bg-warning'
-                          }`}
+                        }`}
                       />
                       <span className="text-sm font-medium capitalize">
                         {demo.gender?.toLowerCase()} • {demo.age_range}
@@ -199,12 +200,13 @@ const DemographicsSection: React.FC<DemographicsSectionProps> = ({ influencer })
                   </div>
                   <Progress
                     value={demo.value}
-                    className={`h-2 ${demo.gender === 'FEMALE'
+                    className={`h-2 ${
+                      demo.gender === 'FEMALE'
                         ? '[&>div]:bg-accent'
                         : demo.gender === 'MALE'
                           ? '[&>div]:bg-interactive'
                           : '[&>div]:bg-warning'
-                      }`}
+                    }`}
                   />
                 </div>
               )

@@ -102,6 +102,12 @@ export default function DebugToolsPage() {
           buttonText="Manage Notifications"
         />
         <DebugToolCard
+          title="Resend Email Management"
+          description="Comprehensive email management, analytics, templates, and monitoring."
+          linkHref="/debug-tools/resend-management"
+          buttonText="Manage Email System"
+        />
+        <DebugToolCard
           title="UI Components"
           description="View and test centralized UI components."
           linkHref="/debug-tools/ui-components"

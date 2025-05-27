@@ -285,7 +285,7 @@ const AdvancedAnalyticsSection: React.FC<AdvancedAnalyticsSectionProps> = ({ inf
         <div>
           <div className="text-sm font-medium text-primary mb-3">Engagement Rate Distribution</div>
           {engagementData?.engagementRateHistogram &&
-            engagementData.engagementRateHistogram.length > 0 ? (
+          engagementData.engagementRateHistogram.length > 0 ? (
             <div className="space-y-2">
               {engagementData.engagementRateHistogram.map(
                 (band: EngagementRateHistogram, index: number) => (

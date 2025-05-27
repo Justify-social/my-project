@@ -3,7 +3,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDebouncedCallback } from 'use-debounce';
-import { useForm, useFieldArray, FormProvider, ControllerRenderProps } from 'react-hook-form';
+import {
+  useForm,
+  useFieldArray,
+  FormProvider,
+  ControllerRenderProps,
+  Control,
+  FieldErrors,
+} from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWizard } from '@/components/features/campaigns/WizardContext';
@@ -61,6 +68,21 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { InfluencerSearchEntry } from './InfluencerSearchEntry';
+
+// Type alias for InfluencerSearchEntry compatibility
+type InfluencerSearchFormData = {
+  Influencer: Array<{
+    id?: string;
+    platform: string;
+    handle: string;
+    platformId?: string | null;
+    campaignId?: string;
+    createdAt?: string | null;
+    updatedAt?: string | null;
+    [key: string]: unknown;
+  }>;
+  [key: string]: unknown;
+};
 
 if (process.env.NODE_ENV === 'development') {
   console.log('[DEBUG] PrismaCurrency.GBP:', PrismaCurrency.GBP);
@@ -1389,8 +1411,8 @@ function Step1Content() {
                 <InfluencerSearchEntry
                   key={field.fieldId}
                   index={index}
-                  control={form.control}
-                  errors={form.formState.errors}
+                  control={form.control as unknown as Control<InfluencerSearchFormData>}
+                  errors={form.formState.errors as unknown as FieldErrors<InfluencerSearchFormData>}
                   remove={removeInfluencer}
                 />
               ))}

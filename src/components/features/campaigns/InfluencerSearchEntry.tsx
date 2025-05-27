@@ -68,11 +68,17 @@ const supportedPlatforms = [
   },
 ];
 
-// Define the form structure for better typing
+// Interface that matches the structure used by Step1FormData and other campaign forms
 interface CampaignFormData {
   Influencer: Array<{
+    id?: string;
     platform: string;
     handle: string;
+    platformId?: string | null;
+    campaignId?: string;
+    createdAt?: string | null;
+    updatedAt?: string | null;
+    [key: string]: unknown;
   }>;
   [key: string]: unknown;
 }

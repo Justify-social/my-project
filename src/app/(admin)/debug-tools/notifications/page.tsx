@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,15 +20,19 @@ import { Icon } from '@/components/ui/icon/icon';
 import { useNotifications } from '@/providers/NotificationProvider';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
+import { RecipientSelector } from '@/components/ui/recipient-selector';
+import { DateTimePicker } from '@/components/ui/datetime-picker';
+import { toast } from 'react-hot-toast';
 
-interface User {
+interface SelectedRecipient {
   id: string;
-  email: string;
-  name?: string;
+  type: 'user' | 'organisation';
+  name: string;
+  email?: string;
+  userCount?: number;
 }
 
 interface NotificationForm {
-  userId: string;
   type: string;
   title: string;
   message: string;
@@ -37,11 +41,9 @@ interface NotificationForm {
 }
 
 export default function NotificationsDebugPage() {
-  const { notifications, refreshNotifications, showToast } = useNotifications();
-  const [users, setUsers] = useState<User[]>([]);
-  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const { notifications, refreshNotifications } = useNotifications();
+  const [selectedRecipients, setSelectedRecipients] = useState<SelectedRecipient[]>([]);
   const [form, setForm] = useState<NotificationForm>({
-    userId: '',
     type: 'INFO',
     title: '',
     message: '',
@@ -49,79 +51,45 @@ export default function NotificationsDebugPage() {
     expiresAt: '',
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [searchEmail, setSearchEmail] = useState('');
-
-  const fetchUsers = useCallback(async () => {
-    try {
-      const response = await fetch('/api/admin/users');
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(data.users || []);
-      }
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      showToast('error', 'Failed to fetch users');
-    }
-  }, [showToast]);
-
-  // Fetch users for the dropdown
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
 
   const handleInputChange = (field: keyof NotificationForm, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleUserSelect = (userId: string) => {
-    if (selectedUsers.includes(userId)) {
-      setSelectedUsers(prev => prev.filter(id => id !== userId));
-    } else {
-      setSelectedUsers(prev => [...prev, userId]);
-    }
-  };
-
-  const createNotification = async (userIds: string[]) => {
+  const createBulkNotifications = async () => {
     setIsLoading(true);
     try {
-      const promises = userIds.map(userId =>
-        fetch('/api/notifications', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ...form,
-            userId,
-            expiresAt: form.expiresAt ? new Date(form.expiresAt).toISOString() : null,
-          }),
-        })
-      );
+      const response = await fetch('/api/notifications/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recipients: selectedRecipients.map(r => ({ id: r.id, type: r.type })),
+          ...form,
+          expiresAt: form.expiresAt || null,
+        }),
+      });
 
-      const results = await Promise.all(promises);
-      const successCount = results.filter(r => r.ok).length;
-      const failureCount = results.length - successCount;
+      const result = await response.json();
 
-      if (successCount > 0) {
-        showToast('success', `${successCount} notification(s) created successfully`);
+      if (response.ok) {
+        toast.success(result.message || 'Notifications created successfully');
         refreshNotifications();
 
         // Reset form
         setForm({
-          userId: '',
           type: 'INFO',
           title: '',
           message: '',
           actionUrl: '',
           expiresAt: '',
         });
-        setSelectedUsers([]);
-      }
-
-      if (failureCount > 0) {
-        showToast('error', `${failureCount} notification(s) failed to create`);
+        setSelectedRecipients([]);
+      } else {
+        toast.error(result.error || 'Failed to create notifications');
       }
     } catch (error) {
-      console.error('Error creating notification:', error);
-      showToast('error', 'Failed to create notifications');
+      console.error('Error creating notifications:', error);
+      toast.error('Failed to create notifications');
     } finally {
       setIsLoading(false);
     }
@@ -131,18 +99,16 @@ export default function NotificationsDebugPage() {
     e.preventDefault();
 
     if (!form.title || !form.message) {
-      showToast('error', 'Title and message are required');
+      toast.error('Title and message are required');
       return;
     }
 
-    const targetUsers = selectedUsers.length > 0 ? selectedUsers : [form.userId];
-
-    if (targetUsers.length === 0 || (targetUsers.length === 1 && !targetUsers[0])) {
-      showToast('error', 'Please select at least one user');
+    if (selectedRecipients.length === 0) {
+      toast.error('Please select at least one recipient');
       return;
     }
 
-    await createNotification(targetUsers);
+    await createBulkNotifications();
   };
 
   const quickNotifications = [
@@ -176,29 +142,23 @@ export default function NotificationsDebugPage() {
     },
   ];
 
-  const filteredUsers = users.filter(
-    user =>
-      user.email.toLowerCase().includes(searchEmail.toLowerCase()) ||
-      (user.name && user.name.toLowerCase().includes(searchEmail.toLowerCase()))
-  );
-
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'CAMPAIGN_SUBMITTED':
-        return 'appCampaigns'; // Use app icon for campaigns
+        return 'appCampaigns';
       case 'BRAND_LIFT_SUBMITTED':
-        return 'appBrandLift'; // Use app icon for brand lift
+        return 'appBrandLift';
       case 'BRAND_LIFT_REPORT_READY':
-        return 'appReports'; // Use app icon for reports
+        return 'appReports';
       case 'SUCCESS':
-        return 'faCircleCheckSolid'; // Correct solid icon name
+        return 'faCircleCheckSolid';
       case 'ERROR':
-        return 'faTriangleExclamationSolid'; // Correct solid icon name
+        return 'faTriangleExclamationSolid';
       case 'WARNING':
-        return 'faTriangleExclamationLight'; // Use light version for warnings
+        return 'faTriangleExclamationLight';
       case 'INFO':
       default:
-        return 'faCircleInfoSolid'; // Correct solid icon name
+        return 'faCircleInfoSolid';
     }
   };
 
@@ -309,12 +269,12 @@ export default function NotificationsDebugPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="expiresAt">Expires At (optional)</Label>
-                    <Input
+                    <DateTimePicker
                       id="expiresAt"
-                      type="datetime-local"
+                      label="Expires At (optional)"
                       value={form.expiresAt}
-                      onChange={e => handleInputChange('expiresAt', e.target.value)}
+                      onChange={value => handleInputChange('expiresAt', value)}
+                      description="Set when this notification should automatically expire"
                     />
                   </div>
 
@@ -325,56 +285,11 @@ export default function NotificationsDebugPage() {
               </CardContent>
             </Card>
 
-            {/* User Selection */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Select Recipients</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="searchEmail">Search Users</Label>
-                  <Input
-                    id="searchEmail"
-                    value={searchEmail}
-                    onChange={e => setSearchEmail(e.target.value)}
-                    placeholder="Search by email or name"
-                    className="w-full"
-                  />
-                </div>
-
-                <ScrollArea className="h-64">
-                  <div className="space-y-2">
-                    {filteredUsers.map(user => (
-                      <div
-                        key={user.id}
-                        className={cn(
-                          'flex items-center space-x-2 p-2 rounded-md cursor-pointer hover:bg-muted',
-                          selectedUsers.includes(user.id) && 'bg-muted'
-                        )}
-                        onClick={() => handleUserSelect(user.id)}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedUsers.includes(user.id)}
-                          onChange={() => handleUserSelect(user.id)}
-                          className="rounded"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{user.email}</p>
-                          {user.name && (
-                            <p className="text-xs text-muted-foreground truncate">{user.name}</p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-
-                <div className="text-sm text-muted-foreground">
-                  {selectedUsers.length} user(s) selected
-                </div>
-              </CardContent>
-            </Card>
+            {/* Recipient Selection */}
+            <RecipientSelector
+              selectedRecipients={selectedRecipients}
+              onSelectionChange={setSelectedRecipients}
+            />
           </div>
 
           {/* Quick Notifications */}

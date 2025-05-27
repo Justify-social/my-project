@@ -94,8 +94,8 @@ const ContactAnalyticsSection: React.FC<ContactAnalyticsSectionProps> = ({ influ
   // Calculate account age if creation date available
   const accountAge = accountDetails.createdAt
     ? Math.floor(
-      (Date.now() - new Date(accountDetails.createdAt).getTime()) / (1000 * 60 * 60 * 24)
-    )
+        (Date.now() - new Date(accountDetails.createdAt).getTime()) / (1000 * 60 * 60 * 24)
+      )
     : null;
 
   // Calculate collaboration viability indicators

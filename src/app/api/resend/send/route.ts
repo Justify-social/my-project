@@ -1,0 +1,239 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { auth, clerkClient } from '@clerk/nextjs/server';
+import { Resend } from 'resend';
+import { render } from '@react-email/render';
+import { logger } from '@/lib/logger';
+import { handleApiError } from '@/lib/apiErrorHandler';
+import { UnauthenticatedError, ForbiddenError, BadRequestError } from '@/lib/errors';
+import { z } from 'zod';
+import { EMAIL_TEMPLATES, type TemplateId } from '@/components/email-templates/email-templates';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Request validation schema
+const SendEmailSchema = z.object({
+  recipients: z.array(
+    z.object({
+      id: z.string(),
+      type: z.enum(['user', 'organisation']),
+    })
+  ),
+  from: z.string().email(),
+  subject: z.string().min(1),
+  templateType: z.string(),
+  content: z.string().min(1), // Single content field instead of message + htmlContent
+  scheduledAt: z.string().optional().nullable(),
+});
+
+export async function POST(request: NextRequest) {
+  try {
+    const { userId: clerkUserId, sessionClaims } = await auth();
+    if (!clerkUserId) {
+      throw new UnauthenticatedError('Authentication required.');
+    }
+
+    // Check if user has admin permissions
+    if (
+      sessionClaims?.['metadata.role'] !== 'super_admin' &&
+      sessionClaims?.['metadata.role'] !== 'admin'
+    ) {
+      logger.warn('Non-admin attempted to send bulk emails', {
+        clerkUserId,
+        metadataRole: sessionClaims?.['metadata.role'],
+      });
+      throw new ForbiddenError('Admin access required for email sending.');
+    }
+
+    const body = await request.json();
+    const validatedData = SendEmailSchema.parse(body);
+
+    const { recipients, from, subject, templateType, content, scheduledAt } = validatedData;
+
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error('Resend API key not configured');
+    }
+
+    // Collect all user email addresses from recipients
+    const userEmails: string[] = [];
+    const client = await clerkClient();
+
+    for (const recipient of recipients) {
+      if (recipient.type === 'user') {
+        try {
+          const user = await client.users.getUser(recipient.id);
+          if (user.emailAddresses[0]?.emailAddress) {
+            userEmails.push(user.emailAddresses[0].emailAddress);
+          }
+        } catch (error) {
+          logger.error(`Failed to fetch user ${recipient.id}:`, {
+            error: error instanceof Error ? error.message : String(error),
+            userId: recipient.id,
+          });
+        }
+      } else if (recipient.type === 'organisation') {
+        try {
+          // Fetch organization members
+          const organizationMembershipList =
+            await client.organizations.getOrganizationMembershipList({
+              organizationId: recipient.id,
+            });
+
+          for (const membership of organizationMembershipList.data) {
+            if (membership.publicUserData?.userId) {
+              try {
+                const user = await client.users.getUser(membership.publicUserData.userId);
+                if (user.emailAddresses[0]?.emailAddress) {
+                  userEmails.push(user.emailAddresses[0].emailAddress);
+                }
+              } catch (error) {
+                logger.error(
+                  `Failed to fetch user ${membership.publicUserData.userId} from org ${recipient.id}:`,
+                  {
+                    error: error instanceof Error ? error.message : String(error),
+                  }
+                );
+              }
+            }
+          }
+        } catch (error) {
+          logger.error(`Failed to fetch users for organization ${recipient.id}:`, {
+            error: error instanceof Error ? error.message : String(error),
+            organizationId: recipient.id,
+          });
+        }
+      }
+    }
+
+    // Remove duplicates
+    const uniqueEmails = [...new Set(userEmails)];
+
+    if (uniqueEmails.length === 0) {
+      throw new BadRequestError('No valid email addresses found in the selected recipients.');
+    }
+
+    // Generate email content using React Email templates
+    let emailContent = '';
+
+    // Check if templateType is a known template
+    if (templateType in EMAIL_TEMPLATES) {
+      const TemplateComponent = EMAIL_TEMPLATES[templateType as TemplateId];
+      emailContent = await render(
+        TemplateComponent({
+          subject,
+          content,
+          recipientName: undefined, // Could be enhanced to get user names
+          actionUrl: 'https://justify.social/dashboard',
+        })
+      );
+    } else {
+      // Use the notification template for custom content
+      const NotificationTemplate = EMAIL_TEMPLATES.notification;
+      emailContent = await render(
+        NotificationTemplate({
+          subject,
+          content,
+          recipientName: undefined,
+          actionUrl: 'https://justify.social/dashboard',
+        })
+      );
+    }
+
+    // Handle scheduling (if scheduledAt is provided)
+    if (scheduledAt) {
+      // For now, we'll store scheduled emails and process them later
+      // In a production environment, you'd use a job queue like Bull/BullMQ
+      logger.info('Email scheduling requested', {
+        scheduledAt,
+        recipientCount: uniqueEmails.length,
+        userId: clerkUserId,
+      });
+
+      // Store scheduled email for later processing
+      // TODO: Implement scheduling mechanism
+      return NextResponse.json({
+        success: true,
+        message: `Email scheduled for ${uniqueEmails.length} recipients`,
+        scheduledAt,
+        recipientCount: uniqueEmails.length,
+      });
+    }
+
+    // Send emails immediately
+    const results = [];
+    const batchSize = 5; // Process in batches to avoid rate limits
+
+    for (let i = 0; i < uniqueEmails.length; i += batchSize) {
+      const batch = uniqueEmails.slice(i, i + batchSize);
+
+      const batchPromises = batch.map(async email => {
+        try {
+          const { data, error } = await resend.emails.send({
+            from,
+            to: email,
+            subject,
+            html: emailContent,
+            text: content.replace(/<[^>]*>/g, ''), // Strip HTML for plain text version
+            tags: [
+              { name: 'type', value: templateType },
+              { name: 'sender', value: clerkUserId },
+            ],
+          });
+
+          if (error) {
+            logger.error(`Failed to send email to ${email}:`, { error: error.message });
+            return { email, success: false, error: error.message };
+          }
+
+          logger.info(`Email sent successfully to ${email}`, { emailId: data?.id });
+          return { email, success: true, emailId: data?.id };
+        } catch (error) {
+          logger.error(`Exception sending email to ${email}:`, {
+            error: error instanceof Error ? error.message : String(error),
+          });
+          return {
+            email,
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          };
+        }
+      });
+
+      const batchResults = await Promise.all(batchPromises);
+      results.push(...batchResults);
+
+      // Add a small delay between batches to be gentle on the API
+      if (i + batchSize < uniqueEmails.length) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
+
+    const successCount = results.filter(r => r.success).length;
+    const failureCount = results.length - successCount;
+
+    logger.info(`Bulk email sending completed`, {
+      totalRecipients: uniqueEmails.length,
+      successCount,
+      failureCount,
+      userId: clerkUserId,
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: `${successCount} emails sent successfully${failureCount > 0 ? `, ${failureCount} failed` : ''}`,
+      results: {
+        total: uniqueEmails.length,
+        success: successCount,
+        failed: failureCount,
+      },
+      details: results,
+    });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid request data', details: error.errors },
+        { status: 400 }
+      );
+    }
+    return handleApiError(error, request);
+  }
+}

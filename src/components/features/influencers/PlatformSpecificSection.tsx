@@ -306,12 +306,13 @@ const PlatformSpecificSection: React.FC<PlatformSpecificSectionProps> = ({ influ
             {Array.from({ length: 24 }, (_, hour) => (
               <div
                 key={hour}
-                className={`h-6 rounded-sm ${hour >= 9 && hour <= 17
-                  ? 'bg-success/40'
-                  : hour >= 18 && hour <= 22
-                    ? 'bg-warning/40'
-                    : 'bg-muted'
-                  }`}
+                className={`h-6 rounded-sm ${
+                  hour >= 9 && hour <= 17
+                    ? 'bg-success/40'
+                    : hour >= 18 && hour <= 22
+                      ? 'bg-warning/40'
+                      : 'bg-muted'
+                }`}
                 title={`${hour}:00`}
               />
             ))}

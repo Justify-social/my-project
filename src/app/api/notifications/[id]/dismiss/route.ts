@@ -3,7 +3,10 @@ import { getAuth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 
 // PATCH /api/notifications/[id]/dismiss - Dismiss notification
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(
+  request: NextRequest,
+  { params: paramsPromise }: { params: Promise<{ id: string }> }
+) {
   try {
     const { userId } = getAuth(request);
 
@@ -11,6 +14,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const params = await paramsPromise;
     const notificationId = params.id;
 
     // Verify the notification belongs to the user and update it
