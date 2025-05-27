@@ -1,153 +1,47 @@
 'use client';
 
-import React from 'react';
-import { useUser, useAuth } from '@clerk/nextjs';
+import { useState } from 'react';
+import { SignIn, SignedIn, SignedOut, UserButton, useAuth, useUser } from '@clerk/nextjs';
+import { ClerkDebugPanel } from '@/components/debug/clerk-debug';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { getClerkConfig, validateClerkConfig } from '@/lib/auth/clerk-config';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Link from 'next/link';
 
 export default function AuthTestPage() {
-  const { user, isLoaded: userLoaded } = useUser();
-  const { isLoaded: authLoaded, userId, orgId } = useAuth();
-  const config = getClerkConfig();
-  const validation = validateClerkConfig();
-
-  if (!userLoaded || !authLoaded) {
-    return (
-      <div className="container mx-auto p-6">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading authentication state...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const [showDebug, setShowDebug] = useState(false);
+  const { isLoaded: authLoaded, userId } = useAuth();
+  const { isLoaded: userLoaded, user } = useUser();
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-primary mb-2">Authentication Test</h1>
-        <p className="text-muted-foreground">
-          This page helps verify that Clerk authentication is working correctly.
-        </p>
-      </div>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-4xl mx-auto px-4 space-y-6">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Clerk Authentication Test Page</h1>
+          <p className="text-gray-600">
+            Simple environment to test Clerk authentication without layout interference
+          </p>
+        </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Authentication Status */}
+        {/* Status Overview */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              Authentication Status
-              <Badge variant={user ? 'default' : 'destructive'}>
-                {user ? 'Authenticated' : 'Not Authenticated'}
-              </Badge>
-            </CardTitle>
+            <CardTitle>Authentication Status</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {user ? (
-              <div className="space-y-2">
-                <div>
-                  <strong>User ID:</strong> {userId}
-                </div>
-                <div>
-                  <strong>Email:</strong> {user.primaryEmailAddress?.emailAddress || 'N/A'}
-                </div>
-                <div>
-                  <strong>Name:</strong> {user.fullName || user.firstName || 'N/A'}
-                </div>
-                <div>
-                  <strong>Organization ID:</strong> {orgId || 'None'}
-                </div>
-                <div>
-                  <strong>Created:</strong>{' '}
-                  {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-4">
-                <p className="text-muted-foreground mb-4">You are not signed in.</p>
-                <Button asChild>
-                  <Link href="/sign-in">Sign In</Link>
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Configuration Status */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              Configuration Status
-              <Badge variant={validation.isValid ? 'default' : 'destructive'}>
-                {validation.isValid ? 'Valid' : 'Issues Detected'}
-              </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div>
-                <strong>Environment:</strong> {config.environment}
+                <strong>Auth Loaded:</strong> {authLoaded ? '✅ Yes' : '⏳ Loading...'}
               </div>
               <div>
-                <strong>Key Type:</strong>{' '}
-                {config.publishableKey?.startsWith('pk_test_')
-                  ? 'Development'
-                  : config.publishableKey?.startsWith('pk_live_')
-                    ? 'Production'
-                    : 'Unknown'}
+                <strong>User Loaded:</strong> {userLoaded ? '✅ Yes' : '⏳ Loading...'}
               </div>
               <div>
-                <strong>Key Prefix:</strong>{' '}
-                {config.publishableKey?.substring(0, 15) + '...' || 'Missing'}
+                <strong>User ID:</strong> {userId ? '✅ Set' : '❌ None'}
               </div>
               <div>
-                <strong>Sign In URL:</strong> {config.signInUrl}
+                <strong>User Email:</strong> {user?.primaryEmailAddress?.emailAddress || '❌ None'}
               </div>
-              <div>
-                <strong>After Sign In:</strong> {config.afterSignInUrl}
-              </div>
-            </div>
-
-            {validation.errors.length > 0 && (
-              <div className="mt-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
-                <h4 className="font-semibold text-destructive mb-2">Configuration Issues:</h4>
-                <ul className="text-sm text-destructive space-y-1">
-                  {validation.errors.map((error, index) => (
-                    <li key={index}>• {error}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Navigation Testing */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Navigation Testing</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground mb-4">
-              Test navigation to protected and public routes:
-            </p>
-            <div className="grid gap-2">
-              <Button variant="outline" asChild className="justify-start">
-                <Link href="/dashboard">Dashboard (Protected)</Link>
-              </Button>
-              <Button variant="outline" asChild className="justify-start">
-                <Link href="/campaigns">Campaigns (Protected)</Link>
-              </Button>
-              <Button variant="outline" asChild className="justify-start">
-                <Link href="/brand-lift/survey-design/test">Brand Lift (Protected)</Link>
-              </Button>
-              <Button variant="outline" asChild className="justify-start">
-                <Link href="/settings">Settings (Protected)</Link>
-              </Button>
             </div>
           </CardContent>
         </Card>
@@ -158,29 +52,122 @@ export default function AuthTestPage() {
             <CardTitle>Environment Information</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2 text-sm">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
               <div>
-                <strong>NODE_ENV:</strong> {process.env.NODE_ENV}
+                <strong>Node Env:</strong> {process.env.NODE_ENV}
               </div>
               <div>
-                <strong>VERCEL_ENV:</strong> {process.env.VERCEL_ENV || 'Not set'}
+                <strong>Vercel Env:</strong> {process.env.VERCEL_ENV || 'Not set'}
               </div>
               <div>
-                <strong>Domain:</strong>{' '}
-                {typeof window !== 'undefined' ? window.location.origin : 'Server-side'}
-              </div>
-              <div>
-                <strong>Configured:</strong> {config.isConfigured ? 'Yes' : 'No'}
+                <strong>Clerk Key:</strong>{' '}
+                {process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? '✅ Configured' : '❌ Missing'}
               </div>
             </div>
           </CardContent>
         </Card>
-      </div>
 
-      <div className="mt-6 text-center">
-        <Button variant="outline" asChild>
-          <Link href="/dashboard">← Back to Dashboard</Link>
-        </Button>
+        {/* Authentication States */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Signed Out State */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Not Signed In</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <SignedOut>
+                <Alert className="mb-4">
+                  <AlertTitle>You are not signed in</AlertTitle>
+                  <AlertDescription>Please sign in using the form below.</AlertDescription>
+                </Alert>
+
+                <div className="max-w-sm mx-auto">
+                  <SignIn
+                    routing="hash"
+                    afterSignInUrl="/auth-test"
+                    signUpUrl="#"
+                    appearance={{
+                      elements: {
+                        card: 'shadow-none border-0 p-0',
+                        footer: 'hidden',
+                      },
+                    }}
+                  />
+                </div>
+              </SignedOut>
+
+              <SignedIn>
+                <Alert>
+                  <AlertTitle>You are signed in!</AlertTitle>
+                  <AlertDescription>
+                    Welcome back! The authentication is working correctly.
+                  </AlertDescription>
+                </Alert>
+              </SignedIn>
+            </CardContent>
+          </Card>
+
+          {/* Signed In State */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Signed In</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <SignedIn>
+                <div className="space-y-4">
+                  <Alert>
+                    <AlertTitle>✅ Authentication Successful</AlertTitle>
+                    <AlertDescription>
+                      You are successfully authenticated with Clerk.
+                    </AlertDescription>
+                  </Alert>
+
+                  <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                    <div>
+                      <p className="font-medium">Welcome, {user?.firstName || 'User'}!</p>
+                      <p className="text-sm text-gray-600">
+                        {user?.primaryEmailAddress?.emailAddress}
+                      </p>
+                    </div>
+                    <UserButton afterSignOutUrl="/auth-test" />
+                  </div>
+
+                  <Button onClick={() => (window.location.href = '/dashboard')} className="w-full">
+                    Go to Dashboard
+                  </Button>
+                </div>
+              </SignedIn>
+
+              <SignedOut>
+                <Alert variant="destructive">
+                  <AlertTitle>Not Signed In</AlertTitle>
+                  <AlertDescription>Please sign in using the form on the left.</AlertDescription>
+                </Alert>
+              </SignedOut>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Debug Panel */}
+        <div className="space-y-4">
+          <div className="text-center">
+            <Button onClick={() => setShowDebug(!showDebug)} variant="outline" className="mx-auto">
+              {showDebug ? 'Hide' : 'Show'} Debug Information
+            </Button>
+          </div>
+
+          {showDebug && <ClerkDebugPanel />}
+        </div>
+
+        {/* Navigation */}
+        <div className="text-center space-x-4">
+          <Button asChild variant="outline">
+            <Link href="/sign-in">Go to Sign-In Page</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/">Go to Home</Link>
+          </Button>
+        </div>
       </div>
     </div>
   );

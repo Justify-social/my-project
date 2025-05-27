@@ -2,10 +2,11 @@
 
 import { SignIn } from '@clerk/nextjs';
 import { useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { AuthSkeleton } from '@/components/ui/loading-skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { ClerkDebugPanel } from '@/components/debug/clerk-debug';
 
 // Removed Link import as it's handled by Clerk component
 // import Link from 'next/link';
@@ -13,6 +14,8 @@ import { Button } from '@/components/ui/button';
 function SignInComponent() {
   const searchParams = useSearchParams();
   const redirectUrl = searchParams?.get('redirect_url');
+  const [showDebug, setShowDebug] = useState(false);
+  const [clerkRenderTimeout, setClerkRenderTimeout] = useState(false);
 
   const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
   const isClerkConfigured = !!clerkPublishableKey && clerkPublishableKey.length > 0;
@@ -26,6 +29,22 @@ function SignInComponent() {
     redirectUrl,
     timestamp: new Date().toISOString(),
   });
+
+  // Set a timeout to detect if Clerk form fails to render
+  useEffect(() => {
+    if (isClerkConfigured) {
+      const timer = setTimeout(() => {
+        // Check if Clerk form has rendered
+        const clerkForm = document.querySelector('.cl-rootBox, .cl-card, [data-clerk-id]');
+        if (!clerkForm) {
+          console.warn('🚨 [SIGN-IN] Clerk form failed to render within 5 seconds');
+          setClerkRenderTimeout(true);
+        }
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isClerkConfigured]);
 
   // Show error state if Clerk is not configured
   if (!isClerkConfigured) {
@@ -57,8 +76,32 @@ function SignInComponent() {
     );
   }
 
+  // Show debug info if Clerk form times out or user requests it
+  if (showDebug || clerkRenderTimeout) {
+    return (
+      <div className="w-full max-w-4xl mx-auto space-y-6">
+        <Alert variant="destructive">
+          <AlertTitle>Authentication Loading Issue Detected</AlertTitle>
+          <AlertDescription>
+            The sign-in form is taking longer than expected to load. This could be due to network
+            issues, content security policy restrictions, or client-side loading problems.
+          </AlertDescription>
+        </Alert>
+
+        <ClerkDebugPanel />
+
+        <div className="flex gap-2 justify-center">
+          <Button onClick={() => setShowDebug(false)} variant="outline">
+            Try Again
+          </Button>
+          <Button onClick={() => window.location.reload()}>Refresh Page</Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full max-w-md mx-auto space-y-4">
       <SignIn
         routing="path"
         path="/sign-in"
@@ -85,6 +128,18 @@ function SignInComponent() {
           },
         }}
       />
+
+      {/* Debug trigger button for production troubleshooting */}
+      <div className="text-center mt-4">
+        <Button
+          onClick={() => setShowDebug(true)}
+          variant="link"
+          size="sm"
+          className="text-xs text-muted-foreground hover:text-foreground"
+        >
+          Having trouble signing in? Show diagnostic info
+        </Button>
+      </div>
     </div>
   );
 }
