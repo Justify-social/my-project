@@ -86,7 +86,7 @@ export default clerkMiddleware(async (auth, req) => {
         return NextResponse.redirect(dashboardUrl);
       }
     } catch (error) {
-      console.log(`[MIDDLEWARE] Auth check failed for root path, redirecting to sign-in`);
+      console.log(`[MIDDLEWARE] Auth check failed for root path, redirecting to sign-in:`, error);
       const signInUrl = new URL('/sign-in', req.url);
       return NextResponse.redirect(signInUrl);
     }
