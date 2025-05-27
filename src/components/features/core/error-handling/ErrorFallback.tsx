@@ -13,7 +13,9 @@ interface ErrorFallbackProps {
  * A standard fallback component to display when an ErrorBoundary catches an error.
  */
 const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetErrorBoundary }) => {
-  console.error('Render Error Caught:', error); // Log the error for debugging
+  if (process.env.NODE_ENV === 'development') {
+    console.error('Render Error Caught:', error); // Log the error for debugging
+  }
 
   return (
     <div

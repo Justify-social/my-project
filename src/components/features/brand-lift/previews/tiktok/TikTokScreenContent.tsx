@@ -57,37 +57,47 @@ const TikTokScreenContent: React.FC<TikTokScreenContentProps> = ({
     if (media.type === 'video' && !media.muxPlaybackId && media.url) {
       const extractedId = extractMuxPlaybackId(media.url);
       if (extractedId) {
-        console.debug('[TikTok Component] Extracted Mux playback ID from URL:', extractedId);
+        if (process.env.NODE_ENV === 'development') {
+          console.debug('[TikTok Component] Extracted Mux playback ID from URL:', extractedId);
+        }
         setPlayerState(prev => ({ ...prev, extractedPlaybackId: extractedId }));
       }
     }
   }, [media]);
 
-  // Log detailed info at component render time (only in console, not in UI)
+  // Log detailed info at component render time (only in development)
   useEffect(() => {
-    console.debug('[TikTok Component] Rendered with media:', {
-      type: media.type,
-      muxPlaybackId: media.muxPlaybackId,
-      muxProcessingStatus: media.muxProcessingStatus,
-      imageUrl: media.imageUrl,
-      dimensions: media.dimensions,
-      url: media.url,
-    });
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('[TikTok Component] Rendered with media:', {
+        type: media.type,
+        muxPlaybackId: media.muxPlaybackId,
+        muxProcessingStatus: media.muxProcessingStatus,
+        imageUrl: media.imageUrl,
+        dimensions: media.dimensions,
+        url: media.url,
+      });
+    }
   }, [media]);
 
   // Attempt to play the video when videoReady changes to true
   useEffect(() => {
     if (videoReady && playerRef.current) {
       try {
-        console.debug('[TikTok Component] Video ready, attempting to play...');
+        if (process.env.NODE_ENV === 'development') {
+          console.debug('[TikTok Component] Video ready, attempting to play...');
+        }
         // Use setTimeout to ensure the component is fully rendered
         const timer = setTimeout(() => {
           if (playerRef.current) {
-            console.debug('[TikTok Component] Playing video...');
+            if (process.env.NODE_ENV === 'development') {
+              console.debug('[TikTok Component] Playing video...');
+            }
             playerRef.current
               .play()
               .then(() => {
-                console.debug('[TikTok Component] Video playback started successfully');
+                if (process.env.NODE_ENV === 'development') {
+                  console.debug('[TikTok Component] Video playback started successfully');
+                }
                 setPlayerState(prev => ({ ...prev, playing: true }));
               })
               .catch((error: Error) => {
@@ -127,7 +137,9 @@ const TikTokScreenContent: React.FC<TikTokScreenContentProps> = ({
 
   // Handle loading event from MuxPlayer
   const handleMuxPlayerLoadedData = () => {
-    console.debug('[TikTok Component] Mux player loaded data');
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('[TikTok Component] Mux player loaded data');
+    }
     setPlayerState(prev => ({ ...prev, loaded: true }));
   };
 
@@ -167,7 +179,9 @@ const TikTokScreenContent: React.FC<TikTokScreenContentProps> = ({
               setPlayerState(prev => ({ ...prev, error: 'Player error' }));
             }}
             onPlaying={() => {
-              console.debug('[TikTok Component] Mux player playing');
+              if (process.env.NODE_ENV === 'development') {
+                console.debug('[TikTok Component] Mux player playing');
+              }
               setPlayerState(prev => ({ ...prev, playing: true }));
             }}
           />

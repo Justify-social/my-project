@@ -19,7 +19,9 @@ export default function DebugToolsLayout({ children }: { children: React.ReactNo
   // Redirect unauthorized users
   useEffect(() => {
     if (isLoaded && !canAccess) {
-      console.warn('Access denied to debug tools - Super Admin role required');
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Access denied to debug tools - Super Admin role required');
+      }
       router.push('/dashboard');
     }
   }, [isLoaded, canAccess, router]);

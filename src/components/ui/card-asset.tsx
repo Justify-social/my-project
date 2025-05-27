@@ -390,7 +390,9 @@ export function AssetCard({
   cardClassName,
   ...props
 }: AssetCardProps) {
-  console.log('[AssetCard STEP 5 RENDER] Full props:', { asset, currency, defaultPlatform }); // Added for Step 5 debugging
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[AssetCard STEP 5 RENDER] Full props:', { asset, currency, defaultPlatform }); // Added for Step 5 debugging
+  }
   // Uses updated AssetCardProps
   if (!asset) return null;
 

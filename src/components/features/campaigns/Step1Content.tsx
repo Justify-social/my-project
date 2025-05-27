@@ -67,9 +67,11 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 
-console.log('[DEBUG] PrismaCurrency.GBP:', PrismaCurrency.GBP);
-console.log('[DEBUG] PrismaCurrency.USD:', PrismaCurrency.USD);
-console.log('[DEBUG] typeof PrismaCurrency.GBP:', typeof PrismaCurrency.GBP);
+if (process.env.NODE_ENV === 'development') {
+  console.log('[DEBUG] PrismaCurrency.GBP:', PrismaCurrency.GBP);
+  console.log('[DEBUG] PrismaCurrency.USD:', PrismaCurrency.USD);
+  console.log('[DEBUG] typeof PrismaCurrency.GBP:', typeof PrismaCurrency.GBP);
+}
 
 // --- Define Toast Helper Functions Locally ---
 const showSuccessToast = (message: string, iconId?: string) => {

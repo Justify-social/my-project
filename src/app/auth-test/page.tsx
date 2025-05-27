@@ -148,16 +148,22 @@ export default function AuthTestPage() {
           </Card>
         </div>
 
-        {/* Debug Panel */}
-        <div className="space-y-4">
-          <div className="text-center">
-            <Button onClick={() => setShowDebug(!showDebug)} variant="outline" className="mx-auto">
-              {showDebug ? 'Hide' : 'Show'} Debug Information
-            </Button>
-          </div>
+        {/* Debug Panel - only show in development */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="space-y-4">
+            <div className="text-center">
+              <Button
+                onClick={() => setShowDebug(!showDebug)}
+                variant="outline"
+                className="mx-auto"
+              >
+                {showDebug ? 'Hide' : 'Show'} Debug Information
+              </Button>
+            </div>
 
-          {showDebug && <ClerkDebugPanel />}
-        </div>
+            {showDebug && <ClerkDebugPanel />}
+          </div>
+        )}
 
         {/* Navigation */}
         <div className="text-center space-x-4">

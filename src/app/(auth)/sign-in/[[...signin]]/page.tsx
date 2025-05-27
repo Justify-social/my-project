@@ -20,15 +20,17 @@ function SignInComponent() {
   const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
   const isClerkConfigured = !!clerkPublishableKey && clerkPublishableKey.length > 0;
 
-  // Always log configuration status for debugging production issues
-  console.log('🔍 [SIGN-IN] Environment check:', {
-    hasClerkKey: !!clerkPublishableKey,
-    keyPrefix: clerkPublishableKey?.substring(0, 15) + '...',
-    nodeEnv: process.env.NODE_ENV,
-    vercelEnv: process.env.VERCEL_ENV,
-    redirectUrl,
-    timestamp: new Date().toISOString(),
-  });
+  // Log configuration status only in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔍 [SIGN-IN] Environment check:', {
+      hasClerkKey: !!clerkPublishableKey,
+      keyPrefix: clerkPublishableKey?.substring(0, 15) + '...',
+      nodeEnv: process.env.NODE_ENV,
+      vercelEnv: process.env.VERCEL_ENV,
+      redirectUrl,
+      timestamp: new Date().toISOString(),
+    });
+  }
 
   // Set a timeout to detect if Clerk form fails to render
   useEffect(() => {
@@ -37,7 +39,9 @@ function SignInComponent() {
         // Check if Clerk form has rendered
         const clerkForm = document.querySelector('.cl-rootBox, .cl-card, [data-clerk-id]');
         if (!clerkForm) {
-          console.warn('🚨 [SIGN-IN] Clerk form failed to render within 5 seconds');
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('🚨 [SIGN-IN] Clerk form failed to render within 5 seconds');
+          }
           setClerkRenderTimeout(true);
         }
       }, 5000);
@@ -76,8 +80,8 @@ function SignInComponent() {
     );
   }
 
-  // Show debug info if Clerk form times out or user requests it
-  if (showDebug || clerkRenderTimeout) {
+  // Show debug info only in development or if user explicitly requests it
+  if ((showDebug || clerkRenderTimeout) && process.env.NODE_ENV === 'development') {
     return (
       <div className="w-full max-w-4xl mx-auto space-y-6">
         <Alert variant="destructive">
@@ -96,6 +100,23 @@ function SignInComponent() {
           </Button>
           <Button onClick={() => window.location.reload()}>Refresh Page</Button>
         </div>
+      </div>
+    );
+  }
+
+  // In production, if there's a timeout, just show a simple error message
+  if (clerkRenderTimeout && process.env.NODE_ENV === 'production') {
+    return (
+      <div className="w-full max-w-md mx-auto space-y-4">
+        <Alert variant="destructive">
+          <AlertTitle>Loading Issue</AlertTitle>
+          <AlertDescription>
+            The sign-in form is taking longer than expected to load. Please try refreshing the page.
+          </AlertDescription>
+        </Alert>
+        <Button onClick={() => window.location.reload()} className="w-full">
+          Refresh Page
+        </Button>
       </div>
     );
   }
@@ -129,17 +150,19 @@ function SignInComponent() {
         }}
       />
 
-      {/* Debug trigger button for production troubleshooting */}
-      <div className="text-center mt-4">
-        <Button
-          onClick={() => setShowDebug(true)}
-          variant="link"
-          size="sm"
-          className="text-xs text-muted-foreground hover:text-foreground"
-        >
-          Having trouble signing in? Show diagnostic info
-        </Button>
-      </div>
+      {/* Debug trigger button - only show in development */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="text-center mt-4">
+          <Button
+            onClick={() => setShowDebug(true)}
+            variant="link"
+            size="sm"
+            className="text-xs text-muted-foreground hover:text-foreground"
+          >
+            Having trouble signing in? Show diagnostic info
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
