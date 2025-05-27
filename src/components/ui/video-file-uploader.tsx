@@ -167,6 +167,11 @@ export function VideoFileUploader<TFieldValues extends FieldValues = FieldValues
         uploadUrl: uploadUrl.substring(0, 50) + '...', // Log partial URL for debugging
       });
 
+      // Validate upload URL format
+      if (!uploadUrl.startsWith('https://')) {
+        throw new Error(`Invalid upload URL format: ${uploadUrl.substring(0, 50)}...`);
+      }
+
       // 2. Upload the file to Mux using UpChunk
       const upload = UpChunk.createUpload({
         endpoint: uploadUrl,
@@ -178,25 +183,45 @@ export function VideoFileUploader<TFieldValues extends FieldValues = FieldValues
 
       upchunkRef.current = upload; // Store reference for potential abort
 
+      // Track if upload actually starts
+      let uploadStarted = false;
+      const uploadTimeout = setTimeout(() => {
+        if (!uploadStarted) {
+          logger.error('UpChunk upload timeout: No events received after 10 seconds');
+          setErrorState('Upload failed to start. Please check your connection and try again.');
+          toast.error('Upload failed to start. Please try again.');
+          setIsUploading(false);
+        }
+      }, 10000);
+
       upload.on('attempt', attempt => {
+        uploadStarted = true;
+        clearTimeout(uploadTimeout);
         logger.info('UpChunk chunk attempt:', attempt.detail);
       });
 
       upload.on('attemptFailure', failure => {
+        uploadStarted = true;
+        clearTimeout(uploadTimeout);
         logger.warn('UpChunk chunk attempt failed:', failure.detail);
       });
 
       upload.on('chunkSuccess', success => {
+        uploadStarted = true;
+        clearTimeout(uploadTimeout);
         logger.info('UpChunk chunk succeeded:', success.detail);
       });
 
       upload.on('progress', progress => {
+        uploadStarted = true;
+        clearTimeout(uploadTimeout);
         const progressPercent = Math.floor(progress.detail);
         setUploadProgress(progressPercent);
         logger.info(`UpChunk upload progress: ${progressPercent}%`);
       });
 
       upload.on('success', () => {
+        clearTimeout(uploadTimeout);
         logger.info('UpChunk upload completed successfully');
         toast.success(`"${localFile.name}" uploaded successfully! Mux is now processing it.`);
         setIsUploading(false);
@@ -216,6 +241,7 @@ export function VideoFileUploader<TFieldValues extends FieldValues = FieldValues
       });
 
       upload.on('error', errorData => {
+        clearTimeout(uploadTimeout);
         logger.error('UpChunk upload error:', errorData.detail);
         const errorMessage =
           errorData.detail?.message || errorData.detail || 'Unknown upload error';
@@ -227,6 +253,9 @@ export function VideoFileUploader<TFieldValues extends FieldValues = FieldValues
           onUploadError(new Error(`UpChunk upload failed: ${errorMessage}`));
         }
       });
+
+      // Log that UpChunk object was created successfully
+      logger.info('UpChunk upload object created successfully. Waiting for upload to begin...');
     } catch (error) {
       logger.error('Video upload initiation or process error:', error);
       const errorMessage = (error as Error).message || 'An unexpected error occurred.';
