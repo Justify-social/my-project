@@ -99,7 +99,7 @@ function SidebarItem({
 
         {/* Use text-xs for child items and text-sm for parent/standalone items */}
         <span
-          className={`flex-grow ${isChild ? 'text-xs' : 'text-sm'} font-heading font-medium truncate ${active || (isHydrated && isHovered) ? 'text-accent' : 'text-foreground'}`}
+          className={`flex-grow ${isChild ? 'text-xs' : 'text-sm'} font-body font-medium truncate ${active || (isHydrated && isHovered) ? 'text-accent' : 'text-foreground'}`}
         >
           {label}
         </span>
@@ -274,26 +274,31 @@ export function Sidebar({
   useEffect(() => {
     if (!isHydrated) return;
 
-    const autoExpandKey = items.find((item, _index) => {
+    // Find the item that should be auto-expanded (has an active child)
+    const autoExpandItem = items.find((item, _index) => {
       const hasActiveChildItem = hasActiveChild(item);
       return hasActiveChildItem;
     });
 
-    if (autoExpandKey) {
-      const itemKey = autoExpandKey.label + items.indexOf(autoExpandKey);
-      setExpandedSections(prev => {
-        // If this section should be expanded but isn't, expand it and collapse others
-        if (!prev[itemKey]) {
-          const newState: Record<string, boolean> = {};
-          Object.keys(prev).forEach(key => {
-            newState[key] = false; // Collapse all sections
-          });
-          newState[itemKey] = true; // Expand only this section
-          return newState;
-        }
-        return prev;
+    // Reset all sections - collapse everything first
+    const newState: Record<string, boolean> = {};
+
+    // If we found an item that should be expanded, expand only that one
+    if (autoExpandItem) {
+      const itemKey = autoExpandItem.label + items.indexOf(autoExpandItem);
+      items.forEach((item, index) => {
+        const key = item.label + index;
+        newState[key] = key === itemKey; // Only expand the one with active child
+      });
+    } else {
+      // No active children anywhere - collapse all sections
+      items.forEach((item, index) => {
+        const key = item.label + index;
+        newState[key] = false;
       });
     }
+
+    setExpandedSections(newState);
   }, [activePath, isHydrated, items, hasActiveChild]);
 
   return (
@@ -351,11 +356,8 @@ export function Sidebar({
 
             const isHoveredParent = (isHydrated && hoverStates[itemKey]) || false;
 
-            // Auto-expand section if any child is active
-            const shouldAutoExpand = hasActiveChildItem;
-
-            const isExpanded =
-              (isHydrated && (expandedSections[itemKey] || shouldAutoExpand)) || false;
+            // Only expand if explicitly set in expandedSections (controlled by useEffect above)
+            const isExpanded = (isHydrated && expandedSections[itemKey]) || false;
             const parentIconName = item.icon; // ONLY use explicitly provided icon for parents
             const parentIconPath = parentIconName ? iconRegistry[parentIconName] : undefined;
 
@@ -415,7 +417,7 @@ export function Sidebar({
                           )}
                           {/* Parent item label: text-sm */}
                           <span
-                            className={`text-sm font-heading font-medium truncate ${isActiveParent || isHoveredParent ? 'text-accent' : 'text-foreground'}`}
+                            className={`text-sm font-body font-medium truncate ${isActiveParent || isHoveredParent ? 'text-accent' : 'text-foreground'}`}
                           >
                             {item.label}
                           </span>
@@ -468,7 +470,7 @@ export function Sidebar({
                           )}
                           {/* Parent item label: text-sm */}
                           <span
-                            className={`text-sm font-heading font-medium truncate ${isActiveParent || isHoveredParent ? 'text-accent' : 'text-foreground'}`}
+                            className={`text-sm font-body font-medium truncate ${isActiveParent || isHoveredParent ? 'text-accent' : 'text-foreground'}`}
                           >
                             {item.label}
                           </span>

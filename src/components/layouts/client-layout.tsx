@@ -93,6 +93,16 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
       ],
     },
     {
+      id: 'influencers',
+      label: 'Influencers',
+      icon: 'appInfluencers',
+      href: '/influencer-marketplace',
+      children: [
+        { id: 'influencers-marketplace', label: 'Marketplace', href: '/influencer-marketplace' },
+        { id: 'influencers-list', label: 'List', href: '/influencers' },
+      ],
+    },
+    {
       id: 'brand-lift',
       label: 'Brand Lift',
       icon: 'appBrandLift',
@@ -111,41 +121,20 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
       ],
     },
     {
-      id: 'creative-testing',
-      label: 'Creative Testing',
-      icon: 'appCreativeAssetTesting',
-      children: [
-        {
-          id: 'creative-testing-list',
-          label: 'List',
-          href: '/creative-testing',
-        },
-        {
-          id: 'creative-testing-reports',
-          label: 'Reports',
-          href: '/creative-testing/reports',
-        },
-      ],
-    },
-    {
       id: 'brand-health',
       label: 'Brand Health',
       icon: 'appBrandHealth',
       href: '/brand-health',
     },
     {
-      id: 'influencers',
-      label: 'Influencers',
-      icon: 'appInfluencers',
-      href: '/influencer-marketplace',
-      children: [
-        { id: 'influencers-marketplace', label: 'Marketplace', href: '/influencer-marketplace' },
-        { id: 'influencers-list', label: 'List', href: '/influencers' },
-      ],
+      id: 'creative-testing',
+      label: 'Creative Testing',
+      icon: 'appCreativeAssetTesting',
+      href: '/creative-testing',
     },
     { id: 'mmm', href: '/mmm', label: 'MMM', icon: 'appMmm' },
-    { id: 'help', href: '/help', label: 'Help', icon: 'appHelp' },
     { id: 'billing', href: '/account/billing', label: 'Billing', icon: 'appBilling' },
+    { id: 'help', href: '/help', label: 'Help', icon: 'appHelp' },
   ];
 
   const settingsItemDef: SidebarItemDef = {

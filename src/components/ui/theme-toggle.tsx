@@ -48,7 +48,7 @@ export function ThemeToggle() {
       {/* Text: Apply active color if dark, hover color otherwise */}
       <span
         className={cn(
-          'text-sm font-heading font-medium truncate',
+          'text-sm font-body font-medium truncate',
           isDark ? 'text-accent' : 'text-foreground group-hover:text-accent'
         )}
       >

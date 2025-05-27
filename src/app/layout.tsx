@@ -1,4 +1,4 @@
-import { Inter } from 'next/font/google';
+import { Inter, Sora, Work_Sans } from 'next/font/google';
 // Remove Auth0 UserProvider
 // import { UserProvider } from '@auth0/nextjs-auth0/client';
 import ConditionalLayout from '@/components/layouts/conditional-layout'; // Import the new wrapper
@@ -27,7 +27,20 @@ import { debugClerkConfig } from '@/lib/auth/clerk-config';
 // Import diagnostic script for legacy compatibility
 // Removed as part of icon system simplification - functionality now built into Icon component
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-sans',
+});
+
+const sora = Sora({
+  subsets: ['latin'],
+  variable: '--font-heading',
+});
+
+const workSans = Work_Sans({
+  subsets: ['latin'],
+  variable: '--font-body',
+});
 
 // Remove dynamic import definition
 // const DynamicClientAuth = dynamic(...);
@@ -63,7 +76,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       {/* Wrap with ClerkProvider */}
       <html lang="en">
         <head>{/* Using local SVG icons - no external scripts needed */}</head>
-        <body className={`${inter.className} bg-white`}>
+        <body
+          className={`${inter.variable} ${sora.variable} ${workSans.variable} font-body bg-white`}
+        >
           {/* Wrap with LocalizationProvider */}
           <LocalizationProvider>
             <WebVitalsProvider>

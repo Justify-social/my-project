@@ -256,14 +256,41 @@ body {
   font-family: 'Work Sans', sans-serif;
 }
 
+/* SSOT Font Hierarchy - Sora for h1-h3, Work Sans for h4-h6, body, buttons, and navigation */
 h1,
 h2,
-h3,
+h3 {
+  font-family: 'Sora', sans-serif;
+  color: hsl(var(--foreground));
+}
+
 h4,
 h5,
 h6 {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Work Sans', sans-serif;
   color: hsl(var(--foreground));
+}
+
+/* Enforce Work Sans for buttons, navigation, and interactive elements */
+button,
+.btn,
+[role='button'],
+nav,
+nav *:not(h1):not(h2):not(h3),
+.font-body,
+aside nav *,
+aside *:not(h1):not(h2):not(h3),
+[data-cy='main-sidebar'] *:not(h1):not(h2):not(h3),
+[data-cy='main-navigation'] *:not(h1):not(h2):not(h3) {
+  font-family: 'Work Sans', sans-serif !important;
+}
+
+/* Override any Tailwind font classes for navigation specifically */
+aside .font-heading,
+nav .font-heading,
+[data-cy='main-sidebar'] .font-heading,
+[data-cy='main-navigation'] .font-heading {
+  font-family: 'Work Sans', sans-serif !important;
 }
 
 a {

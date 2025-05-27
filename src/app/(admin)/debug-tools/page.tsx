@@ -65,16 +65,10 @@ export default function DebugToolsPage() {
           buttonText="Open API Verification"
         />
         <DebugToolCard
-          title="UI Components"
-          description="View and test centralized UI components."
-          linkHref="/debug-tools/ui-components"
-          buttonText="View UI Components"
-        />
-        <DebugToolCard
-          title="Database Health"
-          description="Access schema, documentation, and health monitoring."
-          linkHref="/debug-tools/database"
-          buttonText="View Database Health"
+          title="Campaign Wizard Checker"
+          description="View all created campaign wizards."
+          linkHref="/debug-tools/campaign-wizards"
+          buttonText="Check Campaign Wizards"
         />
         <DebugToolCard
           title="Clerk Authentication"
@@ -83,16 +77,16 @@ export default function DebugToolsPage() {
           buttonText="Test Authentication"
         />
         <DebugToolCard
-          title="Mux Asset Checker"
-          description="View and verify Mux video assets."
-          linkHref="/debug-tools/mux-assets"
-          buttonText="Check Mux Assets"
+          title="Cypress Analytics Dashboard"
+          description="Comprehensive test analytics, performance metrics, coverage analysis, and error patterns."
+          linkHref="/debug-tools/analytics"
+          buttonText="View Analytics Dashboard"
         />
         <DebugToolCard
-          title="Campaign Wizard Checker"
-          description="View all created campaign wizards."
-          linkHref="/debug-tools/campaign-wizards" // Link to the new page
-          buttonText="Check Campaign Wizards"
+          title="Database Health"
+          description="Access schema, documentation, and health monitoring."
+          linkHref="/debug-tools/database"
+          buttonText="View Database Health"
         />
         <DebugToolCard
           title="Documentation Hub"
@@ -101,10 +95,16 @@ export default function DebugToolsPage() {
           onButtonClick={() => window.open('https://justify-1.gitbook.io/jzyx2tuf', '_blank')}
         />
         <DebugToolCard
-          title="Cypress Analytics Dashboard"
-          description="Comprehensive test analytics, performance metrics, coverage analysis, and error patterns."
-          linkHref="/debug-tools/analytics"
-          buttonText="View Analytics Dashboard"
+          title="Mux Asset Checker"
+          description="View and verify Mux video assets."
+          linkHref="/debug-tools/mux-assets"
+          buttonText="Check Mux Assets"
+        />
+        <DebugToolCard
+          title="UI Components"
+          description="View and test centralized UI components."
+          linkHref="/debug-tools/ui-components"
+          buttonText="View UI Components"
         />
       </div>
 

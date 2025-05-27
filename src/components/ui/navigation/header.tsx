@@ -52,7 +52,7 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <header
-      className="fixed top-0 left-0 w-full z-50 bg-background border-b font-heading"
+      className="fixed top-0 left-0 w-full z-50 bg-background border-b font-body"
       data-testid="header" // Aid for testing
       data-cy="main-header"
     >

@@ -91,7 +91,7 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
               <Icon iconId={iconIdToRender} className="mr-3 h-5 w-5 flex-shrink-0" />
               <span
                 className={cn(
-                  'text-sm font-heading font-medium truncate',
+                  'text-sm font-body font-medium truncate',
                   isActive || isHovered ? 'text-accent' : 'text-foreground'
                 )}
               >
@@ -119,7 +119,7 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
           />
           <span
             className={cn(
-              'text-sm font-heading font-medium truncate',
+              'text-sm font-body font-medium truncate',
               'text-foreground group-hover:text-accent'
             )}
           >
@@ -153,7 +153,7 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
           />
           <span
             className={cn(
-              'text-sm font-heading font-medium truncate',
+              'text-sm font-body font-medium truncate',
               'text-foreground group-hover:text-accent'
             )}
           >
