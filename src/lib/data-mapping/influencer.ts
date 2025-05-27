@@ -215,10 +215,14 @@ export const mapInsightIQProfileToInfluencerProfileData = (
   );
 
   // Extract audience demographics from InsightIQ profile with analytics
+  // Note: Using 'as any' type assertion due to structural differences between
+  // InsightIQ API response format and internal AudienceDemographics type.
+  // The external API uses different enum values that don't match our internal types.
   const audienceDemographics = profile.audience
     ? {
         countries: profile.audience.countries || [],
         cities: profile.audience.cities || [],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         gender_age_distribution: (profile.audience.gender_age_distribution || null) as any,
         // Add other audience fields from InsightIQ API
         ethnicities: profile.audience.ethnicities || [],
