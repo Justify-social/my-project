@@ -310,9 +310,30 @@ function Step4Content() {
         return wizardAsset && asset.muxProcessingStatus !== wizardAsset.muxProcessingStatus;
       });
 
-      if (!needsFieldIdUpdate && !processingStatusChanged && !wizard.isLoading) {
+      // NEW: Check if content has changed (name, budget, rationale, etc.)
+      const contentChanged = formAssets.some((asset, index) => {
+        const wizardAsset = wizardAssets[index];
+        if (!wizardAsset) return false;
+
+        // Check key user-editable fields that might have been saved to database
+        return (
+          asset.name !== wizardAsset.name ||
+          asset.budget !== wizardAsset.budget ||
+          asset.rationale !== wizardAsset.rationale ||
+          JSON.stringify(asset.associatedInfluencerIds || []) !==
+            JSON.stringify(wizardAsset.associatedInfluencerIds || [])
+        );
+      });
+
+      if (!needsFieldIdUpdate && !processingStatusChanged && !contentChanged && !wizard.isLoading) {
         console.log('[Step4Content MAIN SYNC useEffect] Assets already synced, skipping update');
         return;
+      }
+
+      if (contentChanged) {
+        console.log(
+          '[Step4Content MAIN SYNC useEffect] Content changes detected, will sync form with database values'
+        );
       }
     }
 
@@ -418,6 +439,41 @@ function Step4Content() {
           assetWasChanged = true;
         } else if (!matchedFormAsset.id && wizardAssetDbId) {
           updatedFormAsset.id = wizardAssetDbId;
+          assetWasChanged = true;
+        }
+
+        // NEW: Sync user-editable content fields when database has newer values
+        if (wizardAsset.name && matchedFormAsset.name !== wizardAsset.name) {
+          console.log(
+            `[Step4Content MAIN SYNC useEffect] ==> UPDATING name from "${matchedFormAsset.name}" to "${wizardAsset.name}"`
+          );
+          updatedFormAsset.name = wizardAsset.name;
+          assetWasChanged = true;
+        }
+        if (
+          typeof wizardAsset.budget === 'number' &&
+          matchedFormAsset.budget !== wizardAsset.budget
+        ) {
+          console.log(
+            `[Step4Content MAIN SYNC useEffect] ==> UPDATING budget from ${matchedFormAsset.budget} to ${wizardAsset.budget}`
+          );
+          updatedFormAsset.budget = wizardAsset.budget;
+          assetWasChanged = true;
+        }
+        if (wizardAsset.rationale && matchedFormAsset.rationale !== wizardAsset.rationale) {
+          console.log(
+            `[Step4Content MAIN SYNC useEffect] ==> UPDATING rationale from "${matchedFormAsset.rationale}" to "${wizardAsset.rationale}"`
+          );
+          updatedFormAsset.rationale = wizardAsset.rationale;
+          assetWasChanged = true;
+        }
+        if (
+          wizardAsset.associatedInfluencerIds &&
+          JSON.stringify(matchedFormAsset.associatedInfluencerIds || []) !==
+            JSON.stringify(wizardAsset.associatedInfluencerIds)
+        ) {
+          console.log(`[Step4Content MAIN SYNC useEffect] ==> UPDATING associatedInfluencerIds`);
+          updatedFormAsset.associatedInfluencerIds = wizardAsset.associatedInfluencerIds;
           assetWasChanged = true;
         }
 
