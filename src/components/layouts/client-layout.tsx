@@ -217,7 +217,7 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
       id: 'debug-fonts',
       label: 'Fonts',
       href: '/debug-tools/ui-components?tab=fonts',
-      iconId: 'faTextSizeLight',
+      iconId: 'faPencilLight',
     },
   ];
 
