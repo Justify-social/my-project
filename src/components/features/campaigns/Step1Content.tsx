@@ -300,6 +300,7 @@ function Step1Content() {
   const [campaignDuration, setCampaignDuration] = useState<string | null>(null);
   const [initialFormState, setInitialFormState] = useState<Step1FormData | null>(null);
   const [isNameChecking, setIsNameChecking] = useState(false);
+  const [budgetWarning, setBudgetWarning] = useState<string | null>(null);
 
   const form = useForm<Step1FormData>({
     resolver: zodResolver(Step1ValidationSchema),
@@ -742,6 +743,18 @@ function Step1Content() {
     const duration = calculateDuration(watchedStartDate, watchedEndDate);
     setCampaignDuration(duration);
   }, [watchedStartDate, watchedEndDate]);
+
+  // Budget validation effect
+  useEffect(() => {
+    const totalBudget = parseFloat(parseCurrencyInput(String(watchedTotal || '0')));
+    const socialMediaBudget = parseFloat(parseCurrencyInput(String(watchedSocial || '0')));
+
+    if (socialMediaBudget > 0 && totalBudget > 0 && socialMediaBudget > totalBudget) {
+      setBudgetWarning('Social media budget exceeds total budget');
+    } else {
+      setBudgetWarning(null);
+    }
+  }, [watchedTotal, watchedSocial]);
 
   const currencySymbol = getCurrencySymbol(watchedCurrency);
 
@@ -1349,6 +1362,16 @@ function Step1Content() {
                     )}
                   />
                 </div>
+
+                {/* Budget Warning Badge - Centered and Prominent */}
+                {budgetWarning && (
+                  <div className="md:col-span-2 flex justify-center pt-3 pb-1">
+                    <Badge className="bg-warning/10 text-warning border-warning/20 font-medium text-sm px-4 py-2 hover:bg-warning/15 transition-colors">
+                      <Icon iconId="faTriangleExclamationLight" className="mr-2 h-4 w-4" />
+                      {budgetWarning}
+                    </Badge>
+                  </div>
+                )}
               </TooltipProvider>
             </CardContent>
           </Card>
