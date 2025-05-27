@@ -200,7 +200,7 @@ export function UpcomingCampaignsTable({
                               {campaign.title}
                             </Link>
                           </TooltipTrigger>
-                          <TooltipContent className="w-64 p-3 text-sm bg-background text-foreground border shadow-md rounded-md">
+                          <TooltipContent>
                             <div className="space-y-1.5">
                               <p className="font-semibold text-base mb-1 text-primary">
                                 {campaign.title}

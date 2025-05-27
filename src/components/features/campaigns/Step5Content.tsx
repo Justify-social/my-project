@@ -328,12 +328,8 @@ const KpiBadge = ({ kpi, isPrimary = false }: { kpi: string; isPrimary?: boolean
   return (
     <Tooltip delayDuration={300}>
       <TooltipTrigger asChild>{badgeContent}</TooltipTrigger>
-      <TooltipContent
-        side="top" // Position tooltip above the trigger
-        align="center" // Align center relative to trigger
-        className="max-w-xs bg-gray-900 text-white text-xs rounded-md py-2 px-3 shadow-lg" // Match style of old tooltip, adjust as needed
-      >
-        <p>{tooltipText}</p>
+      <TooltipContent>
+        <p className="whitespace-normal">{tooltipText}</p>
       </TooltipContent>
     </Tooltip>
   );
@@ -449,9 +445,9 @@ const Step2Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
       )}
     </DataItem>
     <DataItem label="Key Benefits" value={data.messaging?.keyBenefits} />
-    <DataItem label="Memorability Hypothesis" value={data.expectedOutcomes?.memorability} />
-    <DataItem label="Purchase Intent Hypothesis" value={data.expectedOutcomes?.purchaseIntent} />
-    <DataItem label="Brand Perception Hypothesis" value={data.expectedOutcomes?.brandPerception} />
+    <DataItem label="Memorability" value={data.expectedOutcomes?.memorability} />
+    <DataItem label="Purchase Intent" value={data.expectedOutcomes?.purchaseIntent} />
+    <DataItem label="Brand Perception" value={data.expectedOutcomes?.brandPerception} />
   </div>
 );
 
@@ -786,7 +782,7 @@ function Step5Content() {
             <Step1Review data={wizardState} />
           </SummarySection>
           <SummarySection
-            title="Objectives & Messaging"
+            title="Expected Outcomes & Messaging"
             stepNumber={2}
             onEdit={() => handleStepClick(2)}
             isComplete={wizardState.step2Complete}

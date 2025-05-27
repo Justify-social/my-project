@@ -99,7 +99,7 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
       href: '/influencer-marketplace',
       children: [
         { id: 'influencers-marketplace', label: 'Marketplace', href: '/influencer-marketplace' },
-        { id: 'influencers-list', label: 'List', href: '/influencers' },
+        { id: 'influencers-list', label: 'List', href: '/influencer-marketplace/list' },
       ],
     },
     {

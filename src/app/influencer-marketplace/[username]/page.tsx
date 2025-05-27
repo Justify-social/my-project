@@ -299,7 +299,7 @@ export default function InfluencerProfilePage() {
                 size="sm"
                 className="hover:bg-destructive/10 hover:border-destructive/20"
               >
-                <Icon iconId="faTrashLight" className="mr-2 h-4 w-4" />
+                <Icon iconId="faTrashCanLight" className="mr-2 h-4 w-4" />
                 Remove
               </Button>
               <Button
@@ -307,7 +307,7 @@ export default function InfluencerProfilePage() {
                 size="sm"
                 className="hover:bg-interactive/10 hover:border-interactive/20"
               >
-                <Icon iconId="faEditLight" className="mr-2 h-4 w-4" />
+                <Icon iconId="faPenToSquareLight" className="mr-2 h-4 w-4" />
                 Edit Profile
               </Button>
 
@@ -408,7 +408,7 @@ export default function InfluencerProfilePage() {
                     value="contact"
                     className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm font-medium px-4 py-3 rounded-md"
                   >
-                    <Icon iconId="faAddressCardLight" className="mr-2 h-4 w-4" />
+                    <Icon iconId="faCreditCardLight" className="mr-2 h-4 w-4" />
                     Contact
                   </TabsTrigger>
                   <TabsTrigger
@@ -422,7 +422,7 @@ export default function InfluencerProfilePage() {
                     value="advanced"
                     className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm font-medium px-4 py-3 rounded-md"
                   >
-                    <Icon iconId="faCrownLight" className="mr-2 h-4 w-4" />
+                    <Icon iconId="faDiamondLight" className="mr-2 h-4 w-4" />
                     Advanced
                   </TabsTrigger>
                   <TabsTrigger
@@ -436,7 +436,7 @@ export default function InfluencerProfilePage() {
                     value="campaigns"
                     className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm font-medium px-4 py-3 rounded-md"
                   >
-                    <Icon iconId="faBullhornLight" className="mr-2 h-4 w-4" />
+                    <Icon iconId="faClipboardLight" className="mr-2 h-4 w-4" />
                     Campaigns
                   </TabsTrigger>
                 </TabsList>

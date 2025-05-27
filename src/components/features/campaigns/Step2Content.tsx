@@ -124,17 +124,41 @@ const features = [
     key: PrismaFeature.CREATIVE_ASSET_TESTING,
     title: 'Creative Asset Testing',
     icon: '/icons/app/appCreativeAssetTesting.svg',
+    disabled: true,
+    description:
+      'A/B test different versions of campaign creative assets (images, videos) to compare performance and audience reactions.',
   },
-  { key: PrismaFeature.BRAND_LIFT, title: 'Brand Lift', icon: '/icons/app/appBrandLift.svg' },
+  {
+    key: PrismaFeature.BRAND_LIFT,
+    title: 'Brand Lift',
+    icon: '/icons/app/appBrandLift.svg',
+    disabled: false,
+    description:
+      'Measure the direct impact of your marketing campaign on key brand metrics such as awareness, consideration, and purchase intent through surveys.',
+  },
   {
     key: PrismaFeature.BRAND_HEALTH,
     title: 'Brand Health',
     icon: '/icons/app/appBrandHealth.svg',
+    disabled: true,
+    description:
+      'Track metrics like audience sentiment, competitive share of voice, and brand loyalty indicators over time.',
   },
   {
     key: PrismaFeature.MIXED_MEDIA_MODELING,
     title: 'Mixed Media Modelling',
     icon: '/icons/app/appMmm.svg',
+    disabled: true,
+    description:
+      'Analyse the impact of different marketing channels (social, search, TV, etc.) on sales and optimise budget allocation.',
+  },
+  {
+    key: 'INFLUENCERS' as const, // String literal type - not in Feature enum yet
+    title: 'Influencers',
+    icon: '/icons/app/appInfluencers.svg',
+    disabled: false,
+    description:
+      'Track how your campaigns perform with influencers without specific measurement requirements - perfect for basic campaign monitoring.',
   },
 ];
 
@@ -537,17 +561,17 @@ function Step2Content() {
                                       <span className="cursor-help">
                                         <Icon
                                           iconId="faCircleInfoLight"
-                                          className="h-3.5 w-3.5 text-muted-foreground opacity-70"
+                                          className={cn(
+                                            'h-3.5 w-3.5',
+                                            isPrimarySelected
+                                              ? 'text-primary'
+                                              : 'text-muted-foreground opacity-70'
+                                          )}
                                         />
                                       </span>
                                     </TooltipTrigger>
-                                    <TooltipContent
-                                      side="top"
-                                      align="start"
-                                      className="max-w-xs z-50 p-3"
-                                    >
-                                      {/* Display only the example in the tooltip */}
-                                      <p className="text-sm whitespace-normal">{kpi.example}</p>
+                                    <TooltipContent>
+                                      <p className="whitespace-normal">{kpi.example}</p>
                                     </TooltipContent>
                                   </Tooltip>
                                 </div>
@@ -684,158 +708,272 @@ function Step2Content() {
               <CardDescription>Define the key messages and value propositions.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <FormField
-                control={form.control}
-                name="messaging.mainMessage"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Main Message</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Single most important takeaway..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <TooltipProvider delayDuration={300}>
+                <FormField
+                  control={form.control}
+                  name="messaging.mainMessage"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center space-x-2">
+                        <span>Main Message</span>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="cursor-help">
+                              <Icon
+                                iconId="faCircleInfoLight"
+                                className="h-3.5 w-3.5 text-muted-foreground opacity-70"
+                              />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="whitespace-normal">
+                              The single most important thing you want your audience to remember
+                              about your brand or product after seeing your campaign.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="Single most important takeaway..." {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              {/* --- Hashtag Input - REVISED --- */}
-              <FormItem>
-                <FormLabel>Campaign Hashtags</FormLabel>
-                {/* Input first */}
-                <FormControl>
-                  <Input
-                    placeholder="Type a hashtag and press Enter..."
-                    value={hashtagInput}
-                    onChange={e => setHashtagInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                  />
-                </FormControl>
-                {/* Badges display below input */}
-                <div className="flex flex-wrap gap-2 pt-2 min-h-[2.5rem] items-center">
-                  {' '}
-                  {/* Added pt-2 */}
-                  {currentHashtags.map(tag => (
-                    <Badge key={tag} variant="secondary" className="pl-2 pr-1 text-sm">
-                      #{tag} {/* Add # prefix for display */}
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        // Make icon white on secondary badge
-                        className="ml-1 h-4 w-4 text-secondary-foreground hover:text-white hover:bg-transparent p-0"
-                        onClick={() => handleRemoveHashtag(tag)}
-                      >
-                        <Icon iconId="faXmarkLight" className="h-3 w-3" />
-                        <span className="sr-only">Remove hashtag {tag}</span>
-                      </Button>
-                    </Badge>
-                  ))}
-                </div>
-                <FormMessage>{form.formState.errors.messaging?.hashtags?.message}</FormMessage>
-              </FormItem>
-              {/* --- End Hashtag Input --- */}
+                {/* --- Hashtag Input - REVISED --- */}
+                <FormItem>
+                  <FormLabel className="flex items-center space-x-2">
+                    <span>Campaign Hashtags</span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="cursor-help">
+                          <Icon
+                            iconId="faCircleInfoLight"
+                            className="h-3.5 w-3.5 text-muted-foreground opacity-70"
+                          />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="whitespace-normal">
+                          Social media hashtags that will help people discover your campaign content
+                          and connect with your brand message across platforms.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </FormLabel>
+                  {/* Input first */}
+                  <FormControl>
+                    <Input
+                      placeholder="Type a hashtag and press Enter..."
+                      value={hashtagInput}
+                      onChange={e => setHashtagInput(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                    />
+                  </FormControl>
+                  {/* Badges display below input */}
+                  <div className="flex flex-wrap gap-2 pt-2 min-h-[2.5rem] items-center">
+                    {' '}
+                    {/* Added pt-2 */}
+                    {currentHashtags.map(tag => (
+                      <Badge key={tag} variant="secondary" className="pl-2 pr-1 text-sm">
+                        #{tag} {/* Add # prefix for display */}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          // Make icon white on secondary badge
+                          className="ml-1 h-4 w-4 text-secondary-foreground hover:text-white hover:bg-transparent p-0"
+                          onClick={() => handleRemoveHashtag(tag)}
+                        >
+                          <Icon iconId="faXmarkLight" className="h-3 w-3" />
+                          <span className="sr-only">Remove hashtag {tag}</span>
+                        </Button>
+                      </Badge>
+                    ))}
+                  </div>
+                  <FormMessage>{form.formState.errors.messaging?.hashtags?.message}</FormMessage>
+                </FormItem>
+                {/* --- End Hashtag Input --- */}
 
-              {/* --- Key Benefit Input - REVISED --- */}
-              <FormItem>
-                <FormLabel>Key Benefits / Value Proposition</FormLabel>
-                {/* Input first */}
-                <FormControl>
-                  <Input
-                    placeholder="Type a key benefit and press Enter..."
-                    value={keyBenefitInput}
-                    onChange={e => setKeyBenefitInput(e.target.value)}
-                    onKeyDown={handleKeyBenefitKeyDown}
-                  />
-                </FormControl>
-                {/* Badges display below input */}
-                <div className="flex flex-wrap gap-2 pt-2 min-h-[2.5rem] items-center">
-                  {' '}
-                  {/* Added pt-2 */}
-                  {currentKeyBenefits.map(benefit => (
-                    <Badge key={benefit} variant="secondary" className="pl-2 pr-1 text-sm">
-                      {benefit}
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="ml-1 h-4 w-4 text-secondary-foreground hover:text-white hover:bg-transparent p-0"
-                        onClick={() => handleRemoveKeyBenefit(benefit)}
-                      >
-                        <Icon iconId="faXmarkLight" className="h-3 w-3" />
-                        <span className="sr-only">Remove key benefit {benefit}</span>
-                      </Button>
-                    </Badge>
-                  ))}
-                </div>
-                <FormMessage>{form.formState.errors.messaging?.keyBenefits?.message}</FormMessage>
-              </FormItem>
-              {/* --- End Key Benefit Input --- */}
+                {/* --- Key Benefit Input - REVISED --- */}
+                <FormItem>
+                  <FormLabel className="flex items-center space-x-2">
+                    <span>Key Benefits / Value Proposition</span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="cursor-help">
+                          <Icon
+                            iconId="faCircleInfoLight"
+                            className="h-3.5 w-3.5 text-muted-foreground opacity-70"
+                          />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="whitespace-normal">
+                          The main advantages or positive outcomes customers will experience from
+                          choosing your product or service over competitors.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </FormLabel>
+                  {/* Input first */}
+                  <FormControl>
+                    <Input
+                      placeholder="Type a key benefit and press Enter..."
+                      value={keyBenefitInput}
+                      onChange={e => setKeyBenefitInput(e.target.value)}
+                      onKeyDown={handleKeyBenefitKeyDown}
+                    />
+                  </FormControl>
+                  {/* Badges display below input */}
+                  <div className="flex flex-wrap gap-2 pt-2 min-h-[2.5rem] items-center">
+                    {' '}
+                    {/* Added pt-2 */}
+                    {currentKeyBenefits.map(benefit => (
+                      <Badge key={benefit} variant="secondary" className="pl-2 pr-1 text-sm">
+                        {benefit}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="ml-1 h-4 w-4 text-secondary-foreground hover:text-white hover:bg-transparent p-0"
+                          onClick={() => handleRemoveKeyBenefit(benefit)}
+                        >
+                          <Icon iconId="faXmarkLight" className="h-3 w-3" />
+                          <span className="sr-only">Remove key benefit {benefit}</span>
+                        </Button>
+                      </Badge>
+                    ))}
+                  </div>
+                  <FormMessage>{form.formState.errors.messaging?.keyBenefits?.message}</FormMessage>
+                </FormItem>
+                {/* --- End Key Benefit Input --- */}
+              </TooltipProvider>
             </CardContent>
           </Card>
 
-          {/* Hypotheses Card */}
+          {/* Expected Outcomes Card */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Icon iconId="faLightbulbLight" className="w-5 h-5 mr-2 text-accent" />
-                Hypotheses (Expected Outcomes)
+                Expected Outcomes
               </CardTitle>
               <CardDescription>
                 Outline expected outcomes based on objectives and KPIs.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <FormField
-                control={form.control}
-                name="expectedOutcomes.memorability"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Memorability / Ad Recall Hypothesis</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="We expect Ad Recall to increase by 15%..."
-                        {...field}
-                        value={(field.value as string) ?? ''}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="expectedOutcomes.purchaseIntent"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Purchase/Action Intent Hypothesis</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Purchase intent will rise by 10%..."
-                        {...field}
-                        value={(field.value as string) ?? ''}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="expectedOutcomes.brandPerception"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Brand Perception Hypothesis</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Campaign will shift perception towards..."
-                        {...field}
-                        value={(field.value as string) ?? ''}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <TooltipProvider delayDuration={300}>
+                <FormField
+                  control={form.control}
+                  name="expectedOutcomes.memorability"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center space-x-2">
+                        <span>Memorability / Ad Recall</span>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="cursor-help">
+                              <Icon
+                                iconId="faCircleInfoLight"
+                                className="h-3.5 w-3.5 text-muted-foreground opacity-70"
+                              />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="whitespace-normal">
+                              How well you expect people to remember seeing your advert after the
+                              campaign. For example, "We expect 70% of viewers to recall our brand
+                              message after one week."
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="We expect Ad Recall to increase by 15%..."
+                          {...field}
+                          value={(field.value as string) ?? ''}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="expectedOutcomes.purchaseIntent"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center space-x-2">
+                        <span>Purchase/Action Intent</span>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="cursor-help">
+                              <Icon
+                                iconId="faCircleInfoLight"
+                                className="h-3.5 w-3.5 text-muted-foreground opacity-70"
+                              />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="whitespace-normal">
+                              How likely people will be to buy your product or take a specific
+                              action (like visiting your website) after seeing your campaign.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Purchase intent will rise by 10%..."
+                          {...field}
+                          value={(field.value as string) ?? ''}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="expectedOutcomes.brandPerception"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center space-x-2">
+                        <span>Brand Perception</span>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="cursor-help">
+                              <Icon
+                                iconId="faCircleInfoLight"
+                                className="h-3.5 w-3.5 text-muted-foreground opacity-70"
+                              />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="whitespace-normal">
+                              How you expect people's opinion or feelings about your brand to change
+                              after seeing your campaign. For example, more trustworthy, innovative,
+                              or affordable.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Campaign will shift perception towards..."
+                          {...field}
+                          value={(field.value as string) ?? ''}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </TooltipProvider>
             </CardContent>
           </Card>
 
@@ -849,75 +987,122 @@ function Step2Content() {
               <CardDescription>Select features to enable for this campaign.</CardDescription>
             </CardHeader>
             <CardContent>
-              {/* Single FormField for the features array */}
-              <FormField
-                control={form.control}
-                name="features"
-                render={(
-                  { field } // Use the field object from the outer FormField
-                ) => (
-                  <FormItem>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                      {features.map(feature => {
-                        const isSelected = field.value?.includes(feature.key);
-                        return (
-                          // Clickable FormItem directly updates the field array value
-                          <FormItem
-                            key={feature.key}
-                            className={cn(
-                              'flex flex-col items-center justify-between rounded-lg border p-4 cursor-pointer transition-all',
-                              isSelected
-                                ? 'bg-accent text-accent-foreground border-accent/40 shadow-md'
-                                : 'bg-background hover:bg-accent/5'
-                            )}
-                            onClick={() => {
-                              const currentValues = field.value || [];
-                              const updatedValues = isSelected
-                                ? currentValues.filter(f => f !== feature.key)
-                                : [...currentValues, feature.key];
-                              // Use setValue to update the array
-                              form.setValue('features', updatedValues, {
-                                shouldValidate: true,
-                                shouldDirty: true,
-                              });
-                            }}
-                          >
-                            {/* Remove redundant FormControl and sr-only Checkbox */}
-                            <div className="flex items-center mb-3">
-                              <div className="mr-3 w-6 h-6 flex items-center justify-center">
-                                {/* Remove filter, rely on parent text color */}
-                                <Image src={feature.icon} alt="" width={28} height={28} />
-                              </div>
-                              {/* Add text-accent-foreground when selected */}
-                              <FormLabel
-                                className={cn(
-                                  'font-medium cursor-pointer',
-                                  isSelected && 'text-accent-foreground'
-                                )}
-                              >
-                                {feature.title}
-                              </FormLabel>
-                            </div>
-                            <div className="flex justify-end w-full mt-auto pt-2">
-                              {/* Visual indicator - Use correct icon ID and color */}
-                              {isSelected ? (
-                                <Icon
-                                  iconId="faCircleCheckSolid"
-                                  className="w-5 h-5 text-accent-foreground"
-                                />
-                              ) : (
-                                <div className="w-5 h-5 border-2 border-muted rounded-full"></div>
+              <TooltipProvider
+                delayDuration={200}
+                skipDelayDuration={100}
+                disableHoverableContent={false}
+              >
+                {/* Single FormField for the features array */}
+                <FormField
+                  control={form.control}
+                  name="features"
+                  render={(
+                    { field } // Use the field object from the outer FormField
+                  ) => (
+                    <FormItem>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                        {features.map(feature => {
+                          const isSelected = field.value?.includes(feature.key);
+                          const isDisabled = feature.disabled;
+
+                          return (
+                            // Clickable FormItem directly updates the field array value
+                            <FormItem
+                              key={feature.key}
+                              className={cn(
+                                'flex flex-col items-center justify-between rounded-lg border p-4 transition-all relative',
+                                isDisabled
+                                  ? 'bg-muted/50 border-muted cursor-not-allowed opacity-60'
+                                  : isSelected
+                                    ? 'bg-accent text-accent-foreground border-accent/40 shadow-md cursor-pointer'
+                                    : 'bg-background hover:bg-accent/5 cursor-pointer'
                               )}
-                            </div>
-                          </FormItem>
-                        );
-                      })}
-                    </div>
-                    {/* Error message for the features array field */}
-                    <FormMessage>{form.formState.errors.features?.message}</FormMessage>
-                  </FormItem>
-                )}
-              />
+                              onClick={() => {
+                                if (isDisabled) return;
+
+                                const currentValues = field.value || [];
+                                const updatedValues = isSelected
+                                  ? currentValues.filter(f => f !== feature.key)
+                                  : [...currentValues, feature.key];
+                                // Use setValue to update the array
+                                form.setValue('features', updatedValues, {
+                                  shouldValidate: true,
+                                  shouldDirty: true,
+                                });
+                              }}
+                            >
+                              {/* Coming Soon badge for disabled features */}
+                              {isDisabled && (
+                                <div className="absolute -top-2 -right-2 bg-muted-foreground text-background text-xs px-2 py-1 rounded-full font-medium">
+                                  Coming Soon
+                                </div>
+                              )}
+
+                              {/* Remove redundant FormControl and sr-only Checkbox */}
+                              <div className="flex items-center mb-3">
+                                <div className="mr-3 w-6 h-6 flex items-center justify-center">
+                                  {/* Remove filter, rely on parent text color */}
+                                  <Image src={feature.icon} alt="" width={28} height={28} />
+                                </div>
+                                {/* Add text-accent-foreground when selected */}
+                                <div className="flex items-center space-x-2">
+                                  <FormLabel
+                                    className={cn(
+                                      'font-medium cursor-pointer',
+                                      isSelected && !isDisabled && 'text-accent-foreground',
+                                      isDisabled && 'cursor-not-allowed'
+                                    )}
+                                  >
+                                    {feature.title}
+                                  </FormLabel>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <span className="cursor-help">
+                                        <Icon
+                                          iconId="faCircleInfoLight"
+                                          className={cn(
+                                            'h-4 w-4',
+                                            isDisabled
+                                              ? 'text-interactive'
+                                              : 'text-muted-foreground opacity-70'
+                                          )}
+                                        />
+                                      </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent usePortal={true} forceHighZ={true}>
+                                      <p className="whitespace-normal font-medium">
+                                        {feature.description}
+                                      </p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </div>
+                              </div>
+                              <div className="flex justify-end w-full mt-auto pt-2">
+                                {/* Visual indicator - Use correct icon ID and color */}
+                                {isSelected && !isDisabled ? (
+                                  <Icon
+                                    iconId="faCircleCheckSolid"
+                                    className="w-5 h-5 text-accent-foreground"
+                                  />
+                                ) : (
+                                  <div
+                                    className={cn(
+                                      'w-5 h-5 border-2 rounded-full',
+                                      isDisabled ? 'border-muted' : 'border-muted'
+                                    )}
+                                  ></div>
+                                )}
+                              </div>
+                            </FormItem>
+                          );
+                        })}
+                      </div>
+                      {/* Error message for the features array field */}
+                      <FormMessage>{form.formState.errors.features?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+              </TooltipProvider>
             </CardContent>
           </Card>
         </form>

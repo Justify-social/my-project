@@ -152,15 +152,17 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                   </div>
                 </div>
               </TooltipTrigger>
-              <TooltipContent className="max-w-xs text-left">
-                <p className="text-sm">
-                  <strong>Justify Score (V2):</strong> Calculated based on audience credibility,
-                  account verification, engagement quality, and follower data.
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  This score provides a comprehensive view of an influencer's overall quality and
-                  potential.
-                </p>
+              <TooltipContent>
+                <div className="text-left whitespace-normal">
+                  <p className="text-sm">
+                    <strong>Justify Score (V2):</strong> Calculated based on audience credibility,
+                    account verification, engagement quality, and follower data.
+                  </p>
+                  <p className="text-xs opacity-75 mt-1">
+                    This score provides a comprehensive view of an influencer's overall quality and
+                    potential.
+                  </p>
+                </div>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -180,7 +182,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                   </Badge>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Account connection verified via InsightIQ.</p>
+                  <p className="whitespace-normal">Account connection verified via InsightIQ.</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

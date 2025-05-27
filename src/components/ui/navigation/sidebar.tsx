@@ -229,24 +229,9 @@ export function Sidebar({
       // Exact match always takes priority
       if (activePath === path) return true;
 
-      // For prefix matching, be more restrictive to avoid sibling conflicts
-      if (path !== '/' && path.length > 1 && activePath.startsWith(path)) {
-        const nextChar = activePath.charAt(path.length);
-        if (nextChar === '/') {
-          // Check if there are nested path segments after this path
-          const remainingPath = activePath.substring(path.length + 1);
-          const hasNestedSegments = remainingPath.includes('/');
-
-          // Only match prefix if this is a direct child route (no additional nesting)
-          // This prevents /campaigns from matching /campaigns/wizard/step-1
-          // while still allowing /campaigns to match /campaigns/some-direct-child
-          return !hasNestedSegments;
-        } else if (nextChar === '') {
-          // Path ends exactly with our test path
-          return true;
-        }
-      }
-
+      // For child routes, only match if it's an exact match
+      // This prevents both parent and child from being active simultaneously
+      // No prefix matching for child routes to avoid conflicts
       return false;
     },
     [activePath]
@@ -258,10 +243,17 @@ export function Sidebar({
         // Check for exact match first
         if (activePath === child.href) return true;
 
-        // For child paths, also check if activePath starts with child.href
-        if (child.href !== '/' && child.href.length > 1 && activePath.startsWith(child.href)) {
-          const nextChar = activePath.charAt(child.href.length);
-          return nextChar === '/' || nextChar === '';
+        // For child paths, check if activePath starts with child.href followed by '/'
+        // But ensure this is a direct sub-route, not a deeper nested route
+        if (
+          child.href !== '/' &&
+          child.href.length > 1 &&
+          activePath.startsWith(child.href + '/')
+        ) {
+          // Additional check: ensure this is actually a sub-route of this specific child
+          // For example, /influencer-marketplace/list should match /influencer-marketplace/list/*
+          // but /influencer-marketplace/username should NOT match /influencer-marketplace/list
+          return true;
         }
 
         return false;
@@ -270,14 +262,38 @@ export function Sidebar({
     [activePath]
   );
 
+  // New function to check if current path is related to parent but not matching any child
+  const isParentRelated = useCallback(
+    (item: { href?: string; children?: { href: string }[] }) => {
+      if (!item.href || activePath === item.href) return false;
+
+      // Check if current path starts with parent href
+      if (activePath.startsWith(item.href + '/')) {
+        // But ensure no child matches exactly or as prefix
+        const hasMatchingChild = item.children?.some(child => {
+          return (
+            activePath === child.href ||
+            (child.href !== '/' && activePath.startsWith(child.href + '/'))
+          );
+        });
+
+        return !hasMatchingChild;
+      }
+
+      return false;
+    },
+    [activePath]
+  );
+
   // Handle auto-expansion with accordion behavior
   useEffect(() => {
     if (!isHydrated) return;
 
-    // Find the item that should be auto-expanded (has an active child)
+    // Find the item that should be auto-expanded (has an active child or is related to current path)
     const autoExpandItem = items.find((item, _index) => {
       const hasActiveChildItem = hasActiveChild(item);
-      return hasActiveChildItem;
+      const isRelatedToParent = isParentRelated(item);
+      return hasActiveChildItem || isRelatedToParent;
     });
 
     // Reset all sections - collapse everything first
@@ -299,7 +315,7 @@ export function Sidebar({
     }
 
     setExpandedSections(newState);
-  }, [activePath, isHydrated, items, hasActiveChild]);
+  }, [activePath, isHydrated, items, hasActiveChild, isParentRelated]);
 
   return (
     <aside
@@ -344,15 +360,18 @@ export function Sidebar({
           {items.map((item, index) => {
             const itemKey = item.label + index; // Create a key for hover state and expansion
 
-            // Enhanced logic: parent is active if its own href is active BUT NOT if it has an active child.
-            // This prevents both parent and child from being highlighted simultaneously.
+            // Enhanced logic: parent is active if:
+            // 1. Its own href is active AND no child is active, OR
+            // 2. Current path is related to parent but doesn't match any child (like profile pages)
             const isParentDirectlyActive = item.href ? isActive(item.href) : false;
             const hasActiveChildItem = hasActiveChild(item);
+            const isRelatedToParent = isParentRelated(item);
 
-            // Parent is only highlighted if:
+            // Parent is highlighted if:
             // 1. Its direct href is active AND no child is active, OR
-            // 2. It has no href and no active children (for non-navigable parents)
-            const isActiveParent = isParentDirectlyActive && !hasActiveChildItem;
+            // 2. Current path is related to parent but no child matches
+            const isActiveParent =
+              (isParentDirectlyActive && !hasActiveChildItem) || isRelatedToParent;
 
             const isHoveredParent = (isHydrated && hoverStates[itemKey]) || false;
 

@@ -61,7 +61,7 @@ jobs:
         run: |
           # Ensure reports directory exists
           mkdir -p config/cypress/reports
-          
+
           # Check if any JSON reports exist before merging
           if ls config/cypress/reports/*.json 1> /dev/null 2>&1; then
             echo "📊 Merging test reports..."

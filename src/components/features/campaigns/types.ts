@@ -25,6 +25,12 @@ export const StatusEnum = z.nativeEnum(PrismaStatus);
 export const KPIEnum = z.nativeEnum(PrismaKPI);
 /** Campaign Feature Enum (from Prisma) */
 export const FeatureEnum = z.nativeEnum(PrismaFeature);
+
+/** Extended Feature Enum that includes both Prisma features and additional string literals */
+export const ExtendedFeatureEnum = z.union([
+  FeatureEnum,
+  z.literal('INFLUENCERS'), // Additional feature not yet in Prisma enum
+]);
 /** Contact Position Enum (from Prisma) */
 export const PositionEnum = z.nativeEnum(PrismaPosition);
 /** Creative Asset Type Enum (from Prisma) */
@@ -244,7 +250,7 @@ export const DraftCampaignDataBaseSchema = z
       .nullable()
       .optional(),
     /** Selected features for the campaign (e.g., Brand Lift). */
-    features: z.array(FeatureEnum).default([]).nullable().optional(),
+    features: z.array(ExtendedFeatureEnum).default([]).nullable().optional(),
     /** Flag indicating Step 2 completion. */
     step2Complete: z.boolean().default(false),
 
@@ -518,7 +524,7 @@ export const SubmissionPayloadSchema = z
     brandPerception: z.string(), // This was under audience in Step 5? Verify location.
     primaryKPI: KPIEnum,
     secondaryKPIs: z.array(KPIEnum),
-    features: z.array(FeatureEnum),
+    features: z.array(ExtendedFeatureEnum),
 
     submissionStatus: SubmissionStatusEnum.optional().default('submitted'), // Set by backend?
     userId: z.string().optional(), // Likely set by backend based on auth context

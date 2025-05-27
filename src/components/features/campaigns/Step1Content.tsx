@@ -1262,8 +1262,8 @@ function Step1Content() {
                                 />
                               </span>
                             </TooltipTrigger>
-                            <TooltipContent side="top" align="start" className="max-w-xs z-50 p-3">
-                              <p className="text-sm whitespace-normal">
+                            <TooltipContent>
+                              <p className="whitespace-normal">
                                 The total campaign budget covering all expenses including influencer
                                 fees, content creation, advertising spend, and operational costs.
                               </p>
@@ -1320,8 +1320,8 @@ function Step1Content() {
                                 />
                               </span>
                             </TooltipTrigger>
-                            <TooltipContent side="top" align="start" className="max-w-xs z-50 p-3">
-                              <p className="text-sm whitespace-normal">
+                            <TooltipContent>
+                              <p className="whitespace-normal">
                                 The portion of total budget specifically allocated to social media
                                 activities including influencer partnerships, sponsored posts, and
                                 social advertising.

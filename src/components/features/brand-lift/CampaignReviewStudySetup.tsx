@@ -705,9 +705,9 @@ const Step2Review: React.FC<{ data: CampaignDetails }> = ({ data }) => (
       )}
     </DataItem>
     <DataItem label="Key Benefits" value={data.messaging?.keyBenefits} />
-    <DataItem label="Memorability Hypothesis" value={data.expectedOutcomes?.memorability} />
-    <DataItem label="Purchase Intent Hypothesis" value={data.expectedOutcomes?.purchaseIntent} />
-    <DataItem label="Brand Perception Hypothesis" value={data.expectedOutcomes?.brandPerception} />
+    <DataItem label="Memorability" value={data.expectedOutcomes?.memorability} />
+    <DataItem label="Purchase Intent" value={data.expectedOutcomes?.purchaseIntent} />
+    <DataItem label="Brand Perception" value={data.expectedOutcomes?.brandPerception} />
   </div>
 );
 

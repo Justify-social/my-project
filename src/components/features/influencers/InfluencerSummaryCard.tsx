@@ -110,7 +110,7 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
           {influencer.platforms?.map(platform => (
             <Icon
               key={platform}
-              iconId={platformIconMap[platform] || 'faQuestionCircleLight'} // Use correct map, keep fallback
+              iconId={platformIconMap[platform] || 'faCircleQuestionLight'} // Use correct map, keep fallback
               className="h-4 w-4 text-gray-500 dark:text-gray-400"
               aria-label={platform}
               size="sm" // Added size prop for consistency
@@ -169,15 +169,17 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
                     <Icon iconId="appJustify" className="h-3 w-3 text-gray-400" size="xs" />
                   </span>
                 </TooltipTrigger>
-                <TooltipContent className="max-w-xs text-left">
-                  <p className="text-sm">
-                    <strong>Justify Score (V2):</strong> Calculated based on audience credibility,
-                    account verification, engagement quality, and follower data.
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    This score provides a comprehensive view of an influencer's overall quality and
-                    potential.
-                  </p>
+                <TooltipContent>
+                  <div className="text-left whitespace-normal">
+                    <p className="text-sm">
+                      <strong>Justify Score (V2):</strong> Calculated based on audience credibility,
+                      account verification, engagement quality, and follower data.
+                    </p>
+                    <p className="text-xs opacity-75 mt-1">
+                      This score provides a comprehensive view of an influencer's overall quality
+                      and potential.
+                    </p>
+                  </div>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

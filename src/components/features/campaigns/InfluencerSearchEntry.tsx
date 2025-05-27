@@ -69,8 +69,8 @@ const supportedPlatforms = [
 
 interface InfluencerSearchEntryProps {
   index: number;
-  control: Control<FieldValues>;
-  errors: FieldErrors<FieldValues>;
+  control: Control<any>;
+  errors: FieldErrors<any>;
   remove: (index: number) => void;
 }
 

@@ -989,7 +989,7 @@ export default function CampaignDetail() {
       </PageSection>
 
       <PageSection>
-        <SectionHeader title="Hypotheses and Messaging" />
+        <SectionHeader title="Expected Outcomes & Messaging" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
           <div>
@@ -1000,7 +1000,7 @@ export default function CampaignDetail() {
               <CardContent className="p-5 space-y-5">
                 <div>
                   <h4 className="text-sm font-semibold text-muted-foreground mb-1">
-                    Memorability / Ad Recall Hypothesis
+                    Memorability / Ad Recall
                   </h4>
                   <p className="text-sm text-foreground bg-muted/30 p-3 rounded-md leading-relaxed">
                     {campaignData.expectedOutcomes?.memorability || 'Not specified'}
@@ -1008,7 +1008,7 @@ export default function CampaignDetail() {
                 </div>
                 <div>
                   <h4 className="text-sm font-semibold text-muted-foreground mb-1">
-                    Purchase/Action Intent Hypothesis
+                    Purchase/Action Intent
                   </h4>
                   <p className="text-sm text-foreground bg-muted/30 p-3 rounded-md leading-relaxed">
                     {campaignData.expectedOutcomes?.purchaseIntent || 'Not specified'}
@@ -1016,7 +1016,7 @@ export default function CampaignDetail() {
                 </div>
                 <div>
                   <h4 className="text-sm font-semibold text-muted-foreground mb-1">
-                    Brand Perception Hypothesis
+                    Brand Perception
                   </h4>
                   <p className="text-sm text-foreground bg-muted/30 p-3 rounded-md leading-relaxed">
                     {campaignData.expectedOutcomes?.brandPerception || 'Not specified'}
