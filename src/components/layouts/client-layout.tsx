@@ -9,6 +9,8 @@ import { usePathname } from 'next/navigation';
 import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
 import SidebarUIComponents from '@/components/ui/navigation/sidebar-ui-components';
 import { ThemeProvider } from '@/components/providers/theme-provider';
+import { NotificationProvider } from '@/providers/NotificationProvider';
+import { Toaster } from '@/components/ui/notifications/Toaster';
 import { MobileMenu } from '@/components/ui/navigation/mobile-menu';
 import { cn } from '@/lib/utils';
 import { useUser } from '@clerk/nextjs';
@@ -236,55 +238,57 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
   return (
     <React.Suspense fallback={<LoadingSkeleton />}>
       <ThemeProvider defaultTheme="light">
-        <div className="min-h-screen flex flex-col">
-          <Header
-            companyName="Justify"
-            remainingCredits={100}
-            notificationsCount={3}
-            onMenuClick={handleMenuToggle}
-            authControls={<DynamicClientAuth />}
-          />
+        <NotificationProvider pollInterval={30000}>
+          <div className="min-h-screen flex flex-col">
+            <Header
+              companyName="Justify"
+              remainingCredits={100}
+              onMenuClick={handleMenuToggle}
+              authControls={<DynamicClientAuth />}
+            />
 
-          <div className="flex flex-1 overflow-hidden">
-            <div
-              className={cn(
-                'fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 transition-all duration-300 z-30',
-                'hidden md:block'
-              )}
-            >
-              {isUIComponentsPage ? (
-                <SidebarUIComponents navItems={debugNavItems} />
-              ) : (
-                <Sidebar
-                  items={sidebarItems}
-                  activePath={pathname}
-                  title="Justify"
-                  settingsHref={settingsItemDef.href as string}
-                  settingsLabel={settingsItemDef.label}
-                  settingsIcon={settingsItemDef.icon}
-                />
-              )}
+            <div className="flex flex-1 overflow-hidden">
+              <div
+                className={cn(
+                  'fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 transition-all duration-300 z-30',
+                  'hidden md:block'
+                )}
+              >
+                {isUIComponentsPage ? (
+                  <SidebarUIComponents navItems={debugNavItems} />
+                ) : (
+                  <Sidebar
+                    items={sidebarItems}
+                    activePath={pathname}
+                    title="Justify"
+                    settingsHref={settingsItemDef.href as string}
+                    settingsLabel={settingsItemDef.label}
+                    settingsIcon={settingsItemDef.icon}
+                  />
+                )}
+              </div>
+
+              <div
+                className={`flex-1 transition-margin duration-200 md:ml-[var(--sidebar-width)] pt-16 overflow-y-auto`}
+              >
+                <main className="p-4 md:p-6 bg-white min-h-[calc(100vh-4rem)] pb-[65px]">
+                  {children}
+                </main>
+              </div>
             </div>
 
-            <div
-              className={`flex-1 transition-margin duration-200 md:ml-[var(--sidebar-width)] pt-16 overflow-y-auto`}
-            >
-              <main className="p-4 md:p-6 bg-white min-h-[calc(100vh-4rem)] pb-[65px]">
-                {children}
-              </main>
-            </div>
+            <MobileMenu
+              isOpen={isMobileOpen}
+              onOpenChange={setIsMobileOpen}
+              menuItems={mobileMenuItems}
+              remainingCredits={100}
+              companyName="Justify"
+              user={user}
+            />
+
+            <Toaster />
           </div>
-
-          <MobileMenu
-            isOpen={isMobileOpen}
-            onOpenChange={setIsMobileOpen}
-            menuItems={mobileMenuItems}
-            remainingCredits={100}
-            notificationsCount={3}
-            companyName="Justify"
-            user={user}
-          />
-        </div>
+        </NotificationProvider>
       </ThemeProvider>
     </React.Suspense>
   );

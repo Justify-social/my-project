@@ -276,7 +276,7 @@ const AdvancedAnalyticsSection: React.FC<AdvancedAnalyticsSectionProps> = ({ inf
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-primary">
-          <Icon iconId="faChartAreaLight" className="h-5 w-5 text-success" />
+          <Icon iconId="faChartBarLight" className="h-5 w-5 text-success" />
           Advanced Engagement Patterns
         </CardTitle>
       </CardHeader>
@@ -285,7 +285,7 @@ const AdvancedAnalyticsSection: React.FC<AdvancedAnalyticsSectionProps> = ({ inf
         <div>
           <div className="text-sm font-medium text-primary mb-3">Engagement Rate Distribution</div>
           {engagementData?.engagementRateHistogram &&
-          engagementData.engagementRateHistogram.length > 0 ? (
+            engagementData.engagementRateHistogram.length > 0 ? (
             <div className="space-y-2">
               {engagementData.engagementRateHistogram.map(
                 (band: EngagementRateHistogram, index: number) => (
@@ -344,7 +344,7 @@ const AdvancedAnalyticsSection: React.FC<AdvancedAnalyticsSectionProps> = ({ inf
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-primary">
-          <Icon iconId="faSearchLight" className="h-5 w-5 text-warning" />
+          <Icon iconId="faMagnifyingGlassLight" className="h-5 w-5 text-warning" />
           Advanced Research Tools
         </CardTitle>
       </CardHeader>
@@ -361,7 +361,7 @@ const AdvancedAnalyticsSection: React.FC<AdvancedAnalyticsSectionProps> = ({ inf
                 className="flex-1"
               />
               <Button variant="outline" size="sm">
-                <Icon iconId="faSearchLight" className="h-4 w-4 mr-1" />
+                <Icon iconId="faMagnifyingGlassLight" className="h-4 w-4 mr-1" />
                 Lookup
               </Button>
             </div>
@@ -386,7 +386,7 @@ const AdvancedAnalyticsSection: React.FC<AdvancedAnalyticsSectionProps> = ({ inf
                 className="flex-1"
               />
               <Button variant="outline" size="sm">
-                <Icon iconId="faVennDiagramLight" className="h-4 w-4 mr-1" />
+                <Icon iconId="faUsersLight" className="h-4 w-4 mr-1" />
                 Analyze
               </Button>
             </div>
@@ -419,7 +419,7 @@ const AdvancedAnalyticsSection: React.FC<AdvancedAnalyticsSectionProps> = ({ inf
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-primary">
-          <Icon iconId="faCrownLight" className="h-5 w-5 text-accent" />
+          <Icon iconId="faDiamondLight" className="h-5 w-5 text-accent" />
           Enterprise Intelligence
         </CardTitle>
       </CardHeader>
@@ -507,7 +507,7 @@ const AdvancedAnalyticsSection: React.FC<AdvancedAnalyticsSectionProps> = ({ inf
       <Card>
         <CardContent className="flex items-center justify-center h-32">
           <div className="text-center">
-            <Icon iconId="faCrownLight" className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+            <Icon iconId="faDiamondLight" className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
             <p className="text-sm text-muted-foreground">
               Advanced analytics features will be available here once InsightIQ data is fully
               processed.

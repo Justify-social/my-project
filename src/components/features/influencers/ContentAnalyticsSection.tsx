@@ -147,7 +147,7 @@ const ContentAnalyticsSection: React.FC<ContentAnalyticsSectionProps> = ({ influ
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-primary">
-          <Icon iconId="faFireLight" className="h-5 w-5 text-destructive" />
+          <Icon iconId="faBoltLight" className="h-5 w-5 text-destructive" />
           Top Performing Content
         </CardTitle>
       </CardHeader>
@@ -204,7 +204,7 @@ const ContentAnalyticsSection: React.FC<ContentAnalyticsSectionProps> = ({ influ
 
               {content.url && (
                 <Button variant="ghost" size="sm" className="w-full mt-2">
-                  <Icon iconId="faExternalLinkLight" className="h-3 w-3 mr-1" />
+                  <Icon iconId="faArrowRightLight" className="h-3 w-3 mr-1" />
                   View Content
                 </Button>
               )}
@@ -279,7 +279,7 @@ const ContentAnalyticsSection: React.FC<ContentAnalyticsSectionProps> = ({ influ
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-primary">
-          <Icon iconId="faBullhornLight" className="h-5 w-5 text-warning" />
+          <Icon iconId="faMegaphoneLight" className="h-5 w-5 text-warning" />
           Sponsored Content Analysis
         </CardTitle>
       </CardHeader>
@@ -309,7 +309,7 @@ const ContentAnalyticsSection: React.FC<ContentAnalyticsSectionProps> = ({ influ
           </>
         ) : (
           <div className="text-center py-6">
-            <Icon iconId="faBullhornLight" className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+            <Icon iconId="faMegaphoneLight" className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
             <p className="text-sm text-muted-foreground">No sponsored content detected</p>
           </div>
         )}
@@ -322,7 +322,7 @@ const ContentAnalyticsSection: React.FC<ContentAnalyticsSectionProps> = ({ influ
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-primary">
-          <Icon iconId="faHashtagLight" className="h-5 w-5 text-accent" />
+          <Icon iconId="faTagLight" className="h-5 w-5 text-accent" />
           Content Strategy Analysis
         </CardTitle>
       </CardHeader>
@@ -352,7 +352,7 @@ const ContentAnalyticsSection: React.FC<ContentAnalyticsSectionProps> = ({ influ
             <div className="space-y-2">
               {topMentions.slice(0, 5).map((mention: Mention, index: number) => (
                 <div key={index} className="flex items-center gap-2">
-                  <Icon iconId="faAtLight" className="h-3 w-3 text-muted-foreground" />
+                  <Icon iconId="faUserLight" className="h-3 w-3 text-muted-foreground" />
                   <span className="text-sm">@{mention.name}</span>
                 </div>
               ))}
@@ -370,7 +370,7 @@ const ContentAnalyticsSection: React.FC<ContentAnalyticsSectionProps> = ({ influ
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-primary">
-          <Icon iconId="faChartAreaLight" className="h-5 w-5 text-success" />
+          <Icon iconId="faChartBarLight" className="h-5 w-5 text-success" />
           Engagement Distribution Analysis
         </CardTitle>
       </CardHeader>
@@ -398,7 +398,7 @@ const ContentAnalyticsSection: React.FC<ContentAnalyticsSectionProps> = ({ influ
         ) : (
           <div className="text-center py-6">
             <Icon
-              iconId="faChartAreaLight"
+              iconId="faChartBarLight"
               className="h-8 w-8 text-muted-foreground mx-auto mb-2"
             />
             <p className="text-sm text-muted-foreground">

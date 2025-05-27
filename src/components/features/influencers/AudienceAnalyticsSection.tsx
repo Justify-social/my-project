@@ -115,7 +115,7 @@ const AudienceAnalyticsSection: React.FC<AudienceAnalyticsSectionProps> = ({ inf
     <Card className="border-accent/20 bg-gradient-to-br from-accent/5 to-transparent">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg text-primary">
-          <Icon iconId="faAddressCardLight" className="h-5 w-5 text-accent" />
+          <Icon iconId="faCreditCardLight" className="h-5 w-5 text-accent" />
           Contact & Collaboration
         </CardTitle>
       </CardHeader>
@@ -267,7 +267,7 @@ const AudienceAnalyticsSection: React.FC<AudienceAnalyticsSectionProps> = ({ inf
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-primary">
-          <Icon iconId="faShieldCheckLight" className="h-5 w-5 text-success" />
+          <Icon iconId="faShieldLight" className="h-5 w-5 text-success" />
           Audience Quality Assessment
         </CardTitle>
       </CardHeader>
@@ -281,9 +281,8 @@ const AudienceAnalyticsSection: React.FC<AudienceAnalyticsSectionProps> = ({ inf
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <div
-                    className={`w-3 h-3 rounded-full ${
-                      isPositive ? 'bg-success' : isNegative ? 'bg-destructive' : 'bg-warning'
-                    }`}
+                    className={`w-3 h-3 rounded-full ${isPositive ? 'bg-success' : isNegative ? 'bg-destructive' : 'bg-warning'
+                      }`}
                   />
                   <span className="text-sm font-medium capitalize">
                     {type.name.toLowerCase().replace('_', ' ')}
@@ -293,13 +292,12 @@ const AudienceAnalyticsSection: React.FC<AudienceAnalyticsSectionProps> = ({ inf
               </div>
               <Progress
                 value={type.value}
-                className={`h-2 ${
-                  isPositive
-                    ? '[&>div]:bg-success'
-                    : isNegative
-                      ? '[&>div]:bg-destructive'
-                      : '[&>div]:bg-warning'
-                }`}
+                className={`h-2 ${isPositive
+                  ? '[&>div]:bg-success'
+                  : isNegative
+                    ? '[&>div]:bg-destructive'
+                    : '[&>div]:bg-warning'
+                  }`}
               />
             </div>
           );

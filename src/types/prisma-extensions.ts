@@ -50,6 +50,7 @@ export type ExtendedPrismaClient = PrismaClient & {
 
   // User model
   user: PrismaDelegate;
+  notification: PrismaDelegate;
 
   stripeEvent: PrismaDelegate;
 };

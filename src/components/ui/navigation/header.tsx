@@ -14,6 +14,7 @@ import { Icon } from '@/components/ui/icon/icon';
 import { iconExists } from '@/components/ui/icon/icons';
 import { useSearch } from '@/providers/SearchProvider';
 import { SearchResultsDisplay } from './search-results-display';
+import { NotificationCenter } from '@/components/ui/notifications/NotificationCenter';
 
 // Define NavItem locally
 // interface NavItem {
@@ -25,7 +26,6 @@ import { SearchResultsDisplay } from './search-results-display';
 interface HeaderProps {
   companyName: string;
   remainingCredits: number;
-  notificationsCount: number;
   onMenuClick?: () => void;
   authControls?: React.ReactNode;
 }
@@ -33,7 +33,6 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({
   companyName,
   remainingCredits: _remainingCredits,
-  notificationsCount,
   onMenuClick,
   authControls,
 }) => {
@@ -43,9 +42,6 @@ const Header: React.FC<HeaderProps> = ({
   // Define icon IDs directly
   const coinsIconId = 'faCoinsLight';
   const hasCoinsIcon = iconExists(coinsIconId);
-
-  const bellIconId = 'faBellLight';
-  const hasBellIcon = iconExists(bellIconId);
 
   const menuIconId = 'faBarsLight'; // Use Light variant from map
   const hasMenuIcon = iconExists(menuIconId);
@@ -127,34 +123,8 @@ const Header: React.FC<HeaderProps> = ({
               )}
             </Link>
 
-            {/* Notifications - positioned directly adjacent to coins */}
-            <div className="relative" data-cy="notifications-button">
-              {hasBellIcon ? (
-                <Icon
-                  iconId="faBellSolid" // Use Solid ID directly
-                  className="w-6 h-6 text-foreground" // Changed to text-foreground
-                  title="Notifications"
-                  data-testid="notifications-icon"
-                />
-              ) : (
-                // Fallback if icon doesn't exist
-                <div
-                  className="w-6 h-6 bg-muted rounded-full flex items-center justify-center text-xs"
-                  title="Notifications icon not found"
-                >
-                  N
-                </div>
-              )}
-
-              {notificationsCount > 0 && (
-                <span
-                  className="absolute -top-1 -right-1 bg-destructive text-background rounded-full text-xs w-4 h-4 flex items-center justify-center"
-                  data-cy="notifications-badge"
-                >
-                  {notificationsCount}
-                </span>
-              )}
-            </div>
+            {/* Notifications - using NotificationCenter component */}
+            <NotificationCenter data-cy="notifications-button" />
           </div>
 
           {/* Render Clerk Auth Controls (passed as prop) - visible on desktop */}

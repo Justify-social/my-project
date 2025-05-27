@@ -264,6 +264,7 @@ model User {
   sentInvitations     TeamInvitation[]           @relation("InvitationSender")
   memberOfTeams       TeamMember[]               @relation("TeamMember")
   ownedTeamMembers    TeamMember[]               @relation("TeamOwner")
+  notifications       Notification[]             // New relation to notifications
 
   // Fields for email status tracking
   isEmailDeliverable    Boolean   @default(true)
@@ -275,6 +276,30 @@ model User {
   // --- END DB-1 ---
 
   creativeAssets CreativeAsset[] // Relation back to CreativeAsset
+}
+
+model Notification {
+  id          String             @id @default(uuid())
+  userId      String
+  type        NotificationType
+  status      NotificationStatus @default(UNREAD)
+  title       String
+  message     String             @db.Text
+  metadata    Json?              // Additional data (campaign ID, etc.)
+  actionUrl   String?            // Optional URL for "click to view" functionality
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  readAt      DateTime?          // When the notification was read
+  dismissedAt DateTime?          // When the notification was dismissed
+  expiresAt   DateTime?          // Optional expiration for temporary notifications
+
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
+  @@index([expiresAt])
 }
 
 model NotificationPrefs {
@@ -400,6 +425,23 @@ enum InvitationStatus {
   ACCEPTED
   REJECTED
   EXPIRED
+}
+
+enum NotificationType {
+  CAMPAIGN_SUBMITTED
+  BRAND_LIFT_SUBMITTED
+  BRAND_LIFT_REPORT_READY
+  SYSTEM
+  SUCCESS
+  ERROR
+  WARNING
+  INFO
+}
+
+enum NotificationStatus {
+  UNREAD
+  READ
+  DISMISSED
 }
 
 // New model for storing persistent influencer profile data for the marketplace

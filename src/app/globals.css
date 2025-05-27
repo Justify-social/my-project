@@ -469,3 +469,26 @@ aside[data-cy='main-sidebar'] *:not(button),
 }
 
 /* Font hierarchy is now handled above - no conflicting layers needed */
+
+/* =========================================
+   TOOLTIP MAXIMUM VISIBILITY OVERRIDE
+   ========================================= */
+
+/* Ensure tooltips always appear on top */
+[data-radix-tooltip-content] {
+  z-index: 9999 !important;
+  position: fixed !important;
+  isolation: isolate !important;
+  transform: translateZ(0) !important;
+}
+
+/* Override any container that might clip tooltips */
+[data-radix-tooltip-trigger] {
+  position: relative !important;
+  z-index: 100 !important;
+}
+
+/* Ensure tooltip portal containers are above everything */
+[data-radix-portal] {
+  z-index: 9999 !important;
+}

@@ -159,7 +159,7 @@ const PlatformSpecificSection: React.FC<PlatformSpecificSectionProps> = ({ influ
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-primary">
-          <Icon iconId="faFilmLight" className="h-5 w-5 text-interactive" />
+          <Icon iconId="faVideoLight" className="h-5 w-5 text-interactive" />
           Content Type Performance
         </CardTitle>
       </CardHeader>
@@ -306,13 +306,12 @@ const PlatformSpecificSection: React.FC<PlatformSpecificSectionProps> = ({ influ
             {Array.from({ length: 24 }, (_, hour) => (
               <div
                 key={hour}
-                className={`h-6 rounded-sm ${
-                  hour >= 9 && hour <= 17
-                    ? 'bg-success/40'
-                    : hour >= 18 && hour <= 22
-                      ? 'bg-warning/40'
-                      : 'bg-muted'
-                }`}
+                className={`h-6 rounded-sm ${hour >= 9 && hour <= 17
+                  ? 'bg-success/40'
+                  : hour >= 18 && hour <= 22
+                    ? 'bg-warning/40'
+                    : 'bg-muted'
+                  }`}
                 title={`${hour}:00`}
               />
             ))}
@@ -377,7 +376,7 @@ const PlatformSpecificSection: React.FC<PlatformSpecificSectionProps> = ({ influ
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-primary">
-          <Icon iconId="faShareNodesLight" className="h-5 w-5 text-warning" />
+          <Icon iconId="faShareLight" className="h-5 w-5 text-warning" />
           Cross-Platform Presence
         </CardTitle>
       </CardHeader>
@@ -390,7 +389,7 @@ const PlatformSpecificSection: React.FC<PlatformSpecificSectionProps> = ({ influ
         <div className="space-y-3">
           <div className="flex items-center justify-between p-2 border border-border rounded-lg">
             <div className="flex items-center gap-2">
-              <Icon iconId="faInstagramBrand" className="h-4 w-4 text-accent" />
+              <Icon iconId="brandsInstagram" className="h-4 w-4 text-accent" />
               <span className="text-sm">Instagram</span>
             </div>
             <Badge variant="default">Primary</Badge>
@@ -398,7 +397,7 @@ const PlatformSpecificSection: React.FC<PlatformSpecificSectionProps> = ({ influ
 
           <div className="flex items-center justify-between p-2 border border-border rounded-lg opacity-50">
             <div className="flex items-center gap-2">
-              <Icon iconId="faYoutubeBrand" className="h-4 w-4 text-destructive" />
+              <Icon iconId="brandsYoutube" className="h-4 w-4 text-destructive" />
               <span className="text-sm">YouTube</span>
             </div>
             <Badge variant="outline">Not Connected</Badge>
@@ -406,7 +405,7 @@ const PlatformSpecificSection: React.FC<PlatformSpecificSectionProps> = ({ influ
 
           <div className="flex items-center justify-between p-2 border border-border rounded-lg opacity-50">
             <div className="flex items-center gap-2">
-              <Icon iconId="faTiktokBrand" className="h-4 w-4 text-primary" />
+              <Icon iconId="brandsTiktok" className="h-4 w-4 text-primary" />
               <span className="text-sm">TikTok</span>
             </div>
             <Badge variant="outline">Not Connected</Badge>

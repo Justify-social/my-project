@@ -94,8 +94,8 @@ const ContactAnalyticsSection: React.FC<ContactAnalyticsSectionProps> = ({ influ
   // Calculate account age if creation date available
   const accountAge = accountDetails.createdAt
     ? Math.floor(
-        (Date.now() - new Date(accountDetails.createdAt).getTime()) / (1000 * 60 * 60 * 24)
-      )
+      (Date.now() - new Date(accountDetails.createdAt).getTime()) / (1000 * 60 * 60 * 24)
+    )
     : null;
 
   // Calculate collaboration viability indicators
@@ -106,7 +106,7 @@ const ContactAnalyticsSection: React.FC<ContactAnalyticsSectionProps> = ({ influ
     <Card className="border-interactive/20 bg-gradient-to-br from-interactive/5 to-transparent">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg text-primary">
-          <Icon iconId="faAddressCardLight" className="h-5 w-5 text-interactive" />
+          <Icon iconId="faCreditCardLight" className="h-5 w-5 text-interactive" />
           Complete Contact Directory
         </CardTitle>
       </CardHeader>
@@ -186,7 +186,7 @@ const ContactAnalyticsSection: React.FC<ContactAnalyticsSectionProps> = ({ influ
               {allAddresses.map((address: ContactAddress, index: number) => (
                 <div key={index} className="p-3 bg-muted/30 rounded-lg">
                   <div className="flex items-start gap-2">
-                    <Icon iconId="faMapMarkerAltLight" className="h-4 w-4 text-warning mt-1" />
+                    <Icon iconId="faMapLight" className="h-4 w-4 text-warning mt-1" />
                     <div className="flex-1">
                       <div className="text-sm font-medium">{address.type || 'Address'}</div>
                       <div className="text-xs text-muted-foreground mt-1">
@@ -214,7 +214,7 @@ const ContactAnalyticsSection: React.FC<ContactAnalyticsSectionProps> = ({ influ
     <Card className="border-success/20 bg-gradient-to-br from-success/5 to-transparent">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg text-primary">
-          <Icon iconId="faShieldCheckLight" className="h-5 w-5 text-success" />
+          <Icon iconId="faShieldLight" className="h-5 w-5 text-success" />
           Account Verification & Status
         </CardTitle>
       </CardHeader>
@@ -376,7 +376,7 @@ const ContactAnalyticsSection: React.FC<ContactAnalyticsSectionProps> = ({ influ
               Pricing information not available in public data
             </p>
             <Button variant="outline" size="sm">
-              <Icon iconId="faCalculatorLight" className="h-4 w-4 mr-2" />
+              <Icon iconId="faCoinsLight" className="h-4 w-4 mr-2" />
               Request Custom Quote
             </Button>
           </div>
@@ -406,7 +406,7 @@ const ContactAnalyticsSection: React.FC<ContactAnalyticsSectionProps> = ({ influ
         </Button>
 
         <Button variant="outline" className="w-full">
-          <Icon iconId="faFileTextLight" className="h-4 w-4 mr-2" />
+          <Icon iconId="faFileLinesLight" className="h-4 w-4 mr-2" />
           Generate Media Kit Request
         </Button>
 
@@ -443,7 +443,7 @@ const ContactAnalyticsSection: React.FC<ContactAnalyticsSectionProps> = ({ influ
         <CardContent className="flex items-center justify-center h-32">
           <div className="text-center">
             <Icon
-              iconId="faAddressCardLight"
+              iconId="faCreditCardLight"
               className="h-8 w-8 text-muted-foreground mx-auto mb-2"
             />
             <p className="text-sm text-muted-foreground">
