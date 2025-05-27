@@ -141,7 +141,8 @@ export function VideoFileUploader<TFieldValues extends FieldValues = FieldValues
           fileName: localFile.name,
           fileType: localFile.type,
           campaignWizardId: campaignWizardId, // Pass campaignWizardId
-          // submissionId: submissionId.toString(), // OLD
+          corsOrigin: window.location.origin, // Pass the current origin for CORS
+          description: `Video upload: ${localFile.name}`,
         }),
       });
 
@@ -159,20 +160,44 @@ export function VideoFileUploader<TFieldValues extends FieldValues = FieldValues
         throw new Error('Failed to retrieve Mux upload URL.');
       }
 
+      logger.info('Starting UpChunk upload:', {
+        fileName: localFile.name,
+        fileSize: localFile.size,
+        muxUploadId,
+        uploadUrl: uploadUrl.substring(0, 50) + '...', // Log partial URL for debugging
+      });
+
       // 2. Upload the file to Mux using UpChunk
       const upload = UpChunk.createUpload({
         endpoint: uploadUrl,
         file: localFile,
-        // chunkSize: 5120, // Optional: in KBs, default 5120 (5MB)
+        chunkSize: 5120, // 5MB chunks - good balance for most connections
+        attempts: 3, // Retry failed chunks up to 3 times
+        delayBeforeAttempt: 2, // Wait 2 seconds before retrying
       });
 
       upchunkRef.current = upload; // Store reference for potential abort
 
+      upload.on('attempt', attempt => {
+        logger.info('UpChunk chunk attempt:', attempt.detail);
+      });
+
+      upload.on('attemptFailure', failure => {
+        logger.warn('UpChunk chunk attempt failed:', failure.detail);
+      });
+
+      upload.on('chunkSuccess', success => {
+        logger.info('UpChunk chunk succeeded:', success.detail);
+      });
+
       upload.on('progress', progress => {
-        setUploadProgress(Math.floor(progress.detail));
+        const progressPercent = Math.floor(progress.detail);
+        setUploadProgress(progressPercent);
+        logger.info(`UpChunk upload progress: ${progressPercent}%`);
       });
 
       upload.on('success', () => {
+        logger.info('UpChunk upload completed successfully');
         toast.success(`"${localFile.name}" uploaded successfully! Mux is now processing it.`);
         setIsUploading(false);
         setUploadProgress(100); // Visually complete
@@ -192,18 +217,21 @@ export function VideoFileUploader<TFieldValues extends FieldValues = FieldValues
 
       upload.on('error', errorData => {
         logger.error('UpChunk upload error:', errorData.detail);
-        setErrorState(`Upload failed: ${errorData.detail.message || 'Connection issue.'}`);
-        toast.error(`Upload of "${localFile.name}" failed.`);
+        const errorMessage =
+          errorData.detail?.message || errorData.detail || 'Unknown upload error';
+        setErrorState(`Upload failed: ${errorMessage}`);
+        toast.error(`Upload of "${localFile.name}" failed: ${errorMessage}`);
         setIsUploading(false);
         setUploadProgress(0);
         if (onUploadError) {
-          onUploadError(new Error(errorData.detail.message || 'UpChunk upload failed'));
+          onUploadError(new Error(`UpChunk upload failed: ${errorMessage}`));
         }
       });
     } catch (error) {
       logger.error('Video upload initiation or process error:', error);
-      setErrorState((error as Error).message || 'An unexpected error occurred.');
-      toast.error((error as Error).message || 'Failed to start upload.');
+      const errorMessage = (error as Error).message || 'An unexpected error occurred.';
+      setErrorState(errorMessage);
+      toast.error(`Failed to start upload: ${errorMessage}`);
       setIsUploading(false);
       if (onUploadError) {
         onUploadError(error as Error);

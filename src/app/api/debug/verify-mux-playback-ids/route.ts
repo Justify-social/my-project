@@ -225,6 +225,28 @@ export async function POST(req: NextRequest) {
         success: true,
         message: `Reset processing status for asset ${assetId}`,
       });
+    } else if (action === 'checkMuxUpload') {
+      // Check the status of a Mux upload directly via API
+      const asset = await prisma.creativeAsset.findUnique({
+        where: { id: assetId },
+        select: { muxUploadId: true, muxAssetId: true, muxProcessingStatus: true, name: true },
+      });
+
+      if (!asset) {
+        return NextResponse.json({ success: false, message: 'Asset not found' }, { status: 404 });
+      }
+
+      return NextResponse.json({
+        success: true,
+        asset: {
+          id: assetId,
+          name: asset.name,
+          muxUploadId: asset.muxUploadId,
+          muxAssetId: asset.muxAssetId,
+          muxProcessingStatus: asset.muxProcessingStatus,
+        },
+        message: `Current status: ${asset.muxProcessingStatus}`,
+      });
     } else if (action === 'extractFromUrl') {
       // Get the asset
       const asset = await prisma.creativeAsset.findUnique({

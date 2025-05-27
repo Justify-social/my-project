@@ -51,9 +51,26 @@ export async function POST(req: NextRequest) {
       fileName,
       fileType,
       campaignWizardId,
+      corsOrigin,
     });
 
-    const muxUploadData = await muxService.createDirectUploadUrl(corsOrigin);
+    // Use provided CORS origin or fallback to dynamically detected origin
+    let effectiveCorsOrigin = corsOrigin;
+
+    if (!effectiveCorsOrigin) {
+      if (process.env.NODE_ENV === 'development') {
+        // Dynamically detect the origin from the request
+        const host = req.headers.get('host') || 'localhost:3000';
+        const protocol = req.headers.get('x-forwarded-proto') || 'http';
+        effectiveCorsOrigin = `${protocol}://${host}`;
+      } else {
+        effectiveCorsOrigin = '*';
+      }
+    }
+
+    logger.info(`[API /mux/create-video-upload] Using CORS origin: ${effectiveCorsOrigin}`);
+
+    const muxUploadData = await muxService.createDirectUploadUrl(effectiveCorsOrigin);
 
     // Create CreativeAsset record in the database
     const initialProcessingStatus = 'AWAITING_UPLOAD'; // Or PENDING_MUX_UPLOAD
