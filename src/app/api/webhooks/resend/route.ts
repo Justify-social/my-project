@@ -30,18 +30,16 @@ async function storeEmailEvent(status: string, eventData: ResendEventData) {
 
     await prisma.stripeEvent.create({
       data: {
-        id: `resend_${eventData.email_id}_${status}_${Date.now()}`,
+        id: `resend_${eventData.email_id}_${status}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         type: `email.${status}`,
-        data: {
+        status: 'processed',
+        error: {
           emailId: eventData.email_id,
           to: eventData.to,
-          status,
+          eventStatus: status,
           timestamp: new Date().toISOString(),
           ...eventData,
         },
-        processed: true,
-        livemode: true,
-        createdAt: new Date(),
       },
     });
 

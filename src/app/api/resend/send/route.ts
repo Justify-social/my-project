@@ -7,8 +7,38 @@ import { handleApiError } from '@/lib/apiErrorHandler';
 import { UnauthenticatedError, ForbiddenError, BadRequestError } from '@/lib/errors';
 import { z } from 'zod';
 import { EMAIL_TEMPLATES, type TemplateId } from '@/components/email-templates/email-templates';
+import { prisma } from '@/lib/prisma';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Store email sent event for analytics tracking
+async function storeEmailSentEvent(
+  emailId: string,
+  to: string,
+  subject: string,
+  templateType: string
+) {
+  try {
+    await prisma.stripeEvent.create({
+      data: {
+        id: `resend_${emailId}_sent_immediate_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        type: 'email.sent',
+        status: 'processed',
+        error: {
+          emailId,
+          to,
+          subject,
+          templateType,
+          eventStatus: 'sent',
+          timestamp: new Date().toISOString(),
+        },
+      },
+    });
+    logger.info(`Stored email.sent event for ${emailId}`);
+  } catch (error) {
+    logger.error(`Failed to store email.sent event:`, { emailId, to, error });
+  }
+}
 
 // Request validation schema
 const SendEmailSchema = z.object({
@@ -213,6 +243,12 @@ export async function POST(request: NextRequest) {
           }
 
           logger.info(`Email sent successfully to ${email}`, { emailId: data?.id });
+
+          // Store the sent event for analytics tracking
+          if (data?.id) {
+            await storeEmailSentEvent(data.id, email, subject, templateType);
+          }
+
           return { email, success: true, emailId: data?.id };
         } catch (error) {
           logger.error(`Exception sending email to ${email}:`, {

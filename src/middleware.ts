@@ -19,6 +19,10 @@ const isProtectedRoute = createRouteMatcher([
   '/settings(.*)',
   '/brand-lift(.*)',
   '/account(.*)',
+  '/brand-health(.*)',
+  '/creative-testing(.*)',
+  '/mmm(.*)',
+  '/help(.*)',
 ]);
 
 const isApiRoute = createRouteMatcher(['/api(.*)']);

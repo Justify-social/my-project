@@ -4,6 +4,7 @@ import { logger } from '@/lib/logger';
 import { handleApiError } from '@/lib/apiErrorHandler';
 import { UnauthenticatedError, ForbiddenError, BadRequestError } from '@/lib/errors';
 import { bulkCreateNotifications } from '@/lib/notifications';
+import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
 // Define the request schema
@@ -45,13 +46,13 @@ export async function POST(request: NextRequest) {
 
     const { recipients, type, title, message, actionUrl, expiresAt } = validatedData;
 
-    // Collect all user IDs from recipients
-    const userIds: string[] = [];
+    // Collect all Clerk user IDs from recipients
+    const clerkUserIds: string[] = [];
     const client = await clerkClient();
 
     for (const recipient of recipients) {
       if (recipient.type === 'user') {
-        userIds.push(recipient.id);
+        clerkUserIds.push(recipient.id);
       } else if (recipient.type === 'organization') {
         try {
           // Fetch organization members
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
             .map(membership => membership.publicUserData?.userId)
             .filter(Boolean) as string[];
 
-          userIds.push(...orgUserIds);
+          clerkUserIds.push(...orgUserIds);
         } catch (error) {
           logger.error(`Failed to fetch users for organization ${recipient.id}:`, {
             error: error instanceof Error ? error.message : String(error),
@@ -76,15 +77,40 @@ export async function POST(request: NextRequest) {
     }
 
     // Remove duplicates
-    const uniqueUserIds = [...new Set(userIds)];
+    const uniqueClerkUserIds = [...new Set(clerkUserIds)];
 
-    if (uniqueUserIds.length === 0) {
+    if (uniqueClerkUserIds.length === 0) {
       throw new BadRequestError('No valid users found in the selected recipients.');
+    }
+
+    // Map Clerk user IDs to internal database User IDs
+    const users = await prisma.user.findMany({
+      where: {
+        clerkId: { in: uniqueClerkUserIds },
+      },
+      select: {
+        id: true,
+        clerkId: true,
+      },
+    });
+
+    const internalUserIds = users.map(user => user.id);
+
+    if (internalUserIds.length === 0) {
+      throw new BadRequestError('No matching users found in the database.');
+    }
+
+    if (internalUserIds.length < uniqueClerkUserIds.length) {
+      logger.warn('Some Clerk users not found in database', {
+        clerkUserIds: uniqueClerkUserIds,
+        foundUsers: users.map(u => u.clerkId),
+        missingCount: uniqueClerkUserIds.length - internalUserIds.length,
+      });
     }
 
     // Create notifications for all users
     const result = await bulkCreateNotifications({
-      userIds: uniqueUserIds,
+      userIds: internalUserIds,
       type: type as
         | 'CAMPAIGN_SUBMITTED'
         | 'BRAND_LIFT_SUBMITTED'
@@ -102,17 +128,17 @@ export async function POST(request: NextRequest) {
 
     logger.info(`Bulk notifications created successfully`, {
       recipientCount: recipients.length,
-      userCount: uniqueUserIds.length,
+      userCount: internalUserIds.length,
       notificationCount: result.count,
       userId: clerkUserId,
     });
 
     return NextResponse.json({
       success: true,
-      message: `${result.count} notifications created for ${uniqueUserIds.length} users`,
+      message: `${result.count} notifications created for ${internalUserIds.length} users`,
       recipientBreakdown: {
         totalRecipients: recipients.length,
-        totalUsers: uniqueUserIds.length,
+        totalUsers: internalUserIds.length,
         notificationsCreated: result.count,
       },
     });

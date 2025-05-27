@@ -327,6 +327,15 @@ aside[data-cy='main-sidebar'] *:not(button),
   font-family: 'Inter', sans-serif !important;
 }
 
+/* 5. Font utility classes for explicit control */
+.font-sora {
+  font-family: 'Sora', sans-serif !important;
+}
+
+.font-inter {
+  font-family: 'Inter', sans-serif !important;
+}
+
 /* =========================================
    RESPONSIVE STYLES
    ========================================= */
@@ -552,4 +561,133 @@ aside[data-cy='main-sidebar'] *:not(button),
 /* Ensure tooltip portal containers are above everything */
 [data-radix-portal] {
   z-index: 9999 !important;
+}
+
+/* =========================================
+   CLERK OVERFLOW CONTAINMENT FIXES (SSOT)
+   ========================================= */
+
+/* 
+  MIT Professor-level Clerk Containment Solution
+  
+  Root Cause: Clerk's internal CSS positioning breaks containment
+  Solution: Multi-layered containment strategy with aggressive overrides
+  
+  Strategy:
+  1. CSS Containment API (contain: layout paint style)
+  2. Aggressive CSS overrides with !important
+  3. Multiple nested containers with overflow handling
+  4. Modern overflow: clip for strict clipping
+  5. Inline style backup for critical properties
+*/
+
+/* Layer 1: Root Clerk Container Containment */
+.clerk-auth-container {
+  /* Modern CSS Containment API */
+  contain: layout paint style !important;
+  isolation: isolate !important;
+
+  /* Aggressive Overflow Control */
+  overflow: clip !important;
+  overflow-x: clip !important;
+  overflow-y: clip !important;
+
+  /* Strict Sizing */
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+
+  /* Positioning Control */
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* Layer 2: Clerk Component Wrapper */
+.clerk-container {
+  /* Enhanced Containment */
+  contain: layout paint style size !important;
+
+  /* Dimension Control */
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+
+  /* Overflow Management */
+  overflow: hidden !important;
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
+
+  /* Box Model */
+  box-sizing: border-box !important;
+  position: relative !important;
+}
+
+/* Layer 3: All Clerk Child Elements */
+.clerk-container *,
+.clerk-container [data-clerk-component],
+.clerk-container [class*='cl-'] {
+  /* Universal Box Model Fix */
+  box-sizing: border-box !important;
+
+  /* Prevent Overflow */
+  max-width: 100% !important;
+  width: auto !important;
+
+  /* Text Handling */
+  overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
+
+  /* Flexbox Fixes */
+  flex-shrink: 1 !important;
+  min-width: 0 !important;
+}
+
+/* Layer 4: Emergency Containment Layer */
+.clerk-emergency-container {
+  /* Strictest Containment */
+  contain: strict !important;
+
+  /* Absolute Dimension Control */
+  width: 100% !important;
+  max-width: 100% !important;
+
+  /* Ultimate Overflow Prevention */
+  overflow: clip !important;
+
+  /* Isolation */
+  position: relative !important;
+  isolation: isolate !important;
+}
+
+/* Layer 5: Clerk Button and Input Overrides */
+.clerk-container button,
+.clerk-container input,
+.clerk-container [role='button'] {
+  /* Prevent Button Overflow */
+  max-width: 100% !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+/* Layer 6: Clerk Modal and Overlay Protection */
+.clerk-container [data-clerk-modal],
+.clerk-container [class*='cl-modal'],
+.clerk-container [class*='cl-card'] {
+  /* Modal Containment */
+  max-width: 100% !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+/* Critical: Ensure no element can exceed viewport */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
 }

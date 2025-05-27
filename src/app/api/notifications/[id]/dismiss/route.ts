@@ -8,10 +8,20 @@ export async function PATCH(
   { params: paramsPromise }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = getAuth(request);
+    const { userId: clerkUserId } = getAuth(request);
 
-    if (!userId) {
+    if (!clerkUserId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Map Clerk user ID to internal database User ID
+    const user = await prisma.user.findUnique({
+      where: { clerkId: clerkUserId },
+      select: { id: true },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     const params = await paramsPromise;
@@ -21,7 +31,7 @@ export async function PATCH(
     const notification = await prisma.notification.updateMany({
       where: {
         id: notificationId,
-        userId,
+        userId: user.id,
       },
       data: {
         status: 'DISMISSED',

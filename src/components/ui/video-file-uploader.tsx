@@ -152,7 +152,7 @@ export function VideoFileUploader<TFieldValues extends FieldValues = FieldValues
         );
       }
 
-      const { uploadUrl, internalAssetId, muxAssetId, userId }: MuxUploadInitData =
+      const { uploadUrl, internalAssetId, muxAssetId, muxUploadId, userId }: MuxUploadInitData =
         await apiResponse.json();
 
       if (!uploadUrl) {
@@ -176,6 +176,7 @@ export function VideoFileUploader<TFieldValues extends FieldValues = FieldValues
         toast.success(`"${localFile.name}" uploaded successfully! Mux is now processing it.`);
         setIsUploading(false);
         setUploadProgress(100); // Visually complete
+
         if (onUploadComplete) {
           onUploadComplete({
             internalAssetId,

@@ -5,10 +5,20 @@ import { prisma } from '@/lib/prisma';
 // GET /api/notifications - Fetch user's notifications
 export async function GET(request: NextRequest) {
   try {
-    const { userId } = getAuth(request);
+    const { userId: clerkUserId } = getAuth(request);
 
-    if (!userId) {
+    if (!clerkUserId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Map Clerk user ID to internal database User ID
+    const user = await prisma.user.findUnique({
+      where: { clerkId: clerkUserId },
+      select: { id: true },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -17,9 +27,9 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    // Build filter conditions
+    // Build filter conditions using internal User ID
     const where: Record<string, unknown> = {
-      userId,
+      userId: user.id,
     };
 
     if (status) {
@@ -56,10 +66,20 @@ export async function GET(request: NextRequest) {
 // POST /api/notifications - Create a new notification
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = getAuth(request);
+    const { userId: clerkUserId } = getAuth(request);
 
-    if (!userId) {
+    if (!clerkUserId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Map Clerk user ID to internal database User ID
+    const user = await prisma.user.findUnique({
+      where: { clerkId: clerkUserId },
+      select: { id: true },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     const body = await request.json();
@@ -91,7 +111,7 @@ export async function POST(request: NextRequest) {
 
     const notification = await prisma.notification.create({
       data: {
-        userId,
+        userId: user.id,
         type,
         title,
         message,
@@ -111,10 +131,20 @@ export async function POST(request: NextRequest) {
 // DELETE /api/notifications - Bulk delete notifications
 export async function DELETE(request: NextRequest) {
   try {
-    const { userId } = getAuth(request);
+    const { userId: clerkUserId } = getAuth(request);
 
-    if (!userId) {
+    if (!clerkUserId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Map Clerk user ID to internal database User ID
+    const user = await prisma.user.findUnique({
+      where: { clerkId: clerkUserId },
+      select: { id: true },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -127,7 +157,7 @@ export async function DELETE(request: NextRequest) {
     const result = await prisma.notification.deleteMany({
       where: {
         id: { in: notificationIds },
-        userId, // Ensure user can only delete their own notifications
+        userId: user.id, // Ensure user can only delete their own notifications
       },
     });
 

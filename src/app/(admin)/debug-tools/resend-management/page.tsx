@@ -348,7 +348,7 @@ export default function ResendManagementPage() {
                 <div className="space-y-2">
                   {emailActivity.slice(0, 10).map(activity => (
                     <div
-                      key={`${activity.emailId}-${activity.status}`}
+                      key={`${activity.emailId}-${activity.status}-${activity.timestamp}`}
                       className="flex items-center justify-between p-3 border rounded-md"
                     >
                       <div className="flex items-center gap-3">

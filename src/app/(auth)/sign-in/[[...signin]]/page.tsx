@@ -122,7 +122,14 @@ function SignInComponent() {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto space-y-4">
+    <div className="w-full">
+      {/* Enterprise Header */}
+      <div className="text-center mb-10">
+        <h2 className="font-sora text-3xl font-bold text-slate-900 mb-3">Welcome back</h2>
+        <p className="text-slate-600 font-medium">Access your measurement dashboard</p>
+      </div>
+
+      {/* Clean Clerk Form with Default Styling */}
       <SignIn
         routing="path"
         path="/sign-in"
@@ -130,34 +137,22 @@ function SignInComponent() {
         afterSignInUrl={redirectUrl || '/dashboard'}
         fallbackRedirectUrl="/dashboard"
         appearance={{
-          baseTheme: undefined,
           elements: {
-            // Make card background transparent or remove padding/shadow if the right column provides it
-            // Let's keep the card style for now, as it provides structure within the right column.
-            card: 'bg-white shadow-md border border-divider p-6 rounded-lg max-w-md w-full',
-            formButtonPrimary:
-              'bg-interactive hover:bg-interactive/90 text-white text-sm font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent',
-            formFieldInput:
-              'block w-full rounded-md border border-divider shadow-sm focus:border-accent focus:ring-accent sm:text-sm py-2 px-3',
-            formFieldLabel: 'text-sm font-medium text-secondary',
-            footerActionLink: 'text-interactive hover:underline text-sm',
-            headerTitle: 'text-primary text-xl font-semibold',
-            headerSubtitle: 'text-secondary text-sm',
-            identityPreviewEditButton: 'text-accent hover:text-accent/80',
-            dividerLine: 'bg-divider',
-            socialButtonsBlockButton: 'border-divider hover:bg-gray-50',
+            card: 'shadow-none border-0 bg-transparent',
+            headerTitle: 'hidden',
+            headerSubtitle: 'hidden',
           },
         }}
       />
 
       {/* Debug trigger button - only show in development */}
       {process.env.NODE_ENV === 'development' && (
-        <div className="flex justify-center mt-4">
+        <div className="flex justify-center mt-6">
           <Button
             onClick={() => setShowDebug(true)}
             variant="link"
             size="sm"
-            className="text-xs text-muted-foreground hover:text-foreground"
+            className="text-xs text-slate-400 hover:text-slate-600 font-inter"
           >
             Having trouble signing in? Show diagnostic info
           </Button>

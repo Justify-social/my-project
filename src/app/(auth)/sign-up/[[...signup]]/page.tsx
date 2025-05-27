@@ -8,33 +8,32 @@ import { AuthSkeleton } from '@/components/ui/loading-skeleton';
 // import Link from 'next/link';
 
 export default function SignUpPage() {
-  // Removed outer container div, layout handles centering and background
   return (
     <Suspense fallback={<AuthSkeleton />}>
-      <SignUp
-        routing="path"
-        path="/sign-up"
-        signInUrl="/sign-in"
-        afterSignUpUrl="/dashboard"
-        appearance={{
-          baseTheme: undefined,
-          elements: {
-            // Make card background transparent or remove padding/shadow if the right column provides it
-            // Let's keep the card style for now.
-            card: 'bg-white shadow-md border border-divider p-6 rounded-lg max-w-md w-full',
-            formButtonPrimary:
-              'bg-interactive hover:bg-interactive/90 text-white text-sm font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent',
-            formFieldInput:
-              'block w-full rounded-md border border-divider shadow-sm focus:border-accent focus:ring-accent sm:text-sm py-2 px-3',
-            formFieldLabel: 'text-sm font-medium text-secondary',
-            footerActionLink: 'text-interactive hover:underline text-sm',
-            headerTitle: 'text-primary text-xl font-semibold',
-            headerSubtitle: 'text-secondary text-sm',
-            dividerLine: 'bg-divider',
-            socialButtonsBlockButton: 'border-divider hover:bg-gray-50',
-          },
-        }}
-      />
+      <div className="w-full">
+        {/* Enterprise Header */}
+        <div className="text-center mb-10">
+          <h2 className="font-sora text-3xl font-bold text-slate-900 mb-3">Start measuring ROI</h2>
+          <p className="text-slate-600 font-medium">
+            Join enterprise marketing teams proving results
+          </p>
+        </div>
+
+        {/* Clean Clerk Form with Default Styling */}
+        <SignUp
+          routing="path"
+          path="/sign-up"
+          signInUrl="/sign-in"
+          afterSignUpUrl="/dashboard"
+          appearance={{
+            elements: {
+              card: 'shadow-none border-0 bg-transparent',
+              headerTitle: 'hidden',
+              headerSubtitle: 'hidden',
+            },
+          }}
+        />
+      </div>
     </Suspense>
   );
 }
