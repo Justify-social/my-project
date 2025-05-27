@@ -141,7 +141,7 @@ export const PricingGrid: React.FC = () => {
       <div className="w-full max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h2 className="text-3xl font-bold font-heading text-primary mb-2">Choose your plan</h2>
+          <h2 className="text-3xl font-bold text-primary mb-2">Choose your plan</h2>
           <p className="text-secondary mb-4">
             Select the perfect package for your brand marketing needs
           </p>
@@ -161,7 +161,7 @@ export const PricingGrid: React.FC = () => {
                     plan.highlight && 'bg-blue-50'
                   )}
                 >
-                  <h3 className="text-lg font-semibold font-heading text-primary">{plan.name}</h3>
+                  <h3 className="text-lg font-semibold text-primary">{plan.name}</h3>
                   <p className="text-xl font-bold text-primary mt-1">
                     {plan.price}
                     <span className="text-sm font-normal text-secondary">{plan.interval}</span>

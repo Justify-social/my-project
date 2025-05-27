@@ -1,49 +1,13 @@
-import { Inter, Sora, Work_Sans } from 'next/font/google';
-// Remove Auth0 UserProvider
-// import { UserProvider } from '@auth0/nextjs-auth0/client';
-import ConditionalLayout from '@/components/layouts/conditional-layout'; // Import the new wrapper
+import ConditionalLayout from '@/components/layouts/conditional-layout';
 import './globals.css';
-// import { NextSSRPlugin } from '@uploadthing/react/next-ssr-plugin'; // REMOVE
-// import { extractRouterConfig } from 'uploadthing/server'; // REMOVE
-// import { ourFileRouter } from '@/app/api/uploadthing/core'; // REMOVE - ourFileRouter is deleted
-// import { connection } from 'next/server'; // Removed deprecated import
-// Import IconContextProvider for consistent icon behavior
-// import { IconContextProvider } from '@/components/ui/icon/icon-context'; // Removed context import
 import { SidebarProvider } from '@/providers/SidebarProvider';
 import { SearchProvider } from '@/providers/SearchProvider';
-import { LocalizationProvider } from '@/providers/LocalizationProvider'; // Import the new provider
-import { WebVitalsProvider } from '@/components/providers/WebVitalsProvider'; // Import Web Vitals tracking
-// Remove the custom AuthStateProvider import
-// import { AuthStateProvider } from '@/lib/auth/authCoordinator';
-// Import react-hot-toast Toaster and Icon component
+import { LocalizationProvider } from '@/providers/LocalizationProvider';
+import { WebVitalsProvider } from '@/components/providers/WebVitalsProvider';
 import { Toaster as HotToaster } from 'react-hot-toast';
-import { Icon } from '@/components/ui/icon/icon'; // Assuming Icon component path
-// Import ClerkProvider and UI components
+import { Icon } from '@/components/ui/icon/icon';
 import { ClerkProvider } from '@clerk/nextjs';
-// Remove dynamic import: import dynamic from 'next/dynamic';
-// Import Clerk configuration debug utility
 import { debugClerkConfig } from '@/lib/auth/clerk-config';
-
-// Import diagnostic script for legacy compatibility
-// Removed as part of icon system simplification - functionality now built into Icon component
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-sans',
-});
-
-const sora = Sora({
-  subsets: ['latin'],
-  variable: '--font-heading',
-});
-
-const workSans = Work_Sans({
-  subsets: ['latin'],
-  variable: '--font-body',
-});
-
-// Remove dynamic import definition
-// const DynamicClientAuth = dynamic(...);
 
 export const metadata = {
   title: 'Justify',
@@ -56,14 +20,6 @@ export const metadata = {
   },
 };
 
-// SSR component for UploadThing - REMOVE FUNCTION
-/*
-async function UTSSR() {
-  // await connection(); // Removed usage of deprecated connection
-  return <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />;
-}
-*/
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   // Debug Clerk configuration in development
   if (process.env.NODE_ENV === 'development') {
@@ -72,26 +28,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <ClerkProvider>
-      {' '}
-      {/* Wrap with ClerkProvider */}
       <html lang="en">
-        <head>{/* Using local SVG icons - no external scripts needed */}</head>
-        <body
-          className={`${inter.variable} ${sora.variable} ${workSans.variable} font-body bg-white`}
-        >
-          {/* Wrap with LocalizationProvider */}
+        <head></head>
+        <body className="bg-white">
           <LocalizationProvider>
             <WebVitalsProvider>
               <SidebarProvider>
                 <SearchProvider>
-                  {/* REMOVE UTSSR USAGE 
-                  <Suspense>
-                    <UTSSR />
-                  </Suspense>
-                  */}
-                  {/* Use ConditionalLayout to wrap children */}
                   <ConditionalLayout>{children}</ConditionalLayout>
-                  {/* Replace Shadcn Toaster with react-hot-toast HotToaster and apply SSOT configurations */}
                   <HotToaster
                     position="top-center"
                     toastOptions={{

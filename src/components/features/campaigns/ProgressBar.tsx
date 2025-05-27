@@ -46,7 +46,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
     <footer
       className={cn(
         'sticky bottom-0 border-t bg-background shadow z-40 flex justify-between items-center',
-        'h-[var(--footer-height)] w-full px-4 sm:px-6 font-body text-sm' // Use standard padding
+        'h-[var(--footer-height)] w-full px-4 sm:px-6 text-sm' // Use standard padding
       )}
     >
       {/* Steps Indicator (Left Side) */}

@@ -127,10 +127,10 @@ export default function ClientDashboard() {
   }
 
   return (
-    <div className="space-y-6 font-body" data-cy="dashboard-content">
+    <div className="space-y-6" data-cy="dashboard-content">
       {/* Header Row */}
       <div className="flex justify-between items-center" data-cy="dashboard-header">
-        <h1 className="text-3xl font-bold text-primary font-heading" data-cy="dashboard-title">
+        <h1 className="text-3xl font-bold text-primary" data-cy="dashboard-title">
           {user ? `${user.fullName || user.firstName || 'User'}'s Dashboard` : 'Dashboard'}
         </h1>
         <Button disabled={!isLoaded || !user} asChild data-cy="new-campaign-button">

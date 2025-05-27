@@ -76,9 +76,10 @@ const config = {
         sm: 'calc(var(--radius) - 4px)',
       },
       fontFamily: {
-        sans: ['var(--font-sans)', ...fontFamily.sans],
-        heading: ['var(--font-heading)', ...fontFamily.sans],
-        body: ['var(--font-body)', ...fontFamily.sans],
+        // SSOT Font Configuration - Direct font names from global.css
+        sans: ['Inter', ...fontFamily.sans], // Inter as default
+        heading: ['Sora', ...fontFamily.sans], // Sora for headings
+        body: ['Inter', ...fontFamily.sans], // Inter for body
       },
       keyframes: {
         'accordion-down': {

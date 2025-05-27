@@ -100,7 +100,7 @@ export function ProgressBarWizard({
     <footer
       className={cn(
         'fixed bottom-0 left-0 md:left-[var(--sidebar-width)] bg-background shadow z-40 flex justify-between items-center border-t',
-        'h-[65px] w-full md:w-[calc(100%-var(--sidebar-width))] px-4 sm:px-6 font-body text-sm',
+        'h-[65px] w-full md:w-[calc(100%-var(--sidebar-width))] px-4 sm:px-6 text-sm',
         className
       )}
       role="navigation"

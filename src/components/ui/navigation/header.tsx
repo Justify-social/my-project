@@ -52,14 +52,11 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <header
-      className="fixed top-0 left-0 w-full z-50 bg-background border-b font-body"
+      className="fixed top-0 left-0 w-full z-50 bg-background border-b"
       data-testid="header" // Aid for testing
       data-cy="main-header"
     >
-      <div
-        className="flex items-center justify-between px-4 py-3 font-body"
-        data-cy="header-container"
-      >
+      <div className="flex items-center justify-between px-4 py-3" data-cy="header-container">
         {/* Left: Logo & Company Name wrapped in Link to /dashboard */}
         <Link href="/dashboard" className="flex items-center space-x-2" data-cy="header-logo">
           <Image
@@ -73,14 +70,18 @@ const Header: React.FC<HeaderProps> = ({
               // console.warn('Logo image failed to load');
             }}
           />
-          <span className="font-bold text-foreground text-xl font-body" data-cy="company-name">
+          <span
+            className="font-black text-foreground text-xl"
+            data-cy="company-name"
+            style={{ fontWeight: 700 }}
+          >
             {companyName}
           </span>
         </Link>
 
         {/* Center: Search Bar Container (hidden on mobile) */}
         <div
-          className="hidden md:flex flex-grow justify-center px-4 font-body"
+          className="hidden md:flex flex-grow justify-center px-4"
           data-cy="header-search-container"
         >
           {/* Wrapper for SearchBar + Results - THIS is now relative */}
@@ -101,19 +102,13 @@ const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Right: Icon Group */}
-        <div
-          className="flex items-center space-x-4 md:space-x-6 font-body"
-          data-cy="header-actions"
-        >
+        <div className="flex items-center space-x-4 md:space-x-6" data-cy="header-actions">
           {/* Desktop Icons */}
-          <div
-            className="hidden md:flex items-center space-x-4 font-body"
-            data-cy="desktop-actions"
-          >
+          <div className="hidden md:flex items-center space-x-4" data-cy="desktop-actions">
             {/* Credits */}
             <Link
               href="/account/billing"
-              className="flex items-center space-x-1 cursor-pointer font-body"
+              className="flex items-center space-x-1 cursor-pointer"
               data-cy="credits-button"
             >
               {hasCoinsIcon ? (
@@ -133,7 +128,7 @@ const Header: React.FC<HeaderProps> = ({
             </Link>
 
             {/* Notifications - positioned directly adjacent to coins */}
-            <div className="relative font-body" data-cy="notifications-button">
+            <div className="relative" data-cy="notifications-button">
               {hasBellIcon ? (
                 <Icon
                   iconId="faBellSolid" // Use Solid ID directly
@@ -153,7 +148,7 @@ const Header: React.FC<HeaderProps> = ({
 
               {notificationsCount > 0 && (
                 <span
-                  className="absolute -top-1 -right-1 bg-destructive text-background rounded-full text-xs w-4 h-4 flex items-center justify-center font-body"
+                  className="absolute -top-1 -right-1 bg-destructive text-background rounded-full text-xs w-4 h-4 flex items-center justify-center"
                   data-cy="notifications-badge"
                 >
                   {notificationsCount}
@@ -163,14 +158,14 @@ const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Render Clerk Auth Controls (passed as prop) - visible on desktop */}
-          <div className="hidden md:block font-body" data-cy="auth-controls">
+          <div className="hidden md:block" data-cy="auth-controls">
             {authControls}
           </div>
 
           {/* Mobile Menu Button - Conditionally Rendered */}
           <button
             onClick={onMenuClick}
-            className="md:hidden p-2 font-body"
+            className="md:hidden p-2"
             aria-label="Toggle mobile menu"
             data-testid="mobile-menu-toggle"
             data-cy="mobile-menu-button"

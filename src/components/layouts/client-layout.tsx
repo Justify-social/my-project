@@ -217,7 +217,7 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
       id: 'debug-fonts',
       label: 'Fonts',
       href: '/debug-tools/ui-components?tab=fonts',
-      iconId: 'faPencilLight',
+      iconId: 'faTextSizeLight',
     },
   ];
 
@@ -267,7 +267,7 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
             </div>
 
             <div
-              className={`flex-1 transition-margin duration-200 md:ml-[var(--sidebar-width)] pt-16 font-body overflow-y-auto`}
+              className={`flex-1 transition-margin duration-200 md:ml-[var(--sidebar-width)] pt-16 overflow-y-auto`}
             >
               <main className="p-4 md:p-6 bg-white min-h-[calc(100vh-4rem)] pb-[65px]">
                 {children}

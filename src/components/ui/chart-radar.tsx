@@ -96,8 +96,8 @@ export const RadarChart: React.FC<RadarChartProps> = ({
   tooltipFormatter,
 }) => {
   return (
-    <div className={cn('w-full font-body', className)}>
-      {title && <h3 className="text-xl font-medium mb-2 font-heading">{title}</h3>}
+    <div className={cn('w-full', className)}>
+      {title && <h3 className="text-xl font-medium mb-2">{title}</h3>}
 
       <ResponsiveContainer width={width} height={height}>
         <RechartsRadarChart

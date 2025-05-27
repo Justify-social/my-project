@@ -151,12 +151,12 @@ const ApiVerificationPage: React.FC = () => {
 
   return (
     <div className="container mx-auto py-8 px-4 md:px-6 max-w-screen-xl">
-      <h1 className="text-3xl font-bold mb-6 font-heading">API Verification Tool</h1>
+      <h1 className="text-3xl font-bold mb-6">API Verification Tool</h1>
 
       {/* Overview Section - Use Card for consistency */}
       <Card className="mb-8">
         <CardHeader>
-          <CardTitle className="text-2xl font-semibold font-heading">Overview</CardTitle>
+          <CardTitle className="text-2xl font-semibold">Overview</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground mb-6">
@@ -183,7 +183,7 @@ const ApiVerificationPage: React.FC = () => {
       {results.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl font-semibold font-heading">Results</CardTitle>
+            <CardTitle className="text-xl font-semibold">Results</CardTitle>
           </CardHeader>
           <CardContent>
             {/* Use Shadcn Table components */}

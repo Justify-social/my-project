@@ -150,7 +150,7 @@ export default function BillingClientComponent() {
         {/* CORRECTED Tab Contents Structure */}
         {/* Billing Portal Tab Content */}
         <TabsContent value="billing" className="p-6">
-          <h2 className="text-3xl font-bold font-heading text-primary mb-2 text-center sm:text-left">
+          <h2 className="text-3xl font-bold text-primary mb-2 text-center sm:text-left">
             Manage Billing
           </h2>
           <p className="text-secondary mb-4 text-center sm:text-left">
@@ -169,7 +169,7 @@ export default function BillingClientComponent() {
         </TabsContent>
         {/* FAQ Tab Content */}
         <TabsContent value="faq" className="p-6">
-          <h2 className="text-3xl font-bold font-heading text-primary mb-2 text-center sm:text-left">
+          <h2 className="text-3xl font-bold text-primary mb-2 text-center sm:text-left">
             Frequently Asked Questions
           </h2>
           <p className="text-secondary mb-4 text-center sm:text-left">

@@ -58,7 +58,13 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
           const itemTab = itemParams.get('tab');
           const itemCategory = itemParams.get('category');
           let isActive = false;
+
+          // Handle different tab types
           if (itemTab === 'icons' && currentTab === 'icons') {
+            isActive = true;
+          } else if (itemTab === 'palette' && currentTab === 'palette') {
+            isActive = true;
+          } else if (itemTab === 'fonts' && currentTab === 'fonts') {
             isActive = true;
           } else if (itemTab === 'components' && currentTab === 'components') {
             if (itemCategory && currentCategory === itemCategory) {
@@ -66,6 +72,14 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
             } else if (!currentCategory && itemCategory === 'atom') {
               isActive = true;
             }
+          } else if (
+            !itemTab &&
+            currentTab === 'components' &&
+            !currentCategory &&
+            item.label === 'Atom'
+          ) {
+            // Fallback for default state
+            isActive = true;
           }
 
           // Determine icon variant
@@ -91,7 +105,7 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
               <Icon iconId={iconIdToRender} className="mr-3 h-5 w-5 flex-shrink-0" />
               <span
                 className={cn(
-                  'text-sm font-body font-medium truncate',
+                  'text-sm font-medium truncate',
                   isActive || isHovered ? 'text-accent' : 'text-foreground'
                 )}
               >
@@ -119,7 +133,7 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
           />
           <span
             className={cn(
-              'text-sm font-body font-medium truncate',
+              'text-sm font-medium truncate',
               'text-foreground group-hover:text-accent'
             )}
           >
@@ -153,7 +167,7 @@ function SidebarUIComponentsInternal({ navItems }: SidebarUIComponentsInternalPr
           />
           <span
             className={cn(
-              'text-sm font-body font-medium truncate',
+              'text-sm font-medium truncate',
               'text-foreground group-hover:text-accent'
             )}
           >

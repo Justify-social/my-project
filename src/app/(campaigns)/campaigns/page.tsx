@@ -807,7 +807,7 @@ const ClientCampaignList: React.FC = () => {
   }
 
   return (
-    <div className="px-4 md:px-6 py-6 font-body min-h-screen" data-cy="campaigns-list">
+    <div className="px-4 md:px-6 py-6 min-h-screen" data-cy="campaigns-list">
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
           <h1 className="text-2xl font-bold" data-cy="campaigns-title">

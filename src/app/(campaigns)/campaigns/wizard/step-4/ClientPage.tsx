@@ -6,7 +6,7 @@ import StepLoader from '@/components/features/campaigns/StepContentLoader';
 
 export default function ClientPage() {
   return (
-    <div className="min-h-screen bg-white font-body">
+    <div className="min-h-screen bg-white">
       <Suspense fallback={<WizardSkeleton step={4} />}>
         <StepLoader step={4} />
       </Suspense>

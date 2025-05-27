@@ -99,7 +99,7 @@ function SidebarItem({
 
         {/* Use text-xs for child items and text-sm for parent/standalone items */}
         <span
-          className={`flex-grow ${isChild ? 'text-xs' : 'text-sm'} font-body font-medium truncate ${active || (isHydrated && isHovered) ? 'text-accent' : 'text-foreground'}`}
+          className={`flex-grow ${isChild ? 'text-xs' : 'text-sm'} font-medium truncate ${active || (isHydrated && isHovered) ? 'text-accent' : 'text-foreground'}`}
         >
           {label}
         </span>
@@ -417,7 +417,7 @@ export function Sidebar({
                           )}
                           {/* Parent item label: text-sm */}
                           <span
-                            className={`text-sm font-body font-medium truncate ${isActiveParent || isHoveredParent ? 'text-accent' : 'text-foreground'}`}
+                            className={`text-sm font-medium truncate ${isActiveParent || isHoveredParent ? 'text-accent' : 'text-foreground'}`}
                           >
                             {item.label}
                           </span>
@@ -470,7 +470,7 @@ export function Sidebar({
                           )}
                           {/* Parent item label: text-sm */}
                           <span
-                            className={`text-sm font-body font-medium truncate ${isActiveParent || isHoveredParent ? 'text-accent' : 'text-foreground'}`}
+                            className={`text-sm font-medium truncate ${isActiveParent || isHoveredParent ? 'text-accent' : 'text-foreground'}`}
                           >
                             {item.label}
                           </span>

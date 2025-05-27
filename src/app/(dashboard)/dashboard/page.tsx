@@ -31,7 +31,7 @@ export default function Dashboard() {
     <AuthCheck>
       {' '}
       {/* AuthCheck likely handles redirect if not authenticated */}
-      <div className="px-4 md:px-6 py-6 font-body">
+      <div className="px-4 md:px-6 py-6">
         {/* Use LoadingSkeleton as the fallback */}
         <Suspense
           fallback={

@@ -7,5 +7,5 @@ import React from 'react';
 
 export default function CampaignsLayout({ children }: { children: React.ReactNode }) {
   // Simple wrapper, no client-side hooks needed here
-  return <div className="campaigns-layout font-body">{children}</div>;
+  return <div className="campaigns-layout">{children}</div>;
 }

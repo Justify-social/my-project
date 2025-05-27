@@ -161,7 +161,6 @@ export const FunnelChart: React.FC<FunnelChartProps> = ({
         <text
           textAnchor="middle"
           dominantBaseline="middle"
-          className="font-heading"
           fontSize="11" // Reduced size
           fontWeight="normal" // Reduced weight
           fill={textColor}
@@ -173,7 +172,6 @@ export const FunnelChart: React.FC<FunnelChartProps> = ({
         <text
           textAnchor="middle"
           dominantBaseline="middle"
-          className="font-body"
           fontSize="14"
           fontWeight="semibold" // Use semibold
           dy="16" // Adjusted dy
@@ -186,7 +184,6 @@ export const FunnelChart: React.FC<FunnelChartProps> = ({
           <text
             textAnchor="middle"
             dominantBaseline="middle"
-            className="font-body"
             fontSize="10"
             fontWeight="normal"
             dy="32" // Adjusted dy
@@ -201,7 +198,7 @@ export const FunnelChart: React.FC<FunnelChartProps> = ({
   };
 
   return (
-    <div className={cn('w-full font-body', className)}>
+    <div className={cn('w-full', className)}>
       {title && <h3 className="text-lg font-semibold text-foreground mb-4">{title}</h3>}
       <ResponsiveContainer width={width} height={height}>
         <RechartsFunnelChart data={data}>

@@ -18,13 +18,10 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetErrorBoundary
   }
 
   return (
-    <div
-      role="alert"
-      className="p-6 bg-red-50 border border-red-200 rounded-md text-red-800 font-body"
-    >
+    <div role="alert" className="p-6 bg-red-50 border border-red-200 rounded-md text-red-800">
       <div className="flex items-center mb-3">
         <Icon iconId="faTriangleExclamationLight" className="h-5 w-5 mr-2 text-red-600" />
-        <h3 className="text-lg font-semibold text-red-900 font-heading">Something went wrong</h3>
+        <h3 className="text-lg font-semibold text-red-900">Something went wrong</h3>
       </div>
       <p className="mb-4 text-sm">We encountered an unexpected error. Please try again.</p>
       {/* Optional: Display error message in development */}
