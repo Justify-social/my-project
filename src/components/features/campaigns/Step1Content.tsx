@@ -791,7 +791,12 @@ function Step1Content() {
         if (isMounted) {
           _setConvertedTotalBudget(
             convertedTotal !== null
-              ? `Approx. $${convertedTotal.toLocaleString()} USD`
+              ? `Approx. ${new Intl.NumberFormat('en-US', {
+                  style: 'currency',
+                  currency: 'USD',
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 2,
+                }).format(convertedTotal)}`
               : 'Conversion unavailable'
           );
         }
@@ -808,7 +813,12 @@ function Step1Content() {
         if (isMounted) {
           _setConvertedSocialMediaBudget(
             convertedSocial !== null
-              ? `Approx. $${convertedSocial.toLocaleString()} USD`
+              ? `Approx. ${new Intl.NumberFormat('en-US', {
+                  style: 'currency',
+                  currency: 'USD',
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 2,
+                }).format(convertedSocial)}`
               : 'Conversion unavailable'
           );
         }
