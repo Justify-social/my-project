@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,7 +16,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
 import { Icon } from '@/components/ui/icon/icon';
 import { useNotifications } from '@/providers/NotificationProvider';
 import { cn } from '@/lib/utils';
@@ -52,12 +51,7 @@ export default function NotificationsDebugPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [searchEmail, setSearchEmail] = useState('');
 
-  // Fetch users for the dropdown
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/users');
       if (response.ok) {
@@ -68,7 +62,12 @@ export default function NotificationsDebugPage() {
       console.error('Error fetching users:', error);
       showToast('error', 'Failed to fetch users');
     }
-  };
+  }, [showToast]);
+
+  // Fetch users for the dropdown
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const handleInputChange = (field: keyof NotificationForm, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));

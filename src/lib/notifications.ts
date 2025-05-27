@@ -15,7 +15,7 @@ interface CreateNotificationParams {
   type: NotificationType;
   title: string;
   message: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   actionUrl?: string;
   expiresAt?: Date;
 }
@@ -122,7 +122,7 @@ export async function notifySuccess(params: {
   title: string;
   message: string;
   actionUrl?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }) {
   return createNotification({
     userId: params.userId,
@@ -142,7 +142,7 @@ export async function notifyError(params: {
   title: string;
   message: string;
   actionUrl?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }) {
   return createNotification({
     userId: params.userId,
@@ -162,7 +162,7 @@ export async function notifyWarning(params: {
   title: string;
   message: string;
   actionUrl?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }) {
   return createNotification({
     userId: params.userId,
@@ -182,7 +182,7 @@ export async function notifyInfo(params: {
   title: string;
   message: string;
   actionUrl?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }) {
   return createNotification({
     userId: params.userId,
@@ -202,7 +202,7 @@ export async function notifySystem(params: {
   title: string;
   message: string;
   actionUrl?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   expiresAt?: Date;
 }) {
   return createNotification({
@@ -224,7 +224,7 @@ export async function bulkCreateNotifications(params: {
   type: NotificationType;
   title: string;
   message: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   actionUrl?: string;
   expiresAt?: Date;
 }) {

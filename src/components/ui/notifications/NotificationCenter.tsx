@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useNotifications } from '@/providers/NotificationProvider';
+import { useNotifications, type Notification } from '@/providers/NotificationProvider';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+// Importing components in case they're needed later
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,7 +26,7 @@ interface NotificationCenterProps {
 
 export const NotificationCenter: React.FC<NotificationCenterProps> = ({
   className,
-  maxHeight = '400px',
+  maxHeight: _maxHeight = '400px',
 }) => {
   const {
     notifications,
@@ -81,7 +81,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
     }
   };
 
-  const handleNotificationClick = async (notification: any) => {
+  const handleNotificationClick = async (notification: Notification) => {
     if (notification.status === 'UNREAD') {
       await markAsRead(notification.id);
     }

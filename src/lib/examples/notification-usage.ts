@@ -22,7 +22,10 @@ import {
  * Example: After a campaign is successfully submitted
  * Add this to your campaign submission handler
  */
-export async function handleCampaignSubmission(userId: string, campaignData: any) {
+export async function handleCampaignSubmission(
+  userId: string,
+  campaignData: Record<string, unknown>
+) {
   try {
     // Your existing campaign submission logic here
     const submission = await submitCampaignToDatabase(campaignData);
@@ -30,8 +33,8 @@ export async function handleCampaignSubmission(userId: string, campaignData: any
     // Send notification to user
     await notifyCampaignSubmitted({
       userId: userId,
-      campaignName: campaignData.name,
-      campaignId: campaignData.id,
+      campaignName: campaignData.name as string,
+      campaignId: campaignData.id as string,
       submissionId: submission.id,
     });
 
@@ -56,13 +59,16 @@ export async function handleCampaignSubmission(userId: string, campaignData: any
 /**
  * Example: When a Brand Lift study is submitted
  */
-export async function handleBrandLiftSubmission(userId: string, studyData: any) {
+export async function handleBrandLiftSubmission(
+  userId: string,
+  studyData: Record<string, unknown>
+) {
   try {
     const study = await submitBrandLiftStudy(studyData);
 
     await notifyBrandLiftSubmitted({
       userId: userId,
-      studyName: studyData.name,
+      studyName: studyData.name as string,
       studyId: study.id,
     });
 
@@ -83,12 +89,15 @@ export async function handleBrandLiftSubmission(userId: string, studyData: any) 
  * Example: When a Brand Lift report is ready
  * This would typically be called from a background job or webhook
  */
-export async function handleBrandLiftReportReady(userId: string, reportData: any) {
+export async function handleBrandLiftReportReady(
+  userId: string,
+  reportData: Record<string, unknown>
+) {
   await notifyBrandLiftReportReady({
     userId: userId,
-    studyName: reportData.studyName,
-    studyId: reportData.studyId,
-    reportId: reportData.id,
+    studyName: reportData.studyName as string,
+    studyId: reportData.studyId as string,
+    reportId: reportData.id as string,
   });
 }
 
@@ -193,12 +202,12 @@ export async function notifyMaintenanceWarning(userIds: string[]) {
 // 5. MOCK FUNCTIONS (Replace with your actual implementations)
 // ==========================================
 
-async function submitCampaignToDatabase(campaignData: any) {
+async function submitCampaignToDatabase(_campaignData: Record<string, unknown>) {
   // Replace with your actual campaign submission logic
   return { id: 'submission-123', status: 'submitted' };
 }
 
-async function submitBrandLiftStudy(studyData: any) {
+async function submitBrandLiftStudy(_studyData: Record<string, unknown>) {
   // Replace with your actual Brand Lift submission logic
   return { id: 'study-456', status: 'submitted' };
 }

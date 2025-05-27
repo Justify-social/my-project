@@ -19,7 +19,7 @@ export interface Notification {
   status: 'UNREAD' | 'READ' | 'DISMISSED';
   title: string;
   message: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   actionUrl?: string;
   createdAt: string;
   updatedAt: string;
@@ -225,6 +225,37 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     [user?.id]
   );
 
+  // Show toast message
+  const showToast = useCallback(
+    (
+      type: 'success' | 'error' | 'warning' | 'info',
+      message: string,
+      options?: { action?: { label: string; onClick: () => void } }
+    ) => {
+      const toastOptions = {
+        ...options,
+        duration: type === 'error' ? 6000 : 4000, // Error messages stay longer
+      };
+
+      switch (type) {
+        case 'success':
+          toast.success(message, toastOptions);
+          break;
+        case 'error':
+          toast.error(message, toastOptions);
+          break;
+        case 'warning':
+          toast.warning(message, toastOptions);
+          break;
+        case 'info':
+        default:
+          toast.info(message, toastOptions);
+          break;
+      }
+    },
+    []
+  );
+
   // Create new notification
   const createNotification = useCallback(
     async (notification: Omit<Notification, 'id' | 'createdAt' | 'updatedAt' | 'status'>) => {
@@ -265,38 +296,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
         console.error('Failed to create notification:', error);
       }
     },
-    [user?.id]
-  );
-
-  // Show toast message
-  const showToast = useCallback(
-    (
-      type: 'success' | 'error' | 'warning' | 'info',
-      message: string,
-      options?: { action?: { label: string; onClick: () => void } }
-    ) => {
-      const toastOptions = {
-        ...options,
-        duration: type === 'error' ? 6000 : 4000, // Error messages stay longer
-      };
-
-      switch (type) {
-        case 'success':
-          toast.success(message, toastOptions);
-          break;
-        case 'error':
-          toast.error(message, toastOptions);
-          break;
-        case 'warning':
-          toast.warning(message, toastOptions);
-          break;
-        case 'info':
-        default:
-          toast.info(message, toastOptions);
-          break;
-      }
-    },
-    []
+    [user?.id, showToast]
   );
 
   // Refresh notifications

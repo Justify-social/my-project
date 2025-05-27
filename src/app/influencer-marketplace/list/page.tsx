@@ -55,6 +55,11 @@ interface ApiInfluencerData {
     startDate: string | null;
     endDate: string | null;
   };
+  // Optional fields from InsightIQ API
+  isVerified?: boolean;
+  engagementRate?: number;
+  followersCount?: number;
+  avatarUrl?: string;
 }
 
 // Enhanced influencer interface for the table
@@ -157,21 +162,9 @@ const InfluencerListPage: React.FC = () => {
     });
   };
 
-  const showErrorToast = (message: string, iconId?: string) => {
-    const finalIconId = iconId || 'faTriangleExclamationLight';
-    const errorIcon = <Icon iconId={finalIconId} className="h-5 w-5 text-destructive" />;
-    toast.error(message, {
-      duration: 5000,
-      icon: errorIcon,
-    });
-  };
-
   // Transform API data to table format
   const transformInfluencerData = (apiData: ApiInfluencerData): TableInfluencer => {
     const platformConfig = PLATFORM_CONFIG[apiData.platform];
-
-    // Use real data from InsightIQ API response
-    const realData = apiData as any; // Cast to access additional fields from enriched API response
 
     return {
       id: apiData.id,
@@ -183,14 +176,12 @@ const InfluencerListPage: React.FC = () => {
       addedDate: apiData.createdAt,
       mostRecentCampaign: apiData.CampaignWizard,
       totalCampaigns: 1, // This would be calculated from all campaigns this influencer has been in
-      isVerified: realData.isVerified || false, // Real verification status from InsightIQ
-      engagement: realData.engagementRate
-        ? `${(realData.engagementRate * 100).toFixed(1)}%`
-        : '0.0%', // Real engagement rate
-      followerCount: realData.followersCount
-        ? `${Math.round(realData.followersCount / 1000)}K`
+      isVerified: apiData.isVerified || false, // Real verification status from InsightIQ
+      engagement: apiData.engagementRate ? `${(apiData.engagementRate * 100).toFixed(1)}%` : '0.0%', // Real engagement rate
+      followerCount: apiData.followersCount
+        ? `${Math.round(apiData.followersCount / 1000)}K`
         : '0K', // Real follower count
-      avatarUrl: realData.avatarUrl || null, // Real profile image from InsightIQ
+      avatarUrl: apiData.avatarUrl || null, // Real profile image from InsightIQ
     };
   };
 

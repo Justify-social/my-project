@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useFormContext, Control, FieldErrors, FieldValues } from 'react-hook-form';
+import Image from 'next/image';
+import { useFormContext, Control, FieldErrors } from 'react-hook-form';
 import { useDebouncedCallback } from 'use-debounce';
 import { influencerService } from '@/services/influencer';
 import { InfluencerSummary } from '@/types/influencer';
@@ -67,10 +68,19 @@ const supportedPlatforms = [
   },
 ];
 
+// Define the form structure for better typing
+interface CampaignFormData {
+  Influencer: Array<{
+    platform: string;
+    handle: string;
+  }>;
+  [key: string]: unknown;
+}
+
 interface InfluencerSearchEntryProps {
   index: number;
-  control: Control<any>;
-  errors: FieldErrors<any>;
+  control: Control<CampaignFormData>;
+  errors: FieldErrors<CampaignFormData>;
   remove: (index: number) => void;
 }
 
@@ -132,7 +142,7 @@ export const InfluencerSearchEntry: React.FC<InfluencerSearchEntryProps> = ({
     logger.info(`[InfluencerSearchEntry] Searching for: "${searchTerm}" on platform: ${platform}`);
 
     try {
-      const filters: any = {
+      const filters: Record<string, unknown> = {
         searchTerm: searchTerm,
       };
 
@@ -283,7 +293,7 @@ export const InfluencerSearchEntry: React.FC<InfluencerSearchEntryProps> = ({
                     ))}
                   </SelectContent>
                 </Select>
-                <FormMessage>{(errors as any)?.Influencer?.[index]?.platform?.message}</FormMessage>
+                <FormMessage>{errors?.Influencer?.[index]?.platform?.message}</FormMessage>
               </FormItem>
             )}
           />
@@ -373,9 +383,11 @@ export const InfluencerSearchEntry: React.FC<InfluencerSearchEntryProps> = ({
                                   >
                                     <div className="flex-shrink-0">
                                       {influencer.avatarUrl ? (
-                                        <img
+                                        <Image
                                           src={influencer.avatarUrl}
                                           alt={influencer.name || influencer.handle || ''}
+                                          width={48}
+                                          height={48}
                                           className="h-12 w-12 rounded-full object-cover border-2 border-white shadow-sm"
                                         />
                                       ) : (
@@ -447,9 +459,11 @@ export const InfluencerSearchEntry: React.FC<InfluencerSearchEntryProps> = ({
                     <div className="flex items-center space-x-3 p-3 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-md transition-all duration-200">
                       <div className="flex-shrink-0">
                         {selectedInfluencer.avatarUrl ? (
-                          <img
+                          <Image
                             src={selectedInfluencer.avatarUrl}
                             alt={selectedInfluencer.name || selectedInfluencer.handle || ''}
+                            width={40}
+                            height={40}
                             className="h-10 w-10 rounded-full object-cover border-2 border-green-200"
                           />
                         ) : (
@@ -489,7 +503,7 @@ export const InfluencerSearchEntry: React.FC<InfluencerSearchEntryProps> = ({
                     </div>
                   )}
                 </div>
-                <FormMessage>{(errors as any)?.Influencer?.[index]?.handle?.message}</FormMessage>
+                <FormMessage>{errors?.Influencer?.[index]?.handle?.message}</FormMessage>
               </FormItem>
             )}
           />

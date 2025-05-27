@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
 
     // Build filter conditions
-    const where: any = {
+    const where: Record<string, unknown> = {
       userId,
     };
 
