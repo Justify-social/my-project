@@ -76,7 +76,7 @@ export default function ResendManagementPage() {
   const [emailForm, setEmailForm] = useState<EmailForm>({
     from: process.env.NEXT_PUBLIC_DEFAULT_FROM_EMAIL || 'hello@justify.social',
     subject: '',
-    templateType: 'notification',
+    templateType: 'custom', // Default to custom
     content: '',
     scheduledAt: '',
   });
@@ -143,11 +143,10 @@ export default function ResendManagementPage() {
     const templateMetadata = TEMPLATE_METADATA[template.id as keyof typeof TEMPLATE_METADATA];
     setEmailForm(prev => ({
       ...prev,
-      subject: template.subject,
-      templateType: template.type,
-      content: templateMetadata?.defaultSubject
-        ? `Enter your message here. This will use the ${template.name.toLowerCase()} template.`
-        : 'Enter your message content here.',
+      subject:
+        template.subject || templateMetadata?.defaultSubject || `Email using ${template.name}`,
+      templateType: template.id, // Use template ID as templateType
+      content: '', // Clear content when template is selected
     }));
   };
 
@@ -160,6 +159,11 @@ export default function ResendManagementPage() {
         body: JSON.stringify({
           recipients: selectedRecipients.map(r => ({ id: r.id, type: r.type })),
           ...emailForm,
+          // Ensure content is always provided - for templates, use a default message
+          content:
+            emailForm.templateType === 'custom'
+              ? emailForm.content
+              : `This email was sent using the ${TEMPLATE_METADATA[emailForm.templateType as keyof typeof TEMPLATE_METADATA]?.name || emailForm.templateType} template.`,
           scheduledAt: emailForm.scheduledAt || null,
         }),
       });
@@ -173,7 +177,7 @@ export default function ResendManagementPage() {
         setEmailForm({
           from: process.env.NEXT_PUBLIC_DEFAULT_FROM_EMAIL || 'hello@justify.social',
           subject: '',
-          templateType: 'notification',
+          templateType: 'custom',
           content: '',
           scheduledAt: '',
         });
@@ -408,6 +412,7 @@ export default function ResendManagementPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="custom">Custom Content</SelectItem>
                       {Object.entries(TEMPLATE_METADATA).map(([id, metadata]) => (
                         <SelectItem key={id} value={id}>
                           {metadata.name}
@@ -418,15 +423,35 @@ export default function ResendManagementPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <RichTextEditor
-                    id="content"
-                    label="Email Content"
-                    value={emailForm.content}
-                    onChange={value => handleInputChange('content', value)}
-                    placeholder="Enter your email content here..."
-                    description="Use the formatting toolbar to style your email. The template will be applied automatically."
-                    height="180px"
-                  />
+                  <Label htmlFor="content">Email Content</Label>
+                  {emailForm.templateType === 'custom' ? (
+                    <RichTextEditor
+                      id="content"
+                      value={emailForm.content}
+                      onChange={value => handleInputChange('content', value)}
+                      placeholder="Enter your custom email content here..."
+                      description="Use the formatting toolbar to style your email."
+                      height="180px"
+                    />
+                  ) : (
+                    <div className="p-4 border rounded-md bg-blue-50 border-blue-200">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Icon iconId="faFileLinesSolid" className="h-4 w-4 text-blue-600" />
+                        <span className="font-medium text-blue-900">Template Mode Active</span>
+                      </div>
+                      <p className="text-sm text-blue-700">
+                        Using{' '}
+                        <strong>
+                          {
+                            TEMPLATE_METADATA[
+                              emailForm.templateType as keyof typeof TEMPLATE_METADATA
+                            ]?.name
+                          }
+                        </strong>{' '}
+                        template. The template content will be automatically applied when sending.
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -441,14 +466,20 @@ export default function ResendManagementPage() {
 
                 <Button
                   onClick={sendEmail}
-                  disabled={isLoading || !emailForm.subject || selectedRecipients.length === 0}
+                  disabled={
+                    isLoading ||
+                    selectedRecipients.length === 0 ||
+                    (emailForm.templateType === 'custom' &&
+                      (!emailForm.subject || !emailForm.content.trim())) // For custom: need both subject and content
+                    // For templates: only need recipients (template provides subject and content)
+                  }
                   className="w-full"
                 >
                   {isLoading
                     ? 'Sending...'
                     : emailForm.scheduledAt
-                      ? 'Schedule Email'
-                      : 'Send Email'}
+                      ? `Schedule Email ${emailForm.templateType === 'custom' ? '(Custom)' : '(Template)'}`
+                      : `Send Email ${emailForm.templateType === 'custom' ? '(Custom)' : '(Template)'}`}
                 </Button>
               </CardContent>
             </Card>
@@ -488,8 +519,9 @@ export default function ResendManagementPage() {
                           size="sm"
                           onClick={() => handleTemplateSelect(template)}
                           className="flex-1"
+                          variant={emailForm.templateType === template.id ? 'default' : 'outline'}
                         >
-                          Use Template
+                          {emailForm.templateType === template.id ? 'Selected' : 'Select Template'}
                         </Button>
                         <Button size="sm" variant="outline" onClick={() => testTemplate(template)}>
                           Test

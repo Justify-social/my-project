@@ -114,26 +114,54 @@ export async function POST(request: NextRequest) {
     // Generate email content using React Email templates
     let emailContent = '';
 
-    // Check if templateType is a known template
-    if (templateType in EMAIL_TEMPLATES) {
+    // Check if templateType is 'custom' - handle rich HTML content directly
+    if (templateType === 'custom') {
+      // For custom content, create a simple HTML email with the rich content
+      emailContent = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>${subject}</title>
+          </head>
+          <body style="font-family: 'Inter', 'Arial', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff; color: #333333;">
+            <div style="margin-bottom: 32px;">
+              ${content}
+            </div>
+            
+            <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 32px 0;">
+            
+            <div style="font-size: 14px; color: #6B7280; margin-top: 32px;">
+              <p>Best regards,<br>The Justify.Social Team</p>
+              <p style="font-size: 12px; margin-top: 16px;">
+                This email was sent from Justify.Social. If you have any questions, please contact us at 
+                <a href="mailto:hello@justify.social" style="color: #00BFFF;">hello@justify.social</a>
+              </p>
+            </div>
+          </body>
+        </html>
+      `;
+    } else if (templateType in EMAIL_TEMPLATES) {
+      // Use React Email templates for predefined templates
       const TemplateComponent = EMAIL_TEMPLATES[templateType as TemplateId];
       emailContent = await render(
         TemplateComponent({
           subject,
           content,
           recipientName: undefined, // Could be enhanced to get user names
-          actionUrl: 'https://justify.social/dashboard',
+          actionUrl: 'https://app.justify.social/dashboard',
         })
       );
     } else {
-      // Use the notification template for custom content
+      // Fallback: Use the notification template for unknown templates
       const NotificationTemplate = EMAIL_TEMPLATES.notification;
       emailContent = await render(
         NotificationTemplate({
           subject,
           content,
           recipientName: undefined,
-          actionUrl: 'https://justify.social/dashboard',
+          actionUrl: 'https://app.justify.social/dashboard',
         })
       );
     }
