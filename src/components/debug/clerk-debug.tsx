@@ -7,10 +7,37 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
+interface AuthState {
+  isLoaded: boolean;
+  userId: string | null | undefined;
+  sessionId: string | null | undefined;
+  hasSession: boolean;
+}
+
+interface UserState {
+  isLoaded: boolean;
+  hasUser: boolean;
+  userEmail: string | undefined;
+}
+
+interface ClerkGlobal {
+  // Define basic Clerk global properties we might use
+  loaded?: boolean;
+  user?: unknown;
+  session?: unknown;
+}
+
+// Extend Window interface to include Clerk
+declare global {
+  interface Window {
+    Clerk?: ClerkGlobal;
+  }
+}
+
 interface DebugInfo {
   clerkLoaded: boolean;
-  authState: any;
-  userState: any;
+  authState: AuthState;
+  userState: UserState;
   networkConnectivity: boolean;
   clerkScripts: string[];
   errors: string[];
@@ -22,8 +49,17 @@ export function ClerkDebugPanel() {
   const { isLoaded: userLoaded, user } = useUser();
   const [debugInfo, setDebugInfo] = useState<DebugInfo>({
     clerkLoaded: false,
-    authState: null,
-    userState: null,
+    authState: {
+      isLoaded: false,
+      userId: null,
+      sessionId: null,
+      hasSession: false,
+    },
+    userState: {
+      isLoaded: false,
+      hasUser: false,
+      userEmail: undefined,
+    },
     networkConnectivity: false,
     clerkScripts: [],
     errors: [],
@@ -55,7 +91,9 @@ export function ClerkDebugPanel() {
       // Test network connectivity to Clerk
       let networkConnectivity = false;
       try {
-        const response = await fetch('https://api.clerk.com/v1/health', {
+        // Note: Using fetch with no-cors mode, so we can't read the response
+        // but we can detect if the request succeeds
+        await fetch('https://api.clerk.com/v1/health', {
           method: 'HEAD',
           mode: 'no-cors',
         });
@@ -195,7 +233,7 @@ export function ClerkDebugPanel() {
           <Button
             onClick={() => {
               console.log('🔍 Clerk Debug Info:', debugInfo);
-              console.log('🔍 Window Clerk:', (window as any).Clerk);
+              console.log('🔍 Window Clerk:', window.Clerk);
             }}
             variant="outline"
             size="sm"
