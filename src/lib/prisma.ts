@@ -20,10 +20,11 @@ if (
   (globalThis as { _prismaDbUrlLogged?: boolean })._prismaDbUrlLogged = true;
 }
 
-if (!effectiveDbUrl) {
-  // Throw a clearer error during initialization if no URL is found
-  // This helps diagnose missing environment variables earlier.
-  throw new Error('Database URL is missing. Set DATABASE_URL or POSTGRES_DATABASE_URL.');
+// Don't throw error during build time - defer validation to runtime
+function validateDatabaseUrl() {
+  if (!effectiveDbUrl) {
+    throw new Error('Database URL is missing. Set DATABASE_URL or POSTGRES_DATABASE_URL.');
+  }
 }
 
 const globalForPrisma = globalThis as unknown as {
@@ -31,10 +32,10 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 // Create a new PrismaClient instance
-// Prisma automatically uses DATABASE_URL if no explicit URL is provided.
-// By ensuring POSTGRES_DATABASE_URL is set in Vercel and removing the manual
-// DATABASE_URL override, Prisma should effectively use the correct Vercel/Neon URL.
 const createPrismaClient = () => {
+  // Only validate database URL when actually creating the client (at runtime)
+  validateDatabaseUrl();
+
   console.log('[src/lib/prisma.ts] Creating new PrismaClient instance.');
   return new PrismaClient({
     log:
@@ -46,18 +47,21 @@ const createPrismaClient = () => {
   }) as unknown as ExtendedPrismaClient;
 };
 
-// Use the global instance in development to prevent multiple instances during hot reloading
-const prisma = globalForPrisma.prisma ?? createPrismaClient();
+// Create a lazy-loaded Prisma client that only initializes when first accessed
+let _prisma: ExtendedPrismaClient | undefined;
 
-if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = prisma;
-  if (process.env.NODE_ENV !== 'test') {
-    // Avoid logging during tests
-    // console.log('[src/lib/prisma.ts] Creating new PrismaClient instance.');
-  }
-}
+export const prisma = new Proxy({} as ExtendedPrismaClient, {
+  get(target, prop) {
+    // Initialize the client only when first accessed, not at import time
+    if (!_prisma) {
+      _prisma = globalForPrisma.prisma ?? createPrismaClient();
+      if (process.env.NODE_ENV !== 'production') {
+        globalForPrisma.prisma = _prisma;
+      }
+    }
+    return _prisma[prop as keyof ExtendedPrismaClient];
+  },
+});
 
 // Note: Removed $connect() call here to avoid eager connection on import.
 // Connections are managed automatically by PrismaClient when queries are executed.
-
-export { prisma };
