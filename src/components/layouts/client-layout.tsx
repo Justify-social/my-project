@@ -284,6 +284,7 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
               remainingCredits={100}
               companyName="Justify"
               user={user}
+              authControls={<DynamicClientAuth />}
               notificationsCount={0} // TODO: Connect to notification system
             />
 

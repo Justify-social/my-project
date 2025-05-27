@@ -16,6 +16,7 @@ import { iconExists } from '@/components/ui/icon/icons';
 import { useSearch } from '@/providers/SearchProvider';
 import { SearchResultsDisplay } from './search-results-display';
 import { NotificationCenter } from '@/components/ui/notifications/NotificationCenter';
+import { NAVIGATION_CONSTANTS } from './navigation-constants';
 
 // Define NavItem locally
 // interface NavItem {
@@ -98,7 +99,11 @@ const Header: React.FC<HeaderProps> = ({
         {/* Right: Icon Group */}
         <div className="flex items-center space-x-2 md:space-x-3" data-cy="header-actions">
           {/* Desktop Icons */}
-          <div className="hidden md:flex items-center space-x-2" data-cy="desktop-actions">
+          <div
+            className="hidden md:flex items-center"
+            data-cy="desktop-actions"
+            style={{ gap: NAVIGATION_CONSTANTS.iconGap }}
+          >
             {/* Credits */}
             <Link
               href="/account/billing"
@@ -107,15 +112,15 @@ const Header: React.FC<HeaderProps> = ({
             >
               <IconButtonAction
                 iconBaseName="faCoins"
-                hoverColorClass="text-accent"
+                hoverColorClass={NAVIGATION_CONSTANTS.hoverColor}
                 ariaLabel="Go to billing"
-                defaultColorClass="text-foreground" // Black by default
-                staysSolid={true} // Always solid, only change color on hover
-                className="w-14 h-14" // 15% larger (56px)
+                defaultColorClass={NAVIGATION_CONSTANTS.defaultColor}
+                staysSolid={true}
+                className={`${NAVIGATION_CONSTANTS.coinsSize} ${NAVIGATION_CONSTANTS.forceCoinsSize}`}
               />
             </Link>
 
-            {/* Notifications - using NotificationCenter component */}
+            {/* Notifications */}
             <NotificationCenter data-cy="notifications-button" />
           </div>
 

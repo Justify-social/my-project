@@ -9,10 +9,14 @@
 
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import type { UserResource } from '@clerk/types';
 import { cn } from '@/lib/utils';
 import { Icon } from '@/components/ui/icon/icon';
+import { IconButtonAction } from '@/components/ui/button-icon-action';
 import { iconExists } from '@/components/ui/icon/icons';
+import { NotificationCenter } from '@/components/ui/notifications/NotificationCenter';
+import { NAVIGATION_CONSTANTS } from './navigation-constants';
 import {
   Sheet,
   SheetContent,
@@ -42,6 +46,7 @@ export interface MobileMenuProps {
   notificationsCount: number; // Data for the footer
   companyName: string; // Data for the header
   user?: UserResource | null | undefined; // Use Clerk UserResource type
+  authControls?: React.ReactNode; // Auth controls (same as header)
   className?: string; // Optional additional class names for SheetContent
   onItemClick?: (item: MenuItem) => void; // Optional click handler
 }
@@ -86,8 +91,10 @@ const RenderMenuItem: React.FC<{
   depth?: number;
   onItemClick?: (item: MenuItem) => void;
   onClose: () => void; // Pass onClose to close sheet on item click
-}> = ({ item, depth = 0, onItemClick, onClose }) => {
-  const [isExpanded, setIsExpanded] = React.useState(false);
+  itemKey: string; // Unique key for this item
+  isExpanded: boolean; // Controlled expansion state
+  onToggleExpansion: (itemKey: string) => void; // Function to toggle expansion
+}> = ({ item, depth = 0, onItemClick, onClose, itemKey, isExpanded, onToggleExpansion }) => {
   const hasChildren = item.children && item.children.length > 0;
 
   const mappedAppIconId = getAppIconIdForLabel(item.label);
@@ -99,7 +106,7 @@ const RenderMenuItem: React.FC<{
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (hasChildren) {
       e.preventDefault();
-      setIsExpanded(!isExpanded);
+      onToggleExpansion(itemKey); // Use controlled expansion
     } else {
       onItemClick?.(item);
       onClose(); // Close the sheet when a non-parent item is clicked
@@ -121,10 +128,19 @@ const RenderMenuItem: React.FC<{
               depth > 0 && 'py-2 pl-8 border-b-0'
             )}
           >
-            <span className="flex-shrink-0 mr-3">
-              <Icon iconId={finalIconId!} className="w-5 h-5" />
+            {!NAVIGATION_CONSTANTS.showChildIcons && depth > 0 ? null : (
+              <span className="flex-shrink-0 mr-3">
+                <Icon iconId={finalIconId!} className="w-5 h-5" />
+              </span>
+            )}
+            <span
+              className={cn(
+                'flex-grow',
+                depth > 0 && !NAVIGATION_CONSTANTS.showChildIcons && 'ml-0'
+              )}
+            >
+              {item.label}
             </span>
-            <span className="flex-grow">{item.label}</span>
             {item.badge && (
               <span className="inline-flex items-center justify-center h-5 min-w-5 px-1 ml-2 text-xs font-medium rounded-full bg-accent text-accent-foreground">
                 {item.badge}
@@ -144,10 +160,16 @@ const RenderMenuItem: React.FC<{
             depth > 0 && 'py-2 pl-8 border-b-0'
           )}
         >
-          <span className="flex-shrink-0 mr-3">
-            <Icon iconId={finalIconId!} className="w-5 h-5" />
+          {!NAVIGATION_CONSTANTS.showChildIcons && depth > 0 ? null : (
+            <span className="flex-shrink-0 mr-3">
+              <Icon iconId={finalIconId!} className="w-5 h-5" />
+            </span>
+          )}
+          <span
+            className={cn('flex-grow', depth > 0 && !NAVIGATION_CONSTANTS.showChildIcons && 'ml-0')}
+          >
+            {item.label}
           </span>
-          <span className="flex-grow">{item.label}</span>
           {item.badge && (
             <span className="inline-flex items-center justify-center h-5 min-w-5 px-1 ml-2 text-xs font-medium rounded-full bg-accent text-accent-foreground">
               {item.badge}
@@ -164,15 +186,21 @@ const RenderMenuItem: React.FC<{
       {/* Nested Items */}
       {hasChildren && isExpanded && (
         <ul className="bg-muted/50 dark:bg-muted/20">
-          {item.children?.map((child: MenuItem) => (
-            <RenderMenuItem
-              key={child.id}
-              item={child}
-              depth={depth + 1}
-              onItemClick={onItemClick}
-              onClose={onClose} // Pass down onClose
-            />
-          ))}
+          {item.children?.map((child: MenuItem, childIndex) => {
+            const childKey = `${itemKey}-child-${childIndex}`;
+            return (
+              <RenderMenuItem
+                key={child.id}
+                item={child}
+                depth={depth + 1}
+                onItemClick={onItemClick}
+                onClose={onClose} // Pass down onClose
+                itemKey={childKey}
+                isExpanded={false} // Children don't expand in mobile menu
+                onToggleExpansion={onToggleExpansion}
+              />
+            );
+          })}
         </ul>
       )}
     </li>
@@ -191,10 +219,33 @@ export function MobileMenu({
   notificationsCount,
   companyName,
   user,
+  authControls,
   className,
   onItemClick,
 }: MobileMenuProps) {
   const handleClose = () => onOpenChange(false); // Helper to close sheet
+
+  // --- Centralized Expansion State (same as sidebar) ---
+  const [expandedSections, setExpandedSections] = React.useState<Record<string, boolean>>({});
+
+  // Function to toggle section expansion with accordion behavior (same as sidebar)
+  const toggleSection = (itemKey: string) => {
+    setExpandedSections(prev => {
+      // If clicking on already expanded section, collapse it
+      if (prev[itemKey]) {
+        return { ...prev, [itemKey]: false };
+      }
+
+      // Otherwise, collapse all sections and expand only the clicked one
+      const newState: Record<string, boolean> = {};
+      Object.keys(prev).forEach(key => {
+        newState[key] = false; // Collapse all sections
+      });
+      newState[itemKey] = true; // Expand only the clicked section
+
+      return newState;
+    });
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -224,77 +275,54 @@ export function MobileMenu({
         {/* Navigation List - Takes remaining space and scrolls */}
         <nav className="flex-grow overflow-y-auto">
           <ul className="py-2">
-            {menuItems.map(item => (
-              <RenderMenuItem
-                key={item.id}
-                item={item}
-                onItemClick={onItemClick}
-                onClose={handleClose}
-              />
-            ))}
+            {menuItems.map((item, index) => {
+              const itemKey = item.label + index; // Create unique key same as sidebar
+              const isExpanded = expandedSections[itemKey] || false;
+              return (
+                <RenderMenuItem
+                  key={item.id}
+                  item={item}
+                  onItemClick={onItemClick}
+                  onClose={handleClose}
+                  itemKey={itemKey}
+                  isExpanded={isExpanded}
+                  onToggleExpansion={toggleSection}
+                />
+              );
+            })}
           </ul>
         </nav>
 
         {/* Footer */}
         <SheetFooter className="border-t p-4 mt-auto">
-          {' '}
-          {/* Added mt-auto */}
-          <div className="w-full space-y-4">
-            {' '}
-            {/* Ensure full width */}
-            {/* Credits & Notifications */}
-            <div className="flex justify-between items-center">
-              <div className="flex items-center space-x-2 text-sm">
-                {iconExists(ICONS.COINS) ? (
-                  <Icon iconId={ICONS.COINS} className="w-5 h-5 text-muted-foreground" />
-                ) : (
-                  <span className="text-muted-foreground">$</span>
-                )}
-                <span>{remainingCredits} credits</span>
-              </div>
-              <div className="flex items-center space-x-2 text-sm">
-                <div className="relative">
-                  {iconExists(ICONS.BELL) ? (
-                    <Icon iconId={ICONS.BELL} className="w-5 h-5 text-muted-foreground" />
-                  ) : (
-                    <span className="text-muted-foreground">N</span>
-                  )}
-                  {notificationsCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-[10px] w-4 h-4 flex items-center justify-center">
-                      {notificationsCount}
-                    </span>
-                  )}
-                </div>
-                <span>Notifications</span>
-              </div>
-            </div>
-            {/* User Info */}
-            {user && (
-              <div className="flex items-center space-x-3 pt-4 border-t">
-                {' '}
-                {/* Added pt-4 */}
-                <Image
-                  src={user.imageUrl || ICONS.USER_FALLBACK}
-                  alt="Profile"
-                  width={32}
-                  height={32}
-                  className="rounded-full"
-                  onError={e => {
-                    (e.target as HTMLImageElement).src = ICONS.USER_FALLBACK;
-                  }}
+          <div className="w-full">
+            {/* Icons mirroring header order: coins, bell, profile with 5px spacing */}
+            <div
+              className="flex items-center justify-center"
+              style={{ gap: NAVIGATION_CONSTANTS.iconGap }}
+            >
+              {/* Credits - exact same as header */}
+              <Link
+                href="/account/billing"
+                className="flex items-center space-x-1"
+                data-cy="credits-button"
+              >
+                <IconButtonAction
+                  iconBaseName="faCoins"
+                  hoverColorClass={NAVIGATION_CONSTANTS.hoverColor}
+                  ariaLabel="Go to billing"
+                  defaultColorClass={NAVIGATION_CONSTANTS.defaultColor}
+                  staysSolid={true}
+                  className={`${NAVIGATION_CONSTANTS.coinsSize} ${NAVIGATION_CONSTANTS.forceCoinsSize}`}
                 />
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate text-sm">
-                    {user.fullName ||
-                      `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
-                      'User'}
-                  </p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {user.primaryEmailAddress?.emailAddress || 'No email'}
-                  </p>
-                </div>
-              </div>
-            )}
+              </Link>
+
+              {/* Notifications - exact same as header */}
+              <NotificationCenter data-cy="notifications-button" />
+
+              {/* Profile - exact same as header */}
+              {authControls && <div data-cy="auth-controls">{authControls}</div>}
+            </div>
           </div>
         </SheetFooter>
       </SheetContent>

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useNotifications, type Notification } from '@/providers/NotificationProvider';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { NAVIGATION_CONSTANTS } from '../navigation/navigation-constants';
 // Importing components in case they're needed later
 import {
   DropdownMenu,
@@ -107,11 +108,11 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
         <div className={cn('relative', className)} data-cy="notification-center-trigger">
           <IconButtonAction
             iconBaseName="faBell"
-            hoverColorClass="text-accent"
+            hoverColorClass={NAVIGATION_CONSTANTS.hoverColor}
             ariaLabel="Open notifications"
-            defaultColorClass="text-foreground" // Black by default
-            staysSolid={true} // Always solid, only change color on hover
-            className="h-14 w-14 rounded-full" // Match coins size (56px)
+            defaultColorClass={NAVIGATION_CONSTANTS.defaultColor}
+            staysSolid={true}
+            className={`${NAVIGATION_CONSTANTS.bellSize} ${NAVIGATION_CONSTANTS.forceBellSize} rounded-full`}
           />
           {unreadCount > 0 && (
             <Badge

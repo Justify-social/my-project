@@ -4,6 +4,7 @@ import React from 'react';
 import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button'; // Assuming button path
+import { NAVIGATION_CONSTANTS } from '@/components/ui/navigation/navigation-constants';
 
 export default function ClientAuthComponents() {
   return (
@@ -13,7 +14,7 @@ export default function ClientAuthComponents() {
           afterSignOutUrl="/sign-in"
           appearance={{
             elements: {
-              avatarBox: 'w-14 h-14', // Match coins and bell size (56px)
+              avatarBox: NAVIGATION_CONSTANTS.profileSize,
             },
           }}
         />
