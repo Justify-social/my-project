@@ -229,9 +229,22 @@ export function Sidebar({
       // Exact match always takes priority
       if (activePath === path) return true;
 
-      // For child routes, only match if it's an exact match
+      // Special case: Campaign Wizard - highlight "Wizard" child for all wizard steps + submission
+      if (path === '/campaigns/wizard/step-1' && activePath.startsWith('/campaigns/wizard/')) {
+        return true;
+      }
+
+      // Special case: Campaign List - highlight "List" child for campaign profiles but NOT wizard pages
+      if (
+        path === '/campaigns' &&
+        activePath.startsWith('/campaigns/') &&
+        !activePath.startsWith('/campaigns/wizard/')
+      ) {
+        return true;
+      }
+
+      // For other child routes, only match if it's an exact match
       // This prevents both parent and child from being active simultaneously
-      // No prefix matching for child routes to avoid conflicts
       return false;
     },
     [activePath]
@@ -240,26 +253,11 @@ export function Sidebar({
   const hasActiveChild = useCallback(
     (item: { children?: { href: string }[] }) => {
       return item.children?.some(child => {
-        // Check for exact match first
-        if (activePath === child.href) return true;
-
-        // For child paths, check if activePath starts with child.href followed by '/'
-        // But ensure this is a direct sub-route, not a deeper nested route
-        if (
-          child.href !== '/' &&
-          child.href.length > 1 &&
-          activePath.startsWith(child.href + '/')
-        ) {
-          // Additional check: ensure this is actually a sub-route of this specific child
-          // For example, /influencer-marketplace/list should match /influencer-marketplace/list/*
-          // but /influencer-marketplace/username should NOT match /influencer-marketplace/list
-          return true;
-        }
-
-        return false;
+        // Use the same isActive logic for consistency
+        return isActive(child.href);
       });
     },
-    [activePath]
+    [isActive]
   );
 
   // New function to check if current path is related to parent but not matching any child
