@@ -67,16 +67,17 @@ interface NotificationProviderProps {
 
 export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   children,
-  pollInterval = 30000, // Default: 30 seconds
+  pollInterval = 60000, // Default: 60 seconds (optimized)
 }) => {
   const { user } = useUser();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorCount, setErrorCount] = useState(0); // Track consecutive errors
 
   // Calculate unread count
   const unreadCount = notifications.filter(n => n.status === 'UNREAD').length;
 
-  // Fetch notifications from API
+  // Fetch notifications from API with exponential backoff
   const fetchNotifications = useCallback(async () => {
     if (!user?.id) return;
 
@@ -86,9 +87,13 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
       if (response.ok) {
         const data = await response.json();
         setNotifications(data.notifications || []);
+        setErrorCount(0); // Reset error count on success
+      } else {
+        throw new Error(`HTTP ${response.status}`);
       }
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
+      setErrorCount(prev => prev + 1); // Increment error count
     } finally {
       setIsLoading(false);
     }
@@ -306,16 +311,44 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     }
   }, [user?.id, fetchNotifications]);
 
-  // Polling for new notifications
+  // Smart polling for new notifications (MIT Professor approach)
   useEffect(() => {
     if (!user?.id || pollInterval <= 0) return;
 
-    const interval = setInterval(() => {
-      fetchNotifications();
-    }, pollInterval);
+    let interval: NodeJS.Timeout;
+    let isActive = true;
 
-    return () => clearInterval(interval);
-  }, [user?.id, pollInterval, fetchNotifications]);
+    // Only poll when tab is active (Performance optimization)
+    const handleVisibilityChange = () => {
+      isActive = !document.hidden;
+
+      if (isActive) {
+        // Immediately fetch when tab becomes active
+        fetchNotifications();
+        // Resume polling with exponential backoff
+        clearInterval(interval);
+        const dynamicInterval = pollInterval * Math.pow(2, Math.min(errorCount, 3));
+        interval = setInterval(fetchNotifications, dynamicInterval);
+      } else {
+        // Stop polling when tab is hidden
+        clearInterval(interval);
+      }
+    };
+
+    // Initial setup
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Start polling only if tab is active with exponential backoff
+    if (isActive) {
+      const dynamicInterval = pollInterval * Math.pow(2, Math.min(errorCount, 3)); // Max 8x backoff
+      interval = setInterval(fetchNotifications, dynamicInterval);
+    }
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [user?.id, pollInterval, fetchNotifications, errorCount]);
 
   // Auto-show toast for new notifications
   useEffect(() => {

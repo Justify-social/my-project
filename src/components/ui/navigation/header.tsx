@@ -11,6 +11,7 @@ import Image from 'next/image';
 import React, { useState } from 'react';
 import { SearchBar } from '@/components/ui/search-bar';
 import { Icon } from '@/components/ui/icon/icon';
+import { IconButtonAction } from '@/components/ui/button-icon-action';
 import { iconExists } from '@/components/ui/icon/icons';
 import { useSearch } from '@/providers/SearchProvider';
 import { SearchResultsDisplay } from './search-results-display';
@@ -40,9 +41,6 @@ const Header: React.FC<HeaderProps> = ({
   const { handleSearch, isSearching } = useSearch();
 
   // Define icon IDs directly
-  const coinsIconId = 'faCoinsLight';
-  const hasCoinsIcon = iconExists(coinsIconId);
-
   const menuIconId = 'faBarsLight'; // Use Light variant from map
   const hasMenuIcon = iconExists(menuIconId);
 
@@ -98,29 +96,23 @@ const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Right: Icon Group */}
-        <div className="flex items-center space-x-4 md:space-x-6" data-cy="header-actions">
+        <div className="flex items-center space-x-2 md:space-x-3" data-cy="header-actions">
           {/* Desktop Icons */}
-          <div className="hidden md:flex items-center space-x-4" data-cy="desktop-actions">
+          <div className="hidden md:flex items-center space-x-2" data-cy="desktop-actions">
             {/* Credits */}
             <Link
               href="/account/billing"
-              className="flex items-center space-x-1 cursor-pointer"
+              className="flex items-center space-x-1"
               data-cy="credits-button"
             >
-              {hasCoinsIcon ? (
-                <Icon
-                  iconId="faCoinsSolid" // Use Solid ID directly
-                  className="w-6 h-6 text-foreground" // Changed to text-foreground
-                  data-testid="coins-icon"
-                />
-              ) : (
-                <div
-                  className="w-6 h-6 bg-muted rounded-full flex items-center justify-center text-xs"
-                  title="Coins icon not found"
-                >
-                  $
-                </div>
-              )}
+              <IconButtonAction
+                iconBaseName="faCoins"
+                hoverColorClass="text-accent"
+                ariaLabel="Go to billing"
+                defaultColorClass="text-foreground" // Black by default
+                staysSolid={true} // Always solid, only change color on hover
+                className="w-14 h-14" // 15% larger (56px)
+              />
             </Link>
 
             {/* Notifications - using NotificationCenter component */}

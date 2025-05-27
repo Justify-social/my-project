@@ -186,20 +186,20 @@ export default function NotificationsDebugPage() {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'CAMPAIGN_SUBMITTED':
-        return 'faCampaign';
+        return 'appCampaigns'; // Use app icon for campaigns
       case 'BRAND_LIFT_SUBMITTED':
-        return 'faChartLine';
+        return 'appBrandLift'; // Use app icon for brand lift
       case 'BRAND_LIFT_REPORT_READY':
-        return 'faFileChart';
+        return 'appReports'; // Use app icon for reports
       case 'SUCCESS':
-        return 'faCheckCircle';
+        return 'faCircleCheckSolid'; // Correct solid icon name
       case 'ERROR':
-        return 'faExclamationTriangle';
+        return 'faTriangleExclamationSolid'; // Correct solid icon name
       case 'WARNING':
-        return 'faExclamationCircle';
+        return 'faTriangleExclamationLight'; // Use light version for warnings
       case 'INFO':
       default:
-        return 'faInfoCircle';
+        return 'faCircleInfoSolid'; // Correct solid icon name
     }
   };
 
@@ -231,7 +231,7 @@ export default function NotificationsDebugPage() {
           size="sm"
           className="flex items-center gap-2"
         >
-          <Icon iconId="faRefresh" className="h-4 w-4" />
+          <Icon iconId="faRotateLight" className="h-4 w-4" />
           Refresh
         </Button>
       </div>

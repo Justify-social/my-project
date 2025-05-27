@@ -15,6 +15,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Icon } from '@/components/ui/icon/icon';
+import { IconButtonAction } from '@/components/ui/button-icon-action';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -45,20 +46,20 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'CAMPAIGN_SUBMITTED':
-        return 'faCampaign';
+        return 'appCampaigns'; // Use app icon for campaigns
       case 'BRAND_LIFT_SUBMITTED':
-        return 'faChartLine';
+        return 'appBrandLift'; // Use app icon for brand lift
       case 'BRAND_LIFT_REPORT_READY':
-        return 'faFileChart';
+        return 'appReports'; // Use app icon for reports
       case 'SUCCESS':
-        return 'faCheckCircle';
+        return 'faCircleCheckSolid'; // Correct solid icon name
       case 'ERROR':
-        return 'faExclamationTriangle';
+        return 'faTriangleExclamationSolid'; // Correct solid icon name
       case 'WARNING':
-        return 'faExclamationCircle';
+        return 'faTriangleExclamationLight'; // Use light version for warnings
       case 'INFO':
       default:
-        return 'faInfoCircle';
+        return 'faCircleInfoSolid'; // Correct solid icon name
     }
   };
 
@@ -103,13 +104,15 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className={cn('relative h-9 w-9 rounded-full', className)}
-          data-cy="notification-center-trigger"
-        >
-          <Icon iconId="faBell" className="h-4 w-4" />
+        <div className={cn('relative', className)} data-cy="notification-center-trigger">
+          <IconButtonAction
+            iconBaseName="faBell"
+            hoverColorClass="text-accent"
+            ariaLabel="Open notifications"
+            defaultColorClass="text-foreground" // Black by default
+            staysSolid={true} // Always solid, only change color on hover
+            className="h-14 w-14 rounded-full" // Match coins size (56px)
+          />
           {unreadCount > 0 && (
             <Badge
               variant="destructive"
@@ -119,7 +122,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
               {unreadCount > 99 ? '99+' : unreadCount}
             </Badge>
           )}
-        </Button>
+        </div>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-80" data-cy="notification-center-dropdown">
@@ -133,7 +136,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
               className="h-7 w-7 p-0"
               data-cy="notification-refresh"
             >
-              <Icon iconId="faRefresh" className="h-3 w-3" />
+              <Icon iconId="faRotateLight" className="h-3 w-3" />
             </Button>
             {unreadCount > 0 && (
               <Button
@@ -166,7 +169,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
             </div>
           ) : visibleNotifications.length === 0 ? (
             <div className="p-8 text-center text-sm text-muted-foreground">
-              <Icon iconId="faBell" className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <Icon iconId="faBellLight" className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p>No notifications yet</p>
               <p className="text-xs mt-1">We'll notify you when something important happens</p>
             </div>

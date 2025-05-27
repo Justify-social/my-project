@@ -16,11 +16,14 @@ import { Icon } from '@/components/ui/icon/icon';
 import { cn } from '@/lib/utils';
 
 interface IconButtonActionProps {
-  iconBaseName: string; // e.g., "faEye", "faPenToSquare"
+  iconBaseName: string; // e.g., "faEye", "faPenToSquare", "faBell", "faCoins"
   hoverColorClass: string; // e.g., "text-accent", "text-destructive"
   ariaLabel: string;
   className?: string;
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  inverted?: boolean; // When true: solid → light on hover (default: light → solid)
+  defaultColorClass?: string; // Default color class (defaults to "text-muted-foreground")
+  staysSolid?: boolean; // When true: always use solid icon, only change color on hover
 }
 
 export function IconButtonAction({
@@ -29,11 +32,26 @@ export function IconButtonAction({
   ariaLabel,
   className,
   onClick,
+  inverted = false,
+  defaultColorClass = 'text-muted-foreground',
+  staysSolid = false,
 }: IconButtonActionProps) {
   const [isHovered, setIsHovered] = useState(false);
 
-  const iconId = isHovered ? `${iconBaseName}Solid` : `${iconBaseName}Light`;
-  const iconClassName = isHovered ? hoverColorClass : 'text-muted-foreground';
+  // Determine icon variant based on props
+  let iconId: string;
+  if (staysSolid) {
+    // Always use solid icon, only change color on hover
+    iconId = `${iconBaseName}Solid`;
+  } else if (inverted) {
+    // Inverted behavior: solid → light on hover
+    iconId = isHovered ? `${iconBaseName}Light` : `${iconBaseName}Solid`;
+  } else {
+    // Normal behavior: light → solid on hover
+    iconId = isHovered ? `${iconBaseName}Solid` : `${iconBaseName}Light`;
+  }
+
+  const iconClassName = isHovered ? hoverColorClass : defaultColorClass;
 
   return (
     <Button

@@ -229,6 +229,14 @@ export function Sidebar({
       // Exact match always takes priority
       if (activePath === path) return true;
 
+      // ==========================================
+      // SPECIAL CASE ROUTING RULES FOR CHILD NAVIGATION HIGHLIGHTING
+      // ==========================================
+      // IMPORTANT: When adding new routes with child navigation, ensure you add
+      // corresponding special cases here to maintain proper highlighting behavior.
+      // Follow the pattern below for consistent user experience.
+      // ==========================================
+
       // Special case: Campaign Wizard - highlight "Wizard" child for all wizard steps + submission
       if (path === '/campaigns/wizard/step-1' && activePath.startsWith('/campaigns/wizard/')) {
         return true;
@@ -242,6 +250,38 @@ export function Sidebar({
       ) {
         return true;
       }
+
+      // Special case: Influencer Marketplace - highlight "Marketplace" child for influencer profile pages
+      // This ensures /influencer-marketplace/[username] pages (like /influencer-marketplace/leomessi)
+      // keep the "Marketplace" child item highlighted, NOT the "List" child
+      if (
+        path === '/influencer-marketplace' &&
+        activePath.startsWith('/influencer-marketplace/') &&
+        !activePath.startsWith('/influencer-marketplace/list')
+      ) {
+        return true;
+      }
+
+      // Special case: Influencer List - highlight "List" child for the list page and its sub-routes
+      if (
+        path === '/influencer-marketplace/list' &&
+        activePath.startsWith('/influencer-marketplace/list')
+      ) {
+        return true;
+      }
+
+      // ==========================================
+      // ADD NEW SPECIAL CASES ABOVE THIS LINE
+      // ==========================================
+      // Pattern to follow:
+      // if (
+      //   path === '/parent-route/child-route' &&
+      //   activePath.startsWith('/parent-route/child-route') &&
+      //   !activePath.startsWith('/parent-route/other-child-route')
+      // ) {
+      //   return true;
+      // }
+      // ==========================================
 
       // For other child routes, only match if it's an exact match
       // This prevents both parent and child from being active simultaneously

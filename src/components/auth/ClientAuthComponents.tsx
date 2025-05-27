@@ -9,7 +9,14 @@ export default function ClientAuthComponents() {
   return (
     <>
       <SignedIn>
-        <UserButton afterSignOutUrl="/sign-in" />
+        <UserButton
+          afterSignOutUrl="/sign-in"
+          appearance={{
+            elements: {
+              avatarBox: 'w-14 h-14', // Match coins and bell size (56px)
+            },
+          }}
+        />
       </SignedIn>
       <SignedOut>
         {/* Example Sign In Button - Adjust as needed */}

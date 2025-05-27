@@ -47,17 +47,12 @@ const DebugToolCard: React.FC<DebugToolCardProps> = ({
 
 export default function DebugToolsPage() {
   return (
-    <div className="container mx-auto p-6 space-y-8 max-w-6xl">
+    <div className="w-full p-6 space-y-8">
       <h1 className="text-3xl font-bold text-primary">Debug Tools</h1>
 
       {/* Debug Tools Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* <DebugToolCard 
-            title="Campaign Data Verification" 
-            description="Verify campaign data and identify submission issues."
-            buttonText="Use Verification Tool"
-            onButtonClick={() => document.getElementById('campaign-verify')?.scrollIntoView({ behavior: 'smooth' })}
-        /> */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {/* Debug Tools arranged in alphabetical order */}
         <DebugToolCard
           title="API Verification"
           description="Test and verify external API integrations."
@@ -99,6 +94,12 @@ export default function DebugToolsPage() {
           description="View and verify Mux video assets."
           linkHref="/debug-tools/mux-assets"
           buttonText="Check Mux Assets"
+        />
+        <DebugToolCard
+          title="Notification Management"
+          description="Create, manage, and test the notification system."
+          linkHref="/debug-tools/notifications"
+          buttonText="Manage Notifications"
         />
         <DebugToolCard
           title="UI Components"

@@ -238,7 +238,7 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
   return (
     <React.Suspense fallback={<LoadingSkeleton />}>
       <ThemeProvider defaultTheme="light">
-        <NotificationProvider pollInterval={30000}>
+        <NotificationProvider pollInterval={60000}>
           <div className="min-h-screen flex flex-col">
             <Header
               companyName="Justify"
@@ -284,6 +284,7 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
               remainingCredits={100}
               companyName="Justify"
               user={user}
+              notificationsCount={0} // TODO: Connect to notification system
             />
 
             <Toaster />
