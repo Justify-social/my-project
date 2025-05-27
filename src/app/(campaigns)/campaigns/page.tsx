@@ -815,8 +815,7 @@ const ClientCampaignList: React.FC = () => {
         </h1>
       </div>
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-          <h1 className="text-2xl font-bold text-primary">Campaigns</h1>
+        <div className="flex justify-end mb-6">
           <div className="flex items-center gap-3">
             <Sheet open={isFiltersSheetOpen} onOpenChange={setIsFiltersSheetOpen}>
               <SheetTrigger asChild>

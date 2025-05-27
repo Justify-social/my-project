@@ -299,6 +299,15 @@ export async function searchAlgoliaCampaigns(
     return hits;
   } catch (error) {
     logger.error('[Algolia] Error searching campaigns with SDK', { query, orgId, error });
+
+    // In development, provide more detailed error information
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('[Algolia] Search failed. Check these environment variables:');
+      console.warn('- NEXT_PUBLIC_ALGOLIA_APP_ID:', !!process.env.NEXT_PUBLIC_ALGOLIA_APP_ID);
+      console.warn('- NEXT_PUBLIC_ALGOLIA_API_KEY:', !!process.env.NEXT_PUBLIC_ALGOLIA_API_KEY);
+      console.warn('- searchClient initialized:', !!searchClient);
+    }
+
     return [];
   } finally {
     console.timeEnd(fetchTimerLabel);

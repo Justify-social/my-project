@@ -152,7 +152,7 @@ function SignInComponent() {
 
       {/* Debug trigger button - only show in development */}
       {process.env.NODE_ENV === 'development' && (
-        <div className="text-center mt-4">
+        <div className="flex justify-center mt-4">
           <Button
             onClick={() => setShowDebug(true)}
             variant="link"
