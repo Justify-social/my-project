@@ -169,8 +169,7 @@ const AudienceAnalyticsSection: React.FC<AudienceAnalyticsSectionProps> = ({ inf
                       {type.replace('_', ' ')}:
                     </span>
                     <span className="font-medium">
-                      ${range.min?.toLocaleString() || '0'} - $
-                      {range.max?.toLocaleString() || '0'}
+                      ${range.min?.toLocaleString() || '0'} - ${range.max?.toLocaleString() || '0'}
                     </span>
                   </div>
                 ))}
@@ -282,8 +281,9 @@ const AudienceAnalyticsSection: React.FC<AudienceAnalyticsSectionProps> = ({ inf
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <div
-                    className={`w-3 h-3 rounded-full ${isPositive ? 'bg-success' : isNegative ? 'bg-destructive' : 'bg-warning'
-                      }`}
+                    className={`w-3 h-3 rounded-full ${
+                      isPositive ? 'bg-success' : isNegative ? 'bg-destructive' : 'bg-warning'
+                    }`}
                   />
                   <span className="text-sm font-medium capitalize">
                     {type.name.toLowerCase().replace('_', ' ')}
@@ -293,12 +293,13 @@ const AudienceAnalyticsSection: React.FC<AudienceAnalyticsSectionProps> = ({ inf
               </div>
               <Progress
                 value={type.value}
-                className={`h-2 ${isPositive
-                  ? '[&>div]:bg-success'
-                  : isNegative
-                    ? '[&>div]:bg-destructive'
-                    : '[&>div]:bg-warning'
-                  }`}
+                className={`h-2 ${
+                  isPositive
+                    ? '[&>div]:bg-success'
+                    : isNegative
+                      ? '[&>div]:bg-destructive'
+                      : '[&>div]:bg-warning'
+                }`}
               />
             </div>
           );

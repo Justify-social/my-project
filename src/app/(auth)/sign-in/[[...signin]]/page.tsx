@@ -3,6 +3,7 @@
 import { SignIn } from '@clerk/nextjs';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
+import { AuthSkeleton } from '@/components/ui/loading-skeleton';
 
 // Removed Link import as it's handled by Clerk component
 // import Link from 'next/link';
@@ -56,7 +57,7 @@ function SignInComponent() {
 
 export default function SignInPage() {
   return (
-    <Suspense fallback={<div className="w-full max-w-md mx-auto p-6">Loading...</div>}>
+    <Suspense fallback={<AuthSkeleton />}>
       <SignInComponent />
     </Suspense>
   );

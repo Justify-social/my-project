@@ -428,4 +428,216 @@ export function WizardSkeleton({ step = 1, className }: { step?: number; classNa
   );
 }
 
+/**
+ * @component AuthSkeleton
+ * @category molecule
+ * @subcategory loading
+ * @description Displays a skeleton loading state for authentication forms (sign-in/sign-up).
+ */
+export function AuthSkeleton({ className }: { className?: string }) {
+  return (
+    <div className={cn('w-full max-w-md mx-auto', className)}>
+      <div className="bg-white shadow-md border border-divider p-6 rounded-lg space-y-6">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <Skeleton className="h-7 w-32 mx-auto rounded" />
+          <Skeleton className="h-4 w-48 mx-auto rounded" />
+        </div>
+
+        {/* Social buttons */}
+        <div className="space-y-2">
+          <Skeleton className="h-10 w-full rounded border border-divider" />
+          <Skeleton className="h-10 w-full rounded border border-divider" />
+        </div>
+
+        {/* Divider */}
+        <div className="flex items-center">
+          <Skeleton className="h-px flex-1 bg-divider" />
+          <Skeleton className="h-4 w-8 mx-3 rounded" />
+          <Skeleton className="h-px flex-1 bg-divider" />
+        </div>
+
+        {/* Form fields */}
+        <div className="space-y-4">
+          <div>
+            <Skeleton className="h-4 w-20 mb-2 rounded" />
+            <Skeleton className="h-10 w-full rounded border border-divider" />
+          </div>
+          <div>
+            <Skeleton className="h-4 w-24 mb-2 rounded" />
+            <Skeleton className="h-10 w-full rounded border border-divider" />
+          </div>
+        </div>
+
+        {/* Submit button */}
+        <Skeleton className="h-10 w-full rounded bg-interactive/20" />
+
+        {/* Footer link */}
+        <div className="text-center">
+          <Skeleton className="h-4 w-40 mx-auto rounded" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * @component BillingSkeleton
+ * @category molecule
+ * @subcategory loading
+ * @description Displays a skeleton loading state for billing management pages.
+ */
+export function BillingSkeleton({ className }: { className?: string }) {
+  return (
+    <div className={cn('space-y-6', className)}>
+      {/* Header */}
+      <div className="space-y-2">
+        <Skeleton className="h-8 w-48 rounded" />
+        <Skeleton className="h-4 w-64 rounded" />
+      </div>
+
+      {/* Tabs */}
+      <div className="space-y-4">
+        <div className="grid grid-cols-3 gap-2 h-auto bg-transparent p-0">
+          <Skeleton className="h-10 rounded" />
+          <Skeleton className="h-10 rounded" />
+          <Skeleton className="h-10 rounded" />
+        </div>
+        <Skeleton className="h-px w-full bg-divider" />
+      </div>
+
+      {/* Tab content */}
+      <div className="p-6 space-y-6">
+        {/* Section header */}
+        <div className="space-y-2">
+          <Skeleton className="h-7 w-40 rounded" />
+          <Skeleton className="h-4 w-80 rounded" />
+        </div>
+
+        {/* Billing portal section */}
+        <div className="space-y-4">
+          <Skeleton className="h-10 w-64 rounded bg-interactive/20" />
+          <Skeleton className="h-4 w-96 rounded" />
+        </div>
+
+        {/* Pricing grid placeholder */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={`pricing-${i}`} className="border border-divider rounded-lg p-6 space-y-4">
+              <div className="space-y-2">
+                <Skeleton className="h-6 w-24 rounded" />
+                <Skeleton className="h-8 w-32 rounded" />
+                <Skeleton className="h-4 w-full rounded" />
+              </div>
+              <div className="space-y-2">
+                {Array.from({ length: 4 }).map((_, j) => (
+                  <div key={`feature-${j}`} className="flex items-center space-x-2">
+                    <Skeleton className="h-4 w-4 rounded" />
+                    <Skeleton className="h-4 flex-1 rounded" />
+                  </div>
+                ))}
+              </div>
+              <Skeleton className="h-10 w-full rounded bg-interactive/20" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * @component ProfileSkeleton
+ * @category molecule
+ * @subcategory loading
+ * @description Displays a skeleton loading state for user profile settings pages.
+ */
+export function ProfileSkeleton({ className }: { className?: string }) {
+  return (
+    <div className={cn('w-full space-y-6', className)}>
+      {/* Header */}
+      <div className="space-y-2">
+        <Skeleton className="h-8 w-40 rounded" />
+        <Skeleton className="h-4 w-64 rounded" />
+      </div>
+
+      {/* Profile sections */}
+      <div className="space-y-6">
+        {/* Profile picture and basic info */}
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-32 rounded border-b border-divider pb-2" />
+          <div className="flex items-start space-x-6">
+            <Skeleton className="h-20 w-20 rounded-full" />
+            <div className="space-y-3 flex-1">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-20 rounded" />
+                <Skeleton className="h-10 w-full rounded border border-input" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24 rounded" />
+                <Skeleton className="h-10 w-full rounded border border-input" />
+              </div>
+            </div>
+          </div>
+          <Skeleton className="h-10 w-32 rounded bg-primary/20" />
+        </div>
+
+        {/* Email addresses section */}
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-36 rounded border-b border-divider pb-2" />
+          <div className="space-y-3">
+            <div className="flex items-center justify-between p-3 border border-input rounded">
+              <div className="space-y-1">
+                <Skeleton className="h-4 w-48 rounded" />
+                <Skeleton className="h-3 w-24 rounded" />
+              </div>
+              <Skeleton className="h-8 w-20 rounded" />
+            </div>
+            <Skeleton className="h-10 w-40 rounded bg-primary/20" />
+          </div>
+        </div>
+
+        {/* Security section */}
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-24 rounded border-b border-divider pb-2" />
+          <div className="space-y-3">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-28 rounded" />
+              <Skeleton className="h-10 w-full rounded border border-input" />
+            </div>
+            <Skeleton className="h-10 w-40 rounded bg-primary/20" />
+          </div>
+        </div>
+
+        {/* Connected accounts section */}
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-44 rounded border-b border-divider pb-2" />
+          <div className="space-y-3">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div
+                key={`account-${i}`}
+                className="flex items-center justify-between p-3 border border-input rounded"
+              >
+                <div className="flex items-center space-x-3">
+                  <Skeleton className="h-8 w-8 rounded" />
+                  <div className="space-y-1">
+                    <Skeleton className="h-4 w-24 rounded" />
+                    <Skeleton className="h-3 w-32 rounded" />
+                  </div>
+                </div>
+                <Skeleton className="h-8 w-20 rounded" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Sign out section */}
+      <div className="pt-4 border-t border-divider">
+        <Skeleton className="h-10 w-24 rounded border border-input" />
+      </div>
+    </div>
+  );
+}
+
 export default LoadingSkeleton;

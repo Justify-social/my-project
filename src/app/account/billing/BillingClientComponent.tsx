@@ -9,6 +9,7 @@ import FaqSection from '@/components/billing/FaqSection';
 import { useUser } from '@clerk/nextjs';
 import { loadStripe } from '@stripe/stripe-js'; // Still needed for redirect
 import { Separator } from '@/components/ui/separator';
+import { BillingSkeleton } from '@/components/ui/loading-skeleton';
 
 // Load Stripe outside component render
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
@@ -100,6 +101,11 @@ export default function BillingClientComponent() {
     }
   };
   // --- END FE-Redirect ---
+
+  // Show loading skeleton while user data is loading
+  if (!isUserLoaded) {
+    return <BillingSkeleton />;
+  }
 
   return (
     <div className="space-y-6">

@@ -207,7 +207,9 @@ export const mapInsightIQProfileToInfluencerProfileData = (
   const platformEnum = mapInsightIQPlatformToEnum(profile.work_platform?.name);
 
   logger.debug('[mapInsightIQProfileToInfluencerProfileData] Raw InsightIQ Profile:', profile);
-  const calculatedScore = calculateFullJustifyScore(profile as Parameters<typeof calculateFullJustifyScore>[0]);
+  const calculatedScore = calculateFullJustifyScore(
+    profile as Parameters<typeof calculateFullJustifyScore>[0]
+  );
   logger.debug(
     `[mapInsightIQProfileToInfluencerProfileData] Calculated Score for ${uniqueId}: ${calculatedScore}`
   );
@@ -215,21 +217,21 @@ export const mapInsightIQProfileToInfluencerProfileData = (
   // Extract audience demographics from InsightIQ profile with analytics
   const audienceDemographics = profile.audience
     ? {
-      countries: profile.audience.countries || [],
-      cities: profile.audience.cities || [],
-      gender_age_distribution: (profile.audience.gender_age_distribution || []) as unknown,
-      // Add other audience fields from InsightIQ API
-      ethnicities: profile.audience.ethnicities || [],
-      languages: profile.audience.languages || [],
-      brand_affinity: profile.audience.brand_affinity || [],
-      interests: profile.audience.interests || [],
-      follower_types: profile.audience.follower_types || [],
-      credibility_score: profile.audience.credibility_score,
-      credibility_score_band: profile.audience.credibility_score_band || [],
-      significant_followers_percentage: profile.audience.significant_followers_percentage,
-      significant_followers: profile.audience.significant_followers,
-      lookalikes: profile.audience.lookalikes || [],
-    }
+        countries: profile.audience.countries || [],
+        cities: profile.audience.cities || [],
+        gender_age_distribution: (profile.audience.gender_age_distribution || null) as any,
+        // Add other audience fields from InsightIQ API
+        ethnicities: profile.audience.ethnicities || [],
+        languages: profile.audience.languages || [],
+        brand_affinity: profile.audience.brand_affinity || [],
+        interests: profile.audience.interests || [],
+        follower_types: profile.audience.follower_types || [],
+        credibility_score: profile.audience.credibility_score,
+        credibility_score_band: profile.audience.credibility_score_band || [],
+        significant_followers_percentage: profile.audience.significant_followers_percentage,
+        significant_followers: profile.audience.significant_followers,
+        lookalikes: profile.audience.lookalikes || [],
+      }
     : null;
 
   // Extract engagement metrics from InsightIQ profile with analytics
@@ -290,10 +292,10 @@ export const mapInsightIQProfileToInfluencerProfileData = (
   // Extract location data
   const locationData = profile.location
     ? {
-      city: profile.location.city || null,
-      state: profile.location.state || null,
-      country: profile.location.country || null,
-    }
+        city: profile.location.city || null,
+        state: profile.location.state || null,
+        country: profile.location.country || null,
+      }
     : null;
 
   // Extract audience likers data (separate from followers)
