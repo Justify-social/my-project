@@ -3,14 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDebouncedCallback } from 'use-debounce';
-import {
-  useForm,
-  useFieldArray,
-  UseFormReturn,
-  FormProvider,
-  useFormContext,
-  ControllerRenderProps,
-} from 'react-hook-form';
+import { useForm, useFieldArray, FormProvider, ControllerRenderProps } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWizard } from '@/components/features/campaigns/WizardContext';
@@ -65,7 +58,9 @@ import {
   CommandList,
 } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import { InfluencerSearchEntry } from './InfluencerSearchEntry';
 
 if (process.env.NODE_ENV === 'development') {
   console.log('[DEBUG] PrismaCurrency.GBP:', PrismaCurrency.GBP);
@@ -100,75 +95,6 @@ const showErrorToast = (message: string, iconId?: string) => {
 /** Parses a formatted currency string back into a raw number string. */
 const parseCurrencyInput = (formattedValue: string): string => {
   return formattedValue.replace(/[^\d]/g, ''); // Remove non-digits (commas, etc.)
-};
-
-// --- Influencer Entry Component ---
-interface InfluencerEntryProps {
-  index: number;
-  control: UseFormReturn<Step1FormData>['control'];
-  errors: UseFormReturn<Step1FormData>['formState']['errors'];
-  remove: (index: number) => void;
-}
-
-const InfluencerEntry: React.FC<InfluencerEntryProps> = ({ index, control, errors, remove }) => {
-  const { watch: _watch } = useFormContext<Step1FormData>();
-
-  return (
-    <Card className="mb-4 border-border bg-card/50 relative overflow-hidden">
-      <CardContent className="p-4 space-y-4">
-        <div className="flex justify-end absolute top-2 right-2">
-          <IconButtonAction
-            iconBaseName="faTrashCan"
-            hoverColorClass="text-destructive"
-            ariaLabel="Remove Influencer"
-            className="h-7 w-7"
-            onClick={() => remove(index)}
-          />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-          <FormField
-            control={control}
-            name={`Influencer.${index}.platform`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Platform *</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select platform" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {Object.values(PlatformEnum).map(platformValue => (
-                      <SelectItem key={platformValue} value={platformValue}>
-                        {getPlatformDisplayName(platformValue)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage>{errors.Influencer?.[index]?.platform?.message}</FormMessage>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name={`Influencer.${index}.handle`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Handle / Username *</FormLabel>
-                <div className="flex items-center space-x-2">
-                  <FormControl className="flex-grow">
-                    <Input placeholder="@username or channel_name" {...field} />
-                  </FormControl>
-                </div>
-                <FormMessage>{errors.Influencer?.[index]?.handle?.message}</FormMessage>
-              </FormItem>
-            )}
-          />
-        </div>
-      </CardContent>
-    </Card>
-  );
 };
 
 // Helper types
@@ -282,29 +208,39 @@ const getCurrencySymbol = (currencyCode?: string | null): string => {
   }
 };
 
-// Helper function to get display name for PlatformEnum
-const getPlatformDisplayName = (platform: PlatformEnum): string => {
-  switch (platform) {
-    case PlatformEnum.Instagram:
-      return 'Instagram';
-    case PlatformEnum.YouTube:
-      return 'YouTube';
-    case PlatformEnum.TikTok:
-      return 'TikTok';
-    case PlatformEnum.Twitter:
-      return 'Twitter/X';
-    case PlatformEnum.Facebook:
-      return 'Facebook';
-    case PlatformEnum.Twitch:
-      return 'Twitch';
-    case PlatformEnum.Pinterest:
-      return 'Pinterest';
-    case PlatformEnum.LinkedIn:
-      return 'LinkedIn';
-    default:
-      return platform; // Fallback to the key name
-  }
-};
+// Curated platforms with icons (alphabetical order, excluding Twitch and Pinterest)
+const supportedPlatforms = [
+  {
+    value: PlatformEnum.Facebook,
+    label: 'Facebook',
+    iconId: 'brandsFacebook',
+  },
+  {
+    value: PlatformEnum.Instagram,
+    label: 'Instagram',
+    iconId: 'brandsInstagram',
+  },
+  {
+    value: PlatformEnum.LinkedIn,
+    label: 'LinkedIn',
+    iconId: 'brandsLinkedin',
+  },
+  {
+    value: PlatformEnum.TikTok,
+    label: 'TikTok',
+    iconId: 'brandsTiktok',
+  },
+  {
+    value: PlatformEnum.Twitter,
+    label: 'Twitter/X',
+    iconId: 'brandsXTwitter',
+  },
+  {
+    value: PlatformEnum.YouTube,
+    label: 'YouTube',
+    iconId: 'brandsYoutube',
+  },
+];
 
 // --- TimeZone FormField Internal Component ---
 const TimeZoneFormFieldContent: React.FC<{
@@ -852,7 +788,7 @@ function Step1Content() {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmitAndNavigate)}
-          className="space-y-8"
+          className="space-y-8 pb-12"
           id={`wizard-step-1-form`}
         >
           {/* Campaign Details Card */}
@@ -1182,6 +1118,117 @@ function Step1Content() {
                   />
                 </div>
               </div>
+
+              {/* Additional Contacts Section */}
+              {_contactFields.length > 0 && (
+                <div className="p-4 border rounded-md bg-muted/30">
+                  <h4 className="font-medium mb-3 text-sm text-muted-foreground">
+                    Additional Contacts
+                  </h4>
+                  <div className="space-y-4">
+                    {_contactFields.map((field, index) => (
+                      <Card key={field.id} className="border-border bg-card/50 relative">
+                        <CardContent className="p-4 space-y-4">
+                          <div className="flex justify-end absolute top-2 right-2">
+                            <IconButtonAction
+                              iconBaseName="faTrashCan"
+                              hoverColorClass="text-destructive"
+                              ariaLabel="Remove Contact"
+                              className="h-7 w-7"
+                              onClick={() => _removeContact(index)}
+                            />
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                            <FormField
+                              control={form.control}
+                              name={`additionalContacts.${index}.firstName`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>First Name</FormLabel>
+                                  <FormControl>
+                                    <Input {...field} value={field.value ?? ''} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name={`additionalContacts.${index}.surname`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Surname</FormLabel>
+                                  <FormControl>
+                                    <Input {...field} value={field.value ?? ''} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name={`additionalContacts.${index}.email`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Email</FormLabel>
+                                  <FormControl>
+                                    <Input type="email" {...field} value={field.value ?? ''} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name={`additionalContacts.${index}.position`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Position</FormLabel>
+                                  <Select onValueChange={field.onChange} value={field.value}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select position..." />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {Object.values(PrismaPosition).map(option => (
+                                        <SelectItem key={option} value={option}>
+                                          {option}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Add Contact Button */}
+              <div className="flex justify-start">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    _appendContact({
+                      firstName: '',
+                      surname: '',
+                      email: '',
+                      position: PrismaPosition.Director,
+                    })
+                  }
+                >
+                  <Icon iconId="faPlusLight" className="mr-2 h-4 w-4" />
+                  Add Contact
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
@@ -1192,107 +1239,152 @@ function Step1Content() {
               <CardDescription>Set the budget for the campaign.</CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="md:col-span-1">
-                <FormField
-                  control={form.control}
-                  name="budget.currency"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Currency *</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value || ''}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select currency..." />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {Object.values(PrismaCurrency).map(option => (
-                            <SelectItem key={option} value={option}>
-                              {option}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="md:col-span-1"></div>
-              <div className="md:col-span-1">
-                <FormField
-                  control={form.control}
-                  name="budget.total"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Total Budget *</FormLabel>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                          {currencySymbol}
-                        </span>
-                        <FormControl>
-                          <Input
-                            type="text"
-                            placeholder="0"
-                            className="pl-7"
-                            {...field}
-                            value={formatNumberWithCommas(field.value)}
-                            onChange={e => {
-                              field.onChange(parseFormattedNumber(e.target.value));
-                            }}
-                            onFocus={e => {
-                              if (e.target.value === '0') {
-                                e.target.select();
-                              }
-                            }}
-                          />
-                        </FormControl>
-                      </div>
-                      {_convertedTotalBudget && (
-                        <FormDescription>{_convertedTotalBudget}</FormDescription>
-                      )}
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="md:col-span-1">
-                <FormField
-                  control={form.control}
-                  name="budget.socialMedia"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Social Media Budget *</FormLabel>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                          {currencySymbol}
-                        </span>
-                        <FormControl>
-                          <Input
-                            type="text"
-                            placeholder="0"
-                            className="pl-7"
-                            {...field}
-                            value={formatNumberWithCommas(field.value)}
-                            onChange={e => {
-                              field.onChange(parseFormattedNumber(e.target.value));
-                            }}
-                            onFocus={e => {
-                              if (e.target.value === '0') {
-                                e.target.select();
-                              }
-                            }}
-                          />
-                        </FormControl>
-                      </div>
-                      {_convertedSocialMediaBudget && (
-                        <FormDescription>{_convertedSocialMediaBudget}</FormDescription>
-                      )}
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <TooltipProvider delayDuration={300}>
+                <div className="md:col-span-1">
+                  <FormField
+                    control={form.control}
+                    name="budget.currency"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Currency *</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value || ''}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select currency..." />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {Object.values(PrismaCurrency).map(option => (
+                              <SelectItem key={option} value={option}>
+                                {option}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="md:col-span-1"></div>
+                <div className="md:col-span-1">
+                  <FormField
+                    control={form.control}
+                    name="budget.total"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center">
+                          Total Budget *
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="cursor-help ml-2">
+                                <Icon
+                                  iconId="faCircleInfoLight"
+                                  className="h-3.5 w-3.5 text-muted-foreground opacity-70"
+                                />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" align="start" className="max-w-xs z-50 p-3">
+                              <p className="text-sm whitespace-normal">
+                                The total campaign budget covering all expenses including influencer
+                                fees, content creation, advertising spend, and operational costs.
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </FormLabel>
+                        <div className="relative">
+                          <span
+                            className="absolute left-3 top-0 h-full flex items-center text-muted-foreground"
+                            style={{ lineHeight: '1' }}
+                          >
+                            {currencySymbol}
+                          </span>
+                          <FormControl>
+                            <Input
+                              type="text"
+                              placeholder="0"
+                              className="pl-7"
+                              {...field}
+                              value={formatNumberWithCommas(field.value)}
+                              onChange={e => {
+                                field.onChange(parseFormattedNumber(e.target.value));
+                              }}
+                              onFocus={e => {
+                                if (e.target.value === '0') {
+                                  e.target.select();
+                                }
+                              }}
+                            />
+                          </FormControl>
+                        </div>
+                        {_convertedTotalBudget && (
+                          <FormDescription>{_convertedTotalBudget}</FormDescription>
+                        )}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="md:col-span-1">
+                  <FormField
+                    control={form.control}
+                    name="budget.socialMedia"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center">
+                          Social Media Budget *
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="cursor-help ml-2">
+                                <Icon
+                                  iconId="faCircleInfoLight"
+                                  className="h-3.5 w-3.5 text-muted-foreground opacity-70"
+                                />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" align="start" className="max-w-xs z-50 p-3">
+                              <p className="text-sm whitespace-normal">
+                                The portion of total budget specifically allocated to social media
+                                activities including influencer partnerships, sponsored posts, and
+                                social advertising.
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </FormLabel>
+                        <div className="relative">
+                          <span
+                            className="absolute left-3 top-0 h-full flex items-center text-muted-foreground"
+                            style={{ lineHeight: '1' }}
+                          >
+                            {currencySymbol}
+                          </span>
+                          <FormControl>
+                            <Input
+                              type="text"
+                              placeholder="0"
+                              className="pl-7"
+                              {...field}
+                              value={formatNumberWithCommas(field.value)}
+                              onChange={e => {
+                                field.onChange(parseFormattedNumber(e.target.value));
+                              }}
+                              onFocus={e => {
+                                if (e.target.value === '0') {
+                                  e.target.select();
+                                }
+                              }}
+                            />
+                          </FormControl>
+                        </div>
+                        {_convertedSocialMediaBudget && (
+                          <FormDescription>{_convertedSocialMediaBudget}</FormDescription>
+                        )}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </TooltipProvider>
             </CardContent>
           </Card>
 
@@ -1306,7 +1398,7 @@ function Step1Content() {
             </CardHeader>
             <CardContent>
               {influencerFields.map((field, index) => (
-                <InfluencerEntry
+                <InfluencerSearchEntry
                   key={field.fieldId}
                   index={index}
                   control={form.control}

@@ -286,8 +286,8 @@ main {
 
 /* 
   CLEAN FONT HIERARCHY (SSOT):
-  - Sora: h1, h2, h3 + ALL BUTTONS (headings and interactive elements)
-  - Inter: EVERYTHING ELSE (sidebar, navigation, body text)
+  - Sora: h1, h2, h3 ONLY (headings)
+  - Inter: EVERYTHING ELSE (sidebar, navigation, body text, buttons)
 */
 
 /* 1. Set Inter as default for all elements */
@@ -304,14 +304,14 @@ h3 {
   font-family: 'Sora', sans-serif !important;
 }
 
-/* 3. Override ALL buttons to use Sora */
+/* 3. Ensure ALL buttons use Inter (consistent with body text) */
 button,
 .btn,
 [role='button'],
 input[type='button'],
 input[type='submit'],
 input[type='reset'] {
-  font-family: 'Sora', sans-serif !important;
+  font-family: 'Inter', sans-serif !important;
 }
 
 /* 4. Ensure sidebar uses Inter (override any conflicts) */
