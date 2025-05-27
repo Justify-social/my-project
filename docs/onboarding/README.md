@@ -33,7 +33,7 @@ This section provides a structured onboarding journey for new developers, design
 #### **✅ Repository Setup**
 
 - [ ] **Clone repository**: `git clone [repository-url]`
-- [ ] **Install dependencies**: `npm install`
+- [ ] **Install dependencies**: `npm install --legacy-peer-deps`
 - [ ] **Environment configuration**: Copy `.env.example` to `.env.local`
 - [ ] **Database setup**: `npx prisma migrate dev`
 - [ ] **Development server**: `npm run dev` successfully running

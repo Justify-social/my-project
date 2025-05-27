@@ -1,5 +1,6 @@
 const { defineConfig } = require('cypress');
 const { clerkSetup } = require('@clerk/testing/cypress');
+const { sharedE2EConfig } = require('./config/cypress/cypress.base.config');
 
 // Load environment variables from .env file
 require('dotenv').config();
@@ -9,6 +10,9 @@ module.exports = defineConfig({
   projectId: process.env.CYPRESS_PROJECT_ID,
 
   e2e: {
+    // Use shared configuration for SSOT compliance
+    ...sharedE2EConfig,
+
     setupNodeEvents(on, config) {
       // Set Cypress environment flag
       process.env.CYPRESS_ENV = 'true';
@@ -54,23 +58,6 @@ module.exports = defineConfig({
         );
         return config;
       }
-    },
-    baseUrl: 'http://localhost:3000',
-    specPattern: 'config/cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
-    supportFile: 'config/cypress/support/e2e.js',
-    fixturesFolder: 'config/cypress/fixtures',
-    // Enhanced configuration for better performance and reliability
-    video: false,
-    screenshotOnRunFailure: false,
-    defaultCommandTimeout: 10000,
-    pageLoadTimeout: 30000,
-    requestTimeout: 10000,
-    responseTimeout: 10000,
-    viewportWidth: 1280,
-    viewportHeight: 720,
-    retries: {
-      runMode: 1,
-      openMode: 0,
     },
   },
 });

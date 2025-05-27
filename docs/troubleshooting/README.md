@@ -47,7 +47,7 @@ flowchart TD
     C -->|Yes| E[Change Port: npm run dev -- -p 3001]
     C -->|No| F{Dependencies Installed?}
 
-    F -->|No| G[Run: npm install]
+    F -->|No| G[Run: npm install --legacy-peer-deps --legacy-peer-deps --legacy-peer-deps --legacy-peer-deps]
     F -->|Yes| H{Node Version Correct?}
 
     H -->|No| I[Update to Node 18+]
@@ -122,7 +122,7 @@ npm run dev -- -p 3001
 ```bash
 # Clear node_modules and reinstall
 rm -rf node_modules package-lock.json
-npm install
+npm install --legacy-peer-deps
 
 # Clear Next.js cache
 rm -rf .next

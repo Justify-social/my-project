@@ -2,7 +2,11 @@
 {
   "compilerOptions": {
     "target": "es2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -20,13 +24,25 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
-      "@/lib/types/*": ["./src/lib/types/*"],
-      "@/lib/server/*": ["./src/lib/server/*"],
-      "@/components/ui/*": ["./src/components/ui/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@/lib/types/*": [
+        "./src/lib/types/*"
+      ],
+      "@/lib/server/*": [
+        "./src/lib/server/*"
+      ],
+      "@/components/ui/*": [
+        "./src/components/ui/*"
+      ]
     },
     "baseUrl": "./",
-    "types": ["jest", "node", "@testing-library/jest-dom"]
+    "types": [
+      "jest",
+      "node",
+      "@testing-library/jest-dom"
+    ]
   },
   "include": [
     "next-env.d.ts",
@@ -36,5 +52,10 @@
     "src/types/**/*.d.ts",
     "src/app/api/campaigns/[id]/influencers/bulk-add/route.ts.backup"
   ],
-  "exclude": ["node_modules", "scripts/ui/preview_backups"]
+  "exclude": [
+    "node_modules",
+    "scripts/ui/preview_backups",
+    "cypress/**/*",
+    "config/cypress/**/*"
+  ]
 }

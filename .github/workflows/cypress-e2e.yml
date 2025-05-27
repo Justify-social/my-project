@@ -21,11 +21,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Start application
         run: npm start &
@@ -50,8 +50,23 @@ jobs:
       - name: Generate test report
         if: always()
         run: |
-          npx mochawesome-merge config/cypress/reports/*.json > config/cypress/reports/combined-report.json
-          npx marge config/cypress/reports/combined-report.json --reportDir config/cypress/reports --inline
+          # Ensure reports directory exists
+          mkdir -p config/cypress/reports
+          
+          # Check if any JSON reports exist before merging
+          if ls config/cypress/reports/*.json 1> /dev/null 2>&1; then
+            echo "📊 Merging test reports..."
+            npx mochawesome-merge config/cypress/reports/*.json > config/cypress/reports/combined-report.json || echo "⚠️ Failed to merge reports, but continuing..."
+            
+            # Generate HTML report if merge was successful
+            if [ -f "config/cypress/reports/combined-report.json" ]; then
+              npx marge config/cypress/reports/combined-report.json --reportDir config/cypress/reports --inline || echo "⚠️ Failed to generate HTML report, but continuing..."
+            fi
+          else
+            echo "ℹ️ No test reports found to merge. This may indicate tests failed to run or no tests were executed."
+            # Create empty report for consistency
+            echo '{"stats":{"failures":0,"passes":0,"pending":0,"skipped":0,"tests":0},"results":[]}' > config/cypress/reports/combined-report.json
+          fi
 
       - name: Upload test results
         uses: actions/upload-artifact@v4

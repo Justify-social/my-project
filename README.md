@@ -123,7 +123,7 @@ Our application is a marketing intelligence platform that helps brands measure t
 2. **Install dependencies**
 
    ```bash
-   npm install
+   npm install --legacy-peer-deps
    ```
 
 3. **Environment setup**

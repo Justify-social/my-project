@@ -156,26 +156,26 @@ const AudienceAnalyticsSection: React.FC<AudienceAnalyticsSectionProps> = ({ inf
             <div className="text-sm font-medium text-success mb-2">
               Estimated Collaboration Cost
             </div>
-            {(pricingData.pricing as Record<string, unknown>).post_type && (
+            {(pricingData.pricing as Record<string, unknown>).post_type ? (
               <div className="grid grid-cols-2 gap-2 text-xs">
                 {Object.entries(
                   (pricingData.pricing as Record<string, unknown>).post_type as Record<
                     string,
-                    unknown
+                    PricingRange
                   >
-                ).map(([type, range]: [string, unknown]) => (
+                ).map(([type, range]: [string, PricingRange]) => (
                   <div key={type} className="flex justify-between">
                     <span className="capitalize text-muted-foreground">
                       {type.replace('_', ' ')}:
                     </span>
                     <span className="font-medium">
-                      ${(range as { min?: number; max?: number }).min?.toLocaleString()} - $
-                      {(range as { min?: number; max?: number }).max?.toLocaleString()}
+                      ${range.min?.toLocaleString() || '0'} - $
+                      {range.max?.toLocaleString() || '0'}
                     </span>
                   </div>
                 ))}
               </div>
-            )}
+            ) : null}
           </div>
         )}
 
@@ -282,9 +282,8 @@ const AudienceAnalyticsSection: React.FC<AudienceAnalyticsSectionProps> = ({ inf
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <div
-                    className={`w-3 h-3 rounded-full ${
-                      isPositive ? 'bg-success' : isNegative ? 'bg-destructive' : 'bg-warning'
-                    }`}
+                    className={`w-3 h-3 rounded-full ${isPositive ? 'bg-success' : isNegative ? 'bg-destructive' : 'bg-warning'
+                      }`}
                   />
                   <span className="text-sm font-medium capitalize">
                     {type.name.toLowerCase().replace('_', ' ')}
@@ -294,13 +293,12 @@ const AudienceAnalyticsSection: React.FC<AudienceAnalyticsSectionProps> = ({ inf
               </div>
               <Progress
                 value={type.value}
-                className={`h-2 ${
-                  isPositive
-                    ? '[&>div]:bg-success'
-                    : isNegative
-                      ? '[&>div]:bg-destructive'
-                      : '[&>div]:bg-warning'
-                }`}
+                className={`h-2 ${isPositive
+                  ? '[&>div]:bg-success'
+                  : isNegative
+                    ? '[&>div]:bg-destructive'
+                    : '[&>div]:bg-warning'
+                  }`}
               />
             </div>
           );

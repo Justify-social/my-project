@@ -1,36 +1,27 @@
 const { defineConfig } = require('cypress');
+const { sharedE2EConfig, sharedReporterOptions } = require('./cypress.base.config');
 
 module.exports = defineConfig({
   e2e: {
-    // Base URL
-    baseUrl: 'http://localhost:3000',
+    // Use shared base configuration for SSOT compliance
+    ...sharedE2EConfig,
 
-    // Parallel execution optimizations
+    // Parallel execution optimizations (overrides)
     numTestsKeptInMemory: 10, // Reduced for parallel runs
-    video: false, // Disable video for parallel runs to save resources
-    screenshotOnRunFailure: true,
+    screenshotOnRunFailure: true, // Override shared config for parallel runs
     videosFolder: 'config/cypress/videos',
     screenshotsFolder: 'config/cypress/screenshots',
     downloadsFolder: 'config/cypress/downloads',
-
-    // Test files
-    specPattern: 'config/cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
-    supportFile: 'config/cypress/support/e2e.js',
-    fixturesFolder: 'config/cypress/fixtures',
 
     // Parallel execution settings
     experimentalMemoryManagement: true,
     experimentalStudio: false,
 
-    // Timeouts optimized for CI
+    // Timeouts optimized for CI (override shared timeouts)
     defaultCommandTimeout: 8000,
     pageLoadTimeout: 12000,
     requestTimeout: 8000,
     responseTimeout: 8000,
-
-    // Viewport
-    viewportWidth: 1280,
-    viewportHeight: 720,
 
     // Test isolation for parallel runs
     testIsolation: true,
@@ -42,16 +33,7 @@ module.exports = defineConfig({
     chromeWebSecurity: false,
     modifyObstructiveThirdPartyCode: true,
 
-    // Reporting for parallel runs
-    reporter: 'mochawesome',
-    reporterOptions: {
-      reportDir: 'config/cypress/reports',
-      overwrite: false,
-      html: false,
-      json: true,
-      timestamp: 'isoDateTime',
-      reportFilename: 'cypress-report-[datetime]',
-    },
+    // Reporter options inherited from shared config
 
     // Environment variables
     env: {
