@@ -355,7 +355,12 @@ export const mapInsightIQProfileToInfluencerProfileData = (
   };
 
   // Store the comprehensive InsightIQ data with all extracted analytics
-  (profileData as Record<string, unknown> & InfluencerProfileData).insightiq = {
+  // CRITICAL FIX: Store the RAW InsightIQ data structure that the extractor expects
+  // Instead of restructuring, preserve the original API response format
+  (profileData as Record<string, unknown> & InfluencerProfileData).insightiq = profile;
+
+  // Also store extracted/mapped data for backward compatibility
+  (profileData as Record<string, unknown> & InfluencerProfileData).insightiqMapped = {
     profile: profile,
     audience: {
       ...audienceDemographics,

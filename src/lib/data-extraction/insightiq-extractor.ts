@@ -1052,7 +1052,7 @@ function extractContentData(influencer: InfluencerProfileData): InsightIQExtract
 }
 
 /**
- * Extract Audience Intelligence Data
+ * Extract Audience Intelligence Data with proper name mapping
  */
 function extractAudienceData(
   influencer: InfluencerProfileData
@@ -1062,116 +1062,341 @@ function extractAudienceData(
 
   // Helper function to normalize percentage values
   const normalizePercentage = (value: number): number => {
-    // If value is greater than 1, assume it's already a percentage (26.0 = 26%)
-    // If value is less than or equal to 1, assume it's a decimal (0.26 = 26%)
-    return value > 1 ? value / 100 : value;
+    // CRITICAL FIX: Ensure all values are normalized to decimals (0.35 = 35%)
+    // This prevents double conversion issues in the UI
+    if (value > 1) {
+      // Value is likely already a percentage (35 -> 0.35)
+      return value / 100;
+    }
+    // Value is already a decimal (0.35)
+    return value;
+  };
+
+  // Helper function to normalize gender values
+  const normalizeGender = (gender: string): string => {
+    const genderLower = gender.toLowerCase().trim();
+    if (genderLower === 'female' || genderLower === 'f') return 'Female';
+    if (genderLower === 'male' || genderLower === 'm') return 'Male';
+    if (genderLower === 'other' || genderLower === 'o') return 'Other';
+    // Capitalize first letter for any other gender values
+    return gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase();
+  };
+
+  // Enhanced country mapping with real country names
+  const getCountryName = (code: string): string => {
+    const countryMap: Record<string, string> = {
+      US: 'United States',
+      UK: 'United Kingdom',
+      GB: 'United Kingdom',
+      CA: 'Canada',
+      AU: 'Australia',
+      DE: 'Germany',
+      FR: 'France',
+      IT: 'Italy',
+      ES: 'Spain',
+      NL: 'Netherlands',
+      BR: 'Brazil',
+      MX: 'Mexico',
+      IN: 'India',
+      JP: 'Japan',
+      KR: 'South Korea',
+      CN: 'China',
+      RU: 'Russia',
+      SE: 'Sweden',
+      NO: 'Norway',
+      DK: 'Denmark',
+      FI: 'Finland',
+      CH: 'Switzerland',
+      AT: 'Austria',
+      BE: 'Belgium',
+      IE: 'Ireland',
+      PT: 'Portugal',
+      GR: 'Greece',
+      PL: 'Poland',
+      CZ: 'Czech Republic',
+      HU: 'Hungary',
+      RO: 'Romania',
+      BG: 'Bulgaria',
+      HR: 'Croatia',
+      SI: 'Slovenia',
+      SK: 'Slovakia',
+      LT: 'Lithuania',
+      LV: 'Latvia',
+      EE: 'Estonia',
+      AR: 'Argentina',
+      CL: 'Chile',
+      CO: 'Colombia',
+      PE: 'Peru',
+      VE: 'Venezuela',
+      UY: 'Uruguay',
+      EC: 'Ecuador',
+      BO: 'Bolivia',
+      PY: 'Paraguay',
+      ZA: 'South Africa',
+      EG: 'Egypt',
+      MA: 'Morocco',
+      TN: 'Tunisia',
+      KE: 'Kenya',
+      NG: 'Nigeria',
+      GH: 'Ghana',
+      TH: 'Thailand',
+      VN: 'Vietnam',
+      MY: 'Malaysia',
+      SG: 'Singapore',
+      ID: 'Indonesia',
+      PH: 'Philippines',
+      TW: 'Taiwan',
+      HK: 'Hong Kong',
+      NZ: 'New Zealand',
+      IL: 'Israel',
+      TR: 'Turkey',
+      SA: 'Saudi Arabia',
+      AE: 'United Arab Emirates',
+      QA: 'Qatar',
+      KW: 'Kuwait',
+      BH: 'Bahrain',
+      OM: 'Oman',
+      JO: 'Jordan',
+      LB: 'Lebanon',
+      IQ: 'Iraq',
+      IR: 'Iran',
+      PK: 'Pakistan',
+      BD: 'Bangladesh',
+      LK: 'Sri Lanka',
+      MM: 'Myanmar',
+      KH: 'Cambodia',
+      LA: 'Laos',
+      UZ: 'Uzbekistan',
+      KZ: 'Kazakhstan',
+      KG: 'Kyrgyzstan',
+      TJ: 'Tajikistan',
+      TM: 'Turkmenistan',
+      AF: 'Afghanistan',
+      MN: 'Mongolia',
+      NP: 'Nepal',
+      BT: 'Bhutan',
+      MV: 'Maldives',
+    };
+    return countryMap[code.toUpperCase()] || code.toUpperCase();
+  };
+
+  // Enhanced language mapping with real language names
+  const getLanguageName = (code: string): string => {
+    const languageMap: Record<string, string> = {
+      en: 'English',
+      es: 'Spanish',
+      fr: 'French',
+      de: 'German',
+      it: 'Italian',
+      pt: 'Portuguese',
+      ru: 'Russian',
+      ja: 'Japanese',
+      ko: 'Korean',
+      zh: 'Chinese',
+      ar: 'Arabic',
+      hi: 'Hindi',
+      ur: 'Urdu',
+      bn: 'Bengali',
+      pa: 'Punjabi',
+      te: 'Telugu',
+      ta: 'Tamil',
+      mr: 'Marathi',
+      gu: 'Gujarati',
+      kn: 'Kannada',
+      ml: 'Malayalam',
+      or: 'Odia',
+      as: 'Assamese',
+      nl: 'Dutch',
+      sv: 'Swedish',
+      no: 'Norwegian',
+      da: 'Danish',
+      fi: 'Finnish',
+      pl: 'Polish',
+      cs: 'Czech',
+      sk: 'Slovak',
+      hu: 'Hungarian',
+      ro: 'Romanian',
+      bg: 'Bulgarian',
+      hr: 'Croatian',
+      sr: 'Serbian',
+      sl: 'Slovenian',
+      mk: 'Macedonian',
+      sq: 'Albanian',
+      lt: 'Lithuanian',
+      lv: 'Latvian',
+      et: 'Estonian',
+      mt: 'Maltese',
+      ga: 'Irish',
+      cy: 'Welsh',
+      gd: 'Scottish Gaelic',
+      is: 'Icelandic',
+      fo: 'Faroese',
+      eu: 'Basque',
+      ca: 'Catalan',
+      gl: 'Galician',
+      tr: 'Turkish',
+      he: 'Hebrew',
+      th: 'Thai',
+      vi: 'Vietnamese',
+      ms: 'Malay',
+      id: 'Indonesian',
+      tl: 'Filipino',
+      sw: 'Swahili',
+      am: 'Amharic',
+      ha: 'Hausa',
+      yo: 'Yoruba',
+      ig: 'Igbo',
+      zu: 'Zulu',
+      af: 'Afrikaans',
+      xh: 'Xhosa',
+    };
+    return languageMap[code.toLowerCase()] || code.toUpperCase();
   };
 
   const demographics = {
     countries: (audienceData?.countries || []).map((country: any, index: number) => ({
-      code: country.code,
-      name: country.name,
+      code: country.code || 'UN',
+      name: country.name || getCountryName(country.code || 'UN'),
       value: normalizePercentage(country.value || 0),
       rank: index + 1,
     })),
     cities: (audienceData?.cities || []).map((city: any, index: number) => ({
-      name: city.name,
-      value: normalizePercentage(city.value || 0),
-      country: city.country,
+      name: city.name || city.city || 'Unknown City',
+      value: normalizePercentage(city.value || city.percentage || 0),
+      country: city.country || city.country_code,
       rank: index + 1,
     })),
-    genderAgeDistribution: (audienceData?.gender_age_distribution || []).map((item: any) => ({
-      gender: item.gender,
-      ageRange: item.ageRange,
-      value: normalizePercentage(item.value || 0),
+    genderAgeDistribution: (
+      audienceData?.gender_age_distribution ||
+      audienceData?.genderAge ||
+      []
+    ).map((item: any) => ({
+      gender: normalizeGender(item.gender || item.sex || 'Unknown'),
+      ageRange: item.ageRange || item.age_range || item.age || 'Unknown',
+      value: normalizePercentage(item.value || item.percentage || 0),
       interests: item.interests || [],
     })),
     ethnicities: (audienceData?.ethnicities || []).map((ethnicity: any) => ({
-      name: ethnicity.name,
-      value: normalizePercentage(ethnicity.value || 0),
+      name: ethnicity.name || ethnicity.ethnicity || 'Unknown',
+      value: normalizePercentage(ethnicity.value || ethnicity.percentage || 0),
       region: ethnicity.region,
     })),
     languages: (audienceData?.languages || []).map((language: any, index: number) => ({
-      code: language.code,
-      name: language.name,
-      value: normalizePercentage(language.value || 0),
+      code: language.code || language.lang || 'en',
+      name: language.name || getLanguageName(language.code || language.lang || 'en'),
+      value: normalizePercentage(language.value || language.percentage || 0),
       primary: index === 0,
     })),
     occupations: (audienceData?.occupations || []).map((occupation: any) => ({
-      name: occupation.name,
-      value: normalizePercentage(occupation.value || 0),
-      industry: occupation.industry,
+      name: occupation.name || occupation.job || occupation.profession || 'Unknown',
+      value: normalizePercentage(occupation.value || occupation.percentage || 0),
+      industry: occupation.industry || occupation.sector,
     })),
-    incomeDistribution: (audienceData?.income_distribution || []).map((income: any) => ({
-      range: income.range,
-      percentage: normalizePercentage(income.percentage || 0),
-    })),
-    educationLevels: (audienceData?.education_levels || []).map((education: any) => ({
-      level: education.level,
-      percentage: normalizePercentage(education.percentage || 0),
-    })),
+    incomeDistribution: (audienceData?.income_distribution || audienceData?.income || []).map(
+      (income: any) => ({
+        range: income.range || income.bracket || 'Unknown',
+        percentage: normalizePercentage(income.percentage || income.value || 0),
+      })
+    ),
+    educationLevels: (audienceData?.education_levels || audienceData?.education || []).map(
+      (education: any) => ({
+        level: education.level || education.degree || 'Unknown',
+        percentage: normalizePercentage(education.percentage || education.value || 0),
+      })
+    ),
   };
 
   const likers = {
     significantLikersPercentage:
-      audienceData?.audienceLikers?.significant_likers_percentage || null,
-    credibilityScore: audienceData?.audienceLikers?.credibility_score || null,
-    significantLikers: (audienceData?.audienceLikers?.significant_likers || []).map(
-      (liker: any) => ({
-        platformUsername: liker.platformUsername,
-        imageUrl: liker.imageUrl,
-        isVerified: liker.isVerified,
-        followerCount: liker.followerCount,
-        influence: liker.influence || ('MEDIUM' as const),
-        niche: liker.niche,
-      })
-    ),
-    countries: (audienceData?.audienceLikers?.countries || []).map((country: any) => ({
-      code: country.code,
+      audienceData?.audienceLikers?.significant_likers_percentage ||
+      audienceData?.likers?.significant_percentage ||
+      null,
+    credibilityScore:
+      audienceData?.audienceLikers?.credibility_score || audienceData?.likers?.credibility || null,
+    significantLikers: (
+      audienceData?.audienceLikers?.significant_likers ||
+      audienceData?.likers?.significant ||
+      []
+    ).map((liker: any) => ({
+      platformUsername: liker.platformUsername || liker.username || liker.handle,
+      imageUrl: liker.imageUrl || liker.avatar || liker.profile_picture,
+      isVerified: liker.isVerified || liker.verified || false,
+      followerCount: liker.followerCount || liker.followers,
+      influence: liker.influence || ('MEDIUM' as const),
+      niche: liker.niche || liker.category,
+    })),
+    countries: (
+      audienceData?.audienceLikers?.countries ||
+      audienceData?.likers?.countries ||
+      []
+    ).map((country: any) => ({
+      code: country.code || 'UN',
       value: normalizePercentage(country.value || 0),
     })),
-    averageEngagementOfLikers: audienceData?.audienceLikers?.average_engagement || null,
-    likerGrowthRate: audienceData?.audienceLikers?.growth_rate || null,
+    averageEngagementOfLikers:
+      audienceData?.audienceLikers?.average_engagement ||
+      audienceData?.likers?.avg_engagement ||
+      null,
+    likerGrowthRate:
+      audienceData?.audienceLikers?.growth_rate || audienceData?.likers?.growth || null,
   };
 
   const behavior = {
-    peakActivityHours: audienceData?.behavior?.peak_activity_hours || [],
-    deviceUsage: (audienceData?.behavior?.device_usage || []).map((device: any) => ({
-      device: device.device,
-      percentage: normalizePercentage(device.percentage || 0),
-    })),
-    platformCrossover: (audienceData?.behavior?.platform_crossover || []).map((platform: any) => ({
-      platform: platform.platform,
-      percentage: normalizePercentage(platform.percentage || 0),
+    peakActivityHours:
+      audienceData?.behavior?.peak_activity_hours || audienceData?.activity?.peak_hours || [],
+    deviceUsage: (audienceData?.behavior?.device_usage || audienceData?.devices || []).map(
+      (device: any) => ({
+        device: device.device || device.type || 'Unknown',
+        percentage: normalizePercentage(device.percentage || device.value || 0),
+      })
+    ),
+    platformCrossover: (
+      audienceData?.behavior?.platform_crossover ||
+      audienceData?.platforms ||
+      []
+    ).map((platform: any) => ({
+      platform: platform.platform || platform.name || 'Unknown',
+      percentage: normalizePercentage(platform.percentage || platform.value || 0),
     })),
     shoppingBehavior: {
-      onlineShopping: audienceData?.behavior?.shopping_behavior?.online_shopping || null,
-      brandLoyalty: audienceData?.behavior?.shopping_behavior?.brand_loyalty || null,
-      purchaseInfluence: audienceData?.behavior?.shopping_behavior?.purchase_influence || null,
+      onlineShopping:
+        audienceData?.behavior?.shopping_behavior?.online_shopping ||
+        audienceData?.shopping?.online ||
+        null,
+      brandLoyalty:
+        audienceData?.behavior?.shopping_behavior?.brand_loyalty ||
+        audienceData?.shopping?.loyalty ||
+        null,
+      purchaseInfluence:
+        audienceData?.behavior?.shopping_behavior?.purchase_influence ||
+        audienceData?.shopping?.influence ||
+        null,
     },
   };
 
   return {
     demographics,
     interests: (audienceData?.interests || []).map((interest: any) => ({
-      name: interest.name,
-      value: normalizePercentage(interest.value || 0),
-      category: interest.category,
-      trendingScore: interest.trending_score,
+      name: interest.name || interest.topic || interest.category || 'Unknown',
+      value: normalizePercentage(interest.value || interest.percentage || 0),
+      category: interest.category || interest.type,
+      trendingScore: interest.trending_score || interest.trend,
     })),
-    brandAffinity: (audienceData?.brand_affinity || []).map((brand: any) => ({
-      name: brand.name,
-      value: normalizePercentage(brand.value || 0),
-      category: brand.category,
-      logoUrl: brand.logoUrl,
-      industry: brand.industry,
-      priceRange: brand.price_range,
-    })),
+    brandAffinity: (audienceData?.brand_affinity || audienceData?.brands || []).map(
+      (brand: any) => ({
+        name: brand.name || brand.brand || 'Unknown Brand',
+        value: normalizePercentage(brand.value || brand.percentage || 0),
+        category: brand.category || brand.type,
+        logoUrl: brand.logoUrl || brand.logo,
+        industry: brand.industry || brand.sector,
+        priceRange: brand.price_range || brand.pricing,
+      })
+    ),
     credibilityBand: (audienceData?.credibility_score_band || []).map(
       (band: any, index: number) => ({
-        min: band.min,
-        max: band.max,
-        totalProfileCount: band.totalProfileCount,
+        min: band.min || 0,
+        max: band.max || 100,
+        totalProfileCount: band.totalProfileCount || band.count || 0,
         percentile:
           band.percentile ||
           ((index + 1) / (audienceData?.credibility_score_band?.length || 1)) * 100,

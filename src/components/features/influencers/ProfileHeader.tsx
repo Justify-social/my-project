@@ -171,7 +171,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ influencer, isLoad
             {/* LEFT SECTION - Main Profile Information */}
             <div className="flex-1">
               <div className="flex flex-col sm:flex-row items-start gap-6">
-                {/* Avatar with Trust Indicator */}
+                {/* Avatar */}
                 <div className="relative flex-shrink-0 mx-auto sm:mx-0">
                   <Avatar className="h-32 w-32 border-4 border-accent/20 shadow-lg">
                     <AvatarImage src={avatarUrl ?? undefined} alt={name ?? ''} />
@@ -179,56 +179,6 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ influencer, isLoad
                       {getInitials(name ?? '')}
                     </AvatarFallback>
                   </Avatar>
-
-                  {/* Verification Badge */}
-                  {isVerified && (
-                    <div className="absolute -bottom-2 -right-2">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="bg-sky-500 p-2 rounded-full border-4 border-background shadow-lg">
-                              <Icon iconId="faCircleCheckSolid" className="h-4 w-4 text-white" />
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Verified Account</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                  )}
-
-                  {/* Trust Score Indicator */}
-                  {trustData && (
-                    <div className="absolute -top-2 -left-2">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div
-                              className={`p-2 rounded-full border-4 border-background shadow-lg ${
-                                trustData.riskLevel === 'LOW'
-                                  ? 'bg-success'
-                                  : trustData.riskLevel === 'MEDIUM'
-                                    ? 'bg-warning'
-                                    : 'bg-destructive'
-                              }`}
-                            >
-                              <Icon
-                                iconId={getRiskIcon(trustData.riskLevel)}
-                                className="h-3 w-3 text-white"
-                              />
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>
-                              Trust Score: {trustData.credibilityScore}% ({trustData.riskLevel}{' '}
-                              Risk)
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                  )}
                 </div>
 
                 {/* Profile Information */}

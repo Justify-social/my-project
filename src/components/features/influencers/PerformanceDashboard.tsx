@@ -543,8 +543,11 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ infl
               </h5>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="font-medium mb-1">✅ Engagement Authenticity</p>
-                  <p className="text-muted-foreground">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Icon iconId="faCircleCheckLight" className="w-4 h-4 text-success" />
+                    <p className="font-medium mb-1">Engagement Authenticity</p>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-1">
                     Consistent pattern indicates genuine audience interaction
                   </p>
                 </div>
@@ -555,8 +558,13 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ infl
                   </p>
                 </div>
                 <div>
-                  <p className="font-medium mb-1">🎯 Brand Suitability</p>
-                  <p className="text-muted-foreground">Strong performance with sponsored content</p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Icon iconId="faBullseyeLight" className="w-4 h-4 text-accent" />
+                    <p className="font-medium mb-1">Brand Suitability</p>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-1">
+                    Strong performance with sponsored content
+                  </p>
                 </div>
                 <div>
                   <p className="font-medium mb-1">⏱️ Vetting Time</p>

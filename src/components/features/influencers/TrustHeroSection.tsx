@@ -117,11 +117,24 @@ export const TrustHeroSection: React.FC<TrustHeroSectionProps> = ({ influencer }
                 </div>
               </div>
               <p className="text-sm sm:text-base text-muted-foreground max-w-xs animate-in fade-in duration-500 delay-500">
-                {extractedData.trust.riskLevel === 'LOW' &&
-                  '✅ High confidence in audience authenticity'}
-                {extractedData.trust.riskLevel === 'MEDIUM' &&
-                  '⚠️ Moderate risk - requires attention'}
-                {extractedData.trust.riskLevel === 'HIGH' && '❌ High risk - proceed with caution'}
+                {extractedData.trust.riskLevel === 'LOW' && (
+                  <span className="flex items-center gap-2">
+                    <Icon iconId="faCircleCheckLight" className="w-4 h-4 text-success" />
+                    High confidence in audience authenticity
+                  </span>
+                )}
+                {extractedData.trust.riskLevel === 'MEDIUM' && (
+                  <span className="flex items-center gap-2">
+                    <Icon iconId="faTriangleExclamationLight" className="w-4 h-4 text-warning" />
+                    Moderate risk - requires attention
+                  </span>
+                )}
+                {extractedData.trust.riskLevel === 'HIGH' && (
+                  <span className="flex items-center gap-2">
+                    <Icon iconId="faCircleXmarkLight" className="w-4 h-4 text-destructive" />
+                    High risk - proceed with caution
+                  </span>
+                )}
               </p>
             </div>
           </div>
@@ -151,7 +164,7 @@ export const TrustHeroSection: React.FC<TrustHeroSectionProps> = ({ influencer }
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 animate-in slide-in-from-bottom-3 duration-500 delay-800">
           <div className="flex items-center gap-3">
-            <Icon iconId="faCloudLight" className="h-4 w-4 text-accent flex-shrink-0" />
+            <Icon iconId="faCircleInfoLight" className="h-4 w-4 text-accent flex-shrink-0" />
             <p className="text-sm text-muted-foreground">
               Trust analysis powered by{' '}
               <span className="font-medium text-accent">Justify Intelligence Platform</span> with{' '}

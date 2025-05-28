@@ -469,7 +469,7 @@ export default function ComprehensiveCypressAnalyticsPage() {
                         window.open('https://cloud.cypress.io/projects/3wiyh7', '_blank')
                       }
                     >
-                      <Icon iconId="faCloudLight" size="sm" className="mr-2" />
+                      <Icon iconId="faCircleInfoLight" size="sm" className="mr-2" />
                       View Cypress Cloud Dashboard
                     </Button>
                   </div>
@@ -512,7 +512,7 @@ export default function ComprehensiveCypressAnalyticsPage() {
             <p>SSOT compliant • Zero mock data • British English standards</p>
             <div className="mt-2 flex items-center justify-center gap-2">
               <Badge variant="outline" className="bg-green-50 text-green-600 border-green-200">
-                <Icon iconId="faCloudLight" size="xs" className="mr-1" />
+                <Icon iconId="faCircleInfoLight" size="xs" className="mr-1" />
                 Cloud Recording Enabled
               </Badge>
               <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">

@@ -50,7 +50,7 @@ import { toast } from 'react-hot-toast';
 import { showSuccessToast, showErrorToast } from '@/components/ui/toast';
 import { ButtonAddToCampaign } from '@/components/ui/button-add-to-campaign'; // Import new component
 import { Button } from '@/components/ui/button'; // Added Button import
-import { Card, CardContent } from '@/components/ui/card';
+import { ErrorDisplay } from '@/components/ui/error-display';
 // import { ProfilePageLayout } from '@/components/layouts/ProfilePageLayout';
 
 // Helper function to get enum key from value (case-insensitive)
@@ -69,24 +69,6 @@ function getPlatformEnumFromString(value: string | null): PlatformEnum | null {
   }
   return null; // Not found
 }
-
-// Enhanced error display
-const ErrorDisplay = ({ message }: { message: string }) => (
-  <div className="flex items-center justify-center min-h-[400px]">
-    <Card className="border-destructive/20 bg-destructive/5 max-w-md">
-      <CardContent className="p-6 text-center">
-        <Icon
-          iconId="faTriangleExclamationLight"
-          className="h-12 w-12 text-destructive mx-auto mb-4"
-        />
-        <h3 className="text-lg font-semibold text-destructive mb-2">Error Loading Profile</h3>
-        <p className="text-sm text-muted-foreground">
-          {message || 'An unexpected error occurred.'}
-        </p>
-      </CardContent>
-    </Card>
-  </div>
-);
 
 export default function InfluencerProfilePage() {
   const router = useRouter();
@@ -266,7 +248,7 @@ export default function InfluencerProfilePage() {
               {/* Save Button */}
               <SaveInfluencerButton
                 influencer={influencer}
-                onSuccess={influencerId => {
+                onSuccess={_influencerId => {
                   showSuccessToast(
                     `${influencer.name || influencer.handle} saved successfully!`,
                     'faFloppyDiskLight'
@@ -335,7 +317,20 @@ export default function InfluencerProfilePage() {
         </div>
         {/* Content Area: Loading, Error, or Profile Structure */}
         {error ? (
-          <ErrorDisplay message={error} />
+          <ErrorDisplay
+            message={error}
+            errorType={
+              error.includes('Invalid platform')
+                ? 'INVALID_PLATFORM'
+                : error.includes('not found')
+                  ? 'NOT_FOUND'
+                  : error.includes('Network') || error.includes('Failed to load')
+                    ? 'NETWORK_ERROR'
+                    : 'GENERIC'
+            }
+            platformString={platformString ?? undefined}
+            handle={handle ?? undefined}
+          />
         ) : influencer || isLoading ? (
           <div className="space-y-8">
             {/* Enhanced Profile Header with Internal Loading Orchestration */}
