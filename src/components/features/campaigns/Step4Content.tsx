@@ -205,7 +205,7 @@ function Step4Content() {
       : '';
   }, [wizard.wizardState?.creativeAssets]);
 
-  // ✅ ENHANCED: Robust polling for Mux processing status updates
+  // ✅ ENHANCED: Robust polling for Mux processing status updates with timeout protection
   useEffect(() => {
     if (!wizard.wizardState?.creativeAssets || wizard.isLoading) return;
 
@@ -216,9 +216,50 @@ function Step4Content() {
     }
 
     const assetsProcessing = creativeAssets.filter(
-      (asset: { muxProcessingStatus?: string }) =>
-        asset.muxProcessingStatus &&
-        !['READY', 'ERROR', 'ERROR_NO_PLAYBACK_ID'].includes(asset.muxProcessingStatus)
+      (asset: {
+        muxProcessingStatus?: string;
+        createdAt?: string;
+        name?: string;
+        id?: number | string;
+      }) => {
+        // Check if asset is in processing state
+        const isProcessing =
+          asset.muxProcessingStatus &&
+          !['READY', 'ERROR', 'ERROR_NO_PLAYBACK_ID'].includes(asset.muxProcessingStatus);
+
+        // For AWAITING_UPLOAD assets, check if they're older than 10 minutes (likely stuck)
+        if (asset.muxProcessingStatus === 'AWAITING_UPLOAD' && asset.createdAt) {
+          const assetAge = Date.now() - new Date(asset.createdAt).getTime();
+          const fiveMinutes = 5 * 60 * 1000; // 5 minutes (more aggressive)
+          const tenMinutes = 10 * 60 * 1000; // 10 minutes
+
+          if (assetAge > fiveMinutes) {
+            console.warn(
+              `[Step4] Asset in AWAITING_UPLOAD for ${Math.round(assetAge / 60000)} minutes - likely stuck upload:`,
+              {
+                name: asset.name || 'Untitled',
+                id: asset.id || 'unknown',
+                age: `${Math.round(assetAge / 60000)}min`,
+                uploadId: (asset as { muxUploadId?: string }).muxUploadId || 'none',
+              }
+            );
+
+            // Show user notification about stuck upload after 5 minutes
+            if (assetAge > fiveMinutes) {
+              showErrorToast(
+                `Upload seems stuck for "${asset.name || 'Untitled'}". Consider deleting and re-uploading if this persists.`,
+                'faTriangleExclamationLight',
+                8000
+              );
+            }
+
+            // Don't poll stuck AWAITING_UPLOAD assets older than 10 minutes
+            return assetAge <= tenMinutes;
+          }
+        }
+
+        return isProcessing;
+      }
     );
 
     // ✅ FIX: Use ref to prevent duplicate polling
@@ -226,9 +267,31 @@ function Step4Content() {
       console.log(`[Step4] 🚀 STARTING POLLING for ${assetsProcessing.length} processing assets`);
       isPollingRef.current = true;
 
+      let pollAttempts = 0;
+      const maxPollAttempts = 300; // 10 minutes at 2-second intervals
+
       const pollInterval = setInterval(async () => {
         try {
-          console.log('[Step4] 🔍 Polling for asset status updates...');
+          pollAttempts++;
+          console.log(
+            `[Step4] 🔍 Polling for asset status updates... (attempt ${pollAttempts}/${maxPollAttempts})`
+          );
+
+          // Stop polling after maximum attempts to prevent infinite loops
+          if (pollAttempts >= maxPollAttempts) {
+            console.warn(
+              '[Step4] ⏰ Maximum polling attempts reached - stopping to prevent infinite loop'
+            );
+            isPollingRef.current = false;
+            clearInterval(pollInterval);
+
+            showErrorToast(
+              'Asset processing is taking longer than expected. Please refresh the page or contact support.',
+              'faClockLight',
+              10000
+            );
+            return;
+          }
 
           // Reload wizard data
           await wizard.reloadCampaignData();
@@ -242,9 +305,22 @@ function Step4Content() {
           const currentAssets = wizard.wizardState?.creativeAssets || [];
           const stillProcessing = Array.isArray(currentAssets)
             ? currentAssets.filter(
-                (asset: { muxProcessingStatus?: string }) =>
-                  asset.muxProcessingStatus &&
-                  !['READY', 'ERROR', 'ERROR_NO_PLAYBACK_ID'].includes(asset.muxProcessingStatus)
+                (asset: { muxProcessingStatus?: string; createdAt?: string }) => {
+                  const isProcessing =
+                    asset.muxProcessingStatus &&
+                    !['READY', 'ERROR', 'ERROR_NO_PLAYBACK_ID'].includes(asset.muxProcessingStatus);
+
+                  // Skip stuck AWAITING_UPLOAD assets
+                  if (asset.muxProcessingStatus === 'AWAITING_UPLOAD' && asset.createdAt) {
+                    const assetAge = Date.now() - new Date(asset.createdAt).getTime();
+                    const tenMinutes = 10 * 60 * 1000;
+                    if (assetAge > tenMinutes) {
+                      return false; // Don't count stuck uploads as "processing"
+                    }
+                  }
+
+                  return isProcessing;
+                }
               )
             : [];
 

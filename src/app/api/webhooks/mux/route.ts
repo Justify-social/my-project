@@ -4,8 +4,48 @@ import { validateMuxWebhook, executeResilientMuxOperation } from '@/lib/utils/mu
 import { prisma } from '@/lib/db';
 
 /**
+ * TypeScript interfaces for Mux webhook data
+ */
+interface MuxPlaybackId {
+  id: string;
+  policy: 'public' | 'signed';
+}
+
+interface MuxAssetData {
+  id: string;
+  status: 'preparing' | 'ready' | 'errored';
+  playback_ids?: MuxPlaybackId[];
+  errors?: Array<{ type: string; messages: string[] }>;
+  duration?: number;
+  aspect_ratio?: string;
+  created_at?: string;
+  updated_at?: string;
+  upload_id?: string;
+}
+
+interface MuxWebhookPayload {
+  type:
+    | 'video.asset.ready'
+    | 'video.asset.errored'
+    | 'video.asset.created'
+    | 'video.asset.updated'
+    | 'video.upload.asset_created';
+  data: MuxAssetData;
+  object: {
+    type: string;
+    id: string;
+  };
+  id: string;
+  environment: {
+    name: string;
+    id: string;
+  };
+  created_at: string;
+}
+
+/**
  * 🎯 ENHANCED MUX WEBHOOK ENDPOINT
- * 
+ *
  * Features:
  * - HMAC-SHA256 signature verification for security
  * - Circuit breaker protection against failures
@@ -16,8 +56,8 @@ import { prisma } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
-  let webhookData: any = null;
-  let assetId: string | undefined;
+  let webhookData: MuxWebhookPayload | null = null;
+  let primaryId: string | undefined; // Can be either assetId or uploadId depending on webhook type
 
   try {
     // =========================================================================
@@ -32,10 +72,7 @@ export async function POST(request: NextRequest) {
         service: 'mux-webhook',
         headers: Object.fromEntries(request.headers.entries()),
       });
-      return NextResponse.json(
-        { error: 'Empty request body' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Empty request body' }, { status: 400 });
     }
 
     if (!muxSignature) {
@@ -43,10 +80,7 @@ export async function POST(request: NextRequest) {
         service: 'mux-webhook',
         bodyLength: rawBody.length,
       });
-      return NextResponse.json(
-        { error: 'Missing mux-signature header' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing mux-signature header' }, { status: 400 });
     }
 
     // =========================================================================
@@ -61,10 +95,7 @@ export async function POST(request: NextRequest) {
         error: validationResult.error,
         timestamp: validationResult.timestamp,
       });
-      return NextResponse.json(
-        { error: 'Invalid webhook signature' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Invalid webhook signature' }, { status: 401 });
     }
 
     logger.info('Webhook signature validated successfully', {
@@ -77,30 +108,41 @@ export async function POST(request: NextRequest) {
     // =========================================================================
 
     try {
-      webhookData = JSON.parse(rawBody);
-      assetId = webhookData.data?.id;
+      webhookData = JSON.parse(rawBody) as MuxWebhookPayload;
+      // For most webhooks, the asset ID is in data.id
+      // For video.upload.asset_created, we need both:
+      // - object.id = upload ID
+      // - data.id = asset ID
+      if (webhookData?.type === 'video.upload.asset_created') {
+        primaryId = webhookData.object?.id; // This is actually the upload ID for this event
+      } else {
+        primaryId = webhookData.data?.id;
+      }
     } catch (parseError) {
       logger.error('Failed to parse webhook JSON', {
         service: 'mux-webhook',
         error: parseError instanceof Error ? parseError.message : 'Parse failed',
         bodyLength: rawBody.length,
       });
-      return NextResponse.json(
-        { error: 'Invalid JSON in request body' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
     }
 
-    if (!assetId) {
-      logger.warn('Webhook missing asset ID', {
+    if (!primaryId) {
+      logger.warn('Webhook missing primary ID', {
         service: 'mux-webhook',
-        webhookType: webhookData.type,
-        data: webhookData.data,
+        webhookType: webhookData?.type,
+        data: webhookData?.data,
+        object: webhookData?.object,
       });
-      return NextResponse.json(
-        { error: 'Missing asset ID in webhook data' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing required ID in webhook data' }, { status: 400 });
+    }
+
+    if (!webhookData) {
+      logger.error('Webhook data is null after parsing', {
+        service: 'mux-webhook',
+        primaryId,
+      });
+      return NextResponse.json({ error: 'Invalid webhook data' }, { status: 400 });
     }
 
     // =========================================================================
@@ -109,16 +151,16 @@ export async function POST(request: NextRequest) {
 
     const result = await executeResilientMuxOperation(
       async () => {
-        return await processWebhookEvent(webhookData, assetId!);
+        return await processWebhookEvent(webhookData!, primaryId!);
       },
       'process-webhook',
-      assetId
+      primaryId
     );
 
     const duration = Date.now() - startTime;
     logger.info('Webhook processed successfully', {
       service: 'mux-webhook',
-      assetId,
+      primaryId,
       webhookType: webhookData.type,
       duration,
       result,
@@ -127,15 +169,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       processed: true,
-      assetId,
-      duration
+      primaryId,
+      webhookType: webhookData.type,
+      duration,
     });
-
   } catch (error) {
     const duration = Date.now() - startTime;
     logger.error('Webhook processing failed', {
       service: 'mux-webhook',
-      assetId,
+      primaryId,
       webhookType: webhookData?.type,
       duration,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -166,34 +208,37 @@ export async function POST(request: NextRequest) {
 /**
  * Process individual webhook event with comprehensive error handling
  */
-async function processWebhookEvent(webhookData: any, assetId: string) {
+async function processWebhookEvent(webhookData: MuxWebhookPayload, primaryId: string) {
   const { type, data } = webhookData;
 
   logger.info('Processing webhook event', {
     service: 'mux-webhook-processor',
-    assetId,
+    primaryId,
     type,
     status: data.status,
   });
 
   switch (type) {
     case 'video.asset.ready':
-      return await handleAssetReady(assetId, data);
+      return await handleAssetReady(primaryId, data);
 
     case 'video.asset.errored':
-      return await handleAssetErrored(assetId, data);
+      return await handleAssetErrored(primaryId, data);
 
     case 'video.asset.created':
-      return await handleAssetCreated(assetId, data);
+      return await handleAssetCreated(primaryId, data);
 
     case 'video.asset.updated':
-      return await handleAssetUpdated(assetId, data);
+      return await handleAssetUpdated(primaryId, data);
+
+    case 'video.upload.asset_created':
+      return await handleUploadAssetCreated(primaryId, data);
 
     default:
       logger.info('Ignoring unhandled webhook type', {
         service: 'mux-webhook-processor',
         type,
-        assetId,
+        primaryId,
       });
       return { handled: false, reason: `Unhandled webhook type: ${type}` };
   }
@@ -202,17 +247,17 @@ async function processWebhookEvent(webhookData: any, assetId: string) {
 /**
  * Handle video.asset.ready webhook
  */
-async function handleAssetReady(assetId: string, data: any) {
+async function handleAssetReady(primaryId: string, data: MuxAssetData) {
   logger.info('Handling asset ready webhook', {
     service: 'mux-webhook-processor',
-    assetId,
+    primaryId,
     playbackIds: data.playback_ids,
   });
 
   // Check for idempotency - avoid duplicate processing
   const existingAsset = await prisma.creativeAsset.findFirst({
     where: {
-      muxAssetId: assetId,
+      muxAssetId: primaryId,
       muxProcessingStatus: 'READY',
     },
   });
@@ -220,7 +265,7 @@ async function handleAssetReady(assetId: string, data: any) {
   if (existingAsset) {
     logger.info('Asset already marked as ready - idempotent operation', {
       service: 'mux-webhook-processor',
-      assetId,
+      primaryId,
       existingAssetId: existingAsset.id,
     });
     return { handled: true, reason: 'Already processed (idempotent)', assetId: existingAsset.id };
@@ -232,9 +277,11 @@ async function handleAssetReady(assetId: string, data: any) {
 
   const updatedAsset = await prisma.creativeAsset.updateMany({
     where: {
-      muxAssetId: assetId,
+      OR: [{ muxAssetId: primaryId }, { muxUploadId: primaryId }],
     },
     data: {
+      muxAssetId: primaryId,
+      muxPlaybackId: playbackId || undefined,
       muxProcessingStatus: 'READY',
       url: streamUrl || undefined,
       updatedAt: new Date(),
@@ -244,14 +291,14 @@ async function handleAssetReady(assetId: string, data: any) {
   if (updatedAsset.count === 0) {
     logger.warn('No assets found to update for ready webhook', {
       service: 'mux-webhook-processor',
-      assetId,
+      primaryId,
     });
     return { handled: false, reason: 'No matching assets found' };
   }
 
   logger.info('Asset marked as ready successfully', {
     service: 'mux-webhook-processor',
-    assetId,
+    primaryId,
     updatedCount: updatedAsset.count,
     streamUrl,
   });
@@ -260,25 +307,26 @@ async function handleAssetReady(assetId: string, data: any) {
     handled: true,
     updatedCount: updatedAsset.count,
     streamUrl,
-    status: 'READY'
+    status: 'READY',
   };
 }
 
 /**
  * Handle video.asset.errored webhook
  */
-async function handleAssetErrored(assetId: string, data: any) {
+async function handleAssetErrored(primaryId: string, data: MuxAssetData) {
   logger.error('Handling asset errored webhook', {
     service: 'mux-webhook-processor',
-    assetId,
+    primaryId,
     errors: data.errors,
   });
 
   const updatedAsset = await prisma.creativeAsset.updateMany({
     where: {
-      muxAssetId: assetId,
+      OR: [{ muxAssetId: primaryId }, { muxUploadId: primaryId }],
     },
     data: {
+      muxAssetId: primaryId,
       muxProcessingStatus: 'ERROR',
       updatedAt: new Date(),
     },
@@ -287,7 +335,7 @@ async function handleAssetErrored(assetId: string, data: any) {
   if (updatedAsset.count === 0) {
     logger.warn('No assets found to update for error webhook', {
       service: 'mux-webhook-processor',
-      assetId,
+      primaryId,
     });
     return { handled: false, reason: 'No matching assets found' };
   }
@@ -296,35 +344,109 @@ async function handleAssetErrored(assetId: string, data: any) {
     handled: true,
     updatedCount: updatedAsset.count,
     status: 'ERROR',
-    errors: data.errors
+    errors: data.errors,
   };
 }
 
 /**
  * Handle video.asset.created webhook
  */
-async function handleAssetCreated(assetId: string, data: any) {
+async function handleAssetCreated(assetId: string, data: MuxAssetData) {
   logger.info('Handling asset created webhook', {
     service: 'mux-webhook-processor',
     assetId,
+    uploadId: data.upload_id,
     status: data.status,
   });
 
-  // Just log for now - creation is handled during upload
+  const internalStatus = mapMuxStatusToInternal(data.status);
+
+  if (data.upload_id) {
+    // This is the primary way to link an upload to its final asset ID.
+    const updatedAsset = await prisma.creativeAsset.updateMany({
+      where: {
+        muxUploadId: data.upload_id,
+      },
+      data: {
+        muxAssetId: assetId,
+        muxProcessingStatus: internalStatus || 'PREPARING',
+        updatedAt: new Date(),
+      },
+    });
+
+    if (updatedAsset.count > 0) {
+      logger.info('Asset linked to upload via video.asset.created event', {
+        service: 'mux-webhook-processor',
+        uploadId: data.upload_id,
+        assetId,
+        updatedCount: updatedAsset.count,
+      });
+      return {
+        handled: true,
+        updatedCount: updatedAsset.count,
+        assetId,
+        uploadId: data.upload_id,
+        status: internalStatus || data.status,
+      };
+    } else {
+      logger.warn('No asset found with upload_id to link for video.asset.created', {
+        service: 'mux-webhook-processor',
+        uploadId: data.upload_id,
+        assetId,
+      });
+      // Fallback: if no record was found by upload_id, something is off,
+      // but we can still try to update by asset_id if a record somehow exists with it already.
+      // This is less likely to be the primary update path.
+    }
+  }
+
+  // If no upload_id, or if update by upload_id found nothing,
+  // try to update based on the assetId itself. This might happen if the asset wasn't created via direct upload
+  // or if our initial record keeping was incomplete.
+  if (internalStatus) {
+    const updatedAssetByAssetId = await prisma.creativeAsset.updateMany({
+      where: {
+        muxAssetId: assetId,
+      },
+      data: {
+        muxProcessingStatus: internalStatus,
+        updatedAt: new Date(),
+      },
+    });
+    if (updatedAssetByAssetId.count > 0) {
+      logger.info('Asset status updated via video.asset.created (by assetId)', {
+        service: 'mux-webhook-processor',
+        assetId,
+        updatedCount: updatedAssetByAssetId.count,
+      });
+      return {
+        handled: true,
+        updatedCount: updatedAssetByAssetId.count,
+        status: internalStatus,
+      };
+    }
+  }
+
+  logger.info('Asset creation event processed (or no update needed/possible)', {
+    service: 'mux-webhook-processor',
+    assetId,
+    uploadId: data.upload_id,
+    status: data.status,
+  });
   return {
     handled: true,
-    reason: 'Asset creation logged',
-    status: data.status
+    reason: 'Asset creation logged or updated',
+    status: data.status,
   };
 }
 
 /**
  * Handle video.asset.updated webhook
  */
-async function handleAssetUpdated(assetId: string, data: any) {
+async function handleAssetUpdated(primaryId: string, data: MuxAssetData) {
   logger.info('Handling asset updated webhook', {
     service: 'mux-webhook-processor',
-    assetId,
+    primaryId,
     status: data.status,
   });
 
@@ -334,9 +456,10 @@ async function handleAssetUpdated(assetId: string, data: any) {
   if (status) {
     const updatedAsset = await prisma.creativeAsset.updateMany({
       where: {
-        muxAssetId: assetId,
+        OR: [{ muxAssetId: primaryId }, { muxUploadId: primaryId }],
       },
       data: {
+        muxAssetId: primaryId,
         muxProcessingStatus: status,
         updatedAt: new Date(),
       },
@@ -345,11 +468,71 @@ async function handleAssetUpdated(assetId: string, data: any) {
     return {
       handled: true,
       updatedCount: updatedAsset.count,
-      status
+      status,
     };
   }
 
   return { handled: true, reason: 'No status update needed' };
+}
+
+/**
+ * Handle video.upload.asset_created webhook
+ */
+async function handleUploadAssetCreated(uploadId: string, data: MuxAssetData) {
+  logger.info('Handling upload asset created webhook', {
+    service: 'mux-webhook-processor',
+    uploadId,
+    assetId: data.id,
+    status: data.status,
+  });
+
+  // Find asset by upload ID and update with asset ID
+  const dataToUpdate: {
+    muxProcessingStatus: string;
+    updatedAt: Date;
+    muxAssetId?: string;
+  } = {
+    muxProcessingStatus: mapMuxStatusToInternal(data.status) || 'PREPARING',
+    updatedAt: new Date(),
+  };
+
+  // Always try to set the muxAssetId from data.id.
+  // The video.asset.created event (if it comes) will be more definitive using data.upload_id
+  // but this provides an early link.
+  if (data.id) {
+    dataToUpdate.muxAssetId = data.id;
+  }
+
+  const updatedAsset = await prisma.creativeAsset.updateMany({
+    where: {
+      muxUploadId: uploadId,
+    },
+    data: dataToUpdate,
+  });
+
+  if (updatedAsset.count === 0) {
+    logger.warn('No assets found to update for upload asset created webhook', {
+      service: 'mux-webhook-processor',
+      uploadId,
+      assetId: data.id,
+    });
+    return { handled: false, reason: 'No matching assets found' };
+  }
+
+  logger.info('Asset linked successfully', {
+    service: 'mux-webhook-processor',
+    uploadId,
+    assetId: data.id,
+    updatedCount: updatedAsset.count,
+  });
+
+  return {
+    handled: true,
+    updatedCount: updatedAsset.count,
+    uploadId,
+    assetId: data.id,
+    status: data.status,
+  };
 }
 
 /**
