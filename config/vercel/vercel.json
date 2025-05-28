@@ -1,4 +1,5 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "npm run build",
   "installCommand": "npm ci",
   "framework": "nextjs",
@@ -32,15 +33,5 @@
         }
       ]
     }
-  ],
-  "env": {
-    "DATABASE_URL": "@database_url",
-    "DIRECT_URL": "@direct_url"
-  },
-  "build": {
-    "env": {
-      "DATABASE_URL": "@database_url",
-      "DIRECT_URL": "@direct_url"
-    }
-  }
+  ]
 }
