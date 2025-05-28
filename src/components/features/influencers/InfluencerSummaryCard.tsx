@@ -193,14 +193,6 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
               ? `${(influencer.engagementRate * 100).toFixed(2)}%`
               : 'No data'}
           </div>
-
-          {/* Display Audience Quality Indicator Badge */}
-          <div className="font-medium text-gray-700 dark:text-gray-300">Quality:</div>
-          <div className="text-right">
-            <Badge className={_qualityBadgeStyles}>
-              {influencer.audienceQualityIndicator || 'Unknown'}
-            </Badge>
-          </div>
         </div>
         {/* Action Buttons */}
         <div className="mt-auto pt-3 space-y-2">
