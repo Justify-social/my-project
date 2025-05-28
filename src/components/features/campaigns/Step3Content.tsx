@@ -12,10 +12,11 @@ import {
 } from '@/components/features/campaigns/types';
 import { toast as _toast } from 'react-hot-toast';
 import { WizardSkeleton } from '@/components/ui/loading-skeleton';
-import { Icon } from '@/components/ui/icon/icon';
-import { Button } from '@/components/ui/button';
+import { Icon as _Icon } from '@/components/ui/icon/icon';
+import { Button as _Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { Badge as _Badge } from '@/components/ui/badge';
+import { RemovableBadge } from '@/components/ui/removable-badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Form,
@@ -31,6 +32,10 @@ import { AgeDistributionSliderGroup } from '@/components/ui/slider-age-distribut
 import { GenderSelector } from '@/components/ui/selector-gender';
 import { LanguageSelector } from '@/components/ui/selector-language';
 import { showSuccessToast, showErrorToast } from '@/components/ui/toast';
+import { RadioGroup as _RadioGroup, RadioGroupItem as _RadioGroupItem } from '@/components/ui/radio-group';
+import { Alert as _Alert, AlertDescription as _AlertDescription } from '@/components/ui/alert';
+import { Separator as _Separator } from '@/components/ui/separator';
+import { Collapsible as _Collapsible, CollapsibleContent as _CollapsibleContent, CollapsibleTrigger as _CollapsibleTrigger } from '@/components/ui/collapsible';
 
 // --- Mock Data (Replace with actual data fetching/static data) ---
 // Updated list of top 15 languages, sorted alphabetically
@@ -391,23 +396,15 @@ function Step3Content() {
                           const city = location?.city;
                           if (!city) return null; // Skip rendering if city is missing
                           return (
-                            <Badge
+                            <RemovableBadge
                               key={`${city}-${location.id}`}
                               variant="secondary"
-                              className="pl-2 pr-1 text-sm"
+                              size="md"
+                              onRemove={() => handleRemoveLocation(city)}
+                              removeAriaLabel={`Remove location ${city}`}
                             >
                               {city}
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="ml-1 h-4 w-4 text-secondary-foreground hover:text-white hover:bg-transparent p-0"
-                                onClick={() => handleRemoveLocation(city)}
-                                aria-label={`Remove location ${city}`}
-                              >
-                                <Icon iconId="faXmarkLight" className="h-3 w-3" />
-                              </Button>
-                            </Badge>
+                            </RemovableBadge>
                           );
                         }
                       )}
@@ -465,19 +462,15 @@ function Step3Content() {
                     </FormControl>
                     <div className="flex flex-wrap gap-2 pt-2 min-h-[2.5rem] items-center">
                       {(Array.isArray(field.value) ? field.value : []).map((interest: string) => (
-                        <Badge key={interest} variant="secondary" className="pl-2 pr-1 text-sm">
+                        <RemovableBadge
+                          key={interest}
+                          variant="secondary"
+                          size="md"
+                          onRemove={() => handleRemoveInterest(interest)}
+                          removeAriaLabel={`Remove interest ${interest}`}
+                        >
                           {interest}
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="ml-1 h-4 w-4 text-secondary-foreground hover:text-white hover:bg-transparent p-0"
-                            onClick={() => handleRemoveInterest(interest)}
-                            aria-label={`Remove interest ${interest}`}
-                          >
-                            <Icon iconId="faXmarkLight" className="h-3 w-3" />
-                          </Button>
-                        </Badge>
+                        </RemovableBadge>
                       ))}
                     </div>
                     <FormDescription>Add relevant audience interests.</FormDescription>
@@ -505,19 +498,15 @@ function Step3Content() {
                     <div className="flex flex-wrap gap-2 pt-2 min-h-[2.5rem] items-center">
                       {/* Ensure field.value is treated as array */}
                       {(Array.isArray(field.value) ? field.value : []).map((keyword: string) => (
-                        <Badge key={keyword} variant="secondary" className="pl-2 pr-1 text-sm">
+                        <RemovableBadge
+                          key={keyword}
+                          variant="secondary"
+                          size="md"
+                          onRemove={() => handleRemoveKeyword(keyword)}
+                          removeAriaLabel={`Remove keyword ${keyword}`}
+                        >
                           {keyword}
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="ml-1 h-4 w-4 text-secondary-foreground hover:text-white hover:bg-transparent p-0"
-                            onClick={() => handleRemoveKeyword(keyword)}
-                            aria-label={`Remove keyword ${keyword}`}
-                          >
-                            <Icon iconId="faXmarkLight" className="h-3 w-3" />
-                          </Button>
-                        </Badge>
+                        </RemovableBadge>
                       ))}
                     </div>
                     <FormDescription>
@@ -556,19 +545,15 @@ function Step3Content() {
                     </FormControl>
                     <div className="flex flex-wrap gap-2 pt-2 min-h-[2.5rem] items-center">
                       {(Array.isArray(field.value) ? field.value : []).map((competitor: string) => (
-                        <Badge key={competitor} variant="secondary" className="pl-2 pr-1 text-sm">
+                        <RemovableBadge
+                          key={competitor}
+                          variant="secondary"
+                          size="md"
+                          onRemove={() => handleRemoveCompetitor(competitor)}
+                          removeAriaLabel={`Remove competitor ${competitor}`}
+                        >
                           {competitor}
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="ml-1 h-4 w-4 text-secondary-foreground hover:text-white hover:bg-transparent p-0"
-                            onClick={() => handleRemoveCompetitor(competitor)}
-                            aria-label={`Remove competitor ${competitor}`}
-                          >
-                            <Icon iconId="faXmarkLight" className="h-3 w-3" />
-                          </Button>
-                        </Badge>
+                        </RemovableBadge>
                       ))}
                     </div>
                     <FormDescription>

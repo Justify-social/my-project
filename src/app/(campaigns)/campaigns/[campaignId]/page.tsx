@@ -28,6 +28,7 @@ import { DuplicateCampaignButton } from '@/components/ui/button-duplicate-campai
 import { ConfirmDeleteDialog } from '@/components/ui/dialog-confirm-delete';
 import { getCampaignStatusInfo, CampaignStatusKey } from '@/utils/statusUtils'; // Import centralized utility
 import { useAuth } from '@clerk/nextjs'; // Import useAuth
+import { RemovableBadge } from '@/components/ui/removable-badge';
 
 // Define AGE_BRACKETS for the age distribution summary UI
 const AGE_BRACKETS = [
@@ -57,6 +58,13 @@ const TOP_LANGUAGES_MAP: Array<{ value: string; label: string }> = [
   { value: 'tr', label: 'Turkish' },
   { value: 'vi', label: 'Vietnamese' },
 ];
+
+// Helper function to get language display name
+const getLanguageName = (langCode: string | null | undefined): string => {
+  if (!langCode) return 'N/A';
+  const lang = TOP_LANGUAGES_MAP.find(l => l.value.toLowerCase() === langCode.toLowerCase());
+  return lang ? lang.label : langCode.toUpperCase(); // Fallback to uppercase code
+};
 
 // Define necessary types
 interface CampaignData {
@@ -124,39 +132,35 @@ interface ContactDetails {
 }
 
 // Define type for raw influencer data from API
-interface ApiInfluencer {
+interface APIInfluencerData {
   handle?: string | null;
   platform?: string | null;
-  // Add other potential fields if they exist
 }
 
-// Define interfaces for other mapped API data structures
-interface ApiLanguage {
-  language?: string | null;
+// API response type definitions
+interface APILocationData {
+  city?: string | null;
+  region?: string | null;
+  country?: string | null;
 }
 
-interface _ApiLocation {
-  // Renamed to _ApiLocation as it's unused
-  location?: string | null;
-}
-
-interface _ApiRequirement {
-  // Renamed to _ApiRequirement as it's unused
-  requirement?: string | null;
-}
-
-interface _ApiAsset {
-  // Renamed to _ApiAsset as it's unused
+interface APIAssetData {
+  id?: string | number;
   name?: string | null;
+  fileName?: string | null;
   url?: string | null;
+  type?: string | null;
+  rationale?: string | null;
+  description?: string | null;
+  budget?: number | null;
 }
 
-interface _ApiContact {
-  // Renamed to _ApiContact as it's unused
+interface APIContactData {
   firstName?: string | null;
   surname?: string | null;
   email?: string | null;
   position?: string | null;
+  phone?: string | null;
 }
 
 // Define type for badge variants based on the component's CVA definition
@@ -291,14 +295,14 @@ const _CardGroup = (
   </div>
 );
 
-// Badge group for consistent badge rendering
+// Badge group for consistent badge rendering using RemovableBadge
 const BadgeGroup = ({ items, className }: { items: string[]; className?: string }) => (
   <div className={cn('flex flex-wrap gap-2', className)}>
     {items && items.length > 0 ? (
       items.map((item, index) => (
-        <Badge key={index} variant="outline" className="bg-background/80">
+        <RemovableBadge key={index} variant="secondary" size="sm">
           {item}
-        </Badge>
+        </RemovableBadge>
       ))
     ) : (
       <span className="text-muted-foreground text-sm italic">Not specified</span>
@@ -381,6 +385,7 @@ export default function CampaignDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [influencerProfileImages, setInfluencerProfileImages] = useState<Record<string, string>>({});
 
   // --- Restore Local Toast Helper Functions ---
   const showSuccessToast = (
@@ -478,143 +483,103 @@ export default function CampaignDetail() {
     const fetchCampaignData = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`/api/campaigns/${campaignIdParam}`);
+        // Use the comprehensive brand-lift API endpoint for better data
+        const response = await fetch(`/api/campaign-data-for-brand-lift/${campaignIdParam}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch campaign data: ${response.status}`);
         }
-        const apiResponse = await response.json();
-        const data = apiResponse.data || apiResponse;
+        const data = await response.json();
         if (!data || typeof data !== 'object') {
           throw new Error('Invalid campaign data received from API');
         }
 
-        // Normalize status for SSOT
-        let rawStatus = ((data as { status?: string }).status || 'DRAFT').toUpperCase();
-        if (rawStatus === 'SUBMITTED_FINAL') {
-          rawStatus = 'SUBMITTED';
-        }
-        // Add any other necessary normalizations here if backend sends other variations
-
+        // Enhanced transformation that preserves more data like Step 5 and brand-lift pages
         const transformedData: CampaignData = {
-          id: (data as { id?: string | number }).id
-            ? (data as { id: string | number }).id.toString()
-            : 'N/A',
-          name: (data as { name?: string }).name || 'Unnamed Campaign',
-          status: rawStatus as CampaignStatusKey,
-          startDate: (data as { startDate?: string }).startDate
-            ? new Date((data as { startDate: string }).startDate).toLocaleDateString()
-            : 'N/A',
-          endDate: (data as { endDate?: string }).endDate
-            ? new Date((data as { endDate: string }).endDate).toLocaleDateString()
-            : 'N/A',
-          timeZone: (data as { timeZone?: string }).timeZone || 'N/A',
-          businessGoal: (data as { businessGoal?: string }).businessGoal || 'Not Set',
+          id: data.id || 'N/A',
+          name: data.name || 'Unnamed Campaign',
+          status: (data.status || 'DRAFT').toUpperCase() as CampaignStatusKey,
+          startDate: data.startDate ? new Date(data.startDate).toLocaleDateString() : 'N/A',
+          endDate: data.endDate ? new Date(data.endDate).toLocaleDateString() : 'N/A',
+          timeZone: data.timeZone || 'N/A',
+          businessGoal: data.businessGoal || 'Not Set',
           budget: {
-            total: (data as { budget?: { total?: number } })?.budget?.total || 0,
-            social: (data as { budget?: { socialMedia?: number } })?.budget?.socialMedia || 0,
-            currency: (data as { budget?: { currency?: string } })?.budget?.currency || 'USD',
+            total: data.budget?.total || 0,
+            social: data.budget?.socialMedia || 0,
+            currency: data.budget?.currency || 'USD',
           },
           primaryContact: {
-            name:
-              (data as { primaryContact?: { name?: string } })?.primaryContact?.name ||
+            name: data.primaryContact ?
+              `${data.primaryContact.firstName || ''} ${data.primaryContact.surname || ''}`.trim() || 'Not specified' :
               'Not specified',
-            email:
-              (data as { primaryContact?: { email?: string } })?.primaryContact?.email ||
-              'Not specified',
-            position:
-              (data as { primaryContact?: { position?: string } })?.primaryContact?.position ||
-              'Not specified',
+            email: data.primaryContact?.email || 'Not specified',
+            position: data.primaryContact?.position || 'Not specified',
           },
-          secondaryContact: (data as { secondaryContact?: ContactDetails })?.secondaryContact
-            ? {
-                name: (data as { secondaryContact: ContactDetails }).secondaryContact.name || 'N/A',
-                email:
-                  (data as { secondaryContact: ContactDetails }).secondaryContact.email || 'N/A',
-                position:
-                  (data as { secondaryContact: ContactDetails }).secondaryContact.position || 'N/A',
-              }
-            : undefined,
-          influencers: ((data as { influencers?: ApiInfluencer[] }).influencers || []).map(
-            (inf: ApiInfluencer) => ({
-              handle: inf.handle || 'N/A',
-              platform: inf.platform || 'N/A',
-            })
-          ),
-          primaryKPI: (data as { primaryKPI?: string }).primaryKPI || 'N/A',
-          secondaryKPIs: (data as { secondaryKPIs?: string[] }).secondaryKPIs || [],
-          features: (data as { features?: string[] }).features || [],
-          mainMessage: (data as { mainMessage?: string }).mainMessage || 'N/A',
-          hashtags: (data as { hashtags?: string[] }).hashtags || [],
-          keyBenefits: (data as { keyBenefits?: string[] }).keyBenefits || [],
+          secondaryContact: data.secondaryContact ? {
+            name: `${data.secondaryContact.firstName || ''} ${data.secondaryContact.surname || ''}`.trim() || 'N/A',
+            email: data.secondaryContact.email || 'N/A',
+            position: data.secondaryContact.position || 'N/A',
+          } : undefined,
+          influencers: (data.Influencer || []).map((inf: APIInfluencerData) => ({
+            handle: inf.handle || 'N/A',
+            platform: inf.platform || 'N/A',
+          })),
+          primaryKPI: data.primaryKPI || 'N/A',
+          secondaryKPIs: data.secondaryKPIs || [],
+          features: data.features || [],
+          mainMessage: data.messaging?.mainMessage || 'N/A',
+          hashtags: data.messaging?.hashtags || [],
+          keyBenefits: data.messaging?.keyBenefits || [],
           expectedOutcomes: {
-            memorability:
-              (data as { expectedOutcomes?: { memorability?: string } })?.expectedOutcomes
-                ?.memorability || 'N/A',
-            purchaseIntent:
-              (data as { expectedOutcomes?: { purchaseIntent?: string } })?.expectedOutcomes
-                ?.purchaseIntent || 'N/A',
-            brandPerception:
-              (data as { expectedOutcomes?: { brandPerception?: string } })?.expectedOutcomes
-                ?.brandPerception || 'N/A',
+            memorability: data.expectedOutcomes?.memorability || 'N/A',
+            purchaseIntent: data.expectedOutcomes?.purchaseIntent || 'N/A',
+            brandPerception: data.expectedOutcomes?.brandPerception || 'N/A',
           },
           audience: {
-            genders: (data as { audience?: { genders?: string[] } })?.audience?.genders || [],
-            ageRanges:
-              (data as { audience?: { ageRanges?: Record<string, number> } })?.audience
-                ?.ageRanges || {},
-            languages: (
-              (data as { audience?: { languages?: ApiLanguage[] } })?.audience?.languages || []
-            ).map(
-              (lang: ApiLanguage) =>
-                TOP_LANGUAGES_MAP.find(l => l.value === lang.language)?.label ||
-                lang.language ||
-                'N/A'
-            ),
-            interests: (data as { audience?: { interests?: string[] } })?.audience?.interests || [],
-            locations: (
-              (data as { audience?: { locations?: { location?: string }[] } })?.audience
-                ?.locations || []
-            ).map((loc: { location?: string }) => loc.location || 'N/A'),
-            competitors:
-              (data as { audience?: { competitors?: string[] } })?.audience?.competitors || [],
+            genders: data.demographics?.genders || [],
+            ageRanges: data.demographics || {},
+            languages: data.demographics?.languages || [],
+            interests: data.targeting?.interests || [],
+            locations: data.locations?.map((loc: APILocationData) =>
+              typeof loc === 'string' ? loc :
+                [loc.city, loc.region, loc.country].filter(Boolean).join(', ')
+            ) || [],
+            competitors: data.competitors || [],
           },
           assets: {
-            guidelinesSummary:
-              (data as { assets?: { guidelinesSummary?: string } })?.assets?.guidelinesSummary ||
-              'N/A',
-            requirements: (
-              (
-                data as {
-                  assets?: { requirements?: { requirement?: string; mandatory?: boolean }[] };
-                }
-              )?.assets?.requirements || []
-            ).map((req: { requirement?: string; mandatory?: boolean }) => ({
-              text: req.requirement || 'N/A',
-              mandatory: req.mandatory || false,
-            })),
-            uploaded: (
-              (data as { assets?: { uploadedAssets?: UploadedAsset[] } })?.assets?.uploadedAssets ||
-              []
-            ).map((asset: UploadedAsset) => ({
+            guidelinesSummary: data.assets?.guidelinesSummary || 'N/A',
+            requirements: data.assets?.requirements || [],
+            uploaded: (data.assets || []).map((asset: APIAssetData) => ({
               ...asset,
-              id: asset.id || Date.now() + Math.random(), // Ensure ID exists
-              name: asset.name || 'Untitled Asset',
+              id: asset.id || Date.now() + Math.random(),
+              name: asset.name || asset.fileName || 'Untitled Asset',
               url: asset.url || '#',
-              type: asset.type || getAssetTypeFromUrl(asset.url),
-              description: asset.description || 'No description',
+              type: asset.type || getAssetTypeFromUrl(asset.url || ''),
+              description: asset.rationale || asset.description || 'No description',
               budget: asset.budget || 0,
             })),
-            notes: (data as { assets?: { notes?: string } })?.assets?.notes || '',
+            notes: data.assets?.notes || '',
           },
-          contacts: ((data as { contacts?: _ApiContact[] }).contacts || []).map(
-            (contact: _ApiContact) => ({
+          contacts: [
+            ...(data.primaryContact ? [{
+              name: `${data.primaryContact.firstName || ''} ${data.primaryContact.surname || ''}`.trim() || 'N/A',
+              email: data.primaryContact.email || 'N/A',
+              position: data.primaryContact.position || 'N/A',
+              isPrimary: true,
+            }] : []),
+            ...(data.secondaryContact ? [{
+              name: `${data.secondaryContact.firstName || ''} ${data.secondaryContact.surname || ''}`.trim() || 'N/A',
+              email: data.secondaryContact.email || 'N/A',
+              position: data.secondaryContact.position || 'N/A',
+              isPrimary: false,
+            }] : []),
+            ...(data.additionalContacts || []).map((contact: APIContactData) => ({
               name: `${contact.firstName || ''} ${contact.surname || ''}`.trim() || 'N/A',
               email: contact.email || 'N/A',
               position: contact.position || 'N/A',
-              phone: (contact as { phone?: string }).phone || undefined, // Keep if exists
-              isPrimary: (contact as { isPrimary?: boolean }).isPrimary || false, // Keep if exists
-            })
-          ),
+              phone: contact.phone,
+              isPrimary: false,
+            })),
+          ],
         };
         setCampaignData(transformedData);
       } catch (err) {
@@ -637,6 +602,60 @@ export default function CampaignDetail() {
       setIsLoading(false);
     }
   }, [campaignIdParam]);
+
+  // Fetch profile images for influencers
+  useEffect(() => {
+    const fetchInfluencerProfileImages = async () => {
+      if (!campaignData?.influencers || campaignData.influencers.length === 0) {
+        return;
+      }
+
+      const imagePromises = campaignData.influencers.map(async (influencer) => {
+        try {
+          // Use the InsightIQ API pattern to fetch profile data
+          const response = await fetch(`/api/influencers/fetch-profile?handle=${encodeURIComponent(influencer.handle)}&platform=${encodeURIComponent(influencer.platform.toUpperCase())}`);
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.data?.avatarUrl) {
+              return {
+                handle: influencer.handle,
+                imageUrl: data.data.avatarUrl
+              };
+            }
+          }
+
+          return {
+            handle: influencer.handle,
+            imageUrl: null
+          };
+        } catch (error) {
+          console.error(`Failed to fetch profile image for ${influencer.handle}:`, error);
+          return {
+            handle: influencer.handle,
+            imageUrl: null
+          };
+        }
+      });
+
+      try {
+        const results = await Promise.all(imagePromises);
+        const imageMap: Record<string, string> = {};
+
+        results.forEach((result) => {
+          if (result.imageUrl) {
+            imageMap[result.handle] = result.imageUrl;
+          }
+        });
+
+        setInfluencerProfileImages(imageMap);
+      } catch (error) {
+        console.error('Error fetching influencer profile images:', error);
+      }
+    };
+
+    fetchInfluencerProfileImages();
+  }, [campaignData?.influencers]);
 
   const formatCurrency = (amount: number, currency: string) => {
     return new Intl.NumberFormat('en-US', {
@@ -817,7 +836,7 @@ export default function CampaignDetail() {
               <CardTitle className="text-sm font-medium">Business Goal</CardTitle>
             </CardHeader>
             <CardContent className="px-5 py-4">
-              <p className="font-medium text-base">{campaignData.businessGoal}</p>
+              <div className="text-base text-foreground">{campaignData.businessGoal}</div>
             </CardContent>
           </Card>
 
@@ -827,10 +846,8 @@ export default function CampaignDetail() {
                 <CardTitle className="text-sm font-medium">Campaign Duration</CardTitle>
               </CardHeader>
               <CardContent className="px-5 py-4">
-                <p className="font-medium text-base">
-                  {campaignData.startDate} - {campaignData.endDate}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">{campaignData.timeZone}</p>
+                <div className="text-base text-foreground">{campaignData.startDate} - {campaignData.endDate}</div>
+                <div className="text-sm text-muted-foreground mt-1">{campaignData.timeZone}</div>
               </CardContent>
             </Card>
 
@@ -839,11 +856,13 @@ export default function CampaignDetail() {
                 <CardTitle className="text-sm font-medium">Budget</CardTitle>
               </CardHeader>
               <CardContent className="px-5 py-4">
-                <div className="text-lg font-semibold text-foreground mb-1">
-                  Social: {formatCurrency(campaignData.budget.social, campaignData.budget.currency)}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  Total: {formatCurrency(campaignData.budget.total, campaignData.budget.currency)}
+                <div className="space-y-1">
+                  <div className="text-base text-foreground">
+                    Social: {formatCurrency(campaignData.budget.social, campaignData.budget.currency)}
+                  </div>
+                  <div className="text-base text-foreground">
+                    Total: {formatCurrency(campaignData.budget.total, campaignData.budget.currency)}
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -853,11 +872,11 @@ export default function CampaignDetail() {
                 <CardTitle className="text-sm font-medium">Primary Contact</CardTitle>
               </CardHeader>
               <CardContent className="px-5 py-4">
-                <p className="font-medium text-base">{campaignData.primaryContact.name}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {campaignData.primaryContact.position}
-                </p>
-                <p className="text-xs text-accent mt-1.5">{campaignData.primaryContact.email}</p>
+                <div className="space-y-1">
+                  <div className="text-base text-foreground">{campaignData.primaryContact.name}</div>
+                  <div className="text-sm text-muted-foreground">{campaignData.primaryContact.position}</div>
+                  <div className="text-sm text-accent">{campaignData.primaryContact.email}</div>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -890,11 +909,20 @@ export default function CampaignDetail() {
                   className="shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden group"
                 >
                   <CardContent className="p-4 flex flex-col items-center text-center">
-                    <div className="mb-4 h-24 w-24 rounded-full bg-accent/15 flex items-center justify-center group-hover:bg-accent/25 transition-colors">
-                      <Icon iconId={'faUserCircleLight'} className="h-full w-full text-accent" />
+                    <div className="mb-4 h-24 w-24 rounded-full bg-accent/15 flex items-center justify-center group-hover:bg-accent/25 transition-colors overflow-hidden relative">
+                      {influencerProfileImages[influencer.handle] ? (
+                        <Image
+                          src={influencerProfileImages[influencer.handle]}
+                          alt={influencer.handle}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <Icon iconId={'faUserCircleLight'} className="h-full w-full text-accent" />
+                      )}
                     </div>
 
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 mb-3">
                       {platformInfo ? (
                         <Icon
                           iconId={platformInfo.brandIconId}
@@ -910,6 +938,18 @@ export default function CampaignDetail() {
                         {influencer.handle}
                       </p>
                     </div>
+
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={() => {
+                        const profileUrl = `/influencer-marketplace/${encodeURIComponent(influencer.handle)}?platform=${influencer.platform.toUpperCase()}`;
+                        router.push(profileUrl);
+                      }}
+                      className="w-full"
+                    >
+                      View Profile
+                    </Button>
                   </CardContent>
                 </Card>
               );
@@ -921,43 +961,48 @@ export default function CampaignDetail() {
       <PageSection>
         <SectionHeader title="Contacts" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {campaignData.contacts.map((contact, index) => (
-            <Card
-              key={index}
-              className="shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden group"
-            >
-              <CardContent className="p-5">
-                <div className="flex items-start">
-                  <div className="h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center mr-3 group-hover:bg-accent/20 transition-colors">
-                    <Icon
-                      iconId="faUserLight"
-                      className="h-5 w-5 text-accent group-hover:fa-solid transition-all"
-                    />
+          {campaignData.contacts
+            .filter(contact =>
+              contact.name && contact.name !== 'N/A' &&
+              contact.email && contact.email !== 'N/A'
+            )
+            .map((contact, index) => (
+              <Card
+                key={index}
+                className="shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden group"
+              >
+                <CardContent className="p-5">
+                  <div className="flex items-start">
+                    <div className="h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center mr-3 group-hover:bg-accent/20 transition-colors">
+                      <Icon
+                        iconId="faUserLight"
+                        className="h-5 w-5 text-accent group-hover:fa-solid transition-all"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-medium">{contact.name}</h3>
+                      <p className="text-xs text-muted-foreground">{contact.position !== 'N/A' ? contact.position : ''}</p>
+                      {contact.email && contact.email !== 'N/A' && (
+                        <p className="text-xs text-accent break-words mt-2 flex items-center">
+                          <Icon iconId="faEnvelopeLight" className="mr-1.5 opacity-70 h-3 w-3" />
+                          <a href={`mailto:${contact.email}`} className="hover:underline">
+                            {contact.email}
+                          </a>
+                        </p>
+                      )}
+                      {contact.phone && contact.phone !== 'N/A' && (
+                        <p className="text-xs text-accent break-words mt-1 flex items-center">
+                          <Icon iconId="faPhoneLight" className="mr-1.5 opacity-70 h-3 w-3" />
+                          <a href={`tel:${contact.phone}`} className="hover:underline">
+                            {contact.phone}
+                          </a>
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-medium">{contact.name || 'N/A'}</h3>
-                    <p className="text-xs text-muted-foreground">{contact.position || 'N/A'}</p>
-                    {contact.email && (
-                      <p className="text-xs text-accent break-words mt-2 flex items-center">
-                        <Icon iconId="faEnvelopeLight" className="mr-1.5 opacity-70 h-3 w-3" />
-                        <a href={`mailto:${contact.email}`} className="hover:underline">
-                          {contact.email}
-                        </a>
-                      </p>
-                    )}
-                    {contact.phone && (
-                      <p className="text-xs text-accent break-words mt-1 flex items-center">
-                        <Icon iconId="faPhoneLight" className="mr-1.5 opacity-70 h-3 w-3" />
-                        <a href={`tel:${contact.phone}`} className="hover:underline">
-                          {contact.phone}
-                        </a>
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))}
         </div>
       </PageSection>
 
@@ -1002,25 +1047,25 @@ export default function CampaignDetail() {
                   <h4 className="text-sm font-semibold text-muted-foreground mb-1">
                     Memorability / Ad Recall
                   </h4>
-                  <p className="text-sm text-foreground bg-muted/30 p-3 rounded-md leading-relaxed">
+                  <RemovableBadge variant="secondary" size="sm">
                     {campaignData.expectedOutcomes?.memorability || 'Not specified'}
-                  </p>
+                  </RemovableBadge>
                 </div>
                 <div>
                   <h4 className="text-sm font-semibold text-muted-foreground mb-1">
                     Purchase/Action Intent
                   </h4>
-                  <p className="text-sm text-foreground bg-muted/30 p-3 rounded-md leading-relaxed">
+                  <RemovableBadge variant="secondary" size="sm">
                     {campaignData.expectedOutcomes?.purchaseIntent || 'Not specified'}
-                  </p>
+                  </RemovableBadge>
                 </div>
                 <div>
                   <h4 className="text-sm font-semibold text-muted-foreground mb-1">
                     Brand Perception
                   </h4>
-                  <p className="text-sm text-foreground bg-muted/30 p-3 rounded-md leading-relaxed">
+                  <RemovableBadge variant="secondary" size="sm">
                     {campaignData.expectedOutcomes?.brandPerception || 'Not specified'}
-                  </p>
+                  </RemovableBadge>
                 </div>
               </CardContent>
             </Card>
@@ -1035,9 +1080,9 @@ export default function CampaignDetail() {
                   <h3 className="text-sm font-semibold text-muted-foreground mb-1.5">
                     Main Message
                   </h3>
-                  <p className="text-sm text-foreground bg-muted/30 p-3 rounded-md leading-relaxed">
+                  <RemovableBadge variant="secondary" size="sm">
                     {campaignData.mainMessage || 'Not specified'}
-                  </p>
+                  </RemovableBadge>
                 </div>
                 <Separator />
                 <div>
@@ -1049,9 +1094,7 @@ export default function CampaignDetail() {
                   <h3 className="text-sm font-semibold text-muted-foreground mb-1.5">
                     Key Benefits
                   </h3>
-                  <p className="text-sm text-foreground bg-muted/30 p-3 rounded-md leading-relaxed">
-                    {campaignData.keyBenefits || 'Not specified'}
-                  </p>
+                  <BadgeGroup items={campaignData.keyBenefits || []} />
                 </div>
               </CardContent>
             </Card>
@@ -1068,45 +1111,51 @@ export default function CampaignDetail() {
           <CardContent className="p-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8">
               <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-3">Age Ranges</h3>
+                <h3 className="text-sm font-semibold text-muted-foreground mb-1.5">Age Ranges</h3>
                 {campaignData.audience.ageRanges &&
-                typeof campaignData.audience.ageRanges === 'object' &&
-                Object.keys(campaignData.audience.ageRanges).length > 0 ? (
-                  <div className="mt-2 flex flex-wrap gap-2 justify-start items-center">
-                    {AGE_BRACKETS.map(bracket => {
-                      const percentage =
-                        (campaignData.audience.ageRanges as Record<string, number>)[bracket.key] ||
-                        0;
-                      const colorClass =
-                        percentage > 10
-                          ? 'bg-accent/10 border-accent'
-                          : percentage > 0
-                            ? 'bg-secondary/10 border-secondary'
-                            : 'border-input bg-transparent opacity-60';
-                      return (
-                        <div
-                          key={`${bracket.key}-summary`}
-                          className={cn(
-                            'relative h-12 w-16 rounded-md border-2 flex flex-col items-center justify-center p-1 transition-colors duration-200',
-                            percentage > 0 ? colorClass : 'border-input bg-transparent opacity-60'
-                          )}
-                          title={`${bracket.label}: ${Number(percentage).toFixed(0)}%`}
-                        >
-                          <span
-                            className={cn(
-                              'text-xs font-semibold',
-                              percentage > 0 ? 'text-foreground' : 'text-muted-foreground'
-                            )}
-                          >
-                            {Number(percentage).toFixed(0)}%
-                          </span>
-                          <span className="text-[10px] text-muted-foreground mt-0.5">
-                            {bracket.label}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
+                  typeof campaignData.audience.ageRanges === 'object' &&
+                  Object.keys(campaignData.audience.ageRanges).length > 0 ? (
+                  (() => {
+                    const ageValues = AGE_BRACKETS.map(bracket =>
+                      Number((campaignData.audience.ageRanges as Record<string, number>)[bracket.key] || 0)
+                    );
+                    const maxAgeValue = Math.max(...ageValues);
+                    const hasAgeData = ageValues.some(v => v > 0);
+
+                    return hasAgeData ? (
+                      <div className="flex flex-wrap gap-3">
+                        {AGE_BRACKETS.map(bracket => {
+                          const value = Number((campaignData.audience.ageRanges as Record<string, number>)[bracket.key] || 0);
+                          if (value === 0) return null; // Skip if 0
+                          const isMax = value === maxAgeValue;
+                          const borderColorClass = isMax ? 'border-accent' : 'border-gray-300';
+
+                          return (
+                            <div
+                              key={bracket.key}
+                              className={cn(
+                                'flex flex-col items-center justify-center p-3 rounded-lg border min-w-[70px] text-center',
+                                borderColorClass,
+                                isMax ? 'bg-accent/10' : 'bg-gray-50'
+                              )}
+                            >
+                              <span
+                                className={cn(
+                                  'text-lg font-semibold block mb-0.5',
+                                  isMax ? 'text-accent' : 'text-foreground'
+                                )}
+                              >
+                                {value}%
+                              </span>
+                              <span className="text-xs text-muted-foreground">{bracket.label}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground italic">Not specified</p>
+                    );
+                  })()
                 ) : (
                   <span className="text-sm text-muted-foreground italic">Not specified</span>
                 )}
@@ -1114,13 +1163,9 @@ export default function CampaignDetail() {
                 <div className="flex flex-wrap gap-2">
                   {campaignData.audience.genders.length > 0 ? (
                     campaignData.audience.genders.map((gender, index) => (
-                      <Badge
-                        key={index}
-                        variant="outline"
-                        className="bg-background border-border px-2.5 py-0.5 text-xs"
-                      >
+                      <RemovableBadge key={index} variant="secondary" size="sm">
                         {gender}
-                      </Badge>
+                      </RemovableBadge>
                     ))
                   ) : (
                     <span className="text-muted-foreground text-xs italic">Not specified</span>
@@ -1130,13 +1175,9 @@ export default function CampaignDetail() {
                 <div className="flex flex-wrap gap-2">
                   {campaignData.audience.locations.length > 0 ? (
                     campaignData.audience.locations.map((location, index) => (
-                      <Badge
-                        key={index}
-                        variant="outline"
-                        className="bg-background border-border px-2.5 py-0.5 text-xs"
-                      >
+                      <RemovableBadge key={index} variant="secondary" size="sm">
                         {location}
-                      </Badge>
+                      </RemovableBadge>
                     ))
                   ) : (
                     <span className="text-muted-foreground text-xs italic">Not specified</span>
@@ -1148,13 +1189,9 @@ export default function CampaignDetail() {
                 <div className="flex flex-wrap gap-2">
                   {campaignData.audience.languages.length > 0 ? (
                     campaignData.audience.languages.map((lang, index) => (
-                      <Badge
-                        key={index}
-                        variant="outline"
-                        className="bg-background border-border px-2.5 py-0.5 text-xs"
-                      >
-                        {lang}
-                      </Badge>
+                      <RemovableBadge key={index} variant="secondary" size="sm">
+                        {getLanguageName(lang)}
+                      </RemovableBadge>
                     ))
                   ) : (
                     <span className="text-muted-foreground text-xs italic">Not specified</span>
@@ -1164,29 +1201,21 @@ export default function CampaignDetail() {
                 <div className="flex flex-wrap gap-2">
                   {campaignData.audience.competitors.length > 0 ? (
                     campaignData.audience.competitors.map((competitor, index) => (
-                      <Badge
-                        key={index}
-                        variant="outline"
-                        className="bg-background border-border px-2.5 py-0.5 text-xs"
-                      >
+                      <RemovableBadge key={index} variant="secondary" size="sm">
                         {competitor}
-                      </Badge>
+                      </RemovableBadge>
                     ))
                   ) : (
                     <span className="text-muted-foreground text-xs italic">Not specified</span>
                   )}
                 </div>
-                <h3 className="text-sm font-medium text-muted-foreground mt-4 mb-3">Interests</h3>
+                <h3 className="text-sm font-medium text-muted-foreground mt-6 mb-3">Interests</h3>
                 <div className="flex flex-wrap gap-2">
                   {campaignData.audience.interests.length > 0 ? (
                     campaignData.audience.interests.map((interest, index) => (
-                      <Badge
-                        key={index}
-                        variant="outline"
-                        className="bg-background border-border px-2.5 py-0.5 text-xs"
-                      >
+                      <RemovableBadge key={index} variant="secondary" size="sm">
                         {interest}
-                      </Badge>
+                      </RemovableBadge>
                     ))
                   ) : (
                     <span className="text-muted-foreground text-xs italic">Not specified</span>
@@ -1235,17 +1264,6 @@ export default function CampaignDetail() {
                   })}
                 </div>
 
-                {campaignData.assets.guidelinesSummary &&
-                  campaignData.assets.guidelinesSummary !== 'Not Set' && (
-                    <div className="mt-6 pt-6 border-t">
-                      <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center">
-                        Guidelines Summary
-                      </h3>
-                      <div className="p-4 bg-muted/10 rounded-md border text-sm">
-                        {campaignData.assets.guidelinesSummary}
-                      </div>
-                    </div>
-                  )}
                 {campaignData.assets.requirements &&
                   campaignData.assets.requirements.length > 0 && (
                     <div className="mt-6 pt-6 border-t">

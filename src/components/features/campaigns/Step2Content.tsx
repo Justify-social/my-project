@@ -1,15 +1,15 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo as _useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller as _Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
 import { useWizard } from '@/components/features/campaigns/WizardContext';
 import { toast as _toast } from 'react-hot-toast';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
+import { Button as _Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -40,6 +40,7 @@ import {
 } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
+import { RemovableBadge } from '@/components/ui/removable-badge';
 import { showSuccessToast, showErrorToast } from '@/components/ui/toast';
 import { KPI as PrismaKPI, Feature as PrismaFeature } from '@prisma/client';
 import {
@@ -776,20 +777,15 @@ function Step2Content() {
                     {' '}
                     {/* Added pt-2 */}
                     {currentHashtags.map(tag => (
-                      <Badge key={tag} variant="secondary" className="pl-2 pr-1 text-sm">
-                        #{tag} {/* Add # prefix for display */}
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          // Make icon white on secondary badge
-                          className="ml-1 h-4 w-4 text-secondary-foreground hover:text-white hover:bg-transparent p-0"
-                          onClick={() => handleRemoveHashtag(tag)}
-                        >
-                          <Icon iconId="faXmarkLight" className="h-3 w-3" />
-                          <span className="sr-only">Remove hashtag {tag}</span>
-                        </Button>
-                      </Badge>
+                      <RemovableBadge
+                        key={tag}
+                        variant="secondary"
+                        size="md"
+                        onRemove={() => handleRemoveHashtag(tag)}
+                        removeAriaLabel={`Remove hashtag ${tag}`}
+                      >
+                        #{tag}
+                      </RemovableBadge>
                     ))}
                   </div>
                   <FormMessage>{form.formState.errors.messaging?.hashtags?.message}</FormMessage>
@@ -831,19 +827,15 @@ function Step2Content() {
                     {' '}
                     {/* Added pt-2 */}
                     {currentKeyBenefits.map(benefit => (
-                      <Badge key={benefit} variant="secondary" className="pl-2 pr-1 text-sm">
+                      <RemovableBadge
+                        key={benefit}
+                        variant="secondary"
+                        size="md"
+                        onRemove={() => handleRemoveKeyBenefit(benefit)}
+                        removeAriaLabel={`Remove key benefit ${benefit}`}
+                      >
                         {benefit}
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="ml-1 h-4 w-4 text-secondary-foreground hover:text-white hover:bg-transparent p-0"
-                          onClick={() => handleRemoveKeyBenefit(benefit)}
-                        >
-                          <Icon iconId="faXmarkLight" className="h-3 w-3" />
-                          <span className="sr-only">Remove key benefit {benefit}</span>
-                        </Button>
-                      </Badge>
+                      </RemovableBadge>
                     ))}
                   </div>
                   <FormMessage>{form.formState.errors.messaging?.keyBenefits?.message}</FormMessage>

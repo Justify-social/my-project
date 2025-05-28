@@ -27,8 +27,9 @@ import {
 } from '@/components/ui/form';
 import { Accordion, AccordionContent, AccordionItem } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
+import { RemovableBadge } from '@/components/ui/removable-badge';
 import { cn } from '@/lib/utils';
-import { InfluencerCard } from '@/components/ui/card-influencer';
+import { InfluencerCard as _InfluencerCard } from '@/components/ui/card-influencer';
 import { ProgressBarWizard } from '@/components/ui/progress-bar-wizard';
 import { IconButtonAction } from '@/components/ui/button-icon-action';
 import { AssetCard } from '@/components/ui/card-asset';
@@ -36,6 +37,7 @@ import Image from 'next/image';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { showSuccessToast, showErrorToast } from '@/components/ui/toast';
 import { toast as _toast } from 'react-hot-toast';
+import { EnhancedInfluencerCard } from '@/components/ui/card-influencer';
 
 // --- Utility Functions ---
 const formatDate = (dateString: string | null | undefined): string => {
@@ -262,16 +264,27 @@ const DataItem: React.FC<DataItemProps> = ({ label, value, children, className }
     if (Array.isArray(value)) {
       if (value.length === 0) return <span className="text-muted-foreground italic">None</span>;
       return (
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-2">
           {value.map((item, index) => (
-            <Badge key={index} variant="secondary">
+            <RemovableBadge key={index} variant="secondary" size="sm">
               {item}
-            </Badge>
+            </RemovableBadge>
           ))}
         </div>
       );
     }
-    return String(value);
+
+    // Convert single string values to badges (except for "N/A" and "Not provided" cases)
+    const stringValue = String(value);
+    if (stringValue === 'N/A' || stringValue.toLowerCase().includes('not provided')) {
+      return <span className="text-muted-foreground italic">{stringValue}</span>;
+    }
+
+    return (
+      <RemovableBadge variant="secondary" size="sm">
+        {stringValue}
+      </RemovableBadge>
+    );
   }, [value, children]);
 
   return (
@@ -342,37 +355,61 @@ const Step1Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
     <DataItem label="Campaign Name" value={data.name} />
     <DataItem label="Business Goal" value={data.businessGoal} className="md:col-span-2" />
     <DataItem label="Campaign Duration">
-      {data.startDate && data.endDate
-        ? `${formatDate(data.startDate)} - ${formatDate(data.endDate)}`
-        : 'N/A'}
+      {data.startDate && data.endDate ? (
+        <RemovableBadge variant="secondary" size="sm">
+          {`${formatDate(data.startDate)} - ${formatDate(data.endDate)}`}
+        </RemovableBadge>
+      ) : (
+        <span className="text-muted-foreground italic">N/A</span>
+      )}
     </DataItem>
     <DataItem label="Timezone" value={data.timeZone} />
-    <DataItem
-      label="Total Budget"
-      value={formatCurrency(data.budget?.total, data.budget?.currency)}
-    />
-    <DataItem
-      label="Social Budget"
-      value={formatCurrency(data.budget?.socialMedia, data.budget?.currency)}
-    />
-    <DataItem
-      label="Primary Contact Name"
-      value={
-        `${data.primaryContact?.firstName || ''} ${data.primaryContact?.surname || ''}`.trim() ||
-        'N/A'
-      }
-    />
+    <DataItem label="Total Budget">
+      {data.budget?.total && data.budget?.currency ? (
+        <RemovableBadge variant="secondary" size="sm">
+          {formatCurrency(data.budget.total, data.budget.currency)}
+        </RemovableBadge>
+      ) : (
+        <span className="text-muted-foreground italic">N/A</span>
+      )}
+    </DataItem>
+    <DataItem label="Social Budget">
+      {data.budget?.socialMedia && data.budget?.currency ? (
+        <RemovableBadge variant="secondary" size="sm">
+          {formatCurrency(data.budget.socialMedia, data.budget.currency)}
+        </RemovableBadge>
+      ) : (
+        <span className="text-muted-foreground italic">N/A</span>
+      )}
+    </DataItem>
+    <DataItem label="Primary Contact Name">
+      {(() => {
+        const fullName = `${data.primaryContact?.firstName || ''} ${data.primaryContact?.surname || ''}`.trim();
+        return fullName ? (
+          <RemovableBadge variant="secondary" size="sm">
+            {fullName}
+          </RemovableBadge>
+        ) : (
+          <span className="text-muted-foreground italic">N/A</span>
+        );
+      })()}
+    </DataItem>
     <DataItem label="Primary Contact Email" value={data.primaryContact?.email} />
     <DataItem label="Primary Contact Position" value={data.primaryContact?.position} />
     {data.secondaryContact && (
       <>
-        <DataItem
-          label="Secondary Contact Name"
-          value={
-            `${data.secondaryContact?.firstName || ''} ${data.secondaryContact?.surname || ''}`.trim() ||
-            'N/A'
-          }
-        />
+        <DataItem label="Secondary Contact Name">
+          {(() => {
+            const fullName = `${data.secondaryContact?.firstName || ''} ${data.secondaryContact?.surname || ''}`.trim();
+            return fullName ? (
+              <RemovableBadge variant="secondary" size="sm">
+                {fullName}
+              </RemovableBadge>
+            ) : (
+              <span className="text-muted-foreground italic">N/A</span>
+            );
+          })()}
+        </DataItem>
         <DataItem label="Secondary Contact Email" value={data.secondaryContact?.email} />
         <DataItem label="Secondary Contact Position" value={data.secondaryContact?.position} />
       </>
@@ -380,13 +417,14 @@ const Step1Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
     <div className="md:col-span-2">
       <p className="text-sm font-medium text-muted-foreground mb-1">Influencers</p>
       {data.Influencer && data.Influencer.length > 0 ? (
-        <div className="space-y-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
           {data.Influencer.map((inf, idx) => (
-            <InfluencerCard
+            <EnhancedInfluencerCard
               key={idx}
-              platform={inf.platform}
-              handle={inf.handle}
-              className="bg-muted/30 max-w-sm"
+              influencer={{
+                handle: inf.handle,
+                platform: inf.platform
+              }}
             />
           ))}
         </div>
@@ -421,9 +459,9 @@ const Step2Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
       {data.features && data.features.length > 0 ? (
         <div className="flex flex-wrap gap-2">
           {data.features.map((feature, idx) => (
-            <Badge key={idx} variant="outline" className="py-1 px-2 text-sm">
+            <RemovableBadge key={idx} variant="secondary" size="sm">
               {formatFeatureName(feature)}
-            </Badge>
+            </RemovableBadge>
           ))}
         </div>
       ) : (
@@ -435,16 +473,36 @@ const Step2Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
       {data.messaging?.hashtags && data.messaging.hashtags.length > 0 ? (
         <div className="flex flex-wrap gap-2">
           {data.messaging.hashtags.map((tag, idx) => (
-            <Badge key={idx} variant="secondary" className="py-1 px-2 text-sm flex items-center">
-              {tag}
-            </Badge>
+            <RemovableBadge
+              key={idx}
+              variant="secondary"
+              size="sm"
+            >
+              #{tag}
+            </RemovableBadge>
           ))}
         </div>
       ) : (
         <span className="text-muted-foreground italic">None</span>
       )}
     </DataItem>
-    <DataItem label="Key Benefits" value={data.messaging?.keyBenefits} />
+    <DataItem label="Key Benefits">
+      {data.messaging?.keyBenefits && data.messaging.keyBenefits.length > 0 ? (
+        <div className="flex flex-wrap gap-2">
+          {data.messaging.keyBenefits.map((benefit, idx) => (
+            <RemovableBadge
+              key={idx}
+              variant="secondary"
+              size="sm"
+            >
+              {benefit}
+            </RemovableBadge>
+          ))}
+        </div>
+      ) : (
+        <span className="text-muted-foreground italic">None</span>
+      )}
+    </DataItem>
     <DataItem label="Memorability" value={data.expectedOutcomes?.memorability} />
     <DataItem label="Purchase Intent" value={data.expectedOutcomes?.purchaseIntent} />
     <DataItem label="Brand Perception" value={data.expectedOutcomes?.brandPerception} />
@@ -459,14 +517,26 @@ const Step3Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
-      <DataItem label="Genders" value={data.demographics?.genders} />
+      <DataItem label="Genders">
+        {data.demographics?.genders && data.demographics.genders.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {data.demographics.genders.map((gender, idx) => (
+              <RemovableBadge key={idx} variant="secondary" size="sm">
+                {gender}
+              </RemovableBadge>
+            ))}
+          </div>
+        ) : (
+          <span className="text-muted-foreground italic">None</span>
+        )}
+      </DataItem>
       <DataItem label="Languages">
         {data.demographics?.languages && data.demographics.languages.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {data.demographics.languages.map((langCode, idx) => (
-              <Badge key={idx} variant="secondary" className="py-1 px-2 text-sm">
+              <RemovableBadge key={idx} variant="secondary" size="sm">
                 {getLanguageName(langCode)}
-              </Badge>
+              </RemovableBadge>
             ))}
           </div>
         ) : (
@@ -509,23 +579,67 @@ const Step3Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => {
           <p className="text-sm text-muted-foreground italic">Not specified</p>
         )}
       </div>
-      <DataItem label="Interests" value={data.targeting?.interests} />
-      <DataItem label="Keywords" value={data.targeting?.keywords} />
+      <DataItem label="Interests">
+        {data.targeting?.interests && data.targeting.interests.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {data.targeting.interests.map((interest, idx) => (
+              <RemovableBadge
+                key={idx}
+                variant="secondary"
+                size="sm"
+              >
+                {interest}
+              </RemovableBadge>
+            ))}
+          </div>
+        ) : (
+          <span className="text-muted-foreground italic">None</span>
+        )}
+      </DataItem>
+      <DataItem label="Keywords">
+        {data.targeting?.keywords && data.targeting.keywords.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {data.targeting.keywords.map((keyword, idx) => (
+              <RemovableBadge
+                key={idx}
+                variant="secondary"
+                size="sm"
+              >
+                {keyword}
+              </RemovableBadge>
+            ))}
+          </div>
+        ) : (
+          <span className="text-muted-foreground italic">None</span>
+        )}
+      </DataItem>
       <DataItem label="Locations" className="md:col-span-2">
         {data.locations && data.locations.length > 0 ? (
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-2">
             {data.locations.map((loc, idx) => (
-              <Badge key={idx} variant="outline">
+              <RemovableBadge key={idx} variant="secondary" size="sm">
                 {[loc.city, loc.region, loc.country].filter(Boolean).join(', ') ||
                   'Invalid Location'}
-              </Badge>
+              </RemovableBadge>
             ))}
           </div>
         ) : (
           <span className="text-muted-foreground italic">None specified</span>
         )}
       </DataItem>
-      <DataItem label="Competitors" value={data.competitors} />
+      <DataItem label="Competitors">
+        {data.competitors && data.competitors.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {data.competitors.map((competitor, idx) => (
+              <RemovableBadge key={idx} variant="secondary" size="sm">
+                {competitor}
+              </RemovableBadge>
+            ))}
+          </div>
+        ) : (
+          <span className="text-muted-foreground italic">None</span>
+        )}
+      </DataItem>
     </div>
   );
 };
@@ -610,11 +724,11 @@ const Step4Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
                         <p className="text-xs font-medium text-muted-foreground">
                           Associated Influencers:
                         </p>
-                        <div className="flex flex-wrap gap-1 mt-1">
+                        <div className="flex flex-wrap gap-2 mt-1">
                           {associatedInfluencerHandles.map((handle: string, i: number) => (
-                            <Badge key={i} variant="secondary" className="text-xs">
+                            <RemovableBadge key={i} variant="secondary" size="sm">
                               {handle}
-                            </Badge>
+                            </RemovableBadge>
                           ))}
                         </div>
                       </div>

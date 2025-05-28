@@ -34,6 +34,7 @@ import {
   DraftCampaignData,
   DraftAsset,
 } from '@/components/features/campaigns/types';
+import { RemovableBadge } from '@/components/ui/removable-badge';
 
 // Define InfluencerOption type used in props and internally
 interface InfluencerOption {
@@ -426,26 +427,24 @@ export const AssetCardStep4 = React.memo(
                   {/* Display selected as badges */}
                   <div className="flex flex-wrap gap-1 pt-1 min-h-[20px]">
                     {selectedOptions.map((influencer: InfluencerOption) => (
-                      <Badge key={influencer.id} variant="secondary" className="pl-2 pr-1 text-xs">
-                        {influencer.handle}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const currentIds = selectedInfluencerIds || [];
-                            const newValue = currentIds.filter(
-                              (id: string) => id !== influencer.id
-                            );
+                      <RemovableBadge
+                        key={influencer.id}
+                        variant="secondary"
+                        size="sm"
+                        onRemove={() => {
+                          const currentIds = selectedInfluencerIds || [];
+                          const newValue = currentIds.filter(
+                            (id: string) => id !== influencer.id
+                          );
 
-                            // Update the form field using proper React Hook Form API
-                            field.onChange(newValue);
-                            handleAutoSave();
-                          }}
-                          className="ml-1 p-0.5 rounded-full hover:bg-destructive/20 text-secondary-foreground hover:text-destructive transition-colors"
-                          aria-label={`Remove ${influencer.handle}`}
-                        >
-                          <Icon iconId="faXmarkLight" className="h-2.5 w-2.5" />
-                        </button>
-                      </Badge>
+                          // Update the form field using proper React Hook Form API
+                          field.onChange(newValue);
+                          handleAutoSave();
+                        }}
+                        removeAriaLabel={`Remove ${influencer.handle}`}
+                      >
+                        {influencer.handle}
+                      </RemovableBadge>
                     ))}
                   </div>
                   <FormMessage className="text-xs" />
@@ -548,7 +547,7 @@ export const AssetCardStep4 = React.memo(
       prevAsset.rationale !== nextAsset.rationale ||
       prevAsset.budget !== nextAsset.budget ||
       JSON.stringify(prevAsset.associatedInfluencerIds) !==
-        JSON.stringify(nextAsset.associatedInfluencerIds)
+      JSON.stringify(nextAsset.associatedInfluencerIds)
     ) {
       return false; // Important asset fields changed, need re-render
     }

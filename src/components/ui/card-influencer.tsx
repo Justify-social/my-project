@@ -11,10 +11,14 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { Icon } from './icon/icon';
 import { cn } from '@/lib/utils';
 import { PlatformEnum } from '@/types/enums';
 import { z as _z } from 'zod';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 // Helper function to format large numbers (e.g., follower counts)
 const formatNumber = (num: number | undefined | null): string => {
@@ -135,6 +139,105 @@ export function InfluencerCard({
         ) : (
           cardContent
         )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// Enhanced Influencer Card with real profile images and View Profile button
+interface EnhancedInfluencerCardProps {
+  influencer: {
+    handle: string;
+    platform: PlatformEnum | string;
+  };
+  className?: string;
+}
+
+export function EnhancedInfluencerCard({ influencer, className }: EnhancedInfluencerCardProps) {
+  const router = useRouter();
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+
+  // Platform display mapping
+  const platformDisplayMap: Record<string, { brandIconId: string; displayName: string }> = {
+    instagram: { brandIconId: 'brandsInstagram', displayName: 'Instagram' },
+    youtube: { brandIconId: 'brandsYoutube', displayName: 'YouTube' },
+    tiktok: { brandIconId: 'brandsTiktok', displayName: 'TikTok' },
+    twitter: { brandIconId: 'brandsXTwitter', displayName: 'X (Twitter)' },
+    facebook: { brandIconId: 'brandsFacebook', displayName: 'Facebook' },
+    linkedin: { brandIconId: 'brandsLinkedin', displayName: 'LinkedIn' },
+  };
+
+  const platformKey = typeof influencer.platform === 'string'
+    ? influencer.platform.toLowerCase()
+    : influencer.platform;
+  const platformInfo = platformDisplayMap[platformKey];
+
+  // Fetch profile image from InsightIQ
+  useEffect(() => {
+    const fetchProfileImage = async () => {
+      try {
+        const response = await fetch(
+          `/api/influencers/fetch-profile?handle=${encodeURIComponent(influencer.handle)}&platform=${encodeURIComponent(typeof influencer.platform === 'string' ? influencer.platform.toUpperCase() : influencer.platform)}`
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data?.avatarUrl) {
+            setProfileImage(data.data.avatarUrl);
+          }
+        }
+      } catch (error) {
+        console.error(`Failed to fetch profile image for ${influencer.handle}:`, error);
+      }
+    };
+
+    fetchProfileImage();
+  }, [influencer.handle, influencer.platform]);
+
+  return (
+    <Card className={cn("shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden group", className)}>
+      <CardContent className="p-4 flex flex-col items-center text-center">
+        <div className="mb-4 h-24 w-24 rounded-full bg-accent/15 flex items-center justify-center group-hover:bg-accent/25 transition-colors overflow-hidden relative">
+          {profileImage ? (
+            <Image
+              src={profileImage}
+              alt={influencer.handle}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <Icon iconId={'faUserCircleLight'} className="h-full w-full text-accent" />
+          )}
+        </div>
+
+        <div className="flex items-center space-x-2 mb-3">
+          {platformInfo ? (
+            <Icon
+              iconId={platformInfo.brandIconId}
+              className="h-5 w-5 flex-shrink-0 text-muted-foreground group-hover:text-foreground transition-colors"
+            />
+          ) : (
+            <Icon
+              iconId="faLinkSimpleLight"
+              className="h-5 w-5 flex-shrink-0 text-muted-foreground"
+            />
+          )}
+          <p className="text-sm font-semibold text-foreground truncate">
+            {influencer.handle}
+          </p>
+        </div>
+
+        <Button
+          variant="default"
+          size="sm"
+          onClick={() => {
+            const profileUrl = `/influencer-marketplace/${encodeURIComponent(influencer.handle)}?platform=${typeof influencer.platform === 'string' ? influencer.platform.toUpperCase() : influencer.platform}`;
+            router.push(profileUrl);
+          }}
+          className="w-full"
+        >
+          View Profile
+        </Button>
       </CardContent>
     </Card>
   );
