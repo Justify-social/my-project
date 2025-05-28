@@ -72,10 +72,28 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ influencer, isLoad
     category,
   } = influencer || {};
 
-  // Extract professional data for quick contact actions
+  // Extract ALL available data from InsightIQ API
   const extractedData = influencer ? extractInsightIQData(influencer) : null;
   const professionalData = extractedData?.professional;
   const trustData = extractedData?.trust;
+  const performanceData = extractedData?.performance;
+
+  // Use ONLY real API data - extract all possible values
+  const realFollowersCount = followersCount || performanceData?.reputation?.followerCount || null;
+
+  const realEngagementRate =
+    engagementRate ||
+    performanceData?.engagement?.rate ||
+    (performanceData?.engagement?.averageLikes && realFollowersCount
+      ? performanceData.engagement.averageLikes / realFollowersCount
+      : null);
+
+  const realJustifyScore =
+    typeof justifyScore === 'number'
+      ? justifyScore
+      : trustData?.credibilityScore
+        ? trustData.credibilityScore / 10 // Convert 0-100 to 0-10 scale
+        : null;
 
   const handleCopyHandle = async () => {
     if (handle && navigator.clipboard) {
@@ -245,14 +263,14 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ influencer, isLoad
                   <div className="flex flex-wrap items-center justify-center sm:justify-start gap-6 pt-2">
                     <div className="text-center">
                       <div className="text-2xl font-bold text-primary">
-                        {formatNumber(followersCount)}
+                        {formatNumber(realFollowersCount)}
                       </div>
                       <div className="text-xs text-muted-foreground">Followers</div>
                     </div>
                     <Separator orientation="vertical" className="h-8" />
                     <div className="text-center">
                       <div className="text-2xl font-bold text-primary">
-                        {engagementRate ? `${(engagementRate * 100).toFixed(1)}%` : 'N/A'}
+                        {realEngagementRate ? `${(realEngagementRate * 100).toFixed(1)}%` : '—'}
                       </div>
                       <div className="text-xs text-muted-foreground">Engagement</div>
                     </div>
@@ -325,7 +343,11 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ influencer, isLoad
                         Justify Score
                       </div>
                       <div className="text-4xl font-bold text-primary mb-1">
-                        {typeof justifyScore === 'number' ? justifyScore.toFixed(1) : 'N/A'}
+                        {realJustifyScore !== null
+                          ? realJustifyScore.toFixed(1)
+                          : trustData?.credibilityScore
+                            ? (trustData.credibilityScore / 10).toFixed(1)
+                            : '—'}
                       </div>
                       <div className="text-xs text-muted-foreground">Quality Rating</div>
                     </div>
@@ -420,7 +442,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ influencer, isLoad
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p className="text-sm">Account connection verified via InsightIQ platform</p>
+                      <p className="text-sm">Account verified by Justify.</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>

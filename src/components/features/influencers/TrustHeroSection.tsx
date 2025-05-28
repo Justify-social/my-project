@@ -41,14 +41,26 @@ const getRiskLevelStyles = (riskLevel: 'LOW' | 'MEDIUM' | 'HIGH') => {
 export const TrustHeroSection: React.FC<TrustHeroSectionProps> = ({ influencer }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // 🎯 SSOT: Use centralized data extraction
+  // 🎯 SSOT: Use centralized data extraction from InsightIQ Profile Analytics API
   const extractedData = extractInsightIQData(influencer);
   const trustData = extractedData.trust;
   const styles = getRiskLevelStyles(trustData.riskLevel);
 
-  // Don't render if no trust data available
-  if (!trustData.hasDetailedData) {
-    return null;
+  // Only render if we have real InsightIQ API trust data
+  if (!trustData.hasDetailedData || !trustData.credibilityScore) {
+    return (
+      <Card className="border-accent/20">
+        <CardContent className="p-6 text-center">
+          <Icon iconId="faShieldLight" className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+          <p className="text-sm text-muted-foreground">
+            Trust data not available from InsightIQ API
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            This influencer may not have sufficient audience data for trust analysis
+          </p>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -139,11 +151,12 @@ export const TrustHeroSection: React.FC<TrustHeroSectionProps> = ({ influencer }
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 animate-in slide-in-from-bottom-3 duration-500 delay-800">
           <div className="flex items-center gap-3">
-            <Icon iconId="faInfoLight" className="h-4 w-4 text-accent flex-shrink-0" />
+            <Icon iconId="faCloudLight" className="h-4 w-4 text-accent flex-shrink-0" />
             <p className="text-sm text-muted-foreground">
-              You can trust this assessment with{' '}
+              Trust analysis powered by{' '}
+              <span className="font-medium text-accent">Justify Intelligence Platform</span> with{' '}
               <span className="font-medium text-accent">
-                {extractedData.trust.credibilityScore}% confidence
+                {trustData.credibilityScore}% confidence
               </span>{' '}
               for brand partnerships
             </p>
@@ -259,7 +272,11 @@ export const TrustHeroSection: React.FC<TrustHeroSectionProps> = ({ influencer }
               <div className="space-y-2 text-sm">
                 <div className="flex items-center justify-between">
                   <span>Audience Quality Score</span>
-                  <span className="font-medium">{trustData.audienceQualityScore || 'N/A'}</span>
+                  <span className="font-medium">
+                    {trustData.audienceQualityScore
+                      ? `${trustData.audienceQualityScore}%`
+                      : 'No API data'}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span>Real Followers</span>

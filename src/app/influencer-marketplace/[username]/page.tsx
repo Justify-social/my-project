@@ -19,6 +19,9 @@ import { AdvancedInsightsHub } from '@/components/features/influencers/AdvancedI
 import { CertificationStatusSection } from '@/components/features/influencers/CertificationStatusSection';
 import { RiskScoreSection } from '@/components/features/influencers/RiskScoreSection';
 import { RecentCampaignsSection } from '@/components/features/influencers/RecentCampaignsSection';
+// Import the new components
+import { ContactsPopup } from '@/components/ui/contacts-popup';
+import { SaveInfluencerButton } from '@/components/ui/save-influencer-button';
 // import { LoadingSkeleton } from '@/components/ui/loading-skeleton'; // TODO: Import Skeleton component
 // import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert" // TODO: Import Alert component
 // TODO: Import ProfileHeader and Profile Details components later (Tickets 2.2, 2.4)
@@ -259,6 +262,18 @@ export default function InfluencerProfilePage() {
 
           {!isLoading && !error && influencer && (
             <div className="flex items-center gap-3">
+              {/* Save Button */}
+              <SaveInfluencerButton
+                influencer={influencer}
+                onSuccess={influencerId => {
+                  toast.success(`${influencer.name || influencer.handle} saved successfully!`);
+                }}
+              />
+
+              {/* Contacts Button */}
+              <ContactsPopup influencer={influencer} />
+
+              {/* Risk Report Button */}
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button
@@ -292,6 +307,7 @@ export default function InfluencerProfilePage() {
                 </AlertDialogContent>
               </AlertDialog>
 
+              {/* Add to Campaign Button */}
               {influencer &&
                 platformEnum &&
                 influencer.profileId &&

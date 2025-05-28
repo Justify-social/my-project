@@ -17,8 +17,8 @@ interface PerformanceDashboardProps {
 }
 
 // Helper function to format numbers
-const formatNumber = (num: number | null): string => {
-  if (!num) return '0';
+const formatNumber = (num: number | null | undefined): string => {
+  if (num === null || num === undefined) return 'Calculating...';
   if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
   if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
   return num.toString();
@@ -111,19 +111,19 @@ const getPerformanceRankingStyles = (ranking: string) => {
 };
 
 export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ influencer }) => {
-  // 🎯 SSOT: Use centralized data extraction
+  // 🎯 SSOT: Use centralized data extraction from InsightIQ API
   const extractedData = extractInsightIQData(influencer);
   const performanceData = extractedData.performance;
   const contentData = extractedData.content;
 
-  // Calculate engagement trends from real historical data
+  // Use ONLY real API data for trends - no calculations
   const getEngagementTrend = (): number | null => {
     const history = performanceData.trends.reputationHistory;
     if (history.length >= 2) {
       const recent = history[history.length - 1];
       const previous = history[history.length - 2];
-      if (recent.averageLikes && previous.averageLikes) {
-        return ((recent.averageLikes - previous.averageLikes) / previous.averageLikes) * 100;
+      if (recent.engagementRate && previous.engagementRate) {
+        return ((recent.engagementRate - previous.engagementRate) / previous.engagementRate) * 100;
       }
     }
     return null;
@@ -141,19 +141,47 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ infl
     return null;
   };
 
-  // Real trend calculations
-  const engagementTrend = getEngagementTrend();
-  const viewsTrend = getFollowerTrend(); // Using follower trend as proxy for views trend
-  const likesTrend = getEngagementTrend();
-  const commentsTrend = null; // Would need comment-specific historical data
+  const getViewsTrend = (): number | null => {
+    // Use actual views trend data from API if available
+    return performanceData.trends.growthMetrics.contentGrowthRate;
+  };
 
-  // Don't render if no performance data available
-  if (!performanceData.engagement.rate && !performanceData.reputation.followerCount) {
+  const getLikesTrend = (): number | null => {
+    const history = performanceData.trends.reputationHistory;
+    if (history.length >= 2) {
+      const recent = history[history.length - 1];
+      const previous = history[history.length - 2];
+      if (recent.averageLikes && previous.averageLikes) {
+        return ((recent.averageLikes - previous.averageLikes) / previous.averageLikes) * 100;
+      }
+    }
+    return null;
+  };
+
+  // Real trend calculations from InsightIQ API data only
+  const engagementTrend = getEngagementTrend();
+  const viewsTrend = getViewsTrend();
+  const likesTrend = getLikesTrend();
+  const followerTrend = getFollowerTrend();
+
+  // Only render if we have actual API performance data
+  if (
+    !performanceData.engagement.rate &&
+    !performanceData.engagement.averageLikes &&
+    !performanceData.engagement.averageComments &&
+    !performanceData.engagement.averageViews &&
+    !performanceData.reputation.followerCount
+  ) {
     return (
       <Card className="border-accent/20">
         <CardContent className="p-6 text-center">
           <Icon iconId="faChartLineLight" className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground">Performance data not available</p>
+          <p className="text-sm text-muted-foreground">
+            Performance data not available from InsightIQ API
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            This influencer may not have sufficient historical data or platform access
+          </p>
         </CardContent>
       </Card>
     );
@@ -232,12 +260,17 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ infl
             </div>
             <div className="text-xl sm:text-2xl font-bold text-success mb-1">
               {performanceData.engagement.rate
-                ? (performanceData.engagement.rate * 100).toFixed(1)
-                : 'N/A'}
-              %
+                ? `${(performanceData.engagement.rate * 100).toFixed(1)}%`
+                : 'No API data'}
             </div>
             <p className="text-xs text-muted-foreground">Engagement Rate</p>
-            <div className="text-xs text-success/70 mt-1">Above Average</div>
+            <div className="text-xs text-success/70 mt-1">
+              {performanceData.engagement.rate && performanceData.engagement.rate > 0.03
+                ? 'Above Average'
+                : performanceData.engagement.rate
+                  ? 'Industry Average'
+                  : 'Awaiting data'}
+            </div>
           </div>
 
           {/* Average Views Metric */}
@@ -318,7 +351,7 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ infl
                 aria-hidden="true"
               />
               <Badge variant="outline" className="text-xs text-secondary border-secondary/30">
-                {commentsTrend === null ? '→' : commentsTrend > 0 ? '↗' : '↘'}
+                {followerTrend === null ? '→' : followerTrend > 0 ? '↗' : '↘'}
               </Badge>
             </div>
             <div className="text-xl sm:text-2xl font-bold text-secondary mb-1">
@@ -393,14 +426,17 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ infl
                   aria-hidden="true"
                 />
               </div>
-              <div className="text-2xl font-bold text-success mb-1">
+              <div className="text-2xl font-bold text-success">
                 {performanceData.sponsored.performance
-                  ? (performanceData.sponsored.performance * 100).toFixed(1)
-                  : 'N/A'}
-                %
+                  ? `${(performanceData.sponsored.performance * 100).toFixed(1)}%`
+                  : performanceData.sponsored.sponsoredEngagementAverage
+                    ? `${(performanceData.sponsored.sponsoredEngagementAverage * 100).toFixed(1)}%`
+                    : 'No sponsored data'}
               </div>
               <p className="text-xs text-muted-foreground">
-                {performanceData.sponsored.postsCount || 0} sponsored posts analyzed
+                {performanceData.sponsored.postsCount
+                  ? `${performanceData.sponsored.postsCount} sponsored posts analyzed via InsightIQ API`
+                  : 'No sponsored content data available from API'}
               </p>
             </div>
 
@@ -426,27 +462,57 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ infl
                   aria-hidden="true"
                 />
               </div>
-              <div className="text-2xl font-bold text-primary mb-1">
+              <div className="text-2xl font-bold text-primary">
                 {performanceData.engagement.rate
-                  ? (performanceData.engagement.rate * 100).toFixed(1)
-                  : 'N/A'}
-                %
+                  ? `${(performanceData.engagement.rate * 100).toFixed(1)}%`
+                  : 'No organic data'}
               </div>
-              <p className="text-xs text-muted-foreground">Overall organic engagement rate</p>
+              <p className="text-xs text-muted-foreground">
+                {performanceData.engagement.rate
+                  ? 'Overall organic engagement rate from InsightIQ API'
+                  : 'No organic engagement data available from API'}
+              </p>
             </div>
           </div>
 
-          {/* Performance Summary */}
+          {/* Performance Summary - Real API Data Only */}
           <div className="mt-4 p-3 rounded-lg bg-success/10 border border-success/20 animate-in fade-in duration-500 delay-1000">
-            <p className="text-sm text-muted-foreground mb-2">
-              <span className="font-medium text-accent">Analyst Insight:</span> This influencer
-              shows{' '}
-              {performanceData.sponsored.performance && performanceData.engagement.rate
-                ? performanceData.sponsored.performance > performanceData.engagement.rate * 0.8
-                  ? 'strong'
-                  : 'moderate'
-                : 'insufficient data'}
-            </p>
+            <div className="flex items-center gap-2 mb-2">
+              <Icon iconId="faChartBarLight" className="w-4 h-4 text-success" />
+              <span className="text-sm font-semibold text-primary">
+                InsightIQ Performance Summary
+              </span>
+            </div>
+            <div className="text-sm text-muted-foreground space-y-1">
+              <div className="flex items-center justify-between">
+                <span>Sponsored Performance:</span>
+                <span className="font-medium">
+                  {performanceData.sponsored.performance
+                    ? `${(performanceData.sponsored.performance * 100).toFixed(1)}%`
+                    : performanceData.sponsored.sponsoredEngagementAverage
+                      ? `${(performanceData.sponsored.sponsoredEngagementAverage * 100).toFixed(1)}%`
+                      : '—'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Organic Performance:</span>
+                <span className="font-medium">
+                  {performanceData.engagement.rate
+                    ? `${(performanceData.engagement.rate * 100).toFixed(1)}%`
+                    : '—'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Data Quality:</span>
+                <span className="font-medium text-success">
+                  {performanceData.engagement.rate && performanceData.sponsored.performance
+                    ? 'Comprehensive'
+                    : performanceData.engagement.rate || performanceData.sponsored.performance
+                      ? 'Partial'
+                      : 'Limited'}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 

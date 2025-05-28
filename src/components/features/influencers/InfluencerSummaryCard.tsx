@@ -131,7 +131,7 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
                   </Badge>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Account connection verified via InsightIQ.</p>
+                  <p>Account verified by Justify.</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -153,7 +153,7 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
         <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm mb-4">
           <div className="font-medium text-gray-700 dark:text-gray-300">Followers:</div>
           <div className="text-right text-gray-900 dark:text-white">
-            {influencer.followersCount ? influencer.followersCount.toLocaleString() : 'N/A'}
+            {influencer.followersCount ? influencer.followersCount.toLocaleString() : 'No data'}
           </div>
 
           <div className="font-medium text-gray-700 dark:text-gray-300">Justify Score:</div>
@@ -161,7 +161,7 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
             className="text-right text-gray-900 dark:text-white flex items-center justify-end"
             data-testid="justify-score"
           >
-            {influencer.justifyScore ?? 'N/A'}
+            {influencer.justifyScore ?? 'Analyzing...'}
             <TooltipProvider delayDuration={300}>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -173,11 +173,12 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
                   <div className="text-left whitespace-normal">
                     <p className="text-sm">
                       <strong>Justify Score (V2):</strong> Calculated based on audience credibility,
-                      account verification, engagement quality, and follower data.
+                      account verification, engagement quality, and follower data from InsightIQ
+                      API.
                     </p>
                     <p className="text-xs opacity-75 mt-1">
                       This score provides a comprehensive view of an influencer's overall quality
-                      and potential.
+                      and potential using real platform data.
                     </p>
                   </div>
                 </TooltipContent>
@@ -188,7 +189,9 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
           <div className="font-medium text-gray-700 dark:text-gray-300">Engagement Rate:</div>
           <div className="text-right text-gray-900 dark:text-white">
             {/* Display with 2 decimal places if available */}
-            {influencer.engagementRate ? `${(influencer.engagementRate * 100).toFixed(2)}%` : 'N/A'}
+            {influencer.engagementRate
+              ? `${(influencer.engagementRate * 100).toFixed(2)}%`
+              : 'No data'}
           </div>
         </div>
         {/* Action Buttons */}

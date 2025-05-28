@@ -565,97 +565,203 @@ function extractProfessionalData(
     category: categorizeContactType(contact.type),
   }));
 
-  // Structured email extraction
-  const emails = (insightiq?.profile?.emails || []).map((email: any, index: number) => ({
-    type: email.type || 'UNKNOWN',
-    email: email.email_id,
-    isPrimary: email.type === 'WORK' || index === 0,
-    verified: email.verified || false,
-  }));
+  // Enhanced email extraction from multiple sources
+  const emails: Array<{ type: string; email: string; isPrimary: boolean; verified: boolean }> = [];
 
-  // Add extracted contacts as emails if not already present
-  const extractedEmails = insightiq?.contacts?.email
-    ? [
-        {
-          type: 'EXTRACTED',
-          email: insightiq.contacts.email,
-          isPrimary: emails.length === 0,
-          verified: false,
-        },
-      ]
-    : [];
+  // 1. From profile.emails array
+  (insightiq?.profile?.emails || []).forEach((email: any, index: number) => {
+    emails.push({
+      type: email.type || 'PROFILE',
+      email: email.email_id || email.email,
+      isPrimary: email.type === 'WORK' || email.isPrimary || index === 0,
+      verified: email.verified || false,
+    });
+  });
 
-  // Phone numbers
-  const phoneNumbers = (insightiq?.profile?.phone_numbers || []).map((phone: any) => ({
-    type: phone.type || 'UNKNOWN',
-    number: phone.phone_number,
-    country: phone.country_code,
-    verified: phone.verified || false,
-  }));
-
-  // Add extracted phone if not already present
-  if (insightiq?.contacts?.phone && !phoneNumbers.length) {
-    phoneNumbers.push({
-      type: 'EXTRACTED',
-      number: insightiq.contacts.phone,
-      country: null,
+  // 2. From contacts.email (direct contact)
+  if (insightiq?.contacts?.email && !emails.find(e => e.email === insightiq.contacts.email)) {
+    emails.push({
+      type: 'CONTACT',
+      email: insightiq.contacts.email,
+      isPrimary: emails.length === 0,
       verified: false,
     });
   }
 
+  // 3. From influencer.contactEmail (legacy field)
+  if (influencer.contactEmail && !emails.find(e => e.email === influencer.contactEmail)) {
+    emails.push({
+      type: 'LEGACY',
+      email: influencer.contactEmail,
+      isPrimary: emails.length === 0,
+      verified: false,
+    });
+  }
+
+  // 4. From contact_details array
+  contactDetails.forEach((contact: { type: string; value: string; category: string }) => {
+    if (contact.category === 'email' && !emails.find(e => e.email === contact.value)) {
+      emails.push({
+        type: contact.type || 'EXTRACTED',
+        email: contact.value,
+        isPrimary: emails.length === 0,
+        verified: false,
+      });
+    }
+  });
+
+  // Enhanced phone number extraction from multiple sources
+  const phoneNumbers: Array<{ type: string; number: string; country?: string; verified: boolean }> =
+    [];
+
+  // 1. From profile.phone_numbers array
+  (insightiq?.profile?.phone_numbers || []).forEach((phone: any) => {
+    phoneNumbers.push({
+      type: phone.type || 'PROFILE',
+      number: phone.phone_number || phone.number,
+      country: phone.country_code || phone.country,
+      verified: phone.verified || false,
+    });
+  });
+
+  // 2. From contacts.phone (direct contact)
+  if (
+    insightiq?.contacts?.phone &&
+    !phoneNumbers.find(p => p.number === insightiq.contacts.phone)
+  ) {
+    phoneNumbers.push({
+      type: 'CONTACT',
+      number: insightiq.contacts.phone,
+      country: insightiq.contacts.phone_country || undefined,
+      verified: false,
+    });
+  }
+
+  // 3. From contact_details array
+  contactDetails.forEach((contact: { type: string; value: string; category: string }) => {
+    if (contact.category === 'phone' && !phoneNumbers.find(p => p.number === contact.value)) {
+      phoneNumbers.push({
+        type: contact.type || 'EXTRACTED',
+        number: contact.value,
+        country: undefined,
+        verified: false,
+      });
+    }
+  });
+
+  // Enhanced website extraction from multiple sources
+  let website =
+    influencer.website || insightiq?.contacts?.website || insightiq?.profile?.website || null;
+
+  // Check contact_details for website
+  const websiteContact = contactDetails.find(
+    (contact: { type: string; value: string; category: string }) => contact.category === 'website'
+  );
+  if (websiteContact && !website) {
+    website = websiteContact.value;
+  }
+
   // Addresses
   const addresses = (insightiq?.profile?.addresses || []).map((address: any) => ({
-    type: address.type || 'UNKNOWN',
-    address: address.address_line_1 || address.full_address || 'Unknown',
+    type: address.type || 'ADDRESS',
+    address:
+      address.address_line_1 || address.full_address || address.address || 'Address Available',
     city: address.city,
     state: address.state,
     country: address.country,
     postalCode: address.postal_code || address.zip_code,
   }));
 
-  // Social profiles
-  const socialProfiles = (insightiq?.profile?.social_profiles || []).map((profile: any) => ({
-    platform: profile.platform,
-    url: profile.url,
-    username: profile.username,
-    verified: profile.verified || false,
-  }));
+  // Enhanced social profiles extraction
+  const socialProfiles: Array<{
+    platform: string;
+    url: string;
+    username: string;
+    verified: boolean;
+  }> = [];
 
-  // Account type determination
+  // 1. From profile.social_profiles array
+  (insightiq?.profile?.social_profiles || []).forEach((profile: any) => {
+    socialProfiles.push({
+      platform: profile.platform,
+      url: profile.url,
+      username: profile.username,
+      verified: profile.verified || false,
+    });
+  });
+
+  // 2. From contact_details array
+  contactDetails.forEach((contact: { type: string; value: string; category: string }) => {
+    if (contact.category === 'social' && !socialProfiles.find(p => p.url === contact.value)) {
+      const platform = extractPlatformFromUrl(contact.value) || contact.type;
+      const username = extractUsernameFromUrl(contact.value) || 'Profile Available';
+      socialProfiles.push({
+        platform,
+        url: contact.value,
+        username,
+        verified: false,
+      });
+    }
+  });
+
+  // Account type determination with enhanced logic
   const accountType = determineAccountType(insightiq?.profile);
 
   // Verification status
   const verificationStatus = {
     isPlatformVerified: influencer.isVerified || false,
-    isBusinessAccount: influencer.isBusinessAccount || false,
+    isBusinessAccount:
+      influencer.isBusinessAccount || insightiq?.profile?.is_business_account || false,
     isOfficialArtist: insightiq?.profile?.is_official_artist || false,
     accountAge: calculateAccountAge(insightiq?.profile?.platform_profile_published_at),
     accountCreationDate: insightiq?.profile?.platform_profile_published_at || null,
-    profileCompleteness: insightiq?.profile?.profile_completeness || null,
+    profileCompleteness:
+      insightiq?.profile?.profile_completeness ||
+      calculateProfileCompleteness({
+        emails: emails.length,
+        phones: phoneNumbers.length,
+        website: Boolean(website),
+        bio: Boolean(influencer.bio),
+        avatar: Boolean(influencer.avatarUrl),
+      }),
   };
 
-  // Location data
+  // Enhanced location data
   const location = {
-    city: insightiq?.demographics?.location?.city || insightiq?.location?.city || null,
-    state: insightiq?.demographics?.location?.state || insightiq?.location?.state || null,
+    city:
+      insightiq?.demographics?.location?.city ||
+      insightiq?.location?.city ||
+      insightiq?.profile?.location?.city ||
+      null,
+    state:
+      insightiq?.demographics?.location?.state ||
+      insightiq?.location?.state ||
+      insightiq?.profile?.location?.state ||
+      null,
     country:
       insightiq?.demographics?.location?.country ||
       insightiq?.location?.country ||
+      insightiq?.profile?.location?.country ||
       influencer.primaryAudienceLocation ||
       null,
-    timezone: insightiq?.demographics?.location?.timezone || null,
-    coordinates: insightiq?.demographics?.location?.coordinates
-      ? {
-          lat: insightiq.demographics.location.coordinates.lat,
-          lng: insightiq.demographics.location.coordinates.lng,
-        }
-      : null,
+    timezone: insightiq?.demographics?.location?.timezone || insightiq?.profile?.timezone || null,
+    coordinates:
+      insightiq?.demographics?.location?.coordinates || insightiq?.location?.coordinates
+        ? {
+            lat:
+              insightiq?.demographics?.location?.coordinates?.lat ||
+              insightiq?.location?.coordinates?.lat,
+            lng:
+              insightiq?.demographics?.location?.coordinates?.lng ||
+              insightiq?.location?.coordinates?.lng,
+          }
+        : null,
   };
 
   // Biography analysis
   const biography = {
     length: influencer.bio?.length || null,
-    language: insightiq?.profile?.bio_language || null,
+    language: insightiq?.profile?.bio_language || insightiq?.demographics?.language || null,
     hasLinks: Boolean(influencer.bio?.includes('http') || influencer.bio?.includes('www.')),
     hasHashtags: Boolean(influencer.bio?.includes('#')),
     mentionsCount: (influencer.bio?.match(/@\w+/g) || []).length,
@@ -663,10 +769,10 @@ function extractProfessionalData(
 
   return {
     contactDetails,
-    emails: [...emails, ...extractedEmails],
+    emails,
     phoneNumbers,
     addresses,
-    website: influencer.website || insightiq?.contacts?.website || null,
+    website,
     socialProfiles,
     accountType,
     verificationStatus,
@@ -674,6 +780,48 @@ function extractProfessionalData(
     category: influencer.category ?? null,
     biography,
   };
+}
+
+// Helper functions for enhanced contact extraction
+function extractPlatformFromUrl(url: string): string {
+  const urlLower = url.toLowerCase();
+  if (urlLower.includes('instagram')) return 'Instagram';
+  if (urlLower.includes('twitter') || urlLower.includes('x.com')) return 'Twitter/X';
+  if (urlLower.includes('linkedin')) return 'LinkedIn';
+  if (urlLower.includes('tiktok')) return 'TikTok';
+  if (urlLower.includes('youtube')) return 'YouTube';
+  if (urlLower.includes('facebook')) return 'Facebook';
+  return 'Social Media';
+}
+
+function extractUsernameFromUrl(url: string): string | null {
+  try {
+    const urlObj = new URL(url);
+    const pathname = urlObj.pathname;
+    const segments = pathname.split('/').filter(s => s.length > 0);
+    return segments.length > 0 ? segments[segments.length - 1] : null;
+  } catch {
+    return null;
+  }
+}
+
+function calculateProfileCompleteness(data: {
+  emails: number;
+  phones: number;
+  website: boolean;
+  bio: boolean;
+  avatar: boolean;
+}): number {
+  let score = 0;
+  const maxScore = 5;
+
+  if (data.emails > 0) score += 1;
+  if (data.phones > 0) score += 1;
+  if (data.website) score += 1;
+  if (data.bio) score += 1;
+  if (data.avatar) score += 1;
+
+  return Math.round((score / maxScore) * 100);
 }
 
 /**
