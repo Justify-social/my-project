@@ -41,6 +41,8 @@ const BrandLiftPageSubtitle: React.FC<BrandLiftPageSubtitleProps> = ({
         <Badge variant="outline" className="flex items-center text-xs font-normal px-2 py-0.5">
           <Link
             href={`/campaigns/${campaignId}`}
+            target="_blank"
+            rel="noopener noreferrer"
             className="hover:underline hover:text-accent transition-colors flex items-center group"
           >
             <Icon

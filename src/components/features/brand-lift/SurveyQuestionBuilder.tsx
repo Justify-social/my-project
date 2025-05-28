@@ -378,17 +378,22 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
         {isExpanded && (
           <CardContent className="p-4 space-y-3 border-t">
             {editingQuestionDetail && editingQuestionDetail.questionId === qId ? (
-              <div className="space-y-2">
+              <div className="space-y-4 border border-accent/20 rounded-lg p-4 bg-accent/5">
+                <div className="flex items-center gap-2 text-accent font-medium text-sm">
+                  <Icon iconId="faPenToSquareLight" className="h-4 w-4" />
+                  <span>Write your question</span>
+                </div>
                 <Textarea
                   value={editingQuestionDetail.currentText}
                   onChange={e =>
                     setEditingQuestionDetail({ questionId: qId, currentText: e.target.value })
                   }
-                  placeholder="Enter question text..."
+                  placeholder="What would you like to ask respondents?"
                   disabled={actionsDisabled}
                   title={actionsDisabled ? actionsDisabledTitle : undefined}
                   autoFocus
                   rows={3}
+                  className="bg-white border-accent/20 focus:border-accent focus:ring-accent/20"
                   onKeyDown={e => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
@@ -423,13 +428,18 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
                     }}
                     disabled={actionsDisabled || editingQuestionDetail.currentText.trim() === ''}
                   >
-                    Save Question Text
+                    Save Question
                   </Button>
                 </div>
               </div>
             ) : (
               <div
-                className="p-2 rounded-md border border-transparent hover:border-input min-h-[60px] cursor-text break-words whitespace-pre-wrap"
+                className={cn(
+                  'p-4 rounded-lg border min-h-[60px] cursor-text break-words whitespace-pre-wrap transition-all duration-200',
+                  question.text
+                    ? 'border-input/20 hover:border-input/40 bg-white'
+                    : 'border-accent/30 border-dashed hover:border-accent/60 bg-accent/5'
+                )}
                 onClick={() => {
                   if (!actionsDisabled) {
                     setEditingOptionGL(null);
@@ -441,76 +451,232 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = React.memo(
                 }}
                 title={actionsDisabled ? actionsDisabledTitle : 'Click to edit question text'}
               >
-                {question.text || (
-                  <span className="text-muted-foreground italic">Enter question text...</span>
+                {question.text ? (
+                  <div className="flex items-start gap-2">
+                    <Icon
+                      iconId="faPenToSquareLight"
+                      className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0"
+                    />
+                    <span>{question.text}</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 text-muted-foreground/70">
+                    <Icon iconId="faPenToSquareLight" className="h-4 w-4" />
+                    <span className="italic">Click here to write your question...</span>
+                  </div>
                 )}
               </div>
             )}
-            <div className="p-3 border rounded-md bg-slate-100/80">
-              <div className="flex flex-row gap-4 md:gap-6">
-                <div className="flex-1 flex flex-col space-y-3 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id={`type-sc-${qId}`}
-                      checked={question.questionType === SurveyQuestionType.SINGLE_CHOICE}
-                      onCheckedChange={isChecked => {
-                        if (isChecked) {
-                          onUpdateQuestionType(qId, SurveyQuestionType.SINGLE_CHOICE);
-                        } else if (question.questionType === SurveyQuestionType.SINGLE_CHOICE) {
-                          onUpdateQuestionType(qId, SurveyQuestionType.MULTIPLE_CHOICE);
-                        }
-                      }}
-                      disabled={actionsDisabled}
-                      title={actionsDisabled ? actionsDisabledTitle : 'Set to Single Choice'}
-                    />
-                    <Label htmlFor={`type-sc-${qId}`}>Single Choice</Label>
+
+            {/* Question Configuration Panel */}
+            <div className="p-4 border rounded-lg bg-slate-50/50 space-y-4">
+              {/* Question Type Selection */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Icon iconId="faListLight" className="h-4 w-4" />
+                  Answer Type
+                </h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <div
+                    className={cn(
+                      'p-3 border rounded-lg cursor-pointer transition-all duration-200 relative',
+                      question.questionType === SurveyQuestionType.SINGLE_CHOICE
+                        ? 'border-accent bg-accent/10 ring-1 ring-accent/20'
+                        : 'border-input/40 bg-white hover:border-input/60'
+                    )}
+                    onClick={() =>
+                      !actionsDisabled &&
+                      onUpdateQuestionType(qId, SurveyQuestionType.SINGLE_CHOICE)
+                    }
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Icon
+                          iconId="faListRadioLight"
+                          className={cn(
+                            'h-4 w-4',
+                            question.questionType === SurveyQuestionType.SINGLE_CHOICE
+                              ? 'text-accent'
+                              : 'text-muted-foreground'
+                          )}
+                        />
+                        <span className="text-sm font-medium">Single Choice</span>
+                      </div>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Icon
+                              iconId="faCircleInfoLight"
+                              className="h-3 w-3 text-muted-foreground hover:text-accent transition-colors cursor-help"
+                              onClick={e => e.stopPropagation()}
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-xs">
+                            <div className="text-xs space-y-1">
+                              <p className="font-medium">Single Choice Questions</p>
+                              <p>
+                                Respondents can only select one option from the list. Perfect for
+                                questions like "What is your age group?" or "Which brand do you
+                                prefer?" where only one answer makes sense.
+                              </p>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Respondents pick one option</p>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id={`type-mc-${qId}`}
-                      checked={question.questionType === SurveyQuestionType.MULTIPLE_CHOICE}
-                      onCheckedChange={isChecked => {
-                        if (isChecked) {
-                          onUpdateQuestionType(qId, SurveyQuestionType.MULTIPLE_CHOICE);
-                        } else if (question.questionType === SurveyQuestionType.MULTIPLE_CHOICE) {
-                          onUpdateQuestionType(qId, SurveyQuestionType.SINGLE_CHOICE);
-                        }
-                      }}
-                      disabled={actionsDisabled}
-                      title={actionsDisabled ? actionsDisabledTitle : 'Set to Multiple Choice'}
-                    />
-                    <Label htmlFor={`type-mc-${qId}`}>Multiple Choice</Label>
+
+                  <div
+                    className={cn(
+                      'p-3 border rounded-lg cursor-pointer transition-all duration-200 relative',
+                      question.questionType === SurveyQuestionType.MULTIPLE_CHOICE
+                        ? 'border-accent bg-accent/10 ring-1 ring-accent/20'
+                        : 'border-input/40 bg-white hover:border-input/60'
+                    )}
+                    onClick={() =>
+                      !actionsDisabled &&
+                      onUpdateQuestionType(qId, SurveyQuestionType.MULTIPLE_CHOICE)
+                    }
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Icon
+                          iconId="faListCheckLight"
+                          className={cn(
+                            'h-4 w-4',
+                            question.questionType === SurveyQuestionType.MULTIPLE_CHOICE
+                              ? 'text-accent'
+                              : 'text-muted-foreground'
+                          )}
+                        />
+                        <span className="text-sm font-medium">Multiple Choice</span>
+                      </div>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Icon
+                              iconId="faCircleInfoLight"
+                              className="h-3 w-3 text-muted-foreground hover:text-accent transition-colors cursor-help"
+                              onClick={e => e.stopPropagation()}
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-xs">
+                            <div className="text-xs space-y-1">
+                              <p className="font-medium">Multiple Choice Questions</p>
+                              <p>
+                                Respondents can select multiple options from the list. Ideal for
+                                questions like "Which features interest you?" or "Select all brands
+                                you've heard of" where multiple answers are valid.
+                              </p>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Respondents pick multiple options
+                    </p>
                   </div>
                 </div>
+              </div>
 
-                <div className="flex-1 flex flex-col space-y-3 p-3 border border-slate-200 rounded-md bg-white shadow-sm">
-                  <div className="flex items-center space-x-2">
+              {/* Question Options */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <Icon iconId="faRotateLight" className="h-4 w-4" />
+                    Answer Order
+                  </h4>
+                  <div className="flex items-center space-x-3 p-3 border rounded-lg bg-white">
                     <Switch
                       id={`rand-${qId}`}
                       checked={question.isRandomized ?? false}
                       onCheckedChange={c => onToggleRandomized(qId, c)}
                       disabled={actionsDisabled}
-                      title={actionsDisabled ? actionsDisabledTitle : 'Randomise options'}
                     />
-                    <Label htmlFor={`rand-${qId}`}>Randomise Options</Label>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor={`rand-${qId}`} className="text-sm font-medium">
+                          Randomise Options
+                        </Label>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Icon
+                                iconId="faCircleInfoLight"
+                                className="h-3 w-3 text-muted-foreground hover:text-accent transition-colors cursor-help"
+                              />
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-xs">
+                              <div className="text-xs space-y-1">
+                                <p className="font-medium">Randomise Answer Options</p>
+                                <p>
+                                  When enabled, each respondent will see the answer choices in a
+                                  different random order. This eliminates position bias where people
+                                  tend to select the first or last option simply because of its
+                                  placement.
+                                </p>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Shuffle answer order for each respondent
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <Icon iconId="faUserLight" className="h-4 w-4" />
+                    Response Format
+                  </h4>
+                  <div className="flex items-center space-x-3 p-3 border rounded-lg bg-white">
                     <Switch
-                      id={`mand-${qId}`}
+                      id={`force-${qId}`}
                       checked={!(question.isMandatory ?? true)}
                       onCheckedChange={c => onToggleMandatory(qId, !c)}
                       disabled={actionsDisabled}
-                      title={
-                        actionsDisabled
-                          ? actionsDisabledTitle
-                          : 'ON = Non-Forced (user not forced to pick a main answer), OFF = Forced (answer required from options)'
-                      }
                     />
-                    <Label htmlFor={`mand-${qId}`}>Non-Forced Choice</Label>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor={`force-${qId}`} className="text-sm font-medium">
+                          Non-forced Response
+                        </Label>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Icon
+                                iconId="faCircleInfoLight"
+                                className="h-3 w-3 text-muted-foreground hover:text-accent transition-colors cursor-help"
+                              />
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-xs">
+                              <div className="text-xs space-y-1">
+                                <p className="font-medium">Non-forced vs Forced Response</p>
+                                <p>
+                                  When enabled, escape options like "None of the above", "Other", or
+                                  "Prefer not to say" are automatically added to give respondents
+                                  alternatives if none of the main options apply. These options
+                                  remain in fixed positions to avoid bias.
+                                </p>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Add escape options like "None" or "Other"
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
+
             <div className="mt-2">
               <Label htmlFor={`kpi-assoc-${qId}`} className="text-sm font-medium mr-2">
                 Associated KPI:
@@ -783,6 +949,7 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
     const [error, setError] = useState<string | null>(null);
     const [isAISuggesting, setIsAISuggesting] = useState(false);
     const [selectedGifOptions, setSelectedGifOptions] = useState<Record<string, string | null>>({});
+    const [showAiDisclaimer, setShowAiDisclaimer] = useState(false);
 
     const [gifSearchModalTriggerState, setGifSearchModalTriggerState] = useState<{
       isOpen: boolean;
@@ -1196,6 +1363,7 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
       logger.info('[SurveyQuestionBuilder] Initiating AI question suggestions...', { studyId });
       setIsAISuggesting(true);
       if (onIsAISuggestingChange) onIsAISuggestingChange(true);
+      setShowAiDisclaimer(true); // Show disclaimer immediately when AI process starts
       setProgress(0); // Initial progress
       let suggestedYaml: string | null = null; // Declare here for broader scope
 
@@ -1393,7 +1561,8 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
               questionId: genderQuestionTempId,
               text: 'Male',
               order: 0,
-              imageUrl: null,
+              imageUrl:
+                'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExMnZseXA0eHlna2FiODA0ZGdrN3E0ZmYybG4xc2MyM21mZzgwYjlmcCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/WuGSL4LFUMQU/giphy.gif', // Will Smith
             },
             {
               tempId: generateTempId(),
@@ -1401,7 +1570,11 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
               questionId: genderQuestionTempId,
               text: 'Female',
               order: 1,
-              imageUrl: null,
+              imageUrl:
+                'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExMWZiOWdoNno3NzFybWp5MzB6eGU2dHl3NWcwOW1xbmt3NHd2NTAyZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/5rUG5e98jvlhm/giphy.gif', // Beyonce
+
+              // ce
+              // Diverse group of women celebrating/empowering
             },
             {
               tempId: generateTempId(),
@@ -1409,7 +1582,8 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
               questionId: genderQuestionTempId,
               text: 'Other',
               order: 2,
-              imageUrl: null,
+              imageUrl:
+                'https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExNXBqeXZibDdhMWFnbTZhNjNjeG8yN2MzZnF0NXN0ZDJiMDl4MWY1eiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ndspmyWNDTC0MKW2de/giphy.gif', // Other
             },
             {
               tempId: generateTempId(),
@@ -1417,7 +1591,8 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
               questionId: genderQuestionTempId,
               text: 'Prefer not to say',
               order: 3,
-              imageUrl: null,
+              imageUrl:
+                'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExamxwbHdrbDFzMTlhc2ZjZ2c1eDV0NWc1a3loampsdTVuN3NmdXZiNSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/jbxfRR84why0wNstbw/giphy.gif', //
             },
           ];
           const genderQuestionToAdd: SurveyQuestionData = {
@@ -1446,7 +1621,8 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
               questionId: ageQuestionTempId,
               text: 'Under 18',
               order: 0,
-              imageUrl: null,
+              imageUrl:
+                'https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExeGZ1M2c1cXFjajByYzluNzllamRmbzd6dnU4dmJ6M3g2amZ1bnQ2byZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/1nfwnYf5Uz7hzhYof8/giphy.gif', // Funny Kid
             },
             {
               tempId: generateTempId(),
@@ -1454,7 +1630,8 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
               questionId: ageQuestionTempId,
               text: '18-24',
               order: 1,
-              imageUrl: null,
+              imageUrl:
+                'https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExcWd6eWVwYjgyOTQwaGRlNjJnb3d3aXplczB4aGI2cGN2aDVkZWh6eSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/SeuMW8SY2KivEOumhW/giphy.gif', // Ok Boomer
             },
             {
               tempId: generateTempId(),
@@ -1462,7 +1639,8 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
               questionId: ageQuestionTempId,
               text: '25-34',
               order: 2,
-              imageUrl: null,
+              imageUrl:
+                'https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExbG4xMDNidGs5dzRtcG5tODNnNHlqMzdmd3ZkYm53dDR0YjZ2eGF6biZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/kdX3zD7qAAY5Cu6s0b/giphy.gif', // Joey Friends
             },
             {
               tempId: generateTempId(),
@@ -1470,7 +1648,8 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
               questionId: ageQuestionTempId,
               text: '35-44',
               order: 3,
-              imageUrl: null,
+              imageUrl:
+                'https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExN3RyeWl4ZHN0aWg3bm14dGZ4MGgyN3Y0bWdpb3J3YzhuZ3J3MnhsNiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Js8gkvuhpQLhkQ6kXN/giphy.gif', // Dad
             },
             {
               tempId: generateTempId(),
@@ -1478,7 +1657,8 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
               questionId: ageQuestionTempId,
               text: '45-54',
               order: 4,
-              imageUrl: null,
+              imageUrl:
+                'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExbWlpZ3EwazN1ZTEwdmFmNDdqamhzbWZkZ3Q4ZHJtNTR4a24xODQ2diZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Km2YiI2mzRKgw/giphy.gif', // No Money
             },
             {
               tempId: generateTempId(),
@@ -1486,7 +1666,8 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
               questionId: ageQuestionTempId,
               text: '55-64',
               order: 5,
-              imageUrl: null,
+              imageUrl:
+                'https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExNWZnamNtZnU3dG1wdGY0dTB6anBvc29lNWxuY2ZlZG55dGlld2cxMyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/LCdPNT81vlv3y/giphy.gif', // Money
             },
             {
               tempId: generateTempId(),
@@ -1494,7 +1675,8 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
               questionId: ageQuestionTempId,
               text: '65+',
               order: 6,
-              imageUrl: null,
+              imageUrl:
+                'https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExaGlydW9ubTVoaHI3bW5ibHhiZjBuMXpleDA0aHl5NnR1OHRpM3o5OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/JT87wTuCmorTUhk6k4/giphy.gif', // Cruise
             },
             {
               tempId: generateTempId(),
@@ -1502,7 +1684,8 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
               questionId: ageQuestionTempId,
               text: 'Prefer not to say',
               order: 7,
-              imageUrl: null,
+              imageUrl:
+                'https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcnpzNGc0Nmx0YzVjNGdvNnVhb2FjcTEzcmt5ZGhrYnlkb2JpaGtiayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/W0Dldg5FhnH3dkfTtH/giphy.gif', // Not saying
             },
           ];
           const ageQuestionToAdd: SurveyQuestionData = {
@@ -1567,6 +1750,7 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
         }
         await fetchData(); // Refetch to get all questions with proper IDs and order from DB.
         setProgress(100);
+        // Keep disclaimer showing after completion - it was set at the start
         // The main success toast is now more conditional above.
         // showSuccessToast(`Successfully added ${newQuestions.length} AI suggested question(s).`); // This was the old toast.
       } catch (err: unknown) {
@@ -1714,6 +1898,30 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
       <>
         {/* Survey Questions Section - now takes full width */}
         <div className="space-y-6">
+          {/* AI-Generated Questions Disclaimer */}
+          {showAiDisclaimer && (
+            <Alert variant="default" className="border-amber-500 bg-amber-100 shadow-md">
+              <Icon iconId="faTriangleExclamationSolid" className="h-5 w-5 text-amber-600" />
+              <AlertTitle className="text-amber-900 font-semibold text-lg">
+                AI-Generated Draft Questions - Review Required
+              </AlertTitle>
+              <AlertDescription className="text-amber-800 text-base leading-relaxed">
+                <strong>Important:</strong> These questions have been produced in draft form by AI
+                as recommendations only. It is your responsibility to review, edit, and update all
+                questions and GIFs to ensure they're properly aligned with your brand and campaign
+                goals. Please thoroughly review each question before proceeding.
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowAiDisclaimer(false)}
+                  className="ml-2 h-auto p-1 text-amber-700 hover:text-amber-900 hover:bg-amber-200"
+                >
+                  <Icon iconId="faXmarkLight" className="h-3 w-3" />
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+
           {error && !isLoading && (
             <Alert variant="destructive" className="mt-2">
               <Icon iconId="faTriangleExclamationLight" className="h-4 w-4" />{' '}

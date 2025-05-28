@@ -86,7 +86,7 @@ export const GET = async (
     const finalResponseData: BrandLiftStudyData = {
       id: studyData.id,
       name: studyData.name,
-      campaignId: studyData.submissionId.toString(),
+      campaignId: studyData.campaign?.wizard?.id || studyData.submissionId.toString(),
       status: studyData.status,
       funnelStage: studyData.funnelStage,
       primaryKpi: studyData.primaryKpi,
