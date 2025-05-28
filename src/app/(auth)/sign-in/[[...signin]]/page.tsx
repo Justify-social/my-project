@@ -167,6 +167,7 @@ function SignInComponent() {
                   'w-full bg-[#333333] hover:bg-[#4A5568] text-white font-medium py-2 px-4 rounded-md transition-colors text-sm mt-2 leading-tight',
                 formHeaderTitle: 'hidden',
                 formHeaderSubtitle: 'hidden',
+                headerSubtitle: 'hidden',
                 socialButtons: 'w-full space-y-1.5 mb-2 sm:mb-3 lg:mb-2 xl:mb-3',
                 socialButtonsBlockButton:
                   'w-full border border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-medium py-2 px-4 rounded-md transition-colors text-sm flex items-center justify-center gap-2 leading-tight',

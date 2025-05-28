@@ -155,7 +155,7 @@ export default function StripeElementWrapper() {
       colorBackground: '#FFFFFF',
       colorText: '#333333',
       colorDanger: '#E53E3E',
-      fontFamily: 'Ideal Sans, system-ui, sans-serif',
+      fontFamily: 'Inter, system-ui, sans-serif',
       spacingUnit: '4px',
       borderRadius: '4px',
     },
