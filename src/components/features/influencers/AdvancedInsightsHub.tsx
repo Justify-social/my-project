@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
-import { extractInsightIQData } from '@/lib/data-extraction/insightiq-extractor';
+import { extractInsightIQData } from '@/lib/data-extraction/insightiq-extractor-profile-analytics';
 
 interface AdvancedInsightsHubProps {
   influencer: InfluencerProfileData;

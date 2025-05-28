@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon/icon';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import { extractInsightIQData } from '@/lib/data-extraction/insightiq-extractor';
+import { extractInsightIQData } from '@/lib/data-extraction/insightiq-extractor-profile-analytics';
 
 interface TrustHeroSectionProps {
   influencer: InfluencerProfileData;
@@ -167,7 +167,7 @@ export const TrustHeroSection: React.FC<TrustHeroSectionProps> = ({ influencer }
             <Icon iconId="faCircleInfoLight" className="h-4 w-4 text-accent flex-shrink-0" />
             <p className="text-sm text-muted-foreground">
               Trust analysis powered by{' '}
-              <span className="font-medium text-accent">Justify Intelligence Platform</span> with{' '}
+              <span className="font-medium text-accent">Justify Intelligence</span> with{' '}
               <span className="font-medium text-accent">
                 {trustData.credibilityScore}% confidence
               </span>{' '}

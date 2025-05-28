@@ -9,7 +9,7 @@ import { Icon } from '@/components/ui/icon/icon';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import { extractInsightIQData } from '@/lib/data-extraction/insightiq-extractor';
+import { extractInsightIQData } from '@/lib/data-extraction/insightiq-extractor-profile-analytics';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 
 interface PerformanceDashboardProps {

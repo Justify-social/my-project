@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { BarChart } from '@/components/ui/chart-bar';
 import { PieChart } from '@/components/ui/chart-pie';
 import { cn } from '@/lib/utils';
-import { extractInsightIQData } from '@/lib/data-extraction/insightiq-extractor';
+import { extractInsightIQData } from '@/lib/data-extraction/insightiq-extractor-profile-analytics';
 
 interface AudienceDemographicsHubProps {
   influencer: InfluencerProfileData;

@@ -502,12 +502,9 @@ function extractTrustData(influencer: InfluencerProfileData): InsightIQExtracted
   const insightiq = (influencer as InfluencerProfileData & { insightiq?: any }).insightiq;
   const audienceData = insightiq?.audience;
 
-  // InsightIQ credibility score - check if it's already 0-100 or 0-1
+  // InsightIQ credibility score - API returns percentage values directly
   const rawCredibilityScore = audienceData?.credibility_score || 0;
-  const credibilityScore =
-    rawCredibilityScore > 1
-      ? Math.round(rawCredibilityScore) // Already percentage (73)
-      : Math.round(rawCredibilityScore * 100); // Decimal (0.73 -> 73)
+  const credibilityScore = Math.round(rawCredibilityScore); // ✅ FIXED: API already returns percentage (73 = 73%)
 
   const followerTypes = (audienceData?.follower_types || []).map((type: any) => ({
     name: type.name,
@@ -515,12 +512,9 @@ function extractTrustData(influencer: InfluencerProfileData): InsightIQExtracted
     category: getFollowerTypeCategory(type.name),
   }));
 
-  // InsightIQ significant followers percentage - check format
+  // InsightIQ significant followers percentage - API returns percentage values directly
   const rawSignificantPercentage = audienceData?.significant_followers_percentage || 0;
-  const significantFollowersPercentage =
-    rawSignificantPercentage > 1
-      ? Math.round(rawSignificantPercentage) // Already percentage
-      : Math.round(rawSignificantPercentage * 100); // Decimal to percentage
+  const significantFollowersPercentage = Math.round(rawSignificantPercentage); // ✅ FIXED: API already returns percentage
 
   // Extract specific follower percentages - these are typically decimals (0.6590)
   const realFollowersData = followerTypes.find((type: any) => type.category === 'positive');
@@ -537,35 +531,19 @@ function extractTrustData(influencer: InfluencerProfileData): InsightIQExtracted
 
   // Convert decimal values to percentages for display
   const realFollowersPercentage = realFollowersData
-    ? Math.round(
-        realFollowersData.value > 1 ? realFollowersData.value : realFollowersData.value * 100
-      )
+    ? Math.round(realFollowersData.value) // ✅ FIXED: API already returns percentages (65.9 = 65.9%)
     : 0;
   const suspiciousFollowersPercentage = suspiciousFollowersData
-    ? Math.round(
-        suspiciousFollowersData.value > 1
-          ? suspiciousFollowersData.value
-          : suspiciousFollowersData.value * 100
-      )
+    ? Math.round(suspiciousFollowersData.value) // ✅ FIXED: API already returns percentages
     : 0;
   const qualityFollowersPercentage = qualityFollowersData
-    ? Math.round(
-        qualityFollowersData.value > 1
-          ? qualityFollowersData.value
-          : qualityFollowersData.value * 100
-      )
+    ? Math.round(qualityFollowersData.value) // ✅ FIXED: API already returns percentages
     : 0;
   const massFollowersPercentage = massFollowersData
-    ? Math.round(
-        massFollowersData.value > 1 ? massFollowersData.value : massFollowersData.value * 100
-      )
+    ? Math.round(massFollowersData.value) // ✅ FIXED: API already returns percentages
     : 0;
   const influencerFollowersPercentage = influencerFollowersData
-    ? Math.round(
-        influencerFollowersData.value > 1
-          ? influencerFollowersData.value
-          : influencerFollowersData.value * 100
-      )
+    ? Math.round(influencerFollowersData.value) // ✅ FIXED: API already returns percentages
     : 0;
 
   // Calculate risk level
@@ -950,18 +928,23 @@ function extractPerformanceData(
 
   const sponsored = {
     performance: insightiq?.sponsored_posts_performance || null,
-    postsCount: insightiq?.sponsored_contents?.length || null,
-    totalSponsoredContent:
-      insightiq?.sponsored_contents?.reduce(
-        (total: number, content: any) => total + (content.performance || 0),
-        0
-      ) || null,
+    postsCount: insightiq?.sponsored_contents?.length || 0,
+    totalSponsoredContent: insightiq?.sponsored_contents?.length || 0,
     sponsoredEngagementAverage:
       insightiq?.sponsored_contents?.length > 0
-        ? insightiq.sponsored_contents.reduce(
-            (total: number, content: any) => total + (content.performance || 0),
-            0
-          ) / insightiq.sponsored_contents.length
+        ? insightiq.sponsored_contents.reduce((total: number, content: any) => {
+            const engagement = content.engagement || {};
+            const likes = engagement.like_count || 0;
+            const comments = engagement.comment_count || 0;
+            const saves = engagement.save_count || 0;
+            const totalEngagement = likes + comments + saves;
+
+            // Calculate engagement rate if we have follower count
+            if (influencer.followersCount && influencer.followersCount > 0) {
+              return total + totalEngagement / influencer.followersCount;
+            }
+            return total + totalEngagement;
+          }, 0) / insightiq.sponsored_contents.length
         : null,
     organicComparison: {
       sponsoredEngagement: null, // Calculate from sponsored content data

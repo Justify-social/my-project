@@ -16,7 +16,7 @@ import { IconButtonAction } from '@/components/ui/button-icon-action';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { showSuccessToast, showErrorToast } from '@/components/ui/toast';
-import { extractInsightIQData } from '@/lib/data-extraction/insightiq-extractor';
+import { extractInsightIQData } from '@/lib/data-extraction/insightiq-extractor-profile-analytics';
 import { InfluencerProfileData } from '@/types/influencer';
 
 export interface ContactsPopupProps {
