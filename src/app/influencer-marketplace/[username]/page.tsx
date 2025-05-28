@@ -294,23 +294,6 @@ export default function InfluencerProfilePage() {
 
           {!isLoading && !error && influencer && (
             <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                className="hover:bg-destructive/10 hover:border-destructive/20"
-              >
-                <Icon iconId="faTrashCanLight" className="mr-2 h-4 w-4" />
-                Remove
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="hover:bg-interactive/10 hover:border-interactive/20"
-              >
-                <Icon iconId="faPenToSquareLight" className="mr-2 h-4 w-4" />
-                Edit Profile
-              </Button>
-
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button

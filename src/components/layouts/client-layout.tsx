@@ -111,8 +111,8 @@ const ClientLayoutInner: React.FC<ClientLayoutProps> = ({ children }) => {
       href: '/brand-lift/campaign-selection',
       children: [
         {
-          id: 'brand-lift-selection',
-          label: 'Campaign Selection',
+          id: 'brand-lift-study',
+          label: 'Study',
           href: '/brand-lift/campaign-selection',
         },
         {

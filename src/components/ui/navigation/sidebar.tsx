@@ -270,6 +270,20 @@ export function Sidebar({
         return true;
       }
 
+      // Special case: Brand Lift Study - highlight "Study" child for all brand lift pages except reports
+      if (
+        path === '/brand-lift/campaign-selection' &&
+        activePath.startsWith('/brand-lift/') &&
+        !activePath.startsWith('/brand-lift/reports')
+      ) {
+        return true;
+      }
+
+      // Special case: Brand Lift Reports - highlight "Reports" child for brand lift reports
+      if (path === '/brand-lift/reports' && activePath.startsWith('/brand-lift/reports')) {
+        return true;
+      }
+
       // ==========================================
       // ADD NEW SPECIAL CASES ABOVE THIS LINE
       // ==========================================
