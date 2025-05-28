@@ -19,6 +19,7 @@ import { VideoFileUploader, VideoUploadResult } from '@/components/ui/video-file
 import { ProgressBarWizard } from '@/components/ui/progress-bar-wizard';
 import AssetCardStep4 from '@/components/ui/card-asset-step-4';
 import { showSuccessToast, showErrorToast } from '@/components/ui/toast';
+import { ConfirmDeleteDialog } from '@/components/ui/dialog-confirm-delete';
 import { logger } from '@/lib/logger';
 
 // Infer the DraftAsset type
@@ -61,6 +62,14 @@ function Step4Content() {
 
   // Add state to track if user explicitly clicked Next
   const [isExplicitNext, setIsExplicitNext] = React.useState(false);
+
+  // Delete modal state management (SSOT pattern like campaigns page)
+  const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+  const [assetToDelete, setAssetToDelete] = React.useState<{
+    id: number | string | undefined;
+    index: number;
+    name: string;
+  } | null>(null);
 
   // Prepare influencer options for the select component
   const influencerOptions = React.useMemo(() => {
@@ -315,8 +324,9 @@ function Step4Content() {
     console.error('Upload failed:', _error);
   }, []);
 
-  const handleDeleteAsset = useCallback(
-    async (assetId: number | string | undefined, assetIndex: number, assetName?: string) => {
+  // Delete asset handlers using SSOT modal pattern (like campaigns page)
+  const handleDeleteClick = useCallback(
+    (assetId: number | string | undefined, assetIndex: number, assetName?: string) => {
       // Prevent any accidental form submission during asset deletion
       setIsExplicitNext(false);
 
@@ -328,55 +338,69 @@ function Step4Content() {
         return;
       }
 
-      if (!confirm(`Delete "${assetName || 'Untitled'}"? This cannot be undone.`)) return;
-
-      try {
-        // Convert string IDs to numbers for API call
-        const numericAssetId = typeof assetId === 'string' ? parseInt(assetId) : assetId;
-
-        if (isNaN(numericAssetId)) {
-          throw new Error('Invalid asset ID');
-        }
-
-        const response = await fetch(`/api/creative-assets/${numericAssetId}`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-          throw new Error(errorData.error || errorData.details || `HTTP ${response.status}`);
-        }
-
-        const result = await response.json();
-        logger.info(`Successfully deleted asset ${numericAssetId}:`, result);
-
-        // Remove from form state
-        removeAsset(assetIndex);
-        showSuccessToast(
-          `Asset "${assetName || 'Untitled'}" deleted successfully.`,
-          'faCircleCheckLight'
-        );
-
-        // Reload wizard state to reflect changes
-        await wizard.reloadCampaignData();
-        forceUpdate();
-      } catch (_error) {
-        const errorMessage = _error instanceof Error ? _error.message : 'Unknown error occurred';
-        logger.error(`Failed to delete asset ${assetId}:`, {
-          errorMessage,
-          errorStack: _error instanceof Error ? _error.stack : undefined,
-          assetId,
-          assetName,
-          errorType: _error?.constructor?.name,
-        });
-        showErrorToast(`Failed to delete asset: ${errorMessage}`, 'faTriangleExclamationLight');
-      }
+      // Set up modal for persistent assets
+      setAssetToDelete({
+        id: assetId,
+        index: assetIndex,
+        name: assetName || 'Untitled',
+      });
+      setShowDeleteModal(true);
     },
-    [removeAsset, wizard, forceUpdate, setIsExplicitNext]
+    [removeAsset, forceUpdate, setIsExplicitNext]
   );
+
+  const executeDeleteAsset = async () => {
+    if (!assetToDelete) {
+      showErrorToast('No asset selected for deletion.');
+      return;
+    }
+
+    try {
+      // Convert string IDs to numbers for API call
+      const numericAssetId =
+        typeof assetToDelete.id === 'string' ? parseInt(assetToDelete.id) : assetToDelete.id;
+
+      if (isNaN(numericAssetId!)) {
+        throw new Error('Invalid asset ID');
+      }
+
+      const response = await fetch(`/api/creative-assets/${numericAssetId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || errorData.details || `HTTP ${response.status}`);
+      }
+
+      const result = await response.json();
+      logger.info(`Successfully deleted asset ${numericAssetId}:`, result);
+
+      // Remove from form state
+      removeAsset(assetToDelete.index);
+      showSuccessToast(`Asset "${assetToDelete.name}" deleted successfully.`, 'faCircleCheckLight');
+
+      // Reload wizard state to reflect changes
+      await wizard.reloadCampaignData();
+      forceUpdate();
+    } catch (_error) {
+      const errorMessage = _error instanceof Error ? _error.message : 'Unknown error occurred';
+      logger.error(`Failed to delete asset ${assetToDelete.id}:`, {
+        errorMessage,
+        errorStack: _error instanceof Error ? _error.stack : undefined,
+        assetId: assetToDelete.id,
+        assetName: assetToDelete.name,
+        errorType: _error?.constructor?.name,
+      });
+      showErrorToast(`Failed to delete asset: ${errorMessage}`, 'faTriangleExclamationLight');
+    }
+  };
+
+  // Legacy handleDeleteAsset - replaced with modal pattern above
+  const handleDeleteAsset = handleDeleteClick;
 
   // Navigation handlers
   const handleStepClick = (step: number) => {
@@ -601,6 +625,21 @@ function Step4Content() {
           </Card>
         </form>
       </Form>
+
+      {/* SSOT Delete Confirmation Modal (same as campaigns page) */}
+      {assetToDelete && (
+        <ConfirmDeleteDialog
+          isOpen={showDeleteModal}
+          onClose={() => {
+            setShowDeleteModal(false);
+            setAssetToDelete(null);
+          }}
+          onConfirm={executeDeleteAsset}
+          itemName={assetToDelete.name}
+          dialogTitle="Delete Asset"
+          confirmButtonText="Delete Asset"
+        />
+      )}
     </div>
   );
 }
