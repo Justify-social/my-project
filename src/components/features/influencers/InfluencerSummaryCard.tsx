@@ -110,7 +110,7 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
           {influencer.platforms?.map(platform => (
             <Icon
               key={platform}
-              iconId={platformIconMap[platform] || 'faCircleQuestionLight'} // Use correct map, keep fallback
+              iconId={platformIconMap[platform] || 'faUsersLight'} // Use correct map, keep fallback
               className="h-4 w-4 text-gray-500 dark:text-gray-400"
               aria-label={platform}
               size="sm" // Added size prop for consistency
@@ -192,6 +192,14 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
             {influencer.engagementRate
               ? `${(influencer.engagementRate * 100).toFixed(2)}%`
               : 'No data'}
+          </div>
+
+          {/* Display Audience Quality Indicator Badge */}
+          <div className="font-medium text-gray-700 dark:text-gray-300">Quality:</div>
+          <div className="text-right">
+            <Badge className={_qualityBadgeStyles}>
+              {influencer.audienceQualityIndicator || 'Unknown'}
+            </Badge>
           </div>
         </div>
         {/* Action Buttons */}

@@ -8,7 +8,7 @@ import { Icon } from '@/components/ui/icon/icon';
 import { IconButtonAction } from '@/components/ui/button-icon-action';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Separator } from '@/components/ui/separator';
-import { toast } from 'sonner';
+import { showSuccessToast, showErrorToast } from '@/components/ui/toast';
 import { cn } from '@/lib/utils';
 import { extractInsightIQData } from '@/lib/data-extraction/insightiq-extractor';
 
@@ -21,13 +21,13 @@ const copyToClipboard = async (text: string, label: string) => {
   if (navigator.clipboard) {
     try {
       await navigator.clipboard.writeText(text);
-      toast.success(`${label} copied to clipboard!`);
+      showSuccessToast(`${label} copied to clipboard!`);
     } catch (err) {
-      toast.error(`Failed to copy ${label}.`);
+      showErrorToast(`Failed to copy ${label}.`);
       console.error('Copy error:', err);
     }
   } else {
-    toast.error('Clipboard access not available.');
+    showErrorToast('Clipboard access not available.');
   }
 };
 
@@ -52,7 +52,7 @@ const getAccountTypeStyles = (accountType: string) => {
     default:
       return {
         badge: 'bg-muted/10 text-muted-foreground border-muted/20',
-        icon: 'faQuestionLight',
+        icon: 'faCircleInfoLight',
       };
   }
 };
@@ -271,20 +271,20 @@ export const ProfessionalIntelligenceCard: React.FC<ProfessionalIntelligenceCard
             <div
               className={cn(
                 'p-3 rounded-lg text-center transition-colors',
-                professionalData.verificationStatus.isPlatformVerified
+                professionalData.verificationStatus.isVerified
                   ? 'bg-success/5 border border-success/20'
                   : 'bg-muted/30 border border-border/50'
               )}
             >
               <Icon
                 iconId={
-                  professionalData.verificationStatus.isPlatformVerified
+                  professionalData.verificationStatus.isVerified
                     ? 'faCircleCheckSolid'
                     : 'faCircleXmarkLight'
                 }
                 className={cn(
                   'w-5 h-5 mx-auto mb-1',
-                  professionalData.verificationStatus.isPlatformVerified
+                  professionalData.verificationStatus.isVerified
                     ? 'text-success'
                     : 'text-muted-foreground'
                 )}
@@ -295,20 +295,18 @@ export const ProfessionalIntelligenceCard: React.FC<ProfessionalIntelligenceCard
             <div
               className={cn(
                 'p-3 rounded-lg text-center transition-colors',
-                professionalData.verificationStatus.isBusinessAccount
+                professionalData.accountType === 'BUSINESS'
                   ? 'bg-primary/5 border border-primary/20'
                   : 'bg-muted/30 border border-border/50'
               )}
             >
               <Icon
                 iconId={
-                  professionalData.verificationStatus.isBusinessAccount
-                    ? 'faBuildingLight'
-                    : 'faUserLight'
+                  professionalData.accountType === 'BUSINESS' ? 'faBuildingLight' : 'faUserLight'
                 }
                 className={cn(
                   'w-5 h-5 mx-auto mb-1',
-                  professionalData.verificationStatus.isBusinessAccount
+                  professionalData.accountType === 'BUSINESS'
                     ? 'text-primary'
                     : 'text-muted-foreground'
                 )}
@@ -318,22 +316,22 @@ export const ProfessionalIntelligenceCard: React.FC<ProfessionalIntelligenceCard
           </div>
 
           {/* Account Age */}
-          {professionalData.verificationStatus.accountAge && (
+          {professionalData.accountAge && (
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/20 cursor-help">
                     <Icon iconId="faCalendarLight" className="w-4 h-4 text-muted-foreground" />
                     <span className="text-sm font-medium">
-                      {Math.floor(professionalData.verificationStatus.accountAge / 365)} years old
+                      {Math.floor(professionalData.accountAge / 365)} years old
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      ({professionalData.verificationStatus.accountAge} days)
+                      ({professionalData.accountAge} days)
                     </span>
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Account created {professionalData.verificationStatus.accountAge} days ago</p>
+                  <p>Account created {professionalData.accountAge} days ago</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -354,14 +352,6 @@ export const ProfessionalIntelligenceCard: React.FC<ProfessionalIntelligenceCard
                   .filter(Boolean)
                   .join(', ')}
               </span>
-            </div>
-          )}
-
-          {/* Category */}
-          {professionalData.category && (
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/20">
-              <Icon iconId="faTagLight" className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm font-medium">{professionalData.category}</span>
             </div>
           )}
         </div>
@@ -391,42 +381,35 @@ export const ProfessionalIntelligenceCard: React.FC<ProfessionalIntelligenceCard
             <div className="flex items-center gap-2">
               <Icon
                 iconId={
-                  professionalData.verificationStatus.isPlatformVerified
-                    ? 'faCheckLight'
-                    : 'faXmarkLight'
+                  professionalData.verificationStatus.isVerified ? 'faCheckLight' : 'faXmarkLight'
                 }
                 className={cn(
                   'w-3 h-3',
-                  professionalData.verificationStatus.isPlatformVerified
-                    ? 'text-success'
-                    : 'text-warning'
+                  professionalData.verificationStatus.isVerified ? 'text-success' : 'text-warning'
                 )}
               />
               <span>
                 Platform verification{' '}
-                {professionalData.verificationStatus.isPlatformVerified ? 'confirmed' : 'pending'}
+                {professionalData.verificationStatus.isVerified ? 'confirmed' : 'pending'}
               </span>
             </div>
             <div className="flex items-center gap-2">
               <Icon
                 iconId={
-                  professionalData.verificationStatus.accountAge &&
-                  professionalData.verificationStatus.accountAge > 365
+                  professionalData.accountAge && professionalData.accountAge > 365
                     ? 'faCheckLight'
                     : 'faTriangleExclamationLight'
                 }
                 className={cn(
                   'w-3 h-3',
-                  professionalData.verificationStatus.accountAge &&
-                    professionalData.verificationStatus.accountAge > 365
+                  professionalData.accountAge && professionalData.accountAge > 365
                     ? 'text-success'
                     : 'text-warning'
                 )}
               />
               <span>
                 Account maturity{' '}
-                {professionalData.verificationStatus.accountAge &&
-                professionalData.verificationStatus.accountAge > 365
+                {professionalData.accountAge && professionalData.accountAge > 365
                   ? 'established'
                   : 'recent'}
               </span>

@@ -25,7 +25,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Icon } from '@/components/ui/icon/icon';
 import { toast } from 'react-hot-toast';
 import { showSuccessToast, showErrorToast } from '@/components/ui/toast';
-import logger from '@/lib/logger';
+import { logger } from '@/utils/logger';
 import { PlatformEnum } from '@/types/enums';
 import { Label } from '@/components/ui/label';
 

@@ -4,8 +4,9 @@ import React, { useState } from 'react';
 import { Button, ButtonProps } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon/icon';
 import { toast } from 'sonner';
+import { showSuccessToast, showErrorToast, showWarningToast } from '@/components/ui/toast';
 import { InfluencerProfileData } from '@/types/influencer';
-import { logger } from '@/lib/logger';
+import { logger } from '@/utils/logger';
 
 export interface SaveInfluencerButtonProps {
   influencer: InfluencerProfileData;
@@ -28,7 +29,7 @@ export const SaveInfluencerButton: React.FC<SaveInfluencerButtonProps> = ({
 
   const handleSaveInfluencer = async () => {
     if (!influencer?.id && !influencer?.handle) {
-      toast.error('Cannot save: Influencer information is incomplete.');
+      showErrorToast('Cannot save: Influencer information is incomplete.');
       return;
     }
 
@@ -74,9 +75,10 @@ export const SaveInfluencerButton: React.FC<SaveInfluencerButtonProps> = ({
 
       if (response.ok && result.success) {
         toast.dismiss(savingToastId);
-        toast.success(`${influencer.name || influencer.handle} saved to your list!`, {
-          description: 'You can find them in your saved influencers.',
-        });
+        showSuccessToast(
+          `${influencer.name || influencer.handle} saved to your list!`,
+          'faFloppyDiskLight'
+        );
 
         if (onSuccess) {
           onSuccess(influencer.id || influencer.handle!);
@@ -87,9 +89,11 @@ export const SaveInfluencerButton: React.FC<SaveInfluencerButtonProps> = ({
 
         // Handle specific error cases
         if (result.error?.includes('already saved') || result.message?.includes('already exists')) {
-          toast.info(`${influencer.name || influencer.handle} is already in your saved list.`);
+          showWarningToast(
+            `${influencer.name || influencer.handle} is already in your saved list.`
+          );
         } else {
-          toast.error(result.error || result.message || 'Failed to save influencer.');
+          showErrorToast(result.error || result.message || 'Failed to save influencer.');
         }
       }
     } catch (error) {
@@ -99,7 +103,7 @@ export const SaveInfluencerButton: React.FC<SaveInfluencerButtonProps> = ({
         error: message,
         originalError: error,
       });
-      toast.error(`Error saving influencer: ${message}`);
+      showErrorToast(`Error saving influencer: ${message}`);
     } finally {
       setIsSaving(false);
     }

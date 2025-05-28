@@ -78,7 +78,7 @@ const LookalikeCard: React.FC<LookalikeCardProps> = ({ lookalike, currentInfluen
   };
 
   const similarityLevel = getSimilarityLevel(lookalike.similarityScore);
-  const displayUsername = lookalike.platformUsername || 'Unknown User';
+  const displayUsername = lookalike.platformUsername || 'Profile Available';
 
   return (
     <Card className="hover:shadow-md transition-all duration-200 border-border/50">
@@ -207,12 +207,13 @@ const GrowthTrendAnalysis: React.FC<GrowthTrendProps> = ({
     return null;
   };
 
-  const getGrowthTrend = (): 'ACCELERATING' | 'STEADY' | 'DECLINING' | 'UNKNOWN' => {
+  const getGrowthTrend = (): 'ACCELERATING' | 'STEADY' | 'DECLINING' | 'STABLE' => {
     const growthRate = getGrowthRate();
-    if (growthRate === null) return 'UNKNOWN';
-    if (growthRate > 10) return 'ACCELERATING';
-    if (growthRate > 0) return 'STEADY';
-    return 'DECLINING';
+    if (growthRate === null) return 'STABLE';
+
+    if (growthRate > 0.05) return 'ACCELERATING'; // 5%+ growth
+    if (growthRate > 0) return 'STEADY'; // Positive growth
+    return 'DECLINING'; // Negative or no growth
   };
 
   const growthRate = getGrowthRate();
@@ -533,16 +534,18 @@ export const AdvancedInsightsHub: React.FC<AdvancedInsightsHubProps> = ({ influe
                     <Avatar className="h-10 w-10">
                       <AvatarImage
                         src={brandData.significantFollowers.imageUrl}
-                        alt={brandData.significantFollowers.platformUsername || 'Unknown User'}
+                        alt={
+                          brandData.significantFollowers.platformUsername || 'Influencer Profile'
+                        }
                       />
-                      <AvatarFallback className="text-sm">
-                        {getInitials(brandData.significantFollowers.platformUsername)}
+                      <AvatarFallback className="text-xs">
+                        {brandData.significantFollowers.platformUsername?.slice(0, 2) || 'IF'}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <span className="font-medium">
-                          @{brandData.significantFollowers.platformUsername || 'Unknown User'}
+                          @{brandData.significantFollowers.platformUsername || 'Profile Available'}
                         </span>
                         {brandData.significantFollowers.isVerified && (
                           <Icon iconId="faCircleCheckSolid" className="w-4 h-4 text-sky-500" />
@@ -571,7 +574,7 @@ export const AdvancedInsightsHub: React.FC<AdvancedInsightsHubProps> = ({ influe
                         <Avatar className="h-8 w-8">
                           <AvatarImage
                             src={lookalike.imageUrl}
-                            alt={lookalike.platformUsername || 'Unknown User'}
+                            alt={lookalike.platformUsername || 'Profile Available'}
                           />
                           <AvatarFallback className="text-xs">
                             {getInitials(lookalike.platformUsername)}
@@ -580,7 +583,7 @@ export const AdvancedInsightsHub: React.FC<AdvancedInsightsHubProps> = ({ influe
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-medium">
-                              @{lookalike.platformUsername || 'Unknown User'}
+                              @{lookalike.platformUsername || 'Profile Available'}
                             </span>
                             {lookalike.isVerified && (
                               <Icon iconId="faCircleCheckSolid" className="w-3 h-3 text-sky-500" />

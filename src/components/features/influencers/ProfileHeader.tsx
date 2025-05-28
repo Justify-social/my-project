@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Icon } from '@/components/ui/icon/icon';
 import { IconButtonAction } from '@/components/ui/button-icon-action';
-import { toast } from 'sonner';
+import { showSuccessToast, showErrorToast } from '@/components/ui/toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -34,7 +34,7 @@ const getPlatformIcon = (platform: PlatformEnum): string => {
     case PlatformEnum.Twitter:
       return 'brandsXTwitter';
     default:
-      return 'faCircleQuestionLight';
+      return 'faUsersLight';
   }
 };
 
@@ -99,21 +99,10 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ influencer, isLoad
     if (handle && navigator.clipboard) {
       try {
         await navigator.clipboard.writeText(`@${handle}`);
-        toast.success('Handle copied to clipboard!');
+        showSuccessToast('Handle copied to clipboard!');
       } catch (err) {
-        toast.error('Failed to copy handle.');
+        showErrorToast('Failed to copy handle.');
         console.error('Copy handle error:', err);
-      }
-    }
-  };
-
-  const handleCopyEmail = async (email: string) => {
-    if (navigator.clipboard) {
-      try {
-        await navigator.clipboard.writeText(email);
-        toast.success('Email copied to clipboard!');
-      } catch (err) {
-        toast.error('Failed to copy email.');
       }
     }
   };
@@ -132,6 +121,19 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ influencer, isLoad
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
     if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
     return num.toString();
+  };
+
+  const getRiskIcon = (level: string): string => {
+    switch (level.toLowerCase()) {
+      case 'low':
+        return 'faCircleCheckLight';
+      case 'medium':
+        return 'faTriangleExclamationLight';
+      case 'high':
+        return 'faCircleXmarkLight';
+      default:
+        return 'faShieldLight';
+    }
   };
 
   // Show loading skeleton if needed
@@ -211,7 +213,10 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ influencer, isLoad
                                     : 'bg-destructive'
                               }`}
                             >
-                              <Icon iconId="faShieldLight" className="h-3 w-3 text-white" />
+                              <Icon
+                                iconId={getRiskIcon(trustData.riskLevel)}
+                                className="h-3 w-3 text-white"
+                              />
                             </div>
                           </TooltipTrigger>
                           <TooltipContent>
@@ -363,67 +368,6 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ influencer, isLoad
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-
-              {/* Quick Contact Actions */}
-              {professionalData &&
-                (professionalData.emails.length > 0 || professionalData.website) && (
-                  <div className="bg-muted/30 p-4 rounded-lg border border-border/50">
-                    <h4 className="text-sm font-medium text-primary mb-3 flex items-center gap-2">
-                      <Icon iconId="faAddressCardLight" className="h-4 w-4" />
-                      Quick Contact
-                    </h4>
-                    <div className="space-y-2">
-                      {professionalData.emails.slice(0, 2).map((email, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between p-2 rounded bg-background/50"
-                        >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <Icon
-                              iconId="faEnvelopeLight"
-                              className="h-3 w-3 text-muted-foreground flex-shrink-0"
-                            />
-                            <span className="text-xs truncate">{email.email}</span>
-                          </div>
-                          <div className="flex gap-1 flex-shrink-0">
-                            <IconButtonAction
-                              iconBaseName="faCopy"
-                              hoverColorClass="text-accent"
-                              onClick={() => handleCopyEmail(email.email)}
-                              ariaLabel="Copy email"
-                              className="h-6 w-6"
-                            />
-                            <IconButtonAction
-                              iconBaseName="faEnvelope"
-                              hoverColorClass="text-accent"
-                              onClick={() => window.open(`mailto:${email.email}`)}
-                              ariaLabel="Send email"
-                              className="h-6 w-6"
-                            />
-                          </div>
-                        </div>
-                      ))}
-                      {professionalData.website && (
-                        <div className="flex items-center justify-between p-2 rounded bg-background/50">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <Icon
-                              iconId="faGlobeLight"
-                              className="h-3 w-3 text-muted-foreground flex-shrink-0"
-                            />
-                            <span className="text-xs truncate">Website</span>
-                          </div>
-                          <IconButtonAction
-                            iconBaseName="faArrowRight"
-                            hoverColorClass="text-accent"
-                            onClick={() => window.open(professionalData.website!, '_blank')}
-                            ariaLabel="Visit website"
-                            className="h-6 w-6"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
 
               {/* Verification Status */}
               {isVerified && (

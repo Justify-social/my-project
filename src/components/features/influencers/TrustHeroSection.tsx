@@ -211,11 +211,11 @@ export const TrustHeroSection: React.FC<TrustHeroSectionProps> = ({ influencer }
                     {(type.value * 100).toFixed(1)}%
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {type.category === 'positive'
-                      ? 'Authentic followers'
-                      : type.category === 'negative'
-                        ? 'Requires attention'
-                        : 'Quality unknown'}
+                    {trustData.riskLevel === 'LOW'
+                      ? 'Excellent quality'
+                      : trustData.riskLevel === 'MEDIUM'
+                        ? 'Good quality'
+                        : 'Requires review'}
                   </div>
                 </div>
               ))}

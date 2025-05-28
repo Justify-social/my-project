@@ -69,8 +69,7 @@ const BrandAffinityCard: React.FC<BrandAffinityCardProps> = ({
       </CardHeader>
       <CardContent className="space-y-3">
         {topItems.map((item, index) => {
-          const label =
-            type === 'hashtag' ? `#${item.hashtag || item.name}` : item.name || 'Unknown';
+          const label = getItemName(item, type);
           const isTopTier = index < 2;
 
           return (
@@ -498,3 +497,6 @@ export const BrandIntelligenceHub: React.FC<BrandIntelligenceHubProps> = ({ infl
     </Card>
   );
 };
+
+const getItemName = (item: any, type: 'brand' | 'hashtag' | 'interest') =>
+  type === 'hashtag' ? `#${item.hashtag || item.name}` : item.name || 'Other';

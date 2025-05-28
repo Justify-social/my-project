@@ -47,6 +47,7 @@ import {
 // SelectValue,
 // } from '@/components/ui/select';
 import { toast } from 'react-hot-toast';
+import { showSuccessToast, showErrorToast } from '@/components/ui/toast';
 import { ButtonAddToCampaign } from '@/components/ui/button-add-to-campaign'; // Import new component
 import { Button } from '@/components/ui/button'; // Added Button import
 import { Card, CardContent } from '@/components/ui/card';
@@ -214,7 +215,7 @@ export default function InfluencerProfilePage() {
     // Basic check for influencer data still useful
     if (!influencer?.id) {
       logger.error('[ProfilePage] Cannot request risk report: Missing influencer ID.');
-      toast.error('Cannot request report: Influencer identifier is missing.');
+      showErrorToast('Cannot request report: Influencer identifier is missing.');
       return;
     }
     setIsRequestingReport(true);
@@ -228,7 +229,8 @@ export default function InfluencerProfilePage() {
       // Simulate delay for Sandbox/testing
       await new Promise(resolve => setTimeout(resolve, 4000)); // Use await with Promise for cleaner async simulation
 
-      toast.success('Risk report ready. Opening...', { id: generatingToastId });
+      showSuccessToast('Risk report ready. Opening...', 'faFileLight');
+      toast.dismiss(generatingToastId);
       window.open(sampleReportUrl, '_blank');
     } catch (error: unknown) {
       // Catch potential errors from setTimeout or window.open, though unlikely
@@ -236,9 +238,8 @@ export default function InfluencerProfilePage() {
         error: (error as Error).message,
         originalError: error,
       });
-      toast.error('An unexpected error occurred while preparing the report.', {
-        id: generatingToastId,
-      });
+      showErrorToast('An unexpected error occurred while preparing the report.');
+      toast.dismiss(generatingToastId);
     } finally {
       setIsRequestingReport(false); // Re-enable button after process completes or fails
     }
@@ -266,7 +267,10 @@ export default function InfluencerProfilePage() {
               <SaveInfluencerButton
                 influencer={influencer}
                 onSuccess={influencerId => {
-                  toast.success(`${influencer.name || influencer.handle} saved successfully!`);
+                  showSuccessToast(
+                    `${influencer.name || influencer.handle} saved successfully!`,
+                    'faFloppyDiskLight'
+                  );
                 }}
               />
 
@@ -319,7 +323,10 @@ export default function InfluencerProfilePage() {
                     currentPlatform={platformEnum}
                     availablePlatforms={influencer.platforms}
                     onSuccess={(campaignId, campaignName) => {
-                      toast.success(`${influencer?.name || 'Influencer'} added to ${campaignName}`);
+                      showSuccessToast(
+                        `${influencer?.name || 'Influencer'} added to ${campaignName}`,
+                        'faCheckLight'
+                      );
                     }}
                   />
                 )}

@@ -75,15 +75,30 @@ const DemographicCard: React.FC<DemographicCardProps> = ({
           // For progress bar: need percentage of max value
           const displayValue = showPercentages ? item.value : item.value;
           const progressPercentage = (item.value / maxValue) * 100;
-          const label =
-            item.name ||
-            item.code ||
-            (item.gender && item.ageRange ? `${item.gender} ${item.ageRange}` : 'Unknown');
+          const getDisplayName = (
+            item: any,
+            type: 'country' | 'city' | 'ageGender' | 'language' | 'interest'
+          ) =>
+            type === 'country' || type === 'city' || type === 'language' || type === 'interest'
+              ? item.name || 'Other'
+              : item.gender && item.ageRange
+                ? `${item.gender} ${item.ageRange}`
+                : 'Other';
 
           return (
             <div key={index} className="space-y-1">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-medium truncate">{label}</span>
+                <span className="font-medium truncate">
+                  {getDisplayName(
+                    item,
+                    title.toLowerCase() as
+                      | 'country'
+                      | 'city'
+                      | 'ageGender'
+                      | 'language'
+                      | 'interest'
+                  )}
+                </span>
                 <span className="text-muted-foreground">
                   {showPercentages
                     ? formatDemographicValue(displayValue)
