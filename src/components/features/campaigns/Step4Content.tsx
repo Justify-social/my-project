@@ -114,7 +114,7 @@ function Step4Content() {
         url?: string;
         rationale?: string;
         budget?: number;
-        assignedInfluencers?: string[];
+        associatedInfluencerIds?: string[];
         muxProcessingStatus?: string;
         muxPlaybackId?: string;
         muxUploadId?: string;
@@ -127,7 +127,7 @@ function Step4Content() {
         url: asset.url,
         rationale: asset.rationale || '',
         budget: asset.budget || null,
-        assignedInfluencers: asset.assignedInfluencers || [],
+        associatedInfluencerIds: asset.associatedInfluencerIds || [],
         muxProcessingStatus: asset.muxProcessingStatus || 'PREPARING',
         muxPlaybackId: asset.muxPlaybackId || null,
         muxUploadId: asset.muxUploadId || null,
@@ -143,7 +143,9 @@ function Step4Content() {
           !currentAsset ||
           newAsset.id !== currentAsset.id ||
           newAsset.muxProcessingStatus !== (currentAsset as DraftAsset).muxProcessingStatus ||
-          newAsset.muxPlaybackId !== (currentAsset as DraftAsset).muxPlaybackId
+          newAsset.muxPlaybackId !== (currentAsset as DraftAsset).muxPlaybackId ||
+          JSON.stringify(newAsset.associatedInfluencerIds) !==
+            JSON.stringify((currentAsset as DraftAsset).associatedInfluencerIds)
         );
       });
 
@@ -155,6 +157,7 @@ function Step4Content() {
           id: a.id,
           status: a.muxProcessingStatus,
           playbackId: a.muxPlaybackId,
+          associatedInfluencerIds: a.associatedInfluencerIds,
         }))
       );
 
@@ -454,6 +457,9 @@ function Step4Content() {
 
     try {
       await Promise.all(savePromises);
+
+      // Show success toast to confirm everything has been saved
+      showSuccessToast('All asset details saved successfully!', 'faCircleCheckLight', 3000);
 
       // Mark step complete
       const payload: Partial<DraftCampaignData> = {
