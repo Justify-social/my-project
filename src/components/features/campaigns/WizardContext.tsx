@@ -21,7 +21,6 @@ import {
   Status as PrismaStatus,
   Currency as PrismaCurrency,
   CreativeAsset, // IMPORT CreativeAsset
-  Prisma, // IMPORT Prisma namespace
 } from '@prisma/client'; // Import Prisma enums
 // TODO: Replace WizardCampaignFormData with a proper type derived from schema.prisma CampaignWizard model in types.ts
 // import { CampaignFormData as WizardCampaignFormData } from '@/types/influencer';
@@ -321,7 +320,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
 
           if (dbCreativeAssets.length > 0) {
             logger.info('[WizardContext loadCampaignData] Loading assets from CreativeAsset SSOT.');
-            finalAssets = dbCreativeAssets.map((ca: CreativeAsset, index: number) => ({
+            finalAssets = dbCreativeAssets.map((ca: CreativeAsset, _index: number) => ({
               id: String(ca.id),
               fieldId: `asset-${ca.id}`,
               internalAssetId: ca.id,
@@ -338,9 +337,10 @@ export function WizardProvider({ children }: { children: ReactNode }) {
               createdAt: ca.createdAt?.toISOString ? ca.createdAt.toISOString() : ca.createdAt,
               updatedAt: ca.updatedAt?.toISOString ? ca.updatedAt.toISOString() : ca.updatedAt,
               isPrimaryForBrandLiftPreview: ca.isPrimaryForBrandLiftPreview ?? false,
-              rationale: (ca as any).rationale || '',
-              budget: (ca as any).budget ?? null,
-              associatedInfluencerIds: (ca as any).associatedInfluencerIds || [],
+              rationale: ((ca as Record<string, unknown>).rationale as string) || '',
+              budget: ((ca as Record<string, unknown>).budget as number) ?? null,
+              associatedInfluencerIds:
+                ((ca as Record<string, unknown>).associatedInfluencerIds as string[]) || [],
             })) as DraftAsset[];
           } else {
             finalAssets = [];
@@ -635,7 +635,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
             if (dbCreativeAssetsFromSave.length > 0) {
               logger.info('[WizardContext saveProgress] Loading assets from CreativeAsset SSOT.');
               finalAssetsForStateUpdate = dbCreativeAssetsFromSave.map(
-                (ca: CreativeAsset, index: number) => ({
+                (ca: CreativeAsset, _index: number) => ({
                   id: String(ca.id),
                   fieldId: `asset-${ca.id}`,
                   internalAssetId: ca.id,
@@ -652,9 +652,10 @@ export function WizardProvider({ children }: { children: ReactNode }) {
                   createdAt: ca.createdAt?.toISOString ? ca.createdAt.toISOString() : ca.createdAt,
                   updatedAt: ca.updatedAt?.toISOString ? ca.updatedAt.toISOString() : ca.updatedAt,
                   isPrimaryForBrandLiftPreview: ca.isPrimaryForBrandLiftPreview ?? false,
-                  rationale: (ca as any).rationale || '',
-                  budget: (ca as any).budget ?? null,
-                  associatedInfluencerIds: (ca as any).associatedInfluencerIds || [],
+                  rationale: ((ca as Record<string, unknown>).rationale as string) || '',
+                  budget: ((ca as Record<string, unknown>).budget as number) ?? null,
+                  associatedInfluencerIds:
+                    ((ca as Record<string, unknown>).associatedInfluencerIds as string[]) || [],
                 })
               ) as DraftAsset[];
             } else {

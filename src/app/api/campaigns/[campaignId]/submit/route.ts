@@ -85,19 +85,14 @@ interface WizardTargeting {
   keywords?: string[];
 }
 
-interface WizardAsset {
-  id?: string; // Temporary ID from frontend upload?
-  url?: string;
-  name?: string;
-  fileName?: string;
-  fileSize?: number;
-  type?: string; // 'video' or 'image', maps to CreativeAssetType enum
-  rationale?: string;
-  budget?: number;
-  dimensions?: string; // e.g., "1080x1920"
-  duration?: number; // in seconds for video
-  associatedInfluencerIds?: string[]; // Not directly mapped to CreativeAsset, informational
-}
+// Define types for wizard assets and influencers
+type _WizardAsset = {
+  id?: string | null;
+  name?: string | null;
+  type?: 'image' | 'video' | null;
+  url?: string | null;
+  // ... other asset properties
+};
 
 // Explicitly type the wizard to include submissionId, as linter might be slow
 // This should align with the actual Prisma type after migration

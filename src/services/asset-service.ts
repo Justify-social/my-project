@@ -14,7 +14,7 @@ export function generateCorrelationId(prefix: string = 'op'): string {
  * @deprecated Use direct API call to /api/creative-assets/[assetId] DELETE instead
  * This function created circular dependency issues and has been removed.
  */
-export async function deleteAssetFromAllSources(assetId: number): Promise<boolean> {
+export async function deleteAssetFromAllSources(_assetId: number): Promise<boolean> {
   console.warn(
     '[DEPRECATED] deleteAssetFromAllSources is deprecated. Use direct DELETE API call instead.'
   );
@@ -24,7 +24,7 @@ export async function deleteAssetFromAllSources(assetId: number): Promise<boolea
 /**
  * @deprecated Use deleteAssetFromAllSources instead
  */
-export async function deleteAssetFromStorage(url: string): Promise<boolean> {
+export async function deleteAssetFromStorage(_url: string): Promise<boolean> {
   console.warn(
     '[DEPRECATED] deleteAssetFromStorage is deprecated. Use deleteAssetFromAllSources instead.'
   );
@@ -47,4 +47,21 @@ export async function logOrphanedAsset(url: string, assetId: string): Promise<vo
   } catch (error) {
     console.error('Failed to log orphaned asset:', error);
   }
+}
+
+/**
+ * Retrieve a creative asset by ID
+ */
+export async function getCreativeAssetById(_assetId: string) {
+  // TODO: Implement actual database retrieval
+  return null;
+}
+
+/**
+ * Update the URL of a creative asset
+ */
+export async function updateCreativeAssetUrl(_assetId: string, _url: string) {
+  console.log(`TODO: Update asset ${_assetId} with new URL`);
+  // TODO: Implement actual database update
+  return false;
 }

@@ -56,10 +56,8 @@ function Step4Content() {
     control: form.control,
     name: 'assets',
     keyName: 'fieldId',
-  } as any); // Type assertion to avoid complex generic inference
-
-  // Add polling state
-  const [isPollingStatus, setIsPollingStatus] = React.useState(false);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any); // Complex type inference requires any here
 
   // Add state to track if user explicitly clicked Next
   const [isExplicitNext, setIsExplicitNext] = React.useState(false);
@@ -99,20 +97,33 @@ function Step4Content() {
       : [];
 
     // Convert CreativeAssets to form format
-    const formAssets = creativeAssets.map((asset: any) => ({
-      id: String(asset.id),
-      fieldId: `asset-${asset.id}`,
-      internalAssetId: asset.id,
-      name: asset.name,
-      type: asset.type,
-      url: asset.url,
-      rationale: asset.rationale || '',
-      budget: asset.budget || null,
-      assignedInfluencers: asset.assignedInfluencers || [],
-      muxProcessingStatus: asset.muxProcessingStatus || 'PREPARING',
-      muxPlaybackId: asset.muxPlaybackId || null,
-      muxUploadId: asset.muxUploadId || null,
-    }));
+    const formAssets = creativeAssets.map(
+      (asset: {
+        id: number;
+        name: string;
+        type: string;
+        url?: string;
+        rationale?: string;
+        budget?: number;
+        assignedInfluencers?: string[];
+        muxProcessingStatus?: string;
+        muxPlaybackId?: string;
+        muxUploadId?: string;
+      }) => ({
+        id: String(asset.id),
+        fieldId: `asset-${asset.id}`,
+        internalAssetId: asset.id,
+        name: asset.name,
+        type: asset.type,
+        url: asset.url,
+        rationale: asset.rationale || '',
+        budget: asset.budget || null,
+        assignedInfluencers: asset.assignedInfluencers || [],
+        muxProcessingStatus: asset.muxProcessingStatus || 'PREPARING',
+        muxPlaybackId: asset.muxPlaybackId || null,
+        muxUploadId: asset.muxUploadId || null,
+      })
+    );
 
     // ✅ FIX: Use replaceAssets instead of setValue for proper reactivity
     const hasChanged =
@@ -122,8 +133,8 @@ function Step4Content() {
         return (
           !currentAsset ||
           newAsset.id !== currentAsset.id ||
-          newAsset.muxProcessingStatus !== (currentAsset as any).muxProcessingStatus ||
-          newAsset.muxPlaybackId !== (currentAsset as any).muxPlaybackId
+          newAsset.muxProcessingStatus !== (currentAsset as DraftAsset).muxProcessingStatus ||
+          newAsset.muxPlaybackId !== (currentAsset as DraftAsset).muxPlaybackId
         );
       });
 
@@ -144,7 +155,8 @@ function Step4Content() {
       // Check if any videos just became ready - Use branded toast
       const readyVideos = formAssets.filter(a => a.muxProcessingStatus === 'READY');
       const wasProcessing = fields.some(
-        (f: any) => f.muxProcessingStatus && !['READY', 'ERROR'].includes(f.muxProcessingStatus)
+        (f: DraftAsset) =>
+          f.muxProcessingStatus && !['READY', 'ERROR'].includes(f.muxProcessingStatus)
       );
 
       if (readyVideos.length > 0 && wasProcessing) {
@@ -157,20 +169,29 @@ function Step4Content() {
       }
     }
   }, [
-    // Track changes more comprehensively with proper array checks
-    Array.isArray(wizard.wizardState?.creativeAssets)
-      ? wizard.wizardState.creativeAssets.length
-      : 0,
-    Array.isArray(wizard.wizardState?.creativeAssets)
-      ? wizard.wizardState.creativeAssets
-          .map((a: any) => `${a.id}-${a.muxProcessingStatus}-${a.muxPlaybackId}-${a.url}`)
-          .join('|')
-      : '',
+    wizard.wizardState?.creativeAssets,
+    wizard.wizardState,
     wizard.isLoading,
-    fields.length,
+    fields,
     replaceAssets,
     forceUpdate,
   ]);
+
+  // Extract complex dependency values for useEffect with proper memoization
+  const creativeAssetsLength = Array.isArray(wizard.wizardState?.creativeAssets)
+    ? wizard.wizardState.creativeAssets.length
+    : 0;
+
+  // Memoize the signature to prevent infinite re-renders
+  const creativeAssetsSignature = React.useMemo(() => {
+    return Array.isArray(wizard.wizardState?.creativeAssets)
+      ? wizard.wizardState.creativeAssets
+          .map(
+            (a: { id: number; muxProcessingStatus?: string }) => `${a.id}-${a.muxProcessingStatus}`
+          )
+          .join(',')
+      : '';
+  }, [wizard.wizardState?.creativeAssets]);
 
   // ✅ ENHANCED: Robust polling for Mux processing status updates
   useEffect(() => {
@@ -183,7 +204,7 @@ function Step4Content() {
     }
 
     const assetsProcessing = creativeAssets.filter(
-      (asset: any) =>
+      (asset: { muxProcessingStatus?: string }) =>
         asset.muxProcessingStatus &&
         !['READY', 'ERROR', 'ERROR_NO_PLAYBACK_ID'].includes(asset.muxProcessingStatus)
     );
@@ -192,7 +213,6 @@ function Step4Content() {
     if (assetsProcessing.length > 0 && !isPollingRef.current) {
       console.log(`[Step4] 🚀 STARTING POLLING for ${assetsProcessing.length} processing assets`);
       isPollingRef.current = true;
-      setIsPollingStatus(true);
 
       const pollInterval = setInterval(async () => {
         try {
@@ -210,7 +230,7 @@ function Step4Content() {
           const currentAssets = wizard.wizardState?.creativeAssets || [];
           const stillProcessing = Array.isArray(currentAssets)
             ? currentAssets.filter(
-                (asset: any) =>
+                (asset: { muxProcessingStatus?: string }) =>
                   asset.muxProcessingStatus &&
                   !['READY', 'ERROR', 'ERROR_NO_PLAYBACK_ID'].includes(asset.muxProcessingStatus)
               )
@@ -219,7 +239,6 @@ function Step4Content() {
           if (stillProcessing.length === 0) {
             console.log('[Step4] ✅ ALL ASSETS READY - Stopping polling');
             isPollingRef.current = false;
-            setIsPollingStatus(false);
             clearInterval(pollInterval);
 
             // Final force update
@@ -230,7 +249,6 @@ function Step4Content() {
         } catch (error) {
           console.error('[Step4] ❌ Polling error:', error);
           isPollingRef.current = false;
-          setIsPollingStatus(false);
           clearInterval(pollInterval);
         }
       }, 2000);
@@ -239,7 +257,6 @@ function Step4Content() {
       return () => {
         console.log('[Step4] 🧹 Cleaning up polling interval');
         isPollingRef.current = false;
-        setIsPollingStatus(false);
         clearInterval(pollInterval);
       };
     }
@@ -248,17 +265,14 @@ function Step4Content() {
     if (assetsProcessing.length === 0 && isPollingRef.current) {
       console.log('[Step4] ✅ No more assets processing, stopping poll');
       isPollingRef.current = false;
-      setIsPollingStatus(false);
     }
   }, [
-    Array.isArray(wizard.wizardState?.creativeAssets)
-      ? wizard.wizardState.creativeAssets.length
-      : 0,
-    Array.isArray(wizard.wizardState?.creativeAssets)
-      ? wizard.wizardState.creativeAssets
-          .map((a: any) => `${a.id}-${a.muxProcessingStatus}`)
-          .join(',')
-      : '',
+    creativeAssetsLength,
+    creativeAssetsSignature,
+    wizard.wizardState?.creativeAssets,
+    wizard.wizardState,
+    wizard.isLoading,
+    wizard,
     forceUpdate,
   ]);
 
@@ -290,7 +304,6 @@ function Step4Content() {
       // Start polling immediately for this new upload
       if (!isPollingRef.current) {
         isPollingRef.current = true;
-        setIsPollingStatus(true);
       }
 
       forceUpdate();
@@ -298,8 +311,8 @@ function Step4Content() {
     [appendAsset, forceUpdate]
   );
 
-  const handleUploadError = useCallback((error: Error) => {
-    console.error('Upload failed:', error);
+  const handleUploadError = useCallback((_error: Error) => {
+    console.error('Upload failed:', _error);
   }, []);
 
   const handleDeleteAsset = useCallback(
@@ -350,14 +363,14 @@ function Step4Content() {
         // Reload wizard state to reflect changes
         await wizard.reloadCampaignData();
         forceUpdate();
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      } catch (_error) {
+        const errorMessage = _error instanceof Error ? _error.message : 'Unknown error occurred';
         logger.error(`Failed to delete asset ${assetId}:`, {
           errorMessage,
-          errorStack: error instanceof Error ? error.stack : undefined,
+          errorStack: _error instanceof Error ? _error.stack : undefined,
           assetId,
           assetName,
-          errorType: error?.constructor?.name,
+          errorType: _error?.constructor?.name,
         });
         showErrorToast(`Failed to delete asset: ${errorMessage}`, 'faTriangleExclamationLight');
       }
@@ -428,7 +441,13 @@ function Step4Content() {
       if (saved && wizard.campaignId) {
         router.push(`/campaigns/wizard/step-5?id=${wizard.campaignId}`);
       }
-    } catch (error) {
+    } catch (_error) {
+      const errorMessage = _error instanceof Error ? _error.message : 'Unknown error occurred';
+      logger.error('Failed to save assets during navigation.', {
+        errorMessage,
+        errorStack: _error instanceof Error ? _error.stack : undefined,
+        errorType: _error?.constructor?.name,
+      });
       showErrorToast('Failed to save assets.', 'faTriangleExclamationLight');
     } finally {
       setIsExplicitNext(false); // Reset flag
@@ -479,9 +498,17 @@ function Step4Content() {
       // Reload to get fresh data
       wizard.reloadCampaignData();
       return true;
-    } catch (error) {
+    } catch (_error) {
+      const errorMessage = _error instanceof Error ? _error.message : 'Unknown error occurred';
+      logger.error('Failed to save assets.', {
+        errorMessage,
+        errorStack: _error instanceof Error ? _error.stack : undefined,
+        errorType: _error?.constructor?.name,
+      });
       showErrorToast('Failed to save assets.', 'faTriangleExclamationLight');
       return false;
+    } finally {
+      setIsExplicitNext(false); // Reset flag
     }
   };
 
@@ -554,7 +581,10 @@ function Step4Content() {
 
                   return (
                     <AssetCardStep4
-                      key={`${(field as any).fieldId || field.id}-${asset.muxProcessingStatus || 'no-status'}-${forceUpdateCounter}`}
+                      key={`${
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        (field as any).fieldId || field.id
+                      }-${asset.muxProcessingStatus || 'no-status'}-${forceUpdateCounter}`}
                       assetIndex={index}
                       asset={asset}
                       control={form.control}

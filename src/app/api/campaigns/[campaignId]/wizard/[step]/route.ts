@@ -539,30 +539,26 @@ export async function PATCH(
       // BEGIN SSOT ASSET MAPPING FOR RESPONSE
       if (
         campaignDataForResponse.creativeAssets &&
-        Array.isArray(campaignDataForResponse.creativeAssets)
+        Array.isArray(campaignDataForResponse.creativeAssets) &&
+        campaignDataForResponse.creativeAssets.length > 0
       ) {
         logger.info('[WIZARD PATCH API] Mapping creativeAssets for response.');
         mappedResponseAssetsForPATCH = campaignDataForResponse.creativeAssets.map(
           (ca: CreativeAsset): CreativeAssetClientPayload => ({
             id: String(ca.id),
-            internalAssetId: ca.id,
-            name: String(ca.name ?? ''),
-            fileName: String(ca.name ?? ''),
-            type: String(ca.type ?? 'video'),
-            description: String(ca.description ?? ''),
-            url: ca.url ?? undefined,
-            fileSize: ca.fileSize ?? undefined,
-            muxAssetId: ca.muxAssetId ?? undefined,
-            muxPlaybackId: ca.muxPlaybackId ?? undefined,
-            muxProcessingStatus: ca.muxProcessingStatus ?? undefined,
-            duration: ca.duration ?? undefined,
-            userId: ca.userId ?? undefined,
-            createdAt: ca.createdAt?.toISOString() ?? undefined,
-            updatedAt: ca.updatedAt?.toISOString() ?? undefined,
+            name: ca.name ?? '',
+            type: ca.type ?? 'video',
+            url: ca.url ?? '',
+            description: ca.description ?? '',
+            fileSize: ca.fileSize ?? 0,
+            muxAssetId: ca.muxAssetId ?? '',
+            muxPlaybackId: ca.muxPlaybackId ?? '',
+            muxProcessingStatus: ca.muxProcessingStatus ?? 'PREPARING',
+            duration: ca.duration ?? 0,
+            userId: ca.userId ?? '',
+            createdAt: ca.createdAt?.toISOString?.() ?? ca.createdAt?.toString?.() ?? '',
+            updatedAt: ca.updatedAt?.toISOString?.() ?? ca.updatedAt?.toString?.() ?? '',
             isPrimaryForBrandLiftPreview: ca.isPrimaryForBrandLiftPreview ?? false,
-            rationale: '',
-            budget: undefined,
-            associatedInfluencerIds: [],
           })
         );
       } else {
@@ -690,8 +686,8 @@ export async function GET(
       where: { id: campaignId },
       include: {
         Influencer: true,
-        submission: true, // Eager load the related CampaignWizardSubmission
-        creativeAssets: true, // ***** Ensure creativeAssets is fetched for GET too *****
+        submission: true,
+        creativeAssets: true,
       },
     });
 
@@ -702,30 +698,25 @@ export async function GET(
     const transformedCampaign = EnumTransformers.transformObjectFromBackend(campaign);
 
     // SSOT Asset Mapping for GET response
-    let responseAssetsForGET: any[] = [];
+    let responseAssetsForGET: CreativeAssetClientPayload[] = [];
     if (campaign.creativeAssets && Array.isArray(campaign.creativeAssets)) {
       logger.info('[WIZARD GET API] Mapping creativeAssets for response.');
       responseAssetsForGET = campaign.creativeAssets.map(
-        (ca: Prisma.CreativeAssetGetPayload<object>) => ({
+        (ca: CreativeAsset): CreativeAssetClientPayload => ({
           id: String(ca.id),
-          internalAssetId: ca.id,
-          name: String(ca.name ?? ''),
-          fileName: String(ca.name ?? ''),
-          type: String(ca.type ?? 'video'),
-          description: String(ca.description ?? ''),
-          url: ca.url ?? undefined,
-          fileSize: ca.fileSize ?? undefined,
-          muxAssetId: ca.muxAssetId ?? undefined,
-          muxPlaybackId: ca.muxPlaybackId ?? undefined,
-          muxProcessingStatus: ca.muxProcessingStatus ?? undefined,
-          duration: ca.duration ?? undefined,
-          userId: ca.userId ?? undefined,
-          createdAt: ca.createdAt?.toISOString() ?? undefined,
-          updatedAt: ca.updatedAt?.toISOString() ?? undefined,
+          name: ca.name ?? '',
+          type: ca.type ?? 'video',
+          url: ca.url ?? '',
+          description: ca.description ?? '',
+          fileSize: ca.fileSize ?? 0,
+          muxAssetId: ca.muxAssetId ?? '',
+          muxPlaybackId: ca.muxPlaybackId ?? '',
+          muxProcessingStatus: ca.muxProcessingStatus ?? 'PREPARING',
+          duration: ca.duration ?? 0,
+          userId: ca.userId ?? '',
+          createdAt: ca.createdAt?.toISOString?.() ?? ca.createdAt?.toString?.() ?? '',
+          updatedAt: ca.updatedAt?.toISOString?.() ?? ca.updatedAt?.toString?.() ?? '',
           isPrimaryForBrandLiftPreview: ca.isPrimaryForBrandLiftPreview ?? false,
-          rationale: '',
-          budget: undefined,
-          associatedInfluencerIds: [],
         })
       );
     } else {
@@ -735,11 +726,10 @@ export async function GET(
       responseAssetsForGET = [];
     }
 
-    // Ensure submissionId is at the top level if it came via the relation
     const responseData = {
       ...transformedCampaign,
-      assets: responseAssetsForGET, // ***** USE THE NEWLY MAPPED ASSETS for GET response *****
-      submissionId: campaign.submissionId, // Explicitly ensure direct field is present, even if relation is also transformed
+      assets: responseAssetsForGET,
+      submissionId: campaign.submissionId,
     };
 
     return NextResponse.json({
@@ -747,14 +737,11 @@ export async function GET(
       data: responseData,
     });
   } catch (error) {
-    // Log the error from the outer tryCatch
-    // Await params before accessing properties
     const resolvedParams = await params;
     console.error(
       `Unhandled error in GET /api/campaigns/${resolvedParams.campaignId}/wizard/${resolvedParams.step}:`,
       error
     );
-    // Consider using a more specific error handling function if available
     return NextResponse.json(
       {
         success: false,

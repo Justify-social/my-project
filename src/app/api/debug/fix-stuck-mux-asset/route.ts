@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
       // If Mux says it's ready but our DB doesn't know
       if (muxAssetInfo.status === 'ready' && dbAsset.muxProcessingStatus !== 'READY') {
         const publicPlaybackId = muxAssetInfo.playbackIds?.find(
-          (pid: any) => pid.policy === 'public'
+          (pid: { id: string; policy: string }) => pid.policy === 'public'
         )?.id;
 
         if (publicPlaybackId) {
