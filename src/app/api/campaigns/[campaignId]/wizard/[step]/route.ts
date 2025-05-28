@@ -22,6 +22,16 @@ interface ApiInfluencer {
   handle?: string | null;
   platform?: string | null;
   platformId?: string | null;
+  name?: string | null;
+  avatarUrl?: string | null;
+  isVerified?: boolean | null;
+  followersCount?: number | null;
+  engagementRate?: number | null;
+  email?: string | null;
+  bio?: string | null;
+  location?: string | null;
+  website?: string | null;
+  language?: string | null;
 }
 
 interface CreativeAssetClientPayload {
@@ -45,6 +55,75 @@ interface CreativeAssetClientPayload {
   fileName?: string;
   [key: string]: unknown;
 }
+
+// Validation schema for influencer data
+const validateInfluencerData = (inf: ApiInfluencer): { isValid: boolean; errors: string[] } => {
+  const errors: string[] = [];
+
+  // Required fields
+  if (!inf.handle || typeof inf.handle !== 'string' || inf.handle.trim().length === 0) {
+    errors.push('handle is required and must be a non-empty string');
+  }
+
+  if (!inf.platform || typeof inf.platform !== 'string') {
+    errors.push('platform is required and must be a valid string');
+  }
+
+  // Optional field validations
+  if (inf.followersCount !== null && inf.followersCount !== undefined) {
+    if (
+      typeof inf.followersCount !== 'number' ||
+      inf.followersCount < 0 ||
+      inf.followersCount > 1000000000
+    ) {
+      errors.push('followersCount must be a positive number less than 1 billion');
+    }
+  }
+
+  if (inf.engagementRate !== null && inf.engagementRate !== undefined) {
+    if (
+      typeof inf.engagementRate !== 'number' ||
+      inf.engagementRate < 0 ||
+      inf.engagementRate > 1
+    ) {
+      errors.push('engagementRate must be a number between 0 and 1');
+    }
+  }
+
+  if (inf.avatarUrl && (typeof inf.avatarUrl !== 'string' || inf.avatarUrl.length > 2048)) {
+    errors.push('avatarUrl must be a valid string with max length 2048 characters');
+  }
+
+  if (inf.name && (typeof inf.name !== 'string' || inf.name.length > 255)) {
+    errors.push('name must be a string with max length 255 characters');
+  }
+
+  if (
+    inf.email &&
+    (typeof inf.email !== 'string' || !inf.email.includes('@') || inf.email.length > 255)
+  ) {
+    errors.push('email must be a valid email string with max length 255 characters');
+  }
+
+  if (inf.bio && (typeof inf.bio !== 'string' || inf.bio.length > 2000)) {
+    errors.push('bio must be a string with max length 2000 characters');
+  }
+
+  return { isValid: errors.length === 0, errors };
+};
+
+// Safe ID generation with collision prevention
+const generateSafeInfluencerId = (handle: string, platform: string): string => {
+  const timestamp = Date.now();
+  const randomSuffix = Math.random().toString(36).substring(2, 15);
+  const platformPrefix = platform.substring(0, 3).toLowerCase();
+  const handlePrefix = handle
+    .substring(0, 8)
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
+
+  return `inf-${platformPrefix}-${handlePrefix}-${timestamp}-${randomSuffix}`;
+};
 
 /**
  * PATCH handler for saving/updating campaign wizard step data
@@ -428,71 +507,232 @@ export async function PATCH(
 
     if (step === 1 && influencerData != null && Array.isArray(influencerData)) {
       console.log('Updating influencers for wizard campaign (Step 1):', campaignId);
+
+      // STEP 1: Validate all influencer data before any database operations
+      const validationResults = influencerData.map((inf, index) => ({
+        index,
+        data: inf,
+        validation: validateInfluencerData(inf as ApiInfluencer),
+      }));
+
+      const invalidInfluencers = validationResults.filter(result => !result.validation.isValid);
+
+      if (invalidInfluencers.length > 0) {
+        const errorDetails = invalidInfluencers
+          .map(invalid => `Influencer ${invalid.index}: ${invalid.validation.errors.join(', ')}`)
+          .join('; ');
+
+        logger.error('[Influencer Update] Validation failed', {
+          campaignId,
+          errorDetails,
+          invalidCount: invalidInfluencers.length,
+          totalCount: influencerData.length,
+        });
+
+        throw new BadRequestError(`Influencer validation failed: ${errorDetails}`);
+      }
+
+      // STEP 2: Filter and prepare valid influencer data
+      const validInfluencers = influencerData.filter(
+        (inf: unknown): inf is ApiInfluencer =>
+          inf != null && typeof inf === 'object' && 'handle' in inf && 'platform' in inf
+      );
+
+      if (validInfluencers.length === 0) {
+        logger.warn('[Influencer Update] No valid influencers provided', { campaignId });
+        // Continue without influencers - this might be intentional
+      }
+
+      // STEP 3: Prepare influencer data with comprehensive logging
+      const influencerCreateData = validInfluencers.map((inf: ApiInfluencer) => {
+        const safeId =
+          typeof inf.id === 'string' && inf.id.length > 0
+            ? inf.id
+            : generateSafeInfluencerId(inf.handle as string, inf.platform as string);
+
+        const preparedData = {
+          id: safeId,
+          platform: EnumTransformers.platformToBackend(inf.platform as string),
+          handle: (inf.handle as string).trim(),
+          campaignId: campaignId,
+          updatedAt: new Date(),
+          // Rich profile data fields with safe defaults
+          name: inf.name?.trim() || null,
+          avatarUrl: inf.avatarUrl?.trim() || null,
+          isVerified: typeof inf.isVerified === 'boolean' ? inf.isVerified : null,
+          followersCount:
+            typeof inf.followersCount === 'number'
+              ? Math.max(0, Math.floor(inf.followersCount))
+              : null,
+          engagementRate:
+            typeof inf.engagementRate === 'number'
+              ? Math.max(0, Math.min(1, inf.engagementRate))
+              : null,
+          email: inf.email?.trim() || null,
+          bio: inf.bio?.trim() || null,
+          location: inf.location?.trim() || null,
+          website: inf.website?.trim() || null,
+          language: inf.language?.trim() || null,
+        };
+
+        logger.info('[Influencer Update] Prepared influencer data', {
+          campaignId,
+          influencerId: safeId,
+          handle: preparedData.handle,
+          platform: preparedData.platform,
+          hasRichData: !!(
+            preparedData.name ||
+            preparedData.avatarUrl ||
+            preparedData.followersCount
+          ),
+        });
+
+        return preparedData;
+      });
+
+      // STEP 4: Execute atomic transaction with comprehensive error handling
       try {
         const influencerTxStartTime = Date.now();
-        await prisma.$transaction(async tx => {
-          await tx.influencer.deleteMany({ where: { campaignId } });
-          console.log('Deleted existing influencers for campaign:', campaignId);
-          const influencerCreateData = influencerData
-            .filter(
-              (inf: unknown): inf is ApiInfluencer =>
-                inf != null && typeof inf === 'object' && 'handle' in inf && 'platform' in inf
-            )
-            .map((inf: ApiInfluencer) => ({
-              id:
-                typeof inf.id === 'string'
-                  ? inf.id
-                  : `inf-${Date.now()}-${Math.round(Math.random() * 1000)}`,
-              platform: EnumTransformers.platformToBackend(inf.platform as string),
-              handle: inf.handle as string,
-              campaignId: campaignId,
-              updatedAt: new Date(),
-            }));
-          if (influencerCreateData.length > 0) {
-            await tx.influencer.createMany({ data: influencerCreateData });
-            console.log(
-              `Created ${influencerCreateData.length} new influencers for campaign:`,
-              campaignId
-            );
-          } else {
-            console.log('No valid influencers provided to create for campaign:', campaignId);
+
+        await prisma.$transaction(
+          async tx => {
+            // Delete existing influencers
+            const deleteResult = await tx.influencer.deleteMany({
+              where: { campaignId },
+            });
+
+            logger.info('[Influencer Update] Deleted existing influencers', {
+              campaignId,
+              deletedCount: deleteResult.count,
+            });
+
+            // Create new influencers if any exist
+            if (influencerCreateData.length > 0) {
+              try {
+                const createResult = await tx.influencer.createMany({
+                  data: influencerCreateData,
+                  skipDuplicates: true, // Handle potential ID collisions gracefully
+                });
+
+                logger.info('[Influencer Update] Created new influencers', {
+                  campaignId,
+                  expectedCount: influencerCreateData.length,
+                  actualCount: createResult.count,
+                  success: createResult.count === influencerCreateData.length,
+                });
+
+                if (createResult.count !== influencerCreateData.length) {
+                  logger.warn(
+                    '[Influencer Update] Some influencers were skipped due to duplicates',
+                    {
+                      campaignId,
+                      expectedCount: influencerCreateData.length,
+                      actualCount: createResult.count,
+                      skippedCount: influencerCreateData.length - createResult.count,
+                    }
+                  );
+                }
+              } catch (createError) {
+                logger.error('[Influencer Update] Failed to create influencers', {
+                  campaignId,
+                  error: createError,
+                  dataAttempted: influencerCreateData.length,
+                });
+                throw createError; // Re-throw to trigger transaction rollback
+              }
+            } else {
+              logger.info('[Influencer Update] No influencers to create', { campaignId });
+            }
+          },
+          {
+            timeout: 10000, // 10 second timeout for the transaction
+            maxWait: 5000, // 5 second max wait to acquire connection
           }
+        );
+
+        logger.info('[Influencer Update] Transaction completed successfully', {
+          campaignId,
+          duration: Date.now() - influencerTxStartTime,
+          influencerCount: influencerCreateData.length,
         });
-        console.log('Influencer transaction successful.');
+
         logger.info(
           `[WIZARD_PATCH_PERF] Influencer transaction completed in ${Date.now() - influencerTxStartTime}ms`
         );
-        // Refetch into a temporary variable to get updated influencers
+
+        // STEP 5: Refetch campaign data with error handling
         const refetchCampaignStartTime = Date.now();
         const refetchedCampaign = await prisma.campaignWizard.findUnique({
           where: { id: campaignId },
           include: {
             Influencer: true,
-            submission: true, // Ensure submission is included here as well
+            submission: true,
             creativeAssets: true,
           },
         });
+
         logger.info(
           `[WIZARD_PATCH_PERF] Refetch after influencer TX completed in ${Date.now() - refetchCampaignStartTime}ms`
         );
-        // If refetch was successful, use it for the response
+
         if (refetchedCampaign) {
           campaignDataForResponse = refetchedCampaign;
-          messageSuffix = ' with influencers';
+          messageSuffix = ` with ${refetchedCampaign.Influencer.length} influencers`;
+
+          logger.info('[Influencer Update] Successfully refetched campaign with influencers', {
+            campaignId,
+            influencerCount: refetchedCampaign.Influencer.length,
+            hasRichData: refetchedCampaign.Influencer.some(
+              inf => (inf as any).name || (inf as any).avatarUrl || (inf as any).followersCount
+            ),
+          });
         } else {
-          console.error(
-            `[Influencer Update] Failed to refetch campaign ${campaignId} after influencer update.`
+          logger.error(
+            '[Influencer Update] Failed to refetch campaign after successful influencer update',
+            {
+              campaignId,
+            }
           );
-          // Keep campaignDataForResponse as the original updatedCampaign
           messageSuffix = ' (influencer refetch failed)';
+          // Don't throw here - influencers were saved successfully
         }
-      } catch (infError: unknown) {
-        // Type error as unknown
-        console.error('[Influencer Update] Transaction FAILED:', infError);
-        // Add optional: check error type before logging message if needed
-        // if (infError instanceof Error) { console.error(infError.message); }
-        // Keep campaignDataForResponse as the original updatedCampaign
-        messageSuffix = ' (influencer update error)';
+      } catch (transactionError: unknown) {
+        logger.error('[Influencer Update] Transaction failed - all changes rolled back', {
+          campaignId,
+          error: transactionError,
+          influencerCount: influencerCreateData.length,
+          errorType:
+            transactionError instanceof Error ? transactionError.constructor.name : 'Unknown',
+        });
+
+        // Determine if this is a recoverable error or should fail the entire request
+        if (transactionError instanceof Error) {
+          if (
+            transactionError.message.includes('Unique constraint') ||
+            transactionError.message.includes('timeout') ||
+            transactionError.message.includes('connection')
+          ) {
+            // These are recoverable - campaign data is still saved
+            messageSuffix = ' (influencer update failed - campaign saved)';
+            logger.warn(
+              '[Influencer Update] Continuing with campaign save despite influencer failure',
+              {
+                campaignId,
+                reason: 'Recoverable error type',
+              }
+            );
+          } else {
+            // Unknown error - might indicate data corruption
+            logger.error('[Influencer Update] Unknown error type - may need investigation', {
+              campaignId,
+              errorMessage: transactionError.message,
+              errorStack: transactionError.stack,
+            });
+            messageSuffix = ' (influencer update error - data may be inconsistent)';
+          }
+        } else {
+          messageSuffix = ' (influencer update error - unknown error type)';
+        }
       }
     }
     // If submission was just created, refetch campaignDataForResponse to include the new submissionId and updated currentStep
