@@ -4,19 +4,18 @@ import React from 'react';
 import { InfluencerProfileData } from '@/types/influencer';
 import { PlatformEnum } from '@/types/enums';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge, badgeVariants } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/badge';
 import { Icon } from '@/components/ui/icon/icon';
-import { Button as _Button } from '@/components/ui/button';
 import { IconButtonAction } from '@/components/ui/button-icon-action';
 import { toast } from 'sonner';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Card, CardContent } from '@/components/ui/card';
-import { getInitials as _getInitials } from '@/lib/utils';
-import { cn as _cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
+import { extractInsightIQData } from '@/lib/data-extraction/insightiq-extractor';
 
 interface ProfileHeaderProps {
   influencer: InfluencerProfileData;
+  isLoading?: boolean;
 }
 
 // Helper function to get platform icon names
@@ -59,7 +58,7 @@ const getPlatformDisplayName = (platform: PlatformEnum): string => {
   }
 };
 
-export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ influencer }) => {
+export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ influencer, isLoading = false }) => {
   const {
     avatarUrl,
     name,
@@ -68,40 +67,15 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ influencer }) => {
     platforms,
     isVerified,
     justifyScore,
-    audienceQualityIndicator,
-    contactEmail,
-    website,
     followersCount,
     engagementRate,
     category,
-  } = influencer;
+  } = influencer || {};
 
-  // Extract additional contact info from InsightIQ data if available
-  const extendedInfluencer = influencer as InfluencerProfileData & {
-    insightiq?: {
-      contacts?: {
-        email?: string;
-        phone?: string;
-        website?: string;
-      };
-    };
-  };
-  const insightiqContacts = extendedInfluencer.insightiq?.contacts;
-
-  const handleCopyEmail = async () => {
-    const emailToCopy = contactEmail || insightiqContacts?.email;
-    if (emailToCopy && navigator.clipboard) {
-      try {
-        await navigator.clipboard.writeText(emailToCopy);
-        toast.success('Email copied to clipboard!');
-      } catch (err) {
-        toast.error('Failed to copy email.');
-        console.error('Copy email error:', err);
-      }
-    } else if (emailToCopy) {
-      toast.error('Clipboard access not available.');
-    }
-  };
+  // Extract professional data for quick contact actions
+  const extractedData = influencer ? extractInsightIQData(influencer) : null;
+  const professionalData = extractedData?.professional;
+  const trustData = extractedData?.trust;
 
   const handleCopyHandle = async () => {
     if (handle && navigator.clipboard) {
@@ -115,7 +89,19 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ influencer }) => {
     }
   };
 
-  const getInitials = (name: string) => {
+  const handleCopyEmail = async (email: string) => {
+    if (navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(email);
+        toast.success('Email copied to clipboard!');
+      } catch (err) {
+        toast.error('Failed to copy email.');
+      }
+    }
+  };
+
+  const getInitials = (name?: string) => {
+    if (!name) return '??';
     return name
       .split(' ')
       .map(n => n[0])
@@ -130,219 +116,203 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ influencer }) => {
     return num.toString();
   };
 
-  return (
-    <Card className="mb-8 overflow-hidden border-border/50 shadow-lg bg-gradient-to-br from-background via-background to-muted/10">
-      <CardContent className="p-8">
-        {/* 3-Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* LEFT COLUMN - Influencer Information (Widest - 7 columns) */}
-          <div className="lg:col-span-7">
-            <div className="flex items-start gap-6">
-              {/* Avatar */}
-              <div className="relative">
-                <Avatar className="h-32 w-32 border-4 border-accent/20 shadow-lg">
-                  <AvatarImage src={avatarUrl ?? undefined} alt={name ?? ''} />
-                  <AvatarFallback className="text-2xl font-bold bg-gradient-to-br from-primary/10 to-accent/10">
-                    {getInitials(name ?? '')}
-                  </AvatarFallback>
-                </Avatar>
-                {/* Verification Badge on Avatar */}
-                {isVerified && (
-                  <div className="absolute -bottom-2 -right-2">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="bg-sky-500 p-2 rounded-full border-4 border-background shadow-lg">
-                            <Icon iconId="faCircleCheckSolid" className="h-4 w-4 text-white" />
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Verified Account</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                )}
+  // Show loading skeleton if needed
+  if (isLoading && !name) {
+    return (
+      <div className="space-y-6">
+        <Card className="overflow-hidden border-border/50 shadow-lg">
+          <CardContent className="p-8">
+            <div className="flex flex-col lg:flex-row gap-8 animate-pulse">
+              <div className="flex flex-col sm:flex-row items-start gap-6 flex-1">
+                <div className="h-32 w-32 bg-muted rounded-full"></div>
+                <div className="space-y-4 flex-1">
+                  <div className="h-8 bg-muted rounded w-64"></div>
+                  <div className="h-6 bg-muted rounded w-32"></div>
+                  <div className="h-20 bg-muted rounded"></div>
+                </div>
               </div>
+              <div className="lg:w-80 space-y-4">
+                <div className="h-24 bg-muted rounded"></div>
+                <div className="h-20 bg-muted rounded"></div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
-              {/* Main Info */}
-              <div className="flex-1 space-y-4">
-                {/* Name and Handle */}
-                <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <h1 className="text-3xl font-bold tracking-tight text-primary">{name}</h1>
-                    {category && (
-                      <Badge variant="outline" className="text-xs">
-                        {category}
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <p className="text-lg text-muted-foreground">@{handle}</p>
-                    <IconButtonAction
-                      iconBaseName="faCopy"
-                      hoverColorClass="text-accent"
-                      onClick={handleCopyHandle}
-                      ariaLabel="Copy handle"
-                    />
-                  </div>
-                </div>
+  return (
+    <div className="space-y-6">
+      {/* Clean Profile Header - Apple/Shopify Standard */}
+      <Card className="overflow-hidden border-border/50 shadow-lg bg-gradient-to-br from-background via-background to-muted/10">
+        <CardContent className="p-6 lg:p-8">
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* LEFT SECTION - Main Profile Information */}
+            <div className="flex-1">
+              <div className="flex flex-col sm:flex-row items-start gap-6">
+                {/* Avatar with Trust Indicator */}
+                <div className="relative flex-shrink-0 mx-auto sm:mx-0">
+                  <Avatar className="h-32 w-32 border-4 border-accent/20 shadow-lg">
+                    <AvatarImage src={avatarUrl ?? undefined} alt={name ?? ''} />
+                    <AvatarFallback className="text-2xl font-bold bg-gradient-to-br from-primary/10 to-accent/10">
+                      {getInitials(name ?? '')}
+                    </AvatarFallback>
+                  </Avatar>
 
-                {/* Bio */}
-                {bio && (
-                  <div className="bg-muted/30 p-4 rounded-lg border border-border/50">
-                    <p className="text-sm leading-relaxed text-foreground">{bio}</p>
-                  </div>
-                )}
-
-                {/* Key Metrics Row */}
-                <div className="flex items-center gap-6 pt-2">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">
-                      {formatNumber(followersCount)}
-                    </div>
-                    <div className="text-xs text-muted-foreground">Followers</div>
-                  </div>
-                  <Separator orientation="vertical" className="h-8" />
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">
-                      {engagementRate ? `${(engagementRate * 100).toFixed(1)}%` : 'N/A'}
-                    </div>
-                    <div className="text-xs text-muted-foreground">Engagement</div>
-                  </div>
-                  <Separator orientation="vertical" className="h-8" />
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">{platforms?.length || 0}</div>
-                    <div className="text-xs text-muted-foreground">Platforms</div>
-                  </div>
-                </div>
-
-                {/* Platform Icons */}
-                <div className="flex items-center gap-4 pt-2">
-                  <span className="text-sm font-medium text-muted-foreground">Active on:</span>
-                  <div className="flex items-center gap-3">
-                    {platforms?.map(platform => (
-                      <TooltipProvider key={platform}>
+                  {/* Verification Badge */}
+                  {isVerified && (
+                    <div className="absolute -bottom-2 -right-2">
+                      <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <div className="p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                              <Icon
-                                iconId={getPlatformIcon(platform)}
-                                className="h-6 w-6 text-foreground"
-                              />
+                            <div className="bg-sky-500 p-2 rounded-full border-4 border-background shadow-lg">
+                              <Icon iconId="faCircleCheckSolid" className="h-4 w-4 text-white" />
                             </div>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>{getPlatformDisplayName(platform)}</p>
+                            <p>Verified Account</p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
-                    ))}
+                    </div>
+                  )}
+
+                  {/* Trust Score Indicator */}
+                  {trustData && (
+                    <div className="absolute -top-2 -left-2">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div
+                              className={`p-2 rounded-full border-4 border-background shadow-lg ${
+                                trustData.riskLevel === 'LOW'
+                                  ? 'bg-success'
+                                  : trustData.riskLevel === 'MEDIUM'
+                                    ? 'bg-warning'
+                                    : 'bg-destructive'
+                              }`}
+                            >
+                              <Icon iconId="faShieldLight" className="h-3 w-3 text-white" />
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>
+                              Trust Score: {trustData.credibilityScore}% ({trustData.riskLevel}{' '}
+                              Risk)
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                  )}
+                </div>
+
+                {/* Profile Information */}
+                <div className="flex-1 space-y-4 text-center sm:text-left">
+                  {/* Name and Handle */}
+                  <div className="space-y-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                      <h1 className="text-3xl font-bold tracking-tight text-primary">{name}</h1>
+                      {category && (
+                        <Badge variant="outline" className="mx-auto sm:mx-0 w-fit">
+                          {category}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-center sm:justify-start gap-2">
+                      <p className="text-lg text-muted-foreground">@{handle}</p>
+                      <IconButtonAction
+                        iconBaseName="faCopy"
+                        hoverColorClass="text-accent"
+                        onClick={handleCopyHandle}
+                        ariaLabel="Copy handle"
+                        className="h-4 w-4"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Bio */}
+                  {bio && (
+                    <div className="bg-muted/30 p-4 rounded-lg border border-border/50">
+                      <p className="text-sm leading-relaxed text-foreground text-center sm:text-left">
+                        {bio}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Key Metrics */}
+                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-6 pt-2">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-primary">
+                        {formatNumber(followersCount)}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Followers</div>
+                    </div>
+                    <Separator orientation="vertical" className="h-8" />
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-primary">
+                        {engagementRate ? `${(engagementRate * 100).toFixed(1)}%` : 'N/A'}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Engagement</div>
+                    </div>
+                    <Separator orientation="vertical" className="h-8" />
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-primary">
+                        {platforms?.length || 0}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Platforms</div>
+                    </div>
+                    {trustData && (
+                      <>
+                        <Separator orientation="vertical" className="h-8" />
+                        <div className="text-center">
+                          <div
+                            className={`text-2xl font-bold ${
+                              trustData.riskLevel === 'LOW'
+                                ? 'text-success'
+                                : trustData.riskLevel === 'MEDIUM'
+                                  ? 'text-warning'
+                                  : 'text-destructive'
+                            }`}
+                          >
+                            {trustData.credibilityScore}%
+                          </div>
+                          <div className="text-xs text-muted-foreground">Trust Score</div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Platform Icons */}
+                  <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
+                    <span className="text-sm font-medium text-muted-foreground">Active on:</span>
+                    <div className="flex items-center gap-3 flex-wrap justify-center sm:justify-start">
+                      {platforms?.map(platform => (
+                        <TooltipProvider key={platform}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                                <Icon
+                                  iconId={getPlatformIcon(platform)}
+                                  className="h-6 w-6 text-foreground"
+                                />
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{getPlatformDisplayName(platform)}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* MIDDLE COLUMN - Contact Information (3 columns) */}
-          <div className="lg:col-span-3">
-            <div className="bg-accent/5 p-6 rounded-lg border border-accent/20 h-fit">
-              <div className="flex items-center gap-2 mb-4">
-                <Icon iconId="faEnvelopeLight" className="h-5 w-5 text-accent" />
-                <h3 className="font-semibold text-primary">Contact Information</h3>
-              </div>
-
-              <div className="space-y-4">
-                {/* Email */}
-                {(contactEmail || insightiqContacts?.email) && (
-                  <div className="space-y-1">
-                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Email
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Icon
-                        iconId="faEnvelopeLight"
-                        className="h-4 w-4 text-muted-foreground flex-shrink-0"
-                      />
-                      <span className="text-sm font-medium truncate flex-1">
-                        {contactEmail || insightiqContacts?.email}
-                      </span>
-                      <IconButtonAction
-                        iconBaseName="faCopy"
-                        hoverColorClass="text-accent"
-                        onClick={handleCopyEmail}
-                        ariaLabel="Copy email"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* Phone */}
-                {insightiqContacts?.phone && (
-                  <div className="space-y-1">
-                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Phone
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Icon
-                        iconId="faPhoneLight"
-                        className="h-4 w-4 text-muted-foreground flex-shrink-0"
-                      />
-                      <span className="text-sm font-medium">{insightiqContacts.phone}</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Website */}
-                {(website || insightiqContacts?.website) && (
-                  <div className="space-y-1">
-                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Website
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Icon
-                        iconId="faGlobeLight"
-                        className="h-4 w-4 text-muted-foreground flex-shrink-0"
-                      />
-                      <a
-                        href={website || insightiqContacts?.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm font-medium text-interactive hover:underline truncate"
-                      >
-                        Visit Website
-                      </a>
-                    </div>
-                  </div>
-                )}
-
-                {/* Audience Quality */}
-                {audienceQualityIndicator && (
-                  <div className="space-y-1">
-                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Audience Quality
-                    </div>
-                    <Badge
-                      variant={
-                        audienceQualityIndicator === 'High'
-                          ? 'default'
-                          : audienceQualityIndicator === 'Medium'
-                            ? 'secondary'
-                            : 'destructive'
-                      }
-                      className="text-xs"
-                    >
-                      {audienceQualityIndicator}
-                    </Badge>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* RIGHT COLUMN - Justify Score & Verification (2 columns) */}
-          <div className="lg:col-span-2">
-            <div className="space-y-4">
+            {/* RIGHT SECTION - Quick Actions & Scores */}
+            <div className="lg:w-80 space-y-6">
               {/* Justify Score */}
               <TooltipProvider delayDuration={300}>
                 <Tooltip>
@@ -372,6 +342,67 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ influencer }) => {
                 </Tooltip>
               </TooltipProvider>
 
+              {/* Quick Contact Actions */}
+              {professionalData &&
+                (professionalData.emails.length > 0 || professionalData.website) && (
+                  <div className="bg-muted/30 p-4 rounded-lg border border-border/50">
+                    <h4 className="text-sm font-medium text-primary mb-3 flex items-center gap-2">
+                      <Icon iconId="faAddressCardLight" className="h-4 w-4" />
+                      Quick Contact
+                    </h4>
+                    <div className="space-y-2">
+                      {professionalData.emails.slice(0, 2).map((email, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-2 rounded bg-background/50"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Icon
+                              iconId="faEnvelopeLight"
+                              className="h-3 w-3 text-muted-foreground flex-shrink-0"
+                            />
+                            <span className="text-xs truncate">{email.email}</span>
+                          </div>
+                          <div className="flex gap-1 flex-shrink-0">
+                            <IconButtonAction
+                              iconBaseName="faCopy"
+                              hoverColorClass="text-accent"
+                              onClick={() => handleCopyEmail(email.email)}
+                              ariaLabel="Copy email"
+                              className="h-6 w-6"
+                            />
+                            <IconButtonAction
+                              iconBaseName="faEnvelope"
+                              hoverColorClass="text-accent"
+                              onClick={() => window.open(`mailto:${email.email}`)}
+                              ariaLabel="Send email"
+                              className="h-6 w-6"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                      {professionalData.website && (
+                        <div className="flex items-center justify-between p-2 rounded bg-background/50">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Icon
+                              iconId="faGlobeLight"
+                              className="h-3 w-3 text-muted-foreground flex-shrink-0"
+                            />
+                            <span className="text-xs truncate">Website</span>
+                          </div>
+                          <IconButtonAction
+                            iconBaseName="faArrowRight"
+                            hoverColorClass="text-accent"
+                            onClick={() => window.open(professionalData.website!, '_blank')}
+                            ariaLabel="Visit website"
+                            className="h-6 w-6"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
               {/* Verification Status */}
               {isVerified && (
                 <TooltipProvider>
@@ -396,8 +427,8 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ influencer }) => {
               )}
             </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };

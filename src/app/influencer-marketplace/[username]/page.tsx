@@ -4,19 +4,18 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation'; // Hooks for App Router
 import { InfluencerProfileData } from '@/types/influencer';
 import { logger } from '@/lib/logger';
-import { Skeleton } from '@/components/ui/skeleton'; // Use actual Skeleton
 import { Icon } from '@/components/ui/icon/icon'; // Assuming Icon component exists
 import { ProfileHeader } from '@/components/features/influencers/ProfileHeader'; // Import the ProfileHeader component
 // Import Tabs components
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-// Import ALL analytics components (existing + new)
-import { OverallPerformanceSection } from '@/components/features/influencers/OverallPerformanceSection';
-import AudienceAnalyticsSection from '@/components/features/influencers/AudienceAnalyticsSection';
-import ContentAnalyticsSection from '@/components/features/influencers/ContentAnalyticsSection';
-import DemographicsSection from '@/components/features/influencers/DemographicsSection';
-import ContactAnalyticsSection from '@/components/features/influencers/ContactAnalyticsSection';
-import PlatformSpecificSection from '@/components/features/influencers/PlatformSpecificSection';
-import AdvancedAnalyticsSection from '@/components/features/influencers/AdvancedAnalyticsSection';
+// Import ONLY the new intelligence hub components that follow SSOT
+import { TrustHeroSection } from '@/components/features/influencers/TrustHeroSection';
+import { ProfessionalIntelligenceCard } from '@/components/features/influencers/ProfessionalIntelligenceCard';
+import { PerformanceDashboard } from '@/components/features/influencers/PerformanceDashboard';
+import { ContentIntelligenceHub } from '@/components/features/influencers/ContentIntelligenceHub';
+import { AudienceDemographicsHub } from '@/components/features/influencers/AudienceDemographicsHub';
+import { BrandIntelligenceHub } from '@/components/features/influencers/BrandIntelligenceHub';
+import { AdvancedInsightsHub } from '@/components/features/influencers/AdvancedInsightsHub';
 import { CertificationStatusSection } from '@/components/features/influencers/CertificationStatusSection';
 import { RiskScoreSection } from '@/components/features/influencers/RiskScoreSection';
 import { RecentCampaignsSection } from '@/components/features/influencers/RecentCampaignsSection';
@@ -66,40 +65,6 @@ function getPlatformEnumFromString(value: string | null): PlatformEnum | null {
   }
   return null; // Not found
 }
-
-// Enhanced skeleton with premium design
-const ProfileSkeleton = () => (
-  <div className="space-y-8">
-    {/* Premium Header Skeleton */}
-    <Card className="border border-border/50 shadow-sm bg-gradient-to-br from-background to-muted/20">
-      <CardContent className="p-8">
-        <div className="flex items-center space-x-6">
-          <Skeleton className="h-32 w-32 rounded-full border-4 border-accent/20" />
-          <div className="space-y-4 flex-1">
-            <Skeleton className="h-8 w-1/2" />
-            <Skeleton className="h-5 w-1/3" />
-            <Skeleton className="h-16 w-full" />
-          </div>
-          <div className="space-y-3">
-            <Skeleton className="h-10 w-32" />
-            <Skeleton className="h-10 w-32" />
-            <Skeleton className="h-10 w-32" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-
-    {/* Enhanced Tabs Skeleton */}
-    <div className="space-y-6">
-      <Skeleton className="h-12 w-full" />
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Skeleton className="h-64 w-full rounded-lg" />
-        <Skeleton className="h-64 w-full rounded-lg" />
-      </div>
-      <Skeleton className="h-96 w-full rounded-lg" />
-    </div>
-  </div>
-);
 
 // Enhanced error display
 const ErrorDisplay = ({ message }: { message: string }) => (
@@ -346,118 +311,96 @@ export default function InfluencerProfilePage() {
           )}
         </div>
         {/* Content Area: Loading, Error, or Profile Structure */}
-        {isLoading ? (
-          <ProfileSkeleton />
-        ) : error ? (
+        {error ? (
           <ErrorDisplay message={error} />
-        ) : influencer ? (
+        ) : influencer || isLoading ? (
           <div className="space-y-8">
-            {/* Enhanced Profile Header */}
-            <ProfileHeader influencer={influencer} />
+            {/* Enhanced Profile Header with Internal Loading Orchestration */}
+            <ProfileHeader
+              influencer={influencer || ({} as InfluencerProfileData)}
+              isLoading={isLoading}
+            />
 
-            {/* Enhanced Analytics Tabs */}
-            <Tabs defaultValue="performance" className="w-full">
-              <div className="border-b border-border/50 bg-card/50 rounded-t-lg p-1">
-                <TabsList className="grid w-full grid-cols-4 lg:grid-cols-9 gap-1 bg-transparent h-auto p-0">
-                  <TabsTrigger
-                    value="performance"
-                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm font-medium px-4 py-3 rounded-md"
-                  >
-                    <Icon iconId="faChartLineLight" className="mr-2 h-4 w-4" />
-                    Performance
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="audience"
-                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm font-medium px-4 py-3 rounded-md"
-                  >
-                    <Icon iconId="faUsersLight" className="mr-2 h-4 w-4" />
-                    Audience
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="content"
-                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm font-medium px-4 py-3 rounded-md"
-                  >
-                    <Icon iconId="faImageLight" className="mr-2 h-4 w-4" />
-                    Content
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="demographics"
-                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm font-medium px-4 py-3 rounded-md"
-                  >
-                    <Icon iconId="faChartPieLight" className="mr-2 h-4 w-4" />
-                    Demographics
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="contact"
-                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm font-medium px-4 py-3 rounded-md"
-                  >
-                    <Icon iconId="faCreditCardLight" className="mr-2 h-4 w-4" />
-                    Contact
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="platform"
-                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm font-medium px-4 py-3 rounded-md"
-                  >
-                    <Icon iconId="faGlobeLight" className="mr-2 h-4 w-4" />
-                    Platform
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="advanced"
-                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm font-medium px-4 py-3 rounded-md"
-                  >
-                    <Icon iconId="faDiamondLight" className="mr-2 h-4 w-4" />
-                    Advanced
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="risk"
-                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm font-medium px-4 py-3 rounded-md"
-                  >
-                    <Icon iconId="faShieldLight" className="mr-2 h-4 w-4" />
-                    Risk
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="campaigns"
-                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm font-medium px-4 py-3 rounded-md"
-                  >
-                    <Icon iconId="faClipboardLight" className="mr-2 h-4 w-4" />
-                    Campaigns
-                  </TabsTrigger>
-                </TabsList>
-              </div>
+            {/* Enhanced Analytics Tabs - Only show when data is loaded */}
+            {!isLoading && influencer && (
+              <Tabs defaultValue="trust" className="w-full">
+                <div className="border-b border-border/50 bg-card/50 rounded-t-lg p-1">
+                  <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 gap-1 bg-transparent h-auto p-0">
+                    <TabsTrigger
+                      value="trust"
+                      className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm font-medium px-4 py-3 rounded-md"
+                    >
+                      <Icon iconId="faShieldLight" className="mr-2 h-4 w-4" />
+                      Trust Analysis
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="performance"
+                      className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm font-medium px-4 py-3 rounded-md"
+                    >
+                      <Icon iconId="faChartLineLight" className="mr-2 h-4 w-4" />
+                      Performance
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="content"
+                      className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm font-medium px-4 py-3 rounded-md"
+                    >
+                      <Icon iconId="faImageLight" className="mr-2 h-4 w-4" />
+                      Content
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="audience"
+                      className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm font-medium px-4 py-3 rounded-md"
+                    >
+                      <Icon iconId="faUsersLight" className="mr-2 h-4 w-4" />
+                      Audience
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="brand"
+                      className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm font-medium px-4 py-3 rounded-md"
+                    >
+                      <Icon iconId="faTagLight" className="mr-2 h-4 w-4" />
+                      Brand Intel
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="advanced"
+                      className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm font-medium px-4 py-3 rounded-md"
+                    >
+                      <Icon iconId="faGlobeLight" className="mr-2 h-4 w-4" />
+                      Advanced
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
 
-              <div className="bg-card/30 border border-t-0 border-border/50 rounded-b-lg p-6">
-                <TabsContent value="performance" className="mt-0">
-                  <OverallPerformanceSection influencer={influencer} />
-                </TabsContent>
-                <TabsContent value="audience" className="mt-0">
-                  <AudienceAnalyticsSection influencer={influencer} />
-                </TabsContent>
-                <TabsContent value="content" className="mt-0">
-                  <ContentAnalyticsSection influencer={influencer} />
-                </TabsContent>
-                <TabsContent value="demographics" className="mt-0">
-                  <DemographicsSection influencer={influencer} />
-                </TabsContent>
-                <TabsContent value="contact" className="mt-0">
-                  <ContactAnalyticsSection influencer={influencer} />
-                </TabsContent>
-                <TabsContent value="platform" className="mt-0">
-                  <PlatformSpecificSection influencer={influencer} />
-                </TabsContent>
-                <TabsContent value="advanced" className="mt-0">
-                  <AdvancedAnalyticsSection influencer={influencer} />
-                </TabsContent>
-                <TabsContent value="risk" className="mt-0">
-                  <div className="space-y-6">
-                    <RiskScoreSection influencer={influencer} />
-                    <CertificationStatusSection influencer={influencer} />
-                  </div>
-                </TabsContent>
-                <TabsContent value="campaigns" className="mt-0">
-                  <RecentCampaignsSection influencer={influencer} />
-                </TabsContent>
-              </div>
-            </Tabs>
+                <div className="bg-card/30 border border-t-0 border-border/50 rounded-b-lg p-6">
+                  <TabsContent value="trust" className="mt-0">
+                    <div className="space-y-6">
+                      <TrustHeroSection influencer={influencer} />
+                      <ProfessionalIntelligenceCard influencer={influencer} />
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="performance" className="mt-0">
+                    <PerformanceDashboard influencer={influencer} />
+                  </TabsContent>
+                  <TabsContent value="content" className="mt-0">
+                    <ContentIntelligenceHub influencer={influencer} />
+                  </TabsContent>
+                  <TabsContent value="audience" className="mt-0">
+                    <AudienceDemographicsHub influencer={influencer} />
+                  </TabsContent>
+                  <TabsContent value="brand" className="mt-0">
+                    <BrandIntelligenceHub influencer={influencer} />
+                  </TabsContent>
+                  <TabsContent value="advanced" className="mt-0">
+                    <div className="space-y-6">
+                      <AdvancedInsightsHub influencer={influencer} />
+                      <RiskScoreSection influencer={influencer} />
+                      <CertificationStatusSection influencer={influencer} />
+                      <RecentCampaignsSection influencer={influencer} />
+                    </div>
+                  </TabsContent>
+                </div>
+              </Tabs>
+            )}
           </div>
         ) : (
           // Should not happen if error handles not found, but as fallback

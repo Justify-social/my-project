@@ -42,9 +42,5 @@
       "DATABASE_URL": "@database_url",
       "DIRECT_URL": "@direct_url"
     }
-  },
-  "scripts": {
-    "postinstall": "prisma generate",
-    "build": "npm run build"
   }
 }
