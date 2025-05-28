@@ -27,6 +27,13 @@ const isProtectedRoute = createRouteMatcher([
 
 const isApiRoute = createRouteMatcher(['/api(.*)']);
 
+// Routes that should be accessible without organization setup
+const isOrgSetupRoute = createRouteMatcher([
+  '/settings/team(.*)',
+  '/settings/profile(.*)', // Allow profile settings
+  '/sign-out(.*)',
+]);
+
 /**
  * Testing Token Detection
  * Safely detects if this is a Testing Token request from Cypress
@@ -59,7 +66,7 @@ function hasTestingToken(request: Request): boolean {
 }
 
 /**
- * Enhanced Clerk Middleware with Testing Support
+ * Enhanced Clerk Middleware with Testing Support and Organization Setup Check
  */
 export default clerkMiddleware(async (auth, req) => {
   const { pathname } = req.nextUrl;
@@ -79,15 +86,26 @@ export default clerkMiddleware(async (auth, req) => {
   // Handle root path - redirect unauthenticated users to sign-in
   if (pathname === '/') {
     try {
-      const { userId } = await auth();
+      const { userId, orgId } = await auth();
       if (!userId) {
         console.log(`[MIDDLEWARE] Unauthenticated user at root, redirecting to sign-in`);
         const signInUrl = new URL('/sign-in', req.url);
         return NextResponse.redirect(signInUrl);
       } else {
-        console.log(`[MIDDLEWARE] Authenticated user at root, redirecting to dashboard`);
-        const dashboardUrl = new URL('/dashboard', req.url);
-        return NextResponse.redirect(dashboardUrl);
+        // Check if user has organization setup
+        if (!orgId) {
+          console.log(
+            `[MIDDLEWARE] Authenticated user without organization, redirecting to team setup`
+          );
+          const teamSetupUrl = new URL('/settings/team', req.url);
+          return NextResponse.redirect(teamSetupUrl);
+        } else {
+          console.log(
+            `[MIDDLEWARE] Authenticated user with organization, redirecting to dashboard`
+          );
+          const dashboardUrl = new URL('/dashboard', req.url);
+          return NextResponse.redirect(dashboardUrl);
+        }
       }
     } catch (error) {
       console.log(`[MIDDLEWARE] Auth check failed for root path, redirecting to sign-in:`, error);
@@ -123,8 +141,18 @@ export default clerkMiddleware(async (auth, req) => {
   // Handle protected routes
   if (isProtectedRoute(req)) {
     try {
-      await auth.protect();
+      const { userId: _userId, orgId } = await auth.protect();
       console.log(`[MIDDLEWARE] Protected route authenticated: ${pathname}`);
+
+      // Check if user needs to set up organization (except for organization setup routes)
+      if (!orgId && !isOrgSetupRoute(req)) {
+        console.log(
+          `[MIDDLEWARE] User without organization trying to access protected route, redirecting to team setup: ${pathname}`
+        );
+        const teamSetupUrl = new URL('/settings/team', req.url);
+        teamSetupUrl.searchParams.set('redirect_url', pathname); // Save intended destination
+        return NextResponse.redirect(teamSetupUrl);
+      }
     } catch {
       console.log(
         `[MIDDLEWARE] Protected route accessed without auth, redirecting to sign-in: ${pathname}`

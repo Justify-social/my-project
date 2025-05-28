@@ -1,15 +1,22 @@
 'use client';
 
-import React from 'react';
-import { OrganizationProfile, useOrganization, OrganizationSwitcher } from '@clerk/nextjs';
+import React, { useEffect, useState } from 'react';
+import {
+  OrganizationProfile,
+  CreateOrganization,
+  useOrganization,
+  OrganizationSwitcher,
+} from '@clerk/nextjs';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Icon } from '@/components/ui/icon/icon';
 
 // Skeleton placeholder for OrganizationProfile
 const OrgProfileSkeleton = () => (
   <div className="space-y-8">
     <Skeleton className="h-8 w-1/4 mb-6" />
-    <Card className="border-divider">
+    <Card className="border-border">
       <CardHeader>
         <Skeleton className="h-6 w-1/3 mb-2" />
         <Skeleton className="h-4 w-2/3" />
@@ -23,82 +30,141 @@ const OrgProfileSkeleton = () => (
   </div>
 );
 
-// --- Main Component using Clerk's Pre-built UI ---
-const TeamManagementPage = () => {
-  const { organization, isLoaded: isOrgLoaded } = useOrganization();
-
-  return (
-    <div className="space-y-8">
-      {!isOrgLoaded ? (
-        <OrgProfileSkeleton />
-      ) : organization ? (
-        // Use a simple wrapper allowing the component to dictate its width
-        <div className="w-full">
-          <OrganizationProfile
-            path="/settings/team" // Clerk uses this for internal routing
-            routing="path" // Required for catch-all routes
-            appearance={{
-              elements: {
-                // --- Core Theme Styles ---
-                rootBox: 'w-full', // Let it try to fill container
-                card: 'w-full max-w-none shadow-none border-none bg-transparent', // Make internal card invisible
-
-                // --- Text & Headers ---
-                headerTitle: 'text-primary text-2xl font-bold mb-1',
-                headerSubtitle: 'text-secondary text-sm mb-6',
-                profileSectionTitleText:
-                  'text-lg font-semibold text-primary mb-4 border-b border-divider pb-2',
-                accordionTrigger: 'text-md font-medium text-primary hover:no-underline',
-                dividerLine: 'border-divider',
-
-                // --- Form Elements ---
-                formFieldLabel: 'text-sm font-medium text-secondary mb-1 block',
-                formInput:
-                  'w-full px-3 py-2 text-sm bg-background border border-input rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                formFieldHintText: 'text-xs text-muted-foreground mt-1',
-                formFieldErrorText: 'text-xs text-destructive mt-1',
-                formButtonPrimary:
-                  'bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50',
-                formButtonReset: 'text-secondary hover:text-primary text-sm font-medium',
-                select__control: 'border border-input rounded-md',
-                selectButton: 'border border-input rounded-md bg-background hover:bg-muted',
-                selectOptionsContainer: 'bg-popover border border-border rounded-md shadow-md',
-
-                // --- Table Elements ---
-                tableHead: 'text-xs uppercase text-muted-foreground font-medium px-4 py-2',
-                tableRow: 'border-b border-divider',
-                tableCell: 'py-3 px-4 text-sm text-primary align-middle',
-                paginationButton: 'text-secondary hover:text-primary disabled:opacity-50',
-
-                // --- Specific Components ---
-                badge: 'bg-muted text-secondary text-xs font-medium px-2.5 py-0.5 rounded-full',
-                button__danger: 'text-destructive hover:text-destructive/90',
-              },
-            }}
-          />
+// New user setup card
+const SetupOrganisationCard = () => (
+  <Card className="border-accent bg-accent/5">
+    <CardHeader>
+      <div className="flex items-center gap-3">
+        <Icon iconId="faUserGroupSolid" className="h-6 w-6 text-accent" />
+        <div>
+          <CardTitle className="text-xl font-bold text-primary">
+            Welcome! Create Your Organisation
+          </CardTitle>
+          <CardDescription className="text-secondary mt-2">
+            To get started with the platform, you'll need to create an organisation. This helps us
+            organise your campaigns, team members, and projects.
+          </CardDescription>
         </div>
-      ) : (
-        <Card className="border-divider max-w-md mx-auto">
-          {' '}
-          {/* Keep fallback centered */}
-          <CardHeader>
-            <CardTitle>No Active Organization</CardTitle>
-            <CardDescription>Select an organization to manage or create a new one.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center gap-4">
-            <OrganizationSwitcher
-              hidePersonal={true}
-              appearance={
-                {
-                  /* Add custom styling if needed */
-                }
-              }
-            />
-          </CardContent>
-        </Card>
-      )}
+      </div>
+    </CardHeader>
+    <CardContent className="space-y-4">
+      <div className="bg-background p-4 rounded-lg border border-border">
+        <h3 className="font-semibold mb-2 text-primary">What you can do here:</h3>
+        <ul className="space-y-2 text-sm text-secondary">
+          <li className="flex items-center gap-2">
+            <Icon iconId="faCheckSolid" className="h-4 w-4 text-accent" />
+            Create a new organisation for your team
+          </li>
+          <li className="flex items-center gap-2">
+            <Icon iconId="faCheckSolid" className="h-4 w-4 text-accent" />
+            Manage team members and permissions
+          </li>
+          <li className="flex items-center gap-2">
+            <Icon iconId="faCheckSolid" className="h-4 w-4 text-accent" />
+            Set up your organisation's branding and settings
+          </li>
+          <li className="flex items-center gap-2">
+            <Icon iconId="faCheckSolid" className="h-4 w-4 text-accent" />
+            Invite team members to collaborate
+          </li>
+        </ul>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+export default function TeamManagementPage() {
+  const { organization, isLoaded } = useOrganization();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [hasRedirected, setHasRedirected] = useState(false);
+
+  const redirectUrl = searchParams.get('redirect_url');
+
+  // Handle redirect only if there's a specific redirect URL and user has an organisation
+  useEffect(() => {
+    if (isLoaded && organization && redirectUrl && !hasRedirected) {
+      setHasRedirected(true);
+      // Small delay to ensure organisation is fully set up
+      setTimeout(() => {
+        router.push(redirectUrl);
+      }, 1000);
+    }
+  }, [isLoaded, organization, redirectUrl, router, hasRedirected]);
+
+  // Loading state
+  if (!isLoaded) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-4xl" data-cy="team-management-container">
+        <OrgProfileSkeleton />
+      </div>
+    );
+  }
+
+  // No organisation state - show setup card with CreateOrganization
+  if (!organization) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-4xl" data-cy="team-management-container">
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-primary">Team Management</h1>
+              <p className="text-secondary mt-2">Create your organisation and manage your team</p>
+            </div>
+          </div>
+
+          <SetupOrganisationCard />
+
+          {/* CreateOrganization component for users without an organisation */}
+          <Card className="border-border">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-primary">
+                Create Organisation
+              </CardTitle>
+              <CardDescription className="text-secondary">
+                Fill in the details below to create your new organisation.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-6">
+              <CreateOrganization
+                appearance={{
+                  elements: {
+                    organizationPreview: 'hidden',
+                    headerTitle: 'hidden',
+                    headerSubtitle: 'hidden',
+                  },
+                }}
+                afterCreateOrganizationUrl="/settings/team"
+              />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Organisation exists - show normal team management with OrganizationProfile
+  return (
+    <div className="container mx-auto px-4 py-8 max-w-4xl" data-cy="team-management-container">
+      <div className="space-y-6">
+        {/* Success message if user was just redirected */}
+        {redirectUrl && (
+          <Card className="border-success bg-success/10">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 text-success">
+                <Icon iconId="faCircleCheckSolid" className="h-5 w-5" />
+                <span className="font-medium">Organisation setup complete!</span>
+              </div>
+              <p className="text-sm text-success/80 mt-1">
+                You can now access all platform features. You'll be redirected to continue shortly.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* OrganizationProfile - only renders when organisation exists */}
+        <OrganizationProfile />
+      </div>
     </div>
   );
-};
-
-export default TeamManagementPage;
+}
