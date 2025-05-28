@@ -80,6 +80,64 @@ export const InfluencerSchema = z
       .datetime({ offset: true, message: 'Invalid ISO date string' })
       .nullable()
       .optional(),
+
+    // Rich display data for UI restoration
+    name: z.string().nullable().optional(), // Display name (e.g., "Leo Messi")
+    avatarUrl: z.string().nullable().optional(), // Profile image URL
+    isVerified: z.boolean().nullable().optional(), // Verification status (blue checkmark)
+    followersCount: z.number().nullable().optional(), // Follower count for display
+    engagementRate: z.number().nullable().optional(), // Engagement rate percentage
+
+    // Contact & Profile Information
+    email: z.string().nullable().optional(), // Contact email for collaborations
+    bio: z.string().nullable().optional(), // Profile bio/description
+    location: z.string().nullable().optional(), // Location/country
+    website: z.string().nullable().optional(), // Personal/business website
+    language: z.string().nullable().optional(), // Primary language of content
+
+    // Content & Audience Analytics
+    category: z.string().nullable().optional(), // Content category/niche
+    contentTypes: z.array(z.string()).nullable().optional(), // Types of content they create
+    postingFrequency: z.string().nullable().optional(), // How often they post
+    averageLikes: z.number().nullable().optional(), // Average likes per post
+    averageComments: z.number().nullable().optional(), // Average comments per post
+    averageShares: z.number().nullable().optional(), // Average shares per post
+    averageReach: z.number().nullable().optional(), // Average reach per post
+    averageImpressions: z.number().nullable().optional(), // Average impressions per post
+
+    // Audience Demographics & Quality
+    audienceDemographics: z.any().nullable().optional(), // JSON data for flexibility
+    audienceQuality: z.string().nullable().optional(), // HIGH/MEDIUM/LOW quality score
+    fakeFollowerPercent: z.number().nullable().optional(), // Percentage of fake followers
+
+    // Business & Collaboration
+    rateCard: z.any().nullable().optional(), // JSON pricing data
+    brandCollaborations: z.any().nullable().optional(), // JSON collaboration history
+    preferredBrands: z.array(z.string()).nullable().optional(), // Preferred brand types
+    blacklistedBrands: z.array(z.string()).nullable().optional(), // Brands they won't work with
+
+    // Performance Metrics
+    ctr: z.number().nullable().optional(), // Click-through rate
+    cpm: z.number().nullable().optional(), // Cost per mille
+    cpc: z.number().nullable().optional(), // Cost per click
+    conversionRate: z.number().nullable().optional(), // Conversion rate
+    brandLiftMetrics: z.any().nullable().optional(), // JSON brand lift data
+
+    // Platform-specific data
+    instagramData: z.any().nullable().optional(), // JSON Instagram metrics
+    youtubeData: z.any().nullable().optional(), // JSON YouTube metrics
+    tiktokData: z.any().nullable().optional(), // JSON TikTok metrics
+
+    // Marketplace & Discovery
+    isMarketplaceVisible: z.boolean().nullable().optional(), // Show in marketplace
+    marketplaceRating: z.number().nullable().optional(), // Rating from campaigns
+    responseTime: z.string().nullable().optional(), // Response time to inquiries
+    lastActiveDate: z.string().datetime({ offset: true }).nullable().optional(), // Last active
+
+    // Campaign Performance Tracking
+    totalCampaigns: z.number().nullable().optional(), // Total campaigns completed
+    averageRating: z.number().nullable().optional(), // Average rating from brands
+    completionRate: z.number().nullable().optional(), // Campaign completion rate
   })
   .passthrough(); // Added passthrough for safety, review if needed
 

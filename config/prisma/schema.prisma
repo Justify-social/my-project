@@ -56,15 +56,80 @@ model CampaignWizard {
 }
 
 model Influencer {
-  id             String         @id
-  platform       Platform
-  handle         String
-  campaignId     String
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime
-  CampaignWizard CampaignWizard @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  id               String         @id
+  platform         Platform
+  handle           String
+  campaignId       String
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime
+  
+  // Rich display data for UI restoration
+  name             String?        // Display name (e.g., "Leo Messi")
+  avatarUrl        String?        // Profile image URL
+  isVerified       Boolean?       // Verification status (blue checkmark)
+  followersCount   Int?           // Follower count for display
+  engagementRate   Float?         // Engagement rate percentage
+  
+  // Contact & Profile Information
+  email            String?        // Contact email for collaborations
+  bio              String?        // Profile bio/description
+  location         String?        // Location/country
+  website          String?        // Personal/business website
+  language         String?        // Primary language of content
+  
+  // Content & Audience Analytics
+  category         String?        // Content category/niche (beauty, fitness, tech, etc.)
+  contentTypes     String[]       // Types of content they create (photo, video, story, reel)
+  postingFrequency String?        // How often they post (daily, weekly, etc.)
+  averageLikes     Int?           // Average likes per post
+  averageComments  Int?           // Average comments per post
+  averageShares    Int?           // Average shares per post
+  averageReach     Int?           // Average reach per post
+  averageImpressions Int?         // Average impressions per post
+  
+  // Audience Demographics (JSON for flexibility)
+  audienceDemographics Json?      // Age, gender, location breakdown of audience
+  audienceQuality      String?    // HIGH/MEDIUM/LOW quality score
+  fakeFollowerPercent  Float?     // Percentage of fake followers
+  
+  // Business & Collaboration
+  rateCard            Json?       // Pricing for different content types
+  brandCollaborations Json?       // History of brand partnerships
+  preferredBrands     String[]    // Types of brands they prefer working with
+  blacklistedBrands   String[]    // Brands they won't work with
+  
+  // Performance Metrics
+  ctr                 Float?      // Click-through rate
+  cpm                 Float?      // Cost per mille (thousand impressions)
+  cpc                 Float?      // Cost per click
+  conversionRate      Float?      // Conversion rate from campaigns
+  brandLiftMetrics    Json?       // Historical brand lift performance
+  
+  // Platform-specific data
+  instagramData       Json?       // Instagram-specific metrics and data
+  youtubeData         Json?       // YouTube-specific metrics and data
+  tiktokData          Json?       // TikTok-specific metrics and data
+  
+  // Marketplace & Discovery
+  isMarketplaceVisible Boolean?   @default(true) // Show in influencer marketplace
+  marketplaceRating   Float?      // Rating from previous campaigns
+  responseTime        String?     // How quickly they respond to inquiries
+  lastActiveDate      DateTime?   // Last time they were active on platform
+  
+  // Campaign Performance Tracking
+  totalCampaigns      Int?        @default(0) // Total campaigns completed
+  averageRating       Float?      // Average rating from brands
+  completionRate      Float?      // Percentage of campaigns completed successfully
+  
+  CampaignWizard   CampaignWizard @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@index([campaignId])
+  @@index([isMarketplaceVisible]) // For marketplace filtering
+  @@index([category]) // For category-based searches
+  @@index([followersCount]) // For follower-based filtering
+  @@index([engagementRate]) // For engagement-based filtering
+  @@index([location]) // For location-based filtering
+  @@index([platform, followersCount]) // Composite index for platform + followers
   @@unique([campaignId, handle, platform])
 }
 

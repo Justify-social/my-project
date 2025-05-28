@@ -217,12 +217,23 @@ export const InfluencerSearchEntry: React.FC<InfluencerSearchEntryProps> = ({
     setSearchInput(influencer.handle || '');
     setValue(`Influencer.${index}.handle`, influencer.handle || '');
     setValue(`Influencer.${index}.platform`, influencer.platform);
+
+    // Save rich display data for UI restoration after page refresh
+    setValue(`Influencer.${index}.name`, influencer.name || null);
+    setValue(`Influencer.${index}.avatarUrl`, influencer.avatarUrl || null);
+    setValue(`Influencer.${index}.isVerified`, influencer.isVerified || null);
+    setValue(`Influencer.${index}.followersCount`, influencer.followersCount || null);
+    setValue(`Influencer.${index}.engagementRate`, influencer.engagementRate || null);
+
     setSearchOpen(false);
     setSearchResults([]);
-    logger.info(`[InfluencerSearchEntry] Selected influencer:`, {
+    logger.info(`[InfluencerSearchEntry] Selected influencer with rich data:`, {
       id: influencer.id,
       handle: influencer.handle,
       platform: influencer.platform,
+      name: influencer.name,
+      isVerified: influencer.isVerified,
+      avatarUrl: influencer.avatarUrl,
     });
   };
 
@@ -251,6 +262,44 @@ export const InfluencerSearchEntry: React.FC<InfluencerSearchEntryProps> = ({
       setSearchInput(currentHandle || '');
     }
   }, [currentHandle, searchInput, selectedInfluencer]);
+
+  // Restore selectedInfluencer state from saved form data on component mount
+  useEffect(() => {
+    const savedName = watch(`Influencer.${index}.name`);
+    const savedAvatarUrl = watch(`Influencer.${index}.avatarUrl`);
+    const savedIsVerified = watch(`Influencer.${index}.isVerified`);
+    const savedFollowersCount = watch(`Influencer.${index}.followersCount`);
+    const savedEngagementRate = watch(`Influencer.${index}.engagementRate`);
+
+    // If we have rich data saved but no current selectedInfluencer, restore it
+    if (
+      currentHandle &&
+      currentPlatform &&
+      (savedName || savedAvatarUrl || savedIsVerified !== null) &&
+      !selectedInfluencer
+    ) {
+      const restoredInfluencer: InfluencerSearchResult = {
+        id: `restored-${currentHandle}-${currentPlatform}`,
+        name: savedName || null,
+        handle: currentHandle,
+        platform: currentPlatform,
+        avatarUrl: savedAvatarUrl || null,
+        followersCount: savedFollowersCount || null,
+        isVerified: savedIsVerified || false,
+        engagementRate: savedEngagementRate || null,
+      };
+
+      setSelectedInfluencer(restoredInfluencer);
+      setSearchInput(currentHandle);
+
+      logger.info(`[InfluencerSearchEntry] Restored influencer from saved data:`, {
+        handle: currentHandle,
+        name: savedName,
+        isVerified: savedIsVerified,
+        hasAvatar: !!savedAvatarUrl,
+      });
+    }
+  }, [currentHandle, currentPlatform, selectedInfluencer, watch, index]);
 
   return (
     <Card className="mb-4 border-border bg-card/50 relative overflow-hidden transition-all duration-200 hover:shadow-md">

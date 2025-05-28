@@ -195,6 +195,12 @@ async function preparePayload(
         id: inf.id, // Keep ID
         platform: inf.platform,
         handle: inf.handle,
+        // Include rich display data for UI restoration
+        name: inf.name || null,
+        avatarUrl: inf.avatarUrl || null,
+        isVerified: inf.isVerified || null,
+        followersCount: inf.followersCount || null,
+        engagementRate: inf.engagementRate || null,
       })) || [],
     step1Complete: true,
     currentStep: currentStep, // Use passed currentStep

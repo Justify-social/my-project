@@ -1,10 +1,50 @@
 {
   "buildCommand": "npm run build",
-  "installCommand": "npm install --legacy-peer-deps",
+  "installCommand": "npm ci",
   "framework": "nextjs",
+  "regions": ["lhr1"],
+  "functions": {
+    "src/app/api/**": {
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    }
+  ],
+  "env": {
+    "DATABASE_URL": "@database_url",
+    "DIRECT_URL": "@direct_url"
+  },
   "build": {
     "env": {
-      "NPM_FLAGS": "--legacy-peer-deps"
+      "DATABASE_URL": "@database_url",
+      "DIRECT_URL": "@direct_url"
     }
+  },
+  "scripts": {
+    "postinstall": "prisma generate",
+    "build": "npm run build"
   }
 }
