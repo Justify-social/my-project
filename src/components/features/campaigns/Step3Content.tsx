@@ -32,10 +32,17 @@ import { AgeDistributionSliderGroup } from '@/components/ui/slider-age-distribut
 import { GenderSelector } from '@/components/ui/selector-gender';
 import { LanguageSelector } from '@/components/ui/selector-language';
 import { showSuccessToast, showErrorToast } from '@/components/ui/toast';
-import { RadioGroup as _RadioGroup, RadioGroupItem as _RadioGroupItem } from '@/components/ui/radio-group';
+import {
+  RadioGroup as _RadioGroup,
+  RadioGroupItem as _RadioGroupItem,
+} from '@/components/ui/radio-group';
 import { Alert as _Alert, AlertDescription as _AlertDescription } from '@/components/ui/alert';
 import { Separator as _Separator } from '@/components/ui/separator';
-import { Collapsible as _Collapsible, CollapsibleContent as _CollapsibleContent, CollapsibleTrigger as _CollapsibleTrigger } from '@/components/ui/collapsible';
+import {
+  Collapsible as _Collapsible,
+  CollapsibleContent as _CollapsibleContent,
+  CollapsibleTrigger as _CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 
 // --- Mock Data (Replace with actual data fetching/static data) ---
 // Updated list of top 15 languages, sorted alphabetically

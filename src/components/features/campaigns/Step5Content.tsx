@@ -384,7 +384,8 @@ const Step1Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
     </DataItem>
     <DataItem label="Primary Contact Name">
       {(() => {
-        const fullName = `${data.primaryContact?.firstName || ''} ${data.primaryContact?.surname || ''}`.trim();
+        const fullName =
+          `${data.primaryContact?.firstName || ''} ${data.primaryContact?.surname || ''}`.trim();
         return fullName ? (
           <RemovableBadge variant="secondary" size="sm">
             {fullName}
@@ -400,7 +401,8 @@ const Step1Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
       <>
         <DataItem label="Secondary Contact Name">
           {(() => {
-            const fullName = `${data.secondaryContact?.firstName || ''} ${data.secondaryContact?.surname || ''}`.trim();
+            const fullName =
+              `${data.secondaryContact?.firstName || ''} ${data.secondaryContact?.surname || ''}`.trim();
             return fullName ? (
               <RemovableBadge variant="secondary" size="sm">
                 {fullName}
@@ -423,7 +425,7 @@ const Step1Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
               key={idx}
               influencer={{
                 handle: inf.handle,
-                platform: inf.platform
+                platform: inf.platform,
               }}
             />
           ))}
@@ -473,11 +475,7 @@ const Step2Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
       {data.messaging?.hashtags && data.messaging.hashtags.length > 0 ? (
         <div className="flex flex-wrap gap-2">
           {data.messaging.hashtags.map((tag, idx) => (
-            <RemovableBadge
-              key={idx}
-              variant="secondary"
-              size="sm"
-            >
+            <RemovableBadge key={idx} variant="secondary" size="sm">
               #{tag}
             </RemovableBadge>
           ))}
@@ -490,11 +488,7 @@ const Step2Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
       {data.messaging?.keyBenefits && data.messaging.keyBenefits.length > 0 ? (
         <div className="flex flex-wrap gap-2">
           {data.messaging.keyBenefits.map((benefit, idx) => (
-            <RemovableBadge
-              key={idx}
-              variant="secondary"
-              size="sm"
-            >
+            <RemovableBadge key={idx} variant="secondary" size="sm">
               {benefit}
             </RemovableBadge>
           ))}
@@ -583,11 +577,7 @@ const Step3Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => {
         {data.targeting?.interests && data.targeting.interests.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {data.targeting.interests.map((interest, idx) => (
-              <RemovableBadge
-                key={idx}
-                variant="secondary"
-                size="sm"
-              >
+              <RemovableBadge key={idx} variant="secondary" size="sm">
                 {interest}
               </RemovableBadge>
             ))}
@@ -600,11 +590,7 @@ const Step3Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => {
         {data.targeting?.keywords && data.targeting.keywords.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {data.targeting.keywords.map((keyword, idx) => (
-              <RemovableBadge
-                key={idx}
-                variant="secondary"
-                size="sm"
-              >
+              <RemovableBadge key={idx} variant="secondary" size="sm">
                 {keyword}
               </RemovableBadge>
             ))}

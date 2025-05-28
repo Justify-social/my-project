@@ -433,9 +433,7 @@ export const AssetCardStep4 = React.memo(
                         size="sm"
                         onRemove={() => {
                           const currentIds = selectedInfluencerIds || [];
-                          const newValue = currentIds.filter(
-                            (id: string) => id !== influencer.id
-                          );
+                          const newValue = currentIds.filter((id: string) => id !== influencer.id);
 
                           // Update the form field using proper React Hook Form API
                           field.onChange(newValue);
@@ -547,7 +545,7 @@ export const AssetCardStep4 = React.memo(
       prevAsset.rationale !== nextAsset.rationale ||
       prevAsset.budget !== nextAsset.budget ||
       JSON.stringify(prevAsset.associatedInfluencerIds) !==
-      JSON.stringify(nextAsset.associatedInfluencerIds)
+        JSON.stringify(nextAsset.associatedInfluencerIds)
     ) {
       return false; // Important asset fields changed, need re-render
     }

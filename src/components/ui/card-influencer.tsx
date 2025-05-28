@@ -167,9 +167,10 @@ export function EnhancedInfluencerCard({ influencer, className }: EnhancedInflue
     linkedin: { brandIconId: 'brandsLinkedin', displayName: 'LinkedIn' },
   };
 
-  const platformKey = typeof influencer.platform === 'string'
-    ? influencer.platform.toLowerCase()
-    : influencer.platform;
+  const platformKey =
+    typeof influencer.platform === 'string'
+      ? influencer.platform.toLowerCase()
+      : influencer.platform;
   const platformInfo = platformDisplayMap[platformKey];
 
   // Fetch profile image from InsightIQ
@@ -195,16 +196,16 @@ export function EnhancedInfluencerCard({ influencer, className }: EnhancedInflue
   }, [influencer.handle, influencer.platform]);
 
   return (
-    <Card className={cn("shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden group", className)}>
+    <Card
+      className={cn(
+        'shadow-sm hover:shadow-md transition-all border bg-card overflow-hidden group',
+        className
+      )}
+    >
       <CardContent className="p-4 flex flex-col items-center text-center">
         <div className="mb-4 h-24 w-24 rounded-full bg-accent/15 flex items-center justify-center group-hover:bg-accent/25 transition-colors overflow-hidden relative">
           {profileImage ? (
-            <Image
-              src={profileImage}
-              alt={influencer.handle}
-              fill
-              className="object-cover"
-            />
+            <Image src={profileImage} alt={influencer.handle} fill className="object-cover" />
           ) : (
             <Icon iconId={'faUserCircleLight'} className="h-full w-full text-accent" />
           )}
@@ -222,9 +223,7 @@ export function EnhancedInfluencerCard({ influencer, className }: EnhancedInflue
               className="h-5 w-5 flex-shrink-0 text-muted-foreground"
             />
           )}
-          <p className="text-sm font-semibold text-foreground truncate">
-            {influencer.handle}
-          </p>
+          <p className="text-sm font-semibold text-foreground truncate">{influencer.handle}</p>
         </div>
 
         <Button

@@ -33,11 +33,17 @@ import Image from 'next/image';
 import { Textarea as _Textarea } from '@/components/ui/textarea';
 import { AccordionTrigger as _AccordionTrigger } from '@/components/ui/accordion';
 import { RemovableBadge } from '@/components/ui/removable-badge';
-import { InfluencerCard as _InfluencerCard, EnhancedInfluencerCard } from '@/components/ui/card-influencer';
+import {
+  InfluencerCard as _InfluencerCard,
+  EnhancedInfluencerCard,
+} from '@/components/ui/card-influencer';
 import { PlatformEnum } from '@/types/enums';
 import { Separator as _Separator } from '@/components/ui/separator';
 import { toast as _toast } from 'react-hot-toast';
-import { showSuccessToast as _showSuccessToast, showErrorToast as _showErrorToast } from '@/components/ui/toast';
+import {
+  showSuccessToast as _showSuccessToast,
+  showErrorToast as _showErrorToast,
+} from '@/components/ui/toast';
 
 // Assuming these types might be needed from a shared location or defined here
 // For DraftCampaignData structure - based on wizard context Step5Content
@@ -628,7 +634,8 @@ const Step1Review: React.FC<{ data: CampaignDetails }> = ({ data }) => (
     </DataItem>
     <DataItem label="Primary Contact Name">
       {(() => {
-        const fullName = `${data.primaryContact?.firstName || ''} ${data.primaryContact?.surname || ''}`.trim();
+        const fullName =
+          `${data.primaryContact?.firstName || ''} ${data.primaryContact?.surname || ''}`.trim();
         return fullName ? (
           <RemovableBadge variant="secondary" size="sm">
             {fullName}
@@ -639,12 +646,16 @@ const Step1Review: React.FC<{ data: CampaignDetails }> = ({ data }) => (
       })()}
     </DataItem>
     <DataItem label="Primary Contact Email" value={data.primaryContact?.email} />
-    <DataItem label="Primary Contact Position" value={data.primaryContact?.position as string | undefined} />
+    <DataItem
+      label="Primary Contact Position"
+      value={data.primaryContact?.position as string | undefined}
+    />
     {data.secondaryContact && (
       <>
         <DataItem label="Secondary Contact Name">
           {(() => {
-            const fullName = `${data.secondaryContact?.firstName || ''} ${data.secondaryContact?.surname || ''}`.trim();
+            const fullName =
+              `${data.secondaryContact?.firstName || ''} ${data.secondaryContact?.surname || ''}`.trim();
             return fullName ? (
               <RemovableBadge variant="secondary" size="sm">
                 {fullName}
@@ -655,7 +666,10 @@ const Step1Review: React.FC<{ data: CampaignDetails }> = ({ data }) => (
           })()}
         </DataItem>
         <DataItem label="Secondary Contact Email" value={data.secondaryContact?.email} />
-        <DataItem label="Secondary Contact Position" value={data.secondaryContact?.position as string | undefined} />
+        <DataItem
+          label="Secondary Contact Position"
+          value={data.secondaryContact?.position as string | undefined}
+        />
       </>
     )}
     <div className="md:col-span-2">
@@ -678,7 +692,7 @@ const Step1Review: React.FC<{ data: CampaignDetails }> = ({ data }) => (
                 key={inf.id || idx}
                 influencer={{
                   handle: inf.handle || 'N/A',
-                  platform: frontendPlatform
+                  platform: frontendPlatform,
                 }}
                 className="w-full"
               />
