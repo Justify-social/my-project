@@ -114,7 +114,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ studyId }) => {
           )}
         </div>
         <Button onClick={() => fetchData(true)} variant="outline" size="sm">
-          <Icon iconId="faArrowsRotateLight" className="mr-2 h-4 w-4" /> Refresh Data
+          <Icon iconId="faRotateLight" className="mr-2 h-4 w-4" /> Refresh Data
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">

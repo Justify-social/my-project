@@ -247,7 +247,7 @@ export function VideoFileUploader<TFieldValues extends FieldValues = FieldValues
         // ✅ SIMPLE SOLUTION: Manual page refresh after upload
         // This ensures the user always sees the processed video without complex state management
         setTimeout(() => {
-          showSuccessToast('Refreshing page to show your video...', 'faArrowsRotateLight', 2000);
+          showSuccessToast('Refreshing page to show your video...', 'faRotateLight', 2000);
           setTimeout(() => {
             window.location.reload();
           }, 2000);

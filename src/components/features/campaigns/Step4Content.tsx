@@ -61,6 +61,9 @@ function Step4Content() {
   // Add polling state
   const [isPollingStatus, setIsPollingStatus] = React.useState(false);
 
+  // Add state to track if user explicitly clicked Next
+  const [isExplicitNext, setIsExplicitNext] = React.useState(false);
+
   // Prepare influencer options for the select component
   const influencerOptions = React.useMemo(() => {
     const influencers = wizard.wizardState?.Influencer;
@@ -301,6 +304,9 @@ function Step4Content() {
 
   const handleDeleteAsset = useCallback(
     async (assetId: number | string | undefined, assetIndex: number, assetName?: string) => {
+      // Prevent any accidental form submission during asset deletion
+      setIsExplicitNext(false);
+
       if (!assetId) {
         // Remove locally only (temporary/unsaved asset)
         removeAsset(assetIndex);
@@ -356,7 +362,7 @@ function Step4Content() {
         showErrorToast(`Failed to delete asset: ${errorMessage}`, 'faTriangleExclamationLight');
       }
     },
-    [removeAsset, wizard, forceUpdate]
+    [removeAsset, wizard, forceUpdate, setIsExplicitNext]
   );
 
   // Navigation handlers
@@ -378,9 +384,16 @@ function Step4Content() {
 
   // Save & Next handler
   const onSubmitAndNavigate = async () => {
+    // Only navigate if this was an explicit "Next" action
+    if (!isExplicitNext) {
+      console.log('[Step4] Form submission prevented - not an explicit Next action');
+      return;
+    }
+
     const isValid = await form.trigger();
     if (!isValid) {
       showErrorToast('Please fix all form errors before proceeding.', 'faTriangleExclamationLight');
+      setIsExplicitNext(false); // Reset flag
       return;
     }
 
@@ -417,7 +430,18 @@ function Step4Content() {
       }
     } catch (error) {
       showErrorToast('Failed to save assets.', 'faTriangleExclamationLight');
+    } finally {
+      setIsExplicitNext(false); // Reset flag
     }
+  };
+
+  // Explicit Next handler for the progress bar
+  const handleExplicitNext = () => {
+    setIsExplicitNext(true);
+    // Use setTimeout to ensure the flag is set before form submission
+    setTimeout(() => {
+      onSubmitAndNavigate();
+    }, 0);
   };
 
   // Manual Save handler
@@ -469,7 +493,7 @@ function Step4Content() {
           steps={wizard.stepsConfig}
           onStepClick={handleStepClick}
           onBack={handleBack}
-          onNext={onSubmitAndNavigate}
+          onNext={handleExplicitNext}
           isNextDisabled={true}
           isNextLoading={wizard.isLoading}
           onSave={handleSave}
@@ -485,7 +509,7 @@ function Step4Content() {
         steps={wizard.stepsConfig}
         onStepClick={handleStepClick}
         onBack={handleBack}
-        onNext={onSubmitAndNavigate}
+        onNext={handleExplicitNext}
         isNextDisabled={fields.length === 0}
         isNextLoading={form.formState.isSubmitting || wizard.isLoading}
         getCurrentFormData={form.getValues}
@@ -493,7 +517,13 @@ function Step4Content() {
       />
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmitAndNavigate)} className="space-y-8">
+        <form
+          onSubmit={e => {
+            e.preventDefault(); // Prevent default form submission
+            console.log('[Step4] Form submission prevented - use Next button instead');
+          }}
+          className="space-y-8"
+        >
           <Card>
             <CardHeader>
               <CardTitle>Creative Assets</CardTitle>

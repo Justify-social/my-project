@@ -40,7 +40,7 @@ import {
 } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
-import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
+import { showSuccessToast, showErrorToast } from '@/components/ui/toast';
 import { KPI as PrismaKPI, Feature as PrismaFeature } from '@prisma/client';
 import {
   Select as _Select,

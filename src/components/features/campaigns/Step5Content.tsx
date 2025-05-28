@@ -34,7 +34,7 @@ import { IconButtonAction } from '@/components/ui/button-icon-action';
 import { AssetCard } from '@/components/ui/card-asset';
 import Image from 'next/image';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
+import { showSuccessToast, showErrorToast } from '@/components/ui/toast';
 import { toast as _toast } from 'react-hot-toast';
 
 // --- Utility Functions ---

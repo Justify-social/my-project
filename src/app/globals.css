@@ -466,6 +466,10 @@ aside[data-cy='main-sidebar'] *:not(button),
   @apply bg-red-50 border border-red-200 text-red-700 rounded-md shadow-lg;
 }
 
+.toast-warning-custom {
+  @apply bg-orange-50 border border-orange-200 text-orange-700 rounded-md shadow-lg;
+}
+
 .toast-delete-custom {
   @apply bg-red-50 border border-red-500 text-red-700 rounded-md shadow-lg;
 }

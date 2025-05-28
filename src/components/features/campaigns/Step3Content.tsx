@@ -30,7 +30,7 @@ import { ProgressBarWizard } from '@/components/ui/progress-bar-wizard';
 import { AgeDistributionSliderGroup } from '@/components/ui/slider-age-distribution';
 import { GenderSelector } from '@/components/ui/selector-gender';
 import { LanguageSelector } from '@/components/ui/selector-language';
-import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
+import { showSuccessToast, showErrorToast } from '@/components/ui/toast';
 
 // --- Mock Data (Replace with actual data fetching/static data) ---
 // Updated list of top 15 languages, sorted alphabetically
