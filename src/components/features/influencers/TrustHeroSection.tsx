@@ -220,9 +220,7 @@ export const TrustHeroSection: React.FC<TrustHeroSectionProps> = ({ influencer }
                       )}
                     />
                   </div>
-                  <div className="text-lg font-bold text-primary">
-                    {(type.value * 100).toFixed(1)}%
-                  </div>
+                  <div className="text-xs font-bold text-primary">{Math.round(type.value)}%</div>
                   <div className="text-xs text-muted-foreground">
                     {trustData.riskLevel === 'LOW'
                       ? 'Excellent quality'

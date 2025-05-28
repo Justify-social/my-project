@@ -27,7 +27,7 @@ const formatNumber = (num: number | null | undefined): string => {
 // Helper function to format percentage
 const formatPercentage = (num: number | null): string => {
   if (num === null || num === undefined) return 'N/A';
-  return `${(num * 100).toFixed(1)}%`;
+  return `${Math.round(num)}%`;
 };
 
 // Metric card component - Shopify style
@@ -240,7 +240,7 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ infl
             className="p-3 sm:p-4 rounded-lg bg-success/5 border border-success/20 transition-all duration-300 hover:shadow-md hover:scale-105 focus-within:ring-2 focus-within:ring-success/50 animate-in slide-in-from-bottom-1 duration-500 delay-300"
             role="gridcell"
             tabIndex={0}
-            aria-label={`Engagement rate: ${performanceData.engagement.rate ? (performanceData.engagement.rate * 100).toFixed(1) : 'N/A'}%`}
+            aria-label={`Engagement rate: ${performanceData.engagement.rate ? formatPercentage(performanceData.engagement.rate) : 'N/A'}`}
             onKeyDown={e => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
@@ -260,7 +260,7 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ infl
             </div>
             <div className="text-xl sm:text-2xl font-bold text-success mb-1">
               {performanceData.engagement.rate
-                ? `${(performanceData.engagement.rate * 100).toFixed(1)}%`
+                ? formatPercentage(performanceData.engagement.rate)
                 : 'No API data'}
             </div>
             <p className="text-xs text-muted-foreground">Engagement Rate</p>
@@ -409,7 +409,7 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ infl
               className="p-4 rounded-lg bg-success/5 border border-success/20 transition-all duration-300 hover:shadow-md focus-within:ring-2 focus-within:ring-success/50 animate-in slide-in-from-left-3 duration-500 delay-800"
               tabIndex={0}
               role="button"
-              aria-label={`Sponsored posts performance: ${performanceData.sponsored.performance ? (performanceData.sponsored.performance * 100).toFixed(1) : 'N/A'}% engagement rate`}
+              aria-label={`Sponsored posts performance: ${performanceData.sponsored.performance ? formatPercentage(performanceData.sponsored.performance) : performanceData.sponsored.sponsoredEngagementAverage ? formatPercentage(performanceData.sponsored.sponsoredEngagementAverage) : 'N/A'} engagement rate`}
               onKeyDown={e => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
@@ -428,15 +428,15 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ infl
               </div>
               <div className="text-2xl font-bold text-success">
                 {performanceData.sponsored.performance
-                  ? `${(performanceData.sponsored.performance * 100).toFixed(1)}%`
+                  ? formatPercentage(performanceData.sponsored.performance)
                   : performanceData.sponsored.sponsoredEngagementAverage
-                    ? `${(performanceData.sponsored.sponsoredEngagementAverage * 100).toFixed(1)}%`
+                    ? formatPercentage(performanceData.sponsored.sponsoredEngagementAverage)
                     : 'No sponsored data'}
               </div>
               <p className="text-xs text-muted-foreground">
                 {performanceData.sponsored.postsCount
                   ? `${performanceData.sponsored.postsCount} sponsored posts analysed via Justify Intelligence`
-                  : 'No sponsored content data available from API'}
+                  : 'No sponsored content data available'}
               </p>
             </div>
 
@@ -445,7 +445,7 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ infl
               className="p-4 rounded-lg bg-primary/5 border border-primary/20 transition-all duration-300 hover:shadow-md focus-within:ring-2 focus-within:ring-primary/50 animate-in slide-in-from-right-3 duration-500 delay-900"
               tabIndex={0}
               role="button"
-              aria-label={`Organic posts performance: ${performanceData.engagement.rate ? (performanceData.engagement.rate * 100).toFixed(1) : 'N/A'}% engagement rate`}
+              aria-label={`Organic posts performance: ${performanceData.engagement.rate ? formatPercentage(performanceData.engagement.rate) : 'N/A'} engagement rate`}
               onKeyDown={e => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
@@ -464,13 +464,13 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ infl
               </div>
               <div className="text-2xl font-bold text-primary">
                 {performanceData.engagement.rate
-                  ? `${(performanceData.engagement.rate * 100).toFixed(1)}%`
+                  ? formatPercentage(performanceData.engagement.rate)
                   : 'No organic data'}
               </div>
               <p className="text-xs text-muted-foreground">
                 {performanceData.engagement.rate
                   ? 'Overall organic engagement rate from Justify Intelligence'
-                  : 'No organic engagement data available from API'}
+                  : 'No organic engagement data available'}
               </p>
             </div>
           </div>
@@ -488,9 +488,9 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ infl
                 <span>Sponsored Performance:</span>
                 <span className="font-medium">
                   {performanceData.sponsored.performance
-                    ? `${(performanceData.sponsored.performance * 100).toFixed(1)}%`
+                    ? formatPercentage(performanceData.sponsored.performance)
                     : performanceData.sponsored.sponsoredEngagementAverage
-                      ? `${(performanceData.sponsored.sponsoredEngagementAverage * 100).toFixed(1)}%`
+                      ? formatPercentage(performanceData.sponsored.sponsoredEngagementAverage)
                       : '—'}
                 </span>
               </div>
@@ -498,7 +498,7 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ infl
                 <span>Organic Performance:</span>
                 <span className="font-medium">
                   {performanceData.engagement.rate
-                    ? `${(performanceData.engagement.rate * 100).toFixed(1)}%`
+                    ? formatPercentage(performanceData.engagement.rate)
                     : '—'}
                 </span>
               </div>

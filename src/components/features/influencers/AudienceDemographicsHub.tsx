@@ -77,8 +77,22 @@ const getSampleDemographicData = (
 
 // Helper function to format demographic percentages
 const formatDemographicValue = (value: number): string => {
-  // Value should be a decimal (0.26 = 26%), convert to percentage for display
-  return `${(value * 100).toFixed(1)}%`;
+  // ✅ FIXED: API returns percentage values directly (9.3 = 9.3%), not decimals
+  // ✅ ENFORCES INTEGER PERCENTAGES - No decimals allowed
+  return `${Math.round(value)}%`;
+};
+
+// Helper function to format numbers with commas for large values
+const formatNumber = (value: number): string => {
+  if (value >= 1000000) {
+    return (value / 1000000).toFixed(1) + 'M';
+  } else if (value >= 1000) {
+    return (value / 1000).toFixed(1) + 'K';
+  }
+  return value.toLocaleString('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
 };
 
 // Helper function to get top items from array
@@ -182,11 +196,10 @@ const DemographicChart: React.FC<DemographicChartProps> = ({
     return {
       name: truncatedName,
       fullName: displayName, // Keep full name for tooltips
-      // CRITICAL FIX: Don't double-convert percentages
-      // item.value is already a decimal (0.35 = 35%), so we convert once for display
-      value: item.value * 100, // Convert decimal to percentage (0.35 -> 35)
-      rawValue: item.value, // Keep original decimal value
-      percentage: formatDemographicValue(item.value), // This will show "35.0%"
+      // ✅ FIXED: API now returns percentages directly (9.3 = 9.3%), no conversion needed
+      value: item.value, // Use value directly since API returns percentages
+      rawValue: item.value, // Keep original value
+      percentage: formatDemographicValue(item.value), // This will show "9.3%"
     };
   });
 
@@ -280,14 +293,15 @@ const AudienceQualityIndicator: React.FC<AudienceQualityProps> = ({
   significantLikersPercentage,
   countries,
 }) => {
-  // Use sample data if no real data
-  const actualCredibilityScore = credibilityScore || 0.78;
-  const actualSignificantPercentage = significantLikersPercentage || 0.42;
-  const actualCountries = countries.length > 0 ? countries : [{ code: 'US', value: 0.35 }];
+  // Use sample data if no real data - API returns percentages directly
+  const actualCredibilityScore = credibilityScore || 78; // 78% not 0.78
+  const actualSignificantPercentage = significantLikersPercentage || 42; // 42% not 0.42
+  const actualCountries = countries.length > 0 ? countries : [{ code: 'US', value: 35 }]; // 35% not 0.35
 
   const getQualityLevel = (): 'HIGH' | 'MEDIUM' | 'LOW' => {
-    if (actualCredibilityScore >= 0.8 && actualSignificantPercentage >= 0.3) return 'HIGH';
-    if (actualCredibilityScore >= 0.5 && actualSignificantPercentage >= 0.15) return 'MEDIUM';
+    // ✅ FIXED: API returns percentages directly, so compare with percentage values
+    if (actualCredibilityScore >= 80 && actualSignificantPercentage >= 30) return 'HIGH';
+    if (actualCredibilityScore >= 50 && actualSignificantPercentage >= 15) return 'MEDIUM';
     return 'LOW';
   };
 
@@ -339,11 +353,11 @@ const AudienceQualityIndicator: React.FC<AudienceQualityProps> = ({
       <div className="space-y-2 text-xs text-muted-foreground">
         <div className="flex items-center justify-between">
           <span>Credibility Score</span>
-          <span className="font-medium">{(actualCredibilityScore * 100).toFixed(0)}%</span>
+          <span className="font-medium">{actualCredibilityScore.toFixed(0)}%</span>
         </div>
         <div className="flex items-center justify-between">
           <span>Significant Likers</span>
-          <span className="font-medium">{(actualSignificantPercentage * 100).toFixed(1)}%</span>
+          <span className="font-medium">{actualSignificantPercentage.toFixed(1)}%</span>
         </div>
         <div className="flex items-center justify-between">
           <span>Primary Market</span>
@@ -371,19 +385,19 @@ export const AudienceDemographicsHub: React.FC<AudienceDemographicsHubProps> = (
     if (countries.length === 0) {
       // Use sample data for calculation
       const sampleCountries = getSampleDemographicData('countries');
-      const topCountryShare = sampleCountries[0]?.value || 0.35;
+      const topCountryShare = sampleCountries[0]?.value || 35; // 35% not 0.35
       const languageCount = 3; // Sample language count
-      return Math.min(100, (1 - topCountryShare) * 70 + Math.min(languageCount / 5, 1) * 30);
+      return Math.min(100, (1 - topCountryShare / 100) * 70 + Math.min(languageCount / 5, 1) * 30);
     }
 
     // Calculate diversity based on distribution spread
-    const topCountryShare = countries[0]?.value || 0;
+    const topCountryShare = countries[0]?.value || 0; // API returns percentages directly
     const languageCount = languages.length;
 
     // Higher diversity = lower concentration in top country + more languages
     const diversityScore = Math.min(
       100,
-      (1 - topCountryShare) * 70 + // Geographic diversity (70% weight)
+      (1 - topCountryShare / 100) * 70 + // ✅ FIXED: Divide by 100 since API returns percentages
         Math.min(languageCount / 5, 1) * 30 // Language diversity (30% weight)
     );
 
@@ -394,11 +408,12 @@ export const AudienceDemographicsHub: React.FC<AudienceDemographicsHubProps> = (
 
   // Calculate audience quality level
   const getAudienceQuality = (): 'HIGH' | 'MEDIUM' | 'LOW' => {
-    const score = audienceData.likers.credibilityScore || 0.78; // Sample fallback
-    const significantPercentage = audienceData.likers.significantLikersPercentage || 0.42; // Sample fallback
+    const score = audienceData.likers.credibilityScore || 78; // 78% not 0.78 - sample fallback
+    const significantPercentage = audienceData.likers.significantLikersPercentage || 42; // 42% not 0.42 - sample fallback
 
-    if (score >= 0.8 && significantPercentage >= 0.3) return 'HIGH';
-    if (score >= 0.5 && significantPercentage >= 0.15) return 'MEDIUM';
+    // ✅ FIXED: API returns percentages directly, compare with percentage values
+    if (score >= 80 && significantPercentage >= 30) return 'HIGH';
+    if (score >= 50 && significantPercentage >= 15) return 'MEDIUM';
     return 'LOW';
   };
 
@@ -550,7 +565,7 @@ export const AudienceDemographicsHub: React.FC<AudienceDemographicsHubProps> = (
                         {band.min}% - {band.max}% Credibility
                       </div>
                       <div className="text-lg font-bold text-primary">
-                        {band.totalProfileCount.toLocaleString()}
+                        {formatNumber(band.totalProfileCount)}
                       </div>
                       <div className="text-xs text-muted-foreground">profiles</div>
                     </div>
@@ -576,7 +591,7 @@ export const AudienceDemographicsHub: React.FC<AudienceDemographicsHubProps> = (
                         <p className="text-sm font-medium truncate">@{liker.platformUsername}</p>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           {liker.followerCount && (
-                            <span>{(liker.followerCount / 1000).toFixed(0)}K followers</span>
+                            <span>{formatNumber(liker.followerCount)} followers</span>
                           )}
                           {liker.isVerified && (
                             <Icon iconId="faCircleCheckSolid" className="w-3 h-3 text-sky-500" />

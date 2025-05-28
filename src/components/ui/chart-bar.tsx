@@ -81,6 +81,21 @@ const DEFAULT_COLORS = [
   'hsl(var(--success))', // Example: Assuming a success color variable exists
 ];
 
+// Utility function to format numbers with commas
+const formatNumber = (value: number): string => {
+  if (value >= 1000000) {
+    return (value / 1000000).toFixed(1) + 'M';
+  } else if (value >= 1000) {
+    return (value / 1000).toFixed(1) + 'K';
+  }
+  return value.toLocaleString();
+};
+
+// Default custom tooltip formatter that removes "value: " prefix
+const defaultTooltipFormatter = (value: number, name: string) => {
+  return [formatNumber(value), null];
+};
+
 export const BarChart: React.FC<BarChartProps> = ({
   data,
   xKey,
@@ -131,15 +146,15 @@ export const BarChart: React.FC<BarChartProps> = ({
           />
 
           <Tooltip
-            formatter={tooltipFormatter}
-            contentStyle={{}}
+            formatter={tooltipFormatter || defaultTooltipFormatter}
+            contentStyle={{
+              backgroundColor: 'hsl(var(--background))',
+              border: '1px solid hsl(var(--border))',
+              borderRadius: 'var(--radius)',
+              color: 'hsl(var(--foreground))',
+            }}
             wrapperStyle={{
-              backgroundColor: 'bg-background',
-              color: 'text-foreground',
-              borderRadius: 'rounded-md',
-              boxShadow: 'shadow-md',
-              padding: 'p-2',
-              fontSize: 'text-xs',
+              fontSize: '12px',
             }}
           />
 

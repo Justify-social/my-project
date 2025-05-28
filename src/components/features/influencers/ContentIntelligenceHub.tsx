@@ -152,48 +152,49 @@ export const ContentIntelligenceHub: React.FC<ContentIntelligenceHubProps> = ({ 
   const contentData = extractedData.content;
   const performanceData = extractedData.performance;
 
-  // Calculate content quality scores from real API data
-  const contentQualityScores = {
-    overall: Math.round(
-      (performanceData.engagement.rate || 0) * 100 +
-        (contentData.contentAnalysis.totalCount
-          ? Math.min(contentData.contentAnalysis.totalCount / 50, 1) * 20
-          : 0)
-    ), // Based on engagement rate + content volume
-    consistency: contentData.contentAnalysis.totalCount
-      ? Math.min(Math.round((contentData.contentAnalysis.totalCount / 30) * 100), 100)
-      : 0, // Based on posting frequency (30 posts = 100%)
-    engagement: Math.round((performanceData.engagement.rate || 0) * 2000), // Convert engagement rate to 0-100 scale
-    brandSafety: contentData.contentAnalysis.hiddenLikesPercentage
-      ? Math.round(100 - contentData.contentAnalysis.hiddenLikesPercentage * 100)
-      : 85, // Lower score if high hidden likes percentage
+  // ✅ FIXED: Use ONLY real API data, no synthetic calculations
+  const realApiMetrics = {
+    engagementRate: performanceData.engagement.rate ? performanceData.engagement.rate * 100 : null, // Real engagement rate as number
+    totalContent: contentData.contentAnalysis.totalCount || null, // Real content count from API
+    hiddenLikesPercentage: contentData.contentAnalysis.hiddenLikesPercentage
+      ? contentData.contentAnalysis.hiddenLikesPercentage * 100
+      : null, // Real hidden likes percentage as number
+    averageLikes: performanceData.engagement.averageLikes || null, // Real average likes from API
+    averageComments: performanceData.engagement.averageComments || null, // Real average comments from API
+    averageViews: performanceData.engagement.averageViews || null, // Real average views from API
+    sponsoredCount: performanceData.sponsored.postsCount || 0, // Real sponsored content count
+    sponsoredEngagement: performanceData.sponsored.sponsoredEngagementAverage
+      ? performanceData.sponsored.sponsoredEngagementAverage * 100
+      : null, // Real sponsored engagement as number
+    performanceRanking: contentData.contentAnalysis.performanceRanking || 'UNKNOWN', // Real API ranking
   };
 
-  // Calculate brand safety assessment from real API data
+  // Calculate brand safety assessment from real API data only
   const getBrandSafetyLevel = (): 'SAFE' | 'CAUTION' | 'RISK' => {
-    const hiddenLikesPercent = contentData.contentAnalysis.hiddenLikesPercentage || 0;
+    const hiddenLikesPercent = realApiMetrics.hiddenLikesPercentage || 0;
     const sponsoredRatio =
-      performanceData.sponsored.postsCount && contentData.contentAnalysis.totalCount
-        ? performanceData.sponsored.postsCount / contentData.contentAnalysis.totalCount
+      realApiMetrics.sponsoredCount && realApiMetrics.totalContent
+        ? realApiMetrics.sponsoredCount / realApiMetrics.totalContent
         : 0;
 
-    if (hiddenLikesPercent > 0.5 || sponsoredRatio > 0.8) return 'RISK';
-    if (hiddenLikesPercent > 0.2 || sponsoredRatio > 0.5) return 'CAUTION';
+    // ✅ FIXED: Use real API thresholds based on actual data ranges
+    if (hiddenLikesPercent > 50 || sponsoredRatio > 0.8) return 'RISK'; // 50% hidden likes or 80% sponsored
+    if (hiddenLikesPercent > 20 || sponsoredRatio > 0.5) return 'CAUTION'; // 20% hidden likes or 50% sponsored
     return 'SAFE';
   };
 
   const brandSafetyLevel = getBrandSafetyLevel();
 
-  // Generate brand safety details from real data
+  // Generate brand safety details from real API data only
   const getBrandSafetyDetails = (): string[] => {
     const details: string[] = [];
-    const hiddenLikesPercent = contentData.contentAnalysis.hiddenLikesPercentage || 0;
-    const sponsoredCount = performanceData.sponsored.postsCount || 0;
-    const totalContent = contentData.contentAnalysis.totalCount || 0;
+    const hiddenLikesPercent = realApiMetrics.hiddenLikesPercentage || 0;
+    const sponsoredCount = realApiMetrics.sponsoredCount || 0;
+    const totalContent = realApiMetrics.totalContent || 0;
 
-    if (hiddenLikesPercent < 0.1) {
+    if (hiddenLikesPercent < 10) {
       details.push('Low hidden likes percentage indicates authentic engagement');
-    } else if (hiddenLikesPercent > 0.3) {
+    } else if (hiddenLikesPercent > 30) {
       details.push('High hidden likes percentage may indicate engagement concerns');
     }
 
@@ -209,7 +210,7 @@ export const ContentIntelligenceHub: React.FC<ContentIntelligenceHubProps> = ({ 
       details.push('Limited recent content available for analysis');
     }
 
-    details.push(`Performance ranking: ${contentData.contentAnalysis.performanceRanking}`);
+    details.push(`Performance ranking: ${realApiMetrics.performanceRanking}`);
 
     return details;
   };
@@ -241,7 +242,7 @@ export const ContentIntelligenceHub: React.FC<ContentIntelligenceHubProps> = ({ 
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Icon iconId="faImagesLight" className="text-accent w-5 h-5" />
+            <Icon iconId="faFileLinesLight" className="text-accent w-5 h-5" />
             <span className="text-primary">Content Intelligence</span>
           </div>
           <div className="flex items-center gap-2">
@@ -250,7 +251,10 @@ export const ContentIntelligenceHub: React.FC<ContentIntelligenceHubProps> = ({ 
               className="text-xs bg-primary/10 text-primary border-primary/20"
             >
               <Icon iconId="faSparklesLight" className="w-3 h-3 mr-1" />
-              Quality Score: {contentQualityScores.overall}
+              Engagement:{' '}
+              {realApiMetrics.engagementRate
+                ? `${realApiMetrics.engagementRate.toFixed(2)}%`
+                : 'N/A'}
             </Badge>
             <Badge variant="secondary" className="text-xs">
               Last 30 Days
@@ -268,27 +272,27 @@ export const ContentIntelligenceHub: React.FC<ContentIntelligenceHubProps> = ({ 
           </h4>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <ContentQualityCard
-              score={contentQualityScores.overall}
-              label="Overall Quality"
-              description="Comprehensive content quality assessment based on engagement, aesthetics, and brand alignment"
+              score={realApiMetrics.engagementRate || 0}
+              label="Engagement Rate"
+              description="Real engagement rate for this influencer"
               icon="faStarLight"
             />
             <ContentQualityCard
-              score={contentQualityScores.consistency}
-              label="Consistency"
-              description="Posting frequency, visual consistency, and messaging alignment across content"
+              score={realApiMetrics.totalContent || 0}
+              label="Total Content"
+              description="Total number of posts analysed"
               icon="faCalendarLight"
             />
             <ContentQualityCard
-              score={contentQualityScores.engagement}
-              label="Engagement"
-              description="Content performance based on likes, comments, shares, and audience interaction"
+              score={realApiMetrics.averageLikes || 0}
+              label="Average Likes"
+              description="Average likes per post"
               icon="faHeartLight"
             />
             <ContentQualityCard
-              score={contentQualityScores.brandSafety}
-              label="Brand Safety"
-              description="Content appropriateness, brand alignment, and safety for partnership opportunities"
+              score={realApiMetrics.hiddenLikesPercentage || 0}
+              label="Hidden Likes %"
+              description="Percentage of posts with hidden likes"
               icon="faShieldLight"
             />
           </div>
@@ -358,8 +362,10 @@ export const ContentIntelligenceHub: React.FC<ContentIntelligenceHubProps> = ({ 
                 <div className="text-center">
                   <div className="text-xl font-bold text-success">
                     {performanceData.sponsored.performance
-                      ? `${(performanceData.sponsored.performance * 100).toFixed(1)}%`
-                      : 'N/A'}
+                      ? `${performanceData.sponsored.performance.toFixed(1)}%`
+                      : performanceData.sponsored.sponsoredEngagementAverage
+                        ? `${performanceData.sponsored.sponsoredEngagementAverage.toFixed(1)}%`
+                        : 'No sponsored data'}
                   </div>
                   <p className="text-xs text-muted-foreground">Avg Performance</p>
                 </div>
@@ -450,25 +456,36 @@ export const ContentIntelligenceHub: React.FC<ContentIntelligenceHubProps> = ({ 
                 <Icon iconId="faClipboardLight" className="w-5 h-5 text-success" />
                 <span className="font-medium text-primary">Content Vetting Summary</span>
                 <Badge variant="secondary" className="bg-success/10 text-success border-success/30">
-                  {contentQualityScores.overall} Quality
+                  {realApiMetrics.engagementRate
+                    ? `${realApiMetrics.engagementRate.toFixed(2)}%`
+                    : 'N/A'}
                 </Badge>
               </div>
               <div className="text-xs text-muted-foreground space-y-1">
                 <div className="flex items-center gap-2">
                   <Icon
                     iconId={
-                      contentQualityScores.brandSafety >= 80
+                      realApiMetrics.hiddenLikesPercentage &&
+                      realApiMetrics.hiddenLikesPercentage >= 80
                         ? 'faCheckLight'
                         : 'faTriangleExclamationLight'
                     }
                     className={cn(
                       'w-3 h-3',
-                      contentQualityScores.brandSafety >= 80 ? 'text-success' : 'text-warning'
+                      realApiMetrics.hiddenLikesPercentage &&
+                        realApiMetrics.hiddenLikesPercentage >= 80
+                        ? 'text-success'
+                        : 'text-warning'
                     )}
                   />
                   <span>
-                    Brand safety score: {contentQualityScores.brandSafety}/100 -{' '}
-                    {contentQualityScores.brandSafety >= 80
+                    Brand safety score:{' '}
+                    {realApiMetrics.hiddenLikesPercentage
+                      ? `${realApiMetrics.hiddenLikesPercentage.toFixed(1)}%`
+                      : 'N/A'}{' '}
+                    -{' '}
+                    {realApiMetrics.hiddenLikesPercentage &&
+                    realApiMetrics.hiddenLikesPercentage >= 80
                       ? 'Excellent for partnerships'
                       : 'Requires review'}
                   </span>
@@ -476,18 +493,20 @@ export const ContentIntelligenceHub: React.FC<ContentIntelligenceHubProps> = ({ 
                 <div className="flex items-center gap-2">
                   <Icon
                     iconId={
-                      contentQualityScores.consistency >= 70 ? 'faCheckLight' : 'faMinusLight'
+                      realApiMetrics.totalContent && realApiMetrics.totalContent > 0
+                        ? 'faCheckLight'
+                        : 'faCircleInfoLight'
                     }
                     className={cn(
                       'w-3 h-3',
-                      contentQualityScores.consistency >= 70
+                      realApiMetrics.totalContent && realApiMetrics.totalContent > 0
                         ? 'text-success'
-                        : 'text-muted-foreground'
+                        : 'text-accent'
                     )}
                   />
                   <span>
                     Content consistency:{' '}
-                    {contentQualityScores.consistency >= 70
+                    {realApiMetrics.totalContent && realApiMetrics.totalContent > 0
                       ? 'Regular posting schedule maintained'
                       : 'Irregular posting pattern'}
                   </span>

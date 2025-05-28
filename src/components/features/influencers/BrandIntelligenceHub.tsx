@@ -9,7 +9,10 @@ import { Icon } from '@/components/ui/icon/icon';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
-import { extractInsightIQData } from '@/lib/data-extraction/insightiq-extractor-profile-analytics';
+import {
+  extractInsightIQData,
+  validateProgressValue,
+} from '@/lib/data-extraction/insightiq-extractor-profile-analytics';
 
 interface BrandIntelligenceHubProps {
   influencer: InfluencerProfileData;
@@ -17,7 +20,7 @@ interface BrandIntelligenceHubProps {
 
 // Helper function to format brand affinity value
 const formatAffinityValue = (value: number): string => {
-  return `${(value * 100).toFixed(1)}%`;
+  return `${Math.round(value)}%`;
 };
 
 // Helper function to get top items from array
@@ -99,7 +102,10 @@ const BrandAffinityCard: React.FC<BrandAffinityCardProps> = ({
                   {formatAffinityValue(item.value)}
                 </span>
                 <div className="w-12">
-                  <Progress value={item.value * 100} className="h-1" />
+                  <Progress
+                    value={validateProgressValue(item.value, `brand-${item.name}`)}
+                    className="h-1"
+                  />
                 </div>
               </div>
             </div>
@@ -471,7 +477,13 @@ export const BrandIntelligenceHub: React.FC<BrandIntelligenceHubProps> = ({ infl
                             {formatAffinityValue(brand.value)}
                           </span>
                           <div className="w-16">
-                            <Progress value={brand.value * 100} className="h-2" />
+                            <Progress
+                              value={validateProgressValue(
+                                brand.value,
+                                `partnership-${brand.name}`
+                              )}
+                              className="h-2"
+                            />
                           </div>
                         </div>
                       </div>

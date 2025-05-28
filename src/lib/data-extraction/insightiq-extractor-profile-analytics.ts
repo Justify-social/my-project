@@ -115,6 +115,9 @@ export interface InsightIQExtractedData {
         performance: number | null;
         date: string;
       }>;
+      averageSponsoredLikes: number | null;
+      averageSponsoredComments: number | null;
+      sponsoredPerformanceRating: 'UNKNOWN' | 'POOR' | 'AVERAGE' | 'GOOD' | 'EXCELLENT';
     };
     reputation: {
       followerCount: number | null;
@@ -591,20 +594,174 @@ function extractTrustData(influencer: InfluencerProfileData): InsightIQExtracted
   };
 }
 
+// Helper function to return empty professional data structure for error cases
+function getEmptyProfessionalData(): InsightIQExtractedData['professional'] {
+  return {
+    contactDetails: [],
+    emails: [],
+    phoneNumbers: [],
+    addresses: [],
+    website: null,
+    socialProfiles: [],
+    accountType: 'UNKNOWN',
+    verificationStatus: {
+      isVerified: false,
+      verifiedDate: null,
+      verificationMethod: null,
+    },
+    location: {
+      city: null,
+      state: null,
+      country: null,
+      coordinates: null,
+      timezone: null,
+    },
+    accountAge: null,
+    profileCompleteness: 0,
+  };
+}
+
 /**
  * Extract Professional Intelligence Data - Background Checks
  */
 function extractProfessionalData(
   influencer: InfluencerProfileData
 ): InsightIQExtractedData['professional'] {
+  // 🛡️ **ROBUST ERROR HANDLING**: Validate input data before processing
+  if (!influencer || typeof influencer !== 'object') {
+    console.warn('⚠️ CONTACT EXTRACTION: Invalid influencer data provided, using empty defaults');
+    return getEmptyProfessionalData();
+  }
+
+  // Check if influencer has minimal required structure
+  if (!influencer.id && !influencer.handle && !influencer.name) {
+    console.warn('⚠️ CONTACT EXTRACTION: Incomplete influencer data, using empty defaults');
+    return getEmptyProfessionalData();
+  }
+
   const insightiq = (influencer as InfluencerProfileData & { insightiq?: any }).insightiq;
 
-  // Enhanced contact details extraction from multiple sources
-  const contactDetails = (insightiq?.contact_details || []).map((contact: any) => ({
-    type: contact.type || 'UNKNOWN',
-    value: contact.value || '',
-    category: categorizeContactType(contact.type || ''),
-  }));
+  // ✅ ENHANCED CONTACT DETAILS EXTRACTION - SSOT with comprehensive debugging
+  // Extracts from ALL possible sources in the Airtable schema
+  const contactDetails: Array<{
+    type: string;
+    value: string;
+    category: 'email' | 'phone' | 'social' | 'website' | 'other';
+  }> = [];
+
+  // 🔍 **MIT-PROFESSOR-LEVEL DEBUGGING**: Comprehensive data structure analysis
+  if (insightiq) {
+    console.log('🔬 CONTACT EXTRACTION DEBUG: Full influencer object structure', {
+      influencerKeys: Object.keys(influencer),
+      hasInsightiq: !!insightiq,
+      insightiqKeys: insightiq ? Object.keys(insightiq) : [],
+      insightiqProfile: insightiq?.profile ? Object.keys(insightiq.profile) : [],
+      directContactDetails: !!insightiq?.contact_details,
+      contactDetailsLength: insightiq?.contact_details?.length || 0,
+      profileContactDetails: !!insightiq?.profile?.contact_details,
+      influencerContactDetails: !!(influencer as any).contact_details,
+      rootContactDetails: !!(influencer as any).contact_details,
+      // Check for alternative contact paths from Airtable schema
+      profileWebsite: insightiq?.profile?.website,
+      profileEmail: insightiq?.profile?.email,
+      profilePhone: insightiq?.profile?.phone,
+      businessContact: insightiq?.business,
+    });
+  }
+
+  // 1. Primary source: Direct contact_details array (matches Airtable schema)
+  const apiContactDetails = insightiq?.contact_details || [];
+  console.log('📧 API Contact Details:', apiContactDetails);
+
+  apiContactDetails.forEach((contact: any) => {
+    if (contact && contact.value && contact.type) {
+      console.log('✅ CONTACT FOUND:', contact);
+      contactDetails.push({
+        type: contact.type || 'UNKNOWN',
+        value: contact.value,
+        category: categorizeContactType(contact.type || ''),
+      });
+    }
+  });
+
+  // 2. Fallback: Check for contact_details at root level of influencer object
+  const rootContactDetails = (influencer as any).contact_details || [];
+  console.log('🌐 Root Contact Details:', rootContactDetails);
+
+  rootContactDetails.forEach((contact: any) => {
+    if (
+      contact &&
+      contact.value &&
+      contact.type &&
+      !contactDetails.find(c => c.value === contact.value)
+    ) {
+      console.log('✅ ROOT CONTACT FOUND:', contact);
+      contactDetails.push({
+        type: contact.type || 'UNKNOWN',
+        value: contact.value,
+        category: categorizeContactType(contact.type || ''),
+      });
+    }
+  });
+
+  // 🎯 **TARGETED EXTRACTION**: Direct field checking based on Airtable schema
+  // According to Airtable: contact_details.type, contact_details.value
+
+  // 3. Check if contact_details is at profile level
+  const profileContactDetails = insightiq?.profile?.contact_details || [];
+  console.log('👤 Profile Contact Details:', profileContactDetails);
+
+  profileContactDetails.forEach((contact: any) => {
+    if (
+      contact &&
+      contact.value &&
+      contact.type &&
+      !contactDetails.find(c => c.value === contact.value)
+    ) {
+      console.log('✅ PROFILE CONTACT FOUND:', contact);
+      contactDetails.push({
+        type: contact.type || 'UNKNOWN',
+        value: contact.value,
+        category: categorizeContactType(contact.type || ''),
+      });
+    }
+  });
+
+  // 4. Extract from known field patterns (website, email, phone directly)
+  const directFieldExtractions = [
+    { value: insightiq?.profile?.website, type: 'website' },
+    { value: insightiq?.profile?.email, type: 'email' },
+    { value: insightiq?.profile?.phone, type: 'phone' },
+    { value: insightiq?.business?.website, type: 'business_website' },
+    { value: insightiq?.business?.email, type: 'business_email' },
+    { value: insightiq?.business?.phone, type: 'business_phone' },
+    { value: influencer.website, type: 'influencer_website' },
+    { value: (influencer as any).email, type: 'influencer_email' },
+    { value: (influencer as any).contactEmail, type: 'contact_email' },
+  ];
+
+  directFieldExtractions.forEach(({ value, type }) => {
+    if (value && !contactDetails.find(c => c.value === value)) {
+      console.log(`✅ DIRECT FIELD FOUND (${type}):`, value);
+      contactDetails.push({
+        type,
+        value,
+        category: categorizeContactType(type),
+      });
+    }
+  });
+
+  // 3. Debug logging for contact details extraction
+  if (contactDetails.length > 0) {
+    console.log(
+      `✅ CONTACT EXTRACTION: Found ${contactDetails.length} contact details for influencer`,
+      contactDetails
+    );
+  } else {
+    console.warn(
+      `⚠️ CONTACT EXTRACTION: No contact details found for influencer ${influencer.handle || influencer.name || 'unknown'}. This may be expected for private accounts or limited data sharing.`
+    );
+  }
 
   // Enhanced email extraction from multiple sources with better fallbacks
   const emails: Array<{ type: string; email: string; isPrimary: boolean; verified: boolean }> = [];
@@ -848,7 +1005,7 @@ function extractProfessionalData(
 }
 
 // Helper functions for contact extraction
-function categorizeContactType(type: string): string {
+function categorizeContactType(type: string): 'email' | 'phone' | 'social' | 'website' | 'other' {
   const lowerType = type.toLowerCase();
   if (lowerType.includes('email') || lowerType.includes('mail')) return 'email';
   if (lowerType.includes('phone') || lowerType.includes('tel') || lowerType.includes('mobile'))
@@ -913,17 +1070,67 @@ function extractPerformanceData(
   const insightiq = (influencer as InfluencerProfileData & { insightiq?: any }).insightiq;
 
   const engagement = {
-    rate: influencer.engagementRate ?? null,
-    averageLikes: insightiq?.average_likes ?? insightiq?.engagement?.averageLikes ?? null,
-    averageComments: insightiq?.average_comments ?? insightiq?.engagement?.averageComments ?? null,
-    averageViews: insightiq?.average_views ?? insightiq?.engagement?.averageViews ?? null, // ✅ FIXED: Use ?? to handle 0 values
+    rate:
+      influencer.engagementRate ??
+      insightiq?.engagement_rate ??
+      insightiq?.profile?.engagement_rate ??
+      insightiq?.analytics?.engagement_rate ??
+      insightiq?.metrics?.engagement_rate ??
+      null,
+    averageLikes:
+      insightiq?.average_likes ??
+      insightiq?.engagement?.averageLikes ??
+      insightiq?.analytics?.average_likes ??
+      insightiq?.metrics?.average_likes ??
+      insightiq?.profile?.average_likes ??
+      null,
+    averageComments:
+      insightiq?.average_comments ??
+      insightiq?.engagement?.averageComments ??
+      insightiq?.analytics?.average_comments ??
+      insightiq?.metrics?.average_comments ??
+      insightiq?.profile?.average_comments ??
+      null,
+    averageViews:
+      insightiq?.average_views ??
+      insightiq?.engagement?.averageViews ??
+      insightiq?.analytics?.average_views ??
+      insightiq?.metrics?.average_views ??
+      insightiq?.profile?.average_views ??
+      null, // ✅ FIXED: Use ?? to handle 0 values
     averageReelsViews:
-      insightiq?.average_reels_views ?? insightiq?.engagement?.averageReelsViews ?? null,
-    averageShares: insightiq?.average_shares ?? insightiq?.engagement?.averageShares ?? null,
-    averageSaves: insightiq?.average_saves ?? insightiq?.engagement?.averageSaves ?? null,
-    likesToCommentsRatio: insightiq?.engagement?.likes_to_comments_ratio ?? null,
-    peakEngagementHours: insightiq?.engagement?.peak_hours ?? [],
-    engagementTrend: insightiq?.engagement?.trend ?? ('UNKNOWN' as const),
+      insightiq?.average_reels_views ??
+      insightiq?.engagement?.averageReelsViews ??
+      insightiq?.analytics?.average_reels_views ??
+      insightiq?.metrics?.average_reels_views ??
+      null,
+    averageShares:
+      insightiq?.average_shares ??
+      insightiq?.engagement?.averageShares ??
+      insightiq?.analytics?.average_shares ??
+      insightiq?.metrics?.average_shares ??
+      null,
+    averageSaves:
+      insightiq?.average_saves ??
+      insightiq?.engagement?.averageSaves ??
+      insightiq?.analytics?.average_saves ??
+      insightiq?.metrics?.average_saves ??
+      null,
+    likesToCommentsRatio:
+      insightiq?.engagement?.likes_to_comments_ratio ??
+      insightiq?.analytics?.likes_comments_ratio ??
+      insightiq?.metrics?.likes_comments_ratio ??
+      null,
+    peakEngagementHours:
+      insightiq?.engagement?.peak_hours ??
+      insightiq?.analytics?.peak_hours ??
+      insightiq?.audience?.peak_activity_hours ??
+      [],
+    engagementTrend:
+      insightiq?.engagement?.trend ??
+      insightiq?.analytics?.engagement_trend ??
+      insightiq?.trends?.engagement ??
+      ('UNKNOWN' as const),
   };
 
   const sponsored = {
@@ -937,7 +1144,8 @@ function extractPerformanceData(
             const likes = engagement.like_count || 0;
             const comments = engagement.comment_count || 0;
             const saves = engagement.save_count || 0;
-            const totalEngagement = likes + comments + saves;
+            const shares = engagement.share_count || 0;
+            const totalEngagement = likes + comments + saves + shares;
 
             // Calculate engagement rate if we have follower count
             if (influencer.followersCount && influencer.followersCount > 0) {
@@ -947,12 +1155,53 @@ function extractPerformanceData(
           }, 0) / insightiq.sponsored_contents.length
         : null,
     organicComparison: {
-      sponsoredEngagement: null, // Calculate from sponsored content data
-      organicEngagement: null, // Calculate from organic content data
-      ratio: null, // Calculate ratio
+      sponsoredEngagement:
+        insightiq?.sponsored_contents?.length > 0
+          ? insightiq.sponsored_contents.reduce((total: number, content: any) => {
+              const engagement = content.engagement || {};
+              const totalEngagement =
+                (engagement.like_count || 0) +
+                (engagement.comment_count || 0) +
+                (engagement.save_count || 0);
+              return (
+                total +
+                (influencer.followersCount
+                  ? totalEngagement / influencer.followersCount
+                  : totalEngagement)
+              );
+            }, 0) / insightiq.sponsored_contents.length
+          : null,
+      organicEngagement: null, // Will be calculated from regular content data
+      ratio: null, // Will be calculated after both are available
       performance: 'UNKNOWN' as const,
     },
     brandCollaborations: insightiq?.brand_collaborations || [],
+    // Additional metrics for better sponsored content analysis
+    averageSponsoredLikes:
+      insightiq?.sponsored_contents?.length > 0
+        ? Math.round(
+            insightiq.sponsored_contents.reduce(
+              (total: number, content: any) => total + (content.engagement?.like_count || 0),
+              0
+            ) / insightiq.sponsored_contents.length
+          )
+        : null,
+    averageSponsoredComments:
+      insightiq?.sponsored_contents?.length > 0
+        ? Math.round(
+            insightiq.sponsored_contents.reduce(
+              (total: number, content: any) => total + (content.engagement?.comment_count || 0),
+              0
+            ) / insightiq.sponsored_contents.length
+          )
+        : null,
+    sponsoredPerformanceRating:
+      insightiq?.sponsored_contents?.length > 0
+        ? calculateSponsoredPerformanceRating(
+            insightiq.sponsored_contents,
+            influencer.followersCount || 0
+          )
+        : 'UNKNOWN',
   };
 
   const reputation = {
@@ -997,15 +1246,44 @@ function extractPerformanceData(
 
   const trends = {
     reputationHistory:
-      insightiq?.analytics?.reputationHistory || insightiq?.reputation_history || [],
+      insightiq?.analytics?.reputationHistory ||
+      insightiq?.reputation_history ||
+      insightiq?.growth?.history ||
+      insightiq?.trends?.reputation ||
+      insightiq?.metrics?.history ||
+      insightiq?.performance?.history ||
+      [],
     engagementRateHistogram:
-      insightiq?.engagement?.engagementRateHistogram || insightiq?.engagement_rate_histogram || [],
+      insightiq?.engagement?.engagementRateHistogram ||
+      insightiq?.engagement_rate_histogram ||
+      insightiq?.analytics?.engagement_histogram ||
+      insightiq?.metrics?.engagement_distribution ||
+      [],
     growthMetrics: {
-      followerGrowthRate: insightiq?.growth_metrics?.follower_growth_rate || null,
-      engagementGrowthRate: insightiq?.growth_metrics?.engagement_growth_rate || null,
-      contentGrowthRate: insightiq?.growth_metrics?.content_growth_rate || null,
+      followerGrowthRate:
+        insightiq?.growth_metrics?.follower_growth_rate ||
+        insightiq?.growth?.follower_rate ||
+        insightiq?.analytics?.growth?.followers ||
+        insightiq?.metrics?.follower_growth ||
+        null,
+      engagementGrowthRate:
+        insightiq?.growth_metrics?.engagement_growth_rate ||
+        insightiq?.growth?.engagement_rate ||
+        insightiq?.analytics?.growth?.engagement ||
+        insightiq?.metrics?.engagement_growth ||
+        null,
+      contentGrowthRate:
+        insightiq?.growth_metrics?.content_growth_rate ||
+        insightiq?.growth?.content_rate ||
+        insightiq?.analytics?.growth?.content ||
+        insightiq?.metrics?.content_growth ||
+        null,
     },
-    seasonalTrends: insightiq?.seasonal_trends || [],
+    seasonalTrends:
+      insightiq?.seasonal_trends ||
+      insightiq?.trends?.seasonal ||
+      insightiq?.analytics?.seasonal ||
+      [],
   };
 
   return {
@@ -1111,14 +1389,70 @@ function extractContentData(influencer: InfluencerProfileData): InsightIQExtract
       insightiq?.sponsored_contents ||
       insightiq?.content?.sponsoredContents ||
       []
-    ).map((content: any) => ({
-      id: content.id || '',
-      brandName: content.brand_name || 'Unknown',
-      type: content.type || 'post',
-      performance: content.performance || 0,
-      date: content.date || '',
-      disclosureType: content.disclosure_type || 'unknown',
-    })),
+    ).map((content: any, index: number) => {
+      // Extract brand name from description or mentions
+      const extractBrandFromContent = (description: string | null): string => {
+        if (!description) return 'Sponsored Post';
+
+        // Look for common brand mention patterns
+        const brandPatterns = [
+          /@([a-zA-Z0-9._]+)/g, // @mentions
+          /#([a-zA-Z0-9._]+)/g, // #hashtags that might be brands
+          /Photo by @([a-zA-Z0-9._]+)/gi, // Photo credits
+          /by ([A-Z][a-zA-Z0-9\s&]+)(?=\n|\.|\s")/g, // "by BrandName" patterns
+        ];
+
+        for (const pattern of brandPatterns) {
+          const matches = description.match(pattern);
+          if (matches && matches.length > 0) {
+            // Clean up the first match
+            const brandMatch = matches[0].replace(/[@#]/g, '').trim();
+            if (brandMatch && brandMatch.length > 1) {
+              return brandMatch.charAt(0).toUpperCase() + brandMatch.slice(1);
+            }
+          }
+        }
+
+        // If no brand found, try to extract from common sponsored post indicators
+        if (
+          description.toLowerCase().includes('partnership') ||
+          description.toLowerCase().includes('collaboration') ||
+          description.toLowerCase().includes('sponsored')
+        ) {
+          return 'Brand Partnership';
+        }
+
+        return 'Sponsored Post';
+      };
+
+      // Calculate performance based on engagement
+      const engagement = content.engagement || {};
+      const likes = engagement.like_count || 0;
+      const comments = engagement.comment_count || 0;
+      const saves = engagement.save_count || 0;
+      const totalEngagement = likes + comments + saves;
+
+      // Calculate engagement rate as performance metric
+      const engagementRate =
+        influencer.followersCount && influencer.followersCount > 0
+          ? totalEngagement / influencer.followersCount
+          : 0;
+
+      return {
+        id: content.url
+          ? content.url.split('/').pop() || `sponsored-${index}`
+          : `sponsored-${index}`,
+        brandName: extractBrandFromContent(content.description),
+        type: content.type || 'IMAGE',
+        performance: Math.round(engagementRate * 10000) / 100, // Convert to percentage (0.0018 -> 0.18%)
+        date: content.published_at || content.date || new Date().toISOString(),
+        disclosureType: content.disclosure_type || 'partnership',
+        // Additional useful fields for debugging
+        totalEngagement,
+        engagementRate,
+        url: content.url,
+      };
+    }),
     contentAnalysis,
     strategy,
     qualityMetrics,
@@ -1134,16 +1468,11 @@ function extractAudienceData(
   const insightiq = (influencer as InfluencerProfileData & { insightiq?: any }).insightiq;
   const audienceData = insightiq?.audience;
 
-  // Helper function to normalize percentage values
-  const normalizePercentage = (value: number): number => {
-    // CRITICAL FIX: Ensure all values are normalized to decimals (0.35 = 35%)
-    // This prevents double conversion issues in the UI
-    if (value > 1) {
-      // Value is likely already a percentage (35 -> 0.35)
-      return value / 100;
-    }
-    // Value is already a decimal (0.35)
-    return value;
+  // ✅ ROBUST PERCENTAGE VALIDATION - SSOT for percentage handling
+  // Helper function to normalize percentage values with robust validation
+  const normalizePercentage = (value: number, fieldName?: string): number => {
+    // ✅ SSOT: All percentage values go through global validation
+    return validateGlobalPercentage(value, fieldName);
   };
 
   // Helper function to normalize gender values
@@ -1331,12 +1660,12 @@ function extractAudienceData(
     countries: (audienceData?.countries || []).map((country: any, index: number) => ({
       code: country.code || 'UN',
       name: country.name || getCountryName(country.code || 'UN'),
-      value: normalizePercentage(country.value || 0),
+      value: normalizePercentage(country.value || 0, `country-${country.code || index}`),
       rank: index + 1,
     })),
     cities: (audienceData?.cities || []).map((city: any, index: number) => ({
       name: city.name || city.city || 'Unknown City',
-      value: normalizePercentage(city.value || city.percentage || 0),
+      value: normalizePercentage(city.value || city.percentage || 0, `city-${city.name || index}`),
       country: city.country || city.country_code,
       rank: index + 1,
     })),
@@ -1347,35 +1676,53 @@ function extractAudienceData(
     ).map((item: any) => ({
       gender: normalizeGender(item.gender || item.sex || 'Unknown'),
       ageRange: item.ageRange || item.age_range || item.age || 'Unknown',
-      value: normalizePercentage(item.value || item.percentage || 0),
+      value: normalizePercentage(
+        item.value || item.percentage || 0,
+        `genderAge-${item.gender}-${item.ageRange}`
+      ),
       interests: item.interests || [],
     })),
     ethnicities: (audienceData?.ethnicities || []).map((ethnicity: any) => ({
       name: ethnicity.name || ethnicity.ethnicity || 'Unknown',
-      value: normalizePercentage(ethnicity.value || ethnicity.percentage || 0),
+      value: normalizePercentage(
+        ethnicity.value || ethnicity.percentage || 0,
+        `ethnicity-${ethnicity.name}`
+      ),
       region: ethnicity.region,
     })),
     languages: (audienceData?.languages || []).map((language: any, index: number) => ({
       code: language.code || language.lang || 'en',
       name: language.name || getLanguageName(language.code || language.lang || 'en'),
-      value: normalizePercentage(language.value || language.percentage || 0),
+      value: normalizePercentage(
+        language.value || language.percentage || 0,
+        `language-${language.code || index}`
+      ),
       primary: index === 0,
     })),
     occupations: (audienceData?.occupations || []).map((occupation: any) => ({
       name: occupation.name || occupation.job || occupation.profession || 'Unknown',
-      value: normalizePercentage(occupation.value || occupation.percentage || 0),
+      value: normalizePercentage(
+        occupation.value || occupation.percentage || 0,
+        `occupation-${occupation.name}`
+      ),
       industry: occupation.industry || occupation.sector,
     })),
     incomeDistribution: (audienceData?.income_distribution || audienceData?.income || []).map(
       (income: any) => ({
         range: income.range || income.bracket || 'Unknown',
-        percentage: normalizePercentage(income.percentage || income.value || 0),
+        percentage: normalizePercentage(
+          income.percentage || income.value || 0,
+          `income-${income.range}`
+        ),
       })
     ),
     educationLevels: (audienceData?.education_levels || audienceData?.education || []).map(
       (education: any) => ({
         level: education.level || education.degree || 'Unknown',
-        percentage: normalizePercentage(education.percentage || education.value || 0),
+        percentage: normalizePercentage(
+          education.percentage || education.value || 0,
+          `education-${education.level}`
+        ),
       })
     ),
   };
@@ -1411,36 +1758,39 @@ function extractAudienceData(
       []
     ).map((country: any) => ({
       code: country.code || 'UN',
-      value: normalizePercentage(country.value || 0),
+      value: normalizePercentage(country.value || 0, `likers-country-${country.code}`),
     })),
     cities: (audienceData?.audience_likers?.cities || []).map((city: any) => ({
       name: city.name || 'Unknown City',
-      value: normalizePercentage(city.value || 0),
+      value: normalizePercentage(city.value || 0, `likers-city-${city.name}`),
       country: city.country,
     })),
     genderAgeDistribution: (audienceData?.audience_likers?.gender_age_distribution || []).map(
       (item: any) => ({
         gender: normalizeGender(item.gender || 'Unknown'),
         ageRange: item.age_range || 'Unknown',
-        value: normalizePercentage(item.value || 0),
+        value: normalizePercentage(
+          item.value || 0,
+          `likers-genderAge-${item.gender}-${item.age_range}`
+        ),
       })
     ),
     ethnicities: (audienceData?.audience_likers?.ethnicities || []).map((ethnicity: any) => ({
       name: ethnicity.name || 'Unknown',
-      value: normalizePercentage(ethnicity.value || 0),
+      value: normalizePercentage(ethnicity.value || 0, `likers-ethnicity-${ethnicity.name}`),
     })),
     languages: (audienceData?.audience_likers?.languages || []).map((language: any) => ({
       code: language.code || 'en',
       name: getLanguageName(language.code || 'en'),
-      value: normalizePercentage(language.value || 0),
+      value: normalizePercentage(language.value || 0, `likers-language-${language.code}`),
     })),
     brandAffinity: (audienceData?.audience_likers?.brand_affinity || []).map((brand: any) => ({
       name: brand.name || 'Unknown',
-      value: normalizePercentage(brand.value || 0),
+      value: normalizePercentage(brand.value || 0, `likers-brand-${brand.name}`),
     })),
     interests: (audienceData?.audience_likers?.interests || []).map((interest: any) => ({
       name: interest.name || 'Unknown',
-      value: normalizePercentage(interest.value || 0),
+      value: normalizePercentage(interest.value || 0, `likers-interest-${interest.name}`),
     })),
     averageEngagementOfLikers:
       audienceData?.audienceLikers?.average_engagement ||
@@ -1460,7 +1810,10 @@ function extractAudienceData(
     deviceUsage: (audienceData?.behavior?.device_usage || audienceData?.devices || []).map(
       (device: any) => ({
         device: device.device || device.type || 'Unknown',
-        percentage: normalizePercentage(device.percentage || device.value || 0),
+        percentage: normalizePercentage(
+          device.percentage || device.value || 0,
+          `device-${device.device || device.type}`
+        ),
       })
     ),
     platformCrossover: (
@@ -1469,7 +1822,10 @@ function extractAudienceData(
       []
     ).map((platform: any) => ({
       platform: platform.platform || platform.name || 'Unknown',
-      percentage: normalizePercentage(platform.percentage || platform.value || 0),
+      percentage: normalizePercentage(
+        platform.percentage || platform.value || 0,
+        `platform-${platform.platform || platform.name}`
+      ),
     })),
     shoppingBehavior: {
       onlineShopping:
@@ -1491,14 +1847,20 @@ function extractAudienceData(
     demographics,
     interests: (audienceData?.interests || []).map((interest: any) => ({
       name: interest.name || interest.topic || interest.category || 'Unknown',
-      value: normalizePercentage(interest.value || interest.percentage || 0),
+      value: normalizePercentage(
+        interest.value || interest.percentage || 0,
+        `interest-${interest.name || interest.topic || interest.category}`
+      ),
       category: interest.category || interest.type,
       trendingScore: interest.trending_score || interest.trend,
     })),
     brandAffinity: (audienceData?.brand_affinity || audienceData?.brands || []).map(
       (brand: any) => ({
         name: brand.name || brand.brand || 'Unknown Brand',
-        value: normalizePercentage(brand.value || brand.percentage || 0),
+        value: normalizePercentage(
+          brand.value || brand.percentage || 0,
+          `brand-${brand.name || brand.brand}`
+        ),
         category: brand.category || brand.type,
         logoUrl: brand.logoUrl || brand.logo,
         industry: brand.industry || brand.sector,
@@ -1506,14 +1868,20 @@ function extractAudienceData(
       })
     ),
     credibilityBand: (audienceData?.credibility_score_band || []).map(
-      (band: any, index: number) => ({
-        min: band.min || 0,
-        max: band.max || 100,
-        totalProfileCount: band.totalProfileCount || band.count || 0,
-        percentile:
-          band.percentile ||
-          ((index + 1) / (audienceData?.credibility_score_band?.length || 1)) * 100,
-      })
+      (band: any, index: number) => {
+        // Generate proper credibility ranges since API min/max are invalid
+        const totalBands = audienceData?.credibility_score_band?.length || 20;
+        const rangeSize = 100 / totalBands;
+        const calculatedMin = Math.round(index * rangeSize);
+        const calculatedMax = Math.round((index + 1) * rangeSize);
+
+        return {
+          min: calculatedMin,
+          max: calculatedMax === 100 ? 100 : calculatedMax - 1, // Ensure no overlap
+          totalProfileCount: band.total_profile_count || band.count || 0, // ✅ FIXED: Use correct API field name
+          percentile: Math.round(((index + 1) / totalBands) * 100),
+        };
+      }
     ),
     likers,
     behavior,
@@ -1526,14 +1894,87 @@ function extractAudienceData(
 function extractBrandData(influencer: InfluencerProfileData): InsightIQExtractedData['brand'] {
   const insightiq = (influencer as InfluencerProfileData & { insightiq?: any }).insightiq;
 
+  // ✅ CRITICAL FIX: Look for lookalikes data in the correct paths according to Airtable schema
+  // According to the schema: profile.lookalikes.platform_username, profile.lookalikes.url, etc.
+  console.log('🔍 DEBUG: Looking for lookalikes data in InsightIQ object', {
+    hasInsightIQ: !!insightiq,
+    hasProfile: !!insightiq?.profile,
+    hasProfileLookalikes: !!insightiq?.profile?.lookalikes,
+    hasDirectLookalikes: !!insightiq?.lookalikes,
+    hasAnalyticsLookalikes: !!insightiq?.analytics?.lookalikes,
+  });
+
+  const extractLookalikes = () => {
+    // Primary source: profile.lookalikes (matches Airtable schema)
+    const profileLookalikes = insightiq?.profile?.lookalikes || [];
+
+    // Fallback sources for backward compatibility
+    const analyticsLookalikes = insightiq?.analytics?.lookalikes || [];
+    const rootLookalikes = insightiq?.lookalikes || [];
+
+    // Additional potential sources based on API variations
+    const audienceLookalikes = insightiq?.audience?.lookalikes || [];
+    const brandLookalikes = insightiq?.brand?.lookalikes || [];
+    const competitiveLookalikes = insightiq?.competitive?.lookalikes || [];
+
+    // Use the source with the most data
+    const allSources = [
+      profileLookalikes,
+      analyticsLookalikes,
+      rootLookalikes,
+      audienceLookalikes,
+      brandLookalikes,
+      competitiveLookalikes,
+    ];
+    const bestSource = allSources.reduce(
+      (prev, current) => (current.length > prev.length ? current : prev),
+      []
+    );
+
+    console.log('🔍 DEBUG: Lookalikes extraction comprehensive summary', {
+      profileLookalikes: profileLookalikes.length,
+      analyticsLookalikes: analyticsLookalikes.length,
+      rootLookalikes: rootLookalikes.length,
+      audienceLookalikes: audienceLookalikes.length,
+      brandLookalikes: brandLookalikes.length,
+      competitiveLookalikes: competitiveLookalikes.length,
+      selectedSource: bestSource.length,
+      totalDataSources: allSources.filter(src => src.length > 0).length,
+    });
+
+    return bestSource.map((lookalike: any) => ({
+      platformUsername:
+        lookalike.platform_username ||
+        lookalike.platformUsername ||
+        lookalike.username ||
+        lookalike.handle ||
+        'Profile Available',
+      imageUrl:
+        lookalike.image_url || lookalike.imageUrl || lookalike.avatar || lookalike.profile_picture,
+      isVerified: lookalike.is_verified || lookalike.isVerified || lookalike.verified || false,
+      followerCount:
+        lookalike.follower_count || lookalike.followerCount || lookalike.followers || 0,
+      category: lookalike.category || lookalike.niche || lookalike.type || 'Unknown',
+      similarityScore:
+        lookalike.similarity_score ||
+        lookalike.similarityScore ||
+        lookalike.match_score ||
+        lookalike.score ||
+        0,
+      engagementRate:
+        lookalike.engagement_rate || lookalike.engagementRate || lookalike.engagement || 0,
+      averageLikes: lookalike.average_likes || lookalike.averageLikes || lookalike.avg_likes || 0,
+      country: lookalike.country || lookalike.location || 'Unknown',
+      niche: lookalike.niche || lookalike.category || lookalike.vertical || 'General',
+      collaborationPotential:
+        lookalike.collaboration_potential ||
+        lookalike.collaborationPotential ||
+        ('MEDIUM' as const),
+    }));
+  };
+
   return {
-    lookalikes: (insightiq?.analytics?.lookalikes || insightiq?.lookalikes || []).map(
-      (lookalike: any) => ({
-        ...lookalike,
-        niche: lookalike.niche,
-        collaborationPotential: lookalike.collaboration_potential || ('MEDIUM' as const),
-      })
-    ),
+    lookalikes: extractLookalikes(),
     creatorBrandAffinity: (
       insightiq?.analytics?.creatorBrandAffinity ||
       insightiq?.brand_affinity ||
@@ -1691,6 +2132,30 @@ function determineContentPerformanceRanking(insightiq: any): string {
   return 'UNKNOWN';
 }
 
+function calculateSponsoredPerformanceRating(
+  sponsoredContents: any[],
+  followerCount: number
+): 'POOR' | 'AVERAGE' | 'GOOD' | 'EXCELLENT' | 'UNKNOWN' {
+  if (!sponsoredContents || sponsoredContents.length === 0) return 'UNKNOWN';
+
+  // Calculate average engagement rate for sponsored content
+  const totalEngagementRate = sponsoredContents.reduce((total, content) => {
+    const engagement = content.engagement || {};
+    const totalEngagement =
+      (engagement.like_count || 0) + (engagement.comment_count || 0) + (engagement.save_count || 0);
+    return total + (followerCount > 0 ? totalEngagement / followerCount : 0);
+  }, 0);
+
+  const averageEngagementRate = totalEngagementRate / sponsoredContents.length;
+
+  // Rate based on industry benchmarks for sponsored content
+  if (averageEngagementRate >= 0.03) return 'EXCELLENT'; // 3%+ is excellent for sponsored
+  if (averageEngagementRate >= 0.015) return 'GOOD'; // 1.5%+ is good for sponsored
+  if (averageEngagementRate >= 0.008) return 'AVERAGE'; // 0.8%+ is average for sponsored
+  if (averageEngagementRate > 0) return 'POOR'; // Any engagement is better than none
+  return 'UNKNOWN';
+}
+
 // 🎯 **MAIN EXTRACTION FUNCTION - SINGLE SOURCE OF TRUTH**
 
 /**
@@ -1707,6 +2172,52 @@ export function extractInsightIQData(influencer: InfluencerProfileData): Insight
 
   // Get the insightiq data once
   const insightiq = (influencer as InfluencerProfileData & { insightiq?: any }).insightiq;
+
+  // 🔍 **MIT-PROFESSOR-LEVEL ANALYTICS DEBUGGING**
+  if (insightiq) {
+    console.log('📊 ANALYTICS DEBUG: Comprehensive InsightIQ data structure analysis', {
+      // Core data availability
+      hasProfile: !!insightiq.profile,
+      hasAudience: !!insightiq.audience,
+      hasAnalytics: !!insightiq.analytics,
+      hasGrowth: !!insightiq.growth,
+      hasMetrics: !!insightiq.metrics,
+      hasPerformance: !!insightiq.performance,
+
+      // Growth & Trends data
+      reputationHistoryLength: insightiq.reputation_history?.length || 0,
+      analyticsHistoryLength: insightiq.analytics?.reputationHistory?.length || 0,
+      growthHistoryLength: insightiq.growth?.history?.length || 0,
+
+      // Lookalikes data
+      profileLookalikesLength: insightiq.profile?.lookalikes?.length || 0,
+      analyticsLookalikesLength: insightiq.analytics?.lookalikes?.length || 0,
+      audienceLookalikesLength: insightiq.audience?.lookalikes?.length || 0,
+
+      // Engagement data
+      hasEngagementRate: !!insightiq.engagement_rate,
+      hasAverageLikes: !!insightiq.average_likes,
+      hasAverageViews: !!insightiq.average_views,
+
+      // Contact data
+      hasContactDetails: !!insightiq.contact_details,
+      contactDetailsLength: insightiq.contact_details?.length || 0,
+
+      // Brand data
+      brandAffinityLength: insightiq.audience?.brand_affinity?.length || 0,
+      topHashtagsLength: insightiq.top_hashtags?.length || 0,
+
+      // Top-level keys for structure analysis
+      topLevelKeys: Object.keys(insightiq),
+    });
+  } else {
+    console.warn('⚠️ ANALYTICS DEBUG: No InsightIQ data found for influencer', {
+      influencerId: influencer.id,
+      influencerHandle: influencer.handle,
+      influencerName: influencer.name,
+      availableKeys: Object.keys(influencer),
+    });
+  }
 
   /**
    * Enhanced extraction with additional API coverage for comprehensive data utilization
@@ -2041,3 +2552,37 @@ function extractLivestreamData(
     },
   };
 }
+
+/**
+ * ✅ GLOBAL PERCENTAGE VALIDATION - SSOT for all percentage handling
+ * Ensures NO percentage can exceed 100% throughout the entire system
+ * This is the single source of truth for percentage validation
+ * ✅ ENFORCES INTEGER PERCENTAGES - No decimals allowed
+ */
+export const validateGlobalPercentage = (value: number, context?: string): number => {
+  if (value === null || value === undefined || isNaN(value)) return 0;
+
+  // Strict enforcement: Log violations for debugging
+  if (value > 100) {
+    console.error(
+      `🚨 PERCENTAGE VIOLATION: ${context || 'Unknown field'} exceeded 100%: ${value}% - CAPPING TO 100%`
+    );
+  }
+
+  if (value < 0) {
+    console.warn(
+      `⚠️ PERCENTAGE WARNING: ${context || 'Unknown field'} below 0%: ${value}% - SETTING TO 0%`
+    );
+  }
+
+  // STRICTLY enforce: 0 <= percentage <= 100 AND integer values only
+  return Math.round(Math.max(0, Math.min(100, value)));
+};
+
+/**
+ * ✅ ENHANCED PROGRESS BAR VALIDATION
+ * Ensures Progress components never exceed 100%
+ */
+export const validateProgressValue = (value: number, fieldName?: string): number => {
+  return validateGlobalPercentage(value, `Progress-${fieldName || 'Unknown'}`);
+};

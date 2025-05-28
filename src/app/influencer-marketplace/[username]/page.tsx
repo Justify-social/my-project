@@ -276,7 +276,7 @@ export default function InfluencerProfilePage() {
                   <AlertDialogHeader>
                     <AlertDialogTitle className="text-lg">Request Risk Assessment</AlertDialogTitle>
                     <AlertDialogDescription className="text-sm">
-                      Generate a comprehensive risk report analyzing this influencer's profile,
+                      Generate a comprehensive risk report analysing this influencer's profile,
                       content, and potential brand safety concerns.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
@@ -409,12 +409,7 @@ export default function InfluencerProfilePage() {
                     <BrandIntelligenceHub influencer={influencer} />
                   </TabsContent>
                   <TabsContent value="advanced" className="mt-0">
-                    <div className="space-y-6">
-                      <AdvancedInsightsHub influencer={influencer} />
-                      <RiskScoreSection influencer={influencer} />
-                      <CertificationStatusSection influencer={influencer} />
-                      <RecentCampaignsSection influencer={influencer} />
-                    </div>
+                    <AdvancedInsightsHub influencer={influencer} />
                   </TabsContent>
                 </div>
               </Tabs>

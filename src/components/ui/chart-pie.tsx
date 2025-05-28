@@ -35,7 +35,7 @@
  */
 
 import React from 'react';
-import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { cn } from '@/lib/utils';
 
 export interface PieDataPoint {
@@ -80,6 +80,21 @@ interface OutsideLabelProps {
   // Add other potential props if needed
 }
 
+// Utility function to format numbers with commas
+const formatNumber = (value: number): string => {
+  if (value >= 1000000) {
+    return (value / 1000000).toFixed(1) + 'M';
+  } else if (value >= 1000) {
+    return (value / 1000).toFixed(1) + 'K';
+  }
+  return value.toLocaleString();
+};
+
+// Default custom tooltip formatter that removes "value: " prefix
+const defaultTooltipFormatter = (value: number, name: string) => {
+  return [formatNumber(value), null];
+};
+
 export const PieChart: React.FC<PieChartProps> = ({
   data,
   nameKey,
@@ -120,7 +135,7 @@ export const PieChart: React.FC<PieChartProps> = ({
     const radius = numOuterRadius * 1.15; // Position labels further out
     const x = numCx + radius * Math.cos(-midAngle * RADIAN);
     const y = numCy + radius * Math.sin(-midAngle * RADIAN);
-    const percentValue = `${(percent * 100).toFixed(0)}%`;
+    const percentValue = `${percent.toFixed(0)}%`;
 
     // Basic check to avoid tiny labels
     if (percent < 0.03) return null;
@@ -160,6 +175,18 @@ export const PieChart: React.FC<PieChartProps> = ({
               />
             </filter>
           </defs>
+          <Tooltip
+            formatter={defaultTooltipFormatter}
+            contentStyle={{
+              backgroundColor: 'hsl(var(--background))',
+              border: '1px solid hsl(var(--border))',
+              borderRadius: 'var(--radius)',
+              color: 'hsl(var(--foreground))',
+            }}
+            wrapperStyle={{
+              fontSize: '12px',
+            }}
+          />
           <Pie
             data={data}
             cx="50%"

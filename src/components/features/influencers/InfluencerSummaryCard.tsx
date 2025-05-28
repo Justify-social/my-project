@@ -161,7 +161,7 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
             className="text-right text-gray-900 dark:text-white flex items-center justify-end"
             data-testid="justify-score"
           >
-            {influencer.justifyScore ?? 'Analyzing...'}
+            {influencer.justifyScore ?? 'Analysing...'}
             <TooltipProvider delayDuration={300}>
               <Tooltip>
                 <TooltipTrigger asChild>
