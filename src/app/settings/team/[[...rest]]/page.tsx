@@ -1,12 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import {
-  OrganizationProfile,
-  CreateOrganization,
-  useOrganization,
-  OrganizationSwitcher,
-} from '@clerk/nextjs';
+import { OrganizationProfile, CreateOrganization, useOrganization } from '@clerk/nextjs';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';

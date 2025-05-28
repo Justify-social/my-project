@@ -1900,25 +1900,36 @@ const SurveyQuestionBuilder = forwardRef<SurveyQuestionBuilderRef, SurveyQuestio
         <div className="space-y-6">
           {/* AI-Generated Questions Disclaimer */}
           {showAiDisclaimer && (
-            <Alert variant="default" className="border-amber-500 bg-amber-100 shadow-md">
-              <Icon iconId="faTriangleExclamationSolid" className="h-5 w-5 text-amber-600" />
-              <AlertTitle className="text-amber-900 font-semibold text-lg">
-                AI-Generated Draft Questions - Review Required
-              </AlertTitle>
-              <AlertDescription className="text-amber-800 text-base leading-relaxed">
-                <strong>Important:</strong> These questions have been produced in draft form by AI
-                as recommendations only. It is your responsibility to review, edit, and update all
-                questions and GIFs to ensure they're properly aligned with your brand and campaign
-                goals. Please thoroughly review each question before proceeding.
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowAiDisclaimer(false)}
-                  className="ml-2 h-auto p-1 text-amber-700 hover:text-amber-900 hover:bg-amber-200"
-                >
-                  <Icon iconId="faXmarkLight" className="h-3 w-3" />
-                </Button>
-              </AlertDescription>
+            <Alert variant="default" className="border-amber-200 bg-amber-50 shadow-sm relative">
+              <div className="grid grid-cols-[auto_1fr_auto] gap-3 items-start">
+                {/* Icon column */}
+                <div className="flex-shrink-0">
+                  <Icon iconId="faTriangleExclamationSolid" className="h-5 w-5 text-amber-500" />
+                </div>
+
+                {/* Text column */}
+                <div className="min-w-0">
+                  <AlertTitle className="text-amber-800 font-semibold text-base mb-1">
+                    Draft Questions – Please Review
+                  </AlertTitle>
+                  <AlertDescription className="text-amber-700 text-sm leading-relaxed">
+                    These questions are drafts. Please review them thoroughly to ensure they align
+                    with your brand goals.
+                  </AlertDescription>
+                </div>
+
+                {/* Close button column */}
+                <div className="flex-shrink-0">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowAiDisclaimer(false)}
+                    className="h-6 w-6 p-0 text-amber-600 hover:text-amber-800 hover:bg-amber-100 rounded-sm"
+                  >
+                    <Icon iconId="faXmarkLight" className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
             </Alert>
           )}
 

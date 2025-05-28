@@ -16,7 +16,6 @@ import {
 import { addOrUpdateCampaignInAlgolia } from '@/lib/algolia'; // Import Algolia utility
 import { BadRequestError, ForbiddenError, UnauthenticatedError, NotFoundError } from '@/lib/errors'; // Import custom errors
 
-// Define interface for influencer data locally if not exported
 interface ApiInfluencer {
   id?: string | number | null;
   handle?: string | null;
@@ -682,9 +681,10 @@ export async function PATCH(
           logger.info('[Influencer Update] Successfully refetched campaign with influencers', {
             campaignId,
             influencerCount: refetchedCampaign.Influencer.length,
-            hasRichData: refetchedCampaign.Influencer.some(
-              inf => (inf as any).name || (inf as any).avatarUrl || (inf as any).followersCount
-            ),
+            hasRichData: refetchedCampaign.Influencer.some(inf => {
+              const extInf = inf as Record<string, unknown>;
+              return extInf.name || extInf.avatarUrl || extInf.followersCount;
+            }),
           });
         } else {
           logger.error(
