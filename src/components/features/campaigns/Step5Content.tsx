@@ -654,19 +654,26 @@ const Step4Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
 
             // Get associated influencer handles for this asset
             let associatedInfluencerHandles: string[] = [];
+            let associatedInfluencerPlatforms: string[] = [];
             if (
               Array.isArray(asset.associatedInfluencerIds) &&
               asset.associatedInfluencerIds.length > 0 &&
               Array.isArray(data.Influencer)
             ) {
-              associatedInfluencerHandles = data.Influencer.filter(
+              const matchedInfluencers = data.Influencer.filter(
                 inf =>
                   inf &&
                   typeof inf.id === 'string' &&
                   (asset.associatedInfluencerIds as string[]).includes(inf.id)
-              ).map(inf => inf.handle);
+              );
+              associatedInfluencerHandles = matchedInfluencers.map(inf => inf.handle);
+              associatedInfluencerPlatforms = matchedInfluencers.map(inf => inf.platform);
             }
             console.log(`[Step5Review] Matched influencer handles:`, associatedInfluencerHandles);
+            console.log(
+              `[Step5Review] Matched influencer platforms:`,
+              associatedInfluencerPlatforms
+            );
 
             // Map the asset data for AssetCard with all needed fields for video playback and display
             const assetCardData = {
@@ -681,9 +688,13 @@ const Step4Review: React.FC<{ data: DraftCampaignData }> = ({ data }) => (
               muxProcessingStatus: asset.muxProcessingStatus || 'READY',
               muxAssetId: asset.muxAssetId,
               fileName: asset.fileName,
-              // Pass first associated influencer as handle (the card only shows one)
+              // Pass first associated influencer as handle and platform (the card only shows one)
               influencerHandle:
-                associatedInfluencerHandles.length > 0 ? associatedInfluencerHandles[0] : '',
+                associatedInfluencerHandles.length > 0 ? associatedInfluencerHandles[0] : undefined,
+              platform:
+                associatedInfluencerPlatforms.length > 0
+                  ? associatedInfluencerPlatforms[0]
+                  : undefined,
               // Include missing fields
               rationale: asset.rationale || asset.description || '',
             };

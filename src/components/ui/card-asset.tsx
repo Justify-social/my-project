@@ -10,12 +10,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Icon } from '@/components/ui/icon/icon';
-import {
-  Card,
-  CardHeader as _CardHeader,
-  CardContent as _CardContent,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardHeader as _CardHeader, CardContent as _CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import MuxPlayer from '@mux/mux-player-react';
@@ -205,46 +200,52 @@ export const AssetPreview = ({
           muted={true}
           preload="auto"
         />
+        {/* File type icon - positioned exactly like trash can but on left */}
         {mediaTypeIconId && (
-          <Badge
-            variant="secondary"
-            className="absolute bottom-1 left-1 z-10 px-1.5 py-0.5 rounded-md text-xs inline-flex items-center"
-            title={mediaTypeLabel}
-          >
-            <Icon iconId={mediaTypeIconId} className="h-3 w-3" />
-          </Badge>
+          <div className="absolute top-3 left-3 z-10">
+            <Badge
+              variant="secondary"
+              className="px-2 py-1.5 rounded-md text-xs inline-flex items-center bg-slate-900/90 border border-slate-700/50 shadow-lg backdrop-blur-sm"
+              title={mediaTypeLabel}
+            >
+              <Icon iconId={mediaTypeIconId} className="h-3 w-3 text-white" />
+            </Badge>
+          </div>
         )}
       </div>
     );
   } else if (isImage && url) {
     return (
       <div
-        className={cn('relative overflow-hidden bg-muted/50 w-full aspect-square p-3', className)}
+        className={cn('relative overflow-hidden bg-white w-full aspect-square p-3', className)}
         {...props}
       >
         <Image
           src={url}
           alt={fileName ?? 'Asset preview'}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 rounded-md"
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 rounded-sm shadow-sm"
           width={300}
           height={300}
           unoptimized
         />
+        {/* File type icon - positioned exactly like trash can but on left */}
         {mediaTypeIconId && (
-          <Badge
-            variant="secondary"
-            className="absolute bottom-1 left-1 z-10 px-1.5 py-0.5 rounded-md text-xs inline-flex items-center"
-            title={mediaTypeLabel}
-          >
-            <Icon iconId={mediaTypeIconId} className="h-3 w-3" />
-          </Badge>
+          <div className="absolute top-3 left-3 z-10">
+            <Badge
+              variant="secondary"
+              className="px-2 py-1.5 rounded-md text-xs inline-flex items-center bg-slate-900/90 border border-slate-700/50 shadow-lg backdrop-blur-sm"
+              title={mediaTypeLabel}
+            >
+              <Icon iconId={mediaTypeIconId} className="h-3 w-3 text-white" />
+            </Badge>
+          </div>
         )}
       </div>
     );
   } else if (isVideo && url && !muxPlaybackId) {
     return (
       <div
-        className={cn('relative overflow-hidden bg-muted/50 w-full aspect-square p-3', className)}
+        className={cn('relative overflow-hidden bg-white w-full aspect-square p-3', className)}
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
         onClick={togglePlayPause}
@@ -253,7 +254,7 @@ export const AssetPreview = ({
         <video
           ref={videoRef}
           src={url}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 rounded-md"
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 rounded-sm shadow-sm"
           muted
           playsInline
           loop
@@ -264,24 +265,27 @@ export const AssetPreview = ({
             <button
               type="button"
               onClick={togglePlayPause}
-              className="w-10 h-10 bg-black/50 rounded-full flex items-center justify-center hover:bg-black/70 transition-colors z-10"
+              className="w-12 h-12 bg-black/70 rounded-full flex items-center justify-center hover:bg-black/80 transition-colors z-10 shadow-lg"
               aria-label={isPlaying ? 'Pause video' : 'Play video'}
             >
               <Icon
                 iconId={isPlaying ? 'faPauseSolid' : 'faPlaySolid'}
-                className="h-4 w-4 text-white"
+                className="h-5 w-5 text-white"
               />
             </button>
           </div>
         )}
+        {/* File type icon - positioned exactly like trash can but on left */}
         {mediaTypeIconId && (
-          <Badge
-            variant="secondary"
-            className="absolute bottom-1 left-1 z-10 px-1.5 py-0.5 rounded-md text-xs inline-flex items-center"
-            title={mediaTypeLabel}
-          >
-            <Icon iconId={mediaTypeIconId} className="h-3 w-3" />
-          </Badge>
+          <div className="absolute top-3 left-3 z-10">
+            <Badge
+              variant="secondary"
+              className="px-2 py-1.5 rounded-md text-xs inline-flex items-center bg-slate-900/90 border border-slate-700/50 shadow-lg backdrop-blur-sm"
+              title={mediaTypeLabel}
+            >
+              <Icon iconId={mediaTypeIconId} className="h-3 w-3 text-white" />
+            </Badge>
+          </div>
         )}
       </div>
     );
@@ -289,35 +293,40 @@ export const AssetPreview = ({
     return (
       <div
         className={cn(
-          'relative overflow-hidden bg-muted/50 w-full aspect-square p-3 flex flex-col items-center justify-center',
+          'relative overflow-hidden bg-slate-50 w-full aspect-square p-3 flex flex-col items-center justify-center',
           className
         )}
         {...props}
       >
-        <Icon
-          iconId={
-            mediaTypeIconId ||
-            (muxProcessingStatus === 'ERROR' || muxProcessingStatus === 'ERROR_NO_PLAYBACK_ID'
-              ? 'faCircleXmarkLight'
-              : 'faCircleNotchLight')
-          }
-          className={`h-10 w-10 text-muted-foreground ${(muxProcessingStatus === 'MUX_PROCESSING' || muxProcessingStatus === 'AWAITING_UPLOAD') && !muxPlaybackId ? 'animate-spin' : ''}`}
-        />
-        <p className="text-xs text-muted-foreground mt-2">
-          {muxProcessingStatus === 'MUX_PROCESSING' || muxProcessingStatus === 'AWAITING_UPLOAD'
-            ? 'Processing...'
-            : muxProcessingStatus === 'ERROR' || muxProcessingStatus === 'ERROR_NO_PLAYBACK_ID'
-              ? 'Error'
-              : 'Video unavailable'}
-        </p>
+        <div className="bg-white rounded-sm shadow-sm w-full h-full flex flex-col items-center justify-center">
+          <Icon
+            iconId={
+              mediaTypeIconId ||
+              (muxProcessingStatus === 'ERROR' || muxProcessingStatus === 'ERROR_NO_PLAYBACK_ID'
+                ? 'faCircleXmarkLight'
+                : 'faCircleNotchLight')
+            }
+            className={`h-10 w-10 text-muted-foreground ${(muxProcessingStatus === 'MUX_PROCESSING' || muxProcessingStatus === 'AWAITING_UPLOAD') && !muxPlaybackId ? 'animate-spin' : ''}`}
+          />
+          <p className="text-xs text-muted-foreground mt-2 text-center px-2">
+            {muxProcessingStatus === 'MUX_PROCESSING' || muxProcessingStatus === 'AWAITING_UPLOAD'
+              ? 'Processing...'
+              : muxProcessingStatus === 'ERROR' || muxProcessingStatus === 'ERROR_NO_PLAYBACK_ID'
+                ? 'Error'
+                : 'Video unavailable'}
+          </p>
+        </div>
+        {/* File type icon - positioned exactly like trash can but on left */}
         {mediaTypeIconId && (
-          <Badge
-            variant="secondary"
-            className="absolute bottom-1 left-1 z-10 px-1.5 py-0.5 rounded-md text-xs inline-flex items-center"
-            title={mediaTypeLabel}
-          >
-            <Icon iconId={mediaTypeIconId} className="h-3 w-3" />
-          </Badge>
+          <div className="absolute top-3 left-3 z-10">
+            <Badge
+              variant="secondary"
+              className="px-2 py-1.5 rounded-md text-xs inline-flex items-center bg-slate-900/90 border border-slate-700/50 shadow-lg backdrop-blur-sm"
+              title={mediaTypeLabel}
+            >
+              <Icon iconId={mediaTypeIconId} className="h-3 w-3 text-white" />
+            </Badge>
+          </div>
         )}
       </div>
     );
@@ -326,26 +335,33 @@ export const AssetPreview = ({
   return (
     <div
       className={cn(
-        'relative overflow-hidden bg-muted/50 w-full aspect-square p-3 flex flex-col items-center justify-center',
+        'relative overflow-hidden bg-slate-50 w-full aspect-square p-3 flex flex-col items-center justify-center',
         className
       )}
       {...props}
     >
-      <Icon
-        iconId={mediaTypeIconId || 'faFileCircleQuestionLight'}
-        className="h-10 w-10 text-muted-foreground/50 mb-1"
-      />
-      {mediaTypeLabel && <p className="text-xs text-muted-foreground">{mediaTypeLabel}</p>}
-      {fileName && (
-        <p className="text-xs text-muted-foreground truncate max-w-full px-1">{fileName}</p>
-      )}
+      <div className="bg-white rounded-sm shadow-sm w-full h-full flex flex-col items-center justify-center">
+        <Icon
+          iconId={mediaTypeIconId || 'faFileCircleQuestionLight'}
+          className="h-10 w-10 text-muted-foreground/50 mb-2"
+        />
+        {mediaTypeLabel && <p className="text-xs text-muted-foreground">{mediaTypeLabel}</p>}
+        {fileName && (
+          <p className="text-xs text-muted-foreground truncate max-w-full px-2 text-center">
+            {fileName}
+          </p>
+        )}
+      </div>
+      {/* File type icon - positioned exactly like trash can but on left */}
       {mediaTypeIconId && !mediaTypeLabel && (
-        <Badge
-          variant="secondary"
-          className="absolute bottom-1 left-1 z-10 px-1.5 py-0.5 rounded-md text-xs inline-flex items-center"
-        >
-          <Icon iconId={mediaTypeIconId} className="h-3 w-3" />
-        </Badge>
+        <div className="absolute top-3 left-3 z-10">
+          <Badge
+            variant="secondary"
+            className="px-2 py-1.5 rounded-md text-xs inline-flex items-center bg-slate-900/90 border border-slate-700/50 shadow-lg backdrop-blur-sm"
+          >
+            <Icon iconId={mediaTypeIconId} className="h-3 w-3 text-white" />
+          </Badge>
+        </div>
       )}
     </div>
   );
@@ -390,9 +406,36 @@ export function AssetCard({
   cardClassName,
   ...props
 }: AssetCardProps) {
+  const [influencerProfileImage, setInfluencerProfileImage] = useState<string | null>(null);
+
   if (process.env.NODE_ENV === 'development') {
     console.log('[AssetCard STEP 5 RENDER] Full props:', { asset, currency, defaultPlatform }); // Added for Step 5 debugging
   }
+
+  // Fetch influencer profile image similar to card-influencer.tsx
+  useEffect(() => {
+    const fetchInfluencerProfileImage = async () => {
+      if (!asset?.influencerHandle || !asset?.platform) return;
+
+      try {
+        const response = await fetch(
+          `/api/influencers/fetch-profile?handle=${encodeURIComponent(asset.influencerHandle)}&platform=${encodeURIComponent(asset.platform.toUpperCase())}`
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data?.avatarUrl) {
+            setInfluencerProfileImage(data.data.avatarUrl);
+          }
+        }
+      } catch (error) {
+        console.error(`Failed to fetch profile image for ${asset.influencerHandle}:`, error);
+      }
+    };
+
+    fetchInfluencerProfileImage();
+  }, [asset?.influencerHandle, asset?.platform]);
+
   // Uses updated AssetCardProps
   if (!asset) return null;
 
@@ -421,80 +464,148 @@ export function AssetCard({
   return (
     <Card
       className={cn(
-        'relative group flex flex-col overflow-hidden h-full',
-        'border border-border rounded-lg shadow-lg',
-        'hover:shadow-xl transition-shadow duration-300 ease-in-out',
-        props.onClick && 'cursor-pointer',
+        // Premium Polaroid-inspired design with Apple/Shopify quality - made wider and bigger
+        'relative group flex flex-col overflow-hidden h-full max-w-md mx-auto', // Changed from max-w-sm to max-w-md for wider cards
+        'bg-white border-0 rounded-xl shadow-lg',
+        'hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out',
+        // Enhanced Polaroid-style depth and dimension
+        'before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/10 before:via-transparent before:to-black/5 before:pointer-events-none before:z-10',
+        'after:absolute after:inset-0 after:shadow-inner after:pointer-events-none after:z-10',
+        props.onClick && 'cursor-pointer hover:shadow-2xl hover:scale-[1.02]',
         cardClassName
       )}
+      style={{
+        boxShadow:
+          '0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9)',
+      }}
       {...props}
     >
-      <AssetPreview
-        url={isVideoAsset && muxPlaybackId ? `https://stream.mux.com/${muxPlaybackId}.m3u8` : url}
-        fileName={name}
-        type={type}
-        mediaTypeIconId={mediaTypeIconId}
-        mediaTypeLabel={mediaTypeLabel}
-        muxPlaybackId={muxPlaybackId}
-        muxProcessingStatus={muxProcessingStatus}
-      />
+      {/* Polaroid-style image area with generous white border - increased image size */}
+      <div className="p-4 pb-2 bg-white">
+        {' '}
+        {/* Reduced padding from p-6 pb-3 to p-4 pb-2 for larger content area */}
+        <AssetPreview
+          url={isVideoAsset && muxPlaybackId ? `https://stream.mux.com/${muxPlaybackId}.m3u8` : url}
+          fileName={name}
+          type={type}
+          mediaTypeIconId={mediaTypeIconId}
+          mediaTypeLabel={mediaTypeLabel}
+          muxPlaybackId={muxPlaybackId}
+          muxProcessingStatus={muxProcessingStatus}
+          className="rounded-md overflow-hidden border border-slate-200/60 shadow-sm"
+        />
+      </div>
 
-      {/* Content Area with padding and flex-grow */}
-      <div className={cn('flex flex-col flex-grow', className)}>
-        <div className="p-4">
-          {/* Header section moved inside content padding */}
-          <div className="flex items-center justify-between gap-2 mb-2">
-            <div className="flex items-center gap-1.5 flex-1 min-w-0">
-              {/* Optional: Icon before title? If needed 
-            <Icon iconId={mediaTypeIconId} className="h-4 w-4 text-muted-foreground flex-shrink-0" /> 
-            */}
-              <CardTitle className="text-sm font-medium leading-snug truncate" title={name}>
-                {name || 'Untitled Asset'}
-              </CardTitle>
-            </div>
-            {hasPlatform(platform, defaultPlatform) && (
-              <Badge
-                variant="outline"
-                className="flex-shrink-0 items-center gap-1 px-1.5 py-0.5 border-border"
-              >
-                <Icon iconId={platformIconId} className="h-3 w-3" />
-                <span className="text-xs font-medium text-muted-foreground">{platform}</span>
-              </Badge>
-            )}
-          </div>
+      {/* Polaroid-style content area with generous spacing */}
+      <div className={cn('flex flex-col flex-grow bg-white px-8 pb-6 pt-5', className)}>
+        {' '}
+        {/* Reduced bottom padding from pb-8 to pb-6 */}
+        {/* Header section with enhanced spacing and center alignment */}
+        <div className="flex flex-col items-center gap-4 mb-6">
+          {/* Centered Title */}
+          <h3
+            className="font-sora text-lg font-bold leading-tight text-slate-900 text-center max-w-full px-2" // Increased from text-base to text-lg
+            title={name}
+          >
+            {name || 'Untitled Asset'}
+          </h3>
 
-          {/* Influencer Handle */}
+          {/* Centered Enhanced Influencer Handle with profile image */}
           {influencerHandle && (
-            <div className="mb-2 flex items-center text-muted-foreground">
-              <Icon iconId="faUserLight" className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />
-              <span className="text-muted-foreground text-xs truncate" title={influencerHandle}>
-                {influencerHandle}
-              </span>
+            <div className="flex flex-col items-center gap-3">
+              {' '}
+              {/* Increased gap from gap-2 to gap-3 */}
+              <div className="flex items-center gap-3">
+                <div className="relative h-9 w-9 rounded-full overflow-hidden bg-slate-100 flex-shrink-0">
+                  {' '}
+                  {/* Increased from h-8 w-8 to h-9 w-9 */}
+                  {influencerProfileImage ? (
+                    <Image
+                      src={influencerProfileImage}
+                      alt={influencerHandle}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Icon iconId="faUserCircleLight" className="h-6 w-6 text-slate-400" />{' '}
+                      {/* Increased from h-5 w-5 to h-6 w-6 */}
+                    </div>
+                  )}
+                </div>
+                <span className="text-base font-semibold text-slate-700" title={influencerHandle}>
+                  {' '}
+                  {/* Increased from text-sm to text-base */}
+                  {influencerHandle}
+                </span>
+              </div>
+              {/* Removed platform display from here - will be moved to bottom left */}
             </div>
           )}
 
-          {/* Description - takes remaining space */}
-          {description && (
-            <div className="mb-2 flex-grow">
-              <span className="text-xs font-medium text-muted-foreground underline">
-                Why this content?
-              </span>
-              <p className="text-sm text-foreground mt-0.5 line-clamp-3">{description}</p>
-            </div>
-          )}
-
-          {/* Spacer to push budget down if no description */}
-          {!description && <div className="flex-grow"></div>}
-
-          {/* Budget - Absolute positioned in bottom-right corner */}
-          {budget !== undefined && budget !== null && (
-            <div className="absolute bottom-3 right-3 z-10">
-              <Badge variant="secondary" className="text-sm font-medium">
-                {formatCurrency(budget, currency)}
-              </Badge>
-            </div>
+          {/* Platform badge with enhanced styling - only show if no influencer or different from influencer platform */}
+          {hasPlatform(platform, defaultPlatform) && !influencerHandle && (
+            <Badge
+              variant="outline"
+              className="flex-shrink-0 items-center gap-2 px-3 py-2 border-slate-200 bg-slate-50/80 hover:bg-slate-100/80 transition-colors shadow-sm"
+            >
+              <Icon iconId={platformIconId} className="h-3.5 w-3.5 text-slate-600" />
+              <span className="text-sm font-semibold text-slate-700 capitalize">{platform}</span>
+            </Badge>
           )}
         </div>
+        {/* Description section with enhanced typography and proper spacing */}
+        {description && (
+          <div className="mb-8 px-2">
+            <div className="flex items-center mb-4">
+              <div className="h-px bg-gradient-to-r from-slate-300 via-slate-200 to-transparent flex-1"></div>
+              <span className="text-xs font-bold text-slate-600 uppercase tracking-widest px-6 bg-white">
+                Why this content?
+              </span>
+              <div className="h-px bg-gradient-to-l from-slate-300 via-slate-200 to-transparent flex-1"></div>
+            </div>
+            <p className="text-sm text-slate-700 leading-relaxed line-clamp-3 font-inter text-left px-1">
+              {description}
+            </p>
+          </div>
+        )}
+        {/* Spacer to push bottom section to bottom */}
+        <div className="flex-grow"></div>
+        {/* Bottom section with platform icon (left) and budget (right) */}
+        {(platform || (budget !== undefined && budget !== null)) && (
+          <div className="mt-auto pt-6 px-2 pb-4">
+            {' '}
+            {/* Added pb-4 for margin from bottom */}
+            <div className="flex justify-between items-center">
+              {/* Platform icon on bottom left */}
+              {platform && (
+                <div className="flex-shrink-0">
+                  <Badge
+                    variant="outline"
+                    className="p-2 border-slate-200 bg-slate-50/80 hover:bg-slate-100/80 transition-colors shadow-sm"
+                  >
+                    <Icon iconId={platformIconId} className="h-4 w-4 text-slate-600" />
+                  </Badge>
+                </div>
+              )}
+
+              {/* Budget badge on bottom right */}
+              {budget !== undefined && budget !== null && (
+                <div className="flex-shrink-0">
+                  <Badge
+                    variant="secondary"
+                    className="text-base font-bold px-5 py-2.5 bg-slate-900 text-white hover:bg-slate-800 transition-all duration-300 shadow-lg hover:shadow-xl border-0"
+                    style={{
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.1)',
+                    }}
+                  >
+                    {formatCurrency(budget, currency)}
+                  </Badge>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </Card>
   );

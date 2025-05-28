@@ -11,7 +11,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { Icon } from '@/components/ui/icon/icon';
 import { IconButtonAction } from '@/components/ui/button-icon-action';
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Card, CardHeader as _CardHeader, CardContent as _CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
@@ -128,7 +128,7 @@ export const AssetCardStep4 = React.memo(
     saveProgress,
     availableInfluencers,
     currency = 'USD',
-    className,
+    className: _className,
     cardClassName,
     onDelete,
   }: AssetCardProps) {
@@ -240,20 +240,29 @@ export const AssetCardStep4 = React.memo(
     return (
       <Card
         className={cn(
-          'group flex flex-col overflow-hidden h-full relative',
-          'border border-border rounded-lg shadow-sm',
+          // Premium Polaroid-inspired design matching display component with Apple/Shopify quality
+          'group flex flex-col overflow-hidden h-full relative max-w-sm mx-auto',
+          'bg-white border-0 rounded-xl shadow-lg',
+          'hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out',
+          // Enhanced Polaroid-style depth and dimension
+          'before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/10 before:via-transparent before:to-black/5 before:pointer-events-none before:z-10',
+          'after:absolute after:inset-0 after:shadow-inner after:pointer-events-none after:z-10',
           cardClassName
         )}
+        style={{
+          boxShadow:
+            '0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9)',
+        }}
       >
-        {/* Delete Button - Top Right Corner */}
+        {/* Delete Button - Top Right Corner with enhanced styling */}
         {onDelete && (
-          <div className="absolute top-2 right-2 z-30">
+          <div className="absolute top-3 right-3 z-30">
             <IconButtonAction
               iconBaseName="faTrashCan"
               hoverColorClass="text-destructive"
               ariaLabel="Delete asset"
               defaultColorClass="text-muted-foreground"
-              className="h-7 w-7 bg-white/90 hover:bg-white shadow-sm border border-border/50"
+              className="h-8 w-8 bg-white/95 hover:bg-white shadow-lg border border-slate-200/60 backdrop-blur-sm rounded-lg transition-all duration-200 hover:scale-105"
               onClick={() =>
                 onDelete(
                   currentAsset.internalAssetId || currentAsset.id,
@@ -265,259 +274,293 @@ export const AssetCardStep4 = React.memo(
           </div>
         )}
 
-        {/* Auto-save indicator */}
+        {/* Auto-save indicator with enhanced styling */}
         {isSaving && (
-          <div className="absolute top-2 left-2 z-20 bg-blue-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+          <div className="absolute top-3 left-3 z-20 bg-blue-500 text-white text-xs px-3 py-2 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur-sm">
             <Icon iconId="faSpinnerLight" className="h-3 w-3 animate-spin" />
-            Saving...
+            <span className="font-medium">Saving...</span>
           </div>
         )}
 
-        {isVideoAsset && muxProcessingStatus && muxProcessingStatus !== 'READY' && (
-          <div className="aspect-video bg-muted flex flex-col items-center justify-center p-4">
-            <Icon iconId="faCircleNotchLight" className="h-8 w-8 text-primary animate-spin mb-2" />
-            <p className="text-xs text-muted-foreground">
-              {muxProcessingStatus === 'MUX_PROCESSING' || muxProcessingStatus === 'AWAITING_UPLOAD'
-                ? 'Video is processing...'
-                : muxProcessingStatus === 'ERROR' || muxProcessingStatus === 'ERROR_NO_PLAYBACK_ID'
-                  ? 'Video processing error'
-                  : `Status: ${muxProcessingStatus}`}
-            </p>
-          </div>
-        )}
-        {(!isVideoAsset || (isVideoAsset && muxProcessingStatus === 'READY' && muxPlaybackId)) && (
-          <AssetPreview
-            url={
-              isVideoAsset && muxPlaybackId ? `https://stream.mux.com/${muxPlaybackId}.m3u8` : url
-            }
-            fileName={name}
-            type={type}
-            mediaTypeIconId={mediaTypeIconId}
-            mediaTypeLabel={mediaTypeLabel}
-            muxPlaybackId={muxPlaybackId}
-            muxProcessingStatus={muxProcessingStatus}
-          />
-        )}
-        {/* Fallback for video assets without a definitive status yet, or if AssetPreview handles initial state */}
-        {isVideoAsset && !muxProcessingStatus && (
-          <AssetPreview
-            url={url}
-            fileName={name}
-            type={type}
-            mediaTypeIconId={mediaTypeIconId}
-            mediaTypeLabel={mediaTypeLabel}
-          />
-        )}
+        {/* Polaroid-style image area with generous white border */}
+        <div className="p-5 pb-3 bg-white">
+          {isVideoAsset && muxProcessingStatus && muxProcessingStatus !== 'READY' && (
+            <div className="aspect-square bg-slate-50 flex flex-col items-center justify-center p-4 rounded-md border border-slate-200/60 shadow-sm relative">
+              <div className="bg-white rounded-sm shadow-sm w-full h-full flex flex-col items-center justify-center">
+                <Icon
+                  iconId="faCircleNotchLight"
+                  className="h-10 w-10 text-primary animate-spin mb-3"
+                />
+                <p className="text-xs text-muted-foreground text-center px-2 leading-relaxed">
+                  {muxProcessingStatus === 'MUX_PROCESSING' ||
+                  muxProcessingStatus === 'AWAITING_UPLOAD'
+                    ? 'Video is processing...'
+                    : muxProcessingStatus === 'ERROR' ||
+                        muxProcessingStatus === 'ERROR_NO_PLAYBACK_ID'
+                      ? 'Video processing error'
+                      : `Status: ${muxProcessingStatus}`}
+                </p>
+              </div>
+              {/* File type icon positioned exactly like trash can but on left */}
+              <div className="absolute top-3 left-3 z-10">
+                <Badge
+                  variant="secondary"
+                  className="px-2 py-1.5 rounded-md text-xs inline-flex items-center bg-slate-900/90 border border-slate-700/50 shadow-lg backdrop-blur-sm"
+                  title={mediaTypeLabel}
+                >
+                  <Icon iconId={mediaTypeIconId} className="h-3 w-3 text-white" />
+                </Badge>
+              </div>
+            </div>
+          )}
+          {(!isVideoAsset ||
+            (isVideoAsset && muxProcessingStatus === 'READY' && muxPlaybackId)) && (
+            <AssetPreview
+              url={
+                isVideoAsset && muxPlaybackId ? `https://stream.mux.com/${muxPlaybackId}.m3u8` : url
+              }
+              fileName={name}
+              type={type}
+              mediaTypeIconId={mediaTypeIconId}
+              mediaTypeLabel={mediaTypeLabel}
+              muxPlaybackId={muxPlaybackId}
+              muxProcessingStatus={muxProcessingStatus}
+              className="rounded-md overflow-hidden border border-slate-200/60 shadow-sm"
+            />
+          )}
+          {/* Fallback for video assets without a definitive status yet */}
+          {isVideoAsset && !muxProcessingStatus && (
+            <AssetPreview
+              url={url}
+              fileName={name}
+              type={type}
+              mediaTypeIconId={mediaTypeIconId}
+              mediaTypeLabel={mediaTypeLabel}
+              className="rounded-md overflow-hidden border border-slate-200/60 shadow-sm"
+            />
+          )}
+        </div>
 
-        <CardHeader className="flex-row items-center justify-between gap-2 pb-2 pt-3 px-3">
-          <div className="flex items-center border border-input rounded-sm flex-1 min-w-0 group relative bg-transparent hover:bg-muted/50 focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-1">
+        {/* Polaroid-style content area with generous spacing */}
+        <div className="bg-white px-6 pb-6 pt-4">
+          {/* Asset Name Field - Styled like premium Polaroid caption */}
+          <div className="mb-5">
             <FormField
               control={control}
               name={fieldNames.name}
               render={({ field }) => (
-                <FormItem className="flex-1 min-w-0">
+                <FormItem className="space-y-2">
                   <FormControl>
                     <Input
                       {...field}
                       value={field.value ?? ''}
-                      className="text-sm font-medium leading-snug h-auto p-1 border-0 shadow-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+                      className="font-sora text-base font-bold text-slate-900 h-auto p-3 border border-slate-200 rounded-lg bg-white hover:bg-slate-50/50 focus:bg-white transition-colors shadow-sm"
                       placeholder="Untitled Asset"
                       onBlur={handleAutoSave}
                     />
                   </FormControl>
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
           </div>
 
-          <FormMessage className="text-xs px-1 w-full" />
-        </CardHeader>
-
-        <CardContent className={cn('px-3 pb-3 flex flex-col flex-grow space-y-3', className)}>
           {influencerHandle && (
-            <div className="mt-1 mb-2 flex items-center text-muted-foreground">
-              <Icon iconId="faUserLight" className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />
-              <span className="text-muted-foreground text-xs truncate" title={influencerHandle}>
+            <div className="mb-4 flex items-center text-slate-600">
+              <Icon
+                iconId="faUserCircleLight"
+                className="h-4 w-4 mr-2 flex-shrink-0 text-slate-500"
+              />
+              <span className="text-sm font-medium truncate" title={influencerHandle}>
                 {influencerHandle}
               </span>
             </div>
           )}
 
-          {/* Influencer Association - Using Shadcn Combobox pattern */}
-          <FormField
-            control={control}
-            name={fieldNames.associatedInfluencerIds}
-            render={({ field }) => {
-              const selectedInfluencerIds = field.value || [];
-              // Find the full option objects for selected IDs
-              const selectedOptions = availableInfluencers.filter((inf: InfluencerOption) =>
-                selectedInfluencerIds.includes(inf.id)
-              );
+          <div className="space-y-5">
+            {/* Influencer Association with enhanced styling */}
+            <FormField
+              control={control}
+              name={fieldNames.associatedInfluencerIds}
+              render={({ field }) => {
+                const selectedInfluencerIds = field.value || [];
+                const selectedOptions = availableInfluencers.filter((inf: InfluencerOption) =>
+                  selectedInfluencerIds.includes(inf.id)
+                );
 
-              return (
-                <FormItem>
-                  <FormLabel className="text-xs text-muted-foreground">
-                    Associated Influencer(s)
-                  </FormLabel>
-                  <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          aria-expanded={popoverOpen}
-                          className={cn(
-                            'w-full justify-between h-9 font-normal text-xs',
-                            !selectedInfluencerIds.length && 'text-muted-foreground'
-                          )}
-                        >
-                          <span className="truncate">
-                            {selectedOptions.length > 0
-                              ? selectedOptions.length === 1
-                                ? selectedOptions[0].handle // Show handle if only one selected
-                                : `${selectedOptions.length} influencers selected`
-                              : 'Select Influencers...'}
-                          </span>
-                          <Icon
-                            iconId="faChevronDownLight"
-                            className="ml-2 h-3 w-3 shrink-0 opacity-50"
+                return (
+                  <FormItem>
+                    <FormLabel className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-3">
+                      Associated Influencer(s)
+                    </FormLabel>
+                    <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={popoverOpen}
+                            className={cn(
+                              'w-full justify-between h-11 font-normal text-sm border-slate-200 bg-slate-50/80 hover:bg-slate-100/80 shadow-sm',
+                              !selectedInfluencerIds.length && 'text-muted-foreground'
+                            )}
+                          >
+                            <span className="truncate">
+                              {selectedOptions.length > 0
+                                ? selectedOptions.length === 1
+                                  ? selectedOptions[0].handle
+                                  : `${selectedOptions.length} influencers selected`
+                                : 'Select Influencers...'}
+                            </span>
+                            <Icon
+                              iconId="faChevronDownLight"
+                              className="ml-2 h-4 w-4 shrink-0 opacity-50"
+                            />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                        <Command>
+                          <CommandInput
+                            placeholder="Search influencers..."
+                            className="h-9 text-sm"
                           />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                      <Command>
-                        <CommandInput placeholder="Search influencers..." className="h-8 text-xs" />
-                        <CommandList>
-                          <CommandEmpty>No influencers found.</CommandEmpty>
-                          <CommandGroup>
-                            {availableInfluencers.map((influencer: InfluencerOption) => (
-                              <CommandItem
-                                key={influencer.id}
-                                value={influencer.handle} // Use handle for searching
-                                onSelect={() => {
-                                  const currentIds = selectedInfluencerIds || [];
-                                  const newValue = currentIds.includes(influencer.id)
-                                    ? currentIds.filter((id: string) => id !== influencer.id)
-                                    : [...currentIds, influencer.id];
-
-                                  // Update the form field using proper React Hook Form API
-                                  field.onChange(newValue);
-                                  handleAutoSave();
-                                }}
-                                className="cursor-pointer text-xs"
-                              >
-                                <Icon
-                                  iconId="faCheckSolid" // Use FontAwesome check
-                                  className={cn(
-                                    'mr-2 h-3 w-3',
-                                    selectedInfluencerIds.includes(influencer.id)
-                                      ? 'opacity-100'
-                                      : 'opacity-0'
-                                  )}
-                                />
-                                {influencer.handle}
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                  {/* Display selected as badges */}
-                  <div className="flex flex-wrap gap-1 pt-1 min-h-[20px]">
-                    {selectedOptions.map((influencer: InfluencerOption) => (
-                      <RemovableBadge
-                        key={influencer.id}
-                        variant="secondary"
-                        size="sm"
-                        onRemove={() => {
-                          const currentIds = selectedInfluencerIds || [];
-                          const newValue = currentIds.filter((id: string) => id !== influencer.id);
-
-                          // Update the form field using proper React Hook Form API
-                          field.onChange(newValue);
-                          handleAutoSave();
-                        }}
-                        removeAriaLabel={`Remove ${influencer.handle}`}
-                      >
-                        {influencer.handle}
-                      </RemovableBadge>
-                    ))}
-                  </div>
-                  <FormMessage className="text-xs" />
-                </FormItem>
-              );
-            }}
-          />
-
-          {/* Justification */}
-          <FormField
-            control={control}
-            name={fieldNames.rationale}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs text-muted-foreground">Why this content?</FormLabel>
-                <FormControl>
-                  <Textarea
-                    {...field}
-                    value={field.value ?? ''}
-                    placeholder="Explain the purpose or strategy..."
-                    rows={2}
-                    className="text-xs resize-none" // Added resize-none
-                    onBlur={handleAutoSave}
-                  />
-                </FormControl>
-                <FormMessage className="text-xs" />
-              </FormItem>
-            )}
-          />
-
-          {/* Budget - Enhanced with better currency display */}
-          <FormField
-            control={control}
-            name={fieldNames.budget}
-            render={({ field }) => {
-              const symbol = getCurrencySymbol(currency);
-              return (
-                <FormItem>
-                  <FormLabel className="text-xs font-semibold text-foreground">
-                    Budget
-                    <Badge
-                      variant="outline"
-                      className="ml-2 text-xs font-medium border-primary/30 text-primary"
-                    >
-                      {currency}
-                    </Badge>
-                  </FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <Input
-                        type="text"
-                        {...field}
-                        value={formatCurrencyInput(field.value)}
-                        onChange={e => {
-                          const parsedValue = parseCurrencyInput(e.target.value);
-                          const numericValue =
-                            parsedValue === '' ? undefined : parseFloat(parsedValue);
-                          field.onChange(numericValue);
-                        }}
-                        onBlur={handleAutoSave}
-                        placeholder="0"
-                        className="text-xs pl-8 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none font-medium"
-                        min="0"
-                      />
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-primary font-semibold text-sm">
-                        {symbol}
-                      </span>
+                          <CommandList>
+                            <CommandEmpty>No influencers found.</CommandEmpty>
+                            <CommandGroup>
+                              {availableInfluencers.map((influencer: InfluencerOption) => (
+                                <CommandItem
+                                  key={influencer.id}
+                                  value={influencer.handle}
+                                  onSelect={() => {
+                                    const currentIds = selectedInfluencerIds || [];
+                                    const newValue = currentIds.includes(influencer.id)
+                                      ? currentIds.filter((id: string) => id !== influencer.id)
+                                      : [...currentIds, influencer.id];
+                                    field.onChange(newValue);
+                                    handleAutoSave();
+                                  }}
+                                  className="cursor-pointer text-sm"
+                                >
+                                  <Icon
+                                    iconId="faCheckSolid"
+                                    className={cn(
+                                      'mr-2 h-4 w-4',
+                                      selectedInfluencerIds.includes(influencer.id)
+                                        ? 'opacity-100'
+                                        : 'opacity-0'
+                                    )}
+                                  />
+                                  {influencer.handle}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    {/* Display selected as badges with enhanced styling */}
+                    <div className="flex flex-wrap gap-2 pt-2 min-h-[24px]">
+                      {selectedOptions.map((influencer: InfluencerOption) => (
+                        <RemovableBadge
+                          key={influencer.id}
+                          variant="secondary"
+                          size="sm"
+                          onRemove={() => {
+                            const currentIds = selectedInfluencerIds || [];
+                            const newValue = currentIds.filter(
+                              (id: string) => id !== influencer.id
+                            );
+                            field.onChange(newValue);
+                            handleAutoSave();
+                          }}
+                          removeAriaLabel={`Remove ${influencer.handle}`}
+                          className="px-3 py-1"
+                        >
+                          {influencer.handle}
+                        </RemovableBadge>
+                      ))}
                     </div>
+                    <FormMessage className="text-xs" />
+                  </FormItem>
+                );
+              }}
+            />
+
+            {/* Justification with enhanced styling */}
+            <FormField
+              control={control}
+              name={fieldNames.rationale}
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center mb-3">
+                    <div className="h-px bg-gradient-to-r from-slate-300 via-slate-200 to-transparent flex-1"></div>
+                    <FormLabel className="text-sm font-bold text-slate-700 uppercase tracking-widest px-4 bg-white">
+                      Why this content?
+                    </FormLabel>
+                    <div className="h-px bg-gradient-to-l from-slate-300 via-slate-200 to-transparent flex-1"></div>
+                  </div>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      value={field.value ?? ''}
+                      placeholder="Explain the purpose or strategy..."
+                      rows={3}
+                      className="text-sm resize-none border-slate-200 bg-slate-50/80 hover:bg-slate-100/80 focus:bg-white transition-colors shadow-sm px-4 py-3"
+                      onBlur={handleAutoSave}
+                    />
                   </FormControl>
                   <FormMessage className="text-xs" />
                 </FormItem>
-              );
-            }}
-          />
-        </CardContent>
+              )}
+            />
+
+            {/* Budget with premium Polaroid styling */}
+            <FormField
+              control={control}
+              name={fieldNames.budget}
+              render={({ field }) => {
+                const symbol = getCurrencySymbol(currency);
+                return (
+                  <FormItem>
+                    <FormLabel className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-3">
+                      Budget
+                      <Badge
+                        variant="outline"
+                        className="ml-3 text-xs font-semibold border-slate-300 bg-slate-100 text-slate-700 px-2 py-1"
+                      >
+                        {currency}
+                      </Badge>
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          type="text"
+                          {...field}
+                          value={formatCurrencyInput(field.value)}
+                          onChange={e => {
+                            const parsedValue = parseCurrencyInput(e.target.value);
+                            const numericValue =
+                              parsedValue === '' ? undefined : parseFloat(parsedValue);
+                            field.onChange(numericValue);
+                          }}
+                          onBlur={handleAutoSave}
+                          placeholder="0"
+                          className="text-base pl-10 pr-4 py-3 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none font-bold border-slate-200 bg-slate-50/80 hover:bg-slate-100/80 focus:bg-white transition-colors shadow-sm rounded-lg"
+                          min="0"
+                        />
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-700 font-bold text-base">
+                          {symbol}
+                        </span>
+                      </div>
+                    </FormControl>
+                    <FormMessage className="text-xs" />
+                  </FormItem>
+                );
+              }}
+            />
+          </div>
+        </div>
       </Card>
     );
   },

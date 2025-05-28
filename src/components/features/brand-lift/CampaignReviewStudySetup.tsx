@@ -859,6 +859,12 @@ const Step4Review: React.FC<{ data: CampaignDetails }> = ({ data }) => (
       {data.assets && data.assets.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pt-2">
           {data.assets.map((asset, idx) => {
+            // Try to get influencer information from the campaign's influencer list
+            // For now, we'll associate the first influencer if available
+            // TODO: Implement proper asset-to-influencer mapping when the API provides it
+            const primaryInfluencer =
+              data.Influencer && data.Influencer.length > 0 ? data.Influencer[0] : null;
+
             const assetCardData = {
               id: asset.id || `asset-${idx}`,
               name: asset.name ?? asset.fileName ?? undefined,
@@ -869,6 +875,9 @@ const Step4Review: React.FC<{ data: CampaignDetails }> = ({ data }) => (
               muxPlaybackId: asset.muxPlaybackId ?? undefined,
               muxProcessingStatus: asset.muxProcessingStatus ?? undefined,
               muxAssetId: asset.muxAssetId ?? undefined,
+              // Include influencer information for consistency across all AssetCard usages
+              influencerHandle: primaryInfluencer?.handle ?? undefined,
+              platform: primaryInfluencer?.platform ?? undefined,
             };
             return (
               <AssetCard

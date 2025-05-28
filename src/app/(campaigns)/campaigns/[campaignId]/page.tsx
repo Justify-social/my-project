@@ -18,16 +18,13 @@ import ErrorFallback from '@/components/features/core/error-handling/ErrorFallba
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import { AssetCard } from '@/components/ui/card-asset';
-import { type VariantProps } from 'class-variance-authority';
-import { badgeVariants } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
-// Import the Duplicate Button using relative path
 import { DuplicateCampaignButton } from '@/components/ui/button-duplicate-campaigns';
 import { ConfirmDeleteDialog } from '@/components/ui/dialog-confirm-delete';
-import { getCampaignStatusInfo, CampaignStatusKey } from '@/utils/statusUtils'; // Import centralized utility
-import { useAuth } from '@clerk/nextjs'; // Import useAuth
+import { getCampaignStatusInfo, CampaignStatusKey } from '@/utils/statusUtils';
+import { useAuth } from '@clerk/nextjs';
 import { RemovableBadge } from '@/components/ui/removable-badge';
 
 // Define AGE_BRACKETS for the age distribution summary UI
@@ -111,7 +108,7 @@ interface CampaignData {
   contacts: Array<ContactDetails & { phone?: string; isPrimary?: boolean }>;
 }
 
-// Define UploadedAsset type
+// Define UploadedAsset type with influencer information
 interface UploadedAsset {
   id: string | number;
   name: string;
@@ -122,6 +119,9 @@ interface UploadedAsset {
   muxPlaybackId?: string;
   muxProcessingStatus?: string;
   muxAssetId?: string;
+  // Add influencer information for consistency across all AssetCard usages
+  influencerHandle?: string;
+  platform?: string;
 }
 
 // Define ContactDetails type
@@ -133,6 +133,7 @@ interface ContactDetails {
 
 // Define type for raw influencer data from API
 interface APIInfluencerData {
+  id?: string | null;
   handle?: string | null;
   platform?: string | null;
 }
@@ -153,6 +154,15 @@ interface APIAssetData {
   rationale?: string | null;
   description?: string | null;
   budget?: number | null;
+  // Add influencer information to match the expected data structure
+  influencerHandle?: string | null;
+  platform?: string | null;
+  // Also include any associated influencer data that might come from relationships
+  associatedInfluencerIds?: string[] | null;
+  // Add Mux-related properties for video assets
+  muxPlaybackId?: string | null;
+  muxProcessingStatus?: string | null;
+  muxAssetId?: string | null;
 }
 
 interface APIContactData {
@@ -162,9 +172,6 @@ interface APIContactData {
   position?: string | null;
   phone?: string | null;
 }
-
-// Define type for badge variants based on the component's CVA definition
-type _BadgeVariant = VariantProps<typeof badgeVariants>['variant']; // Renamed to _BadgeVariant as it's unused
 
 // KPI mapping for icons
 const kpiIconMap: Record<string, string> = {
@@ -230,28 +237,6 @@ const getKpiTooltip = (kpiKey: string): string => {
   return kpiTooltips[normalizedKey] || 'Measures campaign performance';
 };
 
-// DataItem component for consistent display formatting
-const _DataItem = ({
-  // Renamed to _DataItem as it's unused
-  label,
-  value,
-  iconId,
-  className,
-}: {
-  label: string;
-  value: React.ReactNode;
-  iconId?: string;
-  className?: string;
-}) => (
-  <div className={cn('flex items-start py-2', className)}>
-    {iconId && <Icon iconId={iconId} className="mr-2 mt-1 text-muted-foreground" />}
-    <div className="flex-1">
-      <p className="text-sm font-medium text-muted-foreground mb-1">{label}</p>
-      <div className="text-base text-foreground">{value || 'Not specified'}</div>
-    </div>
-  </div>
-);
-
 // PageSection wrapper component for consistent spacing between major page sections
 const PageSection = ({
   children,
@@ -259,39 +244,13 @@ const PageSection = ({
 }: {
   children: React.ReactNode;
   className?: string;
-}) => (
-  <section className={cn('mb-12', className)}>
-    {' '}
-    {/* Consistent bottom margin for all sections */}
-    {children}
-  </section>
-);
+}) => <section className={cn('mb-12', className)}>{children}</section>;
 
-// Section Header component (Ensure defined before use)
+// Section Header component
 const SectionHeader = ({ title, className }: { title: string; className?: string }) => (
   <div className={cn('flex items-center gap-2 mb-6', className)}>
     <h2 className="text-xl font-semibold tracking-tight whitespace-nowrap">{title}</h2>
     <Separator className="flex-grow" />
-  </div>
-);
-
-// Section Header without separator (for grid layouts)
-const _SectionHeaderNoSeparator = (
-  { title, className }: { title: string; className?: string } // Renamed to _SectionHeaderNoSeparator as it's unused
-) => (
-  <div className={cn('mb-6', className)}>
-    {' '}
-    {/* Standardized bottom margin */}
-    <h2 className="text-xl font-semibold tracking-tight whitespace-nowrap">{title}</h2>
-  </div>
-);
-
-// Card Group component for consistent styling
-const _CardGroup = (
-  { children, className }: { children: React.ReactNode; className?: string } // Renamed to _CardGroup as it's unused
-) => (
-  <div className={cn('grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5', className)}>
-    {children}
   </div>
 );
 
@@ -357,29 +316,19 @@ const KpiBadge = ({ kpi, isPrimary = false }: { kpi: string; isPrimary?: boolean
   );
 };
 
-// Format measurement name with proper capitalization
-const _formatMeasurementName = (name: string): string => {
-  // Renamed to _formatMeasurementName as it's unused
-  return name
-    .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
-};
-
-// Add this helper function within the CampaignDetail component scope,
-// or ensure it's imported if defined elsewhere and accessible.
+// Helper function to get asset type from URL
 const getAssetTypeFromUrl = (url: string): string => {
-  if (!url) return 'file'; // Default or 'unknown'
+  if (!url) return 'file';
   const extension = url.split('.').pop()?.toLowerCase();
   if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension || '')) return 'image';
   if (['mp4', 'webm', 'mov', 'avi'].includes(extension || '')) return 'video';
-  return 'file'; // Fallback for other types
+  return 'file';
 };
 
 export default function CampaignDetail() {
   const router = useRouter();
   const params = useParams();
-  const { orgId: _activeOrgId, isLoaded: _isAuthLoaded, userId: _clerkUserId } = useAuth(); // Prefixed unused variables
+  const { orgId: activeOrgId, isLoaded: isAuthLoaded, userId: _clerkUserId } = useAuth();
   const campaignIdParam = (params?.campaignId as string) || '';
   const [campaignData, setCampaignData] = useState<CampaignData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -557,15 +506,90 @@ export default function CampaignDetail() {
           assets: {
             guidelinesSummary: data.assets?.guidelinesSummary || 'N/A',
             requirements: data.assets?.requirements || [],
-            uploaded: (data.assets || []).map((asset: APIAssetData) => ({
-              ...asset,
-              id: asset.id || Date.now() + Math.random(),
-              name: asset.name || asset.fileName || 'Untitled Asset',
-              url: asset.url || '#',
-              type: asset.type || getAssetTypeFromUrl(asset.url || ''),
-              description: asset.rationale || asset.description || 'No description',
-              budget: asset.budget || 0,
-            })),
+            uploaded: (data.assets || []).map((asset: APIAssetData, idx: number) => {
+              console.log(
+                `[Campaign Profile] Processing asset for card:`,
+                JSON.parse(JSON.stringify(asset))
+              );
+              console.log(
+                `[Campaign Profile] data.Influencer:`,
+                JSON.parse(JSON.stringify(data.Influencer))
+              );
+              console.log(
+                `[Campaign Profile] asset.associatedInfluencerIds:`,
+                JSON.parse(JSON.stringify(asset.associatedInfluencerIds))
+              );
+
+              // Get associated influencer handles for this asset - using exact same logic as Step5
+              let associatedInfluencerHandles: string[] = [];
+              let associatedInfluencerPlatforms: string[] = [];
+              if (
+                Array.isArray(asset.associatedInfluencerIds) &&
+                asset.associatedInfluencerIds.length > 0 &&
+                Array.isArray(data.Influencer)
+              ) {
+                const matchedInfluencers = data.Influencer.filter(
+                  (inf: APIInfluencerData) =>
+                    inf &&
+                    typeof inf.id === 'string' &&
+                    (asset.associatedInfluencerIds as string[]).includes(inf.id)
+                );
+                associatedInfluencerHandles = matchedInfluencers
+                  .map((inf: APIInfluencerData) => inf.handle)
+                  .filter(Boolean);
+                associatedInfluencerPlatforms = matchedInfluencers
+                  .map((inf: APIInfluencerData) => inf.platform)
+                  .filter(Boolean);
+              }
+              console.log(
+                `[Campaign Profile] Matched influencer handles:`,
+                associatedInfluencerHandles
+              );
+              console.log(
+                `[Campaign Profile] Matched influencer platforms:`,
+                associatedInfluencerPlatforms
+              );
+
+              // If no associated influencers found via IDs, try using first influencer as fallback
+              if (
+                associatedInfluencerHandles.length === 0 &&
+                data.Influencer &&
+                data.Influencer.length > 0
+              ) {
+                console.log(
+                  `[Campaign Profile] No direct associations found, using first influencer as fallback`
+                );
+                associatedInfluencerHandles = [data.Influencer[0].handle].filter(Boolean);
+                associatedInfluencerPlatforms = [data.Influencer[0].platform].filter(Boolean);
+              }
+
+              const assetCardData = {
+                id: asset.id || `asset-${idx}`,
+                name: asset.name || asset.fileName || `Asset ${idx + 1}`,
+                url: asset.url || '#',
+                type: asset.type || getAssetTypeFromUrl(asset.url || ''),
+                description: asset.rationale || asset.description || 'No description',
+                budget: typeof asset.budget === 'number' ? asset.budget : 0,
+                muxPlaybackId: asset.muxPlaybackId,
+                muxProcessingStatus: asset.muxProcessingStatus || 'READY',
+                muxAssetId: asset.muxAssetId,
+                // Pass first associated influencer as handle and platform (the card only shows one)
+                influencerHandle:
+                  associatedInfluencerHandles.length > 0
+                    ? associatedInfluencerHandles[0]
+                    : undefined,
+                platform:
+                  associatedInfluencerPlatforms.length > 0
+                    ? associatedInfluencerPlatforms[0]
+                    : undefined,
+              };
+              console.log(
+                `[Campaign Profile] Final assetCardData:`,
+                JSON.parse(JSON.stringify(assetCardData))
+              );
+
+              return assetCardData;
+            }),
             notes: data.assets?.notes || '',
           },
           contacts: [
@@ -739,7 +763,7 @@ export default function CampaignDetail() {
   };
 
   // Add a check before rendering action buttons
-  const canPerformActions = _isAuthLoaded && _activeOrgId;
+  const canPerformActions = isAuthLoaded && activeOrgId;
 
   if (isLoading) {
     return (
@@ -1289,14 +1313,14 @@ export default function CampaignDetail() {
           <CardContent className="px-5 py-6">
             {campaignData.assets.uploaded && campaignData.assets.uploaded.length > 0 ? (
               <div className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {campaignData.assets.uploaded.map(assetItem => {
                     return (
                       <AssetCard
                         key={assetItem.id}
                         asset={assetItem}
                         currency={campaignData.budget?.currency}
-                        cardClassName="w-full h-full"
+                        cardClassName="h-full"
                         className="p-0"
                       />
                     );
