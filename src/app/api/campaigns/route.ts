@@ -441,7 +441,6 @@ export const POST = async (request: NextRequest) => {
       locations: transformedData.locations || [],
       targeting: transformedData.targeting || Prisma.JsonNull,
       competitors: transformedData.competitors || [],
-      assets: transformedData.assets || [],
       status: Status.DRAFT,
       step1Complete: true, // Default assumption for new campaigns from this endpoint
       step2Complete: false,

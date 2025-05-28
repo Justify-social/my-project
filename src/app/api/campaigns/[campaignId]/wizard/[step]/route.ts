@@ -276,20 +276,14 @@ export async function PATCH(
         JSON.stringify(mappedData, null, 2)
       );
     } else if (step === 4) {
-      // Simplified Step 4 handling - avoid race conditions by not updating CreativeAsset records directly
       if (dataToSave.targetPlatforms !== undefined)
         mappedData.targetPlatforms = dataToSave.targetPlatforms ?? [];
       if (dataToSave.step4Complete !== undefined)
         mappedData.step4Complete = dataToSave.step4Complete;
 
-      // Store assets in the JSON field only - CreativeAsset records are managed by dedicated APIs
-      if (dataToSave.assets && Array.isArray(dataToSave.assets)) {
-        console.log(
-          '[API PATCH Step 4] Storing assets in CampaignWizard.assets JSON field:',
-          JSON.stringify(dataToSave.assets, null, 2)
-        );
-        mappedData.assets = dataToSave.assets;
-      }
+      // ✅ REMOVED DUAL STORAGE: CreativeAsset table is now SSOT
+      // Assets are managed directly via /api/creative-assets endpoints, not through JSON storage
+      console.log('[API PATCH Step 4] Using CreativeAsset table as SSOT - no JSON assets storage');
     } else if (step === 5) {
       if ('status' in dataToSave && dataToSave.status) {
         // Ensure Status enum is imported from @prisma/client
@@ -573,42 +567,9 @@ export async function PATCH(
         );
       } else {
         logger.info(
-          '[WIZARD PATCH API] No creativeAssets found on campaignDataForResponse to map for response. campaignDataForResponse.assets (Json[]) will be used if it exists, or empty.'
+          '[WIZARD PATCH API] No creativeAssets found on campaignDataForResponse to map for response. Using SSOT CreativeAsset table only.'
         );
-        mappedResponseAssetsForPATCH =
-          campaignDataForResponse.assets && Array.isArray(campaignDataForResponse.assets)
-            ? (campaignDataForResponse.assets as Prisma.JsonArray).map(jsonVal => {
-                const asset = jsonVal as Prisma.JsonObject;
-                return {
-                  id: String(asset.id || Date.now()),
-                  name: String(asset.name || ''),
-                  fileName: String(asset.fileName || asset.name || ''),
-                  type: String(asset.type || 'video'),
-                  description: String(asset.description || asset.rationale || ''),
-                  url: asset.url as string | undefined,
-                  fileSize: asset.fileSize as number | undefined,
-                  muxAssetId: asset.muxAssetId as string | undefined,
-                  muxPlaybackId: asset.muxPlaybackId as string | undefined,
-                  muxProcessingStatus: asset.muxProcessingStatus as string | undefined,
-                  duration: asset.duration as number | undefined,
-                  userId: asset.userId as string | undefined,
-                  createdAt: asset.createdAt
-                    ? new Date(asset.createdAt as string | number).toISOString()
-                    : undefined,
-                  updatedAt: asset.updatedAt
-                    ? new Date(asset.updatedAt as string | number).toISOString()
-                    : undefined,
-                  isPrimaryForBrandLiftPreview:
-                    (asset.isPrimaryForBrandLiftPreview as boolean | undefined) ?? false,
-                  rationale: String(asset.rationale || ''),
-                  budget: asset.budget as number | null | undefined,
-                  associatedInfluencerIds: Array.isArray(asset.associatedInfluencerIds)
-                    ? (asset.associatedInfluencerIds as string[])
-                    : [],
-                  internalAssetId: asset.internalAssetId as number | undefined,
-                } as CreativeAssetClientPayload;
-              })
-            : [];
+        mappedResponseAssetsForPATCH = [];
       }
       // END SSOT ASSET MAPPING FOR RESPONSE
 
@@ -741,7 +702,7 @@ export async function GET(
     const transformedCampaign = EnumTransformers.transformObjectFromBackend(campaign);
 
     // SSOT Asset Mapping for GET response
-    let responseAssetsForGET = [];
+    let responseAssetsForGET: any[] = [];
     if (campaign.creativeAssets && Array.isArray(campaign.creativeAssets)) {
       logger.info('[WIZARD GET API] Mapping creativeAssets for response.');
       responseAssetsForGET = campaign.creativeAssets.map(
@@ -769,10 +730,9 @@ export async function GET(
       );
     } else {
       logger.info(
-        '[WIZARD GET API] No creativeAssets found on campaign to map for response. Using campaign.assets (Json[]) if available.'
+        '[WIZARD GET API] No creativeAssets found on campaign to map for response. Using SSOT CreativeAsset table only.'
       );
-      responseAssetsForGET =
-        campaign.assets && Array.isArray(campaign.assets) ? campaign.assets : [];
+      responseAssetsForGET = [];
     }
 
     // Ensure submissionId is at the top level if it came via the relation

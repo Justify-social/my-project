@@ -362,14 +362,8 @@ export async function GET(
       '[API GET /api/campaigns/[campaignId]] Normalizing data for frontend schema compatibility...'
     );
 
-    // --- START ASSET ENRICHMENT / MAPPING (REVISED) ---
+    // --- START ASSET MAPPING FROM SSOT CreativeAsset TABLE ONLY ---
     let responseAssets: MergedAsset[] = [];
-    const wizardJsonAssetsValue = 'assets' in campaign && campaign.assets ? campaign.assets : null;
-    let wizardJsonAssets: Prisma.JsonArray = [];
-    if (wizardJsonAssetsValue && Array.isArray(wizardJsonAssetsValue)) {
-      wizardJsonAssets = wizardJsonAssetsValue as Prisma.JsonArray;
-    }
-
     const dbCreativeAssets =
       'creativeAssets' in campaign &&
       campaign.creativeAssets &&
@@ -377,78 +371,10 @@ export async function GET(
         ? (campaign.creativeAssets as CreativeAsset[])
         : [];
 
-    if (wizardJsonAssets.length > 0) {
+    // ✅ SSOT: Use only CreativeAsset table, no JSON asset lookup
+    if (dbCreativeAssets.length > 0) {
       logger.info(
-        '[API GET /api/campaigns/[campaignId]] Prioritizing CampaignWizard.assets (JSON) and merging with CreativeAsset data.'
-      );
-      responseAssets = wizardJsonAssets.map((jsonAssetValue: Prisma.JsonValue) => {
-        const jsonObject = jsonAssetValue as Prisma.JsonObject;
-        const dbAssetMatch = dbCreativeAssets.find(
-          (db_ca: CreativeAsset) =>
-            db_ca.id !== null &&
-            db_ca.id !== undefined &&
-            String(db_ca.id) === String(jsonObject.internalAssetId || jsonObject.id)
-        );
-
-        // All properties from jsonObject are optional in MergedAsset or will be overwritten by specific assignments below.
-        // So, casting to Partial<MergedAsset> for the spread should be safe.
-        const baseAssetFromJsonObject: Partial<MergedAsset> = jsonObject as Partial<MergedAsset>;
-
-        const mergedAsset: MergedAsset = {
-          ...baseAssetFromJsonObject, // Spread the jsonObject safely
-          id: String(jsonObject.id || dbAssetMatch?.id || Date.now()),
-          internalAssetId: (jsonObject.internalAssetId || dbAssetMatch?.id) as
-            | string
-            | number
-            | undefined,
-          name: String(jsonObject.name || dbAssetMatch?.name || ''),
-          fileName: String(jsonObject.fileName || jsonObject.name || ''), // Only from jsonObject if exists
-          type: String(dbAssetMatch?.type || jsonObject.type || 'video'),
-          description: String(
-            dbAssetMatch?.description || jsonObject.rationale || jsonObject.description || ''
-          ),
-          rationale: String(jsonObject.rationale || dbAssetMatch?.description || ''),
-          url: dbAssetMatch?.url || (jsonObject.url as string) || undefined,
-          fileSize: dbAssetMatch?.fileSize ?? (jsonObject.fileSize as number | undefined),
-          muxAssetId: dbAssetMatch?.muxAssetId ?? (jsonObject.muxAssetId as string | undefined),
-          muxPlaybackId:
-            dbAssetMatch?.muxPlaybackId ?? (jsonObject.muxPlaybackId as string | undefined),
-          muxProcessingStatus:
-            dbAssetMatch?.muxProcessingStatus ??
-            (jsonObject.muxProcessingStatus as string | undefined),
-          duration: dbAssetMatch?.duration ?? (jsonObject.duration as number | undefined),
-          userId: dbAssetMatch?.userId ?? (jsonObject.userId as string | undefined),
-          createdAt:
-            dbAssetMatch?.createdAt?.toISOString() ??
-            (jsonObject.createdAt
-              ? new Date(jsonObject.createdAt as string | number).toISOString()
-              : undefined),
-          updatedAt:
-            dbAssetMatch?.updatedAt?.toISOString() ??
-            (jsonObject.updatedAt
-              ? new Date(jsonObject.updatedAt as string | number).toISOString()
-              : undefined),
-          isPrimaryForBrandLiftPreview:
-            dbAssetMatch?.isPrimaryForBrandLiftPreview ??
-            (jsonObject.isPrimaryForBrandLiftPreview as boolean | undefined) ??
-            false,
-          budget: (jsonObject.budget !== undefined ? jsonObject.budget : undefined) as
-            | number
-            | null
-            | undefined,
-          associatedInfluencerIds: Array.isArray(jsonObject.associatedInfluencerIds)
-            ? (jsonObject.associatedInfluencerIds as string[])
-            : [],
-          fieldId: String(
-            jsonObject.fieldId ||
-              `field-get-${jsonObject.id || jsonObject.internalAssetId || Date.now()}`
-          ),
-        };
-        return mergedAsset;
-      });
-    } else if (dbCreativeAssets.length > 0) {
-      logger.warn(
-        '[API GET /api/campaigns/[campaignId]] CampaignWizard.assets (JSON) was empty. Mapping from creativeAssets relation (Step 4 specific fields like budget/rationale will be default/empty).'
+        '[API GET /api/campaigns/[campaignId]] Using CreativeAsset table as SSOT for asset data.'
       );
       responseAssets = dbCreativeAssets.map((ca: CreativeAsset) => ({
         id: String(ca.id),
@@ -456,9 +382,9 @@ export async function GET(
         name: String(ca.name ?? ''),
         type: String(ca.type ?? 'video'),
         description: String(ca.description ?? ''),
-        rationale: String(ca.description ?? ''),
-        budget: undefined,
-        associatedInfluencerIds: [],
+        rationale: String(ca.rationale ?? ''),
+        budget: ca.budget ?? undefined,
+        associatedInfluencerIds: ca.associatedInfluencerIds ?? [],
         url: ca.url ?? undefined,
         fileSize: ca.fileSize ?? undefined,
         muxAssetId: ca.muxAssetId ?? undefined,
@@ -471,13 +397,13 @@ export async function GET(
         fieldId: `field-get-${ca.id || Date.now()}`,
       }));
     } else {
-      // Both are empty
+      // No assets in CreativeAsset table
       responseAssets = [];
     }
     logger.info(
       `[API GET /api/campaigns/[campaignId]] Mapped ${responseAssets.length} final assets for response.`
     );
-    // --- END ASSET ENRICHMENT / MAPPING (REVISED) ---
+    // --- END ASSET MAPPING FROM SSOT CreativeAsset TABLE ONLY ---
 
     const normalizedCampaign = {
       ...campaign,

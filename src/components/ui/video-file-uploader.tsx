@@ -8,7 +8,6 @@ import React, { useState, useCallback, useRef, CSSProperties } from 'react';
 import { Controller, Control, FieldPath, FieldValues } from 'react-hook-form';
 import { useDropzone, Accept, FileRejection } from 'react-dropzone';
 import * as UpChunk from '@mux/upchunk';
-import { toast } from 'react-hot-toast';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon/icon';
@@ -21,6 +20,7 @@ import {
 } from '@/components/ui/form';
 import { cn } from '@/lib/utils';
 import { logger } from '@/utils/logger'; // Assuming you have a client-side logger utility
+import { showSuccessToast, showErrorToast } from '@/components/ui/toast';
 
 // Type for the data returned on successful Mux upload initiation and CreativeAsset creation
 export interface MuxUploadInitData {
@@ -105,7 +105,7 @@ export function VideoFileUploader<TFieldValues extends FieldValues = FieldValues
           message = 'Please select only one video file.';
 
         setErrorState(message);
-        toast.error(`File rejected: ${message}`);
+        showErrorToast(`File rejected: ${message}`, 'faTriangleExclamationLight');
         return;
       }
 
@@ -189,7 +189,7 @@ export function VideoFileUploader<TFieldValues extends FieldValues = FieldValues
         if (!uploadStarted) {
           logger.error('UpChunk upload timeout: No events received after 10 seconds');
           setErrorState('Upload failed to start. Please check your connection and try again.');
-          toast.error('Upload failed to start. Please try again.');
+          showErrorToast('Upload failed to start. Please try again.', 'faTriangleExclamationLight');
           setIsUploading(false);
         }
       }, 10000);
@@ -223,7 +223,14 @@ export function VideoFileUploader<TFieldValues extends FieldValues = FieldValues
       upload.on('success', () => {
         clearTimeout(uploadTimeout);
         logger.info('UpChunk upload completed successfully');
-        toast.success(`"${localFile.name}" uploaded successfully! Mux is now processing it.`);
+
+        // Use branded success toast
+        showSuccessToast(
+          `"${localFile.name}" uploaded successfully! Mux is now processing it.`,
+          'faCircleCheckLight',
+          4000
+        );
+
         setIsUploading(false);
         setUploadProgress(100); // Visually complete
 
@@ -236,8 +243,20 @@ export function VideoFileUploader<TFieldValues extends FieldValues = FieldValues
             userId, // Pass it through
           });
         }
-        // Don't reset localFile here, so user sees what was uploaded until they change it.
-        // Or reset after a delay: setTimeout(resetState, 2000);
+
+        // ✅ SIMPLE SOLUTION: Manual page refresh after upload
+        // This ensures the user always sees the processed video without complex state management
+        setTimeout(() => {
+          showSuccessToast('Refreshing page to show your video...', 'faArrowsRotateLight', 2000);
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        }, 3000); // Wait 3 seconds to show success message first
+
+        // Reset the local file state after successful upload
+        setTimeout(() => {
+          resetState();
+        }, 1000);
       });
 
       upload.on('error', errorData => {
@@ -246,7 +265,13 @@ export function VideoFileUploader<TFieldValues extends FieldValues = FieldValues
         const errorMessage =
           errorData.detail?.message || errorData.detail || 'Unknown upload error';
         setErrorState(`Upload failed: ${errorMessage}`);
-        toast.error(`Upload of "${localFile.name}" failed: ${errorMessage}`);
+
+        // Use branded error toast
+        showErrorToast(
+          `Upload of "${localFile.name}" failed: ${errorMessage}`,
+          'faTriangleExclamationLight'
+        );
+
         setIsUploading(false);
         setUploadProgress(0);
         if (onUploadError) {
@@ -260,7 +285,10 @@ export function VideoFileUploader<TFieldValues extends FieldValues = FieldValues
       logger.error('Video upload initiation or process error:', error);
       const errorMessage = (error as Error).message || 'An unexpected error occurred.';
       setErrorState(errorMessage);
-      toast.error(`Failed to start upload: ${errorMessage}`);
+
+      // Use branded error toast
+      showErrorToast(`Failed to start upload: ${errorMessage}`, 'faTriangleExclamationLight');
+
       setIsUploading(false);
       if (onUploadError) {
         onUploadError(error as Error);

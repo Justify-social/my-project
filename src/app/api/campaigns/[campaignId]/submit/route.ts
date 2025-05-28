@@ -378,9 +378,13 @@ export async function POST(
           },
         });
 
-        const assetsData = (wizard.assets as WizardAsset[] | null) || [];
-        if (assetsData.length > 0) {
-          const creativeAssetsToCreate = assetsData
+        // SSOT: Fetch assets from CreativeAsset table instead of wizard.assets
+        const creativeAssets = await tx.creativeAsset.findMany({
+          where: { campaignWizardId: wizardId },
+        });
+
+        if (creativeAssets.length > 0) {
+          const creativeAssetsToCreate = creativeAssets
             .map(asset => {
               const assetTypeString = asset.type?.toLowerCase();
               let creativeAssetType: PrismaCreativeAssetType;
@@ -395,13 +399,13 @@ export async function POST(
               return {
                 submissionId: newSubmission.id,
                 name: asset.name || 'Untitled Asset',
-                description: asset.rationale || '',
+                description: asset.description || '',
                 url: asset.url || '', // Should be validated
                 type: creativeAssetType,
                 fileSize: Number(asset.fileSize) || 0,
                 dimensions: asset.dimensions,
                 duration: Number(asset.duration) || undefined,
-                format: asset.fileName?.split('.').pop()?.toLowerCase() || '',
+                format: asset.format || '',
               };
             })
             .filter(asset => asset.url); // Filter out assets without a URL

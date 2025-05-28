@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuth } from '@clerk/nextjs/server';
+import { auth } from '@clerk/nextjs/server';
 import { muxService } from '@/lib/muxService';
 import { logger } from '@/utils/logger';
 import { prisma } from '@/lib/prisma'; // Uncommented
@@ -7,25 +7,42 @@ import { CreativeAssetType, CreativeAsset } from '@prisma/client'; // Import Cre
 
 export async function POST(req: NextRequest) {
   try {
-    const auth = getAuth(req);
-    if (!auth.userId) {
+    const { userId } = await auth();
+    if (!userId) {
       logger.warn('[API /mux/create-video-upload] Unauthenticated access attempt.');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Find your internal user by Clerk ID
-    const user = await prisma.user.findUnique({
-      where: { clerkId: auth.userId },
-      select: { id: true }, // Only select the internal UUID id
+    let user = await prisma.user.findUnique({
+      where: { clerkId: userId },
+      select: { id: true },
     });
 
+    // Fallback: Auto-create user if they don't exist (Clerk webhook might not have triggered)
     if (!user) {
-      logger.error(
-        `[API /mux/create-video-upload] User not found in DB for clerkId: ${auth.userId}`
+      logger.info(
+        `[API /mux/create-video-upload] User not found, auto-creating for clerkId: ${userId}`
       );
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+
+      try {
+        user = await prisma.user.create({
+          data: {
+            clerkId: userId,
+            email: `clerk-user-${userId}@temp.local`,
+            name: null,
+          },
+          select: { id: true },
+        });
+
+        logger.info(`[API /mux/create-video-upload] Auto-created user for clerkId: ${userId}`);
+      } catch (createError) {
+        logger.error(`[API /mux/create-video-upload] Failed to auto-create user:`, createError);
+        return NextResponse.json({ error: 'User setup failed' }, { status: 500 });
+      }
     }
-    const internalUserId = user.id; // This is the User.id (UUID)
+
+    const internalUserId = user.id;
 
     const body = await req.json();
     const {
@@ -47,7 +64,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    logger.info(`[API /mux/create-video-upload] Received request for user: ${auth.userId}`, {
+    logger.info(`[API /mux/create-video-upload] Received request for user: ${userId}`, {
       fileName,
       fileType,
       campaignWizardId,
@@ -91,7 +108,7 @@ export async function POST(req: NextRequest) {
     });
 
     logger.info(
-      `[API /mux/create-video-upload] Successfully created Mux upload URL and CreativeAsset (ID: ${creativeAsset.id}) for user: ${auth.userId}`,
+      `[API /mux/create-video-upload] Successfully created Mux upload URL and CreativeAsset (ID: ${creativeAsset.id}) for user: ${userId}`,
       { muxUploadData }
     );
 

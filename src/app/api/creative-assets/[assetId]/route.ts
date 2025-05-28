@@ -3,7 +3,6 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@clerk/nextjs/server';
 import { logger } from '@/lib/logger';
 import Mux from '@mux/mux-node';
-import { UnauthenticatedError, NotFoundError, ForbiddenError } from '@/lib/errors';
 
 // Initialize Mux client if not already done globally
 // Ensure MUX_TOKEN_ID and MUX_TOKEN_SECRET are in your .env
@@ -19,139 +18,218 @@ if (process.env.MUX_TOKEN_ID && process.env.MUX_TOKEN_SECRET) {
   );
 }
 
-export async function DELETE(
+// PATCH: Update user-editable fields (SSOT)
+export async function PATCH(
   request: NextRequest,
-  { params: paramsPromise }: { params: Promise<{ assetId: string }> }
+  { params }: { params: Promise<{ assetId: string }> }
 ) {
-  const params = await paramsPromise;
-  const assetIdStr = params.assetId;
-  const assetId = parseInt(assetIdStr);
-
-  if (isNaN(assetId)) {
-    return NextResponse.json(
-      { success: false, error: 'Invalid asset ID format.' },
-      { status: 400 }
-    );
-  }
-
-  logger.info(`DELETE /api/creative-assets/${assetId} - Request received`);
-
   try {
-    const { userId: clerkUserId, orgId } = await auth();
-
-    if (!clerkUserId) {
-      throw new UnauthenticatedError('Authentication required to delete an asset.');
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // ✅ FIX: Convert Clerk ID to internal User ID (UUID) to match upload process
+    console.log(`[PATCH] Starting with clerkId: ${userId}`);
+
     const userRecord = await prisma.user.findUnique({
-      where: { clerkId: clerkUserId },
+      where: { clerkId: userId },
       select: { id: true },
     });
 
     if (!userRecord) {
-      throw new NotFoundError('User not found, cannot authorize asset deletion.');
+      logger.error(`[PATCH] User not found for clerkId: ${userId}`);
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
-    const internalUserId = userRecord.id;
 
-    // Find the creative asset to verify ownership/permissions
-    const creativeAsset = await prisma.creativeAsset.findUnique({
+    const internalUserId = userRecord.id;
+    console.log(`[PATCH] Converted clerkId ${userId} to internalUserId: ${internalUserId}`);
+
+    const { assetId: assetIdParam } = await params;
+    const assetId = parseInt(assetIdParam);
+    if (isNaN(assetId)) {
+      return NextResponse.json({ error: 'Invalid asset ID' }, { status: 400 });
+    }
+
+    console.log(`[PATCH] Looking for asset ID: ${assetId} owned by user: ${internalUserId}`);
+
+    // First, let's see if the asset exists at all
+    const anyAsset = await prisma.creativeAsset.findUnique({
       where: { id: assetId },
-      select: {
-        id: true,
-        userId: true,
-        muxAssetId: true,
-        campaignWizard: {
-          select: {
-            orgId: true,
-            userId: true, // User ID on the campaign wizard itself (for legacy checks)
-          },
-        },
+      select: { id: true, userId: true, name: true },
+    });
+
+    console.log(`[PATCH] Asset ${assetId} exists check:`, anyAsset);
+
+    // ✅ FIX: Use internal user ID for ownership check
+    const existingAsset = await prisma.creativeAsset.findFirst({
+      where: {
+        id: assetId,
+        userId: internalUserId, // Use internal UUID, not Clerk ID
       },
     });
 
-    if (!creativeAsset) {
-      throw new NotFoundError('Creative asset not found.');
+    console.log(`[PATCH] Ownership check result:`, existingAsset ? 'FOUND' : 'NOT FOUND');
+
+    if (!existingAsset) {
+      console.log(`[PATCH] Asset ${assetId} not found or not owned by ${internalUserId}`);
+      return NextResponse.json({ error: 'Asset not found or access denied' }, { status: 404 });
     }
 
-    // Authorization:
-    // 1. User who uploaded it can delete it.
-    // 2. If linked to a CampaignWizard, user must have access to that campaign (same org, or legacy owner).
-    let authorized = false;
-    if (creativeAsset.userId === internalUserId) {
-      authorized = true;
-    } else if (creativeAsset.campaignWizard) {
-      if (creativeAsset.campaignWizard.orgId === orgId) {
-        // Check current org context
-        authorized = true;
-      } else if (
-        !creativeAsset.campaignWizard.orgId &&
-        creativeAsset.campaignWizard.userId === internalUserId
-      ) {
-        // Legacy campaign check
-        authorized = true;
-      }
+    const body = await request.json();
+    const { name, rationale, budget, associatedInfluencerIds } = body;
+
+    // Update user-editable fields
+    const updatedAsset = await prisma.creativeAsset.update({
+      where: { id: assetId },
+      data: {
+        ...(name !== undefined && { name }),
+        ...(rationale !== undefined && { rationale }),
+        ...(budget !== undefined && { budget }),
+        ...(associatedInfluencerIds !== undefined && { associatedInfluencerIds }),
+        updatedAt: new Date(),
+      },
+    });
+
+    logger.info(`Asset ${assetId} updated successfully`, {
+      updatedFields: { name, rationale, budget, associatedInfluencerIds },
+      userId: internalUserId,
+      clerkUserId: userId,
+    });
+
+    return NextResponse.json({
+      success: true,
+      asset: updatedAsset,
+    });
+  } catch (error) {
+    logger.error('Error updating creative asset:', { error: error as Error });
+    return NextResponse.json({ error: 'Failed to update asset' }, { status: 500 });
+  }
+}
+
+// DELETE: Remove asset from SSOT and Mux
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ assetId: string }> }
+) {
+  let userId: string | null = null;
+  let internalUserId: string | null = null;
+  let assetIdParam: string = '';
+  let assetId: number = 0;
+
+  try {
+    const authResult = await auth();
+    userId = authResult.userId;
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    if (!authorized) {
-      logger.warn(
-        `User ${internalUserId} (org: ${orgId}) attempt to delete asset ${assetId} denied. Asset user: ${creativeAsset.userId}, Asset Campaign org: ${creativeAsset.campaignWizard?.orgId}`
-      );
-      throw new ForbiddenError('You do not have permission to delete this creative asset.');
+    console.log(`[DELETE] Starting with clerkId: ${userId}`);
+
+    // ✅ FIX: Convert Clerk ID to internal User ID (UUID) to match upload process
+    const userRecord = await prisma.user.findUnique({
+      where: { clerkId: userId },
+      select: { id: true },
+    });
+
+    if (!userRecord) {
+      logger.error(`[DELETE] User not found for clerkId: ${userId}`);
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Delete from Mux first (if it's a Mux asset)
-    if (creativeAsset.muxAssetId && muxClient) {
+    internalUserId = userRecord.id;
+    console.log(`[DELETE] Converted clerkId ${userId} to internalUserId: ${internalUserId}`);
+
+    const resolvedParams = await params;
+    assetIdParam = resolvedParams.assetId;
+    assetId = parseInt(assetIdParam);
+    if (isNaN(assetId)) {
+      return NextResponse.json({ error: 'Invalid asset ID' }, { status: 400 });
+    }
+
+    console.log(`[DELETE] Looking for asset ID: ${assetId} owned by user: ${internalUserId}`);
+
+    // First, let's see if the asset exists at all
+    const anyAsset = await prisma.creativeAsset.findUnique({
+      where: { id: assetId },
+      select: { id: true, userId: true, name: true, muxAssetId: true, muxUploadId: true },
+    });
+
+    console.log(`[DELETE] Asset ${assetId} exists check:`, anyAsset);
+
+    // ✅ FIX: Use internal user ID for ownership check
+    const existingAsset = await prisma.creativeAsset.findFirst({
+      where: {
+        id: assetId,
+        userId: internalUserId, // Use internal UUID, not Clerk ID
+      },
+    });
+
+    console.log(`[DELETE] Ownership check result:`, existingAsset ? 'FOUND' : 'NOT FOUND');
+
+    if (!existingAsset) {
+      console.log(`[DELETE] Asset ${assetId} not found or not owned by ${internalUserId}`);
+      logger.warn(`[DELETE] Asset ${assetId} not found or not owned by user`, {
+        assetId,
+        internalUserId,
+        clerkUserId: userId,
+      });
+      return NextResponse.json({ error: 'Asset not found or access denied' }, { status: 404 });
+    }
+
+    logger.info(`Starting asset deletion for ID: ${assetId}`, {
+      userId: internalUserId,
+      clerkUserId: userId,
+      muxAssetId: existingAsset.muxAssetId,
+      muxUploadId: existingAsset.muxUploadId,
+    });
+
+    // Delete from Mux first (if it exists)
+    if (muxClient && existingAsset.muxAssetId) {
       try {
-        logger.info(`Attempting to delete Mux asset: ${creativeAsset.muxAssetId}`);
-        await muxClient.video.assets.delete(creativeAsset.muxAssetId);
-        logger.info(`Successfully deleted Mux asset: ${creativeAsset.muxAssetId}`);
-      } catch (muxError: unknown) {
-        // Log Mux error but proceed to delete from DB.
-        // If Mux asset not found (404), it might have been deleted already or never fully processed.
-        if (
-          typeof muxError === 'object' &&
-          muxError !== null &&
-          'type' in muxError &&
-          (muxError as { type: string }).type === 'not_found'
-        ) {
-          logger.warn(
-            `Mux asset ${creativeAsset.muxAssetId} not found on Mux. Proceeding with DB deletion.`
-          );
-        } else {
-          const message = muxError instanceof Error ? muxError.message : String(muxError);
-          logger.error(`Failed to delete Mux asset ${creativeAsset.muxAssetId}: ${message}`, {
-            error: muxError,
-          });
-          // Depending on policy, you might choose to not delete from DB if Mux deletion fails critically.
-          // For now, we'll proceed.
-        }
+        await muxClient.video.assets.delete(existingAsset.muxAssetId);
+        logger.info(`Successfully deleted Mux asset: ${existingAsset.muxAssetId}`);
+      } catch (muxError) {
+        logger.warn(`Failed to delete Mux asset ${existingAsset.muxAssetId}:`, { error: muxError });
+        // Continue with database deletion even if Mux deletion fails
       }
-    } else if (creativeAsset.muxAssetId && !muxClient) {
-      logger.warn(
-        `Mux asset ${creativeAsset.muxAssetId} exists, but Mux client is not initialized. Skipping Mux deletion.`
-      );
     }
 
-    // Delete from database
+    // Delete from database (SSOT)
     await prisma.creativeAsset.delete({
       where: { id: assetId },
     });
 
-    logger.info(`Successfully deleted CreativeAsset ${assetId} from database.`);
+    logger.info(`Asset ${assetId} deleted successfully from database`, {
+      userId: internalUserId,
+      clerkUserId: userId,
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: `Asset ${assetId} deleted successfully`,
+    });
+  } catch (error) {
+    // Provide detailed error logging and response
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+
+    logger.error('Error deleting creative asset:', {
+      errorMessage,
+      errorStack,
+      errorType: error?.constructor?.name,
+      assetId: assetIdParam,
+      userId: internalUserId,
+      clerkUserId: userId,
+    });
+
     return NextResponse.json(
-      { success: true, message: 'Creative asset deleted successfully.' },
-      { status: 200 }
+      {
+        error: 'Failed to delete asset',
+        details: errorMessage,
+        assetId: assetIdParam,
+      },
+      { status: 500 }
     );
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : String(error);
-    logger.error(`DELETE /api/creative-assets/${assetId} - Error: ${message}`, { error });
-    if (error instanceof UnauthenticatedError) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 401 });
-    } else if (error instanceof NotFoundError) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 404 });
-    } else if (error instanceof ForbiddenError) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 403 });
-    }
-    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
   }
 }

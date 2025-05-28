@@ -1,5 +1,6 @@
 /**
  * Asset Service - Handles asset operations like deletion and cleanup
+ * ✅ UPDATED: Uses only Mux and CreativeAsset table as SSOT (dual storage removed)
  */
 
 /**
@@ -10,67 +11,24 @@ export function generateCorrelationId(prefix: string = 'op'): string {
 }
 
 /**
- * Deletes an asset from cloud storage
- *
- * @param url The URL of the asset to delete
- * @returns True if deletion was successful, otherwise false
+ * @deprecated Use direct API call to /api/creative-assets/[assetId] DELETE instead
+ * This function created circular dependency issues and has been removed.
  */
-export async function deleteAssetFromStorage(url: string): Promise<boolean> {
-  const correlationId = generateCorrelationId('cleanup');
-  console.log(`[${correlationId}] Deleting asset from storage:`, url);
-
-  // TODO: Implement Mux asset deletion strategy if this function is still needed.
-  // The old UploadThing delete endpoint is no longer available.
-  console.error(
-    `[${correlationId}] deleteAssetFromStorage: UploadThing endpoint /api/uploadthing/delete is deprecated. Mux deletion not yet implemented here.`
+export async function deleteAssetFromAllSources(assetId: number): Promise<boolean> {
+  console.warn(
+    '[DEPRECATED] deleteAssetFromAllSources is deprecated. Use direct DELETE API call instead.'
   );
   return false;
+}
 
-  /* REMOVED UPLOADTHING DELETE CALL
-  try {
-    const response = await fetch('/api/uploadthing/delete', {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Correlation-ID': correlationId,
-      },
-      body: JSON.stringify({ url }),
-    });
-
-    if (!response.ok) {
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        try {
-          const errorData = await response.json();
-          console.error(`[${correlationId}] Failed to delete from storage:`, errorData);
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (_parseError) {
-          console.error(
-            `[${correlationId}] Failed to delete from storage: ${response.status} ${response.statusText}`
-          );
-        }
-      } else {
-        console.error(
-          `[${correlationId}] Failed to delete from storage: ${response.status} ${response.statusText}`
-        );
-      }
-      return false;
-    }
-
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      const result = await response.json();
-      console.log(`[${correlationId}] Successfully deleted asset from storage`, result);
-    } else {
-      console.log(`[${correlationId}] Successfully deleted asset from storage`);
-    }
-
-    return true;
-  } catch (error) {
-    console.error(`[${correlationId}] Error deleting asset from storage:`, error);
-    return false;
-  }
-  */
+/**
+ * @deprecated Use deleteAssetFromAllSources instead
+ */
+export async function deleteAssetFromStorage(url: string): Promise<boolean> {
+  console.warn(
+    '[DEPRECATED] deleteAssetFromStorage is deprecated. Use deleteAssetFromAllSources instead.'
+  );
+  return false;
 }
 
 /**

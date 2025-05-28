@@ -1,24 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuth } from '@clerk/nextjs/server';
+import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 
 // GET /api/notifications - Fetch user's notifications
 export async function GET(request: NextRequest) {
   try {
-    const { userId: clerkUserId } = getAuth(request);
+    const { userId: clerkUserId } = await auth();
 
     if (!clerkUserId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Map Clerk user ID to internal database User ID
-    const user = await prisma.user.findUnique({
+    let user = await prisma.user.findUnique({
       where: { clerkId: clerkUserId },
       select: { id: true },
     });
 
+    // Fallback: Auto-create user if they don't exist (Clerk webhook might not have triggered)
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      console.log(`[Notifications API] User not found, auto-creating for clerkId: ${clerkUserId}`);
+
+      try {
+        // Create user with minimal required data
+        user = await prisma.user.create({
+          data: {
+            clerkId: clerkUserId,
+            email: `clerk-user-${clerkUserId}@temp.local`, // Temporary email, will be updated by webhook
+            name: null,
+          },
+          select: { id: true },
+        });
+
+        console.log(`[Notifications API] Auto-created user for clerkId: ${clerkUserId}`);
+      } catch (createError) {
+        console.error(`[Notifications API] Failed to auto-create user:`, createError);
+        return NextResponse.json({ error: 'User setup failed' }, { status: 500 });
+      }
     }
 
     const { searchParams } = new URL(request.url);
@@ -66,20 +84,40 @@ export async function GET(request: NextRequest) {
 // POST /api/notifications - Create a new notification
 export async function POST(request: NextRequest) {
   try {
-    const { userId: clerkUserId } = getAuth(request);
+    const { userId: clerkUserId } = await auth();
 
     if (!clerkUserId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Map Clerk user ID to internal database User ID
-    const user = await prisma.user.findUnique({
+    let user = await prisma.user.findUnique({
       where: { clerkId: clerkUserId },
       select: { id: true },
     });
 
+    // Fallback: Auto-create user if they don't exist (Clerk webhook might not have triggered)
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      console.log(
+        `[Notifications API POST] User not found, auto-creating for clerkId: ${clerkUserId}`
+      );
+
+      try {
+        // Create user with minimal required data
+        user = await prisma.user.create({
+          data: {
+            clerkId: clerkUserId,
+            email: `clerk-user-${clerkUserId}@temp.local`, // Temporary email, will be updated by webhook
+            name: null,
+          },
+          select: { id: true },
+        });
+
+        console.log(`[Notifications API POST] Auto-created user for clerkId: ${clerkUserId}`);
+      } catch (createError) {
+        console.error(`[Notifications API POST] Failed to auto-create user:`, createError);
+        return NextResponse.json({ error: 'User setup failed' }, { status: 500 });
+      }
     }
 
     const body = await request.json();
@@ -131,20 +169,40 @@ export async function POST(request: NextRequest) {
 // DELETE /api/notifications - Bulk delete notifications
 export async function DELETE(request: NextRequest) {
   try {
-    const { userId: clerkUserId } = getAuth(request);
+    const { userId: clerkUserId } = await auth();
 
     if (!clerkUserId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Map Clerk user ID to internal database User ID
-    const user = await prisma.user.findUnique({
+    let user = await prisma.user.findUnique({
       where: { clerkId: clerkUserId },
       select: { id: true },
     });
 
+    // Fallback: Auto-create user if they don't exist (Clerk webhook might not have triggered)
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      console.log(
+        `[Notifications API DELETE] User not found, auto-creating for clerkId: ${clerkUserId}`
+      );
+
+      try {
+        // Create user with minimal required data
+        user = await prisma.user.create({
+          data: {
+            clerkId: clerkUserId,
+            email: `clerk-user-${clerkUserId}@temp.local`, // Temporary email, will be updated by webhook
+            name: null,
+          },
+          select: { id: true },
+        });
+
+        console.log(`[Notifications API DELETE] Auto-created user for clerkId: ${clerkUserId}`);
+      } catch (createError) {
+        console.error(`[Notifications API DELETE] Failed to auto-create user:`, createError);
+        return NextResponse.json({ error: 'User setup failed' }, { status: 500 });
+      }
     }
 
     const { searchParams } = new URL(request.url);

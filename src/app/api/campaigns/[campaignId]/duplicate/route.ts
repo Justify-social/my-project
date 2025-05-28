@@ -167,9 +167,6 @@ export async function POST(
         ([] as Prisma.InputJsonValue[]),
       targeting: restOfOriginalCampaignWizard.targeting ?? Prisma.JsonNull,
       competitors: restOfOriginalCampaignWizard.competitors ?? [],
-      assets:
-        (restOfOriginalCampaignWizard.assets as Prisma.InputJsonValue[]) ??
-        ([] as Prisma.InputJsonValue[]),
       targetPlatforms: restOfOriginalCampaignWizard.targetPlatforms ?? [],
       status: 'DRAFT',
       currentStep: 1,

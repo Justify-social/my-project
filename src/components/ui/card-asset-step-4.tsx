@@ -10,6 +10,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { Icon } from '@/components/ui/icon/icon';
+import { IconButtonAction } from '@/components/ui/button-icon-action';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
@@ -106,6 +107,7 @@ export interface AssetCardProps {
   currency?: string;
   className?: string; // Applies to CardContent
   cardClassName?: string; // Applies to Card root
+  onDelete?: (assetId: number | string | undefined, assetIndex: number, assetName?: string) => void; // Delete handler
   // Removed [key: string]: any; pass specific Card props if needed
 }
 
@@ -127,6 +129,7 @@ export const AssetCardStep4 = React.memo(
     currency = 'USD',
     className,
     cardClassName,
+    onDelete,
   }: AssetCardProps) {
     const [popoverOpen, setPopoverOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -241,9 +244,29 @@ export const AssetCardStep4 = React.memo(
           cardClassName
         )}
       >
+        {/* Delete Button - Top Right Corner */}
+        {onDelete && (
+          <div className="absolute top-2 right-2 z-30">
+            <IconButtonAction
+              iconBaseName="faTrashCan"
+              hoverColorClass="text-destructive"
+              ariaLabel="Delete asset"
+              defaultColorClass="text-muted-foreground"
+              className="h-7 w-7 bg-white/90 hover:bg-white shadow-sm border border-border/50"
+              onClick={() =>
+                onDelete(
+                  currentAsset.internalAssetId || currentAsset.id,
+                  assetIndex,
+                  currentAsset.name
+                )
+              }
+            />
+          </div>
+        )}
+
         {/* Auto-save indicator */}
         {isSaving && (
-          <div className="absolute top-2 right-2 z-20 bg-blue-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+          <div className="absolute top-2 left-2 z-20 bg-blue-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
             <Icon iconId="faSpinnerLight" className="h-3 w-3 animate-spin" />
             Saving...
           </div>
@@ -305,6 +328,7 @@ export const AssetCardStep4 = React.memo(
               )}
             />
           </div>
+
           <FormMessage className="text-xs px-1 w-full" />
         </CardHeader>
 
@@ -501,13 +525,35 @@ export const AssetCardStep4 = React.memo(
     );
   },
   (prevProps, nextProps) => {
-    // Custom memo comparison for better performance
-    return (
-      prevProps.assetIndex === nextProps.assetIndex &&
-      prevProps.currency === nextProps.currency &&
-      prevProps.availableInfluencers.length === nextProps.availableInfluencers.length &&
-      JSON.stringify(prevProps.asset) === JSON.stringify(nextProps.asset)
-    );
+    // Smart memo comparison focusing on important fields that affect rendering
+    const prevAsset = prevProps.asset;
+    const nextAsset = nextProps.asset;
+
+    // Check non-asset props first
+    if (
+      prevProps.assetIndex !== nextProps.assetIndex ||
+      prevProps.currency !== nextProps.currency ||
+      prevProps.availableInfluencers.length !== nextProps.availableInfluencers.length
+    ) {
+      return false; // Props changed, need re-render
+    }
+
+    // Check important asset fields that affect rendering
+    if (
+      prevAsset.id !== nextAsset.id ||
+      prevAsset.name !== nextAsset.name ||
+      prevAsset.muxProcessingStatus !== nextAsset.muxProcessingStatus ||
+      prevAsset.muxPlaybackId !== nextAsset.muxPlaybackId ||
+      prevAsset.url !== nextAsset.url ||
+      prevAsset.rationale !== nextAsset.rationale ||
+      prevAsset.budget !== nextAsset.budget ||
+      JSON.stringify(prevAsset.associatedInfluencerIds) !==
+        JSON.stringify(nextAsset.associatedInfluencerIds)
+    ) {
+      return false; // Important asset fields changed, need re-render
+    }
+
+    return true; // No important changes, skip re-render
   }
 );
 
