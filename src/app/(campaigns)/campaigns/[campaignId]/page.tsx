@@ -657,7 +657,7 @@ export default function CampaignDetail() {
 
       const imagePromises = campaignData.influencers.map(async influencer => {
         try {
-          // Use the InsightIQ API pattern to fetch profile data
+          // Use the Justify Intelligence API pattern to fetch profile data
           const response = await fetch(
             `/api/influencers/fetch-profile?handle=${encodeURIComponent(influencer.handle)}&platform=${encodeURIComponent(influencer.platform.toUpperCase())}`
           );

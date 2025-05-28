@@ -173,8 +173,8 @@ export const InfluencerSummaryCard: React.FC<InfluencerSummaryCardProps> = ({
                   <div className="text-left whitespace-normal">
                     <p className="text-sm">
                       <strong>Justify Score (V2):</strong> Calculated based on audience credibility,
-                      account verification, engagement quality, and follower data from InsightIQ
-                      API.
+                      account verification, engagement quality, and follower data from Justify
+                      Intelligence
                     </p>
                     <p className="text-xs opacity-75 mt-1">
                       This score provides a comprehensive view of an influencer's overall quality

@@ -41,19 +41,19 @@ const getRiskLevelStyles = (riskLevel: 'LOW' | 'MEDIUM' | 'HIGH') => {
 export const TrustHeroSection: React.FC<TrustHeroSectionProps> = ({ influencer }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // 🎯 SSOT: Use centralized data extraction from InsightIQ Profile Analytics API
+  // 🎯 SSOT: Use centralized data extraction from Justify Intelligence Profile Analytics
   const extractedData = extractInsightIQData(influencer);
   const trustData = extractedData.trust;
   const styles = getRiskLevelStyles(trustData.riskLevel);
 
-  // Only render if we have real InsightIQ API trust data
+  // Only render if we have real Justify Intelligence trust data
   if (!trustData.hasDetailedData || !trustData.credibilityScore) {
     return (
       <Card className="border-accent/20">
         <CardContent className="p-6 text-center">
           <Icon iconId="faShieldLight" className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
           <p className="text-sm text-muted-foreground">
-            Trust data not available from InsightIQ API
+            Trust data not available from Justify Intelligence
           </p>
           <p className="text-xs text-muted-foreground mt-1">
             This influencer may not have sufficient audience data for trust analysis

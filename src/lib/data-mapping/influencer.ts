@@ -17,6 +17,11 @@ interface ContactDetail {
 
 // Extended interface for InsightIQ profile with all analytics fields
 type ExtendedInsightIQProfile = InsightIQProfile & {
+  // Basic profile fields (from API spec)
+  follower_count?: number;
+  following_count?: number;
+  subscriber_count?: number;
+
   // Audience analytics fields
   audience?: {
     countries?: Array<{ code: string; value: number }>;
@@ -328,7 +333,7 @@ export const mapInsightIQProfileToInfluencerProfileData = (
     handle: handle,
     avatarUrl: profile.image_url ?? null,
     platforms: platformEnum ? [platformEnum] : [],
-    followersCount: profile.reputation?.follower_count ?? null,
+    followersCount: profile.follower_count ?? null,
     justifyScore: calculatedScore,
     isVerified: profile.is_verified ?? false,
     isBusinessAccount: profile.is_business ?? profile.platform_account_type === 'BUSINESS',

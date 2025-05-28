@@ -173,7 +173,7 @@ export function EnhancedInfluencerCard({ influencer, className }: EnhancedInflue
       : influencer.platform;
   const platformInfo = platformDisplayMap[platformKey];
 
-  // Fetch profile image from InsightIQ
+  // Fetch profile image from Justify Intelligence
   useEffect(() => {
     const fetchProfileImage = async () => {
       try {

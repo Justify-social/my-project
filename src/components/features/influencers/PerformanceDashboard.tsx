@@ -111,7 +111,7 @@ const getPerformanceRankingStyles = (ranking: string) => {
 };
 
 export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ influencer }) => {
-  // 🎯 SSOT: Use centralized data extraction from InsightIQ API
+  // 🎯 SSOT: Use centralized data extraction from Justify Intelligence
   const extractedData = extractInsightIQData(influencer);
   const performanceData = extractedData.performance;
   const contentData = extractedData.content;
@@ -158,7 +158,7 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ infl
     return null;
   };
 
-  // Real trend calculations from InsightIQ API data only
+  // Real trend calculations from Justify Intelligence data only
   const engagementTrend = getEngagementTrend();
   const viewsTrend = getViewsTrend();
   const likesTrend = getLikesTrend();
@@ -177,7 +177,7 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ infl
         <CardContent className="p-6 text-center">
           <Icon iconId="faChartLineLight" className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
           <p className="text-sm text-muted-foreground">
-            Performance data not available from InsightIQ API
+            Performance data not available from Justify Intelligence
           </p>
           <p className="text-xs text-muted-foreground mt-1">
             This influencer may not have sufficient historical data or platform access
@@ -435,7 +435,7 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ infl
               </div>
               <p className="text-xs text-muted-foreground">
                 {performanceData.sponsored.postsCount
-                  ? `${performanceData.sponsored.postsCount} sponsored posts analyzed via InsightIQ API`
+                  ? `${performanceData.sponsored.postsCount} sponsored posts analysed via Justify Intelligence`
                   : 'No sponsored content data available from API'}
               </p>
             </div>
@@ -469,7 +469,7 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ infl
               </div>
               <p className="text-xs text-muted-foreground">
                 {performanceData.engagement.rate
-                  ? 'Overall organic engagement rate from InsightIQ API'
+                  ? 'Overall organic engagement rate from Justify Intelligence'
                   : 'No organic engagement data available from API'}
               </p>
             </div>
@@ -480,7 +480,7 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ infl
             <div className="flex items-center gap-2 mb-2">
               <Icon iconId="faChartBarLight" className="w-4 h-4 text-success" />
               <span className="text-sm font-semibold text-primary">
-                InsightIQ Performance Summary
+                Justify Intelligence Performance Summary
               </span>
             </div>
             <div className="text-sm text-muted-foreground space-y-1">

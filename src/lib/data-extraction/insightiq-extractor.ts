@@ -162,6 +162,7 @@ export interface InsightIQExtractedData {
       likes: number;
       comments: number;
       shares?: number;
+      saves?: number;
       date: string;
       performance: number;
       isSponsored: boolean;
@@ -173,6 +174,7 @@ export interface InsightIQExtractedData {
       caption?: string;
       likes: number;
       comments: number;
+      saves?: number;
       date: string;
       hashtags: string[];
       mentions: string[];
@@ -268,6 +270,16 @@ export interface InsightIQExtractedData {
         niche?: string;
       }>;
       countries: Array<{ code: string; value: number }>;
+      cities: Array<{ name: string; value: number; country?: string }>;
+      genderAgeDistribution: Array<{
+        gender: string;
+        ageRange: string;
+        value: number;
+      }>;
+      ethnicities: Array<{ name: string; value: number }>;
+      languages: Array<{ code: string; name?: string; value: number }>;
+      brandAffinity: Array<{ name: string; value: number }>;
+      interests: Array<{ name: string; value: number }>;
       averageEngagementOfLikers: number | null;
       likerGrowthRate: number | null;
     };
@@ -422,6 +434,62 @@ export interface InsightIQExtractedData {
       engagementRate: number;
       lastActive: string;
     }>;
+  };
+
+  // ✅ ADDED: Livestream Analytics (Twitch-specific)
+  livestream: {
+    metrics: {
+      hoursWatched: number | null;
+      peakViewers: number | null;
+      averageViewers: number | null;
+      airtime: number | null;
+      daysStreamed: number | null;
+    };
+    followerGrowth: {
+      percentage: number | null;
+      count: number | null;
+      perHour: number | null;
+    };
+    games: Array<{
+      count: number;
+      name: string;
+      hoursWatched: number;
+      hoursWatchedPercentage: number;
+    }>;
+    viewership: {
+      totalLiveViewCount: number | null;
+      uniqueViewers: number | null;
+      authUniqueViewers: number | null;
+    };
+    estimatedAudience: {
+      dailyAverage: number | null;
+      averageViewDuration: number | null;
+    };
+    subscribers: {
+      total: number | null;
+      income: {
+        min: number | null;
+        max: number | null;
+      };
+      tierBreakdown: {
+        paid: number | null;
+        gifted: number | null;
+        prime: number | null;
+        tier1: number | null;
+        tier2: number | null;
+        tier3: number | null;
+      };
+    };
+    chat: {
+      totalMessages: number | null;
+      activeChatters: number | null;
+      dailyEngagementRate: number | null;
+      messagesPerChatter: number | null;
+    };
+    bits: {
+      totalBits: number | null;
+      income: number | null;
+    };
   };
 }
 
@@ -868,16 +936,16 @@ function extractPerformanceData(
 
   const engagement = {
     rate: influencer.engagementRate ?? null,
-    averageLikes: insightiq?.average_likes || insightiq?.engagement?.averageLikes || null,
-    averageComments: insightiq?.average_comments || insightiq?.engagement?.averageComments || null,
-    averageViews: insightiq?.average_views || insightiq?.engagement?.averageViews || null,
+    averageLikes: insightiq?.average_likes ?? insightiq?.engagement?.averageLikes ?? null,
+    averageComments: insightiq?.average_comments ?? insightiq?.engagement?.averageComments ?? null,
+    averageViews: insightiq?.average_views ?? insightiq?.engagement?.averageViews ?? null, // ✅ FIXED: Use ?? to handle 0 values
     averageReelsViews:
-      insightiq?.average_reels_views || insightiq?.engagement?.averageReelsViews || null,
-    averageShares: insightiq?.average_shares || insightiq?.engagement?.averageShares || null,
-    averageSaves: insightiq?.average_saves || insightiq?.engagement?.averageSaves || null,
-    likesToCommentsRatio: insightiq?.engagement?.likes_to_comments_ratio || null,
-    peakEngagementHours: insightiq?.engagement?.peak_hours || [],
-    engagementTrend: insightiq?.engagement?.trend || ('UNKNOWN' as const),
+      insightiq?.average_reels_views ?? insightiq?.engagement?.averageReelsViews ?? null,
+    averageShares: insightiq?.average_shares ?? insightiq?.engagement?.averageShares ?? null,
+    averageSaves: insightiq?.average_saves ?? insightiq?.engagement?.averageSaves ?? null,
+    likesToCommentsRatio: insightiq?.engagement?.likes_to_comments_ratio ?? null,
+    peakEngagementHours: insightiq?.engagement?.peak_hours ?? [],
+    engagementTrend: insightiq?.engagement?.trend ?? ('UNKNOWN' as const),
   };
 
   const sponsored = {
@@ -905,16 +973,37 @@ function extractPerformanceData(
   };
 
   const reputation = {
-    followerCount: influencer.followersCount,
-    followingCount: insightiq?.profile?.reputation?.following_count || null,
-    subscriberCount: insightiq?.profile?.reputation?.subscriber_count || null,
-    contentCount: insightiq?.content_count || insightiq?.content?.contentCount || null,
-    totalPostsCount: insightiq?.profile?.total_posts || null,
-    averagePostFrequency: insightiq?.profile?.average_post_frequency || null,
+    followerCount: influencer.followersCount, // ✅ FIXED: Use the correctly mapped follower count
+    followingCount:
+      insightiq?.following_count ??
+      insightiq?.profile?.following_count ??
+      (insightiq?.reputation_history?.length > 0
+        ? insightiq.reputation_history[0].following_count
+        : null) ?? // ✅ FIXED: Get from latest reputation history
+      null,
+    subscriberCount:
+      insightiq?.subscriber_count ??
+      insightiq?.profile?.subscriber_count ??
+      (insightiq?.reputation_history?.length > 0
+        ? insightiq.reputation_history[0].subscriber_count
+        : null) ??
+      null,
+    contentCount: insightiq?.content_count ?? insightiq?.content?.contentCount ?? null,
+    totalPostsCount: insightiq?.profile?.total_posts ?? null,
+    averagePostFrequency: insightiq?.profile?.average_post_frequency ?? null,
     followerToFollowingRatio:
-      influencer.followersCount && insightiq?.profile?.reputation?.following_count
+      influencer.followersCount &&
+      (insightiq?.following_count ??
+        insightiq?.profile?.following_count ??
+        (insightiq?.reputation_history?.length > 0
+          ? insightiq.reputation_history[0].following_count
+          : null))
         ? Math.round(
-            (influencer.followersCount / insightiq.profile.reputation.following_count) * 100
+            (influencer.followersCount /
+              (insightiq?.following_count ??
+                insightiq?.profile?.following_count ??
+                insightiq.reputation_history[0].following_count)) *
+              100
           ) / 100
         : null,
     postToFollowerRatio:
@@ -1011,11 +1100,12 @@ function extractContentData(influencer: InfluencerProfileData): InsightIQExtract
         id: content.id || '',
         type: content.type || 'post',
         url: content.url,
-        caption: content.caption,
-        likes: content.likes || 0,
-        comments: content.comments || 0,
-        shares: content.shares,
-        date: content.date || '',
+        caption: content.caption || content.description,
+        likes: content.engagement?.like_count || content.likes || 0,
+        comments: content.engagement?.comment_count || content.comments || 0,
+        shares: content.engagement?.share_count || content.shares,
+        saves: content.engagement?.save_count || content.saves,
+        date: content.date || content.published_at || '',
         performance: content.performance || 0,
         isSponsored: content.is_sponsored || false,
       })
@@ -1025,10 +1115,11 @@ function extractContentData(influencer: InfluencerProfileData): InsightIQExtract
         id: content.id || '',
         type: content.type || 'post',
         url: content.url,
-        caption: content.caption,
-        likes: content.likes || 0,
-        comments: content.comments || 0,
-        date: content.date || '',
+        caption: content.caption || content.description,
+        likes: content.engagement?.like_count || content.likes || 0,
+        comments: content.engagement?.comment_count || content.comments || 0,
+        saves: content.engagement?.save_count || content.saves,
+        date: content.date || content.published_at || '',
         hashtags: content.hashtags || [],
         mentions: content.mentions || [],
       })
@@ -1310,12 +1401,17 @@ function extractAudienceData(
     significantLikersPercentage:
       audienceData?.audienceLikers?.significant_likers_percentage ||
       audienceData?.likers?.significant_percentage ||
+      audienceData?.significant_likers_percentage ||
       null,
     credibilityScore:
-      audienceData?.audienceLikers?.credibility_score || audienceData?.likers?.credibility || null,
+      audienceData?.audienceLikers?.credibility_score ||
+      audienceData?.likers?.credibility ||
+      audienceData?.credibility_score ||
+      null,
     significantLikers: (
       audienceData?.audienceLikers?.significant_likers ||
       audienceData?.likers?.significant ||
+      audienceData?.significant_likers ||
       []
     ).map((liker: any) => ({
       platformUsername: liker.platformUsername || liker.username || liker.handle,
@@ -1328,17 +1424,51 @@ function extractAudienceData(
     countries: (
       audienceData?.audienceLikers?.countries ||
       audienceData?.likers?.countries ||
+      audienceData?.audience_likers?.countries ||
       []
     ).map((country: any) => ({
       code: country.code || 'UN',
       value: normalizePercentage(country.value || 0),
     })),
+    cities: (audienceData?.audience_likers?.cities || []).map((city: any) => ({
+      name: city.name || 'Unknown City',
+      value: normalizePercentage(city.value || 0),
+      country: city.country,
+    })),
+    genderAgeDistribution: (audienceData?.audience_likers?.gender_age_distribution || []).map(
+      (item: any) => ({
+        gender: normalizeGender(item.gender || 'Unknown'),
+        ageRange: item.age_range || 'Unknown',
+        value: normalizePercentage(item.value || 0),
+      })
+    ),
+    ethnicities: (audienceData?.audience_likers?.ethnicities || []).map((ethnicity: any) => ({
+      name: ethnicity.name || 'Unknown',
+      value: normalizePercentage(ethnicity.value || 0),
+    })),
+    languages: (audienceData?.audience_likers?.languages || []).map((language: any) => ({
+      code: language.code || 'en',
+      name: getLanguageName(language.code || 'en'),
+      value: normalizePercentage(language.value || 0),
+    })),
+    brandAffinity: (audienceData?.audience_likers?.brand_affinity || []).map((brand: any) => ({
+      name: brand.name || 'Unknown',
+      value: normalizePercentage(brand.value || 0),
+    })),
+    interests: (audienceData?.audience_likers?.interests || []).map((interest: any) => ({
+      name: interest.name || 'Unknown',
+      value: normalizePercentage(interest.value || 0),
+    })),
     averageEngagementOfLikers:
       audienceData?.audienceLikers?.average_engagement ||
       audienceData?.likers?.avg_engagement ||
+      audienceData?.audience_likers?.average_engagement ||
       null,
     likerGrowthRate:
-      audienceData?.audienceLikers?.growth_rate || audienceData?.likers?.growth || null,
+      audienceData?.audienceLikers?.growth_rate ||
+      audienceData?.likers?.growth ||
+      audienceData?.audience_likers?.growth_rate ||
+      null,
   };
 
   const behavior = {
@@ -1761,6 +1891,7 @@ export function extractInsightIQData(influencer: InfluencerProfileData): Insight
     pricing: extractPricingData(influencer),
     creator: extractCreatorData(influencer),
     advanced: extractAdvancedData(influencer),
+    livestream: extractLivestreamData(influencer),
   };
 
   // Store additional comprehensive analytics in the extracted data
@@ -1811,5 +1942,119 @@ function calculateDataUtilization(data: InsightIQExtractedData): Record<string, 
       ? Object.keys(data.pricing.postTypes).length
       : 0,
     creatorFieldsPopulated: Object.values(data.creator).filter(v => v !== null).length,
+  };
+}
+
+/**
+ * Extract Livestream Analytics Data (Twitch-specific)
+ */
+function extractLivestreamData(
+  influencer: InfluencerProfileData
+): InsightIQExtractedData['livestream'] {
+  const insightiq = (influencer as InfluencerProfileData & { insightiq?: any }).insightiq;
+  const livestreamData = insightiq?.livestream_metrics;
+
+  if (!livestreamData) {
+    return {
+      metrics: {
+        hoursWatched: null,
+        peakViewers: null,
+        averageViewers: null,
+        airtime: null,
+        daysStreamed: null,
+      },
+      followerGrowth: {
+        percentage: null,
+        count: null,
+        perHour: null,
+      },
+      games: [],
+      viewership: {
+        totalLiveViewCount: null,
+        uniqueViewers: null,
+        authUniqueViewers: null,
+      },
+      estimatedAudience: {
+        dailyAverage: null,
+        averageViewDuration: null,
+      },
+      subscribers: {
+        total: null,
+        income: { min: null, max: null },
+        tierBreakdown: {
+          paid: null,
+          gifted: null,
+          prime: null,
+          tier1: null,
+          tier2: null,
+          tier3: null,
+        },
+      },
+      chat: {
+        totalMessages: null,
+        activeChatters: null,
+        dailyEngagementRate: null,
+        messagesPerChatter: null,
+      },
+      bits: {
+        totalBits: null,
+        income: null,
+      },
+    };
+  }
+
+  return {
+    metrics: {
+      hoursWatched: livestreamData.hours_watched || null,
+      peakViewers: livestreamData.peak_viewers || null,
+      averageViewers: livestreamData.average_viewers || null,
+      airtime: livestreamData.airtime || null,
+      daysStreamed: livestreamData.days_streamed || null,
+    },
+    followerGrowth: {
+      percentage: livestreamData.follower_growth?.percentage || null,
+      count: livestreamData.follower_growth?.count || null,
+      perHour: livestreamData.follower_growth?.per_hour || null,
+    },
+    games: (livestreamData.games || []).map((game: any) => ({
+      count: game.count || 0,
+      name: game.top?.name || 'Unknown',
+      hoursWatched: game.top?.hours_watched || 0,
+      hoursWatchedPercentage: game.top?.hours_watched_percentage || 0,
+    })),
+    viewership: {
+      totalLiveViewCount: livestreamData.viewership?.total_live_view_count || null,
+      uniqueViewers: livestreamData.viewership?.unique_viewers || null,
+      authUniqueViewers: livestreamData.viewership?.auth_unique_viewers || null,
+    },
+    estimatedAudience: {
+      dailyAverage: livestreamData.estimated_audience?.daily_average || null,
+      averageViewDuration: livestreamData.estimated_audience?.average_view_duration || null,
+    },
+    subscribers: {
+      total: livestreamData.subscribers?.total || null,
+      income: {
+        min: livestreamData.subscribers?.income?.min || null,
+        max: livestreamData.subscribers?.income?.max || null,
+      },
+      tierBreakdown: {
+        paid: livestreamData.subscribers?.tier_breakdown?.paid || null,
+        gifted: livestreamData.subscribers?.tier_breakdown?.gifted || null,
+        prime: livestreamData.subscribers?.tier_breakdown?.prime || null,
+        tier1: livestreamData.subscribers?.tier_breakdown?.tier_1 || null,
+        tier2: livestreamData.subscribers?.tier_breakdown?.tier_2 || null,
+        tier3: livestreamData.subscribers?.tier_breakdown?.tier_3 || null,
+      },
+    },
+    chat: {
+      totalMessages: livestreamData.chat?.total_messages || null,
+      activeChatters: livestreamData.chat?.active_chatters || null,
+      dailyEngagementRate: livestreamData.chat?.daily_engagement_rate || null,
+      messagesPerChatter: livestreamData.chat?.messages_per_chatter || null,
+    },
+    bits: {
+      totalBits: livestreamData.bits?.total_bits || null,
+      income: livestreamData.bits?.income || null,
+    },
   };
 }

@@ -260,7 +260,7 @@ export function MarketplaceFilters({
             />
           </div>
 
-          {/* InsightIQ Verified Filter - Controlled Component */}
+          {/* Justify Verified Filter - Controlled Component */}
           <div className="flex items-center space-x-2">
             <Checkbox
               id="isInsightIQVerified"
@@ -268,7 +268,7 @@ export function MarketplaceFilters({
               checked={localFilters.isInsightIQVerified ?? false}
               onCheckedChange={checked => handleCheckboxChange(checked, 'isInsightIQVerified')}
             />
-            <Label htmlFor="isInsightIQVerified">InsightIQ Verified Only</Label>
+            <Label htmlFor="isInsightIQVerified">Justify Verified Only</Label>
           </div>
 
           {/* Audience Quality Filter - Controlled Component */}

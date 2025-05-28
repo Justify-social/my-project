@@ -72,7 +72,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ influencer, isLoad
     category,
   } = influencer || {};
 
-  // Extract ALL available data from InsightIQ API
+  // Extract ALL available data from Justify Intelligence
   const extractedData = influencer ? extractInsightIQData(influencer) : null;
   const professionalData = extractedData?.professional;
   const trustData = extractedData?.trust;

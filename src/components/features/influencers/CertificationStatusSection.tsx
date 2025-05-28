@@ -5,9 +5,13 @@ import { InfluencerProfileData } from '@/types/influencer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon/icon';
 
+// Note: Specific certification details (beyond Justify verification)
+// can be extracted from profile analytics and displayed here.
+// Examples: Professional certifications, industry memberships, awards, etc.
+
 interface CertificationStatusSectionProps {
   influencer: InfluencerProfileData;
-  // Note: Specific certification details (beyond InsightIQ verification)
+  // Note: Specific certification details (beyond Justify verification)
   // are not currently in InfluencerProfileData.
   // This component will likely need enhancing when certification data structure is defined.
 }
@@ -17,7 +21,7 @@ interface CertificationStatusSectionProps {
 export function CertificationStatusSection({ influencer }: CertificationStatusSectionProps) {
   const { isVerified } = influencer;
 
-  // For now, only display the InsightIQ verification status
+  // For now, only display the Justify verification status
   if (!isVerified) {
     // Optionally show a message that the influencer is not verified,
     // or simply render nothing if only verified badges are desired.

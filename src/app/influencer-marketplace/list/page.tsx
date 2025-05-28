@@ -55,7 +55,7 @@ interface ApiInfluencerData {
     startDate: string | null;
     endDate: string | null;
   };
-  // Optional fields from InsightIQ API
+  // Optional fields from Justify Intelligence
   isVerified?: boolean;
   engagementRate?: number;
   followersCount?: number;
@@ -176,12 +176,12 @@ const InfluencerListPage: React.FC = () => {
       addedDate: apiData.createdAt,
       mostRecentCampaign: apiData.CampaignWizard,
       totalCampaigns: 1, // This would be calculated from all campaigns this influencer has been in
-      isVerified: apiData.isVerified || false, // Real verification status from InsightIQ
+      isVerified: apiData.isVerified || false, // Real verification status from Justify Intelligence
       engagement: apiData.engagementRate ? `${(apiData.engagementRate * 100).toFixed(1)}%` : '0.0%', // Real engagement rate
       followerCount: apiData.followersCount
         ? `${Math.round(apiData.followersCount / 1000)}K`
         : '0K', // Real follower count
-      avatarUrl: apiData.avatarUrl || null, // Real profile image from InsightIQ
+      avatarUrl: apiData.avatarUrl || null, // Real profile image from Justify Intelligence
     };
   };
 
