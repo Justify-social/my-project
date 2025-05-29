@@ -119,9 +119,26 @@ export async function getAssetPlaybackInfo(muxAssetId: string) {
   }
 }
 
+export async function getAssetFullInfo(muxAssetId: string) {
+  if (!muxClient) throw new Error('Mux client not initialized.');
+  try {
+    const asset = await muxClient.video.assets.retrieve(muxAssetId);
+    return asset as unknown as {
+      id: string;
+      status: string;
+      upload_id?: string;
+      playback_ids?: { id: string; policy: string }[];
+    };
+  } catch (error) {
+    logger.error('[MuxService] getAssetFullInfo error', error);
+    throw error;
+  }
+}
+
 export const muxService = {
   createDirectUploadUrl,
   getAssetPlaybackInfo,
+  getAssetFullInfo,
   // Expose Video directly if needed for other operations, or wrap them
   // Video, // Example: if you need direct access to other Mux Video methods
   // Expose the client if direct access is needed, or specific sub-clients like video services

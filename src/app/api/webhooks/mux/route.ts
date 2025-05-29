@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
 import { validateMuxWebhook, executeResilientMuxOperation } from '@/lib/utils/mux-resilience';
 import { prisma } from '@/lib/db';
+import { muxService } from '@/lib/muxService';
 
 /**
  * TypeScript interfaces for Mux webhook data
@@ -289,6 +290,45 @@ async function handleAssetReady(primaryId: string, data: MuxAssetData) {
   });
 
   if (updatedAsset.count === 0) {
+    // Fallback: fetch asset details from Mux to discover upload_id and retry match
+    try {
+      const assetInfo = await muxService.getAssetFullInfo(primaryId);
+      if (assetInfo?.upload_id) {
+        const fallbackUpdate = await prisma.creativeAsset.updateMany({
+          where: { muxUploadId: assetInfo.upload_id },
+          data: {
+            muxAssetId: primaryId,
+            muxPlaybackId: playbackId || undefined,
+            muxProcessingStatus: 'READY',
+            url: streamUrl || undefined,
+            updatedAt: new Date(),
+          },
+        });
+
+        if (fallbackUpdate.count > 0) {
+          logger.info('Asset ready fallback linked via upload_id', {
+            service: 'mux-webhook-processor',
+            primaryId,
+            uploadId: assetInfo.upload_id,
+            updatedCount: fallbackUpdate.count,
+          });
+          return {
+            handled: true,
+            updatedCount: fallbackUpdate.count,
+            streamUrl,
+            status: 'READY',
+            via: 'fallback_upload_id',
+          };
+        }
+      }
+    } catch (e) {
+      logger.error('Fallback fetch asset info failed', {
+        service: 'mux-webhook-processor',
+        primaryId,
+        error: e instanceof Error ? e.message : String(e),
+      });
+    }
+
     logger.warn('No assets found to update for ready webhook', {
       service: 'mux-webhook-processor',
       primaryId,
@@ -369,7 +409,7 @@ async function handleAssetCreated(assetId: string, data: MuxAssetData) {
       },
       data: {
         muxAssetId: assetId,
-        muxProcessingStatus: internalStatus || 'PREPARING',
+        muxProcessingStatus: internalStatus || 'MUX_PROCESSING',
         updatedAt: new Date(),
       },
     });
@@ -492,7 +532,7 @@ async function handleUploadAssetCreated(uploadId: string, data: MuxAssetData) {
     updatedAt: Date;
     muxAssetId?: string;
   } = {
-    muxProcessingStatus: mapMuxStatusToInternal(data.status) || 'PREPARING',
+    muxProcessingStatus: mapMuxStatusToInternal(data.status) || 'MUX_PROCESSING',
     updatedAt: new Date(),
   };
 
@@ -541,7 +581,12 @@ async function handleUploadAssetCreated(uploadId: string, data: MuxAssetData) {
 function mapMuxStatusToInternal(muxStatus: string): string | null {
   switch (muxStatus) {
     case 'preparing':
+    case 'processing':
+    case 'queued':
       return 'MUX_PROCESSING';
+    case 'waiting_for_upload':
+    case 'uploading':
+      return 'AWAITING_UPLOAD';
     case 'ready':
       return 'READY';
     case 'errored':
