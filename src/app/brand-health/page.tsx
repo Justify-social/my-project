@@ -6,10 +6,6 @@ export default function BrandHealthPage() {
       title="Brand Health"
       description="Comprehensive brand health monitoring and sentiment analysis tools are in development. Track brand perception, monitor social sentiment, analyse competitor positioning, and measure brand equity over time. Justify will be in touch soon with updates on this strategic feature."
       iconId="appBrandHealth"
-      primaryAction={{
-        label: 'Get Notified',
-        href: '/settings/profile?notify=brand-health',
-      }}
       secondaryActions={[
         {
           label: 'Brand Lift Studies',

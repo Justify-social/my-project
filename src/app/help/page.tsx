@@ -6,10 +6,6 @@ export default function HelpPage() {
       title="Help & Support Center"
       description="A comprehensive help center with tutorials, documentation, FAQs, and live support is being developed. Get instant answers, watch step-by-step guides, and access expert support for all your marketing intelligence needs. Justify will be in touch soon with updates on this support platform."
       iconId="faCircleQuestionLight"
-      primaryAction={{
-        label: 'Get Notified',
-        href: '/settings/profile?notify=help-center',
-      }}
       secondaryActions={[
         {
           label: 'Contact Support',
