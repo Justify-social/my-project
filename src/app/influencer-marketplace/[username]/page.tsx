@@ -202,7 +202,7 @@ export default function InfluencerProfilePage() {
     }
     setIsRequestingReport(true);
 
-    const sampleReportUrl = '/Jonathan+Mark+Doe.pdf'; // Relative path in /public
+    const sampleReportUrl = `/Jonathan+Mark+Doe-v2.pdf?t=${Date.now()}`; // Relative path in /public with cache buster
 
     // Directly simulate the async process and show PDF
     const generatingToastId = toast('Generating comprehensive risk report...');
