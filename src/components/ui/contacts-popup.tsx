@@ -59,7 +59,7 @@ export const ContactsPopup: React.FC<ContactsPopupProps> = ({
     try {
       await navigator.clipboard.writeText(text);
       showSuccessToast(`${type} copied to clipboard!`);
-    } catch (error) {
+    } catch {
       showErrorToast(`Failed to copy ${type.toLowerCase()}`);
     }
   };

@@ -159,7 +159,7 @@ export async function DELETE(request: NextRequest) {
 
     logger.info('[SavedInfluencers API] Deleting saved influencer:', { profileId, handle });
 
-    const initialLength = savedInfluencers.length;
+    const _initialLength = savedInfluencers.length;
     const index = savedInfluencers.findIndex(
       inf => inf.profileId === profileId || inf.handle === handle
     );

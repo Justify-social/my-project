@@ -120,7 +120,6 @@ interface DemographicChartProps {
   }>;
   chartType?: 'bar' | 'pie';
   limit?: number;
-  showPercentages?: boolean;
   height?: number;
 }
 
@@ -130,7 +129,6 @@ const DemographicChart: React.FC<DemographicChartProps> = ({
   data,
   chartType = 'bar',
   limit = 5,
-  showPercentages = true,
   height = 250,
 }) => {
   // Use sample data if no real data available or if all values are zero

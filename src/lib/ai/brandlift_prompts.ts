@@ -3,7 +3,7 @@
 import { BrandLiftStudyData } from '@/types/brand-lift'; // Assuming types are correctly defined
 
 // --- Constants and Configuration ---
-const AI_MODEL = 'o3'; // Changed back to o3 as per user request
+const AI_MODEL = 'gpt-4o'; // Changed from o3 to gpt-4o
 
 const QUESTION_GENERATION_SYSTEM_PROMPT = `
 You are an expert survey designer specializing in Brand Lift studies. Your task is to generate relevant, engaging, and methodologically sound survey questions based on campaign context. Adhere strictly to the following guidelines:

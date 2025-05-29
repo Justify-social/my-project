@@ -18,6 +18,13 @@ interface BrandIntelligenceHubProps {
   influencer: InfluencerProfileData;
 }
 
+interface BrandAffinityItem {
+  name?: string;
+  hashtag?: string;
+  value: number;
+  category?: string;
+}
+
 // Helper function to format brand affinity value
 const formatAffinityValue = (value: number): string => {
   return `${Math.round(value)}%`;
@@ -32,7 +39,7 @@ const getTopBrandItems = <T extends { value: number }>(items: T[], limit: number
 interface BrandAffinityCardProps {
   title: string;
   icon: string;
-  data: Array<{ name?: string; hashtag?: string; value: number; category?: string }>;
+  data: BrandAffinityItem[];
   limit?: number;
   type: 'brand' | 'hashtag' | 'interest';
 }
@@ -510,5 +517,5 @@ export const BrandIntelligenceHub: React.FC<BrandIntelligenceHubProps> = ({ infl
   );
 };
 
-const getItemName = (item: any, type: 'brand' | 'hashtag' | 'interest') =>
+const getItemName = (item: BrandAffinityItem, type: 'brand' | 'hashtag' | 'interest') =>
   type === 'hashtag' ? `#${item.hashtag || item.name}` : item.name || 'Other';

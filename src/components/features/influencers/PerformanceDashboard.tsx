@@ -7,10 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon/icon';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Separator } from '@/components/ui/separator';
-import { cn } from '@/lib/utils';
-import { extractInsightIQData } from '@/lib/data-extraction/insightiq-extractor-profile-analytics';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
+import { extractInsightIQData } from '@/lib/data-extraction/insightiq-extractor-profile-analytics';
 
 interface PerformanceDashboardProps {
   influencer: InfluencerProfileData;
@@ -30,91 +28,10 @@ const formatPercentage = (num: number | null): string => {
   return `${Math.round(num)}%`;
 };
 
-// Metric card component - Shopify style
-interface MetricCardProps {
-  icon: string;
-  title: string;
-  value: string;
-  change?: number | null;
-  benchmark?: string;
-  color: 'primary' | 'accent' | 'success' | 'warning';
-  isLoading?: boolean;
-}
-
-const MetricCard: React.FC<MetricCardProps> = ({
-  icon,
-  title,
-  value,
-  change,
-  benchmark,
-  color,
-  isLoading = false,
-}) => {
-  const colorStyles = {
-    primary: 'text-primary border-primary/20 bg-primary/5',
-    accent: 'text-accent border-accent/20 bg-accent/5',
-    success: 'text-success border-success/20 bg-success/5',
-    warning: 'text-warning border-warning/20 bg-warning/5',
-  };
-
-  const getTrendIcon = () => {
-    if (change === null || change === undefined) return null;
-    if (change > 0) return 'faArrowUpLight';
-    if (change < 0) return 'faArrowDownLight';
-    return 'faMinusLight';
-  };
-
-  const getTrendColor = () => {
-    if (change === null || change === undefined) return 'text-muted-foreground';
-    if (change > 0) return 'text-success';
-    if (change < 0) return 'text-destructive';
-    return 'text-muted-foreground';
-  };
-
-  return (
-    <Card className={cn('transition-all duration-200 hover:shadow-md', colorStyles[color])}>
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-2">
-          <Icon iconId={icon} className={cn('w-5 h-5', colorStyles[color].split(' ')[0])} />
-          {change !== null && change !== undefined && (
-            <div className={cn('flex items-center gap-1 text-xs', getTrendColor())}>
-              <Icon iconId={getTrendIcon()!} className="w-3 h-3" />
-              <span>{Math.abs(change).toFixed(1)}%</span>
-            </div>
-          )}
-        </div>
-
-        <div className="space-y-1">
-          <div className="text-2xl font-bold text-primary">{isLoading ? '...' : value}</div>
-          <div className="text-xs font-medium text-muted-foreground">{title}</div>
-          {benchmark && <div className="text-xs text-muted-foreground">{benchmark}</div>}
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-// Performance ranking badge
-const getPerformanceRankingStyles = (ranking: string) => {
-  switch (ranking) {
-    case 'EXCELLENT':
-      return 'bg-success/10 text-success border-success/20';
-    case 'GOOD':
-      return 'bg-primary/10 text-primary border-primary/20';
-    case 'AVERAGE':
-      return 'bg-accent/10 text-accent border-accent/20';
-    case 'POOR':
-      return 'bg-warning/10 text-warning border-warning/20';
-    default:
-      return 'bg-muted/10 text-muted-foreground border-muted/20';
-  }
-};
-
 export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ influencer }) => {
   // 🎯 SSOT: Use centralized data extraction from Justify Intelligence
   const extractedData = extractInsightIQData(influencer);
   const performanceData = extractedData.performance;
-  const contentData = extractedData.content;
 
   // Use ONLY real API data for trends - no calculations
   const getEngagementTrend = (): number | null => {

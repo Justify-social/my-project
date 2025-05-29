@@ -91,7 +91,7 @@ const formatNumber = (value: number): string => {
 };
 
 // Default custom tooltip formatter that removes "value: " prefix
-const defaultTooltipFormatter = (value: number, name: string) => {
+const defaultTooltipFormatter = (value: number, _name: string) => {
   return [formatNumber(value), null];
 };
 

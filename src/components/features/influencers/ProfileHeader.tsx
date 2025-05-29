@@ -74,7 +74,6 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ influencer, isLoad
 
   // Extract ALL available data from Justify Intelligence
   const extractedData = influencer ? extractInsightIQData(influencer) : null;
-  const professionalData = extractedData?.professional;
   const trustData = extractedData?.trust;
   const performanceData = extractedData?.performance;
 
@@ -121,19 +120,6 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ influencer, isLoad
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
     if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
     return num.toString();
-  };
-
-  const getRiskIcon = (level: string): string => {
-    switch (level.toLowerCase()) {
-      case 'low':
-        return 'faCircleCheckLight';
-      case 'medium':
-        return 'faTriangleExclamationLight';
-      case 'high':
-        return 'faCircleXmarkLight';
-      default:
-        return 'faShieldLight';
-    }
   };
 
   // Show loading skeleton if needed

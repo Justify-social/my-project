@@ -14,37 +14,12 @@ interface TrustHeroSectionProps {
   influencer: InfluencerProfileData;
 }
 
-// Risk level styling helper
-const getRiskLevelStyles = (riskLevel: 'LOW' | 'MEDIUM' | 'HIGH') => {
-  switch (riskLevel) {
-    case 'LOW':
-      return {
-        badge: 'bg-success/10 text-success border-success/20 hover:bg-success/20',
-        icon: 'text-success',
-        gradient: 'from-success/5 to-success/10',
-      };
-    case 'MEDIUM':
-      return {
-        badge: 'bg-warning/10 text-warning border-warning/20 hover:bg-warning/20',
-        icon: 'text-warning',
-        gradient: 'from-warning/5 to-warning/10',
-      };
-    case 'HIGH':
-      return {
-        badge: 'bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/20',
-        icon: 'text-destructive',
-        gradient: 'from-destructive/5 to-destructive/10',
-      };
-  }
-};
-
 export const TrustHeroSection: React.FC<TrustHeroSectionProps> = ({ influencer }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   // 🎯 SSOT: Use centralized data extraction from Justify Intelligence Profile Analytics
   const extractedData = extractInsightIQData(influencer);
   const trustData = extractedData.trust;
-  const styles = getRiskLevelStyles(trustData.riskLevel);
 
   // Only render if we have real Justify Intelligence trust data
   if (!trustData.hasDetailedData || !trustData.credibilityScore) {

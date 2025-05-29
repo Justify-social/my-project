@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { LineChart } from '@/components/ui/chart-line';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import {
   extractInsightIQData,
@@ -19,6 +19,18 @@ import {
 
 interface AdvancedInsightsHubProps {
   influencer: InfluencerProfileData;
+}
+
+interface ChartableDataPoint {
+  date: string;
+  followers: number;
+  likes: number;
+  engagement: number;
+  growthRate: number;
+  following: number;
+  subscribers: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any; // Allow for dynamic MA fields
 }
 
 // Helper function to format numbers
@@ -192,12 +204,12 @@ interface GrowthTrendProps {
     averageLikes?: number;
     subscriberCount?: number;
   }>;
-  currentFollowers: number | null;
+  _currentFollowers: number | null;
 }
 
 const GrowthTrendAnalysis: React.FC<GrowthTrendProps> = ({
   reputationHistory,
-  currentFollowers,
+  _currentFollowers,
 }) => {
   const [activeMetric, setActiveMetric] = useState<'followers' | 'engagement' | 'growth'>(
     'followers'
@@ -244,7 +256,11 @@ const GrowthTrendAnalysis: React.FC<GrowthTrendProps> = ({
   };
 
   // Calculate moving averages for trend smoothing
-  const calculateMovingAverage = (data: any[], field: string, window: number = 3) => {
+  const calculateMovingAverage = (
+    data: ChartableDataPoint[],
+    field: string,
+    window: number = 3
+  ): ChartableDataPoint[] => {
     return data.map((item, index) => {
       if (index < window - 1) return { ...item, [`${field}MA`]: item[field] };
 
@@ -440,7 +456,7 @@ const GrowthTrendAnalysis: React.FC<GrowthTrendProps> = ({
           <h5 className="text-sm font-medium text-secondary">Growth Analysis Dashboard</h5>
           <Tabs
             value={activeMetric}
-            onValueChange={value => setActiveMetric(value as any)}
+            onValueChange={value => setActiveMetric(value as 'followers' | 'engagement' | 'growth')}
             className="w-auto"
           >
             <TabsList className="grid w-full grid-cols-3 gap-1 bg-muted/30 p-1 h-auto">
@@ -728,10 +744,12 @@ export const AdvancedInsightsHub: React.FC<AdvancedInsightsHubProps> = ({ influe
                 <Icon iconId="faChartLineLight" className="w-4 h-4 text-accent" />
                 Growth Trajectory Analysis
               </h4>
-              <GrowthTrendAnalysis
-                reputationHistory={performanceData.trends.reputationHistory}
-                currentFollowers={performanceData.reputation.followerCount}
-              />
+              <div className="mt-6 pt-6 border-t border-border/30">
+                <GrowthTrendAnalysis
+                  reputationHistory={performanceData.trends.reputationHistory}
+                  _currentFollowers={performanceData.reputation.followerCount}
+                />
+              </div>
             </div>
           </>
         )}

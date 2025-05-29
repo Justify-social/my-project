@@ -16,9 +16,9 @@ import { ContentIntelligenceHub } from '@/components/features/influencers/Conten
 import { AudienceDemographicsHub } from '@/components/features/influencers/AudienceDemographicsHub';
 import { BrandIntelligenceHub } from '@/components/features/influencers/BrandIntelligenceHub';
 import { AdvancedInsightsHub } from '@/components/features/influencers/AdvancedInsightsHub';
-import { CertificationStatusSection } from '@/components/features/influencers/CertificationStatusSection';
-import { RiskScoreSection } from '@/components/features/influencers/RiskScoreSection';
-import { RecentCampaignsSection } from '@/components/features/influencers/RecentCampaignsSection';
+// import { CertificationStatusSection } from '@/components/features/influencers/CertificationStatusSection';
+// import { RiskScoreSection } from '@/components/features/influencers/RiskScoreSection';
+// import { RecentCampaignsSection } from '@/components/features/influencers/RecentCampaignsSection';
 // Import the new components
 import { ContactsPopup } from '@/components/ui/contacts-popup';
 import { SaveInfluencerButton } from '@/components/ui/save-influencer-button';

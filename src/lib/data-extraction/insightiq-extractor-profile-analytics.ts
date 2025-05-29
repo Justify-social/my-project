@@ -1043,11 +1043,11 @@ function buildSocialUrl(platform: string, username: string): string {
 }
 
 function calculateProfileCompleteness(
-  emails: any[],
-  phoneNumbers: any[],
+  emails: InsightIQExtractedData['professional']['emails'],
+  phoneNumbers: InsightIQExtractedData['professional']['phoneNumbers'],
   websites: string[],
-  socialProfiles: any[],
-  location: any
+  socialProfiles: InsightIQExtractedData['professional']['socialProfiles'],
+  location: InsightIQExtractedData['professional']['location']
 ): number {
   let score = 0;
   const maxScore = 5;

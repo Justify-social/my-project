@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PricingGrid from '@/components/billing/PricingGrid';
 import FaqSection from '@/components/billing/FaqSection';
 import { useUser } from '@clerk/nextjs';
-import { loadStripe } from '@stripe/stripe-js'; // Still needed for redirect
+import { loadStripe, Stripe } from '@stripe/stripe-js'; // Still needed for redirect
 import { Separator } from '@/components/ui/separator';
 import { BillingSkeleton } from '@/components/ui/loading-skeleton';
 
@@ -36,7 +36,7 @@ const validateStripeKey = (key: string | undefined): { isValid: boolean; error?:
 };
 
 // Enhanced Stripe loading with comprehensive error handling
-const loadStripeWithErrorHandling = async (key: string) => {
+const loadStripeWithErrorHandling = async (key: string): Promise<Stripe | null> => {
   try {
     console.log(
       '🔧 [Stripe Debug] Attempting to load Stripe with key:',
@@ -51,7 +51,7 @@ const loadStripeWithErrorHandling = async (key: string) => {
 
     // Test network connectivity to Stripe
     try {
-      const response = await fetch('https://js.stripe.com/v3/', {
+      const _response = await fetch('https://js.stripe.com/v3/', {
         method: 'HEAD',
         mode: 'no-cors', // Avoid CORS issues for connectivity test
       });
@@ -64,15 +64,19 @@ const loadStripeWithErrorHandling = async (key: string) => {
     }
 
     // Load Stripe with timeout
-    const stripePromise = loadStripe(key);
-    const timeoutPromise = new Promise((_, reject) => {
+    const stripePromiseLoaded = loadStripe(key);
+    const timeoutPromise = new Promise<Stripe | null>((_, reject) => {
       setTimeout(
         () => reject(new Error('Stripe loading timeout - check for ad blockers or network issues')),
         10000
       );
     });
 
-    const stripe = await Promise.race([stripePromise, timeoutPromise]);
+    // Explicitly cast Promise.race to the expected return type
+    const stripe = await (Promise.race([
+      stripePromiseLoaded,
+      timeoutPromise,
+    ]) as Promise<Stripe | null>);
 
     if (!stripe) {
       throw new Error('Stripe failed to initialize - received null object');
@@ -87,7 +91,7 @@ const loadStripeWithErrorHandling = async (key: string) => {
 };
 
 // Load Stripe only if the key exists and is valid
-let stripePromise: Promise<any> | null = null;
+let stripePromise: Promise<Stripe | null> | null = null;
 if (stripePublishableKey) {
   const validation = validateStripeKey(stripePublishableKey);
   if (validation.isValid) {
