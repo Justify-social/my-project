@@ -477,15 +477,28 @@ export const POST = async (request: NextRequest) => {
         );
 
         for (const influencer of validInfluencers) {
-          await tx.influencer.create({
-            data: {
-              id: influencer.id || uuidv4(),
-              platform: influencer.platform as Platform,
-              handle: influencer.handle,
+          try {
+            await tx.influencer.create({
+              data: {
+                id: influencer.id || uuidv4(),
+                platform: influencer.platform as Platform,
+                handle: influencer.handle,
+                campaignId: newCampaign.id,
+                updatedAt: new Date(),
+                // Add explicit defaults for new fields to prevent missing column errors
+                isMarketplaceVisible: true, // Default marketplace visibility
+                totalCampaigns: 0, // Default campaign count
+              },
+            });
+          } catch (influencerError) {
+            logger.error('Campaign POST: Failed to create influencer record', {
               campaignId: newCampaign.id,
-              updatedAt: new Date(),
-            },
-          });
+              influencerHandle: influencer.handle,
+              influencerPlatform: influencer.platform,
+              error: influencerError instanceof Error ? influencerError.message : String(influencerError),
+            });
+            throw influencerError; // Re-throw to abort transaction
+          }
         }
       }
       return newCampaign;

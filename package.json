@@ -51,6 +51,7 @@
     "db:migrate:production": "prisma migrate deploy",
     "db:status": "prisma migrate status",
     "db:studio": "prisma studio",
+    "db:verify:production": "node scripts/deployment/verify-migration-status.js",
     "generate:campaign": "prisma generate --schema=./prisma/schemas/campaign-wizard.prisma",
     "migrate:campaign": "prisma migrate dev --schema=./prisma/schemas/campaign-wizard.prisma --name init_campaign_wizard",
     "prepare": "husky",
@@ -278,3 +279,4 @@
     "effect": "^3.15.0"
   }
 }
+
