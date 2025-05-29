@@ -1,0 +1,296 @@
+{
+  "stats": {
+    "suites": 5,
+    "tests": 7,
+    "passes": 7,
+    "pending": 0,
+    "failures": 0,
+    "start": "2025-05-29T11:28:24.533Z",
+    "end": "2025-05-29T11:28:40.721Z",
+    "duration": 16188,
+    "testsRegistered": 7,
+    "passPercent": 100,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "3585f5ed-10c1-4eb1-8214-7ef9f4065a2e",
+      "title": "",
+      "fullFile": "config/cypress/e2e/auth/auth-official-clerk.cy.js",
+      "file": "config/cypress/e2e/auth/auth-official-clerk.cy.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "5fe1ba2e-e47d-44ff-a6dd-3f928939636a",
+          "title": "Official Clerk Authentication - SSOT Reference",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [],
+          "suites": [
+            {
+              "uuid": "aa553c92-be74-405b-87e8-9236f84472ca",
+              "title": "Authenticated Route Access",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should access protected dashboard with real Clerk authentication",
+                  "fullTitle": "Official Clerk Authentication - SSOT Reference Authenticated Route Access should access protected dashboard with real Clerk authentication",
+                  "timedOut": null,
+                  "duration": 1091,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "// CRITICAL: Setup Testing Token FIRST, before visiting any routes\n(0, _cypress.setupClerkTestingToken)();\n// Visit protected route - Testing Token handles authentication automatically\ncy.visit('/dashboard');\n// Should be on dashboard, not redirected to sign-in\ncy.url().should('include', '/dashboard');\ncy.url().should('not.include', '/sign-in');\n// Wait for page to fully load\ncy.get('body').should('be.visible');\n// Check for dashboard-specific content\ncy.get('h1, h2, [data-cy*=\"dashboard\"], [data-testid*=\"dashboard\"]').should('exist').and('be.visible');",
+                  "err": {},
+                  "uuid": "144fdb42-7b3f-4a7a-bf2c-8d0f0be09bf7",
+                  "parentUUID": "aa553c92-be74-405b-87e8-9236f84472ca",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should access influencer marketplace with proper authentication",
+                  "fullTitle": "Official Clerk Authentication - SSOT Reference Authenticated Route Access should access influencer marketplace with proper authentication",
+                  "timedOut": null,
+                  "duration": 588,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Setup Testing Token for this test\n(0, _cypress.setupClerkTestingToken)();\n// Visit another protected route\ncy.visit('/influencer-marketplace');\n// Should be on marketplace, not redirected\ncy.url().should('include', '/influencer-marketplace');\ncy.url().should('not.include', '/sign-in');\n// Wait for page load and authentication\ncy.get('body').should('be.visible');",
+                  "err": {},
+                  "uuid": "2bee0418-6367-49a7-9b95-b97bcf213b3c",
+                  "parentUUID": "aa553c92-be74-405b-87e8-9236f84472ca",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should access campaigns page with authentication",
+                  "fullTitle": "Official Clerk Authentication - SSOT Reference Authenticated Route Access should access campaigns page with authentication",
+                  "timedOut": null,
+                  "duration": 528,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Setup Testing Token for this test\n(0, _cypress.setupClerkTestingToken)();\ncy.visit('/campaigns');\n// Should access campaigns without redirect\ncy.url().should('include', '/campaigns');\ncy.url().should('not.include', '/sign-in');\ncy.get('body').should('be.visible');",
+                  "err": {},
+                  "uuid": "b9a6e2d7-dde1-425a-ab81-112cace3d440",
+                  "parentUUID": "aa553c92-be74-405b-87e8-9236f84472ca",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [
+                "144fdb42-7b3f-4a7a-bf2c-8d0f0be09bf7",
+                "2bee0418-6367-49a7-9b95-b97bcf213b3c",
+                "b9a6e2d7-dde1-425a-ab81-112cace3d440"
+              ],
+              "failures": [],
+              "pending": [],
+              "skipped": [],
+              "duration": 2207,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "13f6b213-aac9-4059-affd-0e8a19a62999",
+              "title": "API Calls with Authentication",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should make authenticated API calls successfully",
+                  "fullTitle": "Official Clerk Authentication - SSOT Reference API Calls with Authentication should make authenticated API calls successfully",
+                  "timedOut": null,
+                  "duration": 1609,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Setup Testing Token for this test\n(0, _cypress.setupClerkTestingToken)();\ncy.visit('/dashboard');\n// Wait for authentication\ncy.get('body').should('be.visible');\n// API calls should work with Testing Token\ncy.request({\n  method: 'GET',\n  url: '/api/dashboard',\n  failOnStatusCode: false\n}).then(response => {\n  // Should get a response (may be mocked or real)\n  expect(response.status).to.be.oneOf([200, 401, 404]);\n});",
+                  "err": {},
+                  "uuid": "f980d031-dbe5-439f-beb2-0abbd87650f9",
+                  "parentUUID": "13f6b213-aac9-4059-affd-0e8a19a62999",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": ["f980d031-dbe5-439f-beb2-0abbd87650f9"],
+              "failures": [],
+              "pending": [],
+              "skipped": [],
+              "duration": 1609,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "6f8533a7-8a84-441a-9c69-3c9518a989b0",
+              "title": "Navigation Between Protected Routes",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should navigate between protected routes without re-authentication",
+                  "fullTitle": "Official Clerk Authentication - SSOT Reference Navigation Between Protected Routes should navigate between protected routes without re-authentication",
+                  "timedOut": null,
+                  "duration": 2331,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Setup Testing Token once for this test\n(0, _cypress.setupClerkTestingToken)();\n// Start at dashboard\ncy.visit('/dashboard');\ncy.get('body').should('be.visible');\ncy.url().should('include', '/dashboard');\n// Navigate to marketplace\ncy.visit('/influencer-marketplace');\ncy.get('body').should('be.visible');\ncy.url().should('include', '/influencer-marketplace');\n// Navigate to campaigns\ncy.visit('/campaigns');\ncy.get('body').should('be.visible');\ncy.url().should('include', '/campaigns');\n// Should maintain authentication throughout\ncy.get('body').should('be.visible');",
+                  "err": {},
+                  "uuid": "96941940-5305-40ef-9ea7-39a6706a54a0",
+                  "parentUUID": "6f8533a7-8a84-441a-9c69-3c9518a989b0",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": ["96941940-5305-40ef-9ea7-39a6706a54a0"],
+              "failures": [],
+              "pending": [],
+              "skipped": [],
+              "duration": 2331,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            }
+          ],
+          "passes": [],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 0,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        },
+        {
+          "uuid": "110f41f8-2b94-4cd0-b970-b19630b117d8",
+          "title": "Public Route Access",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "should access public sign-in page without authentication",
+              "fullTitle": "Public Route Access should access public sign-in page without authentication",
+              "timedOut": null,
+              "duration": 630,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.visit('/sign-in');\ncy.url().should('include', '/sign-in');\ncy.get('body').should('be.visible');\n// Should show sign-in form or content\ncy.get('body').should('be.visible');",
+              "err": {},
+              "uuid": "29309de1-456c-4681-afa6-e1a849f28177",
+              "parentUUID": "110f41f8-2b94-4cd0-b970-b19630b117d8",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "should access homepage without authentication",
+              "fullTitle": "Public Route Access should access homepage without authentication",
+              "timedOut": null,
+              "duration": 8043,
+              "state": "passed",
+              "speed": "medium",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.visit('/');\ncy.url().should('not.include', '/sign-in');\ncy.get('body').should('be.visible');",
+              "err": {},
+              "uuid": "44531b4c-5da1-49b9-ba85-408b6768d467",
+              "parentUUID": "110f41f8-2b94-4cd0-b970-b19630b117d8",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "29309de1-456c-4681-afa6-e1a849f28177",
+            "44531b4c-5da1-49b9-ba85-408b6768d467"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 8673,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.2.0"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "cypress-report-[datetime]",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.3"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "config/cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "timestamp": "isoDateTime",
+        "reportFilename": "cypress-report-[datetime]"
+      },
+      "version": "6.2.0"
+    }
+  }
+}

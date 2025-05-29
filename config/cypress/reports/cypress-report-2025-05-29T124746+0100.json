@@ -1,0 +1,658 @@
+{
+  "stats": {
+    "suites": 7,
+    "tests": 20,
+    "passes": 2,
+    "pending": 0,
+    "failures": 18,
+    "start": "2025-05-29T11:41:22.669Z",
+    "end": "2025-05-29T11:47:46.266Z",
+    "duration": 383597,
+    "testsRegistered": 20,
+    "passPercent": 10,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "46f77ee9-a83f-4ce5-9b9b-ac1d45af9e2d",
+      "title": "",
+      "fullFile": "config/cypress/e2e/dashboard/index.cy.js",
+      "file": "config/cypress/e2e/dashboard/index.cy.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "dfc5beaa-1df2-4896-9675-bb61a59085db",
+          "title": "Dashboard Page",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [],
+          "suites": [
+            {
+              "uuid": "00a934e6-1f70-4a5a-b58b-132aaa8efe76",
+              "title": "Dashboard Header",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "displays the correct page title",
+                  "fullTitle": "Dashboard Page Dashboard Header displays the correct page title",
+                  "timedOut": null,
+                  "duration": 10831,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.get('h1').contains('Dashboard').should('exist');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Dashboard' within the element: <h1.cl-headerTitle.🔒️.cl-internal-1tpvhd8> but never did.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Dashboard' within the element: <h1.cl-headerTitle.🔒️.cl-internal-1tpvhd8> but never did.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/index.cy.js:18:41)",
+                    "diff": null
+                  },
+                  "uuid": "ad5d910e-c51b-41c5-a7b5-e8fa101ebf2f",
+                  "parentUUID": "00a934e6-1f70-4a5a-b58b-132aaa8efe76",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "has a working date range filter",
+                  "fullTitle": "Dashboard Page Dashboard Header has a working date range filter",
+                  "timedOut": null,
+                  "duration": 10551,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.get('select').should('exist');\ncy.get('select').select('Last 90 days');\ncy.get('select').should('have.value', 'Last 90 days');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `select`, but never found it.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `select`, but never found it.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/index.cy.js:22:23)",
+                    "diff": null
+                  },
+                  "uuid": "4bf5d95d-f441-4971-84b1-23779c736ea8",
+                  "parentUUID": "00a934e6-1f70-4a5a-b58b-132aaa8efe76",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "has a working export button",
+                  "fullTitle": "Dashboard Page Dashboard Header has a working export button",
+                  "timedOut": null,
+                  "duration": 10485,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.contains('button', 'Export').should('exist');\ncy.contains('button', 'Export').click();\n// Since the actual export might not happen in test, we just verify the button works\ncy.contains('Dashboard data exported successfully').should('exist');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Export' within the selector: 'button' but never did.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Export' within the selector: 'button' but never did.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/index.cy.js:28:38)",
+                    "diff": null
+                  },
+                  "uuid": "f7d334d1-c90c-4ded-9de4-33a1321b574f",
+                  "parentUUID": "00a934e6-1f70-4a5a-b58b-132aaa8efe76",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "ad5d910e-c51b-41c5-a7b5-e8fa101ebf2f",
+                "4bf5d95d-f441-4971-84b1-23779c736ea8",
+                "f7d334d1-c90c-4ded-9de4-33a1321b574f"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 31867,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "0e18b2f3-519d-44f2-a32b-6da9ebacbba2",
+              "title": "Performance Metrics",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "displays all performance metric cards",
+                  "fullTitle": "Dashboard Page Performance Metrics displays all performance metric cards",
+                  "timedOut": null,
+                  "duration": 10714,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.contains('Performance').should('exist');\ncy.get('[data-cy=\"metric-card\"]').should('have.length', 4);",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Performance' but never did.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Performance' but never did.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/index.cy.js:38:33)",
+                    "diff": null
+                  },
+                  "uuid": "e2fe9d40-e86b-4d65-b34a-3bb8fa0b9d7c",
+                  "parentUUID": "0e18b2f3-519d-44f2-a32b-6da9ebacbba2",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "shows Total Campaigns metric",
+                  "fullTitle": "Dashboard Page Performance Metrics shows Total Campaigns metric",
+                  "timedOut": null,
+                  "duration": 10494,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.contains('Total Campaigns').should('exist');\ncy.get('[data-cy=\"metric-card\"]').contains('Total Campaigns').parent().within(() => {\n  cy.get('p.text-2xl').should('exist');\n});",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Total Campaigns' but never did.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Total Campaigns' but never did.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/index.cy.js:43:37)",
+                    "diff": null
+                  },
+                  "uuid": "0d7f2880-d921-4f88-8933-074a2beb40a4",
+                  "parentUUID": "0e18b2f3-519d-44f2-a32b-6da9ebacbba2",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "shows Survey Responses metric",
+                  "fullTitle": "Dashboard Page Performance Metrics shows Survey Responses metric",
+                  "timedOut": null,
+                  "duration": 10561,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.contains('Survey Responses').should('exist');\ncy.get('[data-cy=\"metric-card\"]').contains('Survey Responses').parent().within(() => {\n  cy.get('p.text-2xl').should('exist');\n});",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Survey Responses' but never did.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Survey Responses' but never did.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/index.cy.js:53:38)",
+                    "diff": null
+                  },
+                  "uuid": "761ec8a4-7104-4251-8f00-8355d2b47739",
+                  "parentUUID": "0e18b2f3-519d-44f2-a32b-6da9ebacbba2",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "shows Live Campaigns metric",
+                  "fullTitle": "Dashboard Page Performance Metrics shows Live Campaigns metric",
+                  "timedOut": null,
+                  "duration": 10604,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.contains('Live Campaigns').should('exist');\ncy.get('[data-cy=\"metric-card\"]').contains('Live Campaigns').parent().within(() => {\n  cy.get('p.text-2xl').should('exist');\n});",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Live Campaigns' but never did.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Live Campaigns' but never did.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/index.cy.js:63:36)",
+                    "diff": null
+                  },
+                  "uuid": "0657c2ee-ad30-4cf3-8946-f7d7ece389c6",
+                  "parentUUID": "0e18b2f3-519d-44f2-a32b-6da9ebacbba2",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "shows Credits Available metric",
+                  "fullTitle": "Dashboard Page Performance Metrics shows Credits Available metric",
+                  "timedOut": null,
+                  "duration": 10620,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.contains('Credits Available').should('exist');\ncy.get('[data-cy=\"metric-card\"]').contains('Credits Available').parent().within(() => {\n  cy.get('p.text-2xl').should('exist');\n});",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Credits Available' but never did.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Credits Available' but never did.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/index.cy.js:73:39)",
+                    "diff": null
+                  },
+                  "uuid": "21cf6ed7-5f24-4f2c-a094-95b623ffc6a9",
+                  "parentUUID": "0e18b2f3-519d-44f2-a32b-6da9ebacbba2",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "e2fe9d40-e86b-4d65-b34a-3bb8fa0b9d7c",
+                "0d7f2880-d921-4f88-8933-074a2beb40a4",
+                "761ec8a4-7104-4251-8f00-8355d2b47739",
+                "0657c2ee-ad30-4cf3-8946-f7d7ece389c6",
+                "21cf6ed7-5f24-4f2c-a094-95b623ffc6a9"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 52993,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "9208f156-d86c-4ed9-bbf9-a808ead4f75d",
+              "title": "Campaign Calendar",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "displays the calendar component",
+                  "fullTitle": "Dashboard Page Campaign Calendar displays the calendar component",
+                  "timedOut": null,
+                  "duration": 10603,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.get('[data-cy=\"calendar-dashboard\"]').should('exist');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"calendar-dashboard\"]`, but never found it.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"calendar-dashboard\"]`, but never found it.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/index.cy.js:86:47)",
+                    "diff": null
+                  },
+                  "uuid": "e6b9ceaa-b279-41ee-bbac-0d8e790a9bb2",
+                  "parentUUID": "9208f156-d86c-4ed9-bbf9-a808ead4f75d",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "shows the current month by default",
+                  "fullTitle": "Dashboard Page Campaign Calendar shows the current month by default",
+                  "timedOut": null,
+                  "duration": 10522,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "const currentMonth = new Date().toLocaleString('default', {\n  month: 'long'\n});\ncy.get('[data-cy=\"calendar-dashboard\"]').contains(currentMonth).should('exist');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"calendar-dashboard\"]`, but never found it.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"calendar-dashboard\"]`, but never found it.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/index.cy.js:91:9)",
+                    "diff": null
+                  },
+                  "uuid": "c6579e42-9cbf-43d0-95ca-f696f08bedc2",
+                  "parentUUID": "9208f156-d86c-4ed9-bbf9-a808ead4f75d",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "has navigation controls",
+                  "fullTitle": "Dashboard Page Campaign Calendar has navigation controls",
+                  "timedOut": null,
+                  "duration": 10513,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.get('[data-cy=\"calendar-dashboard\"]').within(() => {\n  cy.get('button[aria-label=\"Previous month\"]').should('exist');\n  cy.get('button[aria-label=\"Next month\"]').should('exist');\n});",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"calendar-dashboard\"]`, but never found it.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"calendar-dashboard\"]`, but never found it.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/index.cy.js:95:9)",
+                    "diff": null
+                  },
+                  "uuid": "eff564a0-cf4b-4199-bd4b-5e5ac3cd3ac6",
+                  "parentUUID": "9208f156-d86c-4ed9-bbf9-a808ead4f75d",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "can navigate to next month",
+                  "fullTitle": "Dashboard Page Campaign Calendar can navigate to next month",
+                  "timedOut": null,
+                  "duration": 10499,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "const currentDate = new Date();\nconst nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);\nconst nextMonthName = nextMonth.toLocaleString('default', {\n  month: 'long'\n});\ncy.get('[data-cy=\"calendar-dashboard\"]').within(() => {\n  cy.get('button[aria-label=\"Next month\"]').click();\n  cy.contains(nextMonthName).should('exist');\n});",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"calendar-dashboard\"]`, but never found it.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"calendar-dashboard\"]`, but never found it.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/index.cy.js:106:9)",
+                    "diff": null
+                  },
+                  "uuid": "42a54ab7-2d4c-4c11-ae9b-774d3c207686",
+                  "parentUUID": "9208f156-d86c-4ed9-bbf9-a808ead4f75d",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "e6b9ceaa-b279-41ee-bbac-0d8e790a9bb2",
+                "c6579e42-9cbf-43d0-95ca-f696f08bedc2",
+                "eff564a0-cf4b-4199-bd4b-5e5ac3cd3ac6",
+                "42a54ab7-2d4c-4c11-ae9b-774d3c207686"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 42137,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "4ace575c-87e8-43c9-a3be-de681176f672",
+              "title": "Upcoming Campaigns",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "displays the upcoming campaigns section",
+                  "fullTitle": "Dashboard Page Upcoming Campaigns displays the upcoming campaigns section",
+                  "timedOut": null,
+                  "duration": 10481,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.get('[data-cy=\"upcoming-campaigns-card\"]').should('exist');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"upcoming-campaigns-card\"]`, but never found it.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"upcoming-campaigns-card\"]`, but never found it.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/index.cy.js:116:52)",
+                    "diff": null
+                  },
+                  "uuid": "6de4bc22-80c1-40c0-9b4a-c4dc6e0d63bb",
+                  "parentUUID": "4ace575c-87e8-43c9-a3be-de681176f672",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "shows campaign cards or empty state",
+                  "fullTitle": "Dashboard Page Upcoming Campaigns shows campaign cards or empty state",
+                  "timedOut": null,
+                  "duration": 10579,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.get('[data-cy=\"upcoming-campaigns-card\"]').within(() => {\n  // Either campaign cards exist or there's an empty state message\n  cy.get('body').then($body => {\n    if ($body.find('[data-cy=\"campaign-card\"]').length > 0) {\n      cy.get('[data-cy=\"campaign-card\"]').should('exist');\n    } else {\n      cy.contains('No upcoming campaigns').should('exist');\n    }\n  });\n});",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"upcoming-campaigns-card\"]`, but never found it.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"upcoming-campaigns-card\"]`, but never found it.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/index.cy.js:120:9)",
+                    "diff": null
+                  },
+                  "uuid": "5c42922f-91c3-4156-a104-d2aa6c08c994",
+                  "parentUUID": "4ace575c-87e8-43c9-a3be-de681176f672",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "has a functional New Campaign button",
+                  "fullTitle": "Dashboard Page Upcoming Campaigns has a functional New Campaign button",
+                  "timedOut": null,
+                  "duration": 10659,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.get('[data-cy=\"upcoming-campaigns-card\"]').within(() => {\n  cy.contains('New Campaign').click();\n});\n// Should navigate to campaign wizard\ncy.url().should('include', '/campaigns/wizard/step-1');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"upcoming-campaigns-card\"]`, but never found it.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"upcoming-campaigns-card\"]`, but never found it.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/index.cy.js:133:9)",
+                    "diff": null
+                  },
+                  "uuid": "151b9bfd-43e7-4950-8ff4-a83e11a03d95",
+                  "parentUUID": "4ace575c-87e8-43c9-a3be-de681176f672",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "6de4bc22-80c1-40c0-9b4a-c4dc6e0d63bb",
+                "5c42922f-91c3-4156-a104-d2aa6c08c994",
+                "151b9bfd-43e7-4950-8ff4-a83e11a03d95"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 31719,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "5016c68a-34d1-402a-8acf-f7a261d22946",
+              "title": "Brand Health",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "displays the brand health section",
+                  "fullTitle": "Dashboard Page Brand Health displays the brand health section",
+                  "timedOut": null,
+                  "duration": 515,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.contains('Brand Health').should('exist');",
+                  "err": {},
+                  "uuid": "33444566-266d-4033-b4e1-a365b7fdefff",
+                  "parentUUID": "5016c68a-34d1-402a-8acf-f7a261d22946",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "shows the sentiment score",
+                  "fullTitle": "Dashboard Page Brand Health shows the sentiment score",
+                  "timedOut": null,
+                  "duration": 10563,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.contains('Sentiment Score').should('exist');\ncy.contains('Positive Score').should('exist');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Sentiment Score' but never did.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Sentiment Score' but never did.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/index.cy.js:149:37)",
+                    "diff": null
+                  },
+                  "uuid": "887d654f-fb84-4889-b135-b08b59784a82",
+                  "parentUUID": "5016c68a-34d1-402a-8acf-f7a261d22946",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "contains visualizations",
+                  "fullTitle": "Dashboard Page Brand Health contains visualizations",
+                  "timedOut": null,
+                  "duration": 636,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Find charts or graph elements\ncy.get('svg').should('exist');",
+                  "err": {},
+                  "uuid": "9fcdf166-8c7b-4f8f-8ec7-2552c3ba8951",
+                  "parentUUID": "5016c68a-34d1-402a-8acf-f7a261d22946",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [
+                "33444566-266d-4033-b4e1-a365b7fdefff",
+                "9fcdf166-8c7b-4f8f-8ec7-2552c3ba8951"
+              ],
+              "failures": ["887d654f-fb84-4889-b135-b08b59784a82"],
+              "pending": [],
+              "skipped": [],
+              "duration": 11714,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "8be20768-d47e-473c-84bd-ca7846203bfa",
+              "title": "Dashboard Interactivity",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "updates timeframe when filter changes",
+                  "fullTitle": "Dashboard Page Dashboard Interactivity updates timeframe when filter changes",
+                  "timedOut": null,
+                  "duration": 10514,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.get('select').select('Last 90 days');\n// We can't fully test data changes, but we can verify the selection changed\ncy.get('select').should('have.value', 'Last 90 days');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `select`, but never found it.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `select`, but never found it.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/index.cy.js:162:9)",
+                    "diff": null
+                  },
+                  "uuid": "f6a8f929-5864-4ee8-a864-e1ab686ccfd5",
+                  "parentUUID": "8be20768-d47e-473c-84bd-ca7846203bfa",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "shows tooltips on hover of charts",
+                  "fullTitle": "Dashboard Page Dashboard Interactivity shows tooltips on hover of charts",
+                  "timedOut": null,
+                  "duration": 10497,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Find a chart and trigger hover event\ncy.get('[data-cy=\"chart-card\"]').first().within(() => {\n  cy.get('svg').first().trigger('mouseover');\n  // Tooltip should appear (but might not in headless mode)\n});",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"chart-card\"]`, but never found it.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-cy=\"chart-card\"]`, but never found it.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/index.cy.js:169:9)",
+                    "diff": null
+                  },
+                  "uuid": "037d70c1-bc3d-46f7-ba4a-2c3dcc96a4f7",
+                  "parentUUID": "8be20768-d47e-473c-84bd-ca7846203bfa",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "f6a8f929-5864-4ee8-a864-e1ab686ccfd5",
+                "037d70c1-bc3d-46f7-ba4a-2c3dcc96a4f7"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 21011,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            }
+          ],
+          "passes": [],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 0,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.2.0"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "cypress-report-[datetime]",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.3"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "config/cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "timestamp": "isoDateTime",
+        "reportFilename": "cypress-report-[datetime]"
+      },
+      "version": "6.2.0"
+    }
+  }
+}

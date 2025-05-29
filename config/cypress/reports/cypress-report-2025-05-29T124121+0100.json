@@ -1,0 +1,841 @@
+{
+  "stats": {
+    "suites": 11,
+    "tests": 18,
+    "passes": 1,
+    "pending": 0,
+    "failures": 17,
+    "start": "2025-05-29T11:35:17.861Z",
+    "end": "2025-05-29T11:41:21.148Z",
+    "duration": 363287,
+    "testsRegistered": 26,
+    "passPercent": 3.8461538461538463,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 8,
+    "hasSkipped": true
+  },
+  "results": [
+    {
+      "uuid": "186654e1-9d7c-4d6a-a098-4a81ad9f2aa8",
+      "title": "",
+      "fullFile": "config/cypress/e2e/dashboard/dashboard-with-page-objects.cy.js",
+      "file": "config/cypress/e2e/dashboard/dashboard-with-page-objects.cy.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "8d5d42e1-9a0f-4c21-801b-2c09972d92ca",
+          "title": "Dashboard Page - Using Page Objects (SSOT Pattern)",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [],
+          "suites": [
+            {
+              "uuid": "611196e5-23f7-43d3-8890-ba47a7eb170c",
+              "title": "Page Loading and Core Elements",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should load dashboard with all core elements visible",
+                  "fullTitle": "Dashboard Page - Using Page Objects (SSOT Pattern) Page Loading and Core Elements should load dashboard with all core elements visible",
+                  "timedOut": null,
+                  "duration": 10541,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "(0, _cypress.setupClerkTestingToken)();\ndashboardPage.logAction('Loading dashboard page');\ndashboardPage.visit().expectDashboardLoaded().expectToBeOnDashboard();\n// Verify header elements\ndashboardPage.expectHeaderVisible();\ndashboardPage.expectNavigationVisible();\n// Verify main dashboard elements using data-cy attributes\ndashboardPage.expectDataCyVisible('dashboard-content');\ndashboardPage.expectDataCyVisible('dashboard-header');\ndashboardPage.expectDataCyVisible('dashboard-title');\ndashboardPage.expectDataCyVisible('new-campaign-button');\n// Performance check\ndashboardPage.measurePagePerformance(3000);\ndashboardPage.logAction('Dashboard loaded successfully');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'\n    at DashboardPage.visit (webpack://my-project/./config/cypress/support/page-objects/dashboard/DashboardPage.js:58:16)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/dashboard-with-page-objects.cy.js:26:20)",
+                    "diff": null
+                  },
+                  "uuid": "a8dab9c8-59e5-44cf-ad01-45b4b4d7162e",
+                  "parentUUID": "611196e5-23f7-43d3-8890-ba47a7eb170c",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should display user-specific dashboard title",
+                  "fullTitle": "Dashboard Page - Using Page Objects (SSOT Pattern) Page Loading and Core Elements should display user-specific dashboard title",
+                  "timedOut": null,
+                  "duration": 10687,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "(0, _cypress.setupClerkTestingToken)();\n// Generate test user data\nconst testUser = _testHelpers.TestDataGenerators.generateUser({\n  firstName: 'John',\n  lastName: 'Doe'\n});\n// Mock user data\ncy.intercept('GET', '**/api/user**', {\n  statusCode: 200,\n  body: testUser\n}).as('userDetails');\ndashboardPage.visit().expectUserNameInTitle(testUser.firstName);\n_testHelpers.WaitUtilities.waitForApiCalls('@userDetails');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'\n    at DashboardPage.visit (webpack://my-project/./config/cypress/support/page-objects/dashboard/DashboardPage.js:58:16)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/dashboard-with-page-objects.cy.js:58:20)",
+                    "diff": null
+                  },
+                  "uuid": "1609d196-d39f-47f6-84b9-86b961fa2f2b",
+                  "parentUUID": "611196e5-23f7-43d3-8890-ba47a7eb170c",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should pass accessibility checks",
+                  "fullTitle": "Dashboard Page - Using Page Objects (SSOT Pattern) Page Loading and Core Elements should pass accessibility checks",
+                  "timedOut": null,
+                  "duration": 10550,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "(0, _cypress.setupClerkTestingToken)();\ndashboardPage.visit().checkAccessibility();",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'\n    at DashboardPage.visit (webpack://my-project/./config/cypress/support/page-objects/dashboard/DashboardPage.js:58:16)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/dashboard-with-page-objects.cy.js:65:20)",
+                    "diff": null
+                  },
+                  "uuid": "18a28bdc-1e6f-4524-b944-91c3bd663dd6",
+                  "parentUUID": "611196e5-23f7-43d3-8890-ba47a7eb170c",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "a8dab9c8-59e5-44cf-ad01-45b4b4d7162e",
+                "1609d196-d39f-47f6-84b9-86b961fa2f2b",
+                "18a28bdc-1e6f-4524-b944-91c3bd663dd6"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 31778,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "78c66826-c8ca-438c-8bf7-7de5030e0516",
+              "title": "Navigation and Header Functionality",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should navigate to campaigns page via sidebar",
+                  "fullTitle": "Dashboard Page - Using Page Objects (SSOT Pattern) Navigation and Header Functionality should navigate to campaigns page via sidebar",
+                  "timedOut": null,
+                  "duration": 10646,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "dashboardPage.logAction('Testing navigation to campaigns');\ndashboardPage.navigateToCampaigns();\n_testHelpers.AssertionHelpers.expectUrlToContain('/campaigns');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Navigation and Header Funct...`",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Navigation and Header Funct...`\n    at DashboardPage.visit (webpack://my-project/./config/cypress/support/page-objects/dashboard/DashboardPage.js:58:16)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/dashboard-with-page-objects.cy.js:72:20)",
+                    "diff": null
+                  },
+                  "uuid": "a9774189-2ef7-4254-82c9-e765a34951ab",
+                  "parentUUID": "78c66826-c8ca-438c-8bf7-7de5030e0516",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should navigate to settings page via sidebar",
+                  "fullTitle": "Dashboard Page - Using Page Objects (SSOT Pattern) Navigation and Header Functionality should navigate to settings page via sidebar",
+                  "timedOut": null,
+                  "duration": 0,
+                  "state": "skipped",
+                  "speed": null,
+                  "pass": false,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "dashboardPage.logAction('Testing navigation to settings');\ndashboardPage.navigateToSettings();\n_testHelpers.AssertionHelpers.expectUrlToContain('/settings');",
+                  "err": {},
+                  "uuid": "3eaf2e09-cfeb-4a1e-8993-bac17a0ff464",
+                  "parentUUID": "78c66826-c8ca-438c-8bf7-7de5030e0516",
+                  "isHook": false,
+                  "skipped": true
+                },
+                {
+                  "title": "should open new campaign creation",
+                  "fullTitle": "Dashboard Page - Using Page Objects (SSOT Pattern) Navigation and Header Functionality should open new campaign creation",
+                  "timedOut": null,
+                  "duration": 0,
+                  "state": "skipped",
+                  "speed": null,
+                  "pass": false,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "dashboardPage.logAction('Testing new campaign creation');\ndashboardPage.createNewCampaign();\n_testHelpers.AssertionHelpers.expectUrlToContain('/campaigns/wizard');",
+                  "err": {},
+                  "uuid": "23475b63-f094-4430-b58c-583aea723c14",
+                  "parentUUID": "78c66826-c8ca-438c-8bf7-7de5030e0516",
+                  "isHook": false,
+                  "skipped": true
+                },
+                {
+                  "title": "should handle logo click navigation",
+                  "fullTitle": "Dashboard Page - Using Page Objects (SSOT Pattern) Navigation and Header Functionality should handle logo click navigation",
+                  "timedOut": null,
+                  "duration": 0,
+                  "state": "skipped",
+                  "speed": null,
+                  "pass": false,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "dashboardPage.logAction('Testing logo navigation');\ndashboardPage.clickLogo();\n// Should stay on dashboard or refresh page\n_testHelpers.AssertionHelpers.expectUrlToContain('/dashboard');",
+                  "err": {},
+                  "uuid": "9c80fa16-c533-4949-b7ee-47f16ac0585d",
+                  "parentUUID": "78c66826-c8ca-438c-8bf7-7de5030e0516",
+                  "isHook": false,
+                  "skipped": true
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": ["a9774189-2ef7-4254-82c9-e765a34951ab"],
+              "pending": [],
+              "skipped": [
+                "3eaf2e09-cfeb-4a1e-8993-bac17a0ff464",
+                "23475b63-f094-4430-b58c-583aea723c14",
+                "9c80fa16-c533-4949-b7ee-47f16ac0585d"
+              ],
+              "duration": 10646,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "00b59ff4-dcfb-4ff8-85fc-997ae6f57d34",
+              "title": "Search Functionality",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should display search functionality",
+                  "fullTitle": "Dashboard Page - Using Page Objects (SSOT Pattern) Search Functionality should display search functionality",
+                  "timedOut": null,
+                  "duration": 10605,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "dashboardPage.expectSearchFunctionality();\n// Search elements should be visible\ndashboardPage.expectDataCyVisible('search-bar');\ndashboardPage.expectDataCyVisible('search-input');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Search Functionality`",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Search Functionality`\n    at DashboardPage.visit (webpack://my-project/./config/cypress/support/page-objects/dashboard/DashboardPage.js:58:16)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/dashboard-with-page-objects.cy.js:112:20)",
+                    "diff": null
+                  },
+                  "uuid": "506e03d7-5c9d-40c2-85be-9f513f72b2a0",
+                  "parentUUID": "00b59ff4-dcfb-4ff8-85fc-997ae6f57d34",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should allow typing in search field",
+                  "fullTitle": "Dashboard Page - Using Page Objects (SSOT Pattern) Search Functionality should allow typing in search field",
+                  "timedOut": null,
+                  "duration": 0,
+                  "state": "skipped",
+                  "speed": null,
+                  "pass": false,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "const searchTerm = 'test campaign';\ndashboardPage.logAction('Testing search input', searchTerm);\ndashboardPage.searchFor(searchTerm);\n// Verify search value\ndashboardPage.getByDataCy('search-input').should('have.value', searchTerm);",
+                  "err": {},
+                  "uuid": "ea62300e-841e-43dc-9b9e-0e38a362f885",
+                  "parentUUID": "00b59ff4-dcfb-4ff8-85fc-997ae6f57d34",
+                  "isHook": false,
+                  "skipped": true
+                },
+                {
+                  "title": "should clear search field",
+                  "fullTitle": "Dashboard Page - Using Page Objects (SSOT Pattern) Search Functionality should clear search field",
+                  "timedOut": null,
+                  "duration": 0,
+                  "state": "skipped",
+                  "speed": null,
+                  "pass": false,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "dashboardPage.searchFor('test search').clearSearch();\ndashboardPage.getByDataCy('search-input').should('have.value', '');",
+                  "err": {},
+                  "uuid": "d7b22e1f-5f1f-4f27-bc1c-4bbc640bffe0",
+                  "parentUUID": "00b59ff4-dcfb-4ff8-85fc-997ae6f57d34",
+                  "isHook": false,
+                  "skipped": true
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": ["506e03d7-5c9d-40c2-85be-9f513f72b2a0"],
+              "pending": [],
+              "skipped": [
+                "ea62300e-841e-43dc-9b9e-0e38a362f885",
+                "d7b22e1f-5f1f-4f27-bc1c-4bbc640bffe0"
+              ],
+              "duration": 10605,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "8f1fe371-c8aa-423f-abea-9987b7a87f67",
+              "title": "Calendar Component",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should display calendar section",
+                  "fullTitle": "Dashboard Page - Using Page Objects (SSOT Pattern) Calendar Component should display calendar section",
+                  "timedOut": null,
+                  "duration": 10619,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "dashboardPage.logAction('Testing calendar display');\ndashboardPage.expectCalendarVisible();\n// Calendar should be visible using data-cy attributes\ndashboardPage.expectDataCyVisible('calendar-card');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Calendar Component`",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Calendar Component`\n    at DashboardPage.visit (webpack://my-project/./config/cypress/support/page-objects/dashboard/DashboardPage.js:58:16)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/dashboard-with-page-objects.cy.js:144:20)",
+                    "diff": null
+                  },
+                  "uuid": "0d5941bd-4153-414e-ab7b-78085947c78e",
+                  "parentUUID": "8f1fe371-c8aa-423f-abea-9987b7a87f67",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should show empty state when no events",
+                  "fullTitle": "Dashboard Page - Using Page Objects (SSOT Pattern) Calendar Component should show empty state when no events",
+                  "timedOut": null,
+                  "duration": 0,
+                  "state": "skipped",
+                  "speed": null,
+                  "pass": false,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Mock empty calendar data\ncy.intercept('GET', '**/api/dashboard/events**', {\n  statusCode: 200,\n  body: []\n}).as('emptyCalendar');\ndashboardPage.visit();\n_testHelpers.WaitUtilities.waitForApiCalls('@emptyCalendar');\ndashboardPage.expectCalendarEmptyState();",
+                  "err": {},
+                  "uuid": "681e0557-ce69-44cc-b591-ece7a5a74302",
+                  "parentUUID": "8f1fe371-c8aa-423f-abea-9987b7a87f67",
+                  "isHook": false,
+                  "skipped": true
+                },
+                {
+                  "title": "should handle calendar loading state",
+                  "fullTitle": "Dashboard Page - Using Page Objects (SSOT Pattern) Calendar Component should handle calendar loading state",
+                  "timedOut": null,
+                  "duration": 0,
+                  "state": "skipped",
+                  "speed": null,
+                  "pass": false,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Mock delayed response\ncy.intercept('GET', '**/api/dashboard/events**', {\n  statusCode: 200,\n  body: [],\n  delay: 1000\n}).as('slowCalendar');\ndashboardPage.visit();\n// Should show loading state briefly\ndashboardPage.expectCalendarLoading();\n_testHelpers.WaitUtilities.waitForApiCalls('@slowCalendar');",
+                  "err": {},
+                  "uuid": "42cb9b0b-e61f-4880-8854-45e8b66ed749",
+                  "parentUUID": "8f1fe371-c8aa-423f-abea-9987b7a87f67",
+                  "isHook": false,
+                  "skipped": true
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": ["0d5941bd-4153-414e-ab7b-78085947c78e"],
+              "pending": [],
+              "skipped": [
+                "681e0557-ce69-44cc-b591-ece7a5a74302",
+                "42cb9b0b-e61f-4880-8854-45e8b66ed749"
+              ],
+              "duration": 10619,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "3588b952-fb79-479a-9b93-254339826b9d",
+              "title": "Campaigns Section",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should display campaigns section",
+                  "fullTitle": "Dashboard Page - Using Page Objects (SSOT Pattern) Campaigns Section should display campaigns section",
+                  "timedOut": null,
+                  "duration": 10717,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "dashboardPage.logAction('Testing campaigns section');\ndashboardPage.expectCampaignsVisible();\n// Campaigns card should be visible\ndashboardPage.expectDataCyVisible('campaigns-card');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Campaigns Section`",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Campaigns Section`\n    at DashboardPage.visit (webpack://my-project/./config/cypress/support/page-objects/dashboard/DashboardPage.js:58:16)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/dashboard-with-page-objects.cy.js:189:20)",
+                    "diff": null
+                  },
+                  "uuid": "11f5fd59-87b0-4cca-99d7-0c0ed4e5d356",
+                  "parentUUID": "3588b952-fb79-479a-9b93-254339826b9d",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should handle campaign interaction",
+                  "fullTitle": "Dashboard Page - Using Page Objects (SSOT Pattern) Campaigns Section should handle campaign interaction",
+                  "timedOut": null,
+                  "duration": 0,
+                  "state": "skipped",
+                  "speed": null,
+                  "pass": false,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Mock campaign data with test campaign\nconst testCampaign = _testHelpers.TestDataGenerators.generateCampaign({\n  id: 'test-camp-123',\n  name: 'Test Campaign for Dashboard'\n});\ncy.intercept('GET', '**/api/campaigns**', {\n  statusCode: 200,\n  body: {\n    campaigns: [testCampaign],\n    total: 1\n  }\n}).as('dashboardCampaigns');\ndashboardPage.visit();\n_testHelpers.WaitUtilities.waitForApiCalls('@dashboardCampaigns');\n// Click on campaign (if link exists)\ndashboardPage.clickCampaign(testCampaign.id);",
+                  "err": {},
+                  "uuid": "de03b74a-fe4a-4efc-8ff7-6ef23820758f",
+                  "parentUUID": "3588b952-fb79-479a-9b93-254339826b9d",
+                  "isHook": false,
+                  "skipped": true
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": ["11f5fd59-87b0-4cca-99d7-0c0ed4e5d356"],
+              "pending": [],
+              "skipped": ["de03b74a-fe4a-4efc-8ff7-6ef23820758f"],
+              "duration": 10717,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "6799d957-1d56-4c96-a628-26f06154f04d",
+              "title": "Responsive Design and Mobile Experience",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should display correctly on mobile devices",
+                  "fullTitle": "Dashboard Page - Using Page Objects (SSOT Pattern) Responsive Design and Mobile Experience should display correctly on mobile devices",
+                  "timedOut": null,
+                  "duration": 10587,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "(0, _cypress.setupClerkTestingToken)();\ncy.viewport('iphone-x');\ndashboardPage.visit().expectDashboardLoaded();\n// Core elements should still be visible\ndashboardPage.expectDataCyVisible('dashboard-content');\ndashboardPage.expectDataCyVisible('main-header');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'\n    at DashboardPage.visit (webpack://my-project/./config/cypress/support/page-objects/dashboard/DashboardPage.js:58:16)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/dashboard-with-page-objects.cy.js:230:20)",
+                    "diff": null
+                  },
+                  "uuid": "49fc40be-11e1-4040-b6e2-a33fc0107748",
+                  "parentUUID": "6799d957-1d56-4c96-a628-26f06154f04d",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should display correctly on tablet devices",
+                  "fullTitle": "Dashboard Page - Using Page Objects (SSOT Pattern) Responsive Design and Mobile Experience should display correctly on tablet devices",
+                  "timedOut": null,
+                  "duration": 10581,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "(0, _cypress.setupClerkTestingToken)();\ncy.viewport('ipad-2');\ndashboardPage.visit().expectDashboardLoaded();\n// Dashboard grid should adapt to tablet layout\ndashboardPage.expectDataCyVisible('dashboard-grid');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'\n    at DashboardPage.visit (webpack://my-project/./config/cypress/support/page-objects/dashboard/DashboardPage.js:58:16)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/dashboard-with-page-objects.cy.js:241:20)",
+                    "diff": null
+                  },
+                  "uuid": "c11e21ae-583c-4826-a8d6-a76270d1d0ea",
+                  "parentUUID": "6799d957-1d56-4c96-a628-26f06154f04d",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should handle mobile navigation menu",
+                  "fullTitle": "Dashboard Page - Using Page Objects (SSOT Pattern) Responsive Design and Mobile Experience should handle mobile navigation menu",
+                  "timedOut": null,
+                  "duration": 10698,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "(0, _cypress.setupClerkTestingToken)();\ncy.viewport('iphone-x');\ndashboardPage.visit();\n// Mobile menu button should be visible on small screens\ndashboardPage.expectDataCyVisible('mobile-menu-button');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'\n    at DashboardPage.visit (webpack://my-project/./config/cypress/support/page-objects/dashboard/DashboardPage.js:58:16)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/dashboard-with-page-objects.cy.js:251:20)",
+                    "diff": null
+                  },
+                  "uuid": "58769ca4-2191-45fa-8437-4853fd130220",
+                  "parentUUID": "6799d957-1d56-4c96-a628-26f06154f04d",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "49fc40be-11e1-4040-b6e2-a33fc0107748",
+                "c11e21ae-583c-4826-a8d6-a76270d1d0ea",
+                "58769ca4-2191-45fa-8437-4853fd130220"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 31866,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "d76a7c86-28d4-44fd-b641-d7b87f470732",
+              "title": "Error Handling and Edge Cases",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should handle dashboard API errors gracefully",
+                  "fullTitle": "Dashboard Page - Using Page Objects (SSOT Pattern) Error Handling and Edge Cases should handle dashboard API errors gracefully",
+                  "timedOut": null,
+                  "duration": 10508,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "(0, _cypress.setupClerkTestingToken)();\n// Mock API error\ncy.intercept('GET', '**/api/dashboard**', {\n  statusCode: 500,\n  body: {\n    error: 'Internal server error'\n  }\n}).as('dashboardError');\ndashboardPage.visit();\n_testHelpers.WaitUtilities.waitForApiCalls('@dashboardError');\n// Should still show basic dashboard structure\ndashboardPage.expectDataCyVisible('dashboard-content');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'\n    at DashboardPage.visit (webpack://my-project/./config/cypress/support/page-objects/dashboard/DashboardPage.js:58:16)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/dashboard-with-page-objects.cy.js:267:20)",
+                    "diff": null
+                  },
+                  "uuid": "67df363f-9315-4609-86c1-6770eec3a2e9",
+                  "parentUUID": "d76a7c86-28d4-44fd-b641-d7b87f470732",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should handle slow loading gracefully",
+                  "fullTitle": "Dashboard Page - Using Page Objects (SSOT Pattern) Error Handling and Edge Cases should handle slow loading gracefully",
+                  "timedOut": null,
+                  "duration": 10669,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "(0, _cypress.setupClerkTestingToken)();\n// Mock slow API responses\n_testHelpers.ApiInterceptors.setupDashboardInterceptors();\ncy.intercept('GET', '**/api/dashboard**', {\n  statusCode: 200,\n  body: _testHelpers.TestDataGenerators.generateMetrics(),\n  delay: 3000\n}).as('slowDashboard');\ndashboardPage.visit();\n// Should show dashboard structure immediately\ndashboardPage.expectDataCyVisible('dashboard-content');\n_testHelpers.WaitUtilities.waitForApiCalls('@slowDashboard');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'\n    at DashboardPage.visit (webpack://my-project/./config/cypress/support/page-objects/dashboard/DashboardPage.js:58:16)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/dashboard-with-page-objects.cy.js:285:20)",
+                    "diff": null
+                  },
+                  "uuid": "1275906c-affe-4587-9c32-7afa2d81b6de",
+                  "parentUUID": "d76a7c86-28d4-44fd-b641-d7b87f470732",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should handle authentication expiry",
+                  "fullTitle": "Dashboard Page - Using Page Objects (SSOT Pattern) Error Handling and Edge Cases should handle authentication expiry",
+                  "timedOut": null,
+                  "duration": 10614,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "(0, _cypress.setupClerkTestingToken)();\n// Mock auth expiry\ncy.intercept('GET', '**/api/user**', {\n  statusCode: 401,\n  body: {\n    error: 'Unauthorized'\n  }\n}).as('authExpired');\ndashboardPage.visit();\n// Should redirect to sign-in or show auth prompt\n// Exact behavior depends on auth implementation\ncy.get('body').should('exist');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'\n    at DashboardPage.visit (webpack://my-project/./config/cypress/support/page-objects/dashboard/DashboardPage.js:58:16)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/dashboard-with-page-objects.cy.js:301:20)",
+                    "diff": null
+                  },
+                  "uuid": "e16d59b8-5f1f-47b2-812b-f86075f0b6c1",
+                  "parentUUID": "d76a7c86-28d4-44fd-b641-d7b87f470732",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "67df363f-9315-4609-86c1-6770eec3a2e9",
+                "1275906c-affe-4587-9c32-7afa2d81b6de",
+                "e16d59b8-5f1f-47b2-812b-f86075f0b6c1"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 31791,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "6c87d812-fb5c-46a1-a8ff-e87707d89ff2",
+              "title": "Performance and Analytics",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should load within performance budget",
+                  "fullTitle": "Dashboard Page - Using Page Objects (SSOT Pattern) Performance and Analytics should load within performance budget",
+                  "timedOut": null,
+                  "duration": 10730,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "(0, _cypress.setupClerkTestingToken)();\ndashboardPage.logAction('Testing performance budget');\ndashboardPage.visit().measurePagePerformance(3000); // 3 second budget\n// Performance marks should be recorded\ncy.window().then(win => {\n  const marks = win.performance.getEntriesByType('mark');\n  expect(marks.length).to.be.greaterThan(0);\n});",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'\n    at DashboardPage.visit (webpack://my-project/./config/cypress/support/page-objects/dashboard/DashboardPage.js:58:16)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/dashboard-with-page-objects.cy.js:314:20)",
+                    "diff": null
+                  },
+                  "uuid": "ec0d4d21-6e5e-4cd5-a61e-00adfd27625b",
+                  "parentUUID": "6c87d812-fb5c-46a1-a8ff-e87707d89ff2",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should track key user interactions",
+                  "fullTitle": "Dashboard Page - Using Page Objects (SSOT Pattern) Performance and Analytics should track key user interactions",
+                  "timedOut": null,
+                  "duration": 10618,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "(0, _cypress.setupClerkTestingToken)();\ndashboardPage.visit();\n// Track navigation interactions\ndashboardPage.logAction('Testing analytics tracking');\ndashboardPage.clickNewCampaign();\n// In real implementation, verify analytics events fired\n_testHelpers.AssertionHelpers.expectUrlToContain('/campaigns/wizard');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'\n    at DashboardPage.visit (webpack://my-project/./config/cypress/support/page-objects/dashboard/DashboardPage.js:58:16)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/dashboard-with-page-objects.cy.js:325:20)",
+                    "diff": null
+                  },
+                  "uuid": "2ed52d23-91b0-499e-bacf-a733bd6c40e9",
+                  "parentUUID": "6c87d812-fb5c-46a1-a8ff-e87707d89ff2",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "ec0d4d21-6e5e-4cd5-a61e-00adfd27625b",
+                "2ed52d23-91b0-499e-bacf-a733bd6c40e9"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 21348,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "76c50fb8-bba2-4271-9c44-ce4f471ab72c",
+              "title": "Data Integration and State Management",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should handle real-time data updates",
+                  "fullTitle": "Dashboard Page - Using Page Objects (SSOT Pattern) Data Integration and State Management should handle real-time data updates",
+                  "timedOut": null,
+                  "duration": 10476,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "(0, _cypress.setupClerkTestingToken)();\n// Test WebSocket or polling updates\ndashboardPage.visit();\n// Mock a data update\nconst updatedMetrics = _testHelpers.TestDataGenerators.generateMetrics({\n  totalCampaigns: 25,\n  liveCampaigns: 5\n});\ncy.intercept('GET', '**/api/dashboard**', {\n  statusCode: 200,\n  body: {\n    metrics: updatedMetrics\n  }\n}).as('updatedDashboard');\n// Trigger a refresh or update\ndashboardPage.visit();\n_testHelpers.WaitUtilities.waitForApiCalls('@updatedDashboard');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'\n    at DashboardPage.visit (webpack://my-project/./config/cypress/support/page-objects/dashboard/DashboardPage.js:58:16)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/dashboard-with-page-objects.cy.js:341:20)",
+                    "diff": null
+                  },
+                  "uuid": "db7c865b-77f6-475b-8a79-e6ae8ec73517",
+                  "parentUUID": "76c50fb8-bba2-4271-9c44-ce4f471ab72c",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should maintain state during navigation",
+                  "fullTitle": "Dashboard Page - Using Page Objects (SSOT Pattern) Data Integration and State Management should maintain state during navigation",
+                  "timedOut": null,
+                  "duration": 10633,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "(0, _cypress.setupClerkTestingToken)();\ndashboardPage.visit().searchFor('test query').navigateToCampaigns();\n// Navigate back\ncy.go('back');\n// Search state might or might not be maintained\n// depending on implementation\ndashboardPage.expectToBeOnDashboard();",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: expected '<window>' to have property '__clerk_loaded'\n    at DashboardPage.visit (webpack://my-project/./config/cypress/support/page-objects/dashboard/DashboardPage.js:58:16)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/dashboard/dashboard-with-page-objects.cy.js:362:20)",
+                    "diff": null
+                  },
+                  "uuid": "41bd5945-f99f-49d8-9caf-3a95d7fdb624",
+                  "parentUUID": "76c50fb8-bba2-4271-9c44-ce4f471ab72c",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "db7c865b-77f6-475b-8a79-e6ae8ec73517",
+                "41bd5945-f99f-49d8-9caf-3a95d7fdb624"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 21109,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "48ae3caf-e59a-45b9-8bdb-717494734563",
+              "title": "SSOT Implementation",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should display dashboard content correctly",
+                  "fullTitle": "Dashboard Page - Using Page Objects (SSOT Pattern) SSOT Implementation should display dashboard content correctly",
+                  "timedOut": null,
+                  "duration": 551,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "(0, _cypress.setupClerkTestingToken)();\ncy.visit('/dashboard');\ncy.url().should('include', '/dashboard');\ncy.get('body').should('be.visible');",
+                  "err": {},
+                  "uuid": "360a75d3-f21c-4bd9-9937-8735067c351f",
+                  "parentUUID": "48ae3caf-e59a-45b9-8bdb-717494734563",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": ["360a75d3-f21c-4bd9-9937-8735067c351f"],
+              "failures": [],
+              "pending": [],
+              "skipped": [],
+              "duration": 551,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            }
+          ],
+          "passes": [],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 0,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.2.0"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "cypress-report-[datetime]",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.3"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "config/cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "timestamp": "isoDateTime",
+        "reportFilename": "cypress-report-[datetime]"
+      },
+      "version": "6.2.0"
+    }
+  }
+}

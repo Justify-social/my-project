@@ -1,0 +1,690 @@
+{
+  "stats": {
+    "suites": 10,
+    "tests": 19,
+    "passes": 4,
+    "pending": 0,
+    "failures": 15,
+    "start": "2025-05-29T11:12:05.126Z",
+    "end": "2025-05-29T11:16:25.630Z",
+    "duration": 260504,
+    "testsRegistered": 20,
+    "passPercent": 20,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 1,
+    "hasSkipped": true
+  },
+  "results": [
+    {
+      "uuid": "d1d71d74-ce20-49c3-b232-5cc9d3135cb4",
+      "title": "",
+      "fullFile": "config/cypress/e2e/admin/cypress-analytics-comprehensive.cy.js",
+      "file": "config/cypress/e2e/admin/cypress-analytics-comprehensive.cy.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "bed36b56-0f3f-4d85-a5fa-fdb76bdbae81",
+          "title": "Cypress Analytics Dashboard - Comprehensive Testing",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [],
+          "suites": [
+            {
+              "uuid": "ec67865d-4b10-45fb-917b-9ac6c6aeaae2",
+              "title": "Analytics Page Access and Navigation",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should access analytics dashboard from debug tools",
+                  "fullTitle": "Cypress Analytics Dashboard - Comprehensive Testing Analytics Page Access and Navigation should access analytics dashboard from debug tools",
+                  "timedOut": null,
+                  "duration": 6719,
+                  "state": "passed",
+                  "speed": "medium",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Navigate to debug tools\ncy.visit('/debug-tools');\n// Verify analytics dashboard card is visible\ncy.contains('Cypress Analytics Dashboard').should('be.visible');\ncy.contains('Comprehensive test analytics, performance metrics, coverage analysis, and error patterns.').should('be.visible');\n// Click analytics dashboard link\ncy.contains('View Analytics Dashboard').click();\n// Verify navigation to analytics page\nanalyticsPage.expectToBeOnAnalyticsPage();",
+                  "err": {},
+                  "uuid": "6634f43f-82ba-4c26-9a39-4722f9eca4b7",
+                  "parentUUID": "ec67865d-4b10-45fb-917b-9ac6c6aeaae2",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should display proper page structure and key metrics",
+                  "fullTitle": "Cypress Analytics Dashboard - Comprehensive Testing Analytics Page Access and Navigation should display proper page structure and key metrics",
+                  "timedOut": null,
+                  "duration": 11319,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "analyticsPage.visit();\n// Verify page title and description\ncy.contains('Cypress Analytics').should('be.visible');\ncy.contains('Comprehensive test monitoring, performance insights, and quality metrics').should('be.visible');\n// Verify key metrics overview is visible and follows F-pattern (top-left priority)\nanalyticsPage.expectMetricsOverviewVisible();\n// Verify refresh button is available\ncy.contains('Refresh Data').should('be.visible');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Comprehensive test monitoring, performance insights, and quality metrics' but never did.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Comprehensive test monitoring, performance insights, and quality metrics' but never did.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/cypress-analytics-comprehensive.cy.js:42:8)",
+                    "diff": null
+                  },
+                  "uuid": "e3664c91-5790-4a87-bbb5-89d19cd06f3c",
+                  "parentUUID": "ec67865d-4b10-45fb-917b-9ac6c6aeaae2",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": ["6634f43f-82ba-4c26-9a39-4722f9eca4b7"],
+              "failures": ["e3664c91-5790-4a87-bbb5-89d19cd06f3c"],
+              "pending": [],
+              "skipped": [],
+              "duration": 18038,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "48383bea-bcd3-4564-8766-dec2d454cd96",
+              "title": "Key Metrics Overview - Cognitive Load Optimization",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should display critical metrics in top-left priority area",
+                  "fullTitle": "Cypress Analytics Dashboard - Comprehensive Testing Key Metrics Overview - Cognitive Load Optimization should display critical metrics in top-left priority area",
+                  "timedOut": null,
+                  "duration": 11488,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Test F-pattern layout - most critical info first\ncy.get('.grid').first().within(() => {\n  cy.contains('Total Tests').should('be.visible');\n  cy.contains('Passed').should('be.visible');\n  cy.contains('Failed').should('be.visible');\n  cy.contains('Pass Rate').should('be.visible');\n});\n// Verify metrics show actual values\ncy.contains('59').should('be.visible'); // Total tests\ncy.contains('94.9%').should('be.visible'); // Pass rate",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Pass Rate' within the element: <div.grid.grid-cols-2.md:grid-cols-4.lg:grid-cols-6.gap-4> but never did.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Pass Rate' within the element: <div.grid.grid-cols-2.md:grid-cols-4.lg:grid-cols-6.gap-4> but never did.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/cypress-analytics-comprehensive.cy.js:65:35)\n    at withinFn (http://localhost:3000/__cypress/runner/cypress_runner.js:135507:8)\n    at <unknown> (http://localhost:3000/__cypress/runner/cypress_runner.js:135588:16)\n    at __WEBPACK_DEFAULT_EXPORT__ (http://localhost:3000/__cypress/runner/cypress_runner.js:133446:10)\n    at Context.within (http://localhost:3000/__cypress/runner/cypress_runner.js:135574:67)\n    at wrapped (http://localhost:3000/__cypress/runner/cypress_runner.js:141133:19)",
+                    "diff": null
+                  },
+                  "uuid": "75b077a9-e589-4d3e-b72f-7ef50e3c8afd",
+                  "parentUUID": "48383bea-bcd3-4564-8766-dec2d454cd96",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should provide immediate value interpretation without cognitive overload",
+                  "fullTitle": "Cypress Analytics Dashboard - Comprehensive Testing Key Metrics Overview - Cognitive Load Optimization should provide immediate value interpretation without cognitive overload",
+                  "timedOut": null,
+                  "duration": 11396,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Colors should provide immediate meaning\nanalyticsPage.elements.passedTestsCard().should('contain', '56');\nanalyticsPage.elements.failedTestsCard().should('contain', '3');\n// Pass rate should be prominently displayed\nanalyticsPage.elements.passRateCard().should('contain', '94.9%');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: expected '<div.p-4>' to contain '56'",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: expected '<div.p-4>' to contain '56'\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/cypress-analytics-comprehensive.cy.js:75:47)",
+                    "diff": null
+                  },
+                  "uuid": "e70c5ec7-a4ee-4d79-8683-7b6e80b9ee8d",
+                  "parentUUID": "48383bea-bcd3-4564-8766-dec2d454cd96",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "75b077a9-e589-4d3e-b72f-7ef50e3c8afd",
+                "e70c5ec7-a4ee-4d79-8683-7b6e80b9ee8d"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 22884,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "95e53a67-3132-4ebc-b225-48b57eb32f0f",
+              "title": "Tabbed Analytics - Progressive Disclosure",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should navigate between analytics tabs smoothly",
+                  "fullTitle": "Cypress Analytics Dashboard - Comprehensive Testing Tabbed Analytics - Progressive Disclosure should navigate between analytics tabs smoothly",
+                  "timedOut": null,
+                  "duration": 11027,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Verify all tabs are visible\nanalyticsPage.expectTabsVisible();\n// Test tab navigation\nanalyticsPage.openOverviewTab();\nanalyticsPage.expectOverviewContentVisible();\nanalyticsPage.openPerformanceTab();\nanalyticsPage.expectPerformanceContentVisible();\nanalyticsPage.openCoverageTab();\nanalyticsPage.expectCoverageContentVisible();\nanalyticsPage.openErrorsTab();\nanalyticsPage.expectErrorContentVisible();",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-value=\"overview\"]`, but never found it.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-value=\"overview\"]`, but never found it.\n    at AnalyticsPage.expectTabsVisible (webpack://my-project/./config/cypress/support/page-objects/admin/AnalyticsPage.js:130:32)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/cypress-analytics-comprehensive.cy.js:90:20)",
+                    "diff": null
+                  },
+                  "uuid": "5ad3819d-cd84-4142-8e15-cf419239a523",
+                  "parentUUID": "95e53a67-3132-4ebc-b225-48b57eb32f0f",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should display SSOT compliance status in overview tab",
+                  "fullTitle": "Cypress Analytics Dashboard - Comprehensive Testing Tabbed Analytics - Progressive Disclosure should display SSOT compliance status in overview tab",
+                  "timedOut": null,
+                  "duration": 10738,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "analyticsPage.openOverviewTab();\n// Verify SSOT compliance reporting\ncy.contains('SSOT Compliant Files (12/12)').should('be.visible');\ncy.contains('Modern Auth Pattern: 100%').should('be.visible');\ncy.contains('Zero Deprecated Methods').should('be.visible');\n// Verify specific compliant files are listed\ncy.contains('auth-official-simple.cy.js').should('be.visible');\ncy.contains('campaigns-with-page-objects.cy.js').should('be.visible');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-value=\"overview\"]`, but never found it.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-value=\"overview\"]`, but never found it.\n    at Object.overviewTab (webpack://my-project/./config/cypress/support/page-objects/admin/AnalyticsPage.js:39:26)\n    at AnalyticsPage.openOverviewTab (webpack://my-project/./config/cypress/support/page-objects/admin/AnalyticsPage.js:90:18)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/cypress-analytics-comprehensive.cy.js:107:20)",
+                    "diff": null
+                  },
+                  "uuid": "7243987e-ebaa-4c84-9f35-86d4c749c6a4",
+                  "parentUUID": "95e53a67-3132-4ebc-b225-48b57eb32f0f",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should show performance metrics and bottleneck analysis",
+                  "fullTitle": "Cypress Analytics Dashboard - Comprehensive Testing Tabbed Analytics - Progressive Disclosure should show performance metrics and bottleneck analysis",
+                  "timedOut": null,
+                  "duration": 10613,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "analyticsPage.openPerformanceTab();\n// Verify performance metrics\ncy.contains('2.3s').should('be.visible'); // Avg execution time\ncy.contains('45.2s').should('be.visible'); // Total suite time\n// Verify bottleneck analysis\ncy.contains('Fastest: auth-official-simple.cy.js').should('be.visible');\ncy.contains('Slowest: campaigns-comprehensive.cy.js').should('be.visible');\ncy.contains('Most Flaky: marketplace-minimal.cy.js').should('be.visible');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-value=\"performance\"]`, but never found it.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-value=\"performance\"]`, but never found it.\n    at Object.performanceTab (webpack://my-project/./config/cypress/support/page-objects/admin/AnalyticsPage.js:40:29)\n    at AnalyticsPage.openPerformanceTab (webpack://my-project/./config/cypress/support/page-objects/admin/AnalyticsPage.js:96:18)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/cypress-analytics-comprehensive.cy.js:120:20)",
+                    "diff": null
+                  },
+                  "uuid": "269b8ea4-9eae-49bf-8ed5-7a3ce95d9166",
+                  "parentUUID": "95e53a67-3132-4ebc-b225-48b57eb32f0f",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should display test coverage analysis",
+                  "fullTitle": "Cypress Analytics Dashboard - Comprehensive Testing Tabbed Analytics - Progressive Disclosure should display test coverage analysis",
+                  "timedOut": null,
+                  "duration": 10668,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "analyticsPage.openCoverageTab();\n// Verify coverage metrics for different test categories\ncy.contains('Authentication Tests').should('be.visible');\ncy.contains('95%').should('be.visible');\ncy.contains('Campaign Tests').should('be.visible');\ncy.contains('87%').should('be.visible');\ncy.contains('Dashboard Tests').should('be.visible');\ncy.contains('72%').should('be.visible');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-value=\"coverage\"]`, but never found it.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-value=\"coverage\"]`, but never found it.\n    at Object.coverageTab (webpack://my-project/./config/cypress/support/page-objects/admin/AnalyticsPage.js:41:26)\n    at AnalyticsPage.openCoverageTab (webpack://my-project/./config/cypress/support/page-objects/admin/AnalyticsPage.js:102:18)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/cypress-analytics-comprehensive.cy.js:133:20)",
+                    "diff": null
+                  },
+                  "uuid": "15ebe0a5-2984-4ecf-8528-047bfb2a781d",
+                  "parentUUID": "95e53a67-3132-4ebc-b225-48b57eb32f0f",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should analyze error patterns for debugging insights",
+                  "fullTitle": "Cypress Analytics Dashboard - Comprehensive Testing Tabbed Analytics - Progressive Disclosure should analyze error patterns for debugging insights",
+                  "timedOut": null,
+                  "duration": 10714,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "analyticsPage.openErrorsTab();\n// Verify error pattern analysis\ncy.contains('Common Error Patterns').should('be.visible');\ncy.contains('Element not found: [data-cy=\"campaign-submit-button\"]').should('be.visible');\ncy.contains('8 occurrences').should('be.visible');\n// Verify error context\ncy.contains('campaigns-with-page-objects.cy.js').should('be.visible');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-value=\"errors\"]`, but never found it.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-value=\"errors\"]`, but never found it.\n    at Object.errorsTab (webpack://my-project/./config/cypress/support/page-objects/admin/AnalyticsPage.js:42:24)\n    at AnalyticsPage.openErrorsTab (webpack://my-project/./config/cypress/support/page-objects/admin/AnalyticsPage.js:108:18)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/cypress-analytics-comprehensive.cy.js:147:20)",
+                    "diff": null
+                  },
+                  "uuid": "688033e7-0b3c-4c10-95eb-485b45f0371d",
+                  "parentUUID": "95e53a67-3132-4ebc-b225-48b57eb32f0f",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "5ad3819d-cd84-4142-8e15-cf419239a523",
+                "7243987e-ebaa-4c84-9f35-86d4c749c6a4",
+                "269b8ea4-9eae-49bf-8ed5-7a3ce95d9166",
+                "15ebe0a5-2984-4ecf-8528-047bfb2a781d",
+                "688033e7-0b3c-4c10-95eb-485b45f0371d"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 53760,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "cde1598e-dbba-4042-ad4e-bd4dce73737c",
+              "title": "Recent Test Executions - Real-time Monitoring",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should display recent test executions with status and timing",
+                  "fullTitle": "Cypress Analytics Dashboard - Comprehensive Testing Recent Test Executions - Real-time Monitoring should display recent test executions with status and timing",
+                  "timedOut": null,
+                  "duration": 10665,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.contains('Recent Test Executions').should('be.visible');\n// Verify execution entries show proper information\ncy.contains('Authentication Flow Complete').should('be.visible');\ncy.contains('auth-official-simple.cy.js').should('be.visible');\ncy.contains('passed').should('be.visible');\n// Verify timing information\ncy.contains('2340ms').should('be.visible');\ncy.contains('2 min ago').should('be.visible');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-value=\"overview\"]`, but never found it.\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Recent Test Executions - Re...`",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-value=\"overview\"]`, but never found it.\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Recent Test Executions - Re...`\n    at Object.overviewTab (webpack://my-project/./config/cypress/support/page-objects/admin/AnalyticsPage.js:39:26)\n    at AnalyticsPage.openOverviewTab (webpack://my-project/./config/cypress/support/page-objects/admin/AnalyticsPage.js:90:18)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/cypress-analytics-comprehensive.cy.js:162:20)",
+                    "diff": null
+                  },
+                  "uuid": "7cb32f0f-79b0-439e-9cea-34a270767afa",
+                  "parentUUID": "cde1598e-dbba-4042-ad4e-bd4dce73737c",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should show different execution statuses with appropriate visual indicators",
+                  "fullTitle": "Cypress Analytics Dashboard - Comprehensive Testing Recent Test Executions - Real-time Monitoring should show different execution statuses with appropriate visual indicators",
+                  "timedOut": null,
+                  "duration": 0,
+                  "state": "skipped",
+                  "speed": null,
+                  "pass": false,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Test status badges\ncy.get('[class*=\"bg-green\"]').should('exist'); // Passed tests\ncy.get('[class*=\"bg-red\"]').should('exist'); // Failed tests\n// Verify failed test is clearly indicated\ncy.contains('Dashboard Navigation').parent().should('contain', 'failed');",
+                  "err": {},
+                  "uuid": "c2fec716-9962-412d-9d3e-d23c827f846f",
+                  "parentUUID": "cde1598e-dbba-4042-ad4e-bd4dce73737c",
+                  "isHook": false,
+                  "skipped": true
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": ["7cb32f0f-79b0-439e-9cea-34a270767afa"],
+              "pending": [],
+              "skipped": ["c2fec716-9962-412d-9d3e-d23c827f846f"],
+              "duration": 10665,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "034b2646-7dcc-4fa9-a8b7-49a2e27bd75e",
+              "title": "Data Refresh and Real-time Updates",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should refresh analytics data and show updated timestamp",
+                  "fullTitle": "Cypress Analytics Dashboard - Comprehensive Testing Data Refresh and Real-time Updates should refresh analytics data and show updated timestamp",
+                  "timedOut": null,
+                  "duration": 651,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Get initial timestamp\ncy.contains('Last updated:').invoke('text').as('initialTimestamp');\n// Refresh data\nanalyticsPage.refreshAnalyticsData();\n// Verify loading state\ncy.get('.animate-spin').should('be.visible');\n// Wait for refresh completion\ncy.get('.animate-spin').should('not.exist');\n// Verify timestamp updated\ncy.get('@initialTimestamp').then(initialTimestamp => {\n  cy.contains('Last updated:').should('not.contain', initialTimestamp);\n});",
+                  "err": {
+                    "message": "TypeError: this.elements.dataLoading is not a function",
+                    "estack": "TypeError: this.elements.dataLoading is not a function\n    at AnalyticsPage.refreshAnalyticsData (webpack://my-project/./config/cypress/support/page-objects/admin/AnalyticsPage.js:170:18)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/cypress-analytics-comprehensive.cy.js:198:20)\n    at runnable.fn (http://localhost:3000/__cypress/runner/cypress_runner.js:141400:19)\n    at callFn (http://localhost:3000/__cypress/runner/cypress_runner.js:160478:21)\n    at Runnable.run (http://localhost:3000/__cypress/runner/cypress_runner.js:160465:7)\n    at <unknown> (http://localhost:3000/__cypress/runner/cypress_runner.js:166537:30)\n    at PassThroughHandlerContext.finallyHandler (http://localhost:3000/__cypress/runner/cypress_runner.js:4042:23)\n    at PassThroughHandlerContext.tryCatcher (http://localhost:3000/__cypress/runner/cypress_runner.js:1777:23)\n    at Promise._settlePromiseFromHandler (http://localhost:3000/__cypress/runner/cypress_runner.js:1489:31)",
+                    "diff": null
+                  },
+                  "uuid": "b43387fb-55c0-4a7a-89f9-e9225eab9e31",
+                  "parentUUID": "034b2646-7dcc-4fa9-a8b7-49a2e27bd75e",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": ["b43387fb-55c0-4a7a-89f9-e9225eab9e31"],
+              "pending": [],
+              "skipped": [],
+              "duration": 651,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "853b00c8-d627-4fa3-9221-f084d6435fbe",
+              "title": "Quick Actions - Administrative Functions",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should provide quick access to common analytics actions",
+                  "fullTitle": "Cypress Analytics Dashboard - Comprehensive Testing Quick Actions - Administrative Functions should provide quick access to common analytics actions",
+                  "timedOut": null,
+                  "duration": 10616,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "analyticsPage.testQuickActions();\n// Verify all quick action buttons\ncy.contains('Export Test Report').should('be.visible');\ncy.contains('Run All Tests').should('be.visible');\ncy.contains('View Test Logs').should('be.visible');\ncy.contains('Coverage Report').should('be.visible');\ncy.contains('Performance Analysis').should('be.visible');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Quick Actions' but never did.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Quick Actions' but never did.\n    at Object.quickActions (webpack://my-project/./config/cypress/support/page-objects/admin/AnalyticsPage.js:70:27)\n    at AnalyticsPage.testQuickActions (webpack://my-project/./config/cypress/support/page-objects/admin/AnalyticsPage.js:355:18)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/cypress-analytics-comprehensive.cy.js:219:20)",
+                    "diff": null
+                  },
+                  "uuid": "7ae963c1-fe89-456b-958f-c1ae5611a60c",
+                  "parentUUID": "853b00c8-d627-4fa3-9221-f084d6435fbe",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should enable export functionality for reports",
+                  "fullTitle": "Cypress Analytics Dashboard - Comprehensive Testing Quick Actions - Administrative Functions should enable export functionality for reports",
+                  "timedOut": null,
+                  "duration": 10643,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.contains('Export Test Report').should('be.enabled');\ncy.contains('Coverage Report').should('be.enabled');\ncy.contains('Performance Analysis').should('be.enabled');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Export Test Report' but never did.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Export Test Report' but never did.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/cypress-analytics-comprehensive.cy.js:230:40)",
+                    "diff": null
+                  },
+                  "uuid": "85bbe066-bd5c-4ab9-a79f-0551f8801532",
+                  "parentUUID": "853b00c8-d627-4fa3-9221-f084d6435fbe",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "7ae963c1-fe89-456b-958f-c1ae5611a60c",
+                "85bbe066-bd5c-4ab9-a79f-0551f8801532"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 21259,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "d37db0b5-bec0-4946-ba09-9b7176c0807f",
+              "title": "Comprehensive Analytics Workflow - End-to-End",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should complete full analytics workflow without cognitive overload",
+                  "fullTitle": "Cypress Analytics Dashboard - Comprehensive Testing Comprehensive Analytics Workflow - End-to-End should complete full analytics workflow without cognitive overload",
+                  "timedOut": null,
+                  "duration": 17,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Run complete workflow test\nanalyticsPage.testCompleteAnalyticsWorkflow();",
+                  "err": {
+                    "message": "TypeError: this.elements.dataLoading is not a function",
+                    "estack": "TypeError: this.elements.dataLoading is not a function\n    at AnalyticsPage.refreshAnalyticsData (webpack://my-project/./config/cypress/support/page-objects/admin/AnalyticsPage.js:170:18)\n    at AnalyticsPage.testCompleteAnalyticsWorkflow (webpack://my-project/./config/cypress/support/page-objects/admin/AnalyticsPage.js:343:9)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/cypress-analytics-comprehensive.cy.js:239:20)\n    at runnable.fn (http://localhost:3000/__cypress/runner/cypress_runner.js:141400:19)\n    at callFn (http://localhost:3000/__cypress/runner/cypress_runner.js:160478:21)\n    at Runnable.run (http://localhost:3000/__cypress/runner/cypress_runner.js:160465:7)\n    at <unknown> (http://localhost:3000/__cypress/runner/cypress_runner.js:166537:30)\n    at PassThroughHandlerContext.finallyHandler (http://localhost:3000/__cypress/runner/cypress_runner.js:4042:23)\n    at PassThroughHandlerContext.tryCatcher (http://localhost:3000/__cypress/runner/cypress_runner.js:1777:23)",
+                    "diff": null
+                  },
+                  "uuid": "1b2ccd4b-966a-4233-afe5-93e5fb2887dc",
+                  "parentUUID": "d37db0b5-bec0-4946-ba09-9b7176c0807f",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should maintain consistent navigation patterns with debug tools",
+                  "fullTitle": "Cypress Analytics Dashboard - Comprehensive Testing Comprehensive Analytics Workflow - End-to-End should maintain consistent navigation patterns with debug tools",
+                  "timedOut": null,
+                  "duration": 1279,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Test navigation consistency\ncy.visit('/debug-tools');\ncy.contains('View Analytics Dashboard').click();\nanalyticsPage.expectToBeOnAnalyticsPage();\n// Verify breadcrumb or back navigation maintains context\ncy.url().should('include', '/debug-tools/analytics');",
+                  "err": {},
+                  "uuid": "226d9a3e-bd4b-4aae-8c6b-b1124c72bdf7",
+                  "parentUUID": "d37db0b5-bec0-4946-ba09-9b7176c0807f",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": ["226d9a3e-bd4b-4aae-8c6b-b1124c72bdf7"],
+              "failures": ["1b2ccd4b-966a-4233-afe5-93e5fb2887dc"],
+              "pending": [],
+              "skipped": [],
+              "duration": 1296,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "ebb36223-b17d-4e20-8dd8-5f8179cc178f",
+              "title": "Accessibility and Usability - Admin Team Focused",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should be keyboard navigable for admin efficiency",
+                  "fullTitle": "Cypress Analytics Dashboard - Comprehensive Testing Accessibility and Usability - Admin Team Focused should be keyboard navigable for admin efficiency",
+                  "timedOut": null,
+                  "duration": 506,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Test tab navigation\ncy.get('body').tab();\ncy.focused().should('contain', 'Refresh Data');\n// Test tab switching via keyboard\ncy.get('[role=\"tablist\"]').within(() => {\n  cy.get('[data-value=\"performance\"]').focus().type('{enter}');\n});\nanalyticsPage.expectPerformanceContentVisible();",
+                  "err": {
+                    "message": "TypeError: cy.get(...).tab is not a function",
+                    "estack": "TypeError: cy.get(...).tab is not a function\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/cypress-analytics-comprehensive.cy.js:261:21)\n    at runnable.fn (http://localhost:3000/__cypress/runner/cypress_runner.js:141400:19)\n    at callFn (http://localhost:3000/__cypress/runner/cypress_runner.js:160478:21)\n    at Runnable.run (http://localhost:3000/__cypress/runner/cypress_runner.js:160465:7)\n    at <unknown> (http://localhost:3000/__cypress/runner/cypress_runner.js:166537:30)\n    at PassThroughHandlerContext.finallyHandler (http://localhost:3000/__cypress/runner/cypress_runner.js:4042:23)\n    at PassThroughHandlerContext.tryCatcher (http://localhost:3000/__cypress/runner/cypress_runner.js:1777:23)\n    at Promise._settlePromiseFromHandler (http://localhost:3000/__cypress/runner/cypress_runner.js:1489:31)\n    at Promise._settlePromise (http://localhost:3000/__cypress/runner/cypress_runner.js:1546:18)",
+                    "diff": null
+                  },
+                  "uuid": "1117bd68-7cd3-4d70-af28-48360ed969e7",
+                  "parentUUID": "ebb36223-b17d-4e20-8dd8-5f8179cc178f",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should provide clear visual hierarchy for scanning",
+                  "fullTitle": "Cypress Analytics Dashboard - Comprehensive Testing Accessibility and Usability - Admin Team Focused should provide clear visual hierarchy for scanning",
+                  "timedOut": null,
+                  "duration": 834,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Verify proper heading hierarchy\ncy.get('h1').should('contain', 'Cypress Analytics');\n// Verify card structure follows consistent pattern\ncy.get('[class*=\"border-divider\"]').should('have.length.greaterThan', 5);\n// Verify color coding is consistent\ncy.get('[class*=\"text-green-600\"]').should('exist'); // Passed tests\ncy.get('[class*=\"text-red-600\"]').should('exist'); // Failed tests",
+                  "err": {},
+                  "uuid": "18fd5c4c-bc2a-4169-bdb5-8209ef95c512",
+                  "parentUUID": "ebb36223-b17d-4e20-8dd8-5f8179cc178f",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": ["18fd5c4c-bc2a-4169-bdb5-8209ef95c512"],
+              "failures": ["1117bd68-7cd3-4d70-af28-48360ed969e7"],
+              "pending": [],
+              "skipped": [],
+              "duration": 1340,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "f53f04f6-993b-497d-919c-fa026ebaf138",
+              "title": "Performance and Loading States",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should handle loading states gracefully",
+                  "fullTitle": "Cypress Analytics Dashboard - Comprehensive Testing Performance and Loading States should handle loading states gracefully",
+                  "timedOut": null,
+                  "duration": 946,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Test initial loading\ncy.visit('/debug-tools/analytics');\n// Should show loading spinner initially\ncy.get('.animate-spin', {\n  timeout: 1000\n}).should('be.visible');\n// Should complete loading within reasonable time\ncy.contains('Cypress Analytics', {\n  timeout: 5000\n}).should('be.visible');\ncy.get('.animate-spin').should('not.exist');",
+                  "err": {},
+                  "uuid": "3d8e3f83-9de4-4ba0-81cc-e983d8fd30a0",
+                  "parentUUID": "f53f04f6-993b-497d-919c-fa026ebaf138",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should load analytics data efficiently for admin workflow",
+                  "fullTitle": "Cypress Analytics Dashboard - Comprehensive Testing Performance and Loading States should load analytics data efficiently for admin workflow",
+                  "timedOut": null,
+                  "duration": 3888,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Measure page load performance\ncy.visit('/debug-tools/analytics');\n// Key metrics should be visible quickly\ncy.contains('Total Tests', {\n  timeout: 3000\n}).should('be.visible');\ncy.contains('Pass Rate', {\n  timeout: 3000\n}).should('be.visible');\n// All tabs should be responsive\nanalyticsPage.openPerformanceTab();\ncy.contains('Performance Metrics', {\n  timeout: 2000\n}).should('be.visible');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 3000ms: Expected to find content: 'Pass Rate' but never did.",
+                    "estack": "AssertionError: Timed out retrying after 3000ms: Expected to find content: 'Pass Rate' but never did.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/cypress-analytics-comprehensive.cy.js:304:50)",
+                    "diff": null
+                  },
+                  "uuid": "4e7a1c44-f162-4181-b03d-0aae794eace1",
+                  "parentUUID": "f53f04f6-993b-497d-919c-fa026ebaf138",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": ["3d8e3f83-9de4-4ba0-81cc-e983d8fd30a0"],
+              "failures": ["4e7a1c44-f162-4181-b03d-0aae794eace1"],
+              "pending": [],
+              "skipped": [],
+              "duration": 4834,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            }
+          ],
+          "passes": [],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 0,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.2.0"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "cypress-report-[datetime]",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.3"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "config/cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "timestamp": "isoDateTime",
+        "reportFilename": "cypress-report-[datetime]"
+      },
+      "version": "6.2.0"
+    }
+  }
+}

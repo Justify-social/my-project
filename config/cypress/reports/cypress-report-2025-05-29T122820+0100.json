@@ -1,0 +1,220 @@
+{
+  "stats": {
+    "suites": 3,
+    "tests": 5,
+    "passes": 5,
+    "pending": 0,
+    "failures": 0,
+    "start": "2025-05-29T11:27:40.257Z",
+    "end": "2025-05-29T11:28:20.543Z",
+    "duration": 40286,
+    "testsRegistered": 5,
+    "passPercent": 100,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "7cda1d0f-23ba-46e6-b4a5-c6a0ebbe73ca",
+      "title": "",
+      "fullFile": "config/cypress/e2e/auth/auth-middleware-test.cy.js",
+      "file": "config/cypress/e2e/auth/auth-middleware-test.cy.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "5f05412c-486a-49ad-bd7d-237973ce4602",
+          "title": "Clerk Middleware Authentication Test",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [],
+          "suites": [
+            {
+              "uuid": "686e7efc-df16-44ad-a1dd-ebac80c90261",
+              "title": "Protected Route Access",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should access protected dashboard route without redirect loop",
+                  "fullTitle": "Clerk Middleware Authentication Test Protected Route Access should access protected dashboard route without redirect loop",
+                  "timedOut": null,
+                  "duration": 602,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "(0, _cypress.setupClerkTestingToken)();\ncy.visit('/dashboard');\ncy.url().should('include', '/dashboard');\ncy.url().should('not.include', '/sign-in');\n// Page should load successfully\ncy.get('body').should('be.visible');\ncy.log('✅ Protected route accessed successfully - no redirect loop!');",
+                  "err": {},
+                  "uuid": "f27c1f8e-857e-4103-a2f8-cdc4bb4b6148",
+                  "parentUUID": "686e7efc-df16-44ad-a1dd-ebac80c90261",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should access influencer marketplace without redirect loop",
+                  "fullTitle": "Clerk Middleware Authentication Test Protected Route Access should access influencer marketplace without redirect loop",
+                  "timedOut": null,
+                  "duration": 8167,
+                  "state": "passed",
+                  "speed": "medium",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "(0, _cypress.setupClerkTestingToken)();\ncy.visit('/influencer-marketplace');\ncy.url().should('include', '/influencer-marketplace');\ncy.url().should('not.include', '/sign-in');\n// Page should load successfully\ncy.get('body').should('be.visible');\ncy.log('✅ Marketplace accessed successfully - no redirect loop!');",
+                  "err": {},
+                  "uuid": "a9111cbe-4d6c-4224-a05c-e45d5e3282c4",
+                  "parentUUID": "686e7efc-df16-44ad-a1dd-ebac80c90261",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should access campaigns page without redirect loop",
+                  "fullTitle": "Clerk Middleware Authentication Test Protected Route Access should access campaigns page without redirect loop",
+                  "timedOut": null,
+                  "duration": 4854,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "(0, _cypress.setupClerkTestingToken)();\ncy.visit('/campaigns');\ncy.url().should('include', '/campaigns');\ncy.url().should('not.include', '/sign-in');\n// Page should load successfully\ncy.get('body').should('be.visible');\ncy.log('✅ Campaigns page accessed successfully - no redirect loop!');",
+                  "err": {},
+                  "uuid": "6b9d0a4d-c078-4fe6-ba25-71b3cc8d1a52",
+                  "parentUUID": "686e7efc-df16-44ad-a1dd-ebac80c90261",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should verify middleware recognizes authentication",
+                  "fullTitle": "Clerk Middleware Authentication Test Protected Route Access should verify middleware recognizes authentication",
+                  "timedOut": null,
+                  "duration": 4244,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "(0, _cypress.setupClerkTestingToken)();\ncy.visit('/dashboard');\ncy.url().should('include', '/dashboard');\ncy.url().should('not.include', '/sign-in');\n// Wait for page to load completely\ncy.get('body').should('be.visible');\n// The fact that we're on dashboard means middleware allowed access\n_testHelpers.AssertionHelpers.expectUrlToContain('/dashboard');\ncy.log('✅ Middleware correctly recognizes authentication!');",
+                  "err": {},
+                  "uuid": "7749d94a-1ade-414a-a06f-e381adaced27",
+                  "parentUUID": "686e7efc-df16-44ad-a1dd-ebac80c90261",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [
+                "f27c1f8e-857e-4103-a2f8-cdc4bb4b6148",
+                "a9111cbe-4d6c-4224-a05c-e45d5e3282c4",
+                "6b9d0a4d-c078-4fe6-ba25-71b3cc8d1a52",
+                "7749d94a-1ade-414a-a06f-e381adaced27"
+              ],
+              "failures": [],
+              "pending": [],
+              "skipped": [],
+              "duration": 17867,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "bff54a5a-de44-4436-a8f2-d57ab6abe3af",
+              "title": "Public Route Access",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should allow sign-in page access without authentication",
+                  "fullTitle": "Clerk Middleware Authentication Test Public Route Access should allow sign-in page access without authentication",
+                  "timedOut": null,
+                  "duration": 11441,
+                  "state": "passed",
+                  "speed": "slow",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Public routes should work without special setup\ncy.visit('/sign-in');\ncy.url().should('include', '/sign-in');\ncy.get('body').should('be.visible');\ncy.log('✅ Public route access works correctly');",
+                  "err": {},
+                  "uuid": "39f3b7a0-b0b0-4625-8496-a822864eea90",
+                  "parentUUID": "bff54a5a-de44-4436-a8f2-d57ab6abe3af",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": ["39f3b7a0-b0b0-4625-8496-a822864eea90"],
+              "failures": [],
+              "pending": [],
+              "skipped": [],
+              "duration": 11441,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            }
+          ],
+          "passes": [],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 0,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.2.0"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "cypress-report-[datetime]",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.3"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "config/cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "timestamp": "isoDateTime",
+        "reportFilename": "cypress-report-[datetime]"
+      },
+      "version": "6.2.0"
+    }
+  }
+}

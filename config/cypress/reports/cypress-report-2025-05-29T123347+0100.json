@@ -1,0 +1,127 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 1,
+    "passes": 0,
+    "pending": 0,
+    "failures": 1,
+    "start": "2025-05-29T11:33:46.743Z",
+    "end": "2025-05-29T11:33:47.410Z",
+    "duration": 667,
+    "testsRegistered": 2,
+    "passPercent": 0,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 1,
+    "hasSkipped": true
+  },
+  "results": [
+    {
+      "uuid": "f45b2102-fa6b-48fd-97cb-e5f8ec4b6591",
+      "title": "",
+      "fullFile": "config/cypress/e2e/brand-lift/survey-design.cy.js",
+      "file": "config/cypress/e2e/brand-lift/survey-design.cy.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "c4eb4a71-2bc5-4781-9156-ece3001c020b",
+          "title": "Brand Lift Survey Design Page",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "displays the Survey Design header and Question Builder",
+              "fullTitle": "Brand Lift Survey Design Page displays the Survey Design header and Question Builder",
+              "timedOut": null,
+              "duration": 294,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('h1').should('contain', 'Survey Design');\ncy.contains('Question Builder').should('exist');",
+              "err": {
+                "message": "CypressError: `cy.visit()` failed trying to load:\n\nhttp://localhost:3000/brand-lift/survey-design\n\nThe response we received from your web server was:\n\n  > 404: Not Found\n\nThis was considered a failure because the status code was not `2xx`.\n\nThis http request was redirected '3' times to:\n\n  - 307: https://verified-guppy-74.clerk.accounts.dev/v1/client/handshake?redirect_url=http%3A%2F%2Flocalhost%3A3000%2Fbrand-lift%2Fsurvey-design&__clerk_api_version=2025-04-10&suffixed_cookies=false&__clerk_hs_reason=dev-browser-missing\n  - 307: http://localhost:3000/brand-lift/survey-design?__clerk_handshake=eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDExMUFBQSIsImtpZCI6Imluc18ydEpLd2VGS09ramFMNjFERzM4cE84U2xWaDIiLCJ0eXAiOiJKV1QifQ.eyJoYW5kc2hha2UiOlsiX19jbGllbnRfdWF0PTsgUGF0aD0vOyBFeHBpcmVzPVRodSwgMDEgSmFuIDE5NzAgMDA6MDA6MDAgR01UOyBTYW1lU2l0ZT1MYXgiLCJfX2NsaWVudF91YXQ9MDsgUGF0aD0vOyBEb21haW49bG9jYWxob3N0OyBNYXgtQWdlPTMxNTM2MDAwMDsgU2FtZVNpdGU9TGF4IiwiX19zZXNzaW9uPTsgUGF0aD0vOyBFeHBpcmVzPVRodSwgMDEgSmFuIDE5NzAgMDA6MDA6MDAgR01UOyBTYW1lU2l0ZT1MYXgiLCJfX2NsZXJrX2RiX2p3dD1kdmJfMnhsaEF5d2NLYU5oYXFWbllUWkhmVVM3M2pFOyBQYXRoPS87IEV4cGlyZXM9RnJpLCAyOSBNYXkgMjAyNiAxMTozMzo0NyBHTVQ7IFNhbWVTaXRlPUxheCJdfQ.jAUty0j7qbckqOrt_QEPHc3oUwwIrD8ZsW9ebmfYqbN-929-uB1-QOYuF1S0veRkltqFkanOYZic9w0CWa5DZU80yUVDjk3NozNS7DlahnbL8dxrspnbTVePKmSIPtWcrlV16MtumiTozkMXSX7oA3lxlNIgnO4J3OuYh9E_ApzgaywnKdizxwdTlYa4V-RuLu3cmKugddouLI0W_q5LuAozch7_TUSyl9JfA95G-WSdZSzXXJ4bk4VCBcaBLKfOIcE3loF9cqggXnIyyoim7SDEblJ3R-u2kDgDFHOJChvYe3XwJIsPJ3uMgxfh8yiul6o3AayaVbIesmJ0D2BgXQ\n  - 307: http://localhost:3000/brand-lift/survey-design\n\nIf you do not want status codes to cause failures pass the option: `failOnStatusCode: false`\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Brand Lift Survey Design Page`",
+                "estack": "CypressError: `cy.visit()` failed trying to load:\n\nhttp://localhost:3000/brand-lift/survey-design\n\nThe response we received from your web server was:\n\n  > 404: Not Found\n\nThis was considered a failure because the status code was not `2xx`.\n\nThis http request was redirected '3' times to:\n\n  - 307: https://verified-guppy-74.clerk.accounts.dev/v1/client/handshake?redirect_url=http%3A%2F%2Flocalhost%3A3000%2Fbrand-lift%2Fsurvey-design&__clerk_api_version=2025-04-10&suffixed_cookies=false&__clerk_hs_reason=dev-browser-missing\n  - 307: http://localhost:3000/brand-lift/survey-design?__clerk_handshake=eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDExMUFBQSIsImtpZCI6Imluc18ydEpLd2VGS09ramFMNjFERzM4cE84U2xWaDIiLCJ0eXAiOiJKV1QifQ.eyJoYW5kc2hha2UiOlsiX19jbGllbnRfdWF0PTsgUGF0aD0vOyBFeHBpcmVzPVRodSwgMDEgSmFuIDE5NzAgMDA6MDA6MDAgR01UOyBTYW1lU2l0ZT1MYXgiLCJfX2NsaWVudF91YXQ9MDsgUGF0aD0vOyBEb21haW49bG9jYWxob3N0OyBNYXgtQWdlPTMxNTM2MDAwMDsgU2FtZVNpdGU9TGF4IiwiX19zZXNzaW9uPTsgUGF0aD0vOyBFeHBpcmVzPVRodSwgMDEgSmFuIDE5NzAgMDA6MDA6MDAgR01UOyBTYW1lU2l0ZT1MYXgiLCJfX2NsZXJrX2RiX2p3dD1kdmJfMnhsaEF5d2NLYU5oYXFWbllUWkhmVVM3M2pFOyBQYXRoPS87IEV4cGlyZXM9RnJpLCAyOSBNYXkgMjAyNiAxMTozMzo0NyBHTVQ7IFNhbWVTaXRlPUxheCJdfQ.jAUty0j7qbckqOrt_QEPHc3oUwwIrD8ZsW9ebmfYqbN-929-uB1-QOYuF1S0veRkltqFkanOYZic9w0CWa5DZU80yUVDjk3NozNS7DlahnbL8dxrspnbTVePKmSIPtWcrlV16MtumiTozkMXSX7oA3lxlNIgnO4J3OuYh9E_ApzgaywnKdizxwdTlYa4V-RuLu3cmKugddouLI0W_q5LuAozch7_TUSyl9JfA95G-WSdZSzXXJ4bk4VCBcaBLKfOIcE3loF9cqggXnIyyoim7SDEblJ3R-u2kDgDFHOJChvYe3XwJIsPJ3uMgxfh8yiul6o3AayaVbIesmJ0D2BgXQ\n  - 307: http://localhost:3000/brand-lift/survey-design\n\nIf you do not want status codes to cause failures pass the option: `failOnStatusCode: false`\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Brand Lift Survey Design Page`\n    at <unknown> (http://localhost:3000/__cypress/runner/cypress_runner.js:134670:76)\n    at visitFailedByErr (http://localhost:3000/__cypress/runner/cypress_runner.js:134076:12)\n    at <unknown> (http://localhost:3000/__cypress/runner/cypress_runner.js:134653:13)\n    at tryCatcher (http://localhost:3000/__cypress/runner/cypress_runner.js:1777:23)\n    at Promise._settlePromiseFromHandler (http://localhost:3000/__cypress/runner/cypress_runner.js:1489:31)\n    at Promise._settlePromise (http://localhost:3000/__cypress/runner/cypress_runner.js:1546:18)\n    at Promise._settlePromise0 (http://localhost:3000/__cypress/runner/cypress_runner.js:1591:10)\n    at Promise._settlePromises (http://localhost:3000/__cypress/runner/cypress_runner.js:1667:18)\n    at _drainQueueStep (http://localhost:3000/__cypress/runner/cypress_runner.js:2377:12)\n    at _drainQueue (http://localhost:3000/__cypress/runner/cypress_runner.js:2370:9)\n    at Async._drainQueues (http://localhost:3000/__cypress/runner/cypress_runner.js:2386:5)\n    at Async.drainQueues (http://localhost:3000/__cypress/runner/cypress_runner.js:2256:14)\nFrom Your Spec Code:\n    at Context.eval (webpack://my-project/./config/cypress/e2e/brand-lift/survey-design.cy.js:8:7)",
+                "diff": null
+              },
+              "uuid": "eb3b9ee5-6d07-4467-9f37-4de973c26475",
+              "parentUUID": "c4eb4a71-2bc5-4781-9156-ece3001c020b",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "adds a new question using the builder",
+              "fullTitle": "Brand Lift Survey Design Page adds a new question using the builder",
+              "timedOut": null,
+              "duration": 0,
+              "state": "skipped",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "const newQuestion = 'what is your opinion on our ad?';\ncy.get('input[placeholder=\"enter question text...\"]').should('be.visible').type(newQuestion);\ncy.contains('Add Question').click();\n// Verify the new question appears in the list.\ncy.contains(newQuestion.toLowerCase()).should('exist');",
+              "err": {},
+              "uuid": "f5bc325a-4c18-4fd4-85e4-0cae90341310",
+              "parentUUID": "c4eb4a71-2bc5-4781-9156-ece3001c020b",
+              "isHook": false,
+              "skipped": true
+            }
+          ],
+          "suites": [],
+          "passes": [],
+          "failures": ["eb3b9ee5-6d07-4467-9f37-4de973c26475"],
+          "pending": [],
+          "skipped": ["f5bc325a-4c18-4fd4-85e4-0cae90341310"],
+          "duration": 294,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.2.0"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "cypress-report-[datetime]",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.3"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "config/cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "timestamp": "isoDateTime",
+        "reportFilename": "cypress-report-[datetime]"
+      },
+      "version": "6.2.0"
+    }
+  }
+}

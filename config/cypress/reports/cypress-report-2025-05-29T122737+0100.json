@@ -1,0 +1,591 @@
+{
+  "stats": {
+    "suites": 10,
+    "tests": 15,
+    "passes": 3,
+    "pending": 0,
+    "failures": 12,
+    "start": "2025-05-29T11:22:44.012Z",
+    "end": "2025-05-29T11:27:37.714Z",
+    "duration": 293702,
+    "testsRegistered": 15,
+    "passPercent": 20,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "9343a0ba-c3e7-4a78-aa12-9d5cd6a1d11b",
+      "title": "",
+      "fullFile": "config/cypress/e2e/admin/ui-components-comprehensive.cy.js",
+      "file": "config/cypress/e2e/admin/ui-components-comprehensive.cy.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "aa4b4724-19bc-47c7-b22b-42146834cb4f",
+          "title": "UI Components Preview Pages - Comprehensive Testing",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [],
+          "suites": [
+            {
+              "uuid": "c2f2447a-c603-4aba-a4c8-fc7c47edd316",
+              "title": "Critical Form Components - Priority 1",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should load and display all form component preview pages",
+                  "fullTitle": "UI Components Preview Pages - Comprehensive Testing Critical Form Components - Priority 1 should load and display all form component preview pages",
+                  "timedOut": null,
+                  "duration": 10937,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "const formComponents = ['Input', 'Form', 'Textarea', 'Select', 'Checkbox', 'RadioGroup', 'Switch', 'Slider'];\nformComponents.forEach(component => {\n  cy.visit(`/debug-tools/ui-components/preview/${component}`, {\n    timeout: 10000\n  });\n  // Verify page loads without errors\n  cy.contains('h1', component, {\n    timeout: 5000\n  }).should('be.visible');\n  // Verify breadcrumb navigation\n  cy.contains('UI Components').should('be.visible');\n  // Verify no errors\n  cy.get('body').should('not.contain', 'Error');\n  cy.get('body').should('not.contain', 'undefined');\n});",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: expected '<body.bg-white>' not to contain 'Error'",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: expected '<body.bg-white>' not to contain 'Error'\n    at eval (webpack://my-project/./config/cypress/e2e/admin/ui-components-comprehensive.cy.js:32:23)\nat Array.forEach (<anonymous>)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/ui-components-comprehensive.cy.js:22:21)",
+                    "diff": null
+                  },
+                  "uuid": "51e546a9-f250-400f-9f2d-548ed8e61fd1",
+                  "parentUUID": "c2f2447a-c603-4aba-a4c8-fc7c47edd316",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should test form component interactivity",
+                  "fullTitle": "UI Components Preview Pages - Comprehensive Testing Critical Form Components - Priority 1 should test form component interactivity",
+                  "timedOut": null,
+                  "duration": 1242,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Test Input component interactions\ncy.visit('/debug-tools/ui-components/preview/Input');\n// Look for input examples and test them\ncy.get('input[type=\"text\"]').first().should('be.visible');\ncy.get('input[type=\"text\"]').first().type('Test input value');\ncy.get('input[type=\"text\"]').first().should('have.value', 'Test input value');",
+                  "err": {},
+                  "uuid": "483b29de-f0d6-43f0-bc0d-19ca3ededac6",
+                  "parentUUID": "c2f2447a-c603-4aba-a4c8-fc7c47edd316",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": ["483b29de-f0d6-43f0-bc0d-19ca3ededac6"],
+              "failures": ["51e546a9-f250-400f-9f2d-548ed8e61fd1"],
+              "pending": [],
+              "skipped": [],
+              "duration": 12179,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "9cfd2172-e8ce-4a8e-97a9-41e52b2eb06f",
+              "title": "Critical Navigation Components - Priority 1",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should load and display all navigation component preview pages",
+                  "fullTitle": "UI Components Preview Pages - Comprehensive Testing Critical Navigation Components - Priority 1 should load and display all navigation component preview pages",
+                  "timedOut": null,
+                  "duration": 10064,
+                  "state": "passed",
+                  "speed": "slow",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "const navComponents = ['MobileMenu', 'NavigationMenu', 'Tabs', 'Pagination'];\nnavComponents.forEach(component => {\n  cy.visit(`/debug-tools/ui-components/preview/${component}`, {\n    timeout: 10000\n  });\n  // Verify page loads\n  cy.contains('h1', component, {\n    timeout: 5000\n  }).should('be.visible');\n  // Verify navigation structure\n  cy.contains('UI Components').should('be.visible');\n  // No errors displayed\n  cy.get('body').should('not.contain', 'Error');\n});",
+                  "err": {},
+                  "uuid": "cafc5b3b-fb4f-4f16-9445-16cb31550e82",
+                  "parentUUID": "9cfd2172-e8ce-4a8e-97a9-41e52b2eb06f",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should test navigation component functionality",
+                  "fullTitle": "UI Components Preview Pages - Comprehensive Testing Critical Navigation Components - Priority 1 should test navigation component functionality",
+                  "timedOut": null,
+                  "duration": 1067,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Test Tabs component interactions\ncy.visit('/debug-tools/ui-components/preview/Tabs');\n// Look for tab buttons and test switching\ncy.get('[role=\"tab\"]').should('exist');\ncy.get('[role=\"tabpanel\"]').should('exist');",
+                  "err": {},
+                  "uuid": "f6d0fde9-2755-441c-8ef3-e263e8cb7303",
+                  "parentUUID": "9cfd2172-e8ce-4a8e-97a9-41e52b2eb06f",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [
+                "cafc5b3b-fb4f-4f16-9445-16cb31550e82",
+                "f6d0fde9-2755-441c-8ef3-e263e8cb7303"
+              ],
+              "failures": [],
+              "pending": [],
+              "skipped": [],
+              "duration": 11131,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "3b3b3d4e-470d-4282-9115-fee3d30a3213",
+              "title": "Critical Chart Components - Priority 1",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should load and display all chart component preview pages",
+                  "fullTitle": "UI Components Preview Pages - Comprehensive Testing Critical Chart Components - Priority 1 should load and display all chart component preview pages",
+                  "timedOut": null,
+                  "duration": 11125,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "const chartComponents = ['AreaChart', 'BarChart', 'LineChart', 'PieChart', 'FunnelChart', 'RadarChart', 'ScatterChart'];\nchartComponents.forEach(component => {\n  cy.visit(`/debug-tools/ui-components/preview/${component}`, {\n    timeout: 10000\n  });\n  // Verify page loads\n  cy.contains('h1', component, {\n    timeout: 5000\n  }).should('be.visible');\n  // Verify no errors\n  cy.get('body').should('not.contain', 'Error');\n  cy.get('body').should('not.contain', 'undefined');\n});",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: expected '<body.bg-white>' not to contain 'undefined'",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: expected '<body.bg-white>' not to contain 'undefined'\n    at eval (webpack://my-project/./config/cypress/e2e/admin/ui-components-comprehensive.cy.js:96:23)\nat Array.forEach (<anonymous>)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/ui-components-comprehensive.cy.js:88:22)",
+                    "diff": null
+                  },
+                  "uuid": "6d2e6d97-073b-4fbe-b5d9-57ed697754f4",
+                  "parentUUID": "3b3b3d4e-470d-4282-9115-fee3d30a3213",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": ["6d2e6d97-073b-4fbe-b5d9-57ed697754f4"],
+              "pending": [],
+              "skipped": [],
+              "duration": 11125,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "517666ad-c1d7-45fe-b20e-ad0d78cd4dd7",
+              "title": "Critical Layout Components - Priority 1",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should load and display all layout component preview pages",
+                  "fullTitle": "UI Components Preview Pages - Comprehensive Testing Critical Layout Components - Priority 1 should load and display all layout component preview pages",
+                  "timedOut": null,
+                  "duration": 13360,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "const layoutComponents = ['Card', 'Dialog', 'Sheet', 'Accordion', 'Alert', 'AlertDialog', 'Popover', 'Tooltip'];\nlayoutComponents.forEach(component => {\n  cy.visit(`/debug-tools/ui-components/preview/${component}`, {\n    timeout: 10000\n  });\n  // Verify page loads\n  cy.contains('h1', component, {\n    timeout: 5000\n  }).should('be.visible');\n  // No errors\n  cy.get('body').should('not.contain', 'Error');\n});",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: expected '<body.bg-white>' not to contain 'Error'",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: expected '<body.bg-white>' not to contain 'Error'\n    at eval (webpack://my-project/./config/cypress/e2e/admin/ui-components-comprehensive.cy.js:121:23)\nat Array.forEach (<anonymous>)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/ui-components-comprehensive.cy.js:114:23)",
+                    "diff": null
+                  },
+                  "uuid": "72f38523-4164-47ce-9a4f-8ad9a5fe3229",
+                  "parentUUID": "517666ad-c1d7-45fe-b20e-ad0d78cd4dd7",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should test interactive layout components",
+                  "fullTitle": "UI Components Preview Pages - Comprehensive Testing Critical Layout Components - Priority 1 should test interactive layout components",
+                  "timedOut": null,
+                  "duration": 10685,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Test Dialog component\ncy.visit('/debug-tools/ui-components/preview/Dialog');\n// Look for trigger buttons\ncy.get('button').contains(/open|show|trigger/i).should('exist');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: '/open|show|trigger/i' within the element: <button.inline-flex.items-center.justify-center.gap-2.whitespace-nowrap.rounded-md.text-sm.font-medium.ring-offset-background.transition-colors.focus-visible:outline-none.focus-visible:ring-2.focus-visible:ring-ring.focus-visible:ring-offset-2.disabled:pointer-events-none.disabled:opacity-50.[&_svg]:pointer-events-none.[&_svg]:size-4.[&_svg]:shrink-0.border.border-input.bg-background.hover:bg-accent.hover:text-accent-foreground.h-10.px-4.py-2> but never did.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: '/open|show|trigger/i' within the element: <button.inline-flex.items-center.justify-center.gap-2.whitespace-nowrap.rounded-md.text-sm.font-medium.ring-offset-background.transition-colors.focus-visible:outline-none.focus-visible:ring-2.focus-visible:ring-ring.focus-visible:ring-offset-2.disabled:pointer-events-none.disabled:opacity-50.[&_svg]:pointer-events-none.[&_svg]:size-4.[&_svg]:shrink-0.border.border-input.bg-background.hover:bg-accent.hover:text-accent-foreground.h-10.px-4.py-2> but never did.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/ui-components-comprehensive.cy.js:132:9)",
+                    "diff": null
+                  },
+                  "uuid": "ec45aeed-a0e2-4612-851d-eef049d82711",
+                  "parentUUID": "517666ad-c1d7-45fe-b20e-ad0d78cd4dd7",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "72f38523-4164-47ce-9a4f-8ad9a5fe3229",
+                "ec45aeed-a0e2-4612-851d-eef049d82711"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 24045,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "6cbb7eb7-d3a1-4953-85c0-07d429448258",
+              "title": "Additional UI Components - Priority 2",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should load and display all additional component preview pages",
+                  "fullTitle": "UI Components Preview Pages - Comprehensive Testing Additional UI Components - Priority 2 should load and display all additional component preview pages",
+                  "timedOut": null,
+                  "duration": 24612,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "const additionalComponents = ['Avatar', 'Calendar', 'Carousel', 'Collapsible', 'Command', 'ContextMenu', 'DatePicker', 'DropdownMenu', 'HoverCard', 'Progress', 'Resizable', 'ScrollArea', 'SearchBar', 'SectionHeader', 'Separator', 'Skeleton', 'Table', 'Toast'];\nadditionalComponents.forEach(component => {\n  cy.visit(`/debug-tools/ui-components/preview/${component}`, {\n    timeout: 10000\n  });\n  // Basic page load verification\n  cy.contains('h1', component, {\n    timeout: 5000\n  }).should('be.visible');\n  cy.get('body').should('not.contain', 'Error');\n});",
+                  "err": {
+                    "message": "CypressError: Timed out after waiting `10000ms` for your remote page to load.\n\nYour page did not fire its `load` event within `10000ms`.\n\nYou can try increasing the `pageLoadTimeout` value in `Users/edadams/my-project/cypress.config.js` to wait longer.\n\nBrowsers will not fire the `load` event until all stylesheets and scripts are done downloading.\n\nWhen this `load` event occurs, Cypress will continue running commands.",
+                    "estack": "CypressError: Timed out after waiting `10000ms` for your remote page to load.\n\nYour page did not fire its `load` event within `10000ms`.\n\nYou can try increasing the `pageLoadTimeout` value in `Users/edadams/my-project/cypress.config.js` to wait longer.\n\nBrowsers will not fire the `load` event until all stylesheets and scripts are done downloading.\n\nWhen this `load` event occurs, Cypress will continue running commands.\n    at timedOutWaitingForPageLoad (http://localhost:3000/__cypress/runner/cypress_runner.js:133709:64)\n    at <unknown> (http://localhost:3000/__cypress/runner/cypress_runner.js:134703:16)\n    at tryCatcher (http://localhost:3000/__cypress/runner/cypress_runner.js:1777:23)\n    at <unknown> (http://localhost:3000/__cypress/runner/cypress_runner.js:4156:41)\n    at tryCatcher (http://localhost:3000/__cypress/runner/cypress_runner.js:1777:23)\n    at Promise._settlePromiseFromHandler (http://localhost:3000/__cypress/runner/cypress_runner.js:1489:31)\n    at Promise._settlePromise (http://localhost:3000/__cypress/runner/cypress_runner.js:1546:18)\n    at Promise._settlePromise0 (http://localhost:3000/__cypress/runner/cypress_runner.js:1591:10)\n    at Promise._settlePromises (http://localhost:3000/__cypress/runner/cypress_runner.js:1667:18)\n    at _drainQueueStep (http://localhost:3000/__cypress/runner/cypress_runner.js:2377:12)\n    at _drainQueue (http://localhost:3000/__cypress/runner/cypress_runner.js:2370:9)\n    at Async._drainQueues (http://localhost:3000/__cypress/runner/cypress_runner.js:2386:5)\n    at Async.drainQueues (http://localhost:3000/__cypress/runner/cypress_runner.js:2256:14)",
+                    "diff": null
+                  },
+                  "uuid": "15156ded-9504-49d5-a8b4-dce9f5dc3f7b",
+                  "parentUUID": "6cbb7eb7-d3a1-4953-85c0-07d429448258",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": ["15156ded-9504-49d5-a8b4-dce9f5dc3f7b"],
+              "pending": [],
+              "skipped": [],
+              "duration": 24612,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "c970cf99-1681-4a01-ba99-7ae25a00358d",
+              "title": "Specialized Components - Priority 2",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should load and display all specialized component preview pages",
+                  "fullTitle": "UI Components Preview Pages - Comprehensive Testing Specialized Components - Priority 2 should load and display all specialized component preview pages",
+                  "timedOut": null,
+                  "duration": 12418,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "const specializedComponents = ['AssetCard', 'ButtonIconAction', 'KpiCard', 'LoadingSkeleton', 'LoadingSpinner', 'MetricsComparison', 'MetricsDashboard', 'UpcomingCampaignsTable', 'AspectRatio'];\nspecializedComponents.forEach(component => {\n  cy.visit(`/debug-tools/ui-components/preview/${component}`, {\n    timeout: 10000\n  });\n  // Basic verification\n  cy.contains('h1', component, {\n    timeout: 5000\n  }).should('be.visible');\n  cy.get('body').should('not.contain', 'Error');\n});",
+                  "err": {
+                    "message": "CypressError: Timed out after waiting `10000ms` for your remote page to load.\n\nYour page did not fire its `load` event within `10000ms`.\n\nYou can try increasing the `pageLoadTimeout` value in `Users/edadams/my-project/cypress.config.js` to wait longer.\n\nBrowsers will not fire the `load` event until all stylesheets and scripts are done downloading.\n\nWhen this `load` event occurs, Cypress will continue running commands.",
+                    "estack": "CypressError: Timed out after waiting `10000ms` for your remote page to load.\n\nYour page did not fire its `load` event within `10000ms`.\n\nYou can try increasing the `pageLoadTimeout` value in `Users/edadams/my-project/cypress.config.js` to wait longer.\n\nBrowsers will not fire the `load` event until all stylesheets and scripts are done downloading.\n\nWhen this `load` event occurs, Cypress will continue running commands.\n    at timedOutWaitingForPageLoad (http://localhost:3000/__cypress/runner/cypress_runner.js:133709:64)\n    at <unknown> (http://localhost:3000/__cypress/runner/cypress_runner.js:134703:16)\n    at tryCatcher (http://localhost:3000/__cypress/runner/cypress_runner.js:1777:23)\n    at <unknown> (http://localhost:3000/__cypress/runner/cypress_runner.js:4156:41)\n    at tryCatcher (http://localhost:3000/__cypress/runner/cypress_runner.js:1777:23)\n    at Promise._settlePromiseFromHandler (http://localhost:3000/__cypress/runner/cypress_runner.js:1489:31)\n    at Promise._settlePromise (http://localhost:3000/__cypress/runner/cypress_runner.js:1546:18)\n    at Promise._settlePromise0 (http://localhost:3000/__cypress/runner/cypress_runner.js:1591:10)\n    at Promise._settlePromises (http://localhost:3000/__cypress/runner/cypress_runner.js:1667:18)\n    at _drainQueueStep (http://localhost:3000/__cypress/runner/cypress_runner.js:2377:12)\n    at _drainQueue (http://localhost:3000/__cypress/runner/cypress_runner.js:2370:9)\n    at Async._drainQueues (http://localhost:3000/__cypress/runner/cypress_runner.js:2386:5)\n    at Async.drainQueues (http://localhost:3000/__cypress/runner/cypress_runner.js:2256:14)",
+                    "diff": null
+                  },
+                  "uuid": "d82beb6e-1aea-4986-9c40-c821968839d0",
+                  "parentUUID": "c970cf99-1681-4a01-ba99-7ae25a00358d",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": ["d82beb6e-1aea-4986-9c40-c821968839d0"],
+              "pending": [],
+              "skipped": [],
+              "duration": 12418,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "21146b37-d81e-4fb1-96a4-b39492534760",
+              "title": "UI Component Browser Integration",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should navigate to component previews from main UI components page",
+                  "fullTitle": "UI Components Preview Pages - Comprehensive Testing UI Component Browser Integration should navigate to component previews from main UI components page",
+                  "timedOut": null,
+                  "duration": 10745,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/debug-tools/ui-components');\n// Verify main page loads\ncy.contains('h1', 'UI Components').should('be.visible');\n// Test navigation to a component\ncy.contains('Button').should('be.visible');\ncy.contains('Button').click();\n// Verify navigation to Button preview\ncy.url().should('include', '/debug-tools/ui-components/preview/Button');\ncy.contains('h1', 'Button').should('be.visible');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'UI Components' within the selector: 'h1' but never did.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'UI Components' within the selector: 'h1' but never did.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/ui-components-comprehensive.cy.js:198:41)",
+                    "diff": null
+                  },
+                  "uuid": "0364ec86-9c16-4a1f-b6cc-111dac5a505e",
+                  "parentUUID": "21146b37-d81e-4fb1-96a4-b39492534760",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should handle breadcrumb navigation correctly",
+                  "fullTitle": "UI Components Preview Pages - Comprehensive Testing UI Component Browser Integration should handle breadcrumb navigation correctly",
+                  "timedOut": null,
+                  "duration": 10965,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/debug-tools/ui-components/preview/Input');\n// Test breadcrumb back navigation\ncy.contains('UI Components').click();\ncy.url().should('include', '/debug-tools/ui-components');\ncy.contains('h1', 'UI Components').should('be.visible');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'UI Components' within the selector: 'h1' but never did.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'UI Components' within the selector: 'h1' but never did.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/ui-components-comprehensive.cy.js:215:41)",
+                    "diff": null
+                  },
+                  "uuid": "7b713c8b-e1ef-495c-9031-4f81a4f1fe4d",
+                  "parentUUID": "21146b37-d81e-4fb1-96a4-b39492534760",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "0364ec86-9c16-4a1f-b6cc-111dac5a505e",
+                "7b713c8b-e1ef-495c-9031-4f81a4f1fe4d"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 21710,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "1fdd97ea-6403-4312-97cd-eb3211fa3d62",
+              "title": "Performance and Accessibility Testing",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should load key UI component pages efficiently",
+                  "fullTitle": "UI Components Preview Pages - Comprehensive Testing Performance and Accessibility Testing should load key UI component pages efficiently",
+                  "timedOut": null,
+                  "duration": 12746,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "const testComponents = ['Button', 'Card', 'Input', 'Form', 'Table'];\ntestComponents.forEach(component => {\n  cy.visit(`/debug-tools/ui-components/preview/${component}`, {\n    timeout: 10000\n  });\n  // Verify page loads successfully\n  cy.contains('h1', component, {\n    timeout: 5000\n  }).should('be.visible');\n  cy.get('body').should('not.contain', 'Error');\n});",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: expected '<body.bg-white>' not to contain 'Error'",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: expected '<body.bg-white>' not to contain 'Error'\n    at eval (webpack://my-project/./config/cypress/e2e/admin/ui-components-comprehensive.cy.js:228:23)\nat Array.forEach (<anonymous>)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/ui-components-comprehensive.cy.js:223:21)",
+                    "diff": null
+                  },
+                  "uuid": "148469cf-754d-4023-886c-b4f75b4a0632",
+                  "parentUUID": "1fdd97ea-6403-4312-97cd-eb3211fa3d62",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should be accessible with keyboard navigation",
+                  "fullTitle": "UI Components Preview Pages - Comprehensive Testing Performance and Accessibility Testing should be accessible with keyboard navigation",
+                  "timedOut": null,
+                  "duration": 14,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/debug-tools/ui-components/preview/Button');\n// Test tab navigation\ncy.get('body').tab();\ncy.focused().should('exist');\n// Test that interactive elements are focusable\ncy.get('button, input, [role=\"button\"], [tabindex=\"0\"]').should('exist');",
+                  "err": {
+                    "message": "TypeError: cy.get(...).tab is not a function",
+                    "estack": "TypeError: cy.get(...).tab is not a function\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/ui-components-comprehensive.cy.js:236:21)\n    at runnable.fn (http://localhost:3000/__cypress/runner/cypress_runner.js:141400:19)\n    at callFn (http://localhost:3000/__cypress/runner/cypress_runner.js:160478:21)\n    at Runnable.run (http://localhost:3000/__cypress/runner/cypress_runner.js:160465:7)\n    at <unknown> (http://localhost:3000/__cypress/runner/cypress_runner.js:166537:30)\n    at PassThroughHandlerContext.finallyHandler (http://localhost:3000/__cypress/runner/cypress_runner.js:4042:23)\n    at PassThroughHandlerContext.tryCatcher (http://localhost:3000/__cypress/runner/cypress_runner.js:1777:23)\n    at Promise._settlePromiseFromHandler (http://localhost:3000/__cypress/runner/cypress_runner.js:1489:31)\n    at Promise._settlePromise (http://localhost:3000/__cypress/runner/cypress_runner.js:1546:18)",
+                    "diff": null
+                  },
+                  "uuid": "5342dd67-bb7d-48a2-ad8a-8b8221cdcbb7",
+                  "parentUUID": "1fdd97ea-6403-4312-97cd-eb3211fa3d62",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "148469cf-754d-4023-886c-b4f75b4a0632",
+                "5342dd67-bb7d-48a2-ad8a-8b8221cdcbb7"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 12760,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "62ba026d-6a2f-4e24-a60a-52b35067284e",
+              "title": "Error Handling and Edge Cases",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should handle invalid component routes gracefully",
+                  "fullTitle": "UI Components Preview Pages - Comprehensive Testing Error Handling and Edge Cases should handle invalid component routes gracefully",
+                  "timedOut": null,
+                  "duration": 24,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Test non-existent component\ncy.visit('/debug-tools/ui-components/preview/NonExistentComponent', {\n  failOnStatusCode: false\n});\n// Should either redirect or show appropriate error\ncy.get('body').should('contain.text', 'Not Found').or('contain.text', '404');",
+                  "err": {
+                    "message": "TypeError: cy.get(...).should(...).or is not a function",
+                    "estack": "TypeError: cy.get(...).should(...).or is not a function\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/ui-components-comprehensive.cy.js:252:57)\n    at runnable.fn (http://localhost:3000/__cypress/runner/cypress_runner.js:141400:19)\n    at callFn (http://localhost:3000/__cypress/runner/cypress_runner.js:160478:21)\n    at Runnable.run (http://localhost:3000/__cypress/runner/cypress_runner.js:160465:7)\n    at <unknown> (http://localhost:3000/__cypress/runner/cypress_runner.js:166537:30)\n    at PassThroughHandlerContext.finallyHandler (http://localhost:3000/__cypress/runner/cypress_runner.js:4042:23)\n    at PassThroughHandlerContext.tryCatcher (http://localhost:3000/__cypress/runner/cypress_runner.js:1777:23)\n    at Promise._settlePromiseFromHandler (http://localhost:3000/__cypress/runner/cypress_runner.js:1489:31)\n    at Promise._settlePromise (http://localhost:3000/__cypress/runner/cypress_runner.js:1546:18)",
+                    "diff": null
+                  },
+                  "uuid": "b608c8c6-e80f-4633-934e-33f1b7270bc0",
+                  "parentUUID": "62ba026d-6a2f-4e24-a60a-52b35067284e",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should handle network issues gracefully",
+                  "fullTitle": "UI Components Preview Pages - Comprehensive Testing Error Handling and Edge Cases should handle network issues gracefully",
+                  "timedOut": null,
+                  "duration": 1034,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Intercept and delay requests to test loading states\ncy.intercept('GET', '/debug-tools/ui-components/preview/**', {\n  delay: 1000\n}).as('slowLoad');\ncy.visit('/debug-tools/ui-components/preview/Button');\n// Page should still load eventually\ncy.contains('h1', 'Button').should('be.visible');",
+                  "err": {
+                    "message": "CypressError: `cy.visit()` failed trying to load:\n\nhttp://localhost:3000/debug-tools/ui-components/preview/Button\n\nThe `content-type` of the response we received from your web server was:\n\n  > `undefined`\n\nThis was considered a failure because responses must have `content-type: 'text/html'`\n\nHowever, you can likely use `cy.request()` instead of `cy.visit()`.\n\n`cy.request()` will automatically get and set cookies and enable you to parse responses.",
+                    "estack": "CypressError: `cy.visit()` failed trying to load:\n\nhttp://localhost:3000/debug-tools/ui-components/preview/Button\n\nThe `content-type` of the response we received from your web server was:\n\n  > `undefined`\n\nThis was considered a failure because responses must have `content-type: 'text/html'`\n\nHowever, you can likely use `cy.request()` instead of `cy.visit()`.\n\n`cy.request()` will automatically get and set cookies and enable you to parse responses.\n    at <unknown> (http://localhost:3000/__cypress/runner/cypress_runner.js:134670:76)\n    at visitFailedByErr (http://localhost:3000/__cypress/runner/cypress_runner.js:134076:12)\n    at <unknown> (http://localhost:3000/__cypress/runner/cypress_runner.js:134653:13)\n    at tryCatcher (http://localhost:3000/__cypress/runner/cypress_runner.js:1777:23)\n    at Promise._settlePromiseFromHandler (http://localhost:3000/__cypress/runner/cypress_runner.js:1489:31)\n    at Promise._settlePromise (http://localhost:3000/__cypress/runner/cypress_runner.js:1546:18)\n    at Promise._settlePromise0 (http://localhost:3000/__cypress/runner/cypress_runner.js:1591:10)\n    at Promise._settlePromises (http://localhost:3000/__cypress/runner/cypress_runner.js:1667:18)\n    at _drainQueueStep (http://localhost:3000/__cypress/runner/cypress_runner.js:2377:12)\n    at _drainQueue (http://localhost:3000/__cypress/runner/cypress_runner.js:2370:9)\n    at Async._drainQueues (http://localhost:3000/__cypress/runner/cypress_runner.js:2386:5)\n    at Async.drainQueues (http://localhost:3000/__cypress/runner/cypress_runner.js:2256:14)\nFrom Your Spec Code:\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/ui-components-comprehensive.cy.js:259:9)",
+                    "diff": null
+                  },
+                  "uuid": "ece9f09e-6d19-403e-bd8c-91dd810f4034",
+                  "parentUUID": "62ba026d-6a2f-4e24-a60a-52b35067284e",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "b608c8c6-e80f-4633-934e-33f1b7270bc0",
+                "ece9f09e-6d19-403e-bd8c-91dd810f4034"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 1058,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            }
+          ],
+          "passes": [],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 0,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.2.0"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "cypress-report-[datetime]",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.3"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "config/cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "timestamp": "isoDateTime",
+        "reportFilename": "cypress-report-[datetime]"
+      },
+      "version": "6.2.0"
+    }
+  }
+}

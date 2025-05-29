@@ -495,7 +495,10 @@ export const POST = async (request: NextRequest) => {
               campaignId: newCampaign.id,
               influencerHandle: influencer.handle,
               influencerPlatform: influencer.platform,
-              error: influencerError instanceof Error ? influencerError.message : String(influencerError),
+              error:
+                influencerError instanceof Error
+                  ? influencerError.message
+                  : String(influencerError),
             });
             throw influencerError; // Re-throw to abort transaction
           }

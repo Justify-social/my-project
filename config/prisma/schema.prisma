@@ -435,6 +435,7 @@ enum Feature {
   BRAND_LIFT
   BRAND_HEALTH
   MIXED_MEDIA_MODELING
+  INFLUENCERS
 }
 
 enum Status {

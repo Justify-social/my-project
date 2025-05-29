@@ -1,0 +1,791 @@
+{
+  "stats": {
+    "suites": 12,
+    "tests": 23,
+    "passes": 8,
+    "pending": 0,
+    "failures": 15,
+    "start": "2025-05-29T11:16:27.707Z",
+    "end": "2025-05-29T11:21:37.443Z",
+    "duration": 309736,
+    "testsRegistered": 23,
+    "passPercent": 34.78260869565217,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "358217ba-c6b0-4268-a2d8-785c7393fcc7",
+      "title": "",
+      "fullFile": "config/cypress/e2e/admin/debug-tools-comprehensive.cy.js",
+      "file": "config/cypress/e2e/admin/debug-tools-comprehensive.cy.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "e68a9957-e41a-43fd-a34e-7d87bf48db19",
+          "title": "Debug Tools - Complete Coverage Testing",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [],
+          "suites": [
+            {
+              "uuid": "28c10ff5-709e-41e0-a4a1-a9209c00bb36",
+              "title": "Main Debug Tools Dashboard",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should display all debug tools and navigation links",
+                  "fullTitle": "Debug Tools - Complete Coverage Testing Main Debug Tools Dashboard should display all debug tools and navigation links",
+                  "timedOut": null,
+                  "duration": 915,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/debug-tools');\n// Verify main page structure\ncy.contains('h1', 'Debug Tools').should('be.visible');\n// Verify all debug tool cards are present\nconst expectedTools = ['API Verification', 'UI Components', 'Database Health', 'Clerk Authentication', 'Mux Asset Checker', 'Campaign Wizard Checker', 'Documentation Hub', 'Cypress Analytics Dashboard'];\nexpectedTools.forEach(tool => {\n  cy.contains(tool).should('be.visible');\n});\n// Verify grid layout\ncy.get('.grid').should('exist');\ncy.get('.grid').find('.border-divider').should('have.length.at.least', 8);",
+                  "err": {},
+                  "uuid": "2c12d4bc-49ca-4545-b358-fb91806c4da3",
+                  "parentUUID": "28c10ff5-709e-41e0-a4a1-a9209c00bb36",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should navigate to each debug tool successfully",
+                  "fullTitle": "Debug Tools - Complete Coverage Testing Main Debug Tools Dashboard should navigate to each debug tool successfully",
+                  "timedOut": null,
+                  "duration": 11388,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/debug-tools');\n// Test navigation to each tool\nconst toolNavigations = [{\n  name: 'API Verification',\n  url: '/debug-tools/api-verification'\n}, {\n  name: 'UI Components',\n  url: '/debug-tools/ui-components'\n}, {\n  name: 'Database Health',\n  url: '/debug-tools/database'\n}, {\n  name: 'Clerk Authentication',\n  url: '/debug-tools/clerk-auth'\n}, {\n  name: 'Mux Asset Checker',\n  url: '/debug-tools/mux-assets'\n}, {\n  name: 'Campaign Wizard Checker',\n  url: '/debug-tools/campaign-wizards'\n}, {\n  name: 'Cypress Analytics Dashboard',\n  url: '/debug-tools/analytics'\n}];\ntoolNavigations.forEach(tool => {\n  cy.visit('/debug-tools');\n  cy.contains(tool.name).click();\n  cy.url().should('include', tool.url);\n  cy.go('back');\n});",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: expected 'http://localhost:3000/debug-tools' to include '/debug-tools/api-verification'",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: expected 'http://localhost:3000/debug-tools' to include '/debug-tools/api-verification'\n    at eval (webpack://my-project/./config/cypress/e2e/admin/debug-tools-comprehensive.cy.js:54:17)\nat Array.forEach (<anonymous>)\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/debug-tools-comprehensive.cy.js:51:22)",
+                    "diff": null
+                  },
+                  "uuid": "6ea9b198-6a5a-4335-9e71-e057f04d92fa",
+                  "parentUUID": "28c10ff5-709e-41e0-a4a1-a9209c00bb36",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": ["2c12d4bc-49ca-4545-b358-fb91806c4da3"],
+              "failures": ["6ea9b198-6a5a-4335-9e71-e057f04d92fa"],
+              "pending": [],
+              "skipped": [],
+              "duration": 12303,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "9312a951-797d-4a89-811f-22c7db031347",
+              "title": "API Verification Tool",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should load API verification interface",
+                  "fullTitle": "Debug Tools - Complete Coverage Testing API Verification Tool should load API verification interface",
+                  "timedOut": null,
+                  "duration": 11331,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/debug-tools/api-verification');\n// Verify page loads\ncy.contains('API Verification').should('be.visible');\n// Verify main sections\ncy.contains('Test External API Integrations').should('be.visible');\n// Verify API testing interface elements\ncy.get('button').contains('Verify All APIs').should('be.visible');\n// Verify no errors on load\ncy.get('body').should('not.contain', 'Error');\ncy.get('body').should('not.contain', 'undefined');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Test External API Integrations' but never did.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Test External API Integrations' but never did.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/debug-tools-comprehensive.cy.js:68:52)",
+                    "diff": null
+                  },
+                  "uuid": "25de3974-5c30-440d-8418-c82eb7d5871d",
+                  "parentUUID": "9312a951-797d-4a89-811f-22c7db031347",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should handle API verification workflow",
+                  "fullTitle": "Debug Tools - Complete Coverage Testing API Verification Tool should handle API verification workflow",
+                  "timedOut": null,
+                  "duration": 10610,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/debug-tools/api-verification');\n// Mock API verification request\ncy.intercept('POST', '**/api/admin/verify-apis', {\n  statusCode: 200,\n  body: {\n    status: 'success',\n    verified: 5,\n    total: 5\n  }\n}).as('verifyAPIs');\n// Click verify button\ncy.get('button').contains('Verify All APIs').click();\n// Wait for request\ncy.wait('@verifyAPIs');\n// Verify response handling\ncy.contains('success').should('be.visible');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Verify All APIs' within the element: <button.inline-flex.items-center.justify-center.gap-2.whitespace-nowrap.text-sm.font-medium.ring-offset-background.transition-colors.focus-visible:outline-none.focus-visible:ring-2.focus-visible:ring-ring.focus-visible:ring-offset-2.disabled:pointer-events-none.disabled:opacity-50.[&_svg]:pointer-events-none.[&_svg]:size-4.[&_svg]:shrink-0.bg-accent.text-primary-foreground.hover:bg-accent/90.hover:text-accent-foreground.h-11.rounded-md.px-8> but never did.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Verify All APIs' within the element: <button.inline-flex.items-center.justify-center.gap-2.whitespace-nowrap.text-sm.font-medium.ring-offset-background.transition-colors.focus-visible:outline-none.focus-visible:ring-2.focus-visible:ring-ring.focus-visible:ring-offset-2.disabled:pointer-events-none.disabled:opacity-50.[&_svg]:pointer-events-none.[&_svg]:size-4.[&_svg]:shrink-0.bg-accent.text-primary-foreground.hover:bg-accent/90.hover:text-accent-foreground.h-11.rounded-md.px-8> but never did.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/debug-tools-comprehensive.cy.js:88:23)",
+                    "diff": null
+                  },
+                  "uuid": "74e300f7-8375-4778-a45e-1beebcd02011",
+                  "parentUUID": "9312a951-797d-4a89-811f-22c7db031347",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "25de3974-5c30-440d-8418-c82eb7d5871d",
+                "74e300f7-8375-4778-a45e-1beebcd02011"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 21941,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "d324d2ed-b19d-4cc6-a792-cda86e1156d2",
+              "title": "Database Health Tool",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should load database health interface",
+                  "fullTitle": "Debug Tools - Complete Coverage Testing Database Health Tool should load database health interface",
+                  "timedOut": null,
+                  "duration": 10897,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/debug-tools/database');\n// Verify page loads\ncy.contains('Database Health').should('be.visible');\n// Verify health monitoring sections\ncy.contains('Schema Information').should('be.visible');\ncy.contains('Health Monitoring').should('be.visible');\n// Verify no errors\ncy.get('body').should('not.contain', 'Error');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Schema Information' but never did.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Schema Information' but never did.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/debug-tools-comprehensive.cy.js:106:40)",
+                    "diff": null
+                  },
+                  "uuid": "6341466c-8f66-4e79-98e9-84018d3156a1",
+                  "parentUUID": "d324d2ed-b19d-4cc6-a792-cda86e1156d2",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should display database metrics and status",
+                  "fullTitle": "Debug Tools - Complete Coverage Testing Database Health Tool should display database metrics and status",
+                  "timedOut": null,
+                  "duration": 10565,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/debug-tools/database');\n// Look for health indicators\ncy.get('[class*=\"status\"], [class*=\"health\"], [class*=\"metric\"]').should('exist');\n// Verify tables or data display\ncy.get('table, .grid, [class*=\"card\"]').should('exist');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[class*=\"status\"], [class*=\"health\"], [class*=\"metric\"]`, but never found it.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[class*=\"status\"], [class*=\"health\"], [class*=\"metric\"]`, but never found it.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/debug-tools-comprehensive.cy.js:117:72)",
+                    "diff": null
+                  },
+                  "uuid": "281b0007-8262-4619-b55c-07a98879b136",
+                  "parentUUID": "d324d2ed-b19d-4cc6-a792-cda86e1156d2",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "6341466c-8f66-4e79-98e9-84018d3156a1",
+                "281b0007-8262-4619-b55c-07a98879b136"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 21462,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "6718bf3b-03d1-4cf9-bec7-45b3fb86ff26",
+              "title": "Clerk Authentication Tool",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should load authentication debugging interface",
+                  "fullTitle": "Debug Tools - Complete Coverage Testing Clerk Authentication Tool should load authentication debugging interface",
+                  "timedOut": null,
+                  "duration": 2089,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/debug-tools/clerk-auth');\n// Verify page loads\ncy.contains('Clerk Authentication').should('be.visible');\n// Verify auth debugging sections\ncy.contains('Authentication Status').should('be.visible');\n// Verify no errors\ncy.get('body').should('not.contain', 'Error');",
+                  "err": {},
+                  "uuid": "7c804327-db86-4742-aa38-abf9661c32b8",
+                  "parentUUID": "6718bf3b-03d1-4cf9-bec7-45b3fb86ff26",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should display current authentication state",
+                  "fullTitle": "Debug Tools - Complete Coverage Testing Clerk Authentication Tool should display current authentication state",
+                  "timedOut": null,
+                  "duration": 10638,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/debug-tools/clerk-auth');\n// Look for user info display\ncy.contains('User Information').should('be.visible');\n// Verify authentication status indicators\ncy.get('[class*=\"status\"], [class*=\"auth\"]').should('exist');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'User Information' but never did.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'User Information' but never did.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/debug-tools-comprehensive.cy.js:142:38)",
+                    "diff": null
+                  },
+                  "uuid": "ff1e0d3e-2471-4e94-a120-32d616b051cd",
+                  "parentUUID": "6718bf3b-03d1-4cf9-bec7-45b3fb86ff26",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": ["7c804327-db86-4742-aa38-abf9661c32b8"],
+              "failures": ["ff1e0d3e-2471-4e94-a120-32d616b051cd"],
+              "pending": [],
+              "skipped": [],
+              "duration": 12727,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "ec4e3b31-615a-4fa8-bfee-51ccc08549d4",
+              "title": "Mux Asset Checker",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should load Mux asset management interface",
+                  "fullTitle": "Debug Tools - Complete Coverage Testing Mux Asset Checker should load Mux asset management interface",
+                  "timedOut": null,
+                  "duration": 11060,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/debug-tools/mux-assets');\n// Verify page loads\ncy.contains('Mux Asset Checker').should('be.visible');\n// Verify asset management sections\ncy.contains('Video Assets').should('be.visible');\n// Verify no errors\ncy.get('body').should('not.contain', 'Error');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Mux Asset Checker' but never did.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Mux Asset Checker' but never did.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/debug-tools-comprehensive.cy.js:154:39)",
+                    "diff": null
+                  },
+                  "uuid": "9c1e6a0a-1f98-4f02-8fc8-50882d57e6d2",
+                  "parentUUID": "ec4e3b31-615a-4fa8-bfee-51ccc08549d4",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should display asset listing and management tools",
+                  "fullTitle": "Debug Tools - Complete Coverage Testing Mux Asset Checker should display asset listing and management tools",
+                  "timedOut": null,
+                  "duration": 10640,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/debug-tools/mux-assets');\n// Look for asset containers\ncy.get('.grid, table, [class*=\"asset\"], [class*=\"video\"]').should('exist');\n// Verify management buttons\ncy.get('button').should('exist');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `.grid, table, [class*=\"asset\"], [class*=\"video\"]`, but never found it.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `.grid, table, [class*=\"asset\"], [class*=\"video\"]`, but never found it.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/debug-tools-comprehensive.cy.js:167:65)",
+                    "diff": null
+                  },
+                  "uuid": "4eb56e55-9557-4aa6-b490-79fcbc899cd0",
+                  "parentUUID": "ec4e3b31-615a-4fa8-bfee-51ccc08549d4",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "9c1e6a0a-1f98-4f02-8fc8-50882d57e6d2",
+                "4eb56e55-9557-4aa6-b490-79fcbc899cd0"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 21700,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "a2cf5e4f-a3c7-4939-af89-eb181ccd4368",
+              "title": "Campaign Wizard Checker",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should load campaign wizard debugging interface",
+                  "fullTitle": "Debug Tools - Complete Coverage Testing Campaign Wizard Checker should load campaign wizard debugging interface",
+                  "timedOut": null,
+                  "duration": 10575,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/debug-tools/campaign-wizards');\n// Verify page loads\ncy.contains('Campaign Wizard Checker').should('be.visible');\n// Verify campaign debugging sections\ncy.contains('Created Campaign Wizards').should('be.visible');\n// Verify no errors\ncy.get('body').should('not.contain', 'Error');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Campaign Wizard Checker' but never did.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'Campaign Wizard Checker' but never did.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/debug-tools-comprehensive.cy.js:179:45)",
+                    "diff": null
+                  },
+                  "uuid": "6d14f22d-da26-4778-b585-acc08220bf34",
+                  "parentUUID": "a2cf5e4f-a3c7-4939-af89-eb181ccd4368",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should display campaign wizard data",
+                  "fullTitle": "Debug Tools - Complete Coverage Testing Campaign Wizard Checker should display campaign wizard data",
+                  "timedOut": null,
+                  "duration": 10671,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/debug-tools/campaign-wizards');\n// Look for campaign data display\ncy.get('table, .grid, [class*=\"campaign\"]').should('exist');\n// Verify data columns or sections\ncy.contains('Campaign').should('be.visible');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `table, .grid, [class*=\"campaign\"]`, but never found it.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `table, .grid, [class*=\"campaign\"]`, but never found it.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/debug-tools-comprehensive.cy.js:192:50)",
+                    "diff": null
+                  },
+                  "uuid": "7466b0cb-fbb1-4150-a4c8-13c39ae34e89",
+                  "parentUUID": "a2cf5e4f-a3c7-4939-af89-eb181ccd4368",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "6d14f22d-da26-4778-b585-acc08220bf34",
+                "7466b0cb-fbb1-4150-a4c8-13c39ae34e89"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 21246,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "2e2bf6b7-fba1-4bb2-9d97-01de5930134c",
+              "title": "UI Components Tool (Integration)",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should load UI components browser",
+                  "fullTitle": "Debug Tools - Complete Coverage Testing UI Components Tool (Integration) should load UI components browser",
+                  "timedOut": null,
+                  "duration": 10573,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/debug-tools/ui-components');\n// Verify page loads\ncy.contains('UI Components').should('be.visible');\n// Verify component browser interface\ncy.get('.grid').should('exist');\n// Verify component categories\ncy.contains('Components').should('be.visible');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'UI Components' but never did.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: 'UI Components' but never did.\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/debug-tools-comprehensive.cy.js:204:35)",
+                    "diff": null
+                  },
+                  "uuid": "a691331b-5add-492e-a257-a78fc6a40052",
+                  "parentUUID": "2e2bf6b7-fba1-4bb2-9d97-01de5930134c",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should handle component search and filtering",
+                  "fullTitle": "Debug Tools - Complete Coverage Testing UI Components Tool (Integration) should handle component search and filtering",
+                  "timedOut": null,
+                  "duration": 706,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/debug-tools/ui-components');\n// Look for search functionality\ncy.get('input[type=\"search\"], input[placeholder*=\"search\" i]').should('exist');\n// Look for filter controls\ncy.get('[role=\"tab\"], button').should('exist');",
+                  "err": {},
+                  "uuid": "dd87c124-d275-4831-ae04-5c4c1d0ed797",
+                  "parentUUID": "2e2bf6b7-fba1-4bb2-9d97-01de5930134c",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": ["dd87c124-d275-4831-ae04-5c4c1d0ed797"],
+              "failures": ["a691331b-5add-492e-a257-a78fc6a40052"],
+              "pending": [],
+              "skipped": [],
+              "duration": 11279,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "194a04ea-7cf0-4ac0-97a0-f1e5874f569a",
+              "title": "Cross-Tool Navigation and Integration",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should maintain consistent navigation between debug tools",
+                  "fullTitle": "Debug Tools - Complete Coverage Testing Cross-Tool Navigation and Integration should maintain consistent navigation between debug tools",
+                  "timedOut": null,
+                  "duration": 10953,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Start from main debug tools page\ncy.visit('/debug-tools');\n// Navigate through multiple tools and verify back navigation\ncy.contains('Database Health').click();\ncy.url().should('include', '/debug-tools/database');\n// Navigate to another tool\ncy.visit('/debug-tools');\ncy.contains('API Verification').click();\ncy.url().should('include', '/debug-tools/api-verification');\n// Verify consistent header/navigation\ncy.contains('Debug Tools').should('be.visible');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: expected 'http://localhost:3000/debug-tools' to include '/debug-tools/database'",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: expected 'http://localhost:3000/debug-tools' to include '/debug-tools/database'\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/debug-tools-comprehensive.cy.js:231:15)",
+                    "diff": null
+                  },
+                  "uuid": "bd53bd7b-b541-46e5-b350-ed4c6185df19",
+                  "parentUUID": "194a04ea-7cf0-4ac0-97a0-f1e5874f569a",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should handle external links appropriately",
+                  "fullTitle": "Debug Tools - Complete Coverage Testing Cross-Tool Navigation and Integration should handle external links appropriately",
+                  "timedOut": null,
+                  "duration": 10831,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/debug-tools');\n// Test Documentation Hub external link\ncy.contains('Documentation Hub').should('be.visible');\ncy.contains('View Documentation').should('have.attr', 'onclick');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: expected '<button.inline-flex.items-center.justify-center.gap-2.whitespace-nowrap.rounded-md.text-sm.font-medium.ring-offset-background.transition-colors.focus-visible:outline-none.focus-visible:ring-2.focus-visible:ring-ring.focus-visible:ring-offset-2.disabled:pointer-events-none.disabled:opacity-50.[&_svg]:pointer-events-none.[&_svg]:size-4.[&_svg]:shrink-0.bg-accent.text-primary-foreground.hover:bg-accent/90.hover:text-accent-foreground.h-10.px-4.py-2>' to have attribute 'onclick'",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: expected '<button.inline-flex.items-center.justify-center.gap-2.whitespace-nowrap.rounded-md.text-sm.font-medium.ring-offset-background.transition-colors.focus-visible:outline-none.focus-visible:ring-2.focus-visible:ring-ring.focus-visible:ring-offset-2.disabled:pointer-events-none.disabled:opacity-50.[&_svg]:pointer-events-none.[&_svg]:size-4.[&_svg]:shrink-0.bg-accent.text-primary-foreground.hover:bg-accent/90.hover:text-accent-foreground.h-10.px-4.py-2>' to have attribute 'onclick'\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/debug-tools-comprehensive.cy.js:247:40)",
+                    "diff": null
+                  },
+                  "uuid": "efc91d33-94aa-4cea-b5a7-a8a4ff03ba08",
+                  "parentUUID": "194a04ea-7cf0-4ac0-97a0-f1e5874f569a",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "bd53bd7b-b541-46e5-b350-ed4c6185df19",
+                "efc91d33-94aa-4cea-b5a7-a8a4ff03ba08"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 21784,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "ef44f18a-0b9f-4206-9fea-73278e49f47b",
+              "title": "Performance and Error Handling",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should load all debug tools efficiently",
+                  "fullTitle": "Debug Tools - Complete Coverage Testing Performance and Error Handling should load all debug tools efficiently",
+                  "timedOut": null,
+                  "duration": 3035,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "const debugTools = ['/debug-tools/api-verification', '/debug-tools/database', '/debug-tools/clerk-auth', '/debug-tools/mux-assets', '/debug-tools/campaign-wizards'];\ndebugTools.forEach(tool => {\n  cy.visit(tool, {\n    timeout: 10000\n  });\n  // Verify page loads successfully without hanging\n  cy.get('h1', {\n    timeout: 8000\n  }).should('be.visible');\n  cy.get('body').should('not.contain', 'Error');\n});",
+                  "err": {},
+                  "uuid": "c83c69ed-4b78-4939-86e3-54e61a4cb62a",
+                  "parentUUID": "ef44f18a-0b9f-4206-9fea-73278e49f47b",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should handle authentication requirements",
+                  "fullTitle": "Debug Tools - Complete Coverage Testing Performance and Error Handling should handle authentication requirements",
+                  "timedOut": null,
+                  "duration": 2175,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "// All debug tools should require authentication\nconst debugTools = ['/debug-tools/api-verification', '/debug-tools/database', '/debug-tools/clerk-auth', '/debug-tools/mux-assets', '/debug-tools/campaign-wizards'];\ndebugTools.forEach(tool => {\n  cy.visit(tool);\n  // Should not redirect to sign-in (since we're authenticated)\n  cy.url().should('include', tool);\n  cy.get('body').should('not.contain', 'Sign in');\n});",
+                  "err": {},
+                  "uuid": "2b532b7b-7ae1-414c-b639-73e5a28c68a6",
+                  "parentUUID": "ef44f18a-0b9f-4206-9fea-73278e49f47b",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should handle network failures gracefully",
+                  "fullTitle": "Debug Tools - Complete Coverage Testing Performance and Error Handling should handle network failures gracefully",
+                  "timedOut": null,
+                  "duration": 558,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Test with simulated network issues\ncy.intercept('GET', '/debug-tools/**', {\n  forceNetworkError: true\n}).as('networkError');\ncy.visit('/debug-tools/api-verification', {\n  failOnStatusCode: false\n});\n// Should handle gracefully (may show error state or retry)\ncy.get('body').should('exist');",
+                  "err": {
+                    "message": "CypressError: `cy.visit()` failed trying to load:\n\nhttp://localhost:3000/debug-tools/api-verification\n\nWe attempted to make an http request to this URL but the request failed without a response.\n\nWe received this error at the network level:\n\n  > Error: socket hang up\n\nCommon situations why this would fail:\n  - you don't have internet access\n  - you forgot to run / boot your web server\n  - your web server isn't accessible\n  - you have weird network configuration settings on your computer",
+                    "estack": "CypressError: `cy.visit()` failed trying to load:\n\nhttp://localhost:3000/debug-tools/api-verification\n\nWe attempted to make an http request to this URL but the request failed without a response.\n\nWe received this error at the network level:\n\n  > Error: socket hang up\n\nCommon situations why this would fail:\n  - you don't have internet access\n  - you forgot to run / boot your web server\n  - your web server isn't accessible\n  - you have weird network configuration settings on your computer\n    at <unknown> (http://localhost:3000/__cypress/runner/cypress_runner.js:134686:74)\n    at visitFailedByErr (http://localhost:3000/__cypress/runner/cypress_runner.js:134076:12)\n    at <unknown> (http://localhost:3000/__cypress/runner/cypress_runner.js:134685:11)\n    at tryCatcher (http://localhost:3000/__cypress/runner/cypress_runner.js:1777:23)\n    at Promise._settlePromiseFromHandler (http://localhost:3000/__cypress/runner/cypress_runner.js:1489:31)\n    at Promise._settlePromise (http://localhost:3000/__cypress/runner/cypress_runner.js:1546:18)\n    at Promise._settlePromise0 (http://localhost:3000/__cypress/runner/cypress_runner.js:1591:10)\n    at Promise._settlePromises (http://localhost:3000/__cypress/runner/cypress_runner.js:1667:18)\n    at _drainQueueStep (http://localhost:3000/__cypress/runner/cypress_runner.js:2377:12)\n    at _drainQueue (http://localhost:3000/__cypress/runner/cypress_runner.js:2370:9)\n    at Async._drainQueues (http://localhost:3000/__cypress/runner/cypress_runner.js:2386:5)\n    at Async.drainQueues (http://localhost:3000/__cypress/runner/cypress_runner.js:2256:14)\nFrom Your Spec Code:\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/debug-tools-comprehensive.cy.js:293:9)\n\nFrom Node.js Internals:\n  Error: socket hang up\n      at Socket.socketOnEnd (node:_http_client:528:25)\n      at Socket.emit (node:events:530:35)\n      at endReadableNT (node:internal/streams/readable:1698:12)\n      at process.processTicksAndRejections (node:internal/process/task_queues:82:21)",
+                    "diff": null
+                  },
+                  "uuid": "ed3d5a78-4648-4008-9086-dc2def4b4cd0",
+                  "parentUUID": "ef44f18a-0b9f-4206-9fea-73278e49f47b",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [
+                "c83c69ed-4b78-4939-86e3-54e61a4cb62a",
+                "2b532b7b-7ae1-414c-b639-73e5a28c68a6"
+              ],
+              "failures": ["ed3d5a78-4648-4008-9086-dc2def4b4cd0"],
+              "pending": [],
+              "skipped": [],
+              "duration": 5768,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "b6915d98-6d76-49cf-9492-30b55851bcd5",
+              "title": "Accessibility and Usability",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should be keyboard accessible",
+                  "fullTitle": "Debug Tools - Complete Coverage Testing Accessibility and Usability should be keyboard accessible",
+                  "timedOut": null,
+                  "duration": 14,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/debug-tools');\n// Test tab navigation\ncy.get('body').tab();\ncy.focused().should('exist');\n// Verify interactive elements are focusable\ncy.get('button, a, [role=\"button\"]').should('exist');",
+                  "err": {
+                    "message": "TypeError: cy.get(...).tab is not a function",
+                    "estack": "TypeError: cy.get(...).tab is not a function\n    at Context.eval (webpack://my-project/./config/cypress/e2e/admin/debug-tools-comprehensive.cy.js:305:21)\n    at runnable.fn (http://localhost:3000/__cypress/runner/cypress_runner.js:141400:19)\n    at callFn (http://localhost:3000/__cypress/runner/cypress_runner.js:160478:21)\n    at Runnable.run (http://localhost:3000/__cypress/runner/cypress_runner.js:160465:7)\n    at <unknown> (http://localhost:3000/__cypress/runner/cypress_runner.js:166537:30)\n    at PassThroughHandlerContext.finallyHandler (http://localhost:3000/__cypress/runner/cypress_runner.js:4042:23)\n    at PassThroughHandlerContext.tryCatcher (http://localhost:3000/__cypress/runner/cypress_runner.js:1777:23)\n    at Promise._settlePromiseFromHandler (http://localhost:3000/__cypress/runner/cypress_runner.js:1489:31)\n    at Promise._settlePromise (http://localhost:3000/__cypress/runner/cypress_runner.js:1546:18)",
+                    "diff": null
+                  },
+                  "uuid": "479c2050-6054-4d70-a255-b5fb68d6bc45",
+                  "parentUUID": "b6915d98-6d76-49cf-9492-30b55851bcd5",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should have appropriate ARIA labels and structure",
+                  "fullTitle": "Debug Tools - Complete Coverage Testing Accessibility and Usability should have appropriate ARIA labels and structure",
+                  "timedOut": null,
+                  "duration": 840,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/debug-tools');\n// Verify semantic structure\ncy.get('h1').should('exist');\ncy.get('main, [role=\"main\"]').should('exist');\n// Verify accessible navigation\ncy.get('nav, [role=\"navigation\"]').should('exist');",
+                  "err": {},
+                  "uuid": "bfe2e9d8-8992-47ac-8e3f-053defc21401",
+                  "parentUUID": "b6915d98-6d76-49cf-9492-30b55851bcd5",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": ["bfe2e9d8-8992-47ac-8e3f-053defc21401"],
+              "failures": ["479c2050-6054-4d70-a255-b5fb68d6bc45"],
+              "pending": [],
+              "skipped": [],
+              "duration": 854,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "3338d40a-c6a6-4eb8-9b92-f49bce84c8a4",
+              "title": "Data Validation and Security",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should validate user permissions for admin tools",
+                  "fullTitle": "Debug Tools - Complete Coverage Testing Data Validation and Security should validate user permissions for admin tools",
+                  "timedOut": null,
+                  "duration": 543,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "// All debug tools should be admin-only\ncy.visit('/debug-tools');\n// Verify admin context\ncy.get('body').should('not.contain', 'Access Denied');\ncy.get('body').should('not.contain', 'Unauthorized');",
+                  "err": {},
+                  "uuid": "fa0a4b5c-ad98-44a1-9796-1fca45b6f08f",
+                  "parentUUID": "3338d40a-c6a6-4eb8-9b92-f49bce84c8a4",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should handle sensitive data appropriately",
+                  "fullTitle": "Debug Tools - Complete Coverage Testing Data Validation and Security should handle sensitive data appropriately",
+                  "timedOut": null,
+                  "duration": 1073,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "// Check that sensitive data is not exposed in debug tools\nconst debugTools = ['/debug-tools/database', '/debug-tools/clerk-auth'];\ndebugTools.forEach(tool => {\n  cy.visit(tool);\n  // Should not display raw sensitive data\n  cy.get('body').should('not.contain', 'password');\n  cy.get('body').should('not.contain', 'secret');\n  cy.get('body').should('not.contain', 'token');\n});",
+                  "err": {},
+                  "uuid": "7d53309a-14f9-4a7d-9f66-44794fcdd916",
+                  "parentUUID": "3338d40a-c6a6-4eb8-9b92-f49bce84c8a4",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [
+                "fa0a4b5c-ad98-44a1-9796-1fca45b6f08f",
+                "7d53309a-14f9-4a7d-9f66-44794fcdd916"
+              ],
+              "failures": [],
+              "pending": [],
+              "skipped": [],
+              "duration": 1616,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            }
+          ],
+          "passes": [],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 0,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.2.0"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "cypress-report-[datetime]",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.3"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "config/cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "timestamp": "isoDateTime",
+        "reportFilename": "cypress-report-[datetime]"
+      },
+      "version": "6.2.0"
+    }
+  }
+}
