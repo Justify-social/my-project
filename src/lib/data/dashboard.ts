@@ -238,31 +238,44 @@ export async function getUpcomingCampaigns(
         const platformString = mappedPlatformEnum ? mappedPlatformEnum.toString() : 'N/A';
 
         let budgetAmount: number | undefined = undefined;
+        let budgetCurrency: string | undefined = undefined; // Variable to store currency
         try {
           if (
-            typeof campaign.budget === 'object' &&
-            campaign.budget !== null &&
-            'total' in campaign.budget &&
-            typeof campaign.budget.total === 'number'
+            campaign.budget && // Check if budget exists
+            typeof campaign.budget === 'object' && // Check if it's an object (Prisma JSON maps to object)
+            campaign.budget !== null
           ) {
-            budgetAmount = campaign.budget.total;
-          } else if (typeof campaign.budget === 'number') {
-            budgetAmount = campaign.budget;
+            const budgetObject = campaign.budget as Prisma.JsonObject; // Type assertion
+            if (typeof budgetObject.total === 'number') {
+              budgetAmount = budgetObject.total;
+            }
+            if (typeof budgetObject.currency === 'string') {
+              budgetCurrency = budgetObject.currency;
+            }
           } else if (typeof campaign.budget === 'string') {
+            // Fallback for stringified JSON, though Prisma should handle JSON type directly
             const parsed = JSON.parse(campaign.budget);
-            if (typeof parsed === 'number') {
+            if (typeof parsed === 'object' && parsed !== null) {
+              if (typeof parsed.total === 'number') {
+                budgetAmount = parsed.total;
+              }
+              if (typeof parsed.currency === 'string') {
+                budgetCurrency = parsed.currency;
+              }
+            } else if (typeof parsed === 'number') {
+              // If the entire budget string is just a number (less likely for structured data)
               budgetAmount = parsed;
-            } else if (
-              typeof parsed === 'object' &&
-              parsed !== null &&
-              'total' in parsed &&
-              typeof parsed.total === 'number'
-            ) {
-              budgetAmount = parsed.total;
             }
           }
+          // Note: The case for `typeof campaign.budget === 'number'` might be an old format
+          // or imply that currency is implicitly USD. If that's a valid scenario,
+          // a default currency could be set here.
         } catch (e) {
-          console.error('Error parsing budget JSON:', e);
+          logger.error('[getUpcomingCampaigns] Error parsing budget JSON:', {
+            campaignId: campaign.id,
+            budgetValue: campaign.budget,
+            error: e,
+          });
         }
 
         return {
@@ -273,6 +286,7 @@ export async function getUpcomingCampaigns(
           endDate: campaign.endDate ?? undefined,
           status: mapStatusEnumToString(campaign.status ?? Status.DRAFT),
           budget: budgetAmount,
+          currency: budgetCurrency, // Pass the currency
           influencer: primaryInfluencer
             ? {
                 name: primaryInfluencer.handle,

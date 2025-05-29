@@ -40,6 +40,7 @@ export interface CampaignData {
     image?: string;
   };
   budget?: number;
+  currency?: string;
   startDate: Date;
   endDate?: Date;
   status?: CampaignStatusKey; // Use CampaignStatusKey
@@ -82,13 +83,18 @@ export function UpcomingCampaignsTable({
   };
 
   // Helper to format currency
-  const formatCurrency = (value?: number) => {
+  const formatCurrency = (value?: number, currencyCode: string = 'USD') => {
     if (value === undefined || value === null) return '-';
-    return value.toLocaleString('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-    });
+    try {
+      return value.toLocaleString('en-US', {
+        style: 'currency',
+        currency: currencyCode,
+        minimumFractionDigits: 0,
+      });
+    } catch (error) {
+      console.warn(`Failed to format currency with code: ${currencyCode}`, error);
+      return `${currencyCode} ${value.toLocaleString('en-US', { minimumFractionDigits: 0 })}`;
+    }
   };
 
   // Helper to format single dates (remains for tooltip or single date display)
@@ -251,7 +257,7 @@ export function UpcomingCampaignsTable({
 
                                 <span className="font-medium text-muted-foreground">Budget:</span>
                                 <span className="text-muted-foreground">
-                                  {formatCurrency(campaign.budget)}
+                                  {formatCurrency(campaign.budget, campaign.currency)}
                                 </span>
 
                                 <span className="font-medium text-muted-foreground">
@@ -300,7 +306,9 @@ export function UpcomingCampaignsTable({
                         '-'
                       )}
                     </TableCell>
-                    <TableCell className="text-right">{formatCurrency(campaign.budget)}</TableCell>
+                    <TableCell className="text-right">
+                      {formatCurrency(campaign.budget, campaign.currency)}
+                    </TableCell>
                     <TableCell>
                       {formatCampaignDuration(campaign.startDate, campaign.endDate)}
                     </TableCell>
