@@ -158,7 +158,80 @@ export default function TeamManagementPage() {
         )}
 
         {/* OrganizationProfile - only renders when organisation exists */}
-        <OrganizationProfile />
+        <div className="organization-profile-container">
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `
+              /* Hide dangerous organization actions */
+              [data-localization-key*="leaveOrganization"],
+              [data-localization-key*="deleteOrganization"],
+              [data-localization-key*="dangerSection"],
+              button[data-localization-key*="leaveOrganization"],
+              button[data-localization-key*="deleteOrganization"],
+              
+              /* Hide slug field */
+              input[name*="slug"],
+              input[name="organizationSlug"],
+              [data-localization-key*="organizationSlug"],
+              
+              /* Hide entire danger section */
+              .cl-organizationProfilePage-danger,
+              .cl-organizationProfilePage__dangerSection,
+              
+              /* Hide form rows containing slug */
+              .cl-formFieldRow:has(input[name*="slug"]) {
+                display: none !important;
+                visibility: hidden !important;
+              }
+              
+              /* Additional fallback hiding - text-based */
+              .organization-profile-container button:is([class*="danger"], [class*="delete"], [class*="leave"]) {
+                display: none !important;
+              }
+              
+              /* Hide buttons with specific text content */
+              .organization-profile-container button:contains("Leave organization"),
+              .organization-profile-container button:contains("Delete organization") {
+                display: none !important;
+              }
+            `,
+            }}
+          />
+          <OrganizationProfile
+            appearance={{
+              elements: {
+                // Hide dangerous organization actions section
+                organizationProfilePage__dangerSection: 'hidden',
+                organizationProfilePage__leaveOrganizationSection: 'hidden',
+                organizationProfilePage__deleteOrganizationSection: 'hidden',
+
+                // Hide slug editing field
+                organizationProfilePage__organizationSlugField: 'hidden',
+                formFieldRow__organizationSlug: 'hidden',
+
+                // More specific element targeting for current Clerk versions
+                'organizationProfile-page__danger': 'hidden',
+                'organizationProfile-page__leaveOrganization': 'hidden',
+                'organizationProfile-page__deleteOrganization': 'hidden',
+                'organizationProfile-page__organizationSlug': 'hidden',
+
+                // Alternative naming patterns
+                '[data-localization-key="organizationProfile.profilePage.dangerSection.title"]':
+                  'hidden',
+                '[data-localization-key="organizationProfile.profilePage.dangerSection.leaveOrganization.title"]':
+                  'hidden',
+                '[data-localization-key="organizationProfile.profilePage.dangerSection.deleteOrganization.title"]':
+                  'hidden',
+
+                // CSS targeting as fallback
+                'button[data-localization-key*="leaveOrganization"]': 'hidden',
+                'button[data-localization-key*="deleteOrganization"]': 'hidden',
+                'input[name*="slug"]': 'hidden',
+                'input[name="organizationSlug"]': 'hidden',
+              },
+            }}
+          />
+        </div>
       </div>
     </div>
   );
