@@ -322,23 +322,19 @@ model User {
   campaigns           CampaignWizard[]
   submissions         CampaignWizardSubmission[]
   notificationPrefs   NotificationPrefs?
-  brandingSettings    BrandingSettings?
   receivedInvitations TeamInvitation[]           @relation("InvitationReceiver")
   sentInvitations     TeamInvitation[]           @relation("InvitationSender")
   memberOfTeams       TeamMember[]               @relation("TeamMember")
   ownedTeamMembers    TeamMember[]               @relation("TeamOwner")
-  notifications       Notification[]             // New relation to notifications
-
-  // Fields for email status tracking
+  notifications       Notification[]
   isEmailDeliverable    Boolean   @default(true)
   emailMarketingConsent Boolean   @default(true)
-  emailStatusLastUpdated DateTime? @updatedAt // Using @updatedAt here for simplicity, or can be managed explicitly
-
-  // --- DB-1: Stripe Integration Fields ---
+  emailStatusLastUpdated DateTime? @updatedAt
   stripeCustomerId String? @unique @map("stripe_customer_id")
-  // --- END DB-1 ---
+  creativeAssets CreativeAsset[]
 
-  creativeAssets CreativeAsset[] // Relation back to CreativeAsset
+  clerkOrganizationId String? // Store the Clerk Org ID on the user
+  organization   Organization? @relation("OrganizationUsers", fields: [clerkOrganizationId], references: [clerkOrgId])
 }
 
 model Notification {
@@ -400,16 +396,17 @@ model TeamInvitation {
 
 model BrandingSettings {
   id             String   @id @default(uuid())
-  userId         String   @unique
-  primaryColor   String
-  secondaryColor String
-  accentColor    String
-  headerFont     String
-  bodyFont       String
+  primaryColor   String   @default("#333333")
+  secondaryColor String   @default("#4A5568")
+  accentColor    String   @default("#00BFFF")
+  headerFont     String   @default("Inter")
+  bodyFont       String   @default("Inter")
   logoUrl        String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-  user           User     @relation(fields: [userId], references: [id])
+
+  organizationId String       @unique
+  organization   Organization @relation("OrgBrandingSettings", fields: [organizationId], references: [id], onDelete: Cascade)
 }
 
 enum Platform {
@@ -727,4 +724,20 @@ model SurveyApprovalComment {
   @@index([approvalStatusId])
   @@index([questionId])
   @@index([authorId])
+}
+
+// New Organization model
+model Organization {
+  id        String    @id @default(cuid()) // Internal Organization ID
+  clerkOrgId String   @unique // Clerk's org_xyz ID, used for linking
+  name      String?   // Organization name from Clerk or your system
+  // ... other organization-specific fields ...
+
+  brandingSettings BrandingSettings? @relation("OrgBrandingSettings")
+  users            User[]            @relation("OrganizationUsers") // Users belonging to this organization
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clerkOrgId])
 }
