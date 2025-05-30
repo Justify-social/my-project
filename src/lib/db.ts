@@ -98,7 +98,7 @@ export async function getBrandingSettings(companyId: string) {
     // Removed 'as any' cast. If brandingSettings doesn't exist on the client,
     // the access attempt will throw and fall back to the catch block's default.
     return await prisma.brandingSettings.findUnique({
-      where: { userId: companyId },
+      where: { organizationId: companyId },
     });
   } catch (error) {
     console.error('Error fetching branding settings:', error);
@@ -231,10 +231,10 @@ export async function saveBrandingSettings(companyId: string, settings: Partial<
     // Try to save to actual database if not in development
     // Removed 'as any' cast. Runtime error if model doesn't exist will be caught.
     return await prisma.brandingSettings.upsert({
-      where: { userId: companyId },
+      where: { organizationId: companyId },
       update: settings,
       create: {
-        userId: companyId,
+        organizationId: companyId,
         // Provide defaults for required fields potentially missing in Partial<BrandingSettings>
         primaryColor: settings.primaryColor ?? 'var(--accent-color)',
         secondaryColor: settings.secondaryColor ?? 'var(--secondary-color)',
