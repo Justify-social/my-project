@@ -33,11 +33,26 @@ const brandingSchema = z.object({
 async function getInternalOrgId(clerkOrgId: string): Promise<string | null> {
   if (!clerkOrgId) return null;
   try {
-    const orgRecord = await prisma.organization.findUnique({
+    // Try to find existing organization
+    let orgRecord = await prisma.organization.findUnique({
       where: { clerkOrgId },
       select: { id: true },
     });
-    return orgRecord?.id || null;
+
+    // If organization doesn't exist, create it automatically
+    if (!orgRecord) {
+      console.log(`Auto-creating Organization record for clerkOrgId: ${clerkOrgId}`);
+      orgRecord = await prisma.organization.create({
+        data: {
+          clerkOrgId: clerkOrgId,
+          name: `Organization ${clerkOrgId}`, // Default name, can be updated later
+        },
+        select: { id: true },
+      });
+      console.log(`Created Organization with internal ID: ${orgRecord.id}`);
+    }
+
+    return orgRecord.id;
   } catch (error: any) {
     // Handle case where Organization table doesn't exist yet (during migration deployment)
     if (error?.code === 'P2021') {
