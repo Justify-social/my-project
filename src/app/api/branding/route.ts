@@ -29,49 +29,62 @@ const brandingSchema = z.object({
   logoUrl: z.string().url('Invalid URL').optional().nullable(),
 });
 
+// Helper to get internal organization ID from Clerk Org ID
+async function getInternalOrgId(clerkOrgId: string): Promise<string | null> {
+  if (!clerkOrgId) return null;
+  const orgRecord = await prisma.organization.findUnique({
+    where: { clerkOrgId },
+    select: { id: true },
+  });
+  return orgRecord?.id || null;
+}
+
 /**
  * GET /api/branding
  * Fetches the branding settings for the authenticated user.
  * Attempts findUnique by userId, falls back to defaults or error.
  */
 export async function GET(_request: Request) {
-  let _userId: string | null = null;
+  let clerkUserId: string | null = null;
+  let clerkOrgId: string | null | undefined = null;
   try {
     const authResult = await auth();
-    _userId = authResult.userId;
-    if (!_userId) {
+    clerkUserId = authResult.userId;
+    clerkOrgId = authResult.orgId;
+
+    if (!clerkUserId) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
+    if (!clerkOrgId) {
+      console.warn(`User ${clerkUserId} does not have an active organization for GET.`);
+      return NextResponse.json(
+        { success: false, error: 'No active organization found for user.' },
+        { status: 400 }
+      );
+    }
 
-    // Attempt to find directly by userId
+    const internalOrgId = await getInternalOrgId(clerkOrgId);
+    if (!internalOrgId) {
+      console.warn(`No internal organization record found for clerkOrgId ${clerkOrgId}.`);
+      return NextResponse.json(
+        { success: false, error: 'Organization not found in system.' },
+        { status: 404 }
+      );
+    }
+
     const settings = await prisma.brandingSettings.findUnique({
-      where: { userId: _userId },
+      where: { organizationId: internalOrgId },
     });
 
     if (!settings) {
-      return NextResponse.json(
-        {
-          success: true,
-          data: brandingSchema.parse({}), // Return defaults
-        },
-        { status: 200 }
-      );
+      return NextResponse.json({ success: true, data: brandingSchema.parse({}) }, { status: 200 });
     }
-
     return NextResponse.json({ success: true, data: settings }, { status: 200 });
   } catch (error) {
-    console.error(`API Error fetching branding settings for user ${_userId}:`, error);
-    // Handle potential runtime error if findUnique by userId fails
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2021') {
-      // Example: Table does not exist (less likely) or invalid arg type
-      console.error(
-        'Prisma schema/client type mismatch suspected for findUnique({ where: { userId } })'
-      );
-      return NextResponse.json(
-        { success: false, error: 'Internal configuration error finding settings.' },
-        { status: 500 }
-      );
-    }
+    console.error(
+      `API Error fetching branding settings for org ${clerkOrgId} (user ${clerkUserId}):`,
+      error
+    );
     return handleDbError(error, 'BrandingSettings', DbOperation.FETCH);
   }
 }
@@ -81,12 +94,31 @@ export async function GET(_request: Request) {
  * Pragmatic Update/Create: Finds by userId, then updates by ID or creates.
  */
 export async function PATCH(request: NextRequest) {
-  let _userId: string | null = null;
+  let clerkUserId: string | null = null;
+  let clerkOrgId: string | null | undefined = null;
   try {
     const authResult = await auth();
-    _userId = authResult.userId;
-    if (!_userId) {
+    clerkUserId = authResult.userId;
+    clerkOrgId = authResult.orgId;
+
+    if (!clerkUserId) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+    if (!clerkOrgId) {
+      console.warn(`User ${clerkUserId} does not have an active organization for PATCH.`);
+      return NextResponse.json(
+        { success: false, error: 'No active organization found to save settings.' },
+        { status: 400 }
+      );
+    }
+
+    const internalOrgId = await getInternalOrgId(clerkOrgId);
+    if (!internalOrgId) {
+      console.warn(`No internal organization record found for clerkOrgId ${clerkOrgId}.`);
+      return NextResponse.json(
+        { success: false, error: 'Organization not found in system. Cannot save settings.' },
+        { status: 404 }
+      );
     }
 
     const body = await request.json();
@@ -103,67 +135,63 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const { data: brandingData, success: _success } = validationResult;
-
+    const { data: brandingData } = validationResult;
     let finalSettings;
 
-    // 1. Attempt to find existing settings by userId
-    let existingSettings = null;
-    try {
-      existingSettings = await prisma.brandingSettings.findUnique({
-        where: { userId: _userId },
-      });
-    } catch (findError) {
-      console.error(
-        `Prisma findUnique({ where: { userId } }) failed for user ${_userId}:`,
-        findError
-      );
-      // If findUnique itself fails structurally, proceed to create but log error
-      if (
-        !(findError instanceof Prisma.PrismaClientKnownRequestError && findError.code === 'P2025')
-      ) {
-        // P2025 = Record not found (expected case)
-        // Log unexpected find error, but attempt create anyway
-        console.error('Unexpected error during findUnique by userId, attempting create...');
-      }
-      // existingSettings remains null
-    }
+    const existingSettings = await prisma.brandingSettings.findUnique({
+      where: { organizationId: internalOrgId },
+    });
 
     if (existingSettings) {
-      // 2a. Update using the primary key `id`
       finalSettings = await prisma.brandingSettings.update({
-        where: { id: existingSettings.id }, // Use the actual primary key
+        where: { id: existingSettings.id },
         data: brandingData,
       });
     } else {
-      // 2b. Create new settings, setting the scalar userId field
       finalSettings = await prisma.brandingSettings.create({
         data: {
           ...brandingData,
-          userId: _userId,
+          organizationId: internalOrgId,
         },
       });
     }
-
     return NextResponse.json({ success: true, data: finalSettings }, { status: 200 });
   } catch (error) {
-    console.error(`API Error updating branding settings for user ${_userId}:`, error);
+    console.error(
+      `API Error updating branding settings for org ${clerkOrgId} (user ${clerkUserId}):`,
+      error
+    );
     return handleDbError(error, 'BrandingSettings', DbOperation.UPDATE);
   }
 }
 
-export async function POST(_request: Request) {
-  let userIdForErrorLogging: string | null = null;
+export async function POST(_request: NextRequest) {
+  let clerkUserId: string | null = null;
+  let clerkOrgId: string | null | undefined = null;
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    userIdForErrorLogging = userId;
+    const authResult = await auth();
+    clerkUserId = authResult.userId;
+    clerkOrgId = authResult.orgId;
 
-    const existingSettings = await prisma.brandingSettings.findUnique({
-      where: { userId },
-    });
+    if (!clerkUserId) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+    if (!clerkOrgId) {
+      console.warn(`User ${clerkUserId} does not have an active organization for POST.`);
+      return NextResponse.json(
+        { success: false, error: 'No active organization found to save settings.' },
+        { status: 400 }
+      );
+    }
+
+    const internalOrgId = await getInternalOrgId(clerkOrgId);
+    if (!internalOrgId) {
+      console.warn(`No internal organization record found for clerkOrgId ${clerkOrgId}.`);
+      return NextResponse.json(
+        { success: false, error: 'Organization not found in system. Cannot save settings.' },
+        { status: 404 }
+      );
+    }
 
     const body = await _request.json();
     const validationResult = brandingSchema.safeParse(body);
@@ -180,8 +208,11 @@ export async function POST(_request: Request) {
     }
 
     const { data: brandingData } = validationResult;
-
     let finalSettings;
+
+    const existingSettings = await prisma.brandingSettings.findUnique({
+      where: { organizationId: internalOrgId },
+    });
 
     if (existingSettings) {
       finalSettings = await prisma.brandingSettings.update({
@@ -192,15 +223,14 @@ export async function POST(_request: Request) {
       finalSettings = await prisma.brandingSettings.create({
         data: {
           ...brandingData,
-          userId: userId,
+          organizationId: internalOrgId,
         },
       });
     }
-
     return NextResponse.json({ success: true, data: finalSettings }, { status: 200 });
   } catch (error) {
     console.error(
-      `API Error updating branding settings for user ${userIdForErrorLogging ?? 'UNKNOWN'}:`,
+      `API Error creating/updating branding settings for org ${clerkOrgId} (user ${clerkUserId}):`,
       error
     );
     return handleDbError(error, 'BrandingSettings', DbOperation.UPDATE);
