@@ -121,16 +121,7 @@ export default function TeamManagementPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="p-6">
-              <CreateOrganization
-                appearance={{
-                  elements: {
-                    organizationPreview: 'hidden',
-                    headerTitle: 'hidden',
-                    headerSubtitle: 'hidden',
-                  },
-                }}
-                afterCreateOrganizationUrl="/settings/team"
-              />
+              <CreateOrganization hideSlug={true} afterCreateOrganizationUrl="/settings/team" />
             </CardContent>
           </Card>
         </div>
@@ -162,36 +153,22 @@ export default function TeamManagementPage() {
           <style
             dangerouslySetInnerHTML={{
               __html: `
-              /* Hide dangerous organization actions */
+              /* Hide dangerous organization actions in OrganizationProfile */
               [data-localization-key*="leaveOrganization"],
               [data-localization-key*="deleteOrganization"],
               [data-localization-key*="dangerSection"],
               button[data-localization-key*="leaveOrganization"],
               button[data-localization-key*="deleteOrganization"],
               
-              /* Hide slug field */
-              input[name*="slug"],
-              input[name="organizationSlug"],
-              [data-localization-key*="organizationSlug"],
-              
-              /* Hide entire danger section */
+              /* Hide entire danger section in OrganizationProfile */
               .cl-organizationProfilePage-danger,
-              .cl-organizationProfilePage__dangerSection,
-              
-              /* Hide form rows containing slug */
-              .cl-formFieldRow:has(input[name*="slug"]) {
+              .cl-organizationProfilePage__dangerSection {
                 display: none !important;
                 visibility: hidden !important;
               }
               
-              /* Additional fallback hiding - text-based */
+              /* Hide buttons with dangerous actions */
               .organization-profile-container button:is([class*="danger"], [class*="delete"], [class*="leave"]) {
-                display: none !important;
-              }
-              
-              /* Hide buttons with specific text content */
-              .organization-profile-container button:contains("Leave organization"),
-              .organization-profile-container button:contains("Delete organization") {
                 display: none !important;
               }
             `,
@@ -205,16 +182,6 @@ export default function TeamManagementPage() {
                 organizationProfilePage__leaveOrganizationSection: 'hidden',
                 organizationProfilePage__deleteOrganizationSection: 'hidden',
 
-                // Hide slug editing field
-                organizationProfilePage__organizationSlugField: 'hidden',
-                formFieldRow__organizationSlug: 'hidden',
-
-                // More specific element targeting for current Clerk versions
-                'organizationProfile-page__danger': 'hidden',
-                'organizationProfile-page__leaveOrganization': 'hidden',
-                'organizationProfile-page__deleteOrganization': 'hidden',
-                'organizationProfile-page__organizationSlug': 'hidden',
-
                 // Alternative naming patterns
                 '[data-localization-key="organizationProfile.profilePage.dangerSection.title"]':
                   'hidden',
@@ -226,8 +193,6 @@ export default function TeamManagementPage() {
                 // CSS targeting as fallback
                 'button[data-localization-key*="leaveOrganization"]': 'hidden',
                 'button[data-localization-key*="deleteOrganization"]': 'hidden',
-                'input[name*="slug"]': 'hidden',
-                'input[name="organizationSlug"]': 'hidden',
               },
             }}
           />
