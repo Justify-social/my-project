@@ -32,11 +32,22 @@ const brandingSchema = z.object({
 // Helper to get internal organization ID from Clerk Org ID
 async function getInternalOrgId(clerkOrgId: string): Promise<string | null> {
   if (!clerkOrgId) return null;
-  const orgRecord = await prisma.organization.findUnique({
-    where: { clerkOrgId },
-    select: { id: true },
-  });
-  return orgRecord?.id || null;
+  try {
+    const orgRecord = await prisma.organization.findUnique({
+      where: { clerkOrgId },
+      select: { id: true },
+    });
+    return orgRecord?.id || null;
+  } catch (error: any) {
+    // Handle case where Organization table doesn't exist yet (during migration deployment)
+    if (error?.code === 'P2021') {
+      console.warn(
+        `Organization table not yet available during migration. ClerkOrgId: ${clerkOrgId}`
+      );
+      return null;
+    }
+    throw error; // Re-throw other errors
+  }
 }
 
 /**

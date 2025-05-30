@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "dev": "next dev --turbo",
-    "build": "node scripts/icons/generate-registry-module.mjs && next build",
+    "build": "npm run db:migrate:production && node scripts/icons/generate-registry-module.mjs && next build",
     "build:registry": "tsx scripts/ui/generate-component-registry.ts",
     "start": "next start",
     "lint": "eslint --config eslint.config.mjs --ext .js,.jsx,.ts,.tsx",
